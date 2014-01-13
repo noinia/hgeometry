@@ -40,9 +40,18 @@ data Point' (fields :: [*]) (r :: *) where
   Point' :: HasXY fields r => PlainRec fields -> Point' fields r
 
 
-(<++>) :: HasXY (p ++ fs) r => Point' p r -> PlainRec fs -> Point' (p ++ fs) r
-(Point' r) <++> r' = Point' (r <+> r')
 
+-- instance Implicit (Elem x xs) => Implicit (Elem x (xs ++ '[])) where
+--   implicitly = undefined
+
+
+
+
+-- (<++>) :: (p ⊆ (p ++ fs)) => Point' p r -> PlainRec fs -> Point' (p ++ fs) r
+-- (Point' r) <++> r' = Point' (r <+> r')
+
+testz :: Point' p Int -> PlainRec pr -> Point' (pr ++ p) Int
+testz (Point' r) r' = Point' $ r' <+> r
 
 
 
