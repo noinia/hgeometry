@@ -50,26 +50,20 @@ data Point' (fields :: [*]) (r :: *) where
 -- (<++>) :: (p ⊆ (p ++ fs)) => Point' p r -> PlainRec fs -> Point' (p ++ fs) r
 -- (Point' r) <++> r' = Point' (r <+> r')
 
-testz :: Point' p Int -> PlainRec pr -> Point' (pr ++ p) Int
-testz (Point' r) r' = Point' $ r' <+> r
+-- testz :: Point' p Int -> PlainRec pr -> Point' (pr ++ p) Int
+-- testz (Point' r) r' = Point' $ r' <+> r
 
 
 
+type family Dimension c :: Nat
 
-
-class HasDimension c where
-  type Dimension c :: Nat
-
-class HasNumType c where
-  type NumType c
+type family NumType c :: *
 
 
 class AsPlainRec c where
   type RecFields c :: [*]
 
-  asPlainRec :: c -> PlainRec (RecFields c)
-
-
+  _rec :: Lens' c (PlainRec (RecFields c))
 
 
 class DimensionalFields (d :: Nat) r where
@@ -93,13 +87,10 @@ data Point (d:: Nat) (r :: *) (fields :: [*]) where
 
 instance AsPlainRec (Point d r p) where
   type RecFields (Point d r p) = p
-  asPlainRec (Point p) = p
+  _rec = undefined
 
-instance HasDimension (Point d r p) where
-  type Dimension (Point d r p) = d
-
-instance HasNumType (Point d r p) where
-  type NumType (Point d r p) = r
+type instance Dimension (Point d r p) = d
+type instance NumType (Point d r p) = r
 
 
 
