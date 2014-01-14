@@ -41,14 +41,16 @@ data Point' (fields :: [*]) (r :: *) where
 
 
 
+
+
 -- instance Implicit (Elem x xs) => Implicit (Elem x (xs ++ '[])) where
 --   implicitly = undefined
 
 
 
 
--- (<++>) :: (p ⊆ (p ++ fs)) => Point' p r -> PlainRec fs -> Point' (p ++ fs) r
--- (Point' r) <++> r' = Point' (r <+> r')
+(<++>) :: (HasXY (p ++ fs) r) => Point' p r -> PlainRec fs -> Point' (p ++ fs) r
+(Point' r) <++> r' = Point' (r <+> r')
 
 -- testz :: Point' p Int -> PlainRec pr -> Point' (pr ++ p) Int
 -- testz (Point' r) r' = Point' $ r' <+> r
@@ -66,16 +68,10 @@ class AsPlainRec c where
   _rec :: Lens' c (PlainRec (RecFields c))
 
 
-class DimensionalFields (d :: Nat) r where
-  type Fields d r :: [*]
+type family DimFields (d :: Nat) r :: [*]
 
-
-instance DimensionalFields 2 r where
-  type Fields 2 r = ["x" ::: r, "y" ::: r]
-
-
-instance DimensionalFields 3 r where
-  type Fields 3 r = ["x" ::: r, "y" ::: r, "z" ::: r]
+type instance DimFields 2 r = ["x" ::: r, "y" ::: r]
+type instance DimFields 3 r = ["x" ::: r, "y" ::: r, "z" ::: r]
 
 
 
@@ -83,7 +79,7 @@ instance DimensionalFields 3 r where
 
 
 data Point (d:: Nat) (r :: *) (fields :: [*]) where
-  Point :: (Fields d r ⊆ fields) => PlainRec fields -> Point d r fields
+  Point :: (DimFields d r ⊆ fields) => PlainRec fields -> Point d r fields
 
 instance AsPlainRec (Point d r p) where
   type RecFields (Point d r p) = p
