@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
@@ -17,6 +18,9 @@ import Control.Lens
 
 import Data.AdditiveGroup
 import Data.AffineSpace
+
+import Data.HList.HList
+import Data.HList.HZip
 
 -- import Data.AdditiveGroup
 -- import Data.VectorSpace
@@ -81,6 +85,111 @@ class AsPlainRec c where
   type RecFields c :: [*]
 
   _rec :: Lens' c (PlainRec (RecFields c))
+
+
+--class WithFields (d:: Nat) r where
+--  type DimFields d r :: [*]
+--
+--  fields' :: DimFields d r
+
+
+  -- vectorec :: Vec d r -> PlainRec (DimFields d r)
+
+-- instance WithFields 2 r where
+--   type DimFields 2 r = ["x" ::: r, "y" ::: r]
+
+
+
+
+-- assign' :: HList ((sy ::: r) : ls) -> [r] ->
+
+-- assign'               :: HList fields -> HList values -> PlainRec fields
+-- assign' fields values = hFoldr (\((f,v),r) -> r <+> f =: r) RNil $
+
+
+
+-- foo' :: HZip x y l => HList x -> HList y -> HList l
+-- foo' fields values = hZip fields values
+
+
+class BuildGenericRec (l :: [*]) where
+  genericRec :: PlainRec l
+
+
+instance BuildGenericRec '[] where
+  genericRec = RNil
+
+instance BuildGenericRec l => BuildGenericRec ((sy ::: Assignable sy r) ': l) where
+  genericRec = aField =: (field =:) <+> genericRec
+    where
+       aField = Field :: sy ::: Assignable sy r
+       field  = Field :: sy ::: r
+
+
+myPointRec :: PlainRec '[SelfAssignable "x" Int, SelfAssignable "y" Int]
+myPointRec = genericRec
+
+bazz :: PlainRec '["x" ::: Int]
+bazz = assign' myPointRec 5
+
+
+genericRec' :: PlainRec '[SelfAssignable sy r]
+genericRec' = aField =: (field =:)
+  where
+    aField = Field :: sy ::: Assignable sy r
+    field  = Field :: sy ::: r
+
+
+
+tR :: PlainRec '[SelfAssignable "foo" Int]
+tR = genericRec
+
+
+
+
+
+type Assignable sy r = r -> PlainRec '[sy ::: r]
+
+type SelfAssignable sy r = sy ::: Assignable sy r
+
+
+ax ::SelfAssignable "x" r
+ax = Field :: "x" ::: Assignable "x" r
+
+testRec :: PlainRec '[SelfAssignable "x" Int]
+testRec = ax =: (assignF x)
+  where
+    assignF         :: (sy ::: r) -> r -> PlainRec '[sy ::: r]
+    assignF field r = field =: r
+
+
+bar :: PlainRec '["x" ::: Int]
+bar = x =: 5
+
+
+
+assign' :: ((SelfAssignable sy r) ∈ fields) =>
+           PlainRec fields -> r -> PlainRec '[sy ::: r]
+assign' = rGet (Field :: sy ::: Assignable sy r)
+
+
+
+-- assignX :: (("ax" ::: Assignable "x" r) ∈ fields) =>
+--            PlainRec fields -> r -> PlainRec '["x" ::: r]
+assignX :: ((SelfAssignable "x" r) ∈ fields) =>
+           PlainRec fields -> r -> PlainRec '["x" ::: r]
+assignX = rGet ax
+
+baz :: PlainRec '["x" ::: Int]
+baz = assign' testRec 5
+
+-- bazz :: PlainRec '["foo" ::: Int]
+-- bazz = assign'  5
+
+
+
+
+
 
 
 type family DimFields (d :: Nat) r :: [*]
