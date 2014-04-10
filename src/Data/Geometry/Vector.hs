@@ -4,7 +4,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Vector where
+module Data.Geometry.Vector( Vec(Vec)
+                           , toList
+                           ) where
 
 import Control.Applicative
 
@@ -21,8 +23,14 @@ import Data.Vinyl.Unicode
 
 import GHC.TypeLits
 
-newtype Vec (d :: Nat) r = Vec [r]
+--------------------------------------------------------------------------------
+
+newtype Vec (d :: Nat) r = Vec { toList :: [r] }
                            deriving (Show,Eq,Ord)
+
+
+
+
 
 
 pure'   :: forall a d. SingI (d :: Nat) => a -> Vec d a
@@ -36,24 +44,28 @@ app' :: forall a b d . Vec d (a -> b) -> Vec d a -> Vec d b
 app' = vZipWith ($)
 
 
+
+
+
+
 instance Functor (Vec d) where
   fmap f (Vec xs) = Vec $ fmap f xs
 
-instance SingI (d :: Nat) => Applicative (Vec d) where
-  pure  = pure'
+instance Applicative (Vec d) where
+  pure  = undefined  -- pure'
   (<*>) = app'
 
 
-instance (SingI (d :: Nat), Num r) => AdditiveGroup (Vec d r) where
+instance Num r => AdditiveGroup (Vec d r) where
   zeroV = pure 0
   (^+^) = vZipWith (+)
   negateV = fmap negate
 
-instance (SingI (d :: Nat), Num r) => VectorSpace (Vec d r) where
+instance Num r => VectorSpace (Vec d r) where
   type Scalar (Vec d r) = r
   s *^ v = fmap (s*) v
 
-instance (SingI (d :: Nat), AdditiveGroup r, Num r) => InnerSpace (Vec d r) where
+instance (AdditiveGroup r, Num r) => InnerSpace (Vec d r) where
   v <.> v' = let (Vec r) = vZipWith (*) v v' in
              sum r
 
