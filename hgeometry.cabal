@@ -17,17 +17,20 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:  Data.Geometry.Point
+  exposed-modules:  Data.Geometry.Properties
+                    Data.Geometry.Point
+
 --                    Data.Geometry.Vector
 
 
   -- other-modules:
   -- other-extensions:
-  build-depends: base             >= 4.6       &&     < 4.7
-               , vinyl            >= 0.2       &&     < 0.3
-               , vector-space     >= 0.8.6     &&     < 0.9
-               , lens             >= 3.10.1    &&     < 3.11
-               , HList            >= 0.3       &&     < 0.4
+  build-depends: base             >= 4.7
+               , vinyl            >= 0.4       &&     < 0.5
+               , linear           >= 1.10      &&     < 1.11
+               , lens             >= 4.2       &&     < 4.3
+               , singletons       >= 1.0       &&     < 1.1
+               -- , HList            >= 0.3       &&     < 0.4
 
 
   hs-source-dirs: src
