@@ -1,13 +1,14 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
+
+{-# LANGUAGE PolyKinds #-}     --- TODO: Why do we need this?
+
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-{-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.Point( --Point(..)
                           -- , point
 
@@ -30,69 +31,63 @@ import Data.Geometry.Vector
 import Data.Vinyl
 import Data.Vinyl.TyFun
 import Data.Vinyl.TH
-import Data.Vinyl.Universe.Field
+import Data.Vinyl.Universe.Field((:::), ElField(..))
 
 
 import GHC.TypeLits
 
 
---------------------------------------------------------------------------------
--- data MField :: * -> * where
---   Dim :: KnownNat n => Proxy n -> MField (n ::: t)
+data D (n :: Nat)
 
-data Dim (n :: Nat) where
-  Dim :: KnownNat n => Dim n
+-- | Fields are indexed by either a type level natural number (a dimension), or
+-- by a type level string. If it is a natural number, the type of the value
+-- will be determined by the interpretation function. If it is a string, we can
+-- specify the type ourselves.
+data Field :: * -> * where
+  NatField :: KnownNat n    => Field (D n)
+  SymField :: KnownSymbol s => Field (s ::: t)
 
-
-
-
-
-
-
-
-
-data DimElField :: * -> (TyFun * *) -> * where
-  DimElField :: DimElField t el
-
-type instance App (DimElField r) (sy ::: t) = t
-type instance App (DimElField r) (Dim n)    = r
-
-data MField :: * -> * where
-  MField :: KnownNat n => Dim n -> MField (Dim n)
+-- | Singletons for Field
+data SField :: * -> * where
+  SNatField :: KnownNat n    => SField (Field (D n))
+  SSymField :: KnownSymbol s => SField (Field (s ::: t))
 
 
+-- | The universe/interpretation of the fields. The universe is paramteterized
+  -- over a type t and a TyFun. Th type t is used as a ``default'' type, for
+  -- fields for which we did not specify the type.
+data TElField :: * -> (TyFun * *) -> * where
+  TElField :: TElField t el
+
+type instance App (TElField r) (Field (D n))     = r
+type instance App (TElField r) (Field (s ::: t)) = t
+
+
+x :: SField (Field (D 1))
+x = SNatField
 
 
 
 
 
 
-data DField :: * -> * where
-  DField :: KnownNat n => Dim n -> DField ((Dim n) ::: t)
-
-myPoint :: PlainRec ElField [Dim 1 ::: Int,"name" ::: String]
-myPoint = DField (Dim :: Dim 1) =: 5
-           <+>
-           SField =: "Frank"
 
 
--- -- | Make a
--- data DField :: * -> * where
---   DField :: KnownNat n => DField (n ::: t)
+name :: SField (Field ("name" ::: String))
+name = SSymField
 
-myPoint2 :: PlainRec (DimElField Int) [Dim 1,Dim 2]
-myPoint2 = MField (Dim :: Dim 1)  =: 5
-           <+>
-           MField (Dim :: Dim 2) =: 10
-           -- SField =: "Frank"
 
--- | Make a
 
--- type D (n :: Nat) = DField (Dim n)
 
--- dim :: forall n. KnownNat n => DField (Dim n)
--- dim = DField (Dim :: Dim n)
 
+-- data Point (n :: Nat) (tElF :: * -> *) (fields :: [*]) where
+--   Point :: PlainRec tElF fields
+
+
+
+pt :: PlainRec (TElField Int) [Field (D 1), Field ("name" ::: String)]
+pt =   x    =: 10
+   <+> name =: "frank"
 
 
 
