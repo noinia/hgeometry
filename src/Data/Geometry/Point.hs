@@ -63,17 +63,23 @@ type instance App (TElField r) (Field (D n))     = r
 type instance App (TElField r) (Field (s ::: t)) = t
 
 
-x :: SField (Field (D 1))
+-- | Shorthand for naming dimention fields
+type DField (n :: Nat)  = Field (D n)
+
+-- | And a fancy name for the symbol fields
+type (s :: Symbol) :~>: (t :: *) = Field (s ::: t)
+
+
+-- | Similar shorthands for the corresponding singletons
+type SDField (n :: Nat)             = SField (DField n)
+type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
+
+
+x :: SDField 1
 x = SNatField
 
 
-
-
-
-
-
-
-name :: SField (Field ("name" ::: String))
+name :: SSField "name" String --SField (Field ("name" ::: String))
 name = SSymField
 
 
@@ -85,7 +91,7 @@ name = SSymField
 
 
 
-pt :: PlainRec (TElField Int) [Field (D 1), Field ("name" ::: String)]
+pt :: PlainRec (TElField Int) [DField 1, "name" :~>: String]
 pt =   x    =: 10
    <+> name =: "frank"
 
