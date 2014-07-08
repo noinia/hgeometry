@@ -48,6 +48,7 @@ import Data.Vinyl.Universe.Field((:::), ElField(..))
 
 import GHC.TypeLits
 
+--------------------------------------------------------------------------------
 
 -- | Unary implementation of natural numbers.
 -- Used both at the type and at the value level.
@@ -61,6 +62,7 @@ type family ToNat1 (n :: Nat) :: Nat1 where
   ToNat1 0 = Zero
   ToNat1 n = Succ (ToNat1 (n - 1))
 
+--------------------------------------------------------------------------------
 
 -- | A type expressing a dimension. Note that something like 'D 2' expresses
 -- *only* the second dimention (in whatever space we consider). Say the
@@ -68,6 +70,8 @@ type family ToNat1 (n :: Nat) :: Nat1 where
 data D (d :: Nat)
   -- essentially, we needed a wrapper type to get back from kind nat to kind *
 
+--------------------------------------------------------------------------------
+-- | An alternative Open Vinyl Universe
 
 -- | Fields are indexed by either a type level natural number (a dimension), or
 -- by a type level string. If it is a natural number, the type of the value
@@ -82,7 +86,6 @@ data SField :: * -> * where
   SNatField :: KnownNat d    => SField (Field (D d))
   SSymField :: KnownSymbol s => SField (Field (s ::: t))
 
-
 -- | The universe/interpretation of the fields. The universe is paramteterized
   -- over a type t and a TyFun. Th type t is used as a ``default'' type, for
   -- fields for which we did not specify the type.
@@ -92,63 +95,62 @@ data TElField :: * -> (TyFun * *) -> * where
 type instance App (TElField r) (Field (D d))     = r
 type instance App (TElField r) (Field (s ::: t)) = t
 
-
 -- | Shorthand for naming dimention fields
 type DField (d :: Nat)  = Field (D d)
 
 -- | And a fancy name for the symbol fields
 type (s :: Symbol) :~>: (t :: *) = Field (s ::: t)
 
-
 -- | Similar shorthands for the corresponding singletons
 type SDField (d :: Nat)             = SField (DField d)
 type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
 
+--------------------------------------------------------------------------------
+-- | A defintition of a d dimentional space
 
+-- | R d is a type level list containing all DFields for dimensions 1 t/m d
+type R (d :: Nat) = R1 (ToNat1 d)
 
-
-type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
-  '[] ++ ys       = ys
-  (x ': xs) ++ ys = x ': (xs ++ ys)
-
-
-
+-- | The implementation of R uses the Peano nats
 type family R1 (d :: Nat1) :: [*] where
   R1 Zero     = '[]
   R1 (Succ n) = R1 n ++ '[DField (FromNat1 (Succ n))]
 
-type R (d :: Nat) = R1 (ToNat1 d)
+-- | Type level list concatenation
+type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
+  '[] ++ ys       = ys
+  (x ': xs) ++ ys = x ': (xs ++ ys)
 
+--------------------------------------------------------------------------------
+-- | Defining points in a d-dimensional space
 
-x = SNatField :: SDField 1
-y = SNatField :: SDField 2
-z = SNatField :: SDField 3
-
-
--- _x   :: (1 <= d) => Point d r fields -> Identity r
--- _x p = case p of
---          Point r -> rGet' x r
-
-
-
-name :: SSField "name" String --SField (Field ("name" ::: String))
-name = SSymField
-
-
-
-
-
+-- | A Point in a d dimensional space. Apart from coordinates in R^d may have
+-- additonal fields/attributes. For example color, a label, etc.
 data Point (d :: Nat) (r :: *) (fields :: [*]) where
   -- Point :: (fields <: R d) => PlainRec (TElField r) fields -> Point d r fields
   Point :: ( allFields ~ (R d ++ fields)) =>
            PlainRec (TElField r) allFields -> Point d r fields
 
-
-point :: ( allFields ~ (R d ++ fields)
-         , allFields' :~: allFields
-         ) => PlainRec (TElField r) allFields' -> Point d r fields
+-- | Smart constructor that allows a different order of the input fields
+point :: ( allFields' ~ (R d ++ fields)
+         , allFields :~: allFields'
+         ) => PlainRec (TElField r) allFields -> Point d r fields
 point = Point . cast
 
+-- | Some hands for the axis (fields) in the first three dimensions
+x = SNatField :: SDField 1
+y = SNatField :: SDField 2
+z = SNatField :: SDField 3
+
+-- | And a regular named field
+name :: SSField "name" String --SField (Field ("name" ::: String))
+name = SSymField
+
+
+
+-- _x   :: (1 <= d) => Point d r fields -> Identity r
+-- _x p = case p of
+--          Point r -> rGet' x r
 
 
 
@@ -177,19 +179,7 @@ myX = case myPt of
 myX1 :: Int
 myX1 = runIdentity $ rGet' x pt
 
---------------------------------------------------------------------------------
--- | The data type for a point.
 
--- | A Point in a d dimensional space. Apart from coordinates in R^d may have
--- additonal fields/attributes. For example color, a label, etc. The data type
--- is intentionally left abstract. To construct a point, use fromVector,
--- origin, or `point`.
-
-
-
-
--- data Point (d:: Nat) (r :: *) (fields :: [*]) where
---   Point :: Vec d r -> PlainRec fields -> Point d r fields
 
 -- type instance Dimension (Point d r p) = d
 -- type instance NumType (Point d r p) = r
