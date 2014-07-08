@@ -9,6 +9,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
+{-# LANGUAGE FlexibleContexts #-}
+
+
+{-# LANGUAGE UndecidableInstances #-}    -- For the Nat1 to Nat conversions
+
 module Data.Geometry.Point( --Point(..)
                           -- , point
 
@@ -35,6 +40,20 @@ import Data.Vinyl.Universe.Field((:::), ElField(..))
 
 
 import GHC.TypeLits
+
+
+-- | Unary implementation of natural numbers.
+-- Used both at the type and at the value level.
+data Nat1 = Zero | Succ Nat1
+
+type family FromNat1 (n :: Nat1) :: Nat where
+  FromNat1 Zero     = 0
+  FromNat1 (Succ n) = 1 + FromNat1 n
+
+type family ToNat1 (n :: Nat) :: Nat1 where
+  ToNat1 0 = Zero
+  ToNat1 n = Succ (ToNat1 (n - 1))
+
 
 -- | A type expressing a dimension. Note that something like 'D 2' expresses
 -- *only* the second dimention (in whatever space we consider). Say the
@@ -81,9 +100,36 @@ type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
 
 
 
+type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
+  '[] ++ ys       = ys
+  (x ': xs) ++ ys = x ': (xs ++ ys)
 
 
-data R (d :: Nat)
+
+type family R1 (d :: Nat1) :: [*] where
+  R1 Zero     = '[]
+  R1 (Succ n) = R1 n ++ '[DField (FromNat1 (Succ n))]
+
+type R (d :: Nat) = R1 (ToNat1 d)
+
+
+
+-- class ConstructR (d :: Nat1) where
+--   constructRec :: Rec elF f (R1 d)
+
+--   constructField :: KnownNat (FromNat1 d) => SDField (FromNat1 d)
+--   constructField = SNatField
+
+-- instance ConstructR Zero where
+--   constructRec = RNil
+
+-- instance ConstructR d => ConstructR (Succ d) where
+--   constructRec = constructRec <+> constructField =: undefined
+
+
+
+
+
 
 
 
@@ -99,8 +145,8 @@ name = SSymField
 
 
 
--- data Point (n :: Nat) (tElF :: * -> *) (fields :: [*]) where
---   Point :: PlainRec tElF fields
+data Point (d :: Nat) (r :: *) (fields :: [*]) where
+  Point :: (fields <: R d) => PlainRec (TElField r) fields -> Point d r fields
 
 
 
@@ -108,6 +154,9 @@ pt :: PlainRec (TElField Int) [DField 1, "name" :~>: String]
 pt =   x    =: 10
    <+> name =: "frank"
 
+
+myPt :: Point 1 Int [DField 1, "name" :~>: String]
+myPt = Point pt
 
 
 
