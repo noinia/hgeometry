@@ -4,6 +4,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 
+{-# LANGUAGE ConstraintKinds #-}
+
+
 {-# LANGUAGE PolyKinds #-}     --- TODO: Why do we need this?
 
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -20,7 +23,9 @@ module Data.Geometry.Point( --Point(..)
                           ) where
 
 -- import Control.Applicative
-import Control.Lens
+-- import Control.Lens
+
+
 
 
 import Linear.Affine hiding (Point(..))
@@ -34,6 +39,8 @@ import Data.Geometry.Vector
 -- import Data.Singletons.TH
 
 import Data.Vinyl
+import Data.Vinyl.Idiom.Identity
+import Data.Vinyl.Lens
 import Data.Vinyl.TyFun
 import Data.Vinyl.TH
 import Data.Vinyl.Universe.Field((:::), ElField(..))
@@ -113,29 +120,15 @@ type family R1 (d :: Nat1) :: [*] where
 type R (d :: Nat) = R1 (ToNat1 d)
 
 
-
--- class ConstructR (d :: Nat1) where
---   constructRec :: Rec elF f (R1 d)
-
---   constructField :: KnownNat (FromNat1 d) => SDField (FromNat1 d)
---   constructField = SNatField
-
--- instance ConstructR Zero where
---   constructRec = RNil
-
--- instance ConstructR d => ConstructR (Succ d) where
---   constructRec = constructRec <+> constructField =: undefined
+x = SNatField :: SDField 1
+y = SNatField :: SDField 2
+z = SNatField :: SDField 3
 
 
+-- _x   :: (1 <= d) => Point d r fields -> Identity r
+-- _x p = case p of
+--          Point r -> rGet' x r
 
-
-
-
-
-
-
-x :: SDField 1
-x = SNatField
 
 
 name :: SSField "name" String --SField (Field ("name" ::: String))
@@ -146,7 +139,16 @@ name = SSymField
 
 
 data Point (d :: Nat) (r :: *) (fields :: [*]) where
-  Point :: (fields <: R d) => PlainRec (TElField r) fields -> Point d r fields
+  -- Point :: (fields <: R d) => PlainRec (TElField r) fields -> Point d r fields
+  Point :: ( allFields ~ (R d ++ fields)) =>
+           PlainRec (TElField r) allFields -> Point d r fields
+
+
+point :: ( allFields ~ (R d ++ fields)
+         , allFields' :~: allFields
+         ) => PlainRec (TElField r) allFields' -> Point d r fields
+point = Point . cast
+
 
 
 
@@ -155,10 +157,25 @@ pt =   x    =: 10
    <+> name =: "frank"
 
 
-myPt :: Point 1 Int [DField 1, "name" :~>: String]
+pt2 = pt <+> y =: 5
+
+myPt2 :: Point 2 Int '["name" :~>: String]
+myPt2 = point pt2
+
+
+myPt :: Point 1 Int '["name" :~>: String]
 myPt = Point pt
 
 
+myX :: Int
+myX = case myPt of
+        Point pt' -> runIdentity $ rGet' x pt'
+
+
+
+
+myX1 :: Int
+myX1 = runIdentity $ rGet' x pt
 
 --------------------------------------------------------------------------------
 -- | The data type for a point.
