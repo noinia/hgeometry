@@ -1,21 +1,14 @@
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE UndecidableInstances #-}    -- Def R1
+
 
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE RankNTypes #-} --  lens stuff
 
 
 {-# LANGUAGE PolyKinds #-}     --- TODO: Why do we need this?
 
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
-{-# LANGUAGE FlexibleContexts #-}
 
 
-{-# LANGUAGE UndecidableInstances #-}    -- For the Nat1 to Nat conversions
 
 module Data.Geometry.Point( --Point(..)
                           -- , point
@@ -23,7 +16,7 @@ module Data.Geometry.Point( --Point(..)
                           ) where
 
 -- import Control.Applicative
--- import Control.Lens
+import Control.Lens(Lens')
 
 
 
@@ -40,70 +33,17 @@ import Data.Geometry.Vector
 
 import Data.Vinyl
 import Data.Vinyl.Idiom.Identity
-import Data.Vinyl.Lens
 import Data.Vinyl.TyFun
-import Data.Vinyl.TH
-import Data.Vinyl.Universe.Field((:::), ElField(..))
+import Data.Vinyl.Lens
+import Data.Vinyl.Universe.Geometry
 
+
+import Data.Type.Nat
 
 import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
--- | Unary implementation of natural numbers.
--- Used both at the type and at the value level.
-data Nat1 = Zero | Succ Nat1
-
-type family FromNat1 (n :: Nat1) :: Nat where
-  FromNat1 Zero     = 0
-  FromNat1 (Succ n) = 1 + FromNat1 n
-
-type family ToNat1 (n :: Nat) :: Nat1 where
-  ToNat1 0 = Zero
-  ToNat1 n = Succ (ToNat1 (n - 1))
-
---------------------------------------------------------------------------------
-
--- | A type expressing a dimension. Note that something like 'D 2' expresses
--- *only* the second dimention (in whatever space we consider). Say the
--- two-dimensional plane is expressed by the type `R 2`.
-data D (d :: Nat)
-  -- essentially, we needed a wrapper type to get back from kind nat to kind *
-
---------------------------------------------------------------------------------
--- | An alternative Open Vinyl Universe
-
--- | Fields are indexed by either a type level natural number (a dimension), or
--- by a type level string. If it is a natural number, the type of the value
--- will be determined by the interpretation function. If it is a string, we can
--- specify the type ourselves.
-data Field :: * -> * where
-  NatField :: KnownNat d    => Field (D d)
-  SymField :: KnownSymbol s => Field (s ::: t)
-
--- | Singletons for Field
-data SField :: * -> * where
-  SNatField :: KnownNat d    => SField (Field (D d))
-  SSymField :: KnownSymbol s => SField (Field (s ::: t))
-
--- | The universe/interpretation of the fields. The universe is paramteterized
-  -- over a type t and a TyFun. Th type t is used as a ``default'' type, for
-  -- fields for which we did not specify the type.
-data TElField :: * -> (TyFun * *) -> * where
-  TElField :: TElField t el
-
-type instance App (TElField r) (Field (D d))     = r
-type instance App (TElField r) (Field (s ::: t)) = t
-
--- | Shorthand for naming dimention fields
-type DField (d :: Nat)  = Field (D d)
-
--- | And a fancy name for the symbol fields
-type (s :: Symbol) :~>: (t :: *) = Field (s ::: t)
-
--- | Similar shorthands for the corresponding singletons
-type SDField (d :: Nat)             = SField (DField d)
-type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
 
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
@@ -121,6 +61,8 @@ type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
   '[] ++ ys       = ys
   (x ': xs) ++ ys = x ': (xs ++ ys)
 
+infixr 5 ++
+
 --------------------------------------------------------------------------------
 -- | Defining points in a d-dimensional space
 
@@ -137,6 +79,7 @@ point :: ( allFields' ~ (R d ++ fields)
          ) => PlainRec (TElField r) allFields -> Point d r fields
 point = Point . cast
 
+
 -- | Some hands for the axis (fields) in the first three dimensions
 x = SNatField :: SDField 1
 y = SNatField :: SDField 2
@@ -147,10 +90,26 @@ name :: SSField "name" String --SField (Field ("name" ::: String))
 name = SSymField
 
 
+----------------------------------------
+ -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
 
--- _x   :: (1 <= d) => Point d r fields -> Identity r
+_rec             :: (allFields ~ (R d ++ fields))
+                 => Lens' (Point d r fields) (PlainRec (TElField r) allFields)
+_rec f (Point r) = fmap (\r' -> Point r') (f r)
+
+
+-- _xL :: (DField 1 ∈ R1 d) => Lens' (PlainRec (TElField r) (R1 d)) r
+-- _xL = rLens x
+
+-- _x :: (DField 1 ∈ R d) => Lens' (Point d r fields) r
+-- _x = _rec._xL
+
+
+--          Point r -> _xL r
+-- _x   :: (DField 1 ∈ R d) => Point d r fields -> Identity r
+-- -- _x   :: (1 <= d) => Point d r fields -> Identity r
 -- _x p = case p of
---          Point r -> rGet' x r
+--          Point (r :: PlainRec (TElField r) (R d ++ fields)) -> rGet' x r
 
 
 
