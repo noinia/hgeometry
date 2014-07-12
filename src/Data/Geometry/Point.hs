@@ -71,20 +71,20 @@ type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
 infixr 5 ++
 
 
-type family Dropped (k :: Nat1) (xs :: [*]) where
-  Dropped Zero     xs        = xs
-  Dropped k        '[]       = '[]
-  Dropped (Succ k) (x ': xs) = Dropped k xs
+-- type family Dropped (k :: Nat1) (xs :: [*]) where
+--   Dropped Zero     xs        = xs
+--   Dropped k        '[]       = '[]
+--   Dropped (Succ k) (x ': xs) = Dropped k xs
 
-class Drop (k :: Nat1) where
-  dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
+-- class Drop (k :: Nat1) where
+--   dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
 
-instance Drop Zero where
-  dropRec = const id
+-- instance Drop Zero where
+--   dropRec = const id
 
-instance Drop k => Drop (Succ k) where
-  dropRec _ RNil     = RNil
-  dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
+-- instance Drop k => Drop (Succ k) where
+--   dropRec _ RNil     = RNil
+--   dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
 
 
 
@@ -171,22 +171,122 @@ instance KnownNat (ToNat (S (S (n)))) => VecField (S n) where
 --             => Vec d r -> PlainTRec r '[DField (ToNat (S i))]
 -- indexVec v = (SNatField :: SDField (ToNat (S i))) =: V.index v (undefined :: i)
 
-class FromVec (i :: *) (d :: *) where
-  vecToRec :: Index i d => Proxy i -> Vec d r -> PlainTRec r '[DField (ToNat (S i))]
+-- class FromVec (i :: *) where
+--   vecToRec :: (Index i (S d), Arity d)
+--            => Proxy i -> Vec (S d) r -> PlainTRec r '[DField (ToNat (S i))]
 
-  build :: Index i d => Proxy i -> Vec d r -> PlainTRec r (R (ToNat (S i)))
+-- instance FromVec Z where
+--   vecToRec _ v = (SNatField :: SDField 1) =: V.index v (undefined :: Z)
+
+-- instance ( KnownNat (ToNat (S (S i)))
+--          ) => FromVec (S i) where
+--   vecToRec _ v = (SNatField :: SDField (ToNat (S (S i)))) =: V.index v (undefined :: S i)
 
 
-instance Arity d => FromVec Z (S d) where
-  vecToRec _ v = (SNatField :: SDField 1) =: V.index v (undefined :: Z)
+-- class (Index i (S d), Arity d) => BuildVec (i :: *) (d :: *) where
+--   build :: Proxy i -> Vec (S d) r -> PlainTRec r (R (ToNat (S i)))
 
-  build p v = vecToRec p v
+-- instance (Arity d) => BuildVec Z d where
+--   build p v = vecToRec p v
+
+-- instance (Index i (S d), BuildVec i (S d)) => BuildVec (S i) (S d) where
+--   build p v = cast $
+--               undefined
+--               :&
+--               build (Proxy :: Proxy i) v
+
+type family Replicate (n :: *) (t :: *) where
+  Replicate Z     t = '[]
+  Replicate (S n) t = (t ': Replicate n t)
+
+type family (n :: *) :-: (m :: *) where
+  Z :-: m = Z
+  n :-: Z = Z
+  (S n) :-: (S m) = n :-: m
+
+infixl 6 :-:
+
+class VecToHList (d :: *) where
+  vecToHList :: Arity d => Vec d r -> HList (Replicate d r)
+
+instance VecToHList Z where
+  vecToHList _ = RNil
+
+instance (Arity d, VecToHList d) => VecToHList (S d) where
+  vecToHList v = let (x,xs) = (V.head v, V.tail v)
+                 in (Identity x) :& vecToHList xs
 
 
-instance (KnownNat (ToNat (S (S i))),
-          FromVec i (S d),
-          Arity d) => FromVec (S i) (S d) where
-  vecToRec _ v = (SNatField :: SDField (ToNat (S (S i)))) =: V.index v (undefined :: S i)
+class HListToPlainTRec (d :: *) where
+  hListToRec :: HList (Replicate d r) -> PlainTRec r (R (ToNat d))
+
+  -- dropOne :: PlainTRec r (R (ToNat d)) -> PlainTRec r (
+  --                                           Dropped (S Z) (R (ToNat d)))
+
+instance HListToPlainTRec Z where
+  hListToRec RNil = RNil
+  -- dropOne    RNil = RNil
+
+
+-- instance HListToPlainTRec d => HListToPlainTRec (S d) where
+--   hListToRec (r :& rs) = r :& (dropOne $ hListToRec rs)
+
+
+
+
+
+
+--     where
+--       f _ = undefined
+
+
+--     (x :& xs) = case pk of
+-- --     -- (Proxy :: Proxy Z)     -> x :& hListToRec pd (Proxy :: Proxy z) xs
+-- --     (Proxy :: Proxy (S k)) -> hListToRec pd (Proxy :: Proxy k) xs
+
+
+
+
+
+
+
+
+
+
+
+type family Dropped (k :: *) (xs :: [*]) where
+  Dropped Z     xs        = xs
+  Dropped k     '[]       = '[]
+  Dropped (S k) (x ': xs) = Dropped k xs
+
+class Drop (k :: *) where
+  dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
+
+instance Drop Z where
+  dropRec = const id
+
+instance Drop k => Drop (S k) where
+  dropRec _ RNil     = RNil
+  dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
+
+
+
+
+
+-- fromProxy :: Proxy k -> SDField (ToNat k)
+-- fromProxy
+
+
+vecToRec = undefined
+
+-- instance ( KnownNat (ToNat (S (S i)))
+--          , Arity d
+--          , BuildVec i (S d)
+--          , Index i (S d)
+--          ) => BuildVec (S i) (S d) where
+--   build p v = build (Proxy :: Proxy i) v
+--               <+>
+--               vecToRec p v
 
   -- build p v = build (Proxy :: Proxy i) v
   --             <+>
