@@ -1,14 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}    -- Def R1
 
-
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE RankNTypes #-} --  lens stuff
 
 
 {-# LANGUAGE PolyKinds #-}     --- TODO: Why do we need this?
 
-
-
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Data.Geometry.Point( --Point(..)
                           -- , point
@@ -25,11 +26,15 @@ import Linear.Affine hiding (Point(..))
 import Linear.Vector
 
 import Data.Maybe
+import Data.Proxy
 
 import Data.Geometry.Properties
-import Data.Geometry.Vector
+-- import Data.Geometry.Vector
 
--- import Data.Singletons.TH
+
+import Data.Vector.Fixed.Boxed
+import Data.Vector.Fixed.Cont
+import Data.Vector.Fixed
 
 import Data.Vinyl
 import Data.Vinyl.Idiom.Identity
@@ -41,6 +46,8 @@ import Data.Vinyl.Universe.Geometry
 import Data.Type.Nat
 
 import GHC.TypeLits
+
+import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
 
@@ -63,8 +70,290 @@ type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
 
 infixr 5 ++
 
+
+type family Dropped (k :: Nat1) (xs :: [*]) where
+  Dropped Zero     xs        = xs
+  Dropped k        '[]       = '[]
+  Dropped (Succ k) (x ': xs) = Dropped k xs
+
+class Drop (k :: Nat1) where
+  dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
+
+instance Drop Zero where
+  dropRec = const id
+
+instance Drop k => Drop (Succ k) where
+  dropRec _ RNil     = RNil
+  dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
+
+
+
+
+
+
+-- -- | Dunno what to do about the weird Arity check
+-- toVec   :: Arity (ToPeano d) => Proxy d -> PlainTRec r (R d) -> Vec (ToPeano d) r
+-- toVec p = vector . toContVec p
+
+type family Len (xs :: [*]) where
+  Len '[]       = Z
+  Len (x ': xs) = S (Len xs)
+
+class ToContVec (rs :: [*]) where
+  toContVec :: PlainTRec r rs -> ContVec (Len rs) r
+
+instance ToContVec '[] where
+  toContVec _ = empty
+
+instance ToContVec rs => ToContVec (DField i ': rs) where
+  toContVec (r :& rs) = runIdentity r <| toContVec rs
+
+
+
+
+
+
+
+toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
+                                     , ToContVec (R d)
+                                     , Arity (ToPeano d)
+                                     ) =>
+                      Point' d r fs -> Vec (ToPeano d) r
+toVec (Point' g _) = vector $ toContVec g
+
+
+
+
+class VecField (i :: *) where
+  vField :: SDField (ToNat (S i))
+
+  vIndex   :: (Arity d, Index i d) => Vec d r -> r
+  vIndex v = V.index v (undefined :: i)
+
+instance VecField Z where
+  vField = SNatField
+
+instance KnownNat (ToNat (S (S (n)))) => VecField (S n) where
+  vField = SNatField
+
+
+-- class BuildRec (k :: *) (d :: *)  where
+--   build :: ( Index k (S d)
+--            , KnownNat k'
+--            , k' ~ ToNat (S k)
+--            ) =>
+--            Proxy k -> Vec (S d) r -> PlainTRec r (R k')
+
+-- instance BuildRec Z d where
+--   build _ _ = RNil
+
+-- instance BuildRec (S k) d where
+--   build _ v = (undefined :: PlainTRec r (R (ToNat k)))
+--               <+>
+--               (undefined :: PlainTRec r '[DField (ToNat (S k))])
+
+--               -- (SNatField :: SDField (ToNat (S k))) =: V.index v (undefined :: S k)
+
+
+
+
+
+-- = SNatField :: SDField (ToNat (S i))
+
+
+
+
+-- indexVec :: forall i d r.
+--             ( KnownNat (ToNat (S i))
+--             , Index i d
+--             , Arity d
+--             )
+--             => Vec d r -> PlainTRec r '[DField (ToNat (S i))]
+-- indexVec v = (SNatField :: SDField (ToNat (S i))) =: V.index v (undefined :: i)
+
+class FromVec (i :: *) (d :: *) where
+  vecToRec :: Index i d => Proxy i -> Vec d r -> PlainTRec r '[DField (ToNat (S i))]
+
+  build :: Index i d => Proxy i -> Vec d r -> PlainTRec r (R (ToNat (S i)))
+
+
+instance Arity d => FromVec Z (S d) where
+  vecToRec _ v = (SNatField :: SDField 1) =: V.index v (undefined :: Z)
+
+  build p v = vecToRec p v
+
+
+instance (KnownNat (ToNat (S (S i))),
+          FromVec i (S d),
+          Arity d) => FromVec (S i) (S d) where
+  vecToRec _ v = (SNatField :: SDField (ToNat (S (S i)))) =: V.index v (undefined :: S i)
+
+  -- build p v = build (Proxy :: Proxy i) v
+  --             <+>
+  --             vecToRec p v
+
+
+
+
+-- class FromVec Index i (Len rs) => (i :: *) (rs :: [*]) where
+--   vecToRec :: Vec d r -> PlainTRec r rs
+
+-- -- instance FromVec '[] where
+-- --   vecToRec _ = RNil
+
+-- -- instance (KnownNat i, FromVec rs) => FromVec (DField i ': rs) where
+-- --   vecToRec v = (SNatField :: SDField i) =: V.index v (undefined :: ToPeano (i - 1))
+-- --                <+>
+-- --                vecToRec v
+
+
+vect :: Vec (ToPeano 3) Int
+vect = V.mk3 1 2 3
+
+tr :: PlainTRec Int '[DField 1]
+tr = vecToRec (Proxy :: Proxy Z) vect
+
+-- ix = V.index v (undefined :: ToPeano 1)
+
+-- -- | The nats from fixed-vector don't have a common kind :(
+-- class Index k d => FromVec (k :: *) (d :: *) where
+--   vecToRec :: Vec d r -> PlainTRec r (R (ToNat k))
+
+-- instance Arity d => FromVec Z (S d) where
+--   vecToRec _ = RNil
+
+-- instance (Arity d, FromVec k (S d), Index k d
+--          ) => FromVec (S k) (S d) where
+--   vecToRec v =
+
+
+
+--     let field = SNatField :: SDField (ToNat (S k))
+--                in  vecToRec v
+--                    <+>
+--                    field =: (V.index v (undefined :: k))
+
+
+-- -- instance FromVec (S d) where
+-- --   fromVec v = fromVec
+
+
+
+-- constructRec     :: forall d k r. Index k d
+--                  => Proxy k -> Vec d r -> PlainTRec r (R (ToNat k))
+-- constructRec _ v = constructRec ... v
+--                    <+>
+
+
+
+-- vecToRec :: forall d r. Vec d r -> PlainTRec r (R (ToNat d))
+-- vecToRec v = V.foldr
+
+-- withFields :: Vec d r -> Vec d (Pla)
+
+
+    -- fromVec
+
+    --
+
+
+--                   (Point' g _) = fromVec xs
+--               in Point' ()
+
+
+
+-- fromVec
+
+
+-- class IsoRLen
+
+--       (d :: Nat) (n :: *)
+
+
+
+
+-- toContVec :: Proxy d -> Proxy k ->
+--               PlainTRec r (Dropped (ToNat1 k) (R d)) -> ContVec (ToPeano (d - k)) r
+-- toContVec _ _ RNil      = empty
+
+
+-- toContVec _ (r :& rs) = undefined -- unIdentity r <| toContVec (Proxy :: Proxy (d - 1)) rs
+
+
+
+
+
+-- extraFields :: forall r d d1 fields. (d1 ~ ToNat1 d, Drop d1)
+--             => PlainRec (TElField r) (R d ++ fields)
+--             -> PlainRec (TElField r) (Dropped d1 (R d ++ fields))
+-- extraFields = dropRec (Proxy :: Proxy d1)
+
+
+
+-- split :: forall el f xs ys. Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
+-- split rs = (cast rs, cast rs)
+
+
+class Split (xs :: [*]) (ys :: [*]) where
+  splitRec :: Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
+
+instance Split '[] ys where
+  splitRec r = (RNil,r)
+
+instance Split xs ys => Split (x ': xs) ys where
+  splitRec (r :& rs) = let (rx,ry) = splitRec rs
+                       in (r :& rx, ry)
+  -- sndRec (_ :& rs) = sndRec rs
+
+-- sndRec' :: (r ~ x, rs ~ (xs ++ ys), Split xs ys) =>
+--            Rec el f (r ': rs) -> Rec el f ys
+-- sndRec' = undefined
+
+
+
+
+
+sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~>: String])
+sp = splitRec pt
+
+-- extraFields    :: Split xs rs =>
+--                   Proxy xs
+--                -> PlainRec (TElField r) (xs ++ rs)
+--                -> PlainRec (TElField r) rs
+-- extraFields _ = snd . splitRec
+
 --------------------------------------------------------------------------------
 -- | Defining points in a d-dimensional space
+
+data Point' (d :: Nat) (r :: *) (fields :: [*]) where
+  Point' :: PlainTRec r (R d) -> PlainTRec r fields -> Point' d r fields
+
+
+point' :: forall d r fields allFields.
+          ( Split (R d) fields
+          , allFields :~: (R d ++ fields)
+          ) => PlainTRec r allFields -> Point' d r fields
+point' = uncurry Point' . splitRec . cast
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -- | A Point in a d dimensional space. Apart from coordinates in R^d may have
 -- additonal fields/attributes. For example color, a label, etc.
@@ -98,7 +387,7 @@ _rec             :: (allFields ~ (R d ++ fields))
 _rec f (Point r) = fmap (\r' -> Point r') (f r)
 
 
--- _xL :: (DField 1 ∈ R1 d) => Lens' (PlainRec (TElField r) (R1 d)) r
+-- _xL :: forall d r. (DField 1 ∈ R1 d) => Lens' (PlainRec (TElField r) (R1 d)) r
 -- _xL = rLens x
 
 -- _x :: (DField 1 ∈ R d) => Lens' (Point d r fields) r
@@ -118,7 +407,8 @@ pt =   x    =: 10
    <+> name =: "frank"
 
 
-pt2 = pt <+> y =: 5
+pt2 :: PlainRec (TElField Int) (R 2 ++ '["name" :~>: String])
+pt2 = cast $ pt <+> y =: 5
 
 myPt2 :: Point 2 Int '["name" :~>: String]
 myPt2 = point pt2
