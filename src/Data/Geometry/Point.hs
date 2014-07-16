@@ -146,63 +146,8 @@ instance KnownNat (ToNat (S (S (n)))) => VecField (S n) where
   vField = SNatField
 
 
--- class BuildRec (k :: *) (d :: *)  where
---   build :: ( Index k (S d)
---            , KnownNat k'
---            , k' ~ ToNat (S k)
---            ) =>
---            Proxy k -> Vec (S d) r -> PlainTRec r (R k')
-
--- instance BuildRec Z d where
---   build _ _ = RNil
-
--- instance BuildRec (S k) d where
---   build _ v = (undefined :: PlainTRec r (R (ToNat k)))
---               <+>
---               (undefined :: PlainTRec r '[DField (ToNat (S k))])
-
---               -- (SNatField :: SDField (ToNat (S k))) =: V.index v (undefined :: S k)
 
 
-
-
-
--- = SNatField :: SDField (ToNat (S i))
-
-
-
-
--- indexVec :: forall i d r.
---             ( KnownNat (ToNat (S i))
---             , Index i d
---             , Arity d
---             )
---             => Vec d r -> PlainTRec r '[DField (ToNat (S i))]
--- indexVec v = (SNatField :: SDField (ToNat (S i))) =: V.index v (undefined :: i)
-
--- class FromVec (i :: *) where
---   vecToRec :: (Index i (S d), Arity d)
---            => Proxy i -> Vec (S d) r -> PlainTRec r '[DField (ToNat (S i))]
-
--- instance FromVec Z where
---   vecToRec _ v = (SNatField :: SDField 1) =: V.index v (undefined :: Z)
-
--- instance ( KnownNat (ToNat (S (S i)))
---          ) => FromVec (S i) where
---   vecToRec _ v = (SNatField :: SDField (ToNat (S (S i)))) =: V.index v (undefined :: S i)
-
-
--- class (Index i (S d), Arity d) => BuildVec (i :: *) (d :: *) where
---   build :: Proxy i -> Vec (S d) r -> PlainTRec r (R (ToNat (S i)))
-
--- instance (Arity d) => BuildVec Z d where
---   build p v = vecToRec p v
-
--- instance (Index i (S d), BuildVec i (S d)) => BuildVec (S i) (S d) where
---   build p v = cast $
---               undefined
---               :&
---               build (Proxy :: Proxy i) v
 
 
 type family Replicate (n :: *) (t :: *) where
@@ -275,30 +220,15 @@ instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
 
 
 
--- vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) => Vec pd r -> PlainTRec r (R d)
--- vecToRec = hListToRec pOne pD . vecToHList
---   where
---     pOne :: Proxy (Succ Zero)
---     pOne = Proxy
-
---     pD :: Proxy (ToNat1 d)
---     pD = Proxy
-
-
-  -- hListToRec' :: HList (Replicate1 d r) -> PlainTRec r (Range1 (Succ Zero) d)
-  -- hListToRec' = hListToRec (Proxy :: Proxy (Succ Zero))
-
-
-
-
---     where
---       f _ = undefined
-
-
---     (x :& xs) = case pk of
--- --     -- (Proxy :: Proxy Z)     -> x :& hListToRec pd (Proxy :: Proxy z) xs
--- --     (Proxy :: Proxy (S k)) -> hListToRec pd (Proxy :: Proxy k) xs
-
+vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) =>
+            Proxy d ->
+            Vec pd r -> PlainTRec r (R d)
+vecToRec _ = hListToRec pOne pD . vecToHList
+  where
+    pOne :: Proxy (Succ Zero)
+    pOne = Proxy
+    pD :: Proxy (ToNat1 d)
+    pD = Proxy
 
 
 
@@ -328,38 +258,6 @@ instance Drop k => Drop (S k) where
 
 
 
--- fromProxy :: Proxy k -> SDField (ToNat k)
--- fromProxy
-
-
-
-
--- instance ( KnownNat (ToNat (S (S i)))
---          , Arity d
---          , BuildVec i (S d)
---          , Index i (S d)
---          ) => BuildVec (S i) (S d) where
---   build p v = build (Proxy :: Proxy i) v
---               <+>
---               vecToRec p v
-
-  -- build p v = build (Proxy :: Proxy i) v
-  --             <+>
-  --             vecToRec p v
-
-
-
-
--- class FromVec Index i (Len rs) => (i :: *) (rs :: [*]) where
---   vecToRec :: Vec d r -> PlainTRec r rs
-
--- -- instance FromVec '[] where
--- --   vecToRec _ = RNil
-
--- -- instance (KnownNat i, FromVec rs) => FromVec (DField i ': rs) where
--- --   vecToRec v = (SNatField :: SDField i) =: V.index v (undefined :: ToPeano (i - 1))
--- --                <+>
--- --                vecToRec v
 
 
 vect :: Vec (ToPeano 3) Int
@@ -375,86 +273,6 @@ tr = hListToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy (ToNat1 3)) hl
 
 
 
--- ix = V.index v (undefined :: ToPeano 1)
-
--- -- | The nats from fixed-vector don't have a common kind :(
--- class Index k d => FromVec (k :: *) (d :: *) where
---   vecToRec :: Vec d r -> PlainTRec r (R (ToNat k))
-
--- instance Arity d => FromVec Z (S d) where
---   vecToRec _ = RNil
-
--- instance (Arity d, FromVec k (S d), Index k d
---          ) => FromVec (S k) (S d) where
---   vecToRec v =
-
-
-
---     let field = SNatField :: SDField (ToNat (S k))
---                in  vecToRec v
---                    <+>
---                    field =: (V.index v (undefined :: k))
-
-
--- -- instance FromVec (S d) where
--- --   fromVec v = fromVec
-
-
-
--- constructRec     :: forall d k r. Index k d
---                  => Proxy k -> Vec d r -> PlainTRec r (R (ToNat k))
--- constructRec _ v = constructRec ... v
---                    <+>
-
-
-
--- vecToRec :: forall d r. Vec d r -> PlainTRec r (R (ToNat d))
--- vecToRec v = V.foldr
-
--- withFields :: Vec d r -> Vec d (Pla)
-
-
-    -- fromVec
-
-    --
-
-
---                   (Point' g _) = fromVec xs
---               in Point' ()
-
-
-
--- fromVec
-
-
--- class IsoRLen
-
---       (d :: Nat) (n :: *)
-
-
-
-
--- toContVec :: Proxy d -> Proxy k ->
---               PlainTRec r (Dropped (ToNat1 k) (R d)) -> ContVec (ToPeano (d - k)) r
--- toContVec _ _ RNil      = empty
-
-
--- toContVec _ (r :& rs) = undefined -- unIdentity r <| toContVec (Proxy :: Proxy (d - 1)) rs
-
-
-
-
-
--- extraFields :: forall r d d1 fields. (d1 ~ ToNat1 d, Drop d1)
---             => PlainRec (TElField r) (R d ++ fields)
---             -> PlainRec (TElField r) (Dropped d1 (R d ++ fields))
--- extraFields = dropRec (Proxy :: Proxy d1)
-
-
-
--- split :: forall el f xs ys. Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
--- split rs = (cast rs, cast rs)
-
 
 class Split (xs :: [*]) (ys :: [*]) where
   splitRec :: Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
@@ -465,24 +283,12 @@ instance Split '[] ys where
 instance Split xs ys => Split (x ': xs) ys where
   splitRec (r :& rs) = let (rx,ry) = splitRec rs
                        in (r :& rx, ry)
-  -- sndRec (_ :& rs) = sndRec rs
-
--- sndRec' :: (r ~ x, rs ~ (xs ++ ys), Split xs ys) =>
---            Rec el f (r ': rs) -> Rec el f ys
--- sndRec' = undefined
-
 
 
 
 
 sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~>: String])
 sp = splitRec pt
-
--- extraFields    :: Split xs rs =>
---                   Proxy xs
---                -> PlainRec (TElField r) (xs ++ rs)
---                -> PlainRec (TElField r) rs
--- extraFields _ = snd . splitRec
 
 --------------------------------------------------------------------------------
 -- | Defining points in a d-dimensional space
