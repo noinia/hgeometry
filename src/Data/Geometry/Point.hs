@@ -56,12 +56,13 @@ import qualified Data.Vector.Fixed as V
 -- | A defintition of a d dimentional space
 
 -- | R d is a type level list containing all DFields for dimensions 1 t/m d
-type R (d :: Nat) = R1 (ToNat1 d)
+-- type R (d :: Nat) = R1 (ToNat1 d)
+type R (d :: Nat) = Range 1 d
 
--- | The implementation of R uses the Peano nats
-type family R1 (d :: Nat1) :: [*] where
-  R1 Zero     = '[]
-  R1 (Succ n) = R1 n ++ '[DField (FromNat1 (Succ n))]
+-- -- | The implementation of R uses the Peano nats
+-- type family R1 (d :: Nat1) :: [*] where
+--   R1 Zero     = '[]
+--   R1 (Succ n) = R1 n ++ '[DField (FromNat1 (Succ n))]
 
 -- | Type level list concatenation
 type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
@@ -69,6 +70,20 @@ type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
   (x ': xs) ++ ys = x ': (xs ++ ys)
 
 infixr 5 ++
+
+
+type Range (s :: Nat) (k :: Nat) = Range1 (ToNat1 s) (ToNat1 k)
+
+
+type family Range1 (s :: Nat1) (k :: Nat1) where
+  Range1 s Zero     = '[]
+  Range1 s (Succ k) = DField (FromNat1 s) ': Range1 (Succ s) k
+
+
+
+
+type PlainTRec (r :: *) = PlainRec (TElField r)
+
 
 
 -- type family Dropped (k :: Nat1) (xs :: [*]) where
@@ -195,6 +210,7 @@ instance KnownNat (ToNat (S (S (n)))) => VecField (S n) where
 --               :&
 --               build (Proxy :: Proxy i) v
 
+
 type family Replicate (n :: *) (t :: *) where
   Replicate Z     t = '[]
   Replicate (S n) t = (t ': Replicate n t)
@@ -205,6 +221,30 @@ type family (n :: *) :-: (m :: *) where
   (S n) :-: (S m) = n :-: m
 
 infixl 6 :-:
+
+
+
+type Replicate1 (n :: Nat1) (t :: *) = Replicate (Nat1ToPeano n) t
+
+
+
+type family PeanoToNat1 (n :: *) :: Nat1 where
+  PeanoToNat1 Z = Zero
+  PeanoToNat1 (S n) = Succ (PeanoToNat1 n)
+
+type family Nat1ToPeano (n :: Nat1) :: * where
+  Nat1ToPeano Zero     = Z
+  Nat1ToPeano (Succ n) = S (Nat1ToPeano n)
+
+
+
+
+
+
+
+
+
+
 
 class VecToHList (d :: *) where
   vecToHList :: Arity d => Vec d r -> HList (Replicate d r)
@@ -217,21 +257,42 @@ instance (Arity d, VecToHList d) => VecToHList (S d) where
                  in (Identity x) :& vecToHList xs
 
 
-class HListToPlainTRec (d :: *) where
-  hListToRec :: HList (Replicate d r) -> PlainTRec r (R (ToNat d))
+
+
+
+
+class HListToPlainTRec (d :: Nat1) where
+  hListToRec :: Proxy s -> Proxy d -> HList (Replicate1 d r) -> PlainTRec r (Range1 s d)
+
 
   -- dropOne :: PlainTRec r (R (ToNat d)) -> PlainTRec r (
   --                                           Dropped (S Z) (R (ToNat d)))
 
-instance HListToPlainTRec Z where
-  hListToRec RNil = RNil
-  -- dropOne    RNil = RNil
+instance HListToPlainTRec Zero where
+  hListToRec _ _ RNil = RNil
 
 
--- instance HListToPlainTRec d => HListToPlainTRec (S d) where
---   hListToRec (r :& rs) = r :& (dropOne $ hListToRec rs)
+instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
+  hListToRec (ps :: Proxy s) _ (Identity r :& rs) = (Identity r)
+                                                    :&
+                                                    hListToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) rs
 
 
+
+
+
+vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) => Vec pd r -> PlainTRec r (R d)
+vecToRec = hListToRec pOne pD . vecToHList
+  where
+    pOne :: Proxy (Succ Zero)
+    pOne = Proxy
+
+    pD :: Proxy (ToNat1 d)
+    pD = Proxy
+
+
+  -- hListToRec' :: HList (Replicate1 d r) -> PlainTRec r (Range1 (Succ Zero) d)
+  -- hListToRec' = hListToRec (Proxy :: Proxy (Succ Zero))
 
 
 
@@ -277,7 +338,7 @@ instance Drop k => Drop (S k) where
 -- fromProxy
 
 
-vecToRec = undefined
+
 
 -- instance ( KnownNat (ToNat (S (S i)))
 --          , Arity d
@@ -310,8 +371,15 @@ vecToRec = undefined
 vect :: Vec (ToPeano 3) Int
 vect = V.mk3 1 2 3
 
-tr :: PlainTRec Int '[DField 1]
-tr = vecToRec (Proxy :: Proxy Z) vect
+
+hl :: HList '[Int,Int,Int]
+hl = vecToHList $ vect
+
+tr :: PlainTRec Int '[DField 1, DField 2, DField 3]
+tr = hListToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy (ToNat1 3)) hl
+
+
+
 
 -- ix = V.index v (undefined :: ToPeano 1)
 
