@@ -80,12 +80,6 @@ type family Range1 (s :: Nat1) (k :: Nat1) where
   Range1 s (Succ k) = DField (FromNat1 s) ': Range1 (Succ s) k
 
 
-
-
-type PlainTRec (r :: *) = PlainRec (TElField r)
-
-
-
 -- type family Dropped (k :: Nat1) (xs :: [*]) where
 --   Dropped Zero     xs        = xs
 --   Dropped k        '[]       = '[]
@@ -281,14 +275,14 @@ instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
 
 
 
-vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) => Vec pd r -> PlainTRec r (R d)
-vecToRec = hListToRec pOne pD . vecToHList
-  where
-    pOne :: Proxy (Succ Zero)
-    pOne = Proxy
+-- vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) => Vec pd r -> PlainTRec r (R d)
+-- vecToRec = hListToRec pOne pD . vecToHList
+--   where
+--     pOne :: Proxy (Succ Zero)
+--     pOne = Proxy
 
-    pD :: Proxy (ToNat1 d)
-    pD = Proxy
+--     pD :: Proxy (ToNat1 d)
+--     pD = Proxy
 
 
   -- hListToRec' :: HList (Replicate1 d r) -> PlainTRec r (Range1 (Succ Zero) d)

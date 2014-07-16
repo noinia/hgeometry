@@ -52,3 +52,7 @@ type (s :: Symbol) :~>: (t :: *) = Field (s ::: t)
 -- | Similar shorthands for the corresponding singletons
 type SDField (d :: Nat)             = SField (DField d)
 type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
+
+
+-- | Type signature for a PlainRec with TElField as the interpreter
+type PlainTRec (r :: *) = PlainRec (TElField r)
