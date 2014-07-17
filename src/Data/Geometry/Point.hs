@@ -49,6 +49,7 @@ import GHC.TypeLits
 
 import qualified Data.Vector.Fixed as V
 
+import qualified Data.Vinyl.Universe.Const as U
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -66,6 +67,28 @@ point :: forall d r fields allFields.
           , allFields :~: (R d ++ fields)
           ) => PlainTRec r allFields -> Point d r fields
 point = uncurry Point . splitRec . cast
+
+----------------------------------------
+-- Instances
+
+instance (Eq (PlainTRec r (R d)), Eq (PlainTRec r fields)) => Eq (Point d r fields) where
+  (Point a b) == (Point c d) = a == c && b == d
+
+instance (Ord (PlainTRec r (R d)), Ord (PlainTRec r fields)) => Ord (Point d r fields) where
+  compare (Point a b) (Point c d) = case compare a c of
+                                     EQ -> compare b d
+                                     r  -> r
+
+
+-- instance ( Implicit (PlainRec (U.Const String) fields)
+--          , Show r
+--          ) => Show (Point d r fields) where
+--   show (Point g rs) = concat ["Point "
+--                              , show $ toContVec g, " "
+--                                -- , rshow rs
+--                              ]
+
+
 
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
