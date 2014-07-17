@@ -236,15 +236,37 @@ name = SSymField
 ----------------------------------------
  -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
 
+class ShowableField (t :: *) where
+  showField :: Proxy t -> String
 
-instance Implicit (PlainRec (U.Const String) '[]) where
+instance KnownSymbol sy => ShowableField (sy :~> t) where
+  showField _ = symbolVal (Proxy :: Proxy sy)
+
+instance KnownNat n => ShowableField (DField n) where
+  showField _ = "axis_" ++ (show $ natVal (Proxy :: Proxy n))
+
+
+type StringRec = PlainRec (U.Const String)
+
+instance Implicit (StringRec '[]) where
   implicitly = RNil
 
+instance ( ShowableField x
+         , Implicit (StringRec xs)
+         ) =>
+         Implicit (StringRec (x ': xs)) where
+  implicitly = (Identity $ showField (Proxy :: Proxy x)) :& implicitly
 
-instance Implicit (PlainRec (U.Const String) xs) =>
-           Implicit (PlainRec (U.Const String) (SDField i ': xs)) where
-  implicitly = (Identity "_i") :& implicitly
 
+instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showable
+         , RecAll (TElField r) Identity fields Show -- The fields part is showable
+         , Implicit (StringRec (R d))
+         , Implicit (StringRec fields)
+         ) => Show (Point d r fields) where
+  show (Point g rs) = concat [ "Point "
+                             , rshow g
+                             , rshow rs
+                             ]
 
 
 -- instance Implicit (PlainRec (U.Const String) (Range1 s d)) where
@@ -253,8 +275,8 @@ instance Implicit (PlainRec (U.Const String) xs) =>
 
 
 
-instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~> String]) where
-  implicitly = x =: "x" <+> y =: "y" <+> name =: "name"
+-- instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~> String]) where
+--   implicitly = x =: "x" <+> y =: "y" <+> name =: "name"
 
 --          , Show r
 --          ) => Show (Point d r fields) where
