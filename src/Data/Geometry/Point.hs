@@ -130,8 +130,8 @@ toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
                                      , ToContVec (R d)
                                      , Arity (ToPeano d)
                                      ) =>
-                      Point' d r fs -> Vec (ToPeano d) r
-toVec (Point' g _) = vector $ toContVec g
+                      Point d r fs -> Vec (ToPeano d) r
+toVec (Point g _) = vector $ toContVec g
 
 
 
@@ -232,8 +232,8 @@ instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
 --   Nat1ToPeano (ToNat1 d) ~ ToPeano d
 --                              , Directly (ToNat1 d)
 --                              , Arity (ToPeano d)
---                              ) => Vector' (ToNat1 d) r -> Point' d r '[]
--- vecToPoint v = flip Point' RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
+--                              ) => Vector' (ToNat1 d) r -> Point d r '[]
+-- vecToPoint v = flip Point RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
 
 
 --------------------------------------------------------------------------------
@@ -254,8 +254,8 @@ instance ( Arity (Nat1ToPeano d) , Directly d) => Directly (Succ d) where
 -- vecToPoint   ::  forall r d d1. ( d1 ~ ToNat1 d
 --                                 , Directly d1
 --                                 -- , Arity (Nat1ToPeano d1)
---                                 ) => Vector' d1 r -> Point' d r '[]
--- vecToPoint v = flip Point' RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
+--                                 ) => Vector' d1 r -> Point d r '[]
+-- vecToPoint v = flip Point RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
 
 
 
@@ -300,10 +300,10 @@ myXX = toPoint myVect
 toPoint   :: forall d1 d r. ( Directly d1
                             , FromNat1 d1 ~ d, ToNat1 d ~ d1
                             )
-                            => Vector' d1 r -> Point' d r '[]
-toPoint = flip Point' RNil . vecToRec'
+                            => Vector' d1 r -> Point d r '[]
+toPoint = flip Point RNil . vecToRec'
 
--- toPoint (_ :: Proxy d1) v = Point' r RNil
+-- toPoint (_ :: Proxy d1) v = Point r RNil
 --   where
 --     r :: PlainTRec r (R (FromNat1 d1))
 --     r = undefined
@@ -313,20 +313,6 @@ toPoint = flip Point' RNil . vecToRec'
 
 
 
-type family Dropped (k :: *) (xs :: [*]) where
-  Dropped Z     xs        = xs
-  Dropped k     '[]       = '[]
-  Dropped (S k) (x ': xs) = Dropped k xs
-
-class Drop (k :: *) where
-  dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
-
-instance Drop Z where
-  dropRec = const id
-
-instance Drop k => Drop (S k) where
-  dropRec _ RNil     = RNil
-  dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
 
 
 
@@ -367,48 +353,19 @@ sp = splitRec pt
 --------------------------------------------------------------------------------
 -- | Defining points in a d-dimensional space
 
-data Point' (d :: Nat) (r :: *) (fields :: [*]) where
-  Point' :: PlainTRec r (R d) -> PlainTRec r fields -> Point' d r fields
-
-
-point' :: forall d r fields allFields.
-          ( Split (R d) fields
-          , allFields :~: (R d ++ fields)
-          ) => PlainTRec r allFields -> Point' d r fields
-point' = uncurry Point' . splitRec . cast
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 -- | A Point in a d dimensional space. Apart from coordinates in R^d may have
 -- additonal fields/attributes. For example color, a label, etc.
 data Point (d :: Nat) (r :: *) (fields :: [*]) where
-  -- Point :: (fields <: R d) => PlainRec (TElField r) fields -> Point d r fields
-  Point :: ( allFields ~ (R d ++ fields)) =>
-           PlainRec (TElField r) allFields -> Point d r fields
+  Point :: PlainTRec r (R d) -> PlainTRec r fields -> Point d r fields
+
 
 -- | Smart constructor that allows a different order of the input fields
-point :: ( allFields' ~ (R d ++ fields)
-         , allFields :~: allFields'
-         ) => PlainRec (TElField r) allFields -> Point d r fields
-point = Point . cast
+point :: forall d r fields allFields.
+          ( Split (R d) fields
+          , allFields :~: (R d ++ fields)
+          ) => PlainTRec r allFields -> Point d r fields
+point = uncurry Point . splitRec . cast
 
 
 -- | Some hands for the axis (fields) in the first three dimensions
@@ -424,23 +381,8 @@ name = SSymField
 ----------------------------------------
  -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
 
-_rec             :: (allFields ~ (R d ++ fields))
-                 => Lens' (Point d r fields) (PlainRec (TElField r) allFields)
-_rec f (Point r) = fmap (\r' -> Point r') (f r)
 
 
--- _xL :: forall d r. (DField 1 ∈ R1 d) => Lens' (PlainRec (TElField r) (R1 d)) r
--- _xL = rLens x
-
--- _x :: (DField 1 ∈ R d) => Lens' (Point d r fields) r
--- _x = _rec._xL
-
-
---          Point r -> _xL r
--- _x   :: (DField 1 ∈ R d) => Point d r fields -> Identity r
--- -- _x   :: (1 <= d) => Point d r fields -> Identity r
--- _x p = case p of
---          Point (r :: PlainRec (TElField r) (R d ++ fields)) -> rGet' x r
 
 
 
@@ -457,12 +399,12 @@ myPt2 = point pt2
 
 
 myPt :: Point 1 Int '["name" :~>: String]
-myPt = Point pt
+myPt = point pt
 
 
-myX :: Int
-myX = case myPt of
-        Point pt' -> runIdentity $ rGet' x pt'
+-- myX :: Int
+-- myX = case myPt of
+--         Point pt' -> runIdentity $ rGet' x pt'
 
 
 
