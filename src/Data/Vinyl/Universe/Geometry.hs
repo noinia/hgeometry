@@ -47,11 +47,11 @@ type instance App (TElField r) (Field (s ::: t)) = t
 type DField (d :: Nat)  = Field (D d)
 
 -- | And a fancy name for the symbol fields
-type (s :: Symbol) :~>: (t :: *) = Field (s ::: t)
+type (s :: Symbol) :~> (t :: *) = Field (s ::: t)
 
 -- | Similar shorthands for the corresponding singletons
 type SDField (d :: Nat)             = SField (DField d)
-type SSField (s :: Symbol) (t :: *) = SField (s :~>: t)
+type SSField (s :: Symbol) (t :: *) = SField (s :~> t)
 
 
 -- | Type signature for a PlainRec with TElField as the interpreter

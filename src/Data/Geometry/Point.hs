@@ -216,7 +216,7 @@ instance Split xs ys => Split (x ': xs) ys where
                        in (r :& rx, ry)
 
 
-sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~>: String])
+sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
 sp = splitRec pt
 
 
@@ -253,7 +253,7 @@ instance Implicit (PlainRec (U.Const String) xs) =>
 
 
 
-instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~>: String]) where
+instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~> String]) where
   implicitly = x =: "x" <+> y =: "y" <+> name =: "name"
 
 --          , Show r
@@ -269,17 +269,17 @@ test :: PlainTRec Int (R 2)
 test = x =: 10 <+> y =: 5
 
 
-pt :: PlainTRec Int [DField 1, "name" :~>: String]
+pt :: PlainTRec Int [DField 1, "name" :~> String]
 pt =   x    =: 10
    <+> name =: "frank"
 
-pt2 :: PlainTRec Int (R 2 ++ '["name" :~>: String])
+pt2 :: PlainTRec Int (R 2 ++ '["name" :~> String])
 pt2 = cast $ pt <+> y =: 5
 
-myPt2 :: Point 2 Int '["name" :~>: String]
+myPt2 :: Point 2 Int '["name" :~> String]
 myPt2 = point pt2
 
-myPt :: Point 1 Int '["name" :~>: String]
+myPt :: Point 1 Int '["name" :~> String]
 myPt = point pt
 
 
