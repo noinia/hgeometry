@@ -59,6 +59,9 @@ import qualified Data.Vector.Fixed as V
 -- type R (d :: Nat) = R1 (ToNat1 d)
 type R (d :: Nat) = Range 1 d
 
+type R1 (d :: Nat1) = Range1 (Succ Zero) d
+
+
 -- -- | The implementation of R uses the Peano nats
 -- type family R1 (d :: Nat1) :: [*] where
 --   R1 Zero     = '[]
@@ -183,7 +186,7 @@ type family Nat1ToPeano (n :: Nat1) :: * where
 
 
 
-
+--------------------------------------------------------------------------------
 
 class VecToHList (d :: *) where
   vecToHList :: Arity d => Vec d r -> HList (Replicate d r)
@@ -195,44 +198,115 @@ instance (Arity d, VecToHList d) => VecToHList (S d) where
   vecToHList v = let (x,xs) = (V.head v, V.tail v)
                  in (Identity x) :& vecToHList xs
 
-
-
-
-
+----------------------------------------
 
 class HListToPlainTRec (d :: Nat1) where
   hListToRec :: Proxy s -> Proxy d -> HList (Replicate1 d r) -> PlainTRec r (Range1 s d)
 
 
-  -- dropOne :: PlainTRec r (R (ToNat d)) -> PlainTRec r (
-  --                                           Dropped (S Z) (R (ToNat d)))
-
 instance HListToPlainTRec Zero where
   hListToRec _ _ RNil = RNil
-
-
 instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
-  hListToRec (ps :: Proxy s) _ (Identity r :& rs) = (Identity r)
-                                                    :&
-                                                    hListToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) rs
+  hListToRec (_ :: Proxy s) _ (Identity r :& rs) = (Identity r)
+                                                   :&
+                                                   hListToRec (Proxy :: Proxy (Succ s))
+                                                              (Proxy :: Proxy d) rs
+
+--------------------------------------------------------------------------------
+
+-- class Directly (d :: Nat1) where
+--   vecToRec :: Arity (Nat1ToPeano d) =>
+--               Proxy s -> Proxy d -> Vec (Nat1ToPeano d) r -> PlainTRec r (Range1 s d)
+
+-- instance Directly Zero where
+--   vecToRec _ _ _ = RNil
+
+-- instance (Arity (Nat1ToPeano d), Directly d) => Directly (Succ d) where
+--   vecToRec (_ :: Proxy s) _ v = let (x,xs) = (V.head v, V.tail v)
+--                                 in (Identity x) :& vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
+
+
+-- vecToPoint   ::  forall r d d1. ( d1 ~ ToNat1 d
+--                                   ,
+
+--   Nat1ToPeano (ToNat1 d) ~ ToPeano d
+--                              , Directly (ToNat1 d)
+--                              , Arity (ToPeano d)
+--                              ) => Vector' (ToNat1 d) r -> Point' d r '[]
+-- vecToPoint v = flip Point' RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
+
+
+--------------------------------------------------------------------------------
+
+class Directly (d :: Nat1) where
+  vecToRec :: Proxy s -> Proxy d -> Vector' d r -> PlainTRec r (Range1 s d)
+
+instance Directly Zero where
+  vecToRec _ _ _ = RNil
+
+instance (Directly d) => Directly (Succ d) where
+  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destr v
+                                in (Identity x) :& vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
 
 
 
 
-
-vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) =>
-            Proxy d ->
-            Vec pd r -> PlainTRec r (R d)
-vecToRec _ = hListToRec pOne pD . vecToHList
-  where
-    pOne :: Proxy (Succ Zero)
-    pOne = Proxy
-    pD :: Proxy (ToNat1 d)
-    pD = Proxy
+-- vecToPoint   ::  forall r d d1. ( d1 ~ ToNat1 d
+--                                 , Directly d1
+--                                 -- , Arity (Nat1ToPeano d1)
+--                                 ) => Vector' d1 r -> Point' d r '[]
+-- vecToPoint v = flip Point' RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
 
 
 
+data Vector' (d :: Nat1) (r :: *) where
+  Vector' :: Vec (Nat1ToPeano d) r -> Vector' d r
 
+
+-- destr :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
+destr :: Vector' (Succ d) r -> (r, Vector' d r)
+destr (Vector' v) = (undefined,undefined)
+
+
+-- vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) =>
+--             Proxy d ->
+--             Vec pd r -> PlainTRec r (R d)
+-- vecToRec _ = hListToRec pOne pD . vecToHList
+--   where
+--     pOne :: Proxy (Succ Zero)
+--     pOne = Proxy
+--     pD :: Proxy (ToNat1 d)
+--     pD = Proxy
+
+
+-- myVect :: Vector' (Succ (Succ (Succ Zero))) Int
+myVect :: Vector' (ToNat1 3) Int
+myVect = Vector' vect
+
+-- myPt1 :: Point 3 Int '[]
+-- myPt1 = vecToPoint myVect
+
+-- myRec = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy (ToNat1 3)) myVect
+
+vecToRec' :: forall d d1 r. ( Directly d1
+                            , FromNat1 d1 ~ d, ToNat1 d ~ d1
+                            )
+                            => Vector' d1 r -> PlainTRec r (R d)
+vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
+
+
+myXX = toPoint myVect
+
+toPoint   :: forall d1 d r. ( Directly d1
+                            , FromNat1 d1 ~ d, ToNat1 d ~ d1
+                            )
+                            => Vector' d1 r -> Point' d r '[]
+toPoint = flip Point' RNil . vecToRec'
+
+-- toPoint (_ :: Proxy d1) v = Point' r RNil
+--   where
+--     r :: PlainTRec r (R (FromNat1 d1))
+--     r = undefined
 
 
 
