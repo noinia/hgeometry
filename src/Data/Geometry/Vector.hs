@@ -1,104 +1,59 @@
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Vector( Vec(Vec)
-                           , toList
-                           ) where
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
+module Data.Geometry.Vector where
 
 import Control.Applicative
-
-import Data.List(genericReplicate)
 
 import Linear.Affine
 import Linear.Vector
 
+import Data.Vector.Fixed.Boxed
+import Data.Vector.Fixed(Arity)
+import Data.Vector.Fixed.Cont(Z(..),S(..))
 
-import Data.Vinyl
-
-
+import Data.Type.Nat
 import GHC.TypeLits
+
+import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
 
-newtype Vec (d :: Nat) r = Vec { toList :: [r] }
-                           deriving (Show,Eq,Ord)
+-- | Wrapper around Vec that converts from their Peano numbers to Our peano numbers
+data Vector (d :: Nat1) (r :: *) where
+  Vector :: Vec (Nat1ToPeano d) r -> Vector d r
+
+instance Arity (Nat1ToPeano d) => Functor (Vector d) where
+  fmap f (Vector v) = Vector $ fmap f v
 
 
--- pure'   :: forall a d. SingI (d :: Nat) => a -> Vec d a
--- pure' x = Vec $ genericReplicate (fromSing (sing :: Sing (d :: Nat))) x
+instance Arity (Nat1ToPeano d) => Applicative (Vector d) where
+  pure                        = Vector . pure
+  (Vector fv)  <*> (Vector v) = Vector $ fv <*> v
 
-vZipWith                     :: forall a b c d.
-                                (a -> b -> c) -> Vec d a -> Vec d b -> Vec d c
-vZipWith f (Vec xs) (Vec ys) = Vec $ zipWith f xs ys
-
-app' :: forall a b d . Vec d (a -> b) -> Vec d a -> Vec d b
-app' = vZipWith ($)
-
-
-
-
-instance Functor (Vec d) where
-  fmap f (Vec xs) = Vec $ fmap f xs
-
-instance Applicative (Vec d) where
-  pure  = undefined  -- pure'
-  (<*>) = app'
-
-instance Additive (Vec d) where
+instance Arity (Nat1ToPeano d) => Additive (Vector d) where
   zero = pure 0
-  (^+^) = vZipWith (+)
+  (Vector u) ^+^ (Vector v) = Vector $ V.zipWith (+) u v
 
-instance Affine (Vec d) where
-  type Diff (Vec d) = Vec d
+instance Arity (Nat1ToPeano d) => Affine (Vector d) where
+  type Diff (Vector d) = Vector d
 
   u .-. v = u ^-^ v
   p .+^ v = p ^+^ v
 
+----------------------------------------
+-- | Isomorphism between our Nat1 and the Peano numbers defined in Vector.Fixed
 
--- negateV = fmap negate
+type family PeanoToNat1 (n :: *) :: Nat1 where
+  PeanoToNat1 Z = Zero
+  PeanoToNat1 (S n) = Succ (PeanoToNat1 n)
 
--- instance Num r => VectorSpace (Vec d r) where
---   type Scalar (Vec d r) = r
---   s *^ v = fmap (s*) v
+type family Nat1ToPeano (n :: Nat1) :: * where
+  Nat1ToPeano Zero     = Z
+  Nat1ToPeano (Succ n) = S (Nat1ToPeano n)
 
--- instance (AdditiveGroup r, Num r) => InnerSpace (Vec d r) where
---   v <.> v' = let (Vec r) = vZipWith (*) v v' in
---              sum r
+----------------------------------------
 
-
-
-test :: Vec 3 Int
-test = zero
-
-foo :: Vec 3 Int
-foo = Vec [1,2,3]
-
-
--- data Vec (d :: Nat) (a :: *) where
---   Nil  ::                 Vec 0       a
---   (:.) :: a -> Vec d a -> Vec (d + 1) a
-
-
--- -- myVec :: Vec 2 Int
--- myVec = 1 :. (2 :. Nil)
-
-
--- vReplicate     :: Sing (n :: Nat) -> a -> Vec n a
--- vReplicate s x = case fromSing s of
---                    0 -> Nil
---                    _ -> x :. vReplicate (sing') x
---   where
---     sing' = sing :: Sing ((n - 1) :: Nat)
-
-
--- vZipWith                       :: (a -> b -> c) -> Vec d a -> Vec d b -> Vec d c
--- vZipWith f Nil       _         = Nil
--- -- vZipWith f (x :. xs) (y :. ys) = f x y :. vZipWith f xs ys
-
--- vReplicate :: (Num r, SingE (n:: Nat)) => Vec n r
--- vReplicate = case fromSing (sing :: Nat) of
---                0 -> Nil
---                m ->
+-- | Get the head and tail of a vector
+destruct            :: Arity (Nat1ToPeano d)
+                    => Vector (Succ d) r -> (r, Vector d r)
+destruct (Vector v) = (V.head v, Vector $ V.tail v)

@@ -10,7 +10,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
-
 module Data.Geometry.Point( --Point(..)
                           -- , point
 
@@ -29,18 +28,19 @@ import Data.Maybe
 import Data.Proxy
 
 import Data.Geometry.Properties
--- import Data.Geometry.Vector
+import Data.Geometry.Vector
 
+import Data.Vector.Fixed.Cont(Z(..),S(..),ContVec(..),ToPeano(..))
+import Data.Vector.Fixed((<|),Arity(..))
+import Data.Vector.Fixed.Boxed(Vec)
 
-import Data.Vector.Fixed.Boxed
-import Data.Vector.Fixed.Cont
-import Data.Vector.Fixed
 
 import Data.Vinyl
 import Data.Vinyl.Idiom.Identity
 import Data.Vinyl.TyFun
 import Data.Vinyl.Lens
 import Data.Vinyl.Universe.Geometry
+
 
 
 import Data.Type.Nat
@@ -51,6 +51,21 @@ import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+-- | Points in a d-dimensional space
+
+-- | A Point in a d dimensional space. Apart from coordinates in R^d may have
+-- additonal fields/attributes. For example color, a label, etc.
+data Point (d :: Nat) (r :: *) (fields :: [*]) where
+  Point :: PlainTRec r (R d) -> PlainTRec r fields -> Point d r fields
+
+
+-- | Smart constructor that allows a different order of the input fields
+point :: forall d r fields allFields.
+          ( Split (R d) fields
+          , allFields :~: (R d ++ fields)
+          ) => PlainTRec r allFields -> Point d r fields
+point = uncurry Point . splitRec . cast
 
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
@@ -83,74 +98,70 @@ type family Len (xs :: [*]) where
   Len '[]       = Z
   Len (x ': xs) = S (Len xs)
 
-class ToContVec (rs :: [*]) where
+class RecToContVec (rs :: [*]) where
   toContVec :: PlainTRec r rs -> ContVec (Len rs) r
 
-instance ToContVec '[] where
-  toContVec _ = empty
+instance RecToContVec '[] where
+  toContVec _ = V.empty
 
-instance ToContVec rs => ToContVec (DField i ': rs) where
+instance RecToContVec rs => RecToContVec (DField i ': rs) where
   toContVec (r :& rs) = runIdentity r <| toContVec rs
 
 
 toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
-                                     , ToContVec (R d)
+                                     , RecToContVec (R d)
                                      , Arity (ToPeano d)
                                      ) =>
                       Point d r fs -> Vec (ToPeano d) r
-toVec (Point g _) = vector $ toContVec g
+toVec (Point g _) = V.vector $ toContVec g
+
+
+toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
+                           , ToPeano d ~ Nat1ToPeano (ToNat1 d)
+                           , RecToContVec (R d)
+                           , Arity (ToPeano d)
+                           ) =>
+            Point d r fs -> Vector (ToNat1 d) r
+toVector = Vector . toVec
+
+
+
+
+myVec2 = toVector myPt2
+
+
+myPt2' = toPoint $ toVector myPt2
 
 
 --------------------------------------------------------------------------------
 -- | Conversion from Vector to Point
 
+class VecToRec (d :: Nat1) where
+  vecToRec :: Proxy s -> Proxy d -> Vector d r -> PlainTRec r (Range1 s d)
 
-type family PeanoToNat1 (n :: *) :: Nat1 where
-  PeanoToNat1 Z = Zero
-  PeanoToNat1 (S n) = Succ (PeanoToNat1 n)
-
-type family Nat1ToPeano (n :: Nat1) :: * where
-  Nat1ToPeano Zero     = Z
-  Nat1ToPeano (Succ n) = S (Nat1ToPeano n)
-
-----------------------------------------
-
--- | Wrapper around Vec that converts from their Peano numbers to Our peano numbers
-data Vector' (d :: Nat1) (r :: *) where
-  Vector' :: Vec (Nat1ToPeano d) r -> Vector' d r
-
-
-destr             :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
-destr (Vector' v) = (V.head v,Vector' $ V.tail v)
-
-----------------------------------------
-
-class Directly (d :: Nat1) where
-  vecToRec :: Proxy s -> Proxy d -> Vector' d r -> PlainTRec r (Range1 s d)
-
-instance Directly Zero where
+instance VecToRec Zero where
   vecToRec _ _ _ = RNil
 
-instance (Arity (Nat1ToPeano d), Directly d) => Directly (Succ d) where
-  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destr v in
+instance (Arity (Nat1ToPeano d), VecToRec d) => VecToRec (Succ d) where
+  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destruct v in
                                 (Identity x)
                                 :&
                                 vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
 
-
-
 -- | Version of vecToRec without the proxies
-vecToRec' :: forall d d1 r. ( Directly d1
+vecToRec' :: forall d d1 r. ( VecToRec d1
                             , FromNat1 d1 ~ d, ToNat1 d ~ d1
                             )
-                            => Vector' d1 r -> PlainTRec r (R d)
+                            => Vector d1 r -> PlainTRec r (R d)
 vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
 
+----------------------------------------
 
-toPoint   :: forall d1 d r. ( Directly d1
+-- | Convert a vector into a point
+toPoint   :: forall d1 d r. ( VecToRec d1
                             , FromNat1 d1 ~ d, ToNat1 d ~ d1
                             )
-                            => Vector' d1 r -> Point d r '[]
+                            => Vector d1 r -> Point d r '[]
 toPoint = flip Point RNil . vecToRec'
 
 
@@ -158,24 +169,14 @@ toPoint = flip Point RNil . vecToRec'
 
 
 
--- myVect :: Vector' (Succ (Succ (Succ Zero))) Int
-myVect :: Vector' (ToNat1 3) Int
-myVect = Vector' vect
+myVect :: Vector (ToNat1 3) Int
+myVect = Vector vect
 
 
-vect :: Vec (ToPeano 3) Int
+-- vect :: Vec (ToPeano 3) Int
 vect = V.mk3 1 2 3
 
-
-
-
 myXX = toPoint myVect
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 -- | Constructing a point from a monolithic PlainTRec
@@ -194,22 +195,6 @@ instance Split xs ys => Split (x ': xs) ys where
 
 sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~>: String])
 sp = splitRec pt
-
---------------------------------------------------------------------------------
--- | Points in a d-dimensional space
-
--- | A Point in a d dimensional space. Apart from coordinates in R^d may have
--- additonal fields/attributes. For example color, a label, etc.
-data Point (d :: Nat) (r :: *) (fields :: [*]) where
-  Point :: PlainTRec r (R d) -> PlainTRec r fields -> Point d r fields
-
-
--- | Smart constructor that allows a different order of the input fields
-point :: forall d r fields allFields.
-          ( Split (R d) fields
-          , allFields :~: (R d ++ fields)
-          ) => PlainTRec r allFields -> Point d r fields
-point = uncurry Point . splitRec . cast
 
 
 --------------------------------------------------------------------------------
@@ -233,17 +218,15 @@ name = SSymField
 
 
 
-pt :: PlainRec (TElField Int) [DField 1, "name" :~>: String]
+pt :: PlainTRec Int [DField 1, "name" :~>: String]
 pt =   x    =: 10
    <+> name =: "frank"
 
-
-pt2 :: PlainRec (TElField Int) (R 2 ++ '["name" :~>: String])
+pt2 :: PlainTRec Int (R 2 ++ '["name" :~>: String])
 pt2 = cast $ pt <+> y =: 5
 
 myPt2 :: Point 2 Int '["name" :~>: String]
 myPt2 = point pt2
-
 
 myPt :: Point 1 Int '["name" :~>: String]
 myPt = point pt
