@@ -237,8 +237,36 @@ name = SSymField
  -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
 
 
+instance Implicit (PlainRec (U.Const String) '[]) where
+  implicitly = RNil
 
 
+instance Implicit (PlainRec (U.Const String) xs) =>
+           Implicit (PlainRec (U.Const String) (SDField i ': xs)) where
+  implicitly = (Identity "_i") :& implicitly
+
+
+
+-- instance Implicit (PlainRec (U.Const String) (Range1 s d)) where
+--   implicitly = (SNatField :: s)
+
+
+
+
+instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~>: String]) where
+  implicitly = x =: "x" <+> y =: "y" <+> name =: "name"
+
+--          , Show r
+--          ) => Show (Point d r fields) where
+--   show (Point g rs) = concat ["Point "
+--                              , show $ toContVec g, " "
+--                                -- , rshow rs
+--                              ]
+
+
+
+test :: PlainTRec Int (R 2)
+test = x =: 10 <+> y =: 5
 
 
 pt :: PlainTRec Int [DField 1, "name" :~>: String]
