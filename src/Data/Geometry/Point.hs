@@ -61,12 +61,6 @@ type R (d :: Nat) = Range 1 d
 
 type R1 (d :: Nat1) = Range1 (Succ Zero) d
 
-
--- -- | The implementation of R uses the Peano nats
--- type family R1 (d :: Nat1) :: [*] where
---   R1 Zero     = '[]
---   R1 (Succ n) = R1 n ++ '[DField (FromNat1 (Succ n))]
-
 -- | Type level list concatenation
 type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
   '[] ++ ys       = ys
@@ -82,30 +76,8 @@ type family Range1 (s :: Nat1) (k :: Nat1) where
   Range1 s Zero     = '[]
   Range1 s (Succ k) = DField (FromNat1 s) ': Range1 (Succ s) k
 
-
--- type family Dropped (k :: Nat1) (xs :: [*]) where
---   Dropped Zero     xs        = xs
---   Dropped k        '[]       = '[]
---   Dropped (Succ k) (x ': xs) = Dropped k xs
-
--- class Drop (k :: Nat1) where
---   dropRec :: Proxy k -> Rec el f fields -> Rec el f (Dropped k fields)
-
--- instance Drop Zero where
---   dropRec = const id
-
--- instance Drop k => Drop (Succ k) where
---   dropRec _ RNil     = RNil
---   dropRec _ (_ :& r) = dropRec (Proxy :: Proxy k) r
-
-
-
-
-
-
--- -- | Dunno what to do about the weird Arity check
--- toVec   :: Arity (ToPeano d) => Proxy d -> PlainTRec r (R d) -> Vec (ToPeano d) r
--- toVec p = vector . toContVec p
+--------------------------------------------------------------------------------
+-- | Conversion from Point to Vector
 
 type family Len (xs :: [*]) where
   Len '[]       = Z
@@ -121,11 +93,6 @@ instance ToContVec rs => ToContVec (DField i ': rs) where
   toContVec (r :& rs) = runIdentity r <| toContVec rs
 
 
-
-
-
-
-
 toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
                                      , ToContVec (R d)
                                      , Arity (ToPeano d)
@@ -134,40 +101,8 @@ toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
 toVec (Point g _) = vector $ toContVec g
 
 
-
-
-class VecField (i :: *) where
-  vField :: SDField (ToNat (S i))
-
-  vIndex   :: (Arity d, Index i d) => Vec d r -> r
-  vIndex v = V.index v (undefined :: i)
-
-instance VecField Z where
-  vField = SNatField
-
-instance KnownNat (ToNat (S (S (n)))) => VecField (S n) where
-  vField = SNatField
-
-
-
-
-
-
-type family Replicate (n :: *) (t :: *) where
-  Replicate Z     t = '[]
-  Replicate (S n) t = (t ': Replicate n t)
-
-type family (n :: *) :-: (m :: *) where
-  Z :-: m = Z
-  n :-: Z = Z
-  (S n) :-: (S m) = n :-: m
-
-infixl 6 :-:
-
-
-
-type Replicate1 (n :: Nat1) (t :: *) = Replicate (Nat1ToPeano n) t
-
+--------------------------------------------------------------------------------
+-- | Conversion from Vector to Point
 
 
 type family PeanoToNat1 (n :: *) :: Nat1 where
@@ -178,65 +113,17 @@ type family Nat1ToPeano (n :: Nat1) :: * where
   Nat1ToPeano Zero     = Z
   Nat1ToPeano (Succ n) = S (Nat1ToPeano n)
 
-
-
-
-
-
-
-
-
---------------------------------------------------------------------------------
-
-class VecToHList (d :: *) where
-  vecToHList :: Arity d => Vec d r -> HList (Replicate d r)
-
-instance VecToHList Z where
-  vecToHList _ = RNil
-
-instance (Arity d, VecToHList d) => VecToHList (S d) where
-  vecToHList v = let (x,xs) = (V.head v, V.tail v)
-                 in (Identity x) :& vecToHList xs
-
 ----------------------------------------
 
-class HListToPlainTRec (d :: Nat1) where
-  hListToRec :: Proxy s -> Proxy d -> HList (Replicate1 d r) -> PlainTRec r (Range1 s d)
+-- | Wrapper around Vec that converts from their Peano numbers to Our peano numbers
+data Vector' (d :: Nat1) (r :: *) where
+  Vector' :: Vec (Nat1ToPeano d) r -> Vector' d r
 
 
-instance HListToPlainTRec Zero where
-  hListToRec _ _ RNil = RNil
-instance HListToPlainTRec d => HListToPlainTRec (Succ d) where
-  hListToRec (_ :: Proxy s) _ (Identity r :& rs) = (Identity r)
-                                                   :&
-                                                   hListToRec (Proxy :: Proxy (Succ s))
-                                                              (Proxy :: Proxy d) rs
+destr             :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
+destr (Vector' v) = (V.head v,Vector' $ V.tail v)
 
---------------------------------------------------------------------------------
-
--- class Directly (d :: Nat1) where
---   vecToRec :: Arity (Nat1ToPeano d) =>
---               Proxy s -> Proxy d -> Vec (Nat1ToPeano d) r -> PlainTRec r (Range1 s d)
-
--- instance Directly Zero where
---   vecToRec _ _ _ = RNil
-
--- instance (Arity (Nat1ToPeano d), Directly d) => Directly (Succ d) where
---   vecToRec (_ :: Proxy s) _ v = let (x,xs) = (V.head v, V.tail v)
---                                 in (Identity x) :& vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
-
-
--- vecToPoint   ::  forall r d d1. ( d1 ~ ToNat1 d
---                                   ,
-
---   Nat1ToPeano (ToNat1 d) ~ ToPeano d
---                              , Directly (ToNat1 d)
---                              , Arity (ToPeano d)
---                              ) => Vector' (ToNat1 d) r -> Point d r '[]
--- vecToPoint v = flip Point RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
-
-
---------------------------------------------------------------------------------
+----------------------------------------
 
 class Directly (d :: Nat1) where
   vecToRec :: Proxy s -> Proxy d -> Vector' d r -> PlainTRec r (Range1 s d)
@@ -244,50 +131,15 @@ class Directly (d :: Nat1) where
 instance Directly Zero where
   vecToRec _ _ _ = RNil
 
-instance ( Arity (Nat1ToPeano d) , Directly d) => Directly (Succ d) where
-  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destr v
-                                in (Identity x) :& vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
+instance (Arity (Nat1ToPeano d), Directly d) => Directly (Succ d) where
+  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destr v in
+                                (Identity x)
+                                :&
+                                vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
 
 
 
-
--- vecToPoint   ::  forall r d d1. ( d1 ~ ToNat1 d
---                                 , Directly d1
---                                 -- , Arity (Nat1ToPeano d1)
---                                 ) => Vector' d1 r -> Point d r '[]
--- vecToPoint v = flip Point RNil $ vecToRec (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) v
-
-
-
-data Vector' (d :: Nat1) (r :: *) where
-  Vector' :: Vec (Nat1ToPeano d) r -> Vector' d r
-
-
-destr :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
--- destr :: Vector' (Succ d) r -> (r, Vector' d r)
-destr (Vector' v) = (V.head v,Vector' $ V.tail v)
-
-
--- vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) =>
---             Proxy d ->
---             Vec pd r -> PlainTRec r (R d)
--- vecToRec _ = hListToRec pOne pD . vecToHList
---   where
---     pOne :: Proxy (Succ Zero)
---     pOne = Proxy
---     pD :: Proxy (ToNat1 d)
---     pD = Proxy
-
-
--- myVect :: Vector' (Succ (Succ (Succ Zero))) Int
-myVect :: Vector' (ToNat1 3) Int
-myVect = Vector' vect
-
--- myPt1 :: Point 3 Int '[]
--- myPt1 = vecToPoint myVect
-
--- myRec = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy (ToNat1 3)) myVect
-
+-- | Version of vecToRec without the proxies
 vecToRec' :: forall d d1 r. ( Directly d1
                             , FromNat1 d1 ~ d, ToNat1 d ~ d1
                             )
@@ -295,43 +147,38 @@ vecToRec' :: forall d d1 r. ( Directly d1
 vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
 
 
-myXX = toPoint myVect
-
 toPoint   :: forall d1 d r. ( Directly d1
                             , FromNat1 d1 ~ d, ToNat1 d ~ d1
                             )
                             => Vector' d1 r -> Point d r '[]
 toPoint = flip Point RNil . vecToRec'
 
--- toPoint (_ :: Proxy d1) v = Point r RNil
---   where
---     r :: PlainTRec r (R (FromNat1 d1))
---     r = undefined
 
 
 
 
 
-
-
-
-
-
-
+-- myVect :: Vector' (Succ (Succ (Succ Zero))) Int
+myVect :: Vector' (ToNat1 3) Int
+myVect = Vector' vect
 
 
 vect :: Vec (ToPeano 3) Int
 vect = V.mk3 1 2 3
 
 
-hl :: HList '[Int,Int,Int]
-hl = vecToHList $ vect
 
-tr :: PlainTRec Int '[DField 1, DField 2, DField 3]
-tr = hListToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy (ToNat1 3)) hl
+
+myXX = toPoint myVect
 
 
 
+
+
+
+
+--------------------------------------------------------------------------------
+-- | Constructing a point from a monolithic PlainTRec
 
 
 class Split (xs :: [*]) (ys :: [*]) where
@@ -345,14 +192,11 @@ instance Split xs ys => Split (x ': xs) ys where
                        in (r :& rx, ry)
 
 
-
-
 sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~>: String])
 sp = splitRec pt
 
 --------------------------------------------------------------------------------
--- | Defining points in a d-dimensional space
-
+-- | Points in a d-dimensional space
 
 -- | A Point in a d dimensional space. Apart from coordinates in R^d may have
 -- additonal fields/attributes. For example color, a label, etc.
@@ -367,6 +211,9 @@ point :: forall d r fields allFields.
           ) => PlainTRec r allFields -> Point d r fields
 point = uncurry Point . splitRec . cast
 
+
+--------------------------------------------------------------------------------
+-- | Some common fields
 
 -- | Some hands for the axis (fields) in the first three dimensions
 x = SNatField :: SDField 1
