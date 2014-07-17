@@ -244,7 +244,7 @@ class Directly (d :: Nat1) where
 instance Directly Zero where
   vecToRec _ _ _ = RNil
 
-instance (Directly d) => Directly (Succ d) where
+instance ( Arity (Nat1ToPeano d) , Directly d) => Directly (Succ d) where
   vecToRec (_ :: Proxy s) _ v = let (x,xs) = destr v
                                 in (Identity x) :& vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
 
@@ -263,9 +263,9 @@ data Vector' (d :: Nat1) (r :: *) where
   Vector' :: Vec (Nat1ToPeano d) r -> Vector' d r
 
 
--- destr :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
-destr :: Vector' (Succ d) r -> (r, Vector' d r)
-destr (Vector' v) = (undefined,undefined)
+destr :: Arity (Nat1ToPeano d) => Vector' (Succ d) r -> (r, Vector' d r)
+-- destr :: Vector' (Succ d) r -> (r, Vector' d r)
+destr (Vector' v) = (V.head v,Vector' $ V.tail v)
 
 
 -- vecToRec :: forall pd d r. (pd ~ ToPeano d, Arity (ToPeano d)) =>
