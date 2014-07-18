@@ -233,28 +233,59 @@ name :: SSField "name" String --SField (Field ("name" ::: String))
 name = SSymField
 
 
-----------------------------------------
- -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
+--------------------------------------------------------------------------------
+-- | Lenses
+
+-- | Syntactic sugar
+type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
 
 
 
 
 
--- instance Implicit (PlainRec (U.Const String) (Range1 s d)) where
---   implicitly = (SNatField :: s)
 
 
 
+-- | Lens that gets the Rec containing only the geometric information for this point
+_plainPoint                :: Lens' (Point d r fs) (PlainTRec r (R d))
+_plainPoint f (Point g rs) = fmap (\g' -> Point g' rs) (f g)
 
--- instance Implicit (PlainRec (U.Const String) '[DField 1, DField 2, "name" :~> String]) where
---   implicitly = x =: "x" <+> y =: "y" <+> name =: "name"
+-- | Non type-changing lens for the extra fields  of a point
+_extraFields :: Lens' (Point d r fs) (PlainTRec r fs)
+_extraFields f (Point g rs) = fmap (\rs' -> Point g rs') (f rs)
 
---          , Show r
---          ) => Show (Point d r fields) where
---   show (Point g rs) = concat ["Point "
---                              , show $ toContVec g, " "
---                                -- , rshow rs
---                              ]
+
+-- | Lens to get an axis based on its name
+_axis     :: forall i d r fs. (i :<= d) => SDField i -> Lens' (Point d r fs) r
+_axis fld = _plainPoint . _axisLens' (Proxy :: Proxy d) fld
+
+-- | Lens to get an axis based on it's dimension/number
+_axis'  ::  forall i d r fs. (i :<= d, KnownNat i) => Proxy i -> Lens'(Point d r fs) r
+_axis'_ = _axis (SNatField :: SDField i)
+
+
+-- | Lens to one of the extra fields of a point, based on the name of the field
+_get     :: ((sy :~> t) ∈ fs) => SSField sy t -> Lens' (Point d r fs) t
+_get fld = _extraFields . rLens' fld . _id
+
+
+-- | Lens to one of the extra fields of a point, based on its name as a type
+-- level string
+_get'   :: forall sy t fs d r. ((sy :~> t) ∈ fs, KnownSymbol sy)
+        => Proxy sy -> Lens' (Point d r fs) t
+_get' _ = _get (SSymField :: SSField sy t)
+
+
+
+_axisLens'       :: (i :<= d) => Proxy d -> SDField i -> Lens' (PlainTRec r (R d)) r
+_axisLens' _ fld = rLens' fld . _id
+
+_id :: Lens' (Identity x) x
+_id f (Identity x) = fmap (\x' -> Identity x') (f x)
+
+
+
+--------------------------------------------------------------------------------
 
 
 
@@ -276,11 +307,11 @@ myPt :: Point 1 Int '["name" :~> String]
 myPt = point pt
 
 
--- myX :: Int
--- myX = case myPt of
---         Point pt' -> runIdentity $ rGet' x pt'
+myName :: Lens' (PlainTRec Int [DField 1, "name" :~> String]) String
+myName = rLens' name . _id
 
-
+myX :: forall rs d. (DField 1 ∈ R d) => Lens' (Point d Int rs) Int
+myX = _axis x
 
 
 myX1 :: Int
