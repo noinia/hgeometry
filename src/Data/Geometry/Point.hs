@@ -106,6 +106,9 @@ data Point (d :: Nat) (fs :: [*]) (r :: *) where
   Point :: PlainTRec r (R d) -> PlainTRec r fs -> Point d fs r
 
 
+----------------------------------------
+-- ** Constructing  Points
+
 -- | Smart constructor that allows a different order of the input fields
 --
 -- >>> p :: Point 2 '["name" :~> String] Int
@@ -116,6 +119,13 @@ point :: forall d r fields allFields.
           , allFields :~: (R d ++ fields)
           ) => PlainTRec r allFields -> Point d fields r
 point = uncurry Point . splitRec . cast
+
+
+-- | Construct a Point from a vector. Alternative name for 'toPoint'.
+fromVector   :: ( VecToRec d1
+                , FromNat1 d1 ~ d, ToNat1 d ~ d1
+                ) => Vector d1 r -> Point d '[] r
+fromVector = toPoint
 
 ----------------------------------------
 -- Associated types
@@ -212,6 +222,11 @@ toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
 toVec (Point g _) = V.vector $ toContVec g
 
 
+-- | Convert a Point into a Vector
+--
+--
+-- >>> toVector $ myPoint
+-- TODO
 toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
                            , PeanoNat1Iso d
                            , RecToContVec (R d)
@@ -219,18 +234,6 @@ toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
                            ) =>
             Point d fs r -> Vector (ToNat1 d) r
 toVector = Vector . toVec
-
-
-
-
--- myVec2 = toVector myPt2
-
-
--- myPt2' = toPoint $ toVector myPt2
-
-
-
-
 
 --------------------------------------------------------------------------------
 -- | Conversion from Vector to Point
@@ -257,20 +260,23 @@ vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
 ----------------------------------------
 
 -- | Convert a vector into a point
-toPoint   :: forall d1 d r. ( VecToRec d1
-                            , FromNat1 d1 ~ d, ToNat1 d ~ d1
-                            )
-                            => Vector d1 r -> Point d '[] r
+--
+-- >>> toPoint $ myVector
+-- TODO
+toPoint   :: ( VecToRec d1
+             , FromNat1 d1 ~ d, ToNat1 d ~ d1
+             ) => Vector d1 r -> Point d '[] r
 toPoint = flip Point RNil . vecToRec'
-
-
-
--- myXX = toPoint myVect
 
 --------------------------------------------------------------------------------
 -- | Constructing a point from a monolithic PlainTRec
 
 
+-- | Type class that allows us to split a Vinyl Record based on types. I.e.
+--
+-- >>> splitted :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
+-- >>> splitted = splitRec $ x =: 10 <+> name =: "foo"
+-- TODO
 class Split (xs :: [*]) (ys :: [*]) where
   splitRec :: Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
 
@@ -281,17 +287,6 @@ instance Split xs ys => Split (x ': xs) ys where
   splitRec (r :& rs) = let (rx,ry) = splitRec rs
                        in (r :& rx, ry)
 
-
--- sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
--- sp = splitRec pt
-
-
-
--- -- | And a regular named field
--- name :: SSField "name" String --SField (Field ("name" ::: String))
--- name = SSymField
-
-
 --------------------------------------------------------------------------------
 -- | Lenses
 
@@ -299,20 +294,29 @@ instance Split xs ys => Split (x ': xs) ys where
 type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
 
 
--- | Lens that gets the Rec containing only the geometric information for this point
+-- | Lens that gets the Rec containing only the geometric information for this point.
+--
+-- >>> myPoint .^ _plainPoint
+-- TODO
 _plainPoint                :: Lens' (Point d fs r) (PlainTRec r (R d))
 _plainPoint f (Point g rs) = fmap (\g' -> Point g' rs) (f g)
 
 -- | Non type-changing lens for the extra fields  of a point
+-- >>> myPoint .^ _extraFields
+-- TODO
 _extraFields :: Lens' (Point d fs r) (PlainTRec r fs)
 _extraFields f (Point g rs) = fmap (\rs' -> Point g rs') (f rs)
 
 
--- | Lens to get an axis based on its name
+-- | Lens to get an axis based on its name.
+-- >>> myPoint .^ _axis x
+-- TODO
 _axis     :: forall i d r fs. (i :<= d) => SDField i -> Lens' (Point d fs r) r
 _axis fld = _plainPoint . _axisLens' (Proxy :: Proxy d) fld
 
--- | Lens to get an axis based on it's dimension/number
+-- | Lens to get an axis based on it's dimension/number.
+-- >>> myPoint .^ axis' (Proxy :: Proxy 1)
+--
 _axis'   ::  forall i d r fs. (i :<= d, KnownNat i) => Proxy i -> Lens'(Point d fs r) r
 _axis' _ = _axis (SNatField :: SDField i)
 
@@ -370,21 +374,6 @@ _id f (Identity x) = fmap (\x' -> Identity x') (f x)
 -- myX1 :: Int
 -- myX1 = runIdentity $ rGet' x pt
 
-
-
--- type instance Dimension (Point d r p) = d
--- type instance NumType (Point d r p) = r
-
--- -- instance Num r => AffineSpace (Point d r p) where
--- --   type Diff (Point d r p) = Vec d r
-
--- --   p .-. q = asVec p ^-^  asVec q
-
--- --   (Point u fs) .+^ v = Point (u ^+^ v) fs
-
-
--- asVec             :: Point d r p -> Vec d r
--- asVec (Point v _) = v
 
 
 --------------------------------------------------------------------------------
