@@ -38,7 +38,7 @@ module Data.Geometry.Point( -- * Point Data type
                           ) where
 
 -- import Control.Applicative
-import Control.Lens(Lens')
+import Control.Lens(Lens', (^.))
 
 
 
@@ -77,24 +77,20 @@ import qualified Data.Vector.Fixed as V
 
 -- $setup
 -- >>> :{
--- let x    = SNatField :: SDField 1
---     y    = SNatField :: SDField 2
---
---     name = SSymField :: "name" :~> String
---     size = SSymField :: "size" :~> Int
---
---     myPoint :: Point 2 '["name" :~> String, ]
---     myPoint = point $ x =: 1
---                       <+>
---                       name =: "myPoint"
---                       <+>
---                       y =: 100
---
---     vec :: Vec (ToPeano 3) Int
---     vec = V.mk3 1 2 3
---
---     myVector :: Vector (ToNat1 3) Int
---     myVector = Vector vect
+--  let x    = SNatField :: SDField 1
+--      y    = SNatField :: SDField 2
+--      name = SSymField :: SSField "name" String
+--      size = SSymField :: SSField "size" Int
+--      myPoint :: Point 2 '["name" :~> String] Int
+--      myPoint = point $ x =: 1
+--                        <+>
+--                        name =: "myPoint"
+--                        <+>
+--                        y =: 100
+--      vec :: Vec (ToPeano 3) Int
+--      vec = V.mk3 1 2 3
+--      myVector :: Vector (ToNat1 3) Int
+--      myVector = Vector vec
 -- :}
 
 --------------------------------------------------------------------------------
@@ -111,8 +107,12 @@ data Point (d :: Nat) (fs :: [*]) (r :: *) where
 
 -- | Smart constructor that allows a different order of the input fields
 --
--- >>> p :: Point 2 '["name" :~> String] Int
--- >>> p = point $ x =: 1 <+> name =: "frank" <+> y =: 2
+-- >>> :{
+--  let
+--    p :: Point 2 '["name" :~> String] Int
+--    p = point $ x =: 1 <+> name =: "frank" <+> y =: 2
+-- in p
+-- :}
 -- Point { axis_1 =: 1, axis_2 =: 2 }{ name =: "frank" }
 point :: forall d r fields allFields.
           ( Split (R d) fields
@@ -226,7 +226,7 @@ toVec (Point g _) = V.vector $ toContVec g
 --
 --
 -- >>> toVector $ myPoint
--- TODO
+-- Vector fromList [1,100]
 toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
                            , PeanoNat1Iso d
                            , RecToContVec (R d)
@@ -262,7 +262,7 @@ vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
 -- | Convert a vector into a point
 --
 -- >>> toPoint $ myVector
--- TODO
+-- Point { axis_1 =: 1, axis_2 =: 2, axis_3 =: 3 }{  }
 toPoint   :: ( VecToRec d1
              , FromNat1 d1 ~ d, ToNat1 d ~ d1
              ) => Vector d1 r -> Point d '[] r
@@ -274,9 +274,14 @@ toPoint = flip Point RNil . vecToRec'
 
 -- | Type class that allows us to split a Vinyl Record based on types. I.e.
 --
--- >>> splitted :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
--- >>> splitted = splitRec $ x =: 10 <+> name =: "foo"
--- TODO
+-- >>> :{
+-- let
+--   s :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
+--   s = splitRec $ x =: 10 <+> name =: "foo"
+--   (a,b) = s
+-- in (rshow a, rshow b)
+-- :}
+-- ("{ axis_1 =: 10 }","{ name =: \"foo\" }")
 class Split (xs :: [*]) (ys :: [*]) where
   splitRec :: Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
 
@@ -296,27 +301,27 @@ type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
 
 -- | Lens that gets the Rec containing only the geometric information for this point.
 --
--- >>> myPoint .^ _plainPoint
--- TODO
+-- >>> rshow $ myPoint ^. _plainPoint
+-- "{ axis_1 =: 1, axis_2 =: 100 }"
 _plainPoint                :: Lens' (Point d fs r) (PlainTRec r (R d))
 _plainPoint f (Point g rs) = fmap (\g' -> Point g' rs) (f g)
 
 -- | Non type-changing lens for the extra fields  of a point
--- >>> myPoint .^ _extraFields
--- TODO
+-- >>> rshow $ myPoint ^. _extraFields
+-- "{ name =: \"myPoint\" }"
 _extraFields :: Lens' (Point d fs r) (PlainTRec r fs)
 _extraFields f (Point g rs) = fmap (\rs' -> Point g rs') (f rs)
 
 
 -- | Lens to get an axis based on its name.
--- >>> myPoint .^ _axis x
--- TODO
+-- >>> myPoint ^. _axis x
+-- 1
 _axis     :: forall i d r fs. (i :<= d) => SDField i -> Lens' (Point d fs r) r
 _axis fld = _plainPoint . _axisLens' (Proxy :: Proxy d) fld
 
 -- | Lens to get an axis based on it's dimension/number.
--- >>> myPoint .^ axis' (Proxy :: Proxy 1)
---
+-- >>> myPoint ^. _axis' (Proxy :: Proxy 1)
+-- 1
 _axis'   ::  forall i d r fs. (i :<= d, KnownNat i) => Proxy i -> Lens'(Point d fs r) r
 _axis' _ = _axis (SNatField :: SDField i)
 
