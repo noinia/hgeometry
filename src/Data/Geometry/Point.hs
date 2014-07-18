@@ -39,9 +39,10 @@ import Data.Vinyl
 import Data.Vinyl.Idiom.Identity
 import Data.Vinyl.TyFun
 import Data.Vinyl.Lens
+
+
 import Data.Vinyl.Universe.Geometry
-
-
+import Data.Vinyl.Show
 
 import Data.Type.Nat
 
@@ -49,7 +50,6 @@ import GHC.TypeLits
 
 import qualified Data.Vector.Fixed as V
 
-import qualified Data.Vinyl.Universe.Const as U
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -236,26 +236,6 @@ name = SSymField
 ----------------------------------------
  -- bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
 
-class ShowableField (t :: *) where
-  showField :: Proxy t -> String
-
-instance KnownSymbol sy => ShowableField (sy :~> t) where
-  showField _ = symbolVal (Proxy :: Proxy sy)
-
-instance KnownNat n => ShowableField (DField n) where
-  showField _ = "axis_" ++ (show $ natVal (Proxy :: Proxy n))
-
-
-type StringRec = PlainRec (U.Const String)
-
-instance Implicit (StringRec '[]) where
-  implicitly = RNil
-
-instance ( ShowableField x
-         , Implicit (StringRec xs)
-         ) =>
-         Implicit (StringRec (x ': xs)) where
-  implicitly = (Identity $ showField (Proxy :: Proxy x)) :& implicitly
 
 
 
