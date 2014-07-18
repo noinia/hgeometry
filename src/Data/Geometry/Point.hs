@@ -74,7 +74,6 @@ import GHC.TypeLits
 import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
-
 -- $setup
 -- >>> :{
 --  let x    = SNatField :: SDField 1
@@ -93,6 +92,7 @@ import qualified Data.Vector.Fixed as V
 --      myVector = Vector vec
 -- :}
 
+
 --------------------------------------------------------------------------------
 -- | Points in a d-dimensional space
 
@@ -100,6 +100,7 @@ import qualified Data.Vector.Fixed as V
 -- additonal fields/attributes. For example color, a label, etc.
 data Point (d :: Nat) (fs :: [*]) (r :: *) where
   Point :: PlainTRec r (R d) -> PlainTRec r fs -> Point d fs r
+
 
 
 ----------------------------------------
