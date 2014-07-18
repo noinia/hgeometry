@@ -9,9 +9,31 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
-module Data.Geometry.Point( --Point(..)
-                          -- , point
+module Data.Geometry.Point( -- * Point Data type
+                           Point(..)
+                          , point
 
+                            -- * Conversion Between Points and Vectors
+                          , toVector
+                          , toPoint
+                          , PointAndVec
+
+                            -- * Useful Helper stuff
+                          , Split(..)
+                          , R
+                          , R1
+                          , Range
+                          , Range1(..)
+
+                            -- * Accessing fields / Lenses
+                          , (:<=)
+
+                          , _plainPoint
+                          , _extraFields
+                          , _axis
+                          , _axis'
+                          , _get
+                          , _get'
                           ) where
 
 -- import Control.Applicative
