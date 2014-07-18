@@ -35,7 +35,6 @@ module Data.Geometry.Point( -- * Point Data type
                           , _get
                           , _get'
 
-                          , _x , _y , _z
                           ) where
 
 -- import Control.Applicative
@@ -76,6 +75,28 @@ import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> :{
+-- let x    = SNatField :: SDField 1
+--     y    = SNatField :: SDField 2
+--
+--     name = SSymField :: "name" :~> String
+--     size = SSymField :: "size" :~> Int
+--
+--     myPoint :: Point 2 '["name" :~> String, ]
+--     myPoint = point $ x =: 1
+--                       <+>
+--                       name =: "myPoint"
+--                       <+>
+--                       y =: 100
+--
+--     vec :: Vec (ToPeano 3) Int
+--     vec = V.mk3 1 2 3
+--
+--     myVector :: Vector (ToNat1 3) Int
+--     myVector = Vector vect
+-- :}
+
 --------------------------------------------------------------------------------
 -- | Points in a d-dimensional space
 
@@ -86,12 +107,15 @@ data Point (d :: Nat) (fs :: [*]) (r :: *) where
 
 
 -- | Smart constructor that allows a different order of the input fields
+--
+-- >>> p :: Point 2 '["name" :~> String] Int
+-- >>> p = point $ x =: 1 <+> name =: "frank" <+> y =: 2
+-- Point { axis_1 =: 1, axis_2 =: 2 }{ name =: "frank" }
 point :: forall d r fields allFields.
           ( Split (R d) fields
           , allFields :~: (R d ++ fields)
           ) => PlainTRec r allFields -> Point d fields r
 point = uncurry Point . splitRec . cast
-
 
 ----------------------------------------
 -- Associated types
@@ -199,10 +223,10 @@ toVector = Vector . toVec
 
 
 
-myVec2 = toVector myPt2
+-- myVec2 = toVector myPt2
 
 
-myPt2' = toPoint $ toVector myPt2
+-- myPt2' = toPoint $ toVector myPt2
 
 
 
@@ -241,14 +265,7 @@ toPoint = flip Point RNil . vecToRec'
 
 
 
-myVect :: Vector (ToNat1 3) Int
-myVect = Vector vect
-
-
--- vect :: Vec (ToPeano 3) Int
-vect = V.mk3 1 2 3
-
-myXX = toPoint myVect
+-- myXX = toPoint myVect
 
 --------------------------------------------------------------------------------
 -- | Constructing a point from a monolithic PlainTRec
@@ -265,30 +282,14 @@ instance Split xs ys => Split (x ': xs) ys where
                        in (r :& rx, ry)
 
 
-sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
-sp = splitRec pt
+-- sp :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
+-- sp = splitRec pt
 
 
---------------------------------------------------------------------------------
--- | Some common fields
 
--- | Some hands for the axis (fields) in the first three dimensions
-x = SNatField :: SDField 1
-y = SNatField :: SDField 2
-z = SNatField :: SDField 3
-
-_x :: (1 :<= d) => Lens' (Point d fs r) r
-_x = _axis x
-
-_y :: (2 :<= d) => Lens' (Point d fs r) r
-_y = _axis y
-
-_z :: (3 :<= d) => Lens' (Point d fs r) r
-_z = _axis z
-
--- | And a regular named field
-name :: SSField "name" String --SField (Field ("name" ::: String))
-name = SSymField
+-- -- | And a regular named field
+-- name :: SSField "name" String --SField (Field ("name" ::: String))
+-- name = SSymField
 
 
 --------------------------------------------------------------------------------
@@ -341,33 +342,33 @@ _id f (Identity x) = fmap (\x' -> Identity x') (f x)
 
 
 
-test :: PlainTRec Int (R 2)
-test = x =: 10 <+> y =: 5
+-- test :: PlainTRec Int (R 2)
+-- test = x =: 10 <+> y =: 5
 
 
-pt :: PlainTRec Int [DField 1, "name" :~> String]
-pt =   x    =: 10
-   <+> name =: "frank"
+-- pt :: PlainTRec Int [DField 1, "name" :~> String]
+-- pt =   x    =: 10
+--    <+> name =: "frank"
 
-pt2 :: PlainTRec Int (R 2 ++ '["name" :~> String])
-pt2 = cast $ pt <+> y =: 5
+-- pt2 :: PlainTRec Int (R 2 ++ '["name" :~> String])
+-- pt2 = cast $ pt <+> y =: 5
 
-myPt2 :: Point 2 '["name" :~> String] Int
-myPt2 = point pt2
+-- myPt2 :: Point 2 '["name" :~> String] Int
+-- myPt2 = point pt2
 
-myPt :: Point 1 '["name" :~> String] Int
-myPt = point pt
-
-
-myName :: Lens' (PlainTRec Int [DField 1, "name" :~> String]) String
-myName = rLens' name . _id
-
-myX :: forall rs d. (DField 1 ∈ R d) => Lens' (Point d rs Int) Int
-myX = _axis x
+-- myPt :: Point 1 '["name" :~> String] Int
+-- myPt = point pt
 
 
-myX1 :: Int
-myX1 = runIdentity $ rGet' x pt
+-- myName :: Lens' (PlainTRec Int [DField 1, "name" :~> String]) String
+-- myName = rLens' name . _id
+
+-- myX :: forall rs d. (DField 1 ∈ R d) => Lens' (Point d rs Int) Int
+-- myX = _axis x
+
+
+-- myX1 :: Int
+-- myX1 = runIdentity $ rGet' x pt
 
 
 
