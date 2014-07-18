@@ -306,7 +306,8 @@ type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
 _plainPoint                :: Lens' (Point d fs r) (PlainTRec r (R d))
 _plainPoint f (Point g rs) = fmap (\g' -> Point g' rs) (f g)
 
--- | Non type-changing lens for the extra fields  of a point
+-- | Non type-changing lens for the extra fields  of a point.
+--
 -- >>> rshow $ myPoint ^. _extraFields
 -- "{ name =: \"myPoint\" }"
 _extraFields :: Lens' (Point d fs r) (PlainTRec r fs)
