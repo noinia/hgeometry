@@ -11,8 +11,7 @@ import Data.Traversable
 
 
 import Data.Vector.Fixed.Boxed
-import Data.Vector.Fixed(Arity)
-import Data.Vector.Fixed.Cont(Z(..),S(..))
+import Data.Vector.Fixed.Cont(Z(..),S(..),ToPeano(..))
 
 import Data.Type.Nat
 import GHC.TypeLits
@@ -35,37 +34,42 @@ unV (Vector v) = v
 
 -- All these instances are basically the standard thing deriving would produce
 
-instance (Arity (Nat1ToPeano d), Eq a) => Eq (Vector d a) where
+
+type Arity  (n :: Nat)  = V.Arity (ToPeano n)
+type Arity1 (n :: Nat1) = V.Arity (Nat1ToPeano n)
+
+
+instance (Arity1 d, Eq a) => Eq (Vector d a) where
   (Vector u) == (Vector v) = u == v
 
-instance (Arity (Nat1ToPeano d), Ord a) => Ord (Vector d a) where
+instance (Arity1 d, Ord a) => Ord (Vector d a) where
   (Vector u) <= (Vector v) = u <= v
 
-instance (Arity (Nat1ToPeano d), Show a) => Show (Vector d a) where
+instance (Arity1 d, Show a) => Show (Vector d a) where
   show (Vector v) = "Vector " ++ show v
 
-instance Arity (Nat1ToPeano d) => Functor (Vector d) where
+instance Arity1 d => Functor (Vector d) where
   fmap f (Vector v) = Vector $ fmap f v
 
-instance Arity (Nat1ToPeano d) => Applicative (Vector d) where
+instance Arity1 d => Applicative (Vector d) where
   pure                        = Vector . pure
   (Vector fv)  <*> (Vector v) = Vector $ fv <*> v
 
-instance Arity (Nat1ToPeano d) => Foldable (Vector d) where
+instance Arity1 d => Foldable (Vector d) where
   foldMap f (Vector v) = foldMap f v
 
-instance Arity (Nat1ToPeano d) => Traversable (Vector d) where
+instance Arity1 d => Traversable (Vector d) where
   traverse f (Vector v) = Vector <$> traverse f v
 
 
 
 
 
-instance Arity (Nat1ToPeano d) => Additive (Vector d) where
+instance Arity1 d => Additive (Vector d) where
   zero = pure 0
   (Vector u) ^+^ (Vector v) = Vector $ V.zipWith (+) u v
 
-instance Arity (Nat1ToPeano d) => Affine (Vector d) where
+instance Arity1 d => Affine (Vector d) where
   type Diff (Vector d) = Vector d
 
   u .-. v = u ^-^ v
@@ -74,7 +78,7 @@ instance Arity (Nat1ToPeano d) => Affine (Vector d) where
 
 type instance V.Dim (Vector d) = Nat1ToPeano d
 
-instance Arity (Nat1ToPeano d) => V.Vector (Vector d) r where
+instance Arity1 d => V.Vector (Vector d) r where
   construct    = Vector <$> V.construct
   inspect    v = V.inspect (unV v)
   basicIndex v = V.basicIndex (unV v)
@@ -83,20 +87,10 @@ instance Arity (Nat1ToPeano d) => V.Vector (Vector d) r where
 
 
 
-----------------------------------------
--- | Isomorphism between our Nat1 and the Peano numbers defined in Vector.Fixed
-
-type family PeanoToNat1 (n :: *) :: Nat1 where
-  PeanoToNat1 Z = Zero
-  PeanoToNat1 (S n) = Succ (PeanoToNat1 n)
-
-type family Nat1ToPeano (n :: Nat1) :: * where
-  Nat1ToPeano Zero     = Z
-  Nat1ToPeano (Succ n) = S (Nat1ToPeano n)
 
 ----------------------------------------
 
 -- | Get the head and tail of a vector
-destruct            :: Arity (Nat1ToPeano d)
+destruct            :: Arity1 d
                     => Vector (Succ d) r -> (r, Vector d r)
 destruct (Vector v) = (V.head v, Vector $ V.tail v)

@@ -1,7 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}    -- Def R1
 
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE RankNTypes #-} --  lens stuff
 
 
@@ -31,7 +30,7 @@ import Data.Geometry.Properties
 import Data.Geometry.Vector
 
 import Data.Vector.Fixed.Cont(Z(..),S(..),ContVec(..),ToPeano(..))
-import Data.Vector.Fixed((<|),Arity(..))
+import Data.Vector.Fixed((<|))
 import Data.Vector.Fixed.Boxed(Vec)
 
 
@@ -104,20 +103,16 @@ instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showabl
                              , rshow rs
                              ]
 
-instance ( Arity (ToPeano d)
-         , ToPeano d ~ Nat1ToPeano (ToNat1 d)
-         , d ~ FromNat1 (ToNat1 d)
-         , VecToRec (ToNat1 d)
-         , Len (R d) ~ ToPeano d
-         , RecToContVec (R d)
-         )
-         =>
-         Affine (Point d fs) where
+instance (Arity d, PointAndVec d) => Affine (Point d fs) where
   type Diff (Point d fs) = Vector (ToNat1 d)
 
   p .-. q = toVector p ^-^ toVector q
   p@(Point _ rs) .+^ v = let Point g _ = toPoint $ toVector p ^+^ v
                          in Point g rs
+
+
+-- | The constraints that we need to be able to convert between Points and Vectors (and vice versa)
+type PointAndVec (d :: Nat) = (NatsIso d, RecToContVec (R d), VecToRec (ToNat1 d), Len (R d) ~ ToPeano d)
 
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
@@ -162,16 +157,17 @@ instance RecToContVec rs => RecToContVec (DField i ': rs) where
 
 toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
                                      , RecToContVec (R d)
-                                     , Arity (ToPeano d)
+                                     , PeanoNat1Iso d
+                                     , Arity d
                                      ) =>
                       Point d fs r -> Vec (ToPeano d) r
 toVec (Point g _) = V.vector $ toContVec g
 
 
 toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
-                           , ToPeano d ~ Nat1ToPeano (ToNat1 d)
+                           , PeanoNat1Iso d
                            , RecToContVec (R d)
-                           , Arity (ToPeano d)
+                           , Arity d
                            ) =>
             Point d fs r -> Vector (ToNat1 d) r
 toVector = Vector . toVec
@@ -185,6 +181,9 @@ myVec2 = toVector myPt2
 myPt2' = toPoint $ toVector myPt2
 
 
+
+
+
 --------------------------------------------------------------------------------
 -- | Conversion from Vector to Point
 
@@ -194,7 +193,7 @@ class VecToRec (d :: Nat1) where
 instance VecToRec Zero where
   vecToRec _ _ _ = RNil
 
-instance (Arity (Nat1ToPeano d), VecToRec d) => VecToRec (Succ d) where
+instance (Arity1 d, VecToRec d) => VecToRec (Succ d) where
   vecToRec (_ :: Proxy s) _ v = let (x,xs) = destruct v in
                                 (Identity x)
                                 :&
