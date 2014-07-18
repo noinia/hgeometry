@@ -80,15 +80,15 @@ instance (Ord (PlainTRec r (R d)), Ord (PlainTRec r fields)) => Ord (Point d r f
                                      r  -> r
 
 
--- instance ( Implicit (PlainRec (U.Const String) fields)
---          , Show r
---          ) => Show (Point d r fields) where
---   show (Point g rs) = concat ["Point "
---                              , show $ toContVec g, " "
---                                -- , rshow rs
---                              ]
-
-
+instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showable
+         , RecAll (TElField r) Identity fields Show -- The fields part is showable
+         , Implicit (StringRec (R d))
+         , Implicit (StringRec fields)
+         ) => Show (Point d r fields) where
+  show (Point g rs) = concat [ "Point "
+                             , rshow g
+                             , rshow rs
+                             ]
 
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
@@ -258,15 +258,6 @@ instance ( ShowableField x
   implicitly = (Identity $ showField (Proxy :: Proxy x)) :& implicitly
 
 
-instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showable
-         , RecAll (TElField r) Identity fields Show -- The fields part is showable
-         , Implicit (StringRec (R d))
-         , Implicit (StringRec fields)
-         ) => Show (Point d r fields) where
-  show (Point g rs) = concat [ "Point "
-                             , rshow g
-                             , rshow rs
-                             ]
 
 
 -- instance Implicit (PlainRec (U.Const String) (Range1 s d)) where
