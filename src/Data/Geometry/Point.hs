@@ -34,6 +34,8 @@ module Data.Geometry.Point( -- * Point Data type
                           , _axis'
                           , _get
                           , _get'
+
+                          , _x , _y , _z
                           ) where
 
 -- import Control.Applicative
@@ -275,6 +277,15 @@ x = SNatField :: SDField 1
 y = SNatField :: SDField 2
 z = SNatField :: SDField 3
 
+_x :: (1 :<= d) => Lens' (Point d fs r) r
+_x = _axis x
+
+_y :: (2 :<= d) => Lens' (Point d fs r) r
+_y = _axis y
+
+_z :: (3 :<= d) => Lens' (Point d fs r) r
+_z = _axis z
+
 -- | And a regular named field
 name :: SSField "name" String --SField (Field ("name" ::: String))
 name = SSymField
@@ -285,12 +296,6 @@ name = SSymField
 
 -- | Syntactic sugar
 type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
-
-
-
-
-
-
 
 
 -- | Lens that gets the Rec containing only the geometric information for this point
