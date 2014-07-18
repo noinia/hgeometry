@@ -104,6 +104,21 @@ instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showabl
                              , rshow rs
                              ]
 
+instance ( Arity (ToPeano d)
+         , ToPeano d ~ Nat1ToPeano (ToNat1 d)
+         , d ~ FromNat1 (ToNat1 d)
+         , VecToRec (ToNat1 d)
+         , Len (R d) ~ ToPeano d
+         , RecToContVec (R d)
+         )
+         =>
+         Affine (Point d fs) where
+  type Diff (Point d fs) = Vector (ToNat1 d)
+
+  p .-. q = toVector p ^-^ toVector q
+  p@(Point _ rs) .+^ v = let Point g _ = toPoint $ toVector p ^+^ v
+                         in Point g rs
+
 --------------------------------------------------------------------------------
 -- | A defintition of a d dimentional space
 
