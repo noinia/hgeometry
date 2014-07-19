@@ -21,6 +21,8 @@ import Linear.Vector
 
 import qualified Data.Vector.Fixed as V
 
+import qualified Linear.V3 as L3
+
 --------------------------------------------------------------------------------
 
 -- | Wrapper around Vec that converts from their Peano numbers to Our peano numbers
@@ -96,3 +98,10 @@ instance Arity1 d => V.Vector (Vector d) r where
 destruct            :: Arity1 d
                     => Vector (Succ d) r -> (r, Vector d r)
 destruct (Vector v) = (V.head v, Vector $ V.tail v)
+
+
+cross       :: Num r => Vector (ToNat1 3) r -> Vector (ToNat1 3) r -> Vector (ToNat1 3) r
+u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
+  where
+    toV3 vv              = let [a,b,c] = V.toList vv in L3.V3 a b c
+    fromV3 (L3.V3 a b c) = Vector $ V.mk3 a b c
