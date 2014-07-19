@@ -9,7 +9,6 @@ import Control.Applicative
 import Data.Foldable
 import Data.Traversable
 
-
 import Data.Vector.Fixed.Boxed
 import Data.Vector.Fixed.Cont(Z(..),S(..),ToPeano(..))
 
@@ -17,6 +16,7 @@ import Data.Type.Nat
 import GHC.TypeLits
 
 import Linear.Affine
+import Linear.Metric
 import Linear.Vector
 
 import qualified Data.Vector.Fixed as V
@@ -76,14 +76,16 @@ instance Arity1 d => Affine (Vector d) where
   p .+^ v = p ^+^ v
 
 
+instance Arity1 d => Metric (Vector d) where
+  (Vector u) `dot` (Vector v) = V.sum $ V.zipWith (*) u v
+
+
 type instance V.Dim (Vector d) = Nat1ToPeano d
 
 instance Arity1 d => V.Vector (Vector d) r where
   construct    = Vector <$> V.construct
   inspect    v = V.inspect (unV v)
   basicIndex v = V.basicIndex (unV v)
-
-
 
 
 
