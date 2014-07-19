@@ -12,6 +12,8 @@
 module Data.Geometry.Point( -- * Point Data type
                            Point(..)
                           , point
+                          , fromVector
+                          , origin
 
                             -- * Conversion Between Points and Vectors
                           , toVector
@@ -35,6 +37,8 @@ module Data.Geometry.Point( -- * Point Data type
                           , _get
                           , _get'
 
+                          -- * Re-exports of 'Linear.Affine'
+                          , module Linear.Affine
                           ) where
 
 -- import Control.Applicative
@@ -43,7 +47,7 @@ import Control.Lens(Lens', (^.))
 
 
 
-import Linear.Affine hiding (Point(..))
+import Linear.Affine hiding (Point(..), origin)
 import Linear.Vector
 
 import Data.Maybe
@@ -67,6 +71,7 @@ import Data.Vinyl.Universe.Geometry
 import Data.Vinyl.Show
 
 import Data.Type.Nat
+import Data.Type.List
 import Data.Type.Equality hiding ((:~:))
 
 import GHC.TypeLits
@@ -128,6 +133,14 @@ fromVector   :: ( VecToRec d1
                 ) => Vector d1 r -> Point d '[] r
 fromVector = toPoint
 
+
+origin :: ( Num r
+          , NatsIso d
+          , VecToRec (ToNat1 d)
+          , Arity d
+          ) => Point d '[] r
+origin = fromVector $ V.replicate 0
+
 ----------------------------------------
 -- Associated types
 
@@ -182,12 +195,6 @@ type R (d :: Nat) = Range 1 d
 
 type R1 (d :: Nat1) = Range1 (Succ Zero) d
 
--- | Type level list concatenation
-type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
-  '[] ++ ys       = ys
-  (x ': xs) ++ ys = x ': (xs ++ ys)
-
-infixr 5 ++
 
 
 type Range (s :: Nat) (k :: Nat) = Range1 (ToNat1 s) (ToNat1 k)
