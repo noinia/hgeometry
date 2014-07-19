@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Plane( Plane(..)
                           , basis1
                           , basis2
@@ -15,6 +16,9 @@ import Data.Geometry.Properties
 import Data.Geometry.Vector
 
 import Data.Vinyl
+
+import Data.Vinyl.Show
+import Data.Vinyl.Extra
 import Data.Vinyl.Universe.Geometry
 
 import Data.Type.Nat
@@ -32,10 +36,21 @@ data Plane (fs :: [*]) (r :: *) where
                          ] ++ fs) -> Plane fs r
 
 
+-- instance Eq (PlainTRec r fs) => Eq (Plane fs r) where
+--   (Plane )
+
+instance ( Showable r fs
+         , Show r
+         , Implicit (StringRec fs)
+         ) => Show (Plane fs r) where
+  show (Plane r) = "Plane " ++ rshow r
+
+
 ----------------------------------------
 
 basis1 = SSymField :: SSField "basis1" (Vector (ToNat1 3) r)
 basis2 = SSymField :: SSField "basis2" (Vector (ToNat1 3) r)
+
 
 
 _rec :: Lens' (Plane fs r) (PlainTRec r ('[ "basis1" :~> Vector (ToNat1 3) r

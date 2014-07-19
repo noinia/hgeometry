@@ -69,6 +69,7 @@ import Data.Vinyl.Lens
 
 import Data.Vinyl.Universe.Geometry
 import Data.Vinyl.Show
+import Data.Vinyl.Extra
 
 import Data.Type.Nat
 import Data.Type.List
@@ -279,26 +280,6 @@ toPoint = flip Point RNil . vecToRec'
 --------------------------------------------------------------------------------
 -- | Constructing a point from a monolithic PlainTRec
 
-
--- | Type class that allows us to split a Vinyl Record based on types. I.e.
---
--- >>> :{
--- let
---   s :: (PlainTRec Int '[DField 1], PlainTRec Int '["name" :~> String])
---   s = splitRec $ x =: 10 <+> name =: "foo"
---   (a,b) = s
--- in (rshow a, rshow b)
--- :}
--- ("{ axis_1 =: 10 }","{ name =: \"foo\" }")
-class Split (xs :: [*]) (ys :: [*]) where
-  splitRec :: Rec el f (xs ++ ys) -> (Rec el f xs, Rec el f ys)
-
-instance Split '[] ys where
-  splitRec r = (RNil,r)
-
-instance Split xs ys => Split (x ': xs) ys where
-  splitRec (r :& rs) = let (rx,ry) = splitRec rs
-                       in (r :& rx, ry)
 
 --------------------------------------------------------------------------------
 -- | Lenses
