@@ -18,16 +18,17 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:  Data.Geometry.Properties
-                    Data.Geometry.Vector
+                    -- Data.Geometry.Vector
                     Data.Geometry.Point
-                    Data.Geometry.Plane
+                    -- Data.Geometry.Plane
 
-                    Data.Type.Nat
-                    Data.Type.List
+                    Data.TypeLevel.Common
+                    -- Data.Type.Nat
+                    -- Data.Type.List
 
-                    Data.Vinyl.Universe.Geometry
-                    Data.Vinyl.Show
-                    Data.Vinyl.Extra
+                    -- Data.Vinyl.Universe.Geometry
+                    -- Data.Vinyl.Show
+                    -- Data.Vinyl.Extra
 
 --                    Data.Geometry.Vector
 
@@ -35,10 +36,11 @@ library
   -- other-modules:
   -- other-extensions:
   build-depends: base             >= 4.7
-               , vinyl            >= 0.4       &&     < 0.5
+               , vinyl            >= 0.5       &&     < 0.6
+               , void             >= 0.6.1
                , linear           >= 1.10      &&     < 1.11
                , lens             >= 4.2       &&     < 4.3
-               -- , singletons       >= 1.0       &&     < 1.1
+               , singletons       >= 1.0       &&     < 1.1
                , fixed-vector     >= 0.6.4.0   &&     < 0.7
                -- , HList            >= 0.3       &&     < 0.4
 
@@ -53,6 +55,7 @@ library
                     , DataKinds
                     , TypeOperators
                     , ConstraintKinds
+                    , PolyKinds
 
 
 test-suite doctests

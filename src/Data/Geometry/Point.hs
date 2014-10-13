@@ -1,481 +1,108 @@
-{-# LANGUAGE UndecidableInstances #-}    -- Def R1
-
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE RankNTypes #-} --  lens stuff
-
-
-{-# LANGUAGE PolyKinds #-}     --- TODO: Why do we need this?
-
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
-module Data.Geometry.Point( -- * Point Data type
-                           Point(..)
-                          , point
-                          , fromVector
-                          , origin
+{-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE StandaloneDeriving #-}
+module Data.Geometry.Point where
 
-                            -- * Conversion Between Points and Vectors
-                          , toVector
-                          , toPoint
-                          , PointAndVec
+import Control.Lens
 
-                            -- * Useful Helper stuff
-                          , Split(..)
-                          , R
-                          , R1
-                          , Range
-                          , Range1(..)
+-- import Data.TypeLevel.Common
+import Data.Typeable
+import Data.Vinyl hiding (Nat)
+import qualified Data.Vinyl as V
 
-                            -- * Accessing fields / Lenses
-                          , (:<=)
-
-                          , _plainPoint
-                          , _extraFields
-                          , _axis
-                          , _axis'
-                          , _get
-                          , _get'
-
-                          -- * Re-exports of 'Linear.Affine'
-                          , module Linear.Affine
-                          ) where
-
--- import Control.Applicative
-import Control.Lens(Lens', (^.))
-
-
-
-
-import Linear.Affine hiding (Point(..), origin)
-import Linear.Vector
-
-import Data.Maybe
-import Data.Proxy
-
-import Data.Geometry.Properties
-import Data.Geometry.Vector
-
-import Data.Vector.Fixed.Cont(Z(..),S(..),ContVec(..),ToPeano(..))
-import Data.Vector.Fixed((<|))
-import Data.Vector.Fixed.Boxed(Vec)
-
-
-import Data.Vinyl
-import Data.Vinyl.Idiom.Identity
-import Data.Vinyl.TyFun
-import Data.Vinyl.Lens
-
-
-import Data.Vinyl.Universe.Geometry
-import Data.Vinyl.Show
-import Data.Vinyl.Extra
-
-import Data.Type.Nat
-import Data.Type.List
-import Data.Type.Equality hiding ((:~:))
+-- import Data.Vector.Fixed
+import Data.Singletons
+import Data.Singletons.TH
+import Data.Singletons.Prelude.Bool(If, (:&&))
 
 import GHC.TypeLits
 
-import qualified Data.Vector.Fixed as V
 
 --------------------------------------------------------------------------------
--- $setup
--- >>> :{
---  let x    = SNatField :: SDField 1
---      y    = SNatField :: SDField 2
---      name = SSymField :: SSField "name" String
---      size = SSymField :: SSField "size" Int
---      myPoint :: Point 2 '["name" :~> String] Int
---      myPoint = point $ x =: 1
---                        <+>
---                        name =: "myPoint"
---                        <+>
---                        y =: 100
---      vec :: Vec (ToPeano 3) Int
---      vec = V.mk3 1 2 3
---      myVector :: Vector (ToNat1 3) Int
---      myVector = Vector vec
--- :}
 
+data DField u = Coord Nat | DExt u
 
---------------------------------------------------------------------------------
--- | Points in a d-dimensional space
 
--- | A Point in a d dimensional space. Apart from coordinates in R^d may have
--- additonal fields/attributes. For example color, a label, etc.
-data Point (d :: Nat) (fs :: [*]) (r :: *) where
-  Point :: PlainTRec r (R d) -> PlainTRec r fs -> Point d fs r
+type family IsDimIndexOf (d :: Nat) (n :: Nat) :: Bool where
+  IsDimIndexOf d n = (1 <=? n) :&& (n <=? d)
 
+type family DElF (d :: Nat)
+                 (r :: *)
+                 (elF :: TyFun u * -> *)
+                 (fld :: DField u) where
+  DElF d r elF (Coord n) = If (IsDimIndexOf d n) r Void
+  DElF d r elF (DExt  r) = Apply elF r
 
+-- data DElF_Sym3 :: (TyFun (Either Nat u) * -> *
 
-----------------------------------------
--- ** Constructing  Points
 
--- | Smart constructor that allows a different order of the input fields
---
--- >>> :{
---  let
---    p :: Point 2 '["name" :~> String] Int
---    p = point $ x =: 1 <+> name =: "frank" <+> y =: 2
--- in p
--- :}
--- Point { axis_1 =: 1, axis_2 =: 2 }{ name =: "frank" }
-point :: forall d r fields allFields.
-          ( Split (R d) fields
-          , allFields :~: (R d ++ fields)
-          ) => PlainTRec r allFields -> Point d fields r
-point = uncurry Point . splitRec . cast
 
 
--- | Construct a Point from a vector. Alternative name for 'toPoint'.
-fromVector   :: ( VecToRec d1
-                , FromNat1 d1 ~ d, ToNat1 d ~ d1
-                ) => Vector d1 r -> Point d '[] r
-fromVector = toPoint
-
-
-origin :: ( Num r
-          , NatsIso d
-          , VecToRec (ToNat1 d)
-          , Arity d
-          ) => Point d '[] r
-origin = fromVector $ V.replicate 0
-
-----------------------------------------
--- Associated types
-
-type instance Dimension (Point d fs r) = d
-
-type instance NumType   (Point d fs r) = r
-
-----------------------------------------
--- Instances
-
-instance (Eq (PlainTRec r (R d)), Eq (PlainTRec r fs)) => Eq (Point d fs r) where
-  (Point a b) == (Point c d) = a == c && b == d
-
-instance (Ord (PlainTRec r (R d)), Ord (PlainTRec r fs)) => Ord (Point d fs r) where
-  compare (Point a b) (Point c d) = case compare a c of
-                                     EQ -> compare b d
-                                     r  -> r
-
-instance ( ChangeInterpretation fs
-         , Functor' (Succ Zero) (ToNat1 d)
-         ) => Functor (Point d fs) where
-  fmap f (Point g rs) = Point (fmap'' (Proxy :: Proxy d) f g) (changeInt rs)
-
-
-instance ( RecAll (TElField r) Identity (R d)  Show -- The (R d) part is showable
-         , RecAll (TElField r) Identity fs Show -- The fs part is showable
-         , Implicit (StringRec (R d))
-         , Implicit (StringRec fs)
-         ) => Show (Point d fs r) where
-  show (Point g rs) = concat [ "Point "
-                             , rshow g
-                             , rshow rs
-                             ]
-
-instance (Arity d, PointAndVec d) => Affine (Point d fs) where
-  type Diff (Point d fs) = Vector (ToNat1 d)
-
-  p .-. q = toVector p ^-^ toVector q
-  p@(Point _ rs) .+^ v = let Point g _ = toPoint $ toVector p ^+^ v
-                         in Point g rs
-
-
--- | The constraints that we need to be able to convert between Points and Vectors (and vice versa)
-type PointAndVec (d :: Nat) = (NatsIso d, RecToContVec (R d), VecToRec (ToNat1 d), Len (R d) ~ ToPeano d)
-
---------------------------------------------------------------------------------
--- | A defintition of a d dimentional space
-
--- | R d is a type level list containing all DFields for dimensions 1 t/m d
--- type R (d :: Nat) = R1 (ToNat1 d)
-type R (d :: Nat) = Range 1 d
-
-type R1 (d :: Nat1) = Range1 (Succ Zero) d
-
-
-
-type Range (s :: Nat) (k :: Nat) = Range1 (ToNat1 s) (ToNat1 k)
-
-
-type family Range1 (s :: Nat1) (k :: Nat1) where
-  Range1 s Zero     = '[]
-  Range1 s (Succ k) = DField (FromNat1 s) ': Range1 (Succ s) k
-
---------------------------------------------------------------------------------
--- | Conversion from Point to Vector
-
-type family Len (xs :: [*]) where
-  Len '[]       = Z
-  Len (x ': xs) = S (Len xs)
-
-class RecToContVec (rs :: [*]) where
-  toContVec :: PlainTRec r rs -> ContVec (Len rs) r
-
-instance RecToContVec '[] where
-  toContVec _ = V.empty
-
-instance RecToContVec rs => RecToContVec (DField i ': rs) where
-  toContVec (r :& rs) = runIdentity r <| toContVec rs
-
-
-toVec              :: forall d r fs. ( Len (R d) ~ ToPeano d
-                                     , RecToContVec (R d)
-                                     , PeanoNat1Iso d
-                                     , Arity d
-                                     ) =>
-                      Point d fs r -> Vec (ToPeano d) r
-toVec (Point g _) = V.vector $ toContVec g
-
-
--- | Convert a Point into a Vector
---
---
--- >>> toVector $ myPoint
--- Vector fromList [1,100]
-toVector :: forall d r fs. ( Len (R d) ~ ToPeano d
-                           , PeanoNat1Iso d
-                           , RecToContVec (R d)
-                           , Arity d
-                           ) =>
-            Point d fs r -> Vector (ToNat1 d) r
-toVector = Vector . toVec
-
---------------------------------------------------------------------------------
--- | Conversion from Vector to Point
-
-class VecToRec (d :: Nat1) where
-  vecToRec :: Proxy s -> Proxy d -> Vector d r -> PlainTRec r (Range1 s d)
-
-instance VecToRec Zero where
-  vecToRec _ _ _ = RNil
-
-instance (Arity1 d, VecToRec d) => VecToRec (Succ d) where
-  vecToRec (_ :: Proxy s) _ v = let (x,xs) = destruct v in
-                                (Identity x)
-                                :&
-                                vecToRec (Proxy :: Proxy (Succ s)) (Proxy :: Proxy d) xs
-
--- | Version of vecToRec without the proxies
-vecToRec' :: forall d d1 r. ( VecToRec d1
-                            , FromNat1 d1 ~ d, ToNat1 d ~ d1
-                            )
-                            => Vector d1 r -> PlainTRec r (R d)
-vecToRec' = vecToRec (Proxy :: Proxy (ToNat1 1)) (Proxy :: Proxy d1)
-
-----------------------------------------
-
--- | Convert a vector into a point
---
--- >>> toPoint $ myVector
--- Point { axis_1 =: 1, axis_2 =: 2, axis_3 =: 3 }{  }
-toPoint   :: ( VecToRec d1
-             , FromNat1 d1 ~ d, ToNat1 d ~ d1
-             ) => Vector d1 r -> Point d '[] r
-toPoint = flip Point RNil . vecToRec'
-
---------------------------------------------------------------------------------
--- | Constructing a point from a monolithic PlainTRec
-
-
---------------------------------------------------------------------------------
--- | Lenses
-
--- | Syntactic sugar
-type (n :: Nat) :<= (m :: Nat) = DField n ∈ R m
-
-
--- | Lens that gets the Rec containing only the geometric information for this point.
---
--- >>> rshow $ myPoint ^. _plainPoint
--- "{ axis_1 =: 1, axis_2 =: 100 }"
-_plainPoint                :: Lens' (Point d fs r) (PlainTRec r (R d))
-_plainPoint f (Point g rs) = fmap (\g' -> Point g' rs) (f g)
-
--- | Non type-changing lens for the extra fields  of a point.
---
--- >>> rshow $ myPoint ^. _extraFields
--- "{ name =: \"myPoint\" }"
-_extraFields :: Lens' (Point d fs r) (PlainTRec r fs)
-_extraFields f (Point g rs) = fmap (\rs' -> Point g rs') (f rs)
-
-
--- | Lens to get an axis based on its name.
--- >>> myPoint ^. _axis x
--- 1
-_axis     :: forall i d r fs. (i :<= d) => SDField i -> Lens' (Point d fs r) r
-_axis fld = _plainPoint . _axisLens' (Proxy :: Proxy d) fld
-
--- | Lens to get an axis based on it's dimension/number.
--- >>> myPoint ^. _axis' (Proxy :: Proxy 1)
--- 1
-_axis'   ::  forall i d r fs. (i :<= d, KnownNat i) => Proxy i -> Lens'(Point d fs r) r
-_axis' _ = _axis (SNatField :: SDField i)
-
-
--- | Lens to one of the extra fields of a point, based on the name of the field
-_get     :: ((sy :~> t) ∈ fs) => SSField sy t -> Lens' (Point d fs r) t
-_get fld = _extraFields . rLens' fld . _id
-
-
--- | Lens to one of the extra fields of a point, based on its name as a type
--- level string
-_get'   :: forall sy t fs d r. ((sy :~> t) ∈ fs, KnownSymbol sy)
-        => Proxy sy -> Lens' (Point d fs r) t
-_get' _ = _get (SSymField :: SSField sy t)
-
-
-
-_axisLens'       :: (i :<= d) => Proxy d -> SDField i -> Lens' (PlainTRec r (R d)) r
-_axisLens' _ fld = rLens' fld . _id
-
-_id :: Lens' (Identity x) x
-_id f (Identity x) = fmap (\x' -> Identity x') (f x)
+-- data DElF_Sym2 :: (TyFun (TyFun u * -> *)
+--                          (TyFun (Either V.Nat u) * -> *) -> * )
 
 
 
 --------------------------------------------------------------------------------
+newtype DAttr d r elF fld = DAttr { _unDAttr :: DElF d r elF fld }
+                          deriving (Eq,Ord,Typeable)
+makeLenses ''DAttr
 
+instance (KnownNat n, Show r, IsDimIndexOf d n ~ True)
+         => Show (DAttr d r elF (Coord n)) where
+  show (DAttr x) = concat ["coord_"
+                          , show . natVal $ (Proxy :: Proxy n)
+                          , ": ", show x
+                          ]
 
-
--- test :: PlainTRec Int (R 2)
--- test = x =: 10 <+> y =: 5
-
-
--- pt :: PlainTRec Int [DField 1, "name" :~> String]
--- pt =   x    =: 10
---    <+> name =: "frank"
-
--- pt2 :: PlainTRec Int (R 2 ++ '["name" :~> String])
--- pt2 = cast $ pt <+> y =: 5
-
--- myPt2 :: Point 2 '["name" :~> String] Int
--- myPt2 = point pt2
-
--- myPt :: Point 1 '["name" :~> String] Int
--- myPt = point pt
-
-
--- myName :: Lens' (PlainTRec Int [DField 1, "name" :~> String]) String
--- myName = rLens' name . _id
-
--- myX :: forall rs d. (DField 1 ∈ R d) => Lens' (Point d rs Int) Int
--- myX = _axis x
-
-
--- myX1 :: Int
--- myX1 = runIdentity $ rGet' x pt
-
+instance (Show fld, Show (DElF d r elF (DExt fld)))
+         => Show (DAttr d r elF (DExt fld)) where
+  show (DAttr x) = show (Proxy :: Proxy fld) ++ ": " ++ show x
 
 
 --------------------------------------------------------------------------------
--- | Constructing Points
 
--- fromVector :: Vec d r -> Point d r '[]
--- fromVector = flip Point RNil
+newtype Point (d :: Nat) (elF :: TyFun u * -> *) (rs :: [DField u]) (r :: *) =
+  Point { _unP :: Rec (DAttr d r elF) rs }
+  deriving (Typeable)
 
--- origin :: Num r => Point d r '[]
--- origin = fromVector zeroV
+instance (Show (Rec (DAttr d r elF) rs)) => Show (Point d elF rs r) where
+  show (Point r) = "Point " ++ show r
 
+instance (Eq (Rec (DAttr d r elF) rs)) => Eq (Point d elF rs r) where
+  (Point l) == (Point r) = l == r
 
-
-
-
-
-
-
-
-
-
-
+-- TODO: Maybe we want to explicitly lexicographically compare the coordinates
+-- and only then the remaining fields.
+instance (Ord (Rec (DAttr d r elF) rs)) => Ord (Point d elF rs r) where
+  (Point l) `compare` (Point r) = l `compare` r
 
 --------------------------------------------------------------------------------
--- | Implementation of Functor instance for Point
 
-newtype ConstRec (s :: Nat1) (d :: Nat1) (a :: *) = ConstRec (PlainTRec a (Range1 s d))
-
-instance Functor' s d => Functor (ConstRec s d) where
-  fmap f cr = fmap' (Proxy :: Proxy s) (Proxy :: Proxy d) f cr
-
--- | Implement Functor for ConstRec
-class Functor' (s :: Nat1) (d :: Nat1) where
-  fmap' :: Proxy s -> Proxy d -> (a -> b) -> ConstRec s d a -> ConstRec s d b
-
-instance Functor' s Zero where
-  fmap' _ _ _ _ = ConstRec RNil
-
-instance Functor' (Succ s) d => Functor' s (Succ d) where
-  fmap' ps pd f rss = ConstRec (r' :& rs')
-    where
-      (r,ps',pd',rs) = destructR ps pd rss
-      r'             = Identity $ f r
-      ConstRec rs' = fmap' ps' pd' f rs
-
-destructR    :: Proxy s -> Proxy (Succ d)
-             -> ConstRec s (Succ d) a
-             -> (a, Proxy (Succ s), Proxy d, ConstRec (Succ s) d a)
-destructR _ _ (ConstRec ((Identity r) :& rs)) = (r, Proxy, Proxy, ConstRec rs)
-
-
--- | fmap for the geometric part of our points
-fmap''       :: forall a b d. Functor' (Succ Zero) (ToNat1 d)
-             => Proxy d ->  (a -> b) -> PlainTRec a (R d) -> PlainTRec b (R d)
-fmap'' _ f r = r'
-  where
-    ConstRec r' = fmap' (Proxy :: Proxy (Succ Zero)) (Proxy :: Proxy (ToNat1 d)) f $ ConstRec r
-
-
--- | Class that expresses that we can change the interpretation of the type function. I.e.
--- our nonrelated fields have a type that has nothing to do with the
-class ChangeInterpretation (rs :: [*]) where
-  changeInt :: PlainTRec a rs -> PlainTRec b rs
-
-instance ChangeInterpretation '[] where
-  changeInt _ = RNil
-instance ChangeInterpretation rs => ChangeInterpretation ((sy :~> t) ': rs) where
-  changeInt (r :& rs) = r :& changeInt rs
+-- | Proxy type to index the coordinate fields of a point
+data C (n :: Nat) where C :: C n
 
 
 
---------------------------------------------------------------------------------
--- Some attempt at an defintion that also changes the types in the extra Fields
+
+assign' :: (IsDimIndexOf d n ~ True) => sing n -> r -> DAttr d r elF (Coord n)
+assign' _ x = DAttr x
+
+c1 :: Num r => DAttr 1 r elF (Coord 1)
+c1 = assign' (C :: C 1) 0
+
+origin2 :: Num r => Point 2 elF '[Coord 1, Coord 2] r
+origin2 = Point $  assign' (C :: C 1) 0
+                :& assign' (C :: C 2) 0
+                :& RNil
 
 
--- type family CheckFamily (h :: *) (a :: *) (b :: *) :: * where
---   CheckFamily a a b = b
---   CheckFamily h a b = h
 
 
--- class FunctorExtra (rs :: [*]) (a :: *) (b :: *) where
---   type OutputListType rs a b :: [*]
---   fmapExtra :: (a -> b) -> PlainTRec a rs -> PlainTRec b (OutputListType rs a b)
-
-
--- instance FunctorExtra '[] a b where
---   type OutputListType '[] a b = '[]
---   fmapExtra _ _ = RNil
-
--- instance FunctorExtra rs a b => FunctorExtra ((sy :~> a) ': rs) a b where
---   type OutputListType ((sy :~> a) ': rs) a b = (sy :~> b) ': OutputListType rs a b
-
---   fmapExtra f ((Identity r) :& rs) = Identity (f r) :& fmapExtra f rs
-
--- instance FunctorExtra rs a b => FunctorExtra ((sy :~> c) ': rs) a b where
---   type OutputListType ((sy :~> c) ': rs) a b = (sy :~> c) ': OutputListType rs a b
-
---   fmapExtra f (r :& rs) = r :& fmapExtra f rs
-
-
--- instance FunctorExtra rs a b => FunctorExtra ((sy :~> c) ': rs) a b where
---   type OutputListType ((sy :~> c) ': rs) a b = CheckFamily c a b ': OutputListType rs a b
-
---   fmapExtra f (r :& rs) = fmapExtraHead f r (Proxy :: Proxy c) (Proxy :: Proxy a) :& fmapExtra f rs
-
-
--- fmapExtraHead           :: (a -> b) -> c -> Proxy c -> Proxy a -> CheckFamily c a b
--- fmapExtraHead f x pc pa = case testEquality pc pa of
---   Just Refl -> f x
---   Nothing   -> x
+-- toVector           :: (Vector v r, Dim v ~ d)
+--                    => Point d f rs -> v r
+-- toVector (Point r) = vector $
