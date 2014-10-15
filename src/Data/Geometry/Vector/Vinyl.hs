@@ -105,6 +105,7 @@ instance RecApplicative (DimRange d) => Affine (Vector d) where
   u .-. v = u ^-^ v
   p .+^ v = p ^+^ v
 
+instance RecApplicative (DimRange d) => Metric (Vector d)
 
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
 u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)

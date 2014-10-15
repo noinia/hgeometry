@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -14,10 +15,13 @@ import Data.Typeable
 import Data.Vinyl hiding (Nat)
 import qualified Data.Vinyl as V
 
--- import Data.Vector.Fixed
+-- import qualified Data.Vector.Fixed as FV
+-- import qualified Data.Vector.Fixed.Cont as C
+
 import Data.Singletons
 import Data.Singletons.TH
 import Data.Singletons.Prelude.Bool(If, (:&&))
+import Data.Singletons.Prelude.List((:++))
 
 import GHC.TypeLits
 
@@ -85,6 +89,19 @@ instance (Ord (Rec (DAttr d r elF) rs)) => Ord (Point d elF rs r) where
 
 -- | Proxy type to index the coordinate fields of a point
 data C (n :: Nat) where C :: C n
+
+--------------------------------------------------------------------------------
+
+class Split (xs :: [k]) (ys :: [k]) where
+  splitRec :: Rec f (xs :++ ys) -> (Rec f xs, Rec f ys)
+
+instance Split '[] ys where
+  splitRec r = (RNil,r)
+instance Split xs ys => Split (x ': xs) ys where
+  splitRec (r :& rs) = let (rx,ry) = splitRec rs
+                       in (r :& rx, ry)
+
+
 
 
 
