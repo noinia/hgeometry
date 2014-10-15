@@ -18,7 +18,8 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:  Data.Geometry.Properties
-                    -- Data.Geometry.Vector
+                    Data.Geometry.Vector
+                    Data.Geometry.Vector.Vinyl
                     Data.Geometry.Point
                     -- Data.Geometry.Plane
 
@@ -37,7 +38,6 @@ library
   -- other-extensions:
   build-depends: base             >= 4.7
                , vinyl            >= 0.5       &&     < 0.6
-               , void             >= 0.6.1
                , linear           >= 1.10      &&     < 1.11
                , lens             >= 4.2       &&     < 4.3
                , singletons       >= 1.0       &&     < 1.1
