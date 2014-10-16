@@ -25,7 +25,7 @@ import           Data.Vinyl.Functor
 import           Data.Singletons
 import           Data.Singletons.TH
 import           Data.Singletons.Prelude.Bool(If, (:&&))
-
+import           Data.Singletons.Prelude.Base(IdSym0)
 import           GHC.TypeLits
 
 import qualified Linear.V3 as L3
@@ -38,11 +38,11 @@ import           Linear.Vector
 
 type DimRange (d :: Nat) = Range 1 d
 
-type Range s k = Range1 s (ToVNat k)
+type Range s k = Range1 IdSym0 s (ToVNat k)
 
-type family Range1 (s :: Nat) (k :: TV.Nat) where
-  Range1 s TV.Z     = '[]
-  Range1 s (TV.S k) = s ': Range1 (1 + s) k
+type family Range1 (f :: TyFun Nat t -> *) (s :: Nat) (k :: TV.Nat) :: [t] where
+  Range1 f s TV.Z     = '[]
+  Range1 f s (TV.S k) = Apply f s ': Range1 f (1 + s) k
 
 -- | Check if a given number n is in the Dimrange of d
 type family (n :: Nat) `InDimRange` (d :: Nat) :: Bool where
