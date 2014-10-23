@@ -81,3 +81,12 @@ frank =  (SA =: 5)
       :& (SC =: True)
       :& (SE =: "frank")
       :& RNil
+
+
+-----
+
+-- type family DetermineLOR (lElF :: TyFun lu * -> *)
+--                          (rElF :: TyFun ru * -> *)
+
+--                          (sFld :: sing fld) :: (Either lu ru) where
+--   DetermineLOR lElF rElF sng = Left
