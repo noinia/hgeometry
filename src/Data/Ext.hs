@@ -1,10 +1,22 @@
 module Data.Ext where
 
+import Control.Applicative
 import Control.Lens
+import Data.Monoid
 
 --------------------------------------------------------------------------------
 
-data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord)
+data Ext extra core = core :+ extra deriving (Show,Read,Eq,Ord)
+
+instance Functor (Ext e) where
+  fmap f (c :+ e) = f c :+ e
+instance Monoid e => Applicative (Ext e) where
+  pure x = x :+ mempty
+  -- | This implementation ignores any extra values f may have
+  (f :+ _) <*> (c :+ce) = f c :+ ce
+
+
+type core :+ extra = Ext extra core
 infixr 1 :+
 
 _core :: (core :+ extra) -> core
