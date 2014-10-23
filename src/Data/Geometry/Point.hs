@@ -128,12 +128,33 @@ splitCore' :: Split (DFields d) rs
 splitCore' _ = splitRec
 
 
+class PointVecIso (k :: TV.Nat) where
+  toVRec :: ( (s + FromVNat k) ~ d
+            )
+         => Proxy s -> Proxy k
+         -> Rec (DAttr d r elF) (Range1 CoordSym0 s k)
+         -> Rec (Const r)       (Range1 IdSym0    s k)
+
+instance PointVecIso TV.Z where
+  toVRec _ _ _ = RNil
+
+
+
+instance PointVecIso k => PointVecIso (TV.S k) where
+  -- toVRec (Proxy :: Proxy s) (Proxy :: Proxy (TV.S k))
+  --        (r :& rs) = r' :& toVRec (Proxy :: Proxy (1+s)) (Proxy :: Proxy k) rs
+  --   where
+  --     r' = undefined
+
+
+
+
+
+
 -- class PointToVec (k :: TV.Nat) where
 --   dRecToVec :: Proxy s -> Proxy k -> Rec (DAttr d r elF) (Range1 CoordSym0 s k)
 --                -> Rec (Const r) (Range1 IdSym0 s k)
 
--- instance PointToVec TV.Z where
---   dRecToVec _ _ _ = RNil
 
 -- instance PointToVec k => PointToVec (TV.S k) where
 --   dRecToVec (Proxy :: Proxy s) _ ((DAttr x) :& rs) =
