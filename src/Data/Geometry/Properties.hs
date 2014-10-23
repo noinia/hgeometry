@@ -4,8 +4,9 @@
 module Data.Geometry.Properties where
 
 --------------------------------------------------------------------------------
+import GHC.TypeLits
 
-import Data.Vinyl.TypeLevel
+-- import Data.Vinyl.TypeLevel
 
 
 -- | A type family for types that are associated with a dimension.

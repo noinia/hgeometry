@@ -6,15 +6,15 @@ import Data.Ext
 
 import qualified Data.Sequence as S
 
-newtype PolyLine d r e = PolyLine { unPolyLine :: S.Seq (Point d r :+ e) }
-                         -- deriving (Show,Eq,Ord)
+newtype PolyLine d r pe = PolyLine { unPolyLine :: S.Seq (Point d r :+ pe) }
+                          -- deriving (Show,Eq,Ord)
 
 
-data LineSegment d r e = LineSegment { _start :: Point d r :+ e
-                                     , _end   :: Point d r :+ e
-                                     }
-                         -- deriving (Show,Eq,Ord)
+data LineSegment d r pe = LineSegment { _start :: Point d r :+ pe
+                                      , _end   :: Point d r :+ pe
+                                      }
+                          -- deriving (Show,Eq,Ord)
 
 
 
--- lineSegments :: [LineSegment d r pe :+ e']
+-- lineSegments :: [LineSegment d r pe :+ le]
