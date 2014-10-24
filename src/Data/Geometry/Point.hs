@@ -32,7 +32,6 @@ import           GHC.TypeLits
 
 import           Linear.Vector(Additive(..))
 import           Linear.Affine hiding (Point(..))
-import           Linear.Matrix
 
 --------------------------------------------------------------------------------
 
@@ -64,6 +63,8 @@ unsafeCoord (Point v) i = v FV.! i
 
 pattern Point2 x y <- (_point2 -> (x,y))
 
+point2     :: r -> r -> Point 2 r
 point2 x y = Point . Vector $ FV.mk2 x y
 
+_point2   :: Point 2 r -> (r,r)
 _point2 p = (unsafeCoord p 1, unsafeCoord p 2)
