@@ -11,28 +11,32 @@ import Data.Ratio
 import Data.List.Split
 
 import Data.Geometry.Point
+-- import Data.Geometry.Matrix
 
 import Data.Geometry.Ipe.Types
 import Data.Geometry.Ipe.ParserPrimitives
 
 
+-- type Matrix d m r = ()
+
+
 -----------------------------------------------------------------------
 -- | Represent stuff that can be used as a coordinate in ipe. (similar to show/read)
 
-class Coordinate r where
-    toIpeOut :: r -> String
-    fromSeq            :: Num r => Integer -> Maybe Integer -> r
-    fromSeq x Nothing  = fromInteger x
-    fromSeq x (Just y) = let x'        = fromInteger x
-                             y'        = fromInteger y
-                             asDecimal = head . dropWhile (>= 1) . iterate (* 0.1) in
-                         signum x' * (abs x' + asDecimal y')
+class Num r => Coordinate r where
+    fromSeq :: Integer -> Maybe Integer -> r
+
+defaultFromSeq :: (Ord r, Fractional r) => Integer -> Maybe Integer -> r
+defaultFromSeq x Nothing  = fromInteger x
+defaultFromSeq x (Just y) = let x'        = fromInteger x
+                                y'        = fromInteger y
+                                asDecimal = head . dropWhile (>= 1) . iterate (* 0.1)
+                            in signum x' * (abs x' + asDecimal y')
 
 instance Coordinate Double where
-    toIpeOut = show
+  fromSeq = defaultFromSeq
 
 instance Coordinate (Ratio Integer) where
-    toIpeOut r = show (fromRat r :: Double)
     fromSeq x  Nothing = fromInteger x
     fromSeq x (Just y) = fst . head $ readSigned readFloat (show x ++ "." ++ show y)
 
@@ -53,7 +57,7 @@ readPathOperations = map (fst . runP pOperation) . clean . splitP
       clean  = filter (not . null) . map trim
 
 
-readMatrix :: Coordinate r => String -> Matrix 3 r
+readMatrix :: Coordinate r => String -> Matrix 3 3 r
 readMatrix = fst . runP pMatrix
 
 -----------------------------------------------------------------------
@@ -77,7 +81,7 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
 
 
 pPoint :: Coordinate r => Parser (Point 2 r)
-pPoint = curry Point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
+pPoint = point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
 
 
 pCoordinate :: Coordinate r => Parser r
@@ -85,7 +89,7 @@ pCoordinate = fromSeq <$> pInteger <*> pDecimal
               where
                 pDecimal = pMaybe (pChar '.' *> pInteger)
 
-pMatrix :: Coordinate r => Parser (Matrix 3 r)
+pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
                                    <*> pCount 5 (pWhiteSpace *> pCoordinate)
 
@@ -95,7 +99,7 @@ matrix3FromLists = undefined
 
 
 -- | Generate a matrix from a list of 6 coordinates.
-mkMatrix               :: Coordinate r => [r] -> Matrix 3 r
+mkMatrix               :: Coordinate r => [r] -> Matrix 3 3 r
 mkMatrix [a,b,c,d,e,f] = matrix3FromLists [ [a, c, e]
                                           , [b, d, f]
                                           , [0, 0, 1] ]
