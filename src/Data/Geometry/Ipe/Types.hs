@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Data.Geometry.Ipe.Types where
 
 import Data.Vinyl
@@ -23,12 +24,18 @@ type Matrix d r = ()
 
 
 -- | A complete ipe file
--- TODO: the gs may be different
 data IpeFile gs r = IpeFile { _preamble :: Maybe IpePreamble
                             , _styles   :: [IpeStyle]
-                            , _ipePages :: [IpePage gs r]
+                            , _ipePages :: IpePages gs r
                             }
                   deriving (Eq,Show)
+
+data IpePages gs r where
+  PNil  :: IpePages '[] r
+  PCons :: IpePage gs r -> IpePages gss r -> IpePages (gs ': gss) r
+
+deriving instance Eq   (IpePages gs r)
+deriving instance Show (IpePages gs r)
 
 
 type XmlTree = Text
@@ -82,7 +89,7 @@ data IpeObject gt gs is ts mps ss ps r =
   | IpeMiniPage  (MiniPage r  :+ Rec MiniPageAttrs  mps)
   | IpeUse       (IpeSymbol r :+ Rec SymbolAttrs    ss)
   | IpePath      (Path r      :+ Rec PathAttrs      ps)
-
+    deriving (Show,Eq)
 
 newtype CommonAttrs cs     = CommonAttrs () deriving (Show,Eq,Functor)
 newtype GroupAttrs gs      = GroupAttrs () deriving (Show,Eq,Functor)
@@ -102,11 +109,12 @@ data Group gt r where
         -- -> Group gtt r ->      Group ((Proxy gt,Proxy gs,Proxy is,Proxy ts,Proxy mps, Proxy ss,Proxy ps) ': gtt) r
 
 
+deriving instance Eq   (Group gs r)
+deriving instance Show (Group gs r)
+
+
 -- | Poly kinded 7 tuple
 data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg)
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -128,8 +136,10 @@ data Image r = Image { _imageData :: ()
 -- data TextType = Label | MiniPage deriving (Show,Eq)
 
 data TextLabel r = Label Text (Point 2 r)
+                 deriving (Show,Eq,Ord)
 
 data MiniPage r = MiniPage Text (Point 2 r) r
+                 deriving (Show,Eq,Ord)
 
 width (MiniPage _ _ w) = w
 
