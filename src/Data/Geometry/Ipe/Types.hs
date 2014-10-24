@@ -18,7 +18,7 @@ import qualified Data.Sequence as S
 
 --------------------------------------------------------------------------------
 
-type PolyLine d r = ()
+type PolyLine d r pe = ()
 type Matrix d r = ()
 
 
@@ -161,7 +161,7 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
 newtype Path r = Path { _pathSegments :: S.Seq (PathSegment r) }
                  deriving (Show,Eq,Ord)
 
-data PathSegment r = PolyLineSegment        (PolyLine 2 r)
+data PathSegment r = PolyLineSegment        (PolyLine 2 r ())
                      -- TODO
                    | PolygonPath
                    | CubicBezierSegment     -- (CubicBezier 2 r)
