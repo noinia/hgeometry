@@ -33,8 +33,12 @@ library
 
 --                    Data.Geometry.Vector
 
+                   Data.Geometry.Ipe.Types
+                   Data.Geometry.Ipe.PathParser
 
-  -- other-modules:
+  other-modules:
+                   Data.Geometry.Ipe.ParserPrimitives
+
   -- other-extensions:
   build-depends: base             >= 4.7
                , vinyl            >= 0.5       &&     < 0.6
@@ -42,9 +46,12 @@ library
                , lens             >= 4.2       &&     < 4.3
                , singletons       >= 1.0       &&     < 1.1
 
-
+               , text             >= 0.11
+               , containers       >= 0.5
                , split            >= 0.1.4.2
                , parsec           >= 3
+               -- , tranformers      >= 0.3
+
                -- , fixed-vector     >= 0.6.4.0   &&     < 0.7
                -- , HList            >= 0.3       &&     < 0.4
 

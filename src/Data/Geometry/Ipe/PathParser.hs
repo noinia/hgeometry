@@ -11,18 +11,17 @@ import Data.Ratio
 import Data.List.Split
 
 import Data.Geometry.Point
-import Data.Geometry.Geometry
 
-import Data.Geometry.Ipe.InternalTypes
+import Data.Geometry.Ipe.Types
 import Data.Geometry.Ipe.ParserPrimitives
 
 
 -----------------------------------------------------------------------
 -- | Represent stuff that can be used as a coordinate in ipe. (similar to show/read)
 
-class Coordinate a where
-    toIpeOut :: a -> String
-    fromSeq            :: Num a => Integer -> Maybe Integer -> a
+class Coordinate r where
+    toIpeOut :: r -> String
+    fromSeq            :: Num r => Integer -> Maybe Integer -> r
     fromSeq x Nothing  = fromInteger x
     fromSeq x (Just y) = let x'        = fromInteger x
                              y'        = fromInteger y
@@ -40,12 +39,12 @@ instance Coordinate (Ratio Integer) where
 -----------------------------------------------------------------------
 -- | Running the parsers
 
-readPoint   :: Coordinate a => String -> Maybe (Point2' a)
+readPoint   :: Coordinate r => String -> Maybe (Point 2 r)
 readPoint s = case runP' pPoint s of
                 Left  _     -> Nothing
                 Right (p,_) -> Just p
 
-readPathOperations :: Coordinate a => String -> [Operation a]
+readPathOperations :: Coordinate r => String -> [Operation r]
 readPathOperations = map (fst . runP pOperation) . clean . splitP
     where
       -- Split the input string in pieces, each piece represents one operation
@@ -54,14 +53,14 @@ readPathOperations = map (fst . runP pOperation) . clean . splitP
       clean  = filter (not . null) . map trim
 
 
-readMatrix :: Coordinate a => String -> Matrix3 a
+readMatrix :: Coordinate r => String -> Matrix 3 r
 readMatrix = fst . runP pMatrix
 
 -----------------------------------------------------------------------
 -- | The parsers themselves
 
 
-pOperation :: Coordinate a => Parser (Operation a)
+pOperation :: Coordinate r => Parser (Operation r)
 pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                      , LineTo       <$> pPoint                         *>> 'l'
                      , CurveTo      <$> pPoint <*> pPoint' <*> pPoint' *>> 'c'
@@ -77,22 +76,26 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                p *>> c = p <*>< pWhiteSpace ***> pChar c
 
 
-pPoint :: Coordinate a => Parser (Point2' a)
+pPoint :: Coordinate r => Parser (Point 2 r)
 pPoint = curry Point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
 
 
-pCoordinate :: Coordinate a => Parser a
+pCoordinate :: Coordinate r => Parser r
 pCoordinate = fromSeq <$> pInteger <*> pDecimal
               where
                 pDecimal = pMaybe (pChar '.' *> pInteger)
 
-pMatrix :: Coordinate a => Parser (Matrix3 a)
+pMatrix :: Coordinate r => Parser (Matrix 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
                                    <*> pCount 5 (pWhiteSpace *> pCoordinate)
 
 
+-- TODO
+matrix3FromLists = undefined
+
+
 -- | Generate a matrix from a list of 6 coordinates.
-mkMatrix               :: Coordinate a => [a] -> Matrix3 a
+mkMatrix               :: Coordinate r => [r] -> Matrix 3 r
 mkMatrix [a,b,c,d,e,f] = matrix3FromLists [ [a, c, e]
                                           , [b, d, f]
                                           , [0, 0, 1] ]

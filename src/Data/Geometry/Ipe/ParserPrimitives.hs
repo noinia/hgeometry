@@ -11,7 +11,7 @@ module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          ) where
 
 
-import Data.Functor.Identity
+-- import Data.Functor.Identity
 
 import Control.Applicative hiding (many,(<|>))
 
