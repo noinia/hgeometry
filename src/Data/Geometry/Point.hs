@@ -22,7 +22,7 @@ import qualified Data.Vinyl.TypeLevel as TV
 
 import Data.Vinyl.TypeLevel hiding (Nat)
 
--- import qualified Data.Vector.Fixed as FV
+import qualified Data.Vector.Fixed as FV
 -- import qualified Data.Vector.Fixed.Cont as C
 
 
@@ -49,9 +49,21 @@ type instance Dimension (Point d r) = d
 
 
 
-
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
 
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
+
+
+
+
+unsafeCoord             :: Arity d => Point d r -> Int -> r
+unsafeCoord (Point v) i = v FV.! i
+
+
+pattern Point2 x y <- (_point2 -> (x,y))
+
+point2 x y = Point . Vector $ FV.mk2 x y
+
+_point2 p = (unsafeCoord p 1, unsafeCoord p 2)
