@@ -4,7 +4,7 @@ module Data.Geometry.Ipe.Writer where
 
 
 import Data.Geometry.Point
--- import Data.Geometry.PolyLine
+import Data.Geometry.PolyLine
 
 
 import Data.Geometry.Ipe.Types
@@ -52,8 +52,8 @@ instance IpeWriteText r => IpeWriteText (Operation r) where
   ipeWriteText ClosePath = "h"
 
 
-instance IpeWriteText r => IpeWriteText (PolyLine 2 r ()) where
-  ipeWriteText pl = let (p:rest) = undefined -- toList $ _points pl -- TODO
+instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
+  ipeWriteText pl = let (p:rest) = points pl
                         ops      = MoveTo p : map LineTo rest
                     in T.unlines . map ipeWriteText $ ops
 

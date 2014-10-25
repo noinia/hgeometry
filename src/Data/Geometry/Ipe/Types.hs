@@ -114,7 +114,7 @@ makeLenses ''IpeSymbol
 
 --------------------------------------------------------------------------------
 
-data PathSegment r = PolyLineSegment        (PolyLine 2 r ())
+data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                      -- TODO
                    | PolygonPath
                    | CubicBezierSegment     -- (CubicBezier 2 r)

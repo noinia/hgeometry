@@ -72,4 +72,4 @@ _point2 p = (p ^. unsafeCoord 1, p ^. unsafeCoord 2)
 
 
 class HasPoints t where
-  points :: Lens' t [Point (Dimension t) (NumType t)]
+  points :: t -> [Point (Dimension t) (NumType t)]
