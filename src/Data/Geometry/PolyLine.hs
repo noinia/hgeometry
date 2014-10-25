@@ -1,13 +1,21 @@
 {-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.PolyLine where
 
-import Data.Geometry.Vector(Arity)
-import Data.Geometry.Point
-import Data.Ext
+import           Control.Lens
+
+import           Data.Geometry.Vector(Arity)
+import           Data.Geometry.Point
+import           Data.Ext
 
 import qualified Data.Sequence as S
 
-newtype PolyLine d pe r = PolyLine { unPolyLine :: S.Seq (Point d r :+ pe) }
+--------------------------------------------------------------------------------
+
+newtype PolyLine d pe r = PolyLine { _unPolyLine :: S.Seq (Point d r :+ pe) }
+
+makeLenses ''PolyLine
+
 
 deriving instance (Show r, Show pe, Arity d) => Show (PolyLine d pe r)
 deriving instance (Eq r, Eq pe, Arity d)     => Eq (PolyLine d pe r)
@@ -18,10 +26,15 @@ data LineSegment d pe r = LineSegment { _start :: Point d r :+ pe
                                       , _end   :: Point d r :+ pe
                                       }
 
+makeLenses ''LineSegment
+
+
 deriving instance (Show r, Show pe, Arity d) => Show (LineSegment d pe r)
 deriving instance (Eq r, Eq pe, Arity d)     => Eq (LineSegment d pe r)
 deriving instance (Ord r, Ord pe, Arity d)   => Ord (LineSegment d pe r)
 deriving instance Arity d                    => Functor (LineSegment d pe)
+
+
 
 
 
