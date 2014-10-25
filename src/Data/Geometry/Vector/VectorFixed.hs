@@ -1,12 +1,13 @@
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances  #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Vector.VectorFixed where
 
 import           Control.Applicative
+
+import           Control.Lens
+
+import           Data.Proxy
 
 import           Data.Foldable
 import           Data.Traversable
@@ -24,20 +25,34 @@ import qualified Data.Vector.Fixed as V
 
 import qualified Linear.V3 as L3
 
+
+--------------------------------------------------------------------------------
+
+data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
+
 --------------------------------------------------------------------------------
 
 newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec (ToPeano d) r }
 
+unV :: Lens' (Vector d r) (Vec (ToPeano d) r)
+unV = lens _unV (const Vector)
+
 ----------------------------------------
 type Arity  (n :: Nat)  = V.Arity (ToPeano n)
+
+type Index' i d = V.Index (ToPeano i) (ToPeano d)
+
+element   :: forall i d r. (Arity d, Index' i d) => Proxy i -> Lens' (Vector d r) r
+element _ = V.elementTy (undefined :: (ToPeano i))
+
+
 
 deriving instance (Show r, Arity d) => Show (Vector d r)
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
 deriving instance (Ord r, Arity d)  => Ord (Vector d r)
-
 deriving instance Arity d  => Functor (Vector d)
-deriving instance Arity d  => Foldable (Vector d)
 
+deriving instance Arity d  => Foldable (Vector d)
 deriving instance Arity d  => Applicative (Vector d)
 
 instance Arity d => Traversable (Vector d) where
