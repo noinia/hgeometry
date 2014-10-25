@@ -104,7 +104,8 @@ width (MiniPage _ _ w) = w
 
 --------------------------------------------------------------------------------
 
-data SymbolAttributes = SymbolName | Pos | Stroke | Fill | Pen | Size deriving (Show,Eq,Ord)
+data SymbolAttributes = SymbolName | Pos | Stroke | Fill | Pen | Size
+                      deriving (Show,Eq,Ord)
 
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text

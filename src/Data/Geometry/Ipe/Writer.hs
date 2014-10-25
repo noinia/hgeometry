@@ -3,18 +3,28 @@
 module Data.Geometry.Ipe.Writer where
 
 
-import Data.Geometry.Point
-import Data.Geometry.PolyLine
+import           Data.Geometry.Point
+import           Data.Geometry.PolyLine
 
 
-import Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Types
 
-import Data.Monoid
-import Data.Text(Text)
+import qualified Data.ByteString as B
+import           Data.Monoid
+import           Data.Text(Text)
 
-import Text.XML.Expat.Tree
+import           Text.XML.Expat.Tree
+import           Text.XML.Expat.Format(format')
 
 import qualified Data.Text as T
+
+--------------------------------------------------------------------------------
+
+toIpeXML :: (IpeWriteText r, IpeWrite t) => t r -> B.ByteString
+toIpeXML = format' . ipeWrite
+
+writeIpeFile    :: (IpeWriteText r, IpeWrite t) => FilePath -> t r -> IO ()
+writeIpeFile fp = B.writeFile fp . toIpeXML
 
 --------------------------------------------------------------------------------
 
@@ -24,6 +34,10 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: IpeWriteText r => t r -> Node Text Text
 
+--------------------------------------------------------------------------------
+
+instance IpeWriteText Double where
+  ipeWriteText = T.pack . show
 
 --------------------------------------------------------------------------------
 
@@ -32,8 +46,6 @@ instance IpeWriteText r => IpeWriteText (Point 2 r) where
 
 
 --------------------------------------------------------------------------------
-
-
 instance IpeWrite IpeSymbol where
   ipeWrite (Symbol p n) = Element "use" [ ("pos",  ipeWriteText p)
                                         , ("name", n)

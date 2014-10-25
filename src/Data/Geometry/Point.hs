@@ -6,6 +6,7 @@ module Data.Geometry.Point where
 
 import           Data.Proxy
 
+import           Control.Applicative
 import           Control.Lens
 
 -- import Data.TypeLevel.Common
@@ -73,3 +74,7 @@ _point2 p = (p ^. unsafeCoord 1, p ^. unsafeCoord 2)
 
 class HasPoints t where
   points :: t -> [Point (Dimension t) (NumType t)]
+
+
+origin :: (Arity d, Num r) => Point d r
+origin = Point $ pure 0
