@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.Ipe.Types where
 
 import           Control.Applicative
 import           Control.Lens
+import           Data.Proxy
 import           Data.Vinyl
 
 import           Data.Ext
@@ -13,8 +15,8 @@ import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 
 
-
 import           Data.Text(Text)
+import           Data.TypeLevel.Filter
 
 import           GHC.Exts
 
@@ -140,13 +142,36 @@ data Operation r = MoveTo (Point 2 r)
 
 --------------------------------------------------------------------------------
 
-data IpeObject gt gs is ts mps ss ps r =
-    IpeGroup     (Group gt r  :+ Rec GroupAttrs     gs)
-  | IpeImage     (Image r     :+ Rec CommonAttrs    is)
-  | IpeTextLabel (TextLabel r :+ Rec TextLabelAttrs ts)
-  | IpeMiniPage  (MiniPage r  :+ Rec MiniPageAttrs  mps)
-  | IpeUse       (IpeSymbol r :+ Rec SymbolAttrs    ss)
-  | IpePath      (Path r      :+ Rec PathAttrs      ps)
+data T2 (a :: ka) (b :: kb)
+
+data IpeObjectType t = IpeGroup     t
+                     | IpeImage     t
+                     | IpeTextLabel t
+                     | IpeMiniPage  t
+                     | IpeUse       t
+                     | IpePath      t
+                     deriving (Show,Read,Eq)
+
+type family IpeObjectElF r (f :: IpeObjectType [k]) :: * where
+  -- IpeObjectElF r (IpeGroup (T2 gt gs))    = Group gt r  :+ Rec GroupAttrs     gs
+  IpeObjectElF r (IpeImage is)            = Image r     :+ Rec CommonAttrs    is
+  IpeObjectElF r (IpeTextLabel ts)        = TextLabel r :+ Rec TextLabelAttrs ts
+  IpeObjectElF r (IpeMiniPage mps)        = MiniPage r  :+ Rec MiniPageAttrs  mps
+  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
+  IpeObjectElF r (IpePath ps)             = Path r      :+ Rec PathAttrs      ps
+
+newtype IpeObject r (fld :: IpeObjectType [k]) =
+  IpeObject { _ipeObject :: IpeObjectElF r fld }
+
+makeLenses ''IpeObject
+
+-- data IpeObject gt gs is ts mps ss ps r =
+--     IpeGroup     (Group gt r  :+ Rec GroupAttrs     gs)
+--   | IpeImage     (Image r     :+ Rec CommonAttrs    is)
+--   | IpeTextLabel (TextLabel r :+ Rec TextLabelAttrs ts)
+--   | IpeMiniPage  (MiniPage r  :+ Rec MiniPageAttrs  mps)
+--   | IpeUse       (IpeSymbol r :+ Rec SymbolAttrs    ss)
+--   | IpePath      (Path r      :+ Rec PathAttrs      ps)
     -- deriving (Show,Eq)
 
 -- deriving instance (Show (Group gt r), Show (Rec GroupAttrs gs)) =>
@@ -155,70 +180,37 @@ data IpeObject gt gs is ts mps ss ps r =
 --------------------------------------------------------------------------------
 
 -- | Poly kinded 7 tuple
-data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
-        deriving (Show,Read,Eq,Ord)
+-- data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
+--         deriving (Show,Read,Eq,Ord)
 
 data GroupAttributes = Clip deriving (Show,Read,Eq,Ord)
 type family GroupElF f where
   GroupElF Clip = ()
 
+-- data Group gt r where
+--   GNil  ::                     Group '[] r
+--   GCons :: IpeObject gt gs is ts mps ss ps r
+--         -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
+
+type Group gt r = Rec (IpeObject r) gt
+
+symb :: IpeObjectElF Int (IpeUse '[])
+symb = Symbol origin "foo" :+ RNil
+
+symb' :: IpeObject Int (IpeUse '[])
+symb' = IpeObject symb
+
+gr :: Group '[IpeUse '[]] Int
+gr = symb' :& RNil
 
 
+points' :: forall gt r. Group gt r -> [Point 2 r]
+points' = fmap (^.ipeObject.core.symbolPoint) . filterRec'
 
--- TODO: Model group as a Rec IpeObject [<use the ipeobject constructors as fieldname here>]
-
-
-
-data Group gt r where
-  GNil  ::                     Group '[] r
-  GCons :: IpeObject gt gs is ts mps ss ps r
-        -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
-
-
-
--- points'' :: Lens' (Group gt r) (HList )
-
-points' :: Lens' (Group gt r) [Point 2 r]
-points' = undefined
-
-
-
--- gtraverse :: Applicative f => (forall gt gs is ts mps ss ps.
---                                 IpeObject gt gs is ts mps ss ps r ->
---                                f (IpeObject gt gs is ts mps ss ps r'))
---              -> Group gtt r -> f (Group gtt r')
--- gtraverse f GNil           = pure GNil
--- gtraverse f (o `GCons` gs) = GCons <$> f o <*> undefined
-
-
-
-
--- instance Traversable (Group gt) where
---   traverse f RNil =
-
--- Applicative f => (a -> f b) -> t a -> f (t b)
--- ltraverse :: Applicative f => (forall g. g -> f b) -> Group gt r -> f (Group gt r)
-
-
--- type family ListAll (rs :: [k]) (f :: k -> Constraint) :: Constraint where
---   ListAll '[]       f = ()
---   ListAll (x ': xs) f = (f x, ListAll xs f)
-
-
--- -- deriving instance Eq   (Group gs r)
-
--- -- instance Show (Group '[] r) where
--- --   show _ = "Group []"
-
--- instance ListAll gs Show => Show (Group gs r) where
---   show xs =
-
---   show (o `GCons` gs) = let s = "Group ["
---                             n = length s
---                         in concat [s, ", ", drop n $ show gs]
-
--- deriving instance Show (Rec GroupAttrs gs) => Show (Group gs r)
-
+filterRec' :: forall gt r fld. (fld ~ IpeUse '[]) =>
+              Rec (IpeObject r) gt -> [IpeObject r fld]
+filterRec' = undefined
+-- filterRec' = filterRec (Proxy :: Proxy fld)
 
 --------------------------------------------------------------------------------
 
