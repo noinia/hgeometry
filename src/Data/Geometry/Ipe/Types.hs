@@ -3,7 +3,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.Ipe.Types where
 
-
+import           Control.Applicative
 import           Control.Lens
 import           Data.Vinyl
 
@@ -89,10 +89,6 @@ makeLenses ''Image
 
 --------------------------------------------------------------------------------
 
--- data TextAttributes =
-
--- data TextType = Label | MiniPage deriving (Show,Eq)
-
 data TextLabel r = Label Text (Point 2 r)
                  deriving (Show,Eq,Ord)
 
@@ -100,7 +96,6 @@ data MiniPage r = MiniPage Text (Point 2 r) r
                  deriving (Show,Eq,Ord)
 
 width (MiniPage _ _ w) = w
-
 
 --------------------------------------------------------------------------------
 
@@ -159,16 +154,44 @@ data IpeObject gt gs is ts mps ss ps r =
 
 --------------------------------------------------------------------------------
 
-data GroupAttributes = Clip deriving (Show,Read,Eq,Ord)
+-- | Poly kinded 7 tuple
+data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
+        deriving (Show,Read,Eq,Ord)
 
+data GroupAttributes = Clip deriving (Show,Read,Eq,Ord)
 type family GroupElF f where
   GroupElF Clip = ()
+
+
+
+
+-- TODO: Model group as a Rec IpeObject [<use the ipeobject constructors as fieldname here>]
+
+
 
 data Group gt r where
   GNil  ::                     Group '[] r
   GCons :: IpeObject gt gs is ts mps ss ps r
         -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
-        -- -> Group gtt r ->      Group ((Proxy gt,Proxy gs,Proxy is,Proxy ts,Proxy mps, Proxy ss,Proxy ps) ': gtt) r
+
+
+
+-- points'' :: Lens' (Group gt r) (HList )
+
+points' :: Lens' (Group gt r) [Point 2 r]
+points' = undefined
+
+
+
+-- gtraverse :: Applicative f => (forall gt gs is ts mps ss ps.
+--                                 IpeObject gt gs is ts mps ss ps r ->
+--                                f (IpeObject gt gs is ts mps ss ps r'))
+--              -> Group gtt r -> f (Group gtt r')
+-- gtraverse f GNil           = pure GNil
+-- gtraverse f (o `GCons` gs) = GCons <$> f o <*> undefined
+
+
+
 
 -- instance Traversable (Group gt) where
 --   traverse f RNil =
@@ -196,10 +219,6 @@ data Group gt r where
 
 -- deriving instance Show (Rec GroupAttrs gs) => Show (Group gs r)
 
-
--- | Poly kinded 7 tuple
-data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
-        deriving (Show,Read,Eq,Ord)
 
 --------------------------------------------------------------------------------
 

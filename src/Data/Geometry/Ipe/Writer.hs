@@ -2,6 +2,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Data.Geometry.Ipe.Writer where
 
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Vinyl
 
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
@@ -34,12 +37,16 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: IpeWriteText r => t r -> Node Text Text
 
+class IpeWriteAttributes ats where
+  ipeWriteAtts :: Rec ats rs -> [(Text,Text)]
+
+addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
+n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
+
 --------------------------------------------------------------------------------
 
 instance IpeWriteText Double where
   ipeWriteText = T.pack . show
-
---------------------------------------------------------------------------------
 
 instance IpeWriteText r => IpeWriteText (Point 2 r) where
   ipeWriteText (Point2 x y) = T.unwords [ipeWriteText x, ipeWriteText y]
@@ -50,6 +57,11 @@ instance IpeWrite IpeSymbol where
   ipeWrite (Symbol p n) = Element "use" [ ("pos",  ipeWriteText p)
                                         , ("name", n)
                                         ] []
+
+instance IpeWriteAttributes SymbolAttrs where
+  ipeWriteAtts _ = [] -- TODO
+
+
 
 --------------------------------------------------------------------------------
 
@@ -73,6 +85,23 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
 
-instance IpeWrite PathSegment where
-  ipeWrite path = Element "path" [] [Text $ ipeWriteText path]
-  -- TODO: The rest
+instance IpeWriteAttributes PathAttrs where
+  ipeWriteAtts _ = [] -- TODO!
+
+instance IpeWrite Path where
+  ipeWrite (Path segs) = Element "path" []
+                         [Text . F.foldr1 (<>) . fmap ipeWriteText $ segs]
+
+--------------------------------------------------------------------------------
+
+instance IpeWrite (IpeObject gt gs is ts mps ss ps) where
+  -- ipeWrite (IpeGroup     (g :+ ats)) = ipeWrite g `addAtts` ipeWriteAtts ats
+  -- ipeWrite (IpeImage     (i :+ ats)) = ipeWrite i `addAtts` ipeWriteAtts ats
+  -- ipeWrite (IpeTextLabel (l :+ ats)) = ipeWrite l `addAtts` ipeWriteAtts ats
+  -- ipeWrite (IpeMiniPage  (m :+ ats)) = ipeWrite m `addAtts` ipeWriteAtts ats
+  ipeWrite (IpeUse       (s :+ ats)) = ipeWrite s `addAtts` ipeWriteAtts ats
+  ipeWrite (IpePath      (p :+ ats)) = ipeWrite p `addAtts` ipeWriteAtts ats
+
+
+-- instance IpeWrite (Group gt) where
+--   ipeWrite GNil = mempty
