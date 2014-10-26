@@ -1,5 +1,5 @@
-{-# Language FlexibleContexts
-  #-}
+{-# Language FlexibleContexts  #-}
+{-# Language OverloadedStrings  #-}
 module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          , pMany, pMany1, pChoice
                                          , pChar, pSpace, pWhiteSpace, pInteger, pNatural
@@ -13,24 +13,36 @@ module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
 
 -- import Data.Functor.Identity
 
-import Control.Applicative hiding (many,(<|>))
+import           Control.Applicative hiding (many,(<|>))
 
-import Text.Parsec(ParsecT(..),Parsec, Stream(..))
-import Text.ParserCombinators.Parsec
+import           Text.Parsec(try)
+import           Text.Parsec(ParsecT(..),Parsec, Stream(..))
+import           Text.Parsec.Text
+import           Text.ParserCombinators.Parsec hiding (Parser,try)
 
+import qualified Data.Text as T
+
+
+runP     :: Parser a -> T.Text -> (a, T.Text)
 runP p s = case runP' p s of
              Left  e -> error $ show e
              Right x -> x
 
+runP'   :: Parser a -> T.Text -> Either ParseError (a,T.Text)
 runP' p = parse ((,) <$> p <*> getInput) ""
 
 
 ----------------------------------------------------------------------------
 -- | reexporting some standard combinators
 
+pMany :: Parser a -> Parser [a]
 pMany = many
+
+pMany1 :: Parser a -> Parser [a]
 pMany1 = many1
 
+
+pChoice :: [Parser a] -> Parser a
 pChoice = choice . map try
 
 
@@ -76,7 +88,8 @@ p `pNotFollowedBy` q = do { x <- p ; notFollowedBy' q ; return x }
 infix 1 <*><>, <*><
 
 -- | Runs parser q ``in reverse'' on the end of the input stream
-(<*><>) ::  Stream [c] m t => ParsecT [c] u m (a -> b) -> ParsecT [c] u m a -> ParsecT [c] u m b
+(<*><>) ::  (Reversable s, Stream s m t)
+        => ParsecT s u m (a -> b) -> ParsecT s u m a -> ParsecT s u m b
 p <*><> q = do
   rev
   x <- q
@@ -88,8 +101,8 @@ p <*><> q = do
 p <*>< q = (\a _ -> a) <$> p <*><> q
 
 
-rev :: Stream [c] m t => ParsecT [c] u m ()
-rev = getInput >>= (setInput . reverse)
+rev :: (Reversable s, Stream s m t) => ParsecT s u m ()
+rev = getInput >>= (setInput . reverseS)
 
 -- as :: Parser String
 -- as = many (char 'a')
@@ -108,12 +121,24 @@ rev = getInput >>= (setInput . reverse)
 infixr 2 <***>, ***>, <***
 
 -- | run the parsers in reverse order, first q, then p
+(<***>) :: Monad m => m (t -> b) -> m t -> m b
 p <***> q = do
   x <- q
   f <- p
   return $ f x
 
 -- | the variants with missing brackets
+(***>) :: (Functor m, Monad m) => m a -> m b -> m b
 p ***> q = (\_ s -> s) <$> p <***> q
 
+(<***) :: (Functor m, Monad m) => m b -> m t -> m b
 p <*** q = (\s _ -> s) <$> p <***> q
+
+class Reversable s where
+  reverseS :: s -> s
+
+instance Reversable [c] where
+  reverseS = reverse
+
+instance Reversable T.Text where
+  reverseS = T.reverse

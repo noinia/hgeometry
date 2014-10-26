@@ -1,4 +1,5 @@
 {-# Language FlexibleInstances #-}
+{-# Language OverloadedStrings #-}
 module Data.Geometry.Ipe.PathParser where
 
 import Numeric
@@ -8,14 +9,14 @@ import Control.Monad
 
 import Data.Char(isSpace)
 import Data.Ratio
-import Data.List.Split
 
 import Data.Geometry.Point
 -- import Data.Geometry.Matrix
 
-import Data.Geometry.Ipe.Types
 import Data.Geometry.Ipe.ParserPrimitives
-
+import Data.Geometry.Ipe.Types
+import Data.Text(Text)
+import qualified Data.Text as T
 
 -- type Matrix d m r = ()
 
@@ -43,21 +44,29 @@ instance Coordinate (Ratio Integer) where
 -----------------------------------------------------------------------
 -- | Running the parsers
 
-readPoint   :: Coordinate r => String -> Maybe (Point 2 r)
+readPoint   :: Coordinate r => Text -> Maybe (Point 2 r)
 readPoint s = case runP' pPoint s of
                 Left  _     -> Nothing
                 Right (p,_) -> Just p
 
-readPathOperations :: Coordinate r => String -> [Operation r]
-readPathOperations = map (fst . runP pOperation) . clean . splitP
+readPathOperations :: Coordinate r => Text -> [Operation r]
+readPathOperations = map (fst . runP pOperation) . clean . splitKeepDelims "mlcqeasuh"
     where
       -- Split the input string in pieces, each piece represents one operation
-      splitP = split . keepDelimsR $ oneOf "mlcqeasuh"
-      trim   = dropWhile isSpace
-      clean  = filter (not . null) . map trim
+      trim   = T.dropWhile isSpace
+      clean  = filter (not . T.null) . map trim
+      -- TODO: Do the splitting on the Text rather than unpacking and packing
+      -- the thing
+
+splitKeepDelims          :: [Char] -> Text -> [Text]
+splitKeepDelims delims t = maybe mPref continue $ T.uncons rest
+  where
+    mPref           = if T.null pref then [] else [pref]
+    (pref,rest)     = T.break (`elem` delims) t
+    continue (c,t') = pref `T.snoc` c : splitKeepDelims delims t'
 
 
-readMatrix :: Coordinate r => String -> Matrix 3 3 r
+readMatrix :: Coordinate r => Text -> Matrix 3 3 r
 readMatrix = fst . runP pMatrix
 
 -----------------------------------------------------------------------

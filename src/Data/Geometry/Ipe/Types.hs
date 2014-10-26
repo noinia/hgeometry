@@ -2,6 +2,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
+
+{-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.Types where
 
 import           Control.Applicative
@@ -220,13 +222,12 @@ data IpePage gs r = IpePage { _layers :: [Layer]
                             , _pages  :: Group gs r
                             }
               -- deriving (Eq, Show)
-
 makeLenses ''IpePage
 
+newtype Page r gs = Page { _unP :: Page gs r }
 
-data IpePages gs r where
-  PNil  :: IpePages '[] r
-  PCons :: IpePage gs r -> IpePages gss r -> IpePages (gs ': gss) r
+type IpePages gss r = Rec (Page r) gss
+
 
 
 -- | A complete ipe file
