@@ -23,13 +23,13 @@ import           Text.ParserCombinators.Parsec hiding (Parser,try)
 import qualified Data.Text as T
 
 
-runP     :: Parser a -> T.Text -> (a, T.Text)
-runP p s = case runP' p s of
+runP'     :: Parser a -> T.Text -> (a, T.Text)
+runP' p s = case runP p s of
              Left  e -> error $ show e
              Right x -> x
 
-runP'   :: Parser a -> T.Text -> Either ParseError (a,T.Text)
-runP' p = parse ((,) <$> p <*> getInput) ""
+runP   :: Parser a -> T.Text -> Either ParseError (a,T.Text)
+runP p = parse ((,) <$> p <*> getInput) ""
 
 
 ----------------------------------------------------------------------------

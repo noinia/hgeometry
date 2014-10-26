@@ -2,20 +2,24 @@
 {-# Language OverloadedStrings #-}
 module Data.Geometry.Ipe.PathParser where
 
-import Numeric
+import           Numeric
 
-import Control.Applicative
-import Control.Monad
+import           Control.Applicative
+import           Control.Monad
+import           Data.Bifunctor
+import           Data.Monoid(mconcat)
+import           Data.Semigroup
 
-import Data.Char(isSpace)
-import Data.Ratio
+import           Data.Char(isSpace)
+import           Data.Ratio
 
-import Data.Geometry.Point
+import           Data.Geometry.Point
 -- import Data.Geometry.Matrix
+import           Text.Parsec.Error(messageString, errorMessages)
 
-import Data.Geometry.Ipe.ParserPrimitives
-import Data.Geometry.Ipe.Types
-import Data.Text(Text)
+import           Data.Geometry.Ipe.ParserPrimitives
+import           Data.Geometry.Ipe.Types
+import           Data.Text(Text)
 import qualified Data.Text as T
 
 -- type Matrix d m r = ()
@@ -44,19 +48,46 @@ instance Coordinate (Ratio Integer) where
 -----------------------------------------------------------------------
 -- | Running the parsers
 
-readPoint   :: Coordinate r => Text -> Maybe (Point 2 r)
-readPoint s = case runP' pPoint s of
-                Left  _     -> Nothing
-                Right (p,_) -> Just p
+readPoint :: Coordinate r => Text -> Either Text (Point 2 r)
+readPoint = bimap errorText fst . runP pPoint
 
-readPathOperations :: Coordinate r => Text -> [Operation r]
-readPathOperations = map (fst . runP pOperation) . clean . splitKeepDelims "mlcqeasuh"
+-- Collect errors
+data Either' l r = Left' l | Right' r deriving (Show,Eq)
+instance (Semigroup l, Semigroup r, Monoid r) => Monoid (Either' l r) where
+  mempty = Right' mempty
+  (Left' l)  `mappend` (Left' l')  = Left' $ l <> l'
+  (Left' l)  `mappend` _           = Left' l
+  _          `mappend` (Left' l')  = Left' l'
+  (Right' r) `mappend` (Right' r') = Right' $ r <> r'
+
+either' :: (l -> a) -> (r -> a) -> Either' l r -> a
+either' lf _  (Left' l)  = lf l
+either' _  rf (Right' r) = rf r
+
+
+readPathOperations :: Coordinate r => Text -> Either Text [Operation r]
+readPathOperations = unWrap . mconcat . map (wrap . runP pOperation)
+                   . clean . splitKeepDelims "mlcqeasuh"
     where
+      -- Unwrap the Either'. If it is a Left containing all our errors,
+      -- combine them into one error. Otherwise just ReWrap it in an proper Either
+      unWrap = either' (Left . combineErrors) Right
+      -- for the lefts: wrap the error in a list, for the rights: we only care
+      -- about the result, so wrap that in a list as well. Collecting the
+      -- results is done using the Semigroup instance of Either'
+      wrap   = either (Left' . (:[])) (Right' . (:[]) . fst)
       -- Split the input string in pieces, each piece represents one operation
       trim   = T.dropWhile isSpace
       clean  = filter (not . T.null) . map trim
       -- TODO: Do the splitting on the Text rather than unpacking and packing
       -- the thing
+
+errorText :: ParseError -> Text
+errorText = T.pack . unlines . map messageString . errorMessages
+
+combineErrors :: [ParseError] -> Text
+combineErrors = T.unlines . map errorText
+
 
 splitKeepDelims          :: [Char] -> Text -> [Text]
 splitKeepDelims delims t = maybe mPref continue $ T.uncons rest
@@ -66,8 +97,8 @@ splitKeepDelims delims t = maybe mPref continue $ T.uncons rest
     continue (c,t') = pref `T.snoc` c : splitKeepDelims delims t'
 
 
-readMatrix :: Coordinate r => Text -> Matrix 3 3 r
-readMatrix = fst . runP pMatrix
+readMatrix :: Coordinate r => Text -> Either Text (Matrix 3 3 r)
+readMatrix = bimap errorText fst . runP pMatrix
 
 -----------------------------------------------------------------------
 -- | The parsers themselves
