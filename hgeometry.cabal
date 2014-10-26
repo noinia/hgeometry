@@ -27,6 +27,8 @@ library
                     -- Data.Geometry.Plane
 
                     Data.TypeLevel.Common
+                    Data.TypeLevel.Filter
+
                     -- Data.Type.Nat
                     -- Data.Type.List
 
@@ -37,6 +39,8 @@ library
 --                    Data.Geometry.Vector
 
                    Data.Geometry.Ipe.Types
+                   Data.Geometry.Ipe.Writer
+                   Data.Geometry.Ipe.Reader
                    Data.Geometry.Ipe.PathParser
 
   other-modules:
@@ -47,7 +51,7 @@ library
                , containers       >= 0.5.5
                , vinyl            >= 0.5       &&     < 0.6
                , linear           >= 1.10      &&     < 1.11
-               , lens             >= 4.2       &&     < 4.3
+               , lens             >= 4.2
                , singletons       >= 1.0       &&     < 1.1
 
                , text             >= 0.11
@@ -55,6 +59,7 @@ library
 
                , semigroups       >= 0.15
                , bifunctors       >= 4.1
+               , validation       >= 0.4
 
                , containers       >= 0.5
                , parsec           >= 3
