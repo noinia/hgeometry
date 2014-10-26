@@ -6,9 +6,11 @@ import           Numeric
 
 import           Control.Applicative
 import           Control.Monad
+
 import           Data.Bifunctor
 import           Data.Monoid(mconcat)
 import           Data.Semigroup
+import           Data.Validation(AccValidation(..))
 
 import           Data.Char(isSpace)
 import           Data.Ratio
@@ -63,7 +65,7 @@ instance (Semigroup l, Semigroup r, Monoid r) => Monoid (Either' l r) where
 either' :: (l -> a) -> (r -> a) -> Either' l r -> a
 either' lf _  (Left' l)  = lf l
 either' _  rf (Right' r) = rf r
-
+-- TODO: Use Validation instead of this home-brew one
 
 readPathOperations :: Coordinate r => Text -> Either Text [Operation r]
 readPathOperations = unWrap . mconcat . map (wrap . runP pOperation)

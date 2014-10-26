@@ -5,11 +5,14 @@ module Data.Geometry.PolyLine where
 import           Control.Lens
 import qualified Data.Foldable as F
 
+import           Data.Monoid
+
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector(Arity)
 
+-- import           Data.Sequence((<|))
 import qualified Data.Sequence as S
 
 --------------------------------------------------------------------------------
@@ -43,6 +46,9 @@ type instance NumType   (LineSegment d pe r) = r
 
 instance HasPoints (LineSegment d pe r) where
   points l = [l^.start.core, l^.end.core]
+
+fromPoints :: (Monoid pe, F.Foldable f) => f (Point 2 r) -> PolyLine 2 pe r
+fromPoints = PolyLine . F.foldr (\p s -> (p :+ mempty) <| s) S.empty
 
 
 

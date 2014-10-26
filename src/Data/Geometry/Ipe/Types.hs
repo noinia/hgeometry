@@ -124,6 +124,8 @@ data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    | SplineSegment          -- (Spline 2 r)
                    | ClosedSplineSegment    -- (ClosedSpline 2 r)
                    deriving (Show,Eq,Ord)
+makePrisms ''PathSegment
+
 
 newtype Path r = Path { _pathSegments :: S.Seq (PathSegment r) }
                  deriving (Show,Eq,Ord)
@@ -141,6 +143,7 @@ data Operation r = MoveTo (Point 2 r)
                  | ClosedSpline [Point 2 r]
                  | ClosePath
                  deriving (Eq, Show)
+makePrisms ''Operation
 
 --------------------------------------------------------------------------------
 
