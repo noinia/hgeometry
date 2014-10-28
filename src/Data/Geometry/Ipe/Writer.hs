@@ -110,11 +110,17 @@ instance IpeWrite Path where
 type Atts = [(Text,Text)]
 
 ipeWritePolyLines     :: IpeWriteText r => [(PolyLine 2 () r, Atts)] -> Node Text Text
-ipeWritePolyLines pls = Element "ipe" [] [Element "page" [] $ map f pls]
+ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] $ map f pls]
   where
+    ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
+
     f (pl,ats) = ipeWrite (mkPath pl) `addAtts` ats
     mkPath     = Path . S.singleton . PolyLineSegment
 
 
 writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
 writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
+
+
+testPoly :: PolyLine 2 () Double
+testPoly = fromPoints [origin, point2 0 10, point2 10 10, point2 100 100]
