@@ -14,6 +14,7 @@ import           Data.Geometry.Ipe.Types
 
 import qualified Data.ByteString as B
 import           Data.Monoid
+import qualified Data.Sequence as S
 import           Data.Text(Text)
 
 import           Text.XML.Expat.Tree
@@ -105,3 +106,15 @@ instance IpeWrite Path where
 
 -- instance IpeWrite (Group gt) where
 --   ipeWrite GNil = mempty
+
+type Atts = [(Text,Text)]
+
+ipeWritePolyLines     :: IpeWriteText r => [(PolyLine 2 () r, Atts)] -> Node Text Text
+ipeWritePolyLines pls = Element "ipe" [] [Element "page" [] $ map f pls]
+  where
+    f (pl,ats) = ipeWrite (mkPath pl) `addAtts` ats
+    mkPath     = Path . S.singleton . PolyLineSegment
+
+
+writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
+writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
