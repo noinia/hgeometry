@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Data.Geometry.Ipe.Reader where
 
+import           Data.Either(rights)
 import           Control.Applicative
 import           Control.Lens
 
@@ -26,8 +27,12 @@ import           Text.XML.Expat.Tree
 
 import qualified Data.Text as T
 
+-- fromIpeFile :: (Coordinate r, IpeRead t) => FilePath -> IO [PolyLine 2 () r]
+-- fromIpeFile
 
-fromIpeXML = undefined
+
+fromIpeXML   :: (Coordinate r, IpeRead t) => B.ByteString -> Either ConversionError (t r)
+fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead
 
 class IpeReadText t where
   ipeReadText :: Coordinate r => Text -> Either ConversionError (t r)
@@ -69,3 +74,45 @@ validateAll' err field = foldr (\op res -> f op <> res) (_Success # [])
 
 toValidator     :: err -> Maybe a -> AccValidation [err] a
 toValidator err = maybe (_Failure # [err]) (_Success #)
+
+
+
+-- This is a bit of a hack
+instance IpeRead (PolyLine 2 ()) where
+  ipeRead (Element "path" ats ts) = ipeReadText . T.unlines . map unText $ ts
+                                    -- apparently hexpat already splits the text into lines
+  ipeRead _                       = Left "iperead: no polyline."
+
+unText (Text t) = t
+
+
+instance IpeRead PathSegment where
+  ipeRead = fmap PolyLineSegment . ipeRead
+
+testP :: B.ByteString
+testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
+
+testPoly :: Either Text (PolyLine 2 () Double)
+testPoly = fromIpeXML testP
+
+-- ipeRead' :: [Element Text Text]
+-- ipeRead' = map ipeRead
+
+-- instance IpeRead (IpePage gs) where
+--   ipeRead (Element "page" ats chs) = Right . IpePage [] [] . fromList' . rights $ map ipeRead chs
+--     where
+--       fromList' = Group' . foldr (\x r -> (IpeObject x :& RNil) :& r) RNil
+--   ipeRead _                        = Left "ipeRead: Not a page"
+
+readPolyLines :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
+readPolyLines (Element "ipe" _ chs) = concatMap readPolyLines' chs
+
+
+readPolyLines' :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
+readPolyLines' (Element "page" _ chs) = rights $ map ipeRead chs
+readPolyLines' _                      = []
+
+polylinesFromIpeFile :: (Coordinate r) => FilePath -> IO [PolyLine 2 () r]
+polylinesFromIpeFile = fmap readPolies . B.readFile
+  where
+    readPolies = either (const []) readPolyLines . parse' defaultParseOptions
