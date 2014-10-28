@@ -54,7 +54,6 @@ class IpeRead t where
 extract :: [Text] -> [(Text,Text)] -> ([Text],[(Text,Text)])
 extract = undefined
 
-
 instance IpeReadText (PolyLine 2 ()) where
   ipeReadText t = readPathOperations t >>= fromOps
     where
@@ -64,18 +63,15 @@ instance IpeReadText (PolyLine 2 ()) where
 
 validateAll         :: ConversionError -> Prism' (Operation r) (Point 2 r) -> [Operation r]
                     -> Either ConversionError [Point 2 r]
-validateAll err fld = (^. _Either) . bimap T.unlines id . validateAll' err fld
+validateAll err fld = bimap T.unlines id . validateAll' err fld
+
 
 validateAll' :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
-               -> AccValidation [err] [Point 2 r]
-validateAll' err field = foldr (\op res -> f op <> res) (_Success # [])
+               -> Either [err] [Point 2 r]
+validateAll' err field = toEither . foldr (\op res -> f op <> res) (Right' [])
   where
-    f op = fmap (:[]) . toValidator err $ op ^? field
-
-toValidator     :: err -> Maybe a -> AccValidation [err] a
-toValidator err = maybe (_Failure # [err]) (_Success #)
-
-
+    f op = maybe (Left' [err]) (\p -> Right' [p]) $ op ^? field
+    toEither = either' Left Right
 
 -- This is a bit of a hack
 instance IpeRead (PolyLine 2 ()) where
@@ -91,6 +87,9 @@ instance IpeRead PathSegment where
 
 testP :: B.ByteString
 testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
+
+testO :: Text
+testO = "\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n"
 
 testPoly :: Either Text (PolyLine 2 () Double)
 testPoly = fromIpeXML testP
