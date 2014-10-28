@@ -57,9 +57,15 @@ instance IpeReadText (PolyLine 2 ()) where
                                      <$> validateAll "Expected LineTo p" _LineTo ops
       fromOps _                       = Left "Expected MoveTo p:LineTo q:... "
 
-validateAll :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
-               -> Either err [Point 2 r]
-validateAll = undefined -- TODO: Implement this, using Validation
+validateAll         :: ConversionError -> Prism' (Operation r) (Point 2 r) -> [Operation r]
+                    -> Either ConversionError [Point 2 r]
+validateAll err fld = (^. _Either) . bimap T.unlines id . validateAll' err fld
+
+validateAll' :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
+               -> AccValidation [err] [Point 2 r]
+validateAll' err field = foldr (\op res -> f op <> res) (_Success # [])
+  where
+    f op = fmap (:[]) . toValidator err $ op ^? field
 
 toValidator     :: err -> Maybe a -> AccValidation [err] a
 toValidator err = maybe (_Failure # [err]) (_Success #)
