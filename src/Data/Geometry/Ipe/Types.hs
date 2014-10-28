@@ -219,10 +219,12 @@ filterRec' = undefined
 
 --------------------------------------------------------------------------------
 
+newtype Group' gs r = Group' (Group gs r)
+
 -- | Represents a page in ipe
 data IpePage gs r = IpePage { _layers :: [Layer]
                             , _views  :: [View]
-                            , _pages  :: Group gs r
+                            , _pages  :: Group' gs r
                             }
               -- deriving (Eq, Show)
 makeLenses ''IpePage
