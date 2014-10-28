@@ -13,6 +13,8 @@ import           Data.Geometry.PolyLine
 import           Data.Geometry.Ipe.Types
 
 import qualified Data.ByteString as B
+import           Data.Maybe(mapMaybe)
+import           Data.List(nub)
 import           Data.Monoid
 import qualified Data.Sequence as S
 import           Data.Text(Text)
@@ -110,12 +112,14 @@ instance IpeWrite Path where
 type Atts = [(Text,Text)]
 
 ipeWritePolyLines     :: IpeWriteText r => [(PolyLine 2 () r, Atts)] -> Node Text Text
-ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] $ map f pls]
+ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] $ layers pls ++ map f pls]
   where
     ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
 
     f (pl,ats) = ipeWrite (mkPath pl) `addAtts` ats
     mkPath     = Path . S.singleton . PolyLineSegment
+    layers     = map mkLayer . nub . mapMaybe (lookup "layer" . snd)
+    mkLayer n  = Element "layer" [("name",n)] []
 
 
 writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
