@@ -123,3 +123,7 @@ instance Prefix Z d where
 
 instance (V.Arity i, V.Arity d, V.Index i d, Prefix i d) => Prefix (S i) (S d) where
   prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)
+
+
+imap :: Arity d => (Int -> r -> s ) -> Vector d r -> Vector d s
+imap = V.imap
