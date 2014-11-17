@@ -1,6 +1,11 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
-module Data.Geometry.Box where
+module Data.Geometry.Box( Box(..) , Rectangle
+                        , IsBoxable(..)
+                        , IsAlwaysTrueBoundingBox
+                        , minPoint, maxPoint
+                        , boundingBoxList
+                        ) where
 
 
 import qualified Data.Foldable as F
