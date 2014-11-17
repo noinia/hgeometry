@@ -81,9 +81,12 @@ instance Arity d => V.Vector (Vector d) r where
 
 -- ----------------------------------------
 
+type AlwaysTrueDestruct pd d = (Arity pd, ToPeano d ~ S (ToPeano pd))
+
+
 -- | Get the head and tail of a vector
-destruct            :: (Arity dp, ToPeano d ~ S (ToPeano dp))
-                    => Vector d r -> (r, Vector dp r)
+destruct            :: AlwaysTrueDestruct predD d
+                    => Vector d r -> (r, Vector predD r)
 destruct (Vector v) = (V.head v, Vector $ V.tail v)
 
 
@@ -95,4 +98,28 @@ toV3 vv              = let [a,b,c] = V.toList vv in L3.V3 a b c
 
 fromV3 (L3.V3 a b c) = Vector $ V.mk3 a b c
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
+
+
+
+
+snoc              :: Arity d => Vector d r -> r -> Vector (1 + d) r
+snoc (Vector v) x = undefined -- Vector $ V.snoc x v
+
+init :: AlwaysTrueDestruct predD d => Vector d r -> Vector predD r
+init = Vector . V.reverse . V.tail . V.reverse . _unV
+
+
+
+prefix :: (Prefix (ToPeano i) (ToPeano d)) => Vector d r -> Vector i r
+prefix (Vector v) = Vector $ prefix' v
+
+class Prefix i d where
+  prefix' :: Vec d r -> Vec i r
+
+instance Prefix Z d where
+  prefix' _ = V.vector V.empty
+
+instance (V.Arity i, V.Arity d, V.Index i d, Prefix i d) => Prefix (S i) (S d) where
+  prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)

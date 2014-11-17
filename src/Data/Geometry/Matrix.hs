@@ -13,6 +13,8 @@ import Data.Geometry.Properties
 import GHC.TypeLits
 import           Linear.Matrix
 
+import qualified Data.Geometry.Vector as V
+
 import Data.Vinyl.TypeLevel hiding (Nat)
 
 --------------------------------------------------------------------------------
@@ -26,7 +28,7 @@ newtype Matrix n m r = Matrix (Vector n (Vector m r))
 -- deriving instance (Arity n, Arity m)         => Functor (Matrix n m)
 
 
-newtype Transformation d r = Transformation (Matrix (d + 1) (d + 1) r)
+newtype Transformation d r = Transformation (Matrix (1 + d) (1 + d) r)
 
 -- deriving instance (Show r, Arity d) => Show (Transformation d r)
 -- deriving instance (Eq r, Arity d)   => Eq (Transformation d r)
@@ -34,11 +36,16 @@ newtype Transformation d r = Transformation (Matrix (d + 1) (d + 1) r)
 -- deriving instance Arity d           => Functor (Transformation d)
 
 
-class Transformable t where
-  transform :: t -> Transformation (Dimension t) (NumType t) -> t
+mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
+(Matrix m) `mult` v = m !* v
 
--- instance Num r => Transformable (Point d r) where
---   transform (Point v) (Transformation m) = Point . init $ m !* v'
---     where
---       v' = undefined -- extend with one 0 at the end
---       init = undefined -- drop the last value
+
+class Transformable t where
+  transformBy :: Transformation (Dimension t) (NumType t) -> t -> t
+
+instance ( Num r
+         , Arity d, AlwaysTrueDestruct d (1 + d)
+         ) => Transformable (Point d r) where
+  transformBy (Transformation m) (Point v) = Point . V.init $ m `mult` v'
+    where
+      v'    = snoc v 0
