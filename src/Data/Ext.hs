@@ -2,7 +2,7 @@ module Data.Ext where
 
 import Control.Applicative
 import Control.Lens
-import Data.Monoid
+import Data.Semigroup
 
 --------------------------------------------------------------------------------
 
@@ -10,10 +10,14 @@ data Ext extra core = core :+ extra deriving (Show,Read,Eq,Ord)
 
 instance Functor (Ext e) where
   fmap f (c :+ e) = f c :+ e
+
 instance Monoid e => Applicative (Ext e) where
   pure x = x :+ mempty
   -- | This implementation ignores any extra values f may have
   (f :+ _) <*> (c :+ce) = f c :+ ce
+
+instance (Semigroup core, Semigroup extra) => Semigroup (Ext extra core) where
+  (c :+ e) <> (c' :+ e') = c <> c' :+ e <> e'
 
 
 type core :+ extra = Ext extra core
