@@ -9,6 +9,7 @@ import           Data.Monoid
 
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector(Arity)
 
@@ -30,6 +31,9 @@ type instance NumType   (PolyLine d pe r) = r
 instance HasPoints (PolyLine d pe r) where
   points = F.toList . fmap _core . _unPolyLine
 
+instance Arity d => IsBoxable (PolyLine d pe r) where
+  boundingBox = boundingBoxList . points
+
 --------------------------------------------------------------------------------
 
 data LineSegment d pe r = LineSegment { _start :: Point d r :+ pe
@@ -50,6 +54,7 @@ instance HasPoints (LineSegment d pe r) where
 fromPoints :: (Monoid pe, F.Foldable f) => f (Point 2 r) -> PolyLine 2 pe r
 fromPoints = PolyLine . F.foldr (\p s -> (p :+ mempty) <| s) S.empty
 
-
+instance Arity d => IsBoxable (LineSegment d pe r) where
+  boundingBox = boundingBoxList . points
 
 -- lineSegments :: [LineSegment d r pe :+ le]

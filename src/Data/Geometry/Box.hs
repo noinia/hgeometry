@@ -17,7 +17,6 @@ import Data.Geometry.Point
 import Data.Geometry.Properties
 import           Data.Geometry.Vector(Arity)
 
-
 import Data.Ext
 
 --------------------------------------------------------------------------------
@@ -62,8 +61,8 @@ type Rectangle = Box 2
 --------------------------------------------------------------------------------
 
 class IsBoxable g where
-  boundingBox :: (Monoid pe, Ord (NumType g)) => g -> Box (Dimension g) pe (NumType g)
-
+  boundingBox :: (Monoid pe, Semigroup pe, Ord (NumType g))
+              => g -> Box (Dimension g) pe (NumType g)
 
 type IsAlwaysTrueBoundingBox g pe = (Semigroup pe, Arity (Dimension g))
 
@@ -72,6 +71,8 @@ boundingBoxList :: (IsBoxable g, Monoid pe, F.Foldable c, Ord (NumType g)
                    , IsAlwaysTrueBoundingBox g pe
                    ) => c g -> Box (Dimension g) pe (NumType g)
 boundingBoxList = F.foldMap boundingBox
+
+----------------------------------------
 
 instance IsBoxable (Point d r) where
   boundingBox p = Box (Min p :+ mempty) (Max p :+ mempty)
