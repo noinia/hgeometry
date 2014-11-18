@@ -94,8 +94,10 @@ cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
 u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
 
 
-toV3 vv              = let [a,b,c] = V.toList vv in L3.V3 a b c
+toV3   :: Vector 3 a -> L3.V3 a
+toV3 v = let [a,b,c] = V.toList v in L3.V3 a b c
 
+fromV3               :: L3.V3 a -> Vector 3 a
 fromV3 (L3.V3 a b c) = Vector $ V.mk3 a b c
 
 ----------------------------------------------------------------------------------
