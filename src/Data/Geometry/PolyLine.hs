@@ -69,5 +69,5 @@ instance PointFunctor (LineSegment d p) where
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox = boundingBoxList . points
 
-instance (Num r, AlwaysTrueTFP d) => IsTransformable (LineSegment d p r) where
+instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
