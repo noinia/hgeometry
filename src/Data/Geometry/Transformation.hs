@@ -92,19 +92,19 @@ uniformScaling = scaling . pure
 type AlwaysTrueTransformation d = (Arity (1 + d), AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
 
 translateBy :: ( IsTransformable g, Num (NumType g)
-               , AlwaysTrueTransformation d
+               , AlwaysTrueTransformation (Dimension g)
                ) => Vector (Dimension g) (NumType g) -> g -> g
 translateBy = transformBy . translation
 
 scaleBy :: ( IsTransformable g, Num (NumType g)
-           , AlwaysTrueTransformation d
+           , AlwaysTrueTransformation (Dimension g)
            ) => Vector (Dimension g) (NumType g) -> g -> g
 scaleBy = transformBy . scaling
 
 
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
-                    , AlwaysTrueTransformation d
-                    ) => Vector (Dimension g) (NumType g) -> g -> g
+                    , AlwaysTrueTransformation (Dimension g)
+                    ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 
 
