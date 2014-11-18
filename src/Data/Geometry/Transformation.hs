@@ -71,11 +71,13 @@ transformAllBy :: (Functor c, IsTransformable g)
 transformAllBy t = fmap (transformBy t)
 
 
+type AlwaysTruePFT d = AlwaysTrueDestruct d  (1 + d)
+
+
 transformPointFunctor   :: ( PointFunctor g, Num r, d ~ Dimension (g r)
-                           , AlwaysTrueDestruct d (1 + d)
+                           , AlwaysTruePFT d
                            ) => Transformation d r -> g r -> g r
 transformPointFunctor t = pmap (transformBy t)
-
 
 instance ( Num r
          , Arity d, AlwaysTrueDestruct d (1 + d)

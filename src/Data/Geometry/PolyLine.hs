@@ -37,13 +37,11 @@ instance HasPoints (PolyLine d p r) where
 instance Arity d => IsBoxable (PolyLine d p r) where
   boundingBox = boundingBoxList . points
 
-instance (Num r, AlwaysTrueDestruct d (1 + d)) => IsTransformable (PolyLine d p r) where
+instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor
 
 instance PointFunctor (PolyLine d p) where
   pmap f = over unPolyLine (fmap (fmap f))
-
-
 
 fromPoints :: (Monoid p, F.Foldable f) => f (Point 2 r) -> PolyLine 2 p r
 fromPoints = PolyLine . F.foldr (\p s -> (p :+ mempty) <| s) S.empty
@@ -71,5 +69,5 @@ instance PointFunctor (LineSegment d p) where
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox = boundingBoxList . points
 
-instance (Num r, AlwaysTrueDestruct d (1 + d)) => IsTransformable (LineSegment d p r) where
+instance (Num r, AlwaysTrueTFP d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
