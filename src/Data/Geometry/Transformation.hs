@@ -9,7 +9,7 @@ module Data.Geometry.Transformation where
 
 
 import           Control.Applicative
-import           Control.Lens(lens,set)
+import           Control.Lens(lens,Lens',set)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
@@ -37,7 +37,8 @@ deriving instance (Arity n, Arity m)         => Functor (Matrix n m)
 
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (1 + d) (1 + d) r }
 
--- transformationMatrix = lens _transformationMatrix Transformation
+transformationMatrix :: Lens' (Transformation d r) (Matrix (1 + d) (1 + d) r)
+transformationMatrix = lens _transformationMatrix (const Transformation)
 
 deriving instance (Show r, Arity (1 + d)) => Show (Transformation d r)
 deriving instance (Eq r, Arity (1 + d))   => Eq (Transformation d r)
