@@ -75,8 +75,10 @@ newtype CommonAttrs cs     = CommonAttrs    () deriving (Show,Eq,Functor)
 newtype GroupAttrs gs      = GroupAttrs     () deriving (Show,Eq,Functor)
 newtype TextLabelAttrs tls = TextLabelAttrs () deriving (Show,Eq,Functor)
 newtype MiniPageAttrs mps  = MiniPageAttrs  () deriving (Show,Eq,Functor)
-newtype SymbolAttrs ss     = SymbolAttrs    () deriving (Show,Eq,Functor)
 newtype PathAttrs ps       = PathAttrs      () deriving (Show,Eq,Functor)
+
+newtype SymbolAttrs ps       = SymbolAttrs      () deriving (Show,Eq,Functor)
+
 
 --------------------------------------------------------------------------------
 
@@ -97,8 +99,30 @@ width (MiniPage _ _ w) = w
 
 --------------------------------------------------------------------------------
 
+data IpeValue v = Named Text | Valued v deriving (Show,Eq,Ord)
+
+type Colour = Text -- TODO: Make this a Colour.Colour
+
+newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
+newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
+newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
+
 data SymbolAttributes = SymbolName | Pos | Stroke | Fill | Pen | Size
                       deriving (Show,Eq,Ord)
+
+
+type family SymbolAttrElf (s :: SymbolAttributes) (r :: *) :: * where
+  SymbolAttrElf SymbolName r = Text
+  SymbolAttrElf Pos        r = r
+  SymbolAttrElf Stroke     r = IpeColor
+  SymbolAttrElf Pen        r = IpePen r
+  SymbolAttrElf Fill       r = IpeColor
+  SymbolAttrElf Size       r = IpeSize r
+
+
+-- newtype SymbolAttrs r ss = SymbolAttrs (SymbolAttrElf ss r)
+
+
 
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text
@@ -156,7 +180,7 @@ type family IpeObjectElF r (f :: IpeObjectType [k]) :: * where
   IpeObjectElF r (IpeImage is)            = Image r     :+ Rec CommonAttrs    is
   IpeObjectElF r (IpeTextLabel ts)        = TextLabel r :+ Rec TextLabelAttrs ts
   IpeObjectElF r (IpeMiniPage mps)        = MiniPage r  :+ Rec MiniPageAttrs  mps
-  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
+  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttrs r) ss
   IpeObjectElF r (IpePath ps)             = Path r      :+ Rec PathAttrs      ps
 
 newtype IpeObject r (fld :: IpeObjectType [k]) =
