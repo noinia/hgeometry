@@ -15,14 +15,16 @@ import           Data.Validation(AccValidation(..))
 import           Data.Char(isSpace)
 import           Data.Ratio
 
-import           Data.Geometry.Point
--- import Data.Geometry.Matrix
 import           Text.Parsec.Error(messageString, errorMessages)
-
+import           Data.Geometry.Point
+import           Data.Geometry.Vector
+import           Data.Geometry.Transformation
 import           Data.Geometry.Ipe.ParserPrimitives
 import           Data.Geometry.Ipe.Types
 import           Data.Text(Text)
 import qualified Data.Text as T
+
+import qualified Data.Vector.Fixed as FV
 
 -- type Matrix d m r = ()
 
@@ -136,16 +138,13 @@ pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
                                    <*> pCount 5 (pWhiteSpace *> pCoordinate)
 
 
--- TODO
-matrix3FromLists = undefined
-
-
 -- | Generate a matrix from a list of 6 coordinates.
 mkMatrix               :: Coordinate r => [r] -> Matrix 3 3 r
-mkMatrix [a,b,c,d,e,f] = matrix3FromLists [ [a, c, e]
-                                          , [b, d, f]
-                                          , [0, 0, 1] ]
-                         -- We need the matrix in the following order:
+mkMatrix [a,b,c,d,e,f] = let v3 x y z = Vector $ FV.mk3 x y z
+                         in Matrix $ v3 (v3 a c e)
+                                        (v3 b d f)
+                                        (v3 0 0 1)
+                           -- We need the matrix in the following order:
                          -- 012
                          -- 345
                          --

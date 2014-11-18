@@ -13,7 +13,8 @@ import           Data.Vinyl
 
 import           Data.Ext
 import           Data.Geometry.Point
--- import Data.Geometry.Matrix
+import Data.Geometry.Transformation
+import Data.Geometry.Box(Rectangle)
 import           Data.Geometry.PolyLine
 
 
@@ -28,7 +29,6 @@ import qualified Data.Sequence as S
 
 --------------------------------------------------------------------------------
 
-type Matrix d m r = r
 
 type XmlTree = Text
 
@@ -80,14 +80,8 @@ newtype PathAttrs ps       = PathAttrs      () deriving (Show,Eq,Functor)
 
 --------------------------------------------------------------------------------
 
-data Rectangle r = Rectangle { _lowerLeft :: Point 2 r
-                             , _upperRight :: Point 2 r
-                             }
-                 deriving (Show,Eq,Ord)
-makeLenses ''Rectangle
-
 data Image r = Image { _imageData :: ()
-                     , _rect      :: Rectangle r
+                     , _rect      :: Rectangle () r
                      } deriving (Show,Eq,Ord)
 makeLenses ''Image
 
@@ -137,8 +131,8 @@ data Operation r = MoveTo (Point 2 r)
                  | LineTo (Point 2 r)
                  | CurveTo (Point 2 r) (Point 2 r) (Point 2 r)
                  | QCurveTo (Point 2 r) (Point 2 r)
-                 | Ellipse (Matrix 3 2 r)
-                 | ArcTo (Matrix 3 2 r) (Point 2 r)
+                 | Ellipse (Matrix 3 3 r)
+                 | ArcTo (Matrix 3 3 r) (Point 2 r)
                  | Spline [Point 2 r]
                  | ClosedSpline [Point 2 r]
                  | ClosePath
