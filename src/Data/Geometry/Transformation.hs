@@ -119,12 +119,3 @@ mkRow i x = set (FV.element i) x zero
 -- | Row in a translation matrix
 transRow     :: forall n r. (Arity n, Index' (n-1) n, Num r) => Int -> r -> Vector n r
 transRow i x = set (V.element (Proxy :: Proxy (n-1))) x $ mkRow i 1
-
-
-
-
-
-
-
-t2 :: Transformation 2 Double
-t2 = translation . Vector $ FV.mk2 2 2
