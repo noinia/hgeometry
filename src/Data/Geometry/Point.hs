@@ -110,7 +110,10 @@ coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 -- :}
 -- 1
 --
--- if we want. Similarly, we can write:
+-- if we want.
+pattern Point2 x y   <- (_point2 -> (x,y))
+
+-- Similarly, we can write:
 --
 -- >>> :{
 --   let
@@ -119,27 +122,33 @@ coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 --   in g myPoint
 -- :}
 -- 3
-pattern Point2 x y   <- (_point2 -> (x,y))
 pattern Point3 x y z <- (_point3 -> (x,y,z))
 
-
+-- | Construct a 2 dimensional point
+--
 -- >>> point2 1 2
 -- Point {toVec = Vector {_unV = fromList [1,2]}}
 point2     :: r -> r -> Point 2 r
 point2 x y = Point $ v2 x y
 
--- >> _point2 $ point2 1 2
+-- | Destruct a 2 dimensional point
+--
+-- >>> _point2 $ point2 1 2
 -- (1,2)
 _point2   :: Point 2 r -> (r,r)
 _point2 p = (p^.unsafeCoord 1, p^.unsafeCoord 2)
 
 
--- >>> point2 1 2 3
+-- | Construct a 3 dimensional point
+--
+-- >>> point3 1 2 3
 -- Point {toVec = Vector {_unV = fromList [1,2,3]}}
 point3       :: r -> r -> r -> Point 3 r
 point3 x y z = Point $ v3 x y z
 
--- >> _point3 $ point3 1 2 3
+-- | Destruct a 3 dimensional point
+--
+-- >>> _point3 $ point3 1 2 3
 -- (1,2,3)
 _point3   :: Point 3 r -> (r,r,r)
 _point3 p = (p^.unsafeCoord 1, p^.unsafeCoord 2, p^.unsafeCoord 3)
