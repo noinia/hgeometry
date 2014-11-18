@@ -10,6 +10,16 @@ ghcExts = map ("-X" ++)
           , "DataKinds"
           , "TypeOperators"
           , "ConstraintKinds"
+          , "PolyKinds"
+          , "RankNTypes"
+
+          , "PatternSynonyms"
+          , "ViewPatterns"
+
+          , "StandaloneDeriving"
+          , "GeneralizedNewtypeDeriving"
+          , "FlexibleInstances"
+          , "FlexibleContexts"
           ]
 
 files = ["src/Data/Geometry/Point.hs"]
