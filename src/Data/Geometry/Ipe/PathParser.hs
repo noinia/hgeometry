@@ -24,8 +24,6 @@ import           Data.Geometry.Ipe.Types
 import           Data.Text(Text)
 import qualified Data.Text as T
 
-import qualified Data.Vector.Fixed as FV
-
 -- type Matrix d m r = ()
 
 
@@ -140,10 +138,9 @@ pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
 
 -- | Generate a matrix from a list of 6 coordinates.
 mkMatrix               :: Coordinate r => [r] -> Matrix 3 3 r
-mkMatrix [a,b,c,d,e,f] = let v3 x y z = Vector $ FV.mk3 x y z
-                         in Matrix $ v3 (v3 a c e)
-                                        (v3 b d f)
-                                        (v3 0 0 1)
+mkMatrix [a,b,c,d,e,f] = Matrix $ v3 (v3 a c e)
+                                     (v3 b d f)
+                                     (v3 0 0 1)
                            -- We need the matrix in the following order:
                          -- 012
                          -- 345

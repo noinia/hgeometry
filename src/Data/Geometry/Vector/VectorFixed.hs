@@ -32,7 +32,10 @@ data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 
 --------------------------------------------------------------------------------
 
+-- | Datatype representing d dimensional vectors. Our implementation wraps the
+-- implementation provided by fixed-vector.
 newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec (ToPeano d) r }
+
 
 unV :: Lens' (Vector d r) (Vec (ToPeano d) r)
 unV = lens _unV (const Vector)
@@ -90,30 +93,35 @@ destruct            :: AlwaysTrueDestruct predD d
 destruct (Vector v) = (V.head v, Vector $ V.tail v)
 
 
+-- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
 u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
 
 
+--------------------------------------------------------------------------------
+
+-- | Conversion to a Linear.V3
 toV3   :: Vector 3 a -> L3.V3 a
 toV3 v = let [a,b,c] = V.toList v in L3.V3 a b c
 
+-- | Conversion from a Linear.V3
 fromV3               :: L3.V3 a -> Vector 3 a
-fromV3 (L3.V3 a b c) = Vector $ V.mk3 a b c
+fromV3 (L3.V3 a b c) = v3 a b c
 
 ----------------------------------------------------------------------------------
 
 
-
 type AlwaysTrueSnoc d = ToPeano (1 + d) ~ S (ToPeano d)
 
+-- | Add an element at the back of the vector
 snoc :: (AlwaysTrueSnoc d, Arity d) => Vector d r -> r -> Vector (1 + d) r
 snoc = flip V.snoc
 
+-- | Get a vector of the first d - 1 elements.
 init :: AlwaysTrueDestruct predD d => Vector d r -> Vector predD r
 init = Vector . V.reverse . V.tail . V.reverse . _unV
 
-
-
+-- | Get a prefix of i elements of a vector
 prefix :: (Prefix (ToPeano i) (ToPeano d)) => Vector d r -> Vector i r
 prefix (Vector v) = Vector $ prefix' v
 
@@ -127,5 +135,16 @@ instance (V.Arity i, V.Arity d, V.Index i d, Prefix i d) => Prefix (S i) (S d) w
   prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)
 
 
+-- | Map with indices
 imap :: Arity d => (Int -> r -> s ) -> Vector d r -> Vector d s
 imap = V.imap
+
+--------------------------------------------------------------------------------
+
+-- | Construct a 2 dimensional vector
+v2     :: r -> r -> Vector 2 r
+v2 a b = Vector $ V.mk2 a b
+
+-- | Construct a 3 dimensional vector
+v3      :: r -> r -> r -> Vector 3 r
+v3 a b c = Vector $ V.mk3 a b c

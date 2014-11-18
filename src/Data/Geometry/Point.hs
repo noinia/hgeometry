@@ -51,7 +51,7 @@ newtype Point d r = Point { toVec :: Vector d r }
 -- >>> (point3 1 2 3) ^. vector
 -- Vector {_unV = fromList [1,2,3]}
 -- >>> origin & vector .~ v3 1 2 3
--- Point {Vector {_unV = fromList [1,2,3]}}
+-- Point {toVec = Vector {_unV = fromList [1,2,3]}}
 vector :: Lens' (Point d r) (Vector d r)
 vector = lens toVec (const Point)
 
@@ -88,7 +88,7 @@ unsafeCoord i = vector . FV.element (i-1)
 -- 2
 -- >>> point3 1 2 3 & coord (C :: C 1) .~ 10
 -- Point {toVec = Vector {_unV = fromList [10,2,3]}}
--- >>> over (coord (C :: C 3)) (point3 1 2 3) (+1)
+-- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
 -- Point {toVec = Vector {_unV = fromList [1,2,4]}}
 coord   :: forall i d r. (Index' (i-1) d, Arity d) => C i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
