@@ -113,7 +113,7 @@ coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 -- if we want.
 pattern Point2 x y   <- (_point2 -> (x,y))
 
--- Similarly, we can write:
+-- | Similarly, we can write:
 --
 -- >>> :{
 --   let
