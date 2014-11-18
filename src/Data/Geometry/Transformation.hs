@@ -34,7 +34,15 @@ deriving instance (Eq r, Arity n, Arity m)   => Eq (Matrix n m r)
 deriving instance (Ord r, Arity n, Arity m)  => Ord (Matrix n m r)
 deriving instance (Arity n, Arity m)         => Functor (Matrix n m)
 
+multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
+(Matrix a) `multM` (Matrix b) = Matrix $ a !*! b
 
+mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
+(Matrix m) `mult` v = m !* v
+
+--------------------------------------------------------------------------------
+
+-- | A type representing a Transformation for d dimensional objects
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (1 + d) (1 + d) r }
 
 transformationMatrix :: Lens' (Transformation d r) (Matrix (1 + d) (1 + d) r)
@@ -45,14 +53,11 @@ deriving instance (Eq r, Arity (1 + d))   => Eq (Transformation d r)
 deriving instance (Ord r, Arity (1 + d))  => Ord (Transformation d r)
 deriving instance Arity (1 + d)           => Functor (Transformation d)
 
+type instance NumType (Transformation d r) = r
 
-multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
-(Matrix a) `multM` (Matrix b) = Matrix $ a !*! b
+--------------------------------------------------------------------------------
 
-mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
-(Matrix m) `mult` v = m !* v
-
-
+-- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
