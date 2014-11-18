@@ -44,6 +44,7 @@ import           Linear.Affine hiding (Point(..), origin)
 
 --------------------------------------------------------------------------------
 
+-- | A d-dimensional point.
 newtype Point d r = Point { toVec :: Vector d r }
 
 -- | Lens to access the vector corresponding to this point.
@@ -110,6 +111,7 @@ coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 -- 1
 --
 -- if we want. Similarly, we can write:
+--
 -- >>> :{
 --   let
 --     g                :: Point 3 r -> r
