@@ -55,6 +55,11 @@ deriving instance Arity (1 + d)           => Functor (Transformation d)
 
 type instance NumType (Transformation d r) = r
 
+
+-- | Compose transformations (right to left)
+(|.|) :: (Num r, Arity (1 + d)) => Transformation d r -> Transformation d r -> Transformation d r
+(Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
+
 --------------------------------------------------------------------------------
 
 -- | A class representing types that can be transformed using a transformation
@@ -66,6 +71,12 @@ transformAllBy :: (Functor c, IsTransformable g)
 transformAllBy t = fmap (transformBy t)
 
 
+transformPointFunctor   :: ( PointFunctor g, Num r, d ~ Dimension (g r)
+                           , AlwaysTrueDestruct d (1 + d)
+                           ) => Transformation d r -> g r -> g r
+transformPointFunctor t = pmap (transformBy t)
+
+
 instance ( Num r
          , Arity d, AlwaysTrueDestruct d (1 + d)
          ) => IsTransformable (Point d r) where
@@ -73,9 +84,6 @@ instance ( Num r
     where
       v'    = snoc v 0
 
--- | Compose transformations (right to left)
-(|.|) :: (Num r, Arity (1 + d)) => Transformation d r -> Transformation d r -> Transformation d r
-(Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
 
 --------------------------------------------------------------------------------
 -- | Common transformations

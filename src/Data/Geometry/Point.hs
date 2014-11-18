@@ -72,8 +72,18 @@ _point2   :: Point 2 r -> (r,r)
 _point2 p = (p ^. unsafeCoord 1, p ^. unsafeCoord 2)
 
 
-class HasPoints t where
-  points :: t -> [Point (Dimension t) (NumType t)]
+class HasPoints g where
+  points :: g -> [Point (Dimension g) (NumType g)]
+
+class PointFunctor g where
+  pmap :: (Point (Dimension (g r)) r -> Point (Dimension (g s)) s) -> g r -> g s
+
+  -- pemap :: (d ~ Dimension (g r)) => (Point d r :+ p -> Point d s :+ p) -> g r -> g s
+  -- pemap =
+
+instance PointFunctor (Point d) where
+  pmap f = f
+
 
 
 origin :: (Arity d, Num r) => Point d r
