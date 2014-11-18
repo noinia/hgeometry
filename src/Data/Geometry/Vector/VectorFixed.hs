@@ -102,10 +102,10 @@ fromV3 (L3.V3 a b c) = Vector $ V.mk3 a b c
 
 
 
+type AlwaysTrueSnoc d = ToPeano (1 + d) ~ S (ToPeano d)
 
-
-snoc              :: Arity d => Vector d r -> r -> Vector (1 + d) r
-snoc (Vector v) x = undefined -- Vector $ V.snoc x v
+snoc :: (AlwaysTrueSnoc d, Arity d) => Vector d r -> r -> Vector (1 + d) r
+snoc = flip V.snoc
 
 init :: AlwaysTrueDestruct predD d => Vector d r -> Vector predD r
 init = Vector . V.reverse . V.tail . V.reverse . _unV
