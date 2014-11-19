@@ -1,19 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleInstances #-}
 module Data.Geometry.Ipe.Writer where
 
-import           Control.Applicative
+
+import           Control.Applicative hiding (Const(..))
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Maybe(catMaybes)
 import           Data.Monoid
+import           Data.Proxy
 import qualified Data.Traversable as Tr
 import           Data.Vinyl
-
+import           Data.Vinyl.Functor
+import           Data.Vinyl.TypeLevel
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 
 
 import           Data.Geometry.Ipe.Types
+import           GHC.Exts
 
 import qualified Data.ByteString as B
 import           Data.Maybe(mapMaybe)
@@ -48,8 +55,45 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: IpeWriteText r => t r -> Maybe (Node Text Text)
 
-class IpeWriteAttributes ats where
-  ipeWriteAtts :: Rec ats rs -> [(Text,Text)]
+class IpeAttrName a where
+  attrName :: Proxy a -> Text
+
+
+type Attr = (Text,Text)
+
+-- | Functon to write all attributes in a Rec
+writeAttrs :: ( RecAll f rs IpeWriteText
+              , AllC IpeAttrName rs
+              ) => Rec f rs -> [Attr]
+writeAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames rs)
+                                                        (writeAttrValues rs)
+
+
+-- | Writing the attribute values
+writeAttrValues :: RecAll f rs IpeWriteText => Rec f rs -> [Maybe Text]
+writeAttrValues = recordToList
+                . rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
+                . reifyConstraint (Proxy :: Proxy IpeWriteText)
+
+-- | Writing Attribute names
+writeAttrNames           :: AllC IpeAttrName rs => Rec f rs -> [Text]
+writeAttrNames RNil      = []
+writeAttrNames (x :& xs) = write'' x : writeAttrNames xs
+  where
+    write''   :: forall f s. IpeAttrName s => f s -> Text
+    write'' _ = attrName (Proxy :: Proxy s)
+
+
+
+type family AllC (c :: k -> Constraint) (xs :: [k]) :: Constraint where
+  AllC c '[] = ()
+  AllC c (x ': xs) = (c x, AllC c xs)
+
+
+
+
+instance IpeWriteText Text where
+  ipeWriteText = Just
 
 
 mAddAtts  :: Maybe (Node Text Text) -> [(Text, Text)] -> Maybe (Node Text Text)
@@ -58,12 +102,10 @@ mn `mAddAtts` ats = fmap (`addAtts` ats) mn
 addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
 n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
 
-
 --------------------------------------------------------------------------------
 
 instance IpeWriteText Double where
-  ipeWriteText = Just . T.pack . show
-
+  ipeWriteText = ipeWriteText . T.pack . show
 
 unwords' :: [Maybe Text] -> Maybe Text
 unwords' = fmap T.unwords . sequence
@@ -77,6 +119,16 @@ instance IpeWriteText r => IpeWriteText (Point 2 r) where
 
 
 --------------------------------------------------------------------------------
+
+instance IpeWriteText v => IpeWriteText (IpeValue v) where
+  ipeWriteText (Named t)  = ipeWriteText t
+  ipeWriteText (Valued v) = ipeWriteText v
+
+deriving instance IpeWriteText r => IpeWriteText (IpeSize  r)
+deriving instance IpeWriteText r => IpeWriteText (IpePen   r)
+deriving instance IpeWriteText IpeColor
+
+--------------------------------------------------------------------------------
 instance IpeWrite IpeSymbol where
   ipeWrite (Symbol p n) = f <$> ipeWriteText p
     where
@@ -84,8 +136,15 @@ instance IpeWrite IpeSymbol where
                            , ("name", n)
                            ] []
 
-instance IpeWriteAttributes SymbolAttrs where
-  ipeWriteAtts _ = [] -- TODO
+-- instance IpeWriteAttributes SymbolAttrs where
+--   ipeWriteAtts _ = [] -- TODO
+
+
+instance IpeAttrName SymbolName where attrName _ = "name"
+
+
+-- instance IpeWriteAttributes (SymbolAttrs' r) where
+--   ipeWriteAtts _ = [] -- TODO
 
 
 
@@ -111,8 +170,8 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
 
-instance IpeWriteAttributes PathAttrs where
-  ipeWriteAtts _ = [] -- TODO!
+-- instance IpeWriteAttributes PathAttrs where
+--   ipeWriteAtts _ = [] -- TODO!
 
 instance IpeWrite Path where
   ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt

@@ -120,7 +120,8 @@ type family SymbolAttrElf (s :: SymbolAttributes) (r :: *) :: * where
   SymbolAttrElf Size       r = IpeSize r
 
 
--- newtype SymbolAttrs r ss = SymbolAttrs (SymbolAttrElf ss r)
+newtype SymbolAttrs' r s = SymbolAttrs' (SymbolAttrElf s r)
+
 
 
 
