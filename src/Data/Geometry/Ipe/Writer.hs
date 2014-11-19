@@ -80,9 +80,11 @@ instance IpeWriteText r => IpeWriteText (Operation r) where
 
 
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
-  ipeWriteText pl = let (p:rest) = points pl
-                        ops      = MoveTo p : map LineTo rest
-                    in T.unlines . map ipeWriteText $ ops
+  ipeWriteText pl = case points pl of
+    []       -> ""
+    (p:rest) -> T.unlines . map ipeWriteText $ MoveTo p : map LineTo rest
+    -- TODO: Maybe this should just return a Maybe a, so we can return a
+    -- nothing here.
 
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
