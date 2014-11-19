@@ -2,8 +2,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Data.Geometry.Ipe.Writer where
 
+import           Control.Applicative
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Monoid
+import qualified Data.Traversable as Tr
 import           Data.Vinyl
 
 import           Data.Geometry.Point
@@ -22,44 +25,64 @@ import           Data.Text(Text)
 import           Text.XML.Expat.Tree
 import           Text.XML.Expat.Format(format')
 
+import           System.IO(hPutStrLn,stderr)
+
 import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
 
-toIpeXML :: (IpeWriteText r, IpeWrite t) => t r -> B.ByteString
-toIpeXML = format' . ipeWrite
+toIpeXML :: (IpeWriteText r, IpeWrite t) => t r -> Maybe B.ByteString
+toIpeXML = fmap format' . ipeWrite
 
 writeIpeFile    :: (IpeWriteText r, IpeWrite t) => FilePath -> t r -> IO ()
-writeIpeFile fp = B.writeFile fp . toIpeXML
+writeIpeFile fp = maybe err (B.writeFile fp) . toIpeXML
+  where
+    err = hPutStrLn stderr $
+          "writeIpeFile: error converting to xml. File '" <> fp <> "'not written"
 
 --------------------------------------------------------------------------------
 
 class IpeWriteText t where
-  ipeWriteText :: t -> Text
+  ipeWriteText :: t -> Maybe Text
 
 class IpeWrite t where
-  ipeWrite :: IpeWriteText r => t r -> Node Text Text
+  ipeWrite :: IpeWriteText r => t r -> Maybe (Node Text Text)
 
 class IpeWriteAttributes ats where
   ipeWriteAtts :: Rec ats rs -> [(Text,Text)]
 
+
+mAddAtts  :: Maybe (Node Text Text) -> [(Text, Text)] -> Maybe (Node Text Text)
+mn `mAddAtts` ats = fmap (`addAtts` ats) mn
+
 addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
 n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
+
 
 --------------------------------------------------------------------------------
 
 instance IpeWriteText Double where
-  ipeWriteText = T.pack . show
+  ipeWriteText = Just . T.pack . show
+
+
+unwords' :: [Maybe Text] -> Maybe Text
+unwords' = fmap T.unwords . sequence
+
+unlines' :: [Maybe Text] -> Maybe Text
+unlines' = fmap T.unlines . sequence
+
 
 instance IpeWriteText r => IpeWriteText (Point 2 r) where
-  ipeWriteText (Point2 x y) = T.unwords [ipeWriteText x, ipeWriteText y]
+  ipeWriteText (Point2 x y) = unwords' [ipeWriteText x, ipeWriteText y]
 
 
 --------------------------------------------------------------------------------
 instance IpeWrite IpeSymbol where
-  ipeWrite (Symbol p n) = Element "use" [ ("pos",  ipeWriteText p)
-                                        , ("name", n)
-                                        ] []
+  ipeWrite (Symbol p n) = f <$> ipeWriteText p
+    where
+      f ps = Element "use" [ ("pos", ps)
+                           , ("name", n)
+                           ] []
 
 instance IpeWriteAttributes SymbolAttrs where
   ipeWriteAtts _ = [] -- TODO
@@ -70,21 +93,19 @@ instance IpeWriteAttributes SymbolAttrs where
 
 
 instance IpeWriteText r => IpeWriteText (Operation r) where
-  ipeWriteText (MoveTo p) = T.unwords [ipeWriteText p, "m"]
-  ipeWriteText (LineTo p) = T.unwords [ipeWriteText p, "l"]
-  ipeWriteText (CurveTo p q r) = T.unwords [ ipeWriteText p
-                                           , ipeWriteText q
-                                           , ipeWriteText r, "m"]
+  ipeWriteText (MoveTo p) = unwords' [ipeWriteText p, Just "m"]
+  ipeWriteText (LineTo p) = unwords' [ipeWriteText p, Just "l"]
+  ipeWriteText (CurveTo p q r) = unwords' [ ipeWriteText p
+                                          , ipeWriteText q
+                                          , ipeWriteText r, Just "m"]
   -- TODO: The rest
-  ipeWriteText ClosePath = "h"
+  ipeWriteText ClosePath = Just "h"
 
 
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
   ipeWriteText pl = case points pl of
-    []       -> ""
-    (p:rest) -> T.unlines . map ipeWriteText $ MoveTo p : map LineTo rest
-    -- TODO: Maybe this should just return a Maybe a, so we can return a
-    -- nothing here.
+    []       -> Nothing
+    (p:rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
 
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
@@ -94,8 +115,10 @@ instance IpeWriteAttributes PathAttrs where
   ipeWriteAtts _ = [] -- TODO!
 
 instance IpeWrite Path where
-  ipeWrite (Path segs) = Element "path" []
-                         [Text . F.foldr1 (<>) . fmap ipeWriteText $ segs]
+  ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt
+    where
+      concat' = F.foldr1 (<>)
+      mt      = fmap concat' . Tr.sequence . fmap ipeWriteText $ segs
 
 --------------------------------------------------------------------------------
 
@@ -113,12 +136,14 @@ instance IpeWrite Path where
 
 type Atts = [(Text,Text)]
 
-ipeWritePolyLines     :: IpeWriteText r => [(PolyLine 2 () r, Atts)] -> Node Text Text
-ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] $ layers pls ++ map f pls]
+ipeWritePolyLines     :: IpeWriteText r
+                      => [(PolyLine 2 () r, Atts)] -> Node Text Text
+ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
   where
+    chs     = layers pls ++ mapMaybe f pls
     ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
 
-    f (pl,ats) = ipeWrite (mkPath pl) `addAtts` ats
+    f (pl,ats) = ipeWrite (mkPath pl) `mAddAtts` ats
     mkPath     = Path . S.singleton . PolyLineSegment
     layers     = map mkLayer . nub . mapMaybe (lookup "layer" . snd)
     mkLayer n  = Element "layer" [("name",n)] []
