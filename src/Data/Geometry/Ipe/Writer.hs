@@ -49,12 +49,18 @@ writeIpeFile fp = maybe err (B.writeFile fp) . toIpeXML
 
 --------------------------------------------------------------------------------
 
+-- | For types that can produce a text value
 class IpeWriteText t where
   ipeWriteText :: t -> Maybe Text
 
+-- | Types that correspond to an XML Element. All instances should produce an
+-- Element. If the type should produce a Node with the Text constructor, use
+-- the `IpeWriteText` typeclass instead.
 class IpeWrite t where
   ipeWrite :: IpeWriteText r => t r -> Maybe (Node Text Text)
 
+-- | For the types representing attribute values we can get the name/key to use
+-- when serializing to ipe.
 class IpeAttrName a where
   attrName :: Proxy a -> Text
 
@@ -63,9 +69,9 @@ type Attr = (Text,Text)
 
 -- | Functon to write all attributes in a Rec
 writeAttrs :: ( RecAll f rs IpeWriteText
-              , AllC IpeAttrName rs
+              , AllSatisfy IpeAttrName rs
               ) => Rec f rs -> [Attr]
-writeAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames rs)
+writeAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames  rs)
                                                         (writeAttrValues rs)
 
 
@@ -76,20 +82,17 @@ writeAttrValues = recordToList
                 . reifyConstraint (Proxy :: Proxy IpeWriteText)
 
 -- | Writing Attribute names
-writeAttrNames           :: AllC IpeAttrName rs => Rec f rs -> [Text]
+writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> [Text]
 writeAttrNames RNil      = []
 writeAttrNames (x :& xs) = write'' x : writeAttrNames xs
   where
     write''   :: forall f s. IpeAttrName s => f s -> Text
     write'' _ = attrName (Proxy :: Proxy s)
 
-
-
-type family AllC (c :: k -> Constraint) (xs :: [k]) :: Constraint where
-  AllC c '[] = ()
-  AllC c (x ': xs) = (c x, AllC c xs)
-
-
+-- | Function that states that all elements in xs satisfy a given constraint c
+type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
+  AllSatisfy c '[] = ()
+  AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
 
 
 instance IpeWriteText Text where
