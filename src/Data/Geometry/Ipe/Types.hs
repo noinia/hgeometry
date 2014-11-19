@@ -180,7 +180,8 @@ type family IpeObjectElF r (f :: IpeObjectType [k]) :: * where
   IpeObjectElF r (IpeImage is)            = Image r     :+ Rec CommonAttrs    is
   IpeObjectElF r (IpeTextLabel ts)        = TextLabel r :+ Rec TextLabelAttrs ts
   IpeObjectElF r (IpeMiniPage mps)        = MiniPage r  :+ Rec MiniPageAttrs  mps
-  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttrs r) ss
+  -- IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttrs r) ss
+  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
   IpeObjectElF r (IpePath ps)             = Path r      :+ Rec PathAttrs      ps
 
 newtype IpeObject r (fld :: IpeObjectType [k]) =

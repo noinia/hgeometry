@@ -136,7 +136,7 @@ point2 x y = Point $ v2 x y
 -- >>> _point2 $ point2 1 2
 -- (1,2)
 _point2   :: Point 2 r -> (r,r)
-_point2 p = (p^.unsafeCoord 1, p^.unsafeCoord 2)
+_point2 p = (p^.xCoord, p^.yCoord)
 
 
 -- | Construct a 3 dimensional point
@@ -151,7 +151,37 @@ point3 x y z = Point $ v3 x y z
 -- >>> _point3 $ point3 1 2 3
 -- (1,2,3)
 _point3   :: Point 3 r -> (r,r,r)
-_point3 p = (p^.unsafeCoord 1, p^.unsafeCoord 2, p^.unsafeCoord 3)
+_point3 p = (p^.xCoord, p^.yCoord, p^.zCoord)
+
+
+type i <=. d = (Index' (i-1) d, Arity d)
+
+-- | Shorthand to access the first coordinate C 1
+--
+-- >>> point3 1 2 3 ^. xCoord
+-- 1
+-- >>> point2 1 2 & xCoord .~ 10
+-- Point {toVec = Vector {_unV = fromList [10,2]}}
+xCoord :: (1 <=. d) => Lens' (Point d r) r
+xCoord = coord (C :: C 1)
+
+-- | Shorthand to access the second coordinate C 2
+--
+-- >>> point2 1 2 ^. yCoord
+-- 2
+-- >>> point3 1 2 3 & yCoord %~ (+1)
+-- Point {toVec = Vector {_unV = fromList [1,3,3]}}
+yCoord :: (2 <=. d) => Lens' (Point d r) r
+yCoord = coord (C :: C 2)
+
+-- | Shorthand to access the third coordinate C 3
+--
+-- >>> point3 1 2 3 ^. zCoord
+-- 3
+-- >>> point3 1 2 3 & zCoord %~ (+1)
+-- Point {toVec = Vector {_unV = fromList [1,2,4]}}
+zCoord :: (3 <=. d) => Lens' (Point d r) r
+zCoord = coord (C :: C 3)
 
 --------------------------------------------------------------------------------
 
