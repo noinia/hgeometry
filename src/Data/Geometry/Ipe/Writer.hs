@@ -2,6 +2,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleInstances #-}
+
+{-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Writer where
 
 
@@ -68,11 +70,11 @@ class IpeAttrName a where
 type Attr = (Text,Text)
 
 -- | Functon to write all attributes in a Rec
-writeAttrs :: ( RecAll f rs IpeWriteText
-              , AllSatisfy IpeAttrName rs
-              ) => Rec f rs -> [Attr]
-writeAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames  rs)
-                                                        (writeAttrValues rs)
+ipeWriteAttrs :: ( RecAll f rs IpeWriteText
+                 , AllSatisfy IpeAttrName rs
+                 ) => Rec f rs -> [Attr]
+ipeWriteAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames  rs)
+                                                           (writeAttrValues rs)
 
 
 -- | Writing the attribute values
@@ -139,17 +141,26 @@ instance IpeWrite IpeSymbol where
                            , ("name", n)
                            ] []
 
--- instance IpeWriteAttributes SymbolAttrs where
---   ipeWriteAtts _ = [] -- TODO
-
+instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttrs' r rs) where
+  ipeWriteText (SymbolAttrs' x) = ipeWriteText x
 
 instance IpeAttrName SymbolName where attrName _ = "name"
+instance IpeAttrName Pos        where attrName _ = "pos"
+instance IpeAttrName Stroke     where attrName _ = "stroke"
+instance IpeAttrName Fill       where attrName _ = "fill"
+instance IpeAttrName Pen        where attrName _ = "pen"
+instance IpeAttrName Size       where attrName _ = "size"
 
 
 -- instance IpeWriteAttributes (SymbolAttrs' r) where
 --   ipeWriteAtts _ = [] -- TODO
 
+-- fff :: Rec (SymbolAttrs' r) rs -> [Attr]
 
+-- fff = ipeWriteAttrs testR
+
+-- testR :: Rec (SymbolAttrs' Double) '[SymbolName, Pen]
+-- testR =  (SymbolAttrs' "nameX") :& (SymbolAttrs' . IpePen $ Named "Foo") :& RNil
 
 --------------------------------------------------------------------------------
 
