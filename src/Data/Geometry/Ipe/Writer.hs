@@ -144,12 +144,21 @@ instance IpeWrite IpeSymbol where
 instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttrs' r rs) where
   ipeWriteText (SymbolAttrs' x) = ipeWriteText x
 
+
+-- CommonAttributes
+instance IpeAttrName Layer           where attrName _ = "layer"
+instance IpeAttrName Matrix          where attrName _ = "matrix"
+instance IpeAttrName Pin             where attrName _ = "pin"
+instance IpeAttrName Transformations where attrName _ = "transformations"
+
+-- IpeSymbolAttributes
 instance IpeAttrName SymbolName where attrName _ = "name"
 instance IpeAttrName Pos        where attrName _ = "pos"
 instance IpeAttrName Stroke     where attrName _ = "stroke"
 instance IpeAttrName Fill       where attrName _ = "fill"
 instance IpeAttrName Pen        where attrName _ = "pen"
 instance IpeAttrName Size       where attrName _ = "size"
+
 
 
 -- instance IpeWriteAttributes (SymbolAttrs' r) where

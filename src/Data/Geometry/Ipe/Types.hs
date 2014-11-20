@@ -13,8 +13,8 @@ import           Data.Vinyl
 
 import           Data.Ext
 import           Data.Geometry.Point
-import Data.Geometry.Transformation
-import Data.Geometry.Box(Rectangle)
+import           Data.Geometry.Transformation(Matrix)
+import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.PolyLine
 
 
@@ -68,7 +68,13 @@ data PinType = No | Yes | Horizontal | Vertical
 data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 
 
-data CommonAttributes r = Layer | MatrixA | Pin | Transformations  deriving (Show,Read,Eq)
+data CommonAttributes = Layer | Matrix | Pin | Transformations  deriving (Show,Read,Eq)
+
+type family CommonAttrElf (a :: CommonAttributes) (r :: *) where
+  CommonAttrElf 'Layer          r = Text
+  CommonAttrElf 'Matrix         r = Matrix 3 3 r
+  CommonAttrElf Pin             r = PinType
+  CommonAttrElf Transformations r = TransformationTypes
 
 
 newtype CommonAttrs cs     = CommonAttrs    () deriving (Show,Eq,Functor)
