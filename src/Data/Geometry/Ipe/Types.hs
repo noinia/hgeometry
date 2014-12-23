@@ -120,14 +120,12 @@ newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
 
--- | Possible Attributes for a symbol
-data SymbolAttributeUniverse = SymbolName | SymbolStroke
-                             | SymbolFill | SymbolPen | Size
+-- | The optional Attributes for a symbol
+data SymbolAttributeUniverse = SymbolStroke | SymbolFill | SymbolPen | Size
                              deriving (Show,Eq)
 
 
 type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
-  SymbolAttrElf SymbolName   r = Text
   SymbolAttrElf SymbolStroke r = IpeColor
   SymbolAttrElf SymbolPen    r = IpePen r
   SymbolAttrElf SymbolFill   r = IpeColor

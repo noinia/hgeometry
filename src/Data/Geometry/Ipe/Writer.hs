@@ -107,17 +107,20 @@ type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
 instance IpeWriteText Text where
   ipeWriteText = Just
 
+-- | Add attributes to a node
+addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
+n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
 
+-- | Same as `addAtts` but then for a Maybe node
 mAddAtts  :: Maybe (Node Text Text) -> [(Text, Text)] -> Maybe (Node Text Text)
 mn `mAddAtts` ats = fmap (`addAtts` ats) mn
 
-addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
-n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
 
 --------------------------------------------------------------------------------
 
 instance IpeWriteText Double where
   ipeWriteText = ipeWriteText . T.pack . show
+
 
 unwords' :: [Maybe Text] -> Maybe Text
 unwords' = fmap T.unwords . sequence
@@ -159,7 +162,6 @@ instance IpeAttrName Pin             where attrName _ = "pin"
 instance IpeAttrName Transformations where attrName _ = "transformations"
 
 -- IpeSymbolAttributeUniversre
-instance IpeAttrName SymbolName   where attrName _ = "name"
 instance IpeAttrName SymbolStroke where attrName _ = "stroke"
 instance IpeAttrName SymbolFill   where attrName _ = "fill"
 instance IpeAttrName SymbolPen    where attrName _ = "pen"
