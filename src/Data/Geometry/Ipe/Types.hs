@@ -261,9 +261,13 @@ makeLenses ''IpeObject
 -- data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
 --         deriving (Show,Read,Eq,Ord)
 
+
 data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
-type family GroupElF f where
-  GroupElF Clip = ()
+
+type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
+  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
+
+newtype GroupAttributes r s = GroupAttributes (GroupAttrElf s r)
 
 -- data Group gt r where
 --   GNil  ::                     Group '[] r

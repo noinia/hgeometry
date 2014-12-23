@@ -167,7 +167,6 @@ instance IpeAttrName SymbolFill   where attrName _ = "fill"
 instance IpeAttrName SymbolPen    where attrName _ = "pen"
 instance IpeAttrName Size         where attrName _ = "size"
 
-
 -- PathAttributeUniverse
 instance IpeAttrName Stroke     where attrName _ = "stroke"
 instance IpeAttrName Fill       where attrName _ = "fill"
@@ -182,7 +181,8 @@ instance IpeAttrName Opacity    where attrName _ = "opacity"
 instance IpeAttrName Tiling     where attrName _ = "tiling"
 instance IpeAttrName Gradient   where attrName _ = "gradient"
 
-
+-- GroupAttributeUniverse
+instance IpeAttrName Clip     where attrName _ = "clip"
 
 --------------------------------------------------------------------------------
 
