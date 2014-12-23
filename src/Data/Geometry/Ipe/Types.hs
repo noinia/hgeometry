@@ -62,13 +62,18 @@ makeLenses ''IpePreamble
 type IpeBitmap = XmlTree
 
 --------------------------------------------------------------------------------
+
+-- | Possible values for Pin
 data PinType = No | Yes | Horizontal | Vertical
              deriving (Eq,Show,Read)
 
+-- | Possible values for Transformation
 data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 
 
-data CommonAttributeUniverse = Layer | Matrix | Pin | Transformations  deriving (Show,Read,Eq)
+-- | Some common attributes applicable for all ipe objects
+data CommonAttributeUniverse = Layer | Matrix | Pin | Transformations
+                             deriving (Show,Read,Eq)
 
 type family CommonAttrElf (a :: CommonAttributeUniverse) (r :: *) where
   CommonAttrElf 'Layer          r = Text
@@ -106,6 +111,7 @@ width (MiniPage _ _ w) = w
 
 --------------------------------------------------------------------------------
 
+-- | Many types either consist of a symbolc value, or a value of type v
 data IpeValue v = Named Text | Valued v deriving (Show,Eq,Ord)
 
 type Colour = Text -- TODO: Make this a Colour.Colour
@@ -114,14 +120,14 @@ newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
 
-data SymbolAttributeUniverse = SymbolName | Pos | SymbolStroke
+-- | Possible Attributes for a symbol
+data SymbolAttributeUniverse = SymbolName | SymbolStroke
                              | SymbolFill | SymbolPen | Size
                              deriving (Show,Eq)
 
 
 type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
   SymbolAttrElf SymbolName   r = Text
-  SymbolAttrElf Pos          r = r
   SymbolAttrElf SymbolStroke r = IpeColor
   SymbolAttrElf SymbolPen    r = IpePen r
   SymbolAttrElf SymbolFill   r = IpeColor
@@ -131,10 +137,7 @@ type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
 newtype SymbolAttributes r s = SymbolAttributes (SymbolAttrElf s r)
 
 
-
-
-
-
+-- | A symbol (point) in ipe
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text
                           }
@@ -143,18 +146,22 @@ makeLenses ''IpeSymbol
 
 --------------------------------------------------------------------------------
 
+-- | Possible attributes for a path
 data PathAttributeUniverse = Stroke | Fill | Dash | Pen | LineCap | LineJoin
                            | FillRule | Arrow | RArrow | Opacity | Tiling | Gradient
                            deriving (Show,Eq)
 
-data IpeDash r = Symbolic Text
+-- | Possible values for Dash
+data IpeDash r = DashNamed Text
                | DashPattern [r] r
 
+-- | Possible values for an ipe arrow
 data IpeArrow r = IpeArrow { _arrowName :: Text
                            , _arrowSize :: IpeSize r
                            } deriving (Show,Eq)
+makeLenses ''IpeArrow
 
-
+-- | Allowed Fill types
 data FillType = Wind | EOFill deriving (Show,Read,Eq)
 
 -- | IpeOpacity, IpeTyling, and IpeGradient are all symbolic values
