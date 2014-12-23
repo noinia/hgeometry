@@ -132,7 +132,7 @@ type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
   SymbolAttrElf Size         r = IpeSize r
 
 
-newtype SymbolAttributes r s = SymbolAttributes (SymbolAttrElf s r)
+newtype SymbolAttribute r s = SymbolAttribute (SymbolAttrElf s r)
 
 
 -- | A symbol (point) in ipe
@@ -182,7 +182,7 @@ type family PathAttrElf (s :: PathAttributeUniverse) (r :: *) :: * where
   PathAttrElf Gradient r = IpeGradient
 
 
-newtype PathAttributes r s = PathAttributes (PathAttrElf s r)
+newtype PathAttribute r s = PathAttribute (PathAttrElf s r)
 
 
 
@@ -267,7 +267,7 @@ data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
   GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
 
-newtype GroupAttributes r s = GroupAttributes (GroupAttrElf s r)
+newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
 
 -- data Group gt r where
 --   GNil  ::                     Group '[] r

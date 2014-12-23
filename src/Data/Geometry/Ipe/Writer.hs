@@ -151,8 +151,8 @@ instance IpeWrite IpeSymbol where
                            , ("name", n)
                            ] []
 
-instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttributes r rs) where
-  ipeWriteText (SymbolAttributes x) = ipeWriteText x
+instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttribute r rs) where
+  ipeWriteText (SymbolAttribute x) = ipeWriteText x
 
 
 -- CommonAttributeUnivers
@@ -206,8 +206,8 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
 
-instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttributes r rs) where
-  ipeWriteText (PathAttributes x) = ipeWriteText x
+instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttribute r rs) where
+  ipeWriteText (PathAttribute x) = ipeWriteText x
 
 instance IpeWrite Path where
   ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt
@@ -262,8 +262,8 @@ testPoly = fromPoints [origin, point2 0 10, point2 10 10, point2 100 100]
 testWriteUse :: Maybe (Node Text Text)
 testWriteUse = ipeWriteExt sym
   where
-    sym :: IpeSymbol Double :+ (Rec (SymbolAttributes Double) [Size, SymbolStroke])
-    sym = Symbol origin "mark" :+ (  SymbolAttributes (IpeSize  $ Named "normal")
-                                  :& SymbolAttributes (IpeColor $ Named "green")
+    sym :: IpeSymbol Double :+ (Rec (SymbolAttribute Double) [Size, SymbolStroke])
+    sym = Symbol origin "mark" :+ (  SymbolAttribute (IpeSize  $ Named "normal")
+                                  :& SymbolAttribute (IpeColor $ Named "green")
                                   :& RNil
                                   )
