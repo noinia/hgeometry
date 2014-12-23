@@ -60,6 +60,14 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: IpeWriteText r => t r -> Maybe (Node Text Text)
 
+
+-- | Ipe write for Exts
+ipeWriteExt             :: ( IpeWrite t, IpeWriteText r
+                           , RecAll a as IpeWriteText, AllSatisfy IpeAttrName as
+                           ) => t r :+ Rec a as -> Maybe (Node Text Text)
+ipeWriteExt (x :+ arec) = ipeWrite x `mAddAtts` ipeWriteAttrs arec
+
+
 -- | For the types representing attribute values we can get the name/key to use
 -- when serializing to ipe.
 class IpeAttrName a where
@@ -152,7 +160,6 @@ instance IpeAttrName Transformations where attrName _ = "transformations"
 
 -- IpeSymbolAttributeUniversre
 instance IpeAttrName SymbolName   where attrName _ = "name"
-instance IpeAttrName Pos          where attrName _ = "pos"
 instance IpeAttrName SymbolStroke where attrName _ = "stroke"
 instance IpeAttrName SymbolFill   where attrName _ = "fill"
 instance IpeAttrName SymbolPen    where attrName _ = "pen"
@@ -239,5 +246,22 @@ writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> 
 writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
 
 
+
+--------------------------------------------------------------------------------
+
+
+
 testPoly :: PolyLine 2 () Double
 testPoly = fromPoints [origin, point2 0 10, point2 10 10, point2 100 100]
+
+
+
+
+testWriteUse :: Maybe (Node Text Text)
+testWriteUse = ipeWriteExt sym
+  where
+    sym :: IpeSymbol Double :+ (Rec (SymbolAttributes Double) [Size, SymbolStroke])
+    sym = Symbol origin "mark" :+ (  SymbolAttributes (IpeSize  $ Named "normal")
+                                  :& SymbolAttributes (IpeColor $ Named "green")
+                                  :& RNil
+                                  )
