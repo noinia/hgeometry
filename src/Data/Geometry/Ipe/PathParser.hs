@@ -20,7 +20,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import           Data.Geometry.Transformation
 import           Data.Geometry.Ipe.ParserPrimitives
-import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Types(Operation(..))
 import           Data.Text(Text)
 import qualified Data.Text as T
 
