@@ -2,7 +2,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleInstances #-}
-
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Writer where
 
@@ -141,47 +140,52 @@ instance IpeWrite IpeSymbol where
                            , ("name", n)
                            ] []
 
-instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttrs' r rs) where
-  ipeWriteText (SymbolAttrs' x) = ipeWriteText x
+instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttributes r rs) where
+  ipeWriteText (SymbolAttributes x) = ipeWriteText x
 
 
--- CommonAttributes
+-- CommonAttributeUnivers
 instance IpeAttrName Layer           where attrName _ = "layer"
 instance IpeAttrName Matrix          where attrName _ = "matrix"
 instance IpeAttrName Pin             where attrName _ = "pin"
 instance IpeAttrName Transformations where attrName _ = "transformations"
 
--- IpeSymbolAttributes
-instance IpeAttrName SymbolName where attrName _ = "name"
-instance IpeAttrName Pos        where attrName _ = "pos"
+-- IpeSymbolAttributeUniversre
+instance IpeAttrName SymbolName   where attrName _ = "name"
+instance IpeAttrName Pos          where attrName _ = "pos"
+instance IpeAttrName SymbolStroke where attrName _ = "stroke"
+instance IpeAttrName SymbolFill   where attrName _ = "fill"
+instance IpeAttrName SymbolPen    where attrName _ = "pen"
+instance IpeAttrName Size         where attrName _ = "size"
+
+
+-- PathAttributeUniverse
 instance IpeAttrName Stroke     where attrName _ = "stroke"
 instance IpeAttrName Fill       where attrName _ = "fill"
+instance IpeAttrName Dash       where attrName _ = "dash"
 instance IpeAttrName Pen        where attrName _ = "pen"
-instance IpeAttrName Size       where attrName _ = "size"
+instance IpeAttrName LineCap    where attrName _ = "cap"
+instance IpeAttrName LineJoin   where attrName _ = "join"
+instance IpeAttrName FillRule   where attrName _ = "fillrule"
+instance IpeAttrName Arrow      where attrName _ = "arrow"
+instance IpeAttrName RArrow     where attrName _ = "rarrow"
+instance IpeAttrName Opacity    where attrName _ = "opacity"
+instance IpeAttrName Tiling     where attrName _ = "tiling"
+instance IpeAttrName Gradient   where attrName _ = "gradient"
 
 
-
--- instance IpeWriteAttributes (SymbolAttrs' r) where
---   ipeWriteAtts _ = [] -- TODO
-
--- fff :: Rec (SymbolAttrs' r) rs -> [Attr]
-
--- fff = ipeWriteAttrs testR
-
--- testR :: Rec (SymbolAttrs' Double) '[SymbolName, Pen]
--- testR =  (SymbolAttrs' "nameX") :& (SymbolAttrs' . IpePen $ Named "Foo") :& RNil
 
 --------------------------------------------------------------------------------
 
 
 instance IpeWriteText r => IpeWriteText (Operation r) where
-  ipeWriteText (MoveTo p) = unwords' [ipeWriteText p, Just "m"]
-  ipeWriteText (LineTo p) = unwords' [ipeWriteText p, Just "l"]
+  ipeWriteText (MoveTo p)      = unwords' [ipeWriteText p, Just "m"]
+  ipeWriteText (LineTo p)      = unwords' [ipeWriteText p, Just "l"]
   ipeWriteText (CurveTo p q r) = unwords' [ ipeWriteText p
                                           , ipeWriteText q
                                           , ipeWriteText r, Just "m"]
   -- TODO: The rest
-  ipeWriteText ClosePath = Just "h"
+  ipeWriteText ClosePath       = Just "h"
 
 
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
@@ -193,8 +197,8 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
 
--- instance IpeWriteAttributes PathAttrs where
---   ipeWriteAtts _ = [] -- TODO!
+instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttributes r rs) where
+  ipeWriteText (PathAttributes x) = ipeWriteText x
 
 instance IpeWrite Path where
   ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt

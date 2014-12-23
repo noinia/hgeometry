@@ -68,9 +68,9 @@ data PinType = No | Yes | Horizontal | Vertical
 data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 
 
-data CommonAttributes = Layer | Matrix | Pin | Transformations  deriving (Show,Read,Eq)
+data CommonAttributeUniverse = Layer | Matrix | Pin | Transformations  deriving (Show,Read,Eq)
 
-type family CommonAttrElf (a :: CommonAttributes) (r :: *) where
+type family CommonAttrElf (a :: CommonAttributeUniverse) (r :: *) where
   CommonAttrElf 'Layer          r = Text
   CommonAttrElf 'Matrix         r = Matrix 3 3 r
   CommonAttrElf Pin             r = PinType
@@ -101,6 +101,7 @@ data TextLabel r = Label Text (Point 2 r)
 data MiniPage r = MiniPage Text (Point 2 r) r
                  deriving (Show,Eq,Ord)
 
+width                  :: MiniPage t -> t
 width (MiniPage _ _ w) = w
 
 --------------------------------------------------------------------------------
@@ -113,20 +114,23 @@ newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
 newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
 
-data SymbolAttributes = SymbolName | Pos | Stroke | Fill | Pen | Size
-                      deriving (Show,Eq,Ord)
+data SymbolAttributeUniverse = SymbolName | Pos | SymbolStroke
+                             | SymbolFill | SymbolPen | Size
+                             deriving (Show,Eq)
 
 
-type family SymbolAttrElf (s :: SymbolAttributes) (r :: *) :: * where
-  SymbolAttrElf SymbolName r = Text
-  SymbolAttrElf Pos        r = r
-  SymbolAttrElf Stroke     r = IpeColor
-  SymbolAttrElf Pen        r = IpePen r
-  SymbolAttrElf Fill       r = IpeColor
-  SymbolAttrElf Size       r = IpeSize r
+type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
+  SymbolAttrElf SymbolName   r = Text
+  SymbolAttrElf Pos          r = r
+  SymbolAttrElf SymbolStroke r = IpeColor
+  SymbolAttrElf SymbolPen    r = IpePen r
+  SymbolAttrElf SymbolFill   r = IpeColor
+  SymbolAttrElf Size         r = IpeSize r
 
 
-newtype SymbolAttrs' r s = SymbolAttrs' (SymbolAttrElf s r)
+newtype SymbolAttributes r s = SymbolAttributes (SymbolAttrElf s r)
+
+
 
 
 
@@ -138,6 +142,44 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
 makeLenses ''IpeSymbol
 
 --------------------------------------------------------------------------------
+
+data PathAttributeUniverse = Stroke | Fill | Dash | Pen | LineCap | LineJoin
+                           | FillRule | Arrow | RArrow | Opacity | Tiling | Gradient
+                           deriving (Show,Eq)
+
+data IpeDash r = Symbolic Text
+               | DashPattern [r] r
+
+data IpeArrow r = IpeArrow { _arrowName :: Text
+                           , _arrowSize :: IpeSize r
+                           } deriving (Show,Eq)
+
+
+data FillType = Wind | EOFill deriving (Show,Read,Eq)
+
+-- | IpeOpacity, IpeTyling, and IpeGradient are all symbolic values
+type IpeOpacity  = Text
+type IpeTiling   = Text
+type IpeGradient = Text
+
+type family PathAttrElf (s :: PathAttributeUniverse) (r :: *) :: * where
+  PathAttrElf Stroke   r = IpeColor
+  PathAttrElf Fill     r = IpeColor
+  PathAttrElf Dash     r = IpeDash r
+  PathAttrElf Pen      r = IpePen r
+  PathAttrElf LineCap  r = Int
+  PathAttrElf LineJoin r = Int
+  PathAttrElf FillRule r = FillType
+  PathAttrElf Arrow    r = IpeArrow r
+  PathAttrElf RArrow   r = IpeArrow r
+  PathAttrElf Opacity  r = IpeOpacity
+  PathAttrElf Tiling   r = IpeTiling
+  PathAttrElf Gradient r = IpeGradient
+
+
+newtype PathAttributes r s = PathAttributes (PathAttrElf s r)
+
+
 
 data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                      -- TODO
@@ -214,7 +256,7 @@ makeLenses ''IpeObject
 -- data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
 --         deriving (Show,Read,Eq,Ord)
 
-data GroupAttributes = Clip deriving (Show,Read,Eq,Ord)
+data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 type family GroupElF f where
   GroupElF Clip = ()
 
