@@ -226,8 +226,18 @@ instance IpeWrite Path where
 --   ipeWrite (IpePath      (p :+ ats)) = ipeWrite p `addAtts` ipeWriteAtts ats
 
 
+
+instance IpeWriteText (GroupAttrElf rs r) => IpeWriteText (GroupAttribute r rs) where
+  ipeWriteText (GroupAttribute x) = ipeWriteText x
+
+
+--------------------------------------------------------------------------------
+
+
 -- instance IpeWrite (Group gt) where
 --   ipeWrite GNil = mempty
+
+--------------------------------------------------------------------------------
 
 type Atts = [(Text,Text)]
 
