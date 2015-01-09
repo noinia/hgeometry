@@ -3,9 +3,9 @@ module Data.Geometry.Vector( module GV
                            , isScalarMultipleOf
                            ) where
 
-import qualified Data.Vector.Fixed as FV
-import qualified Data.Foldable as F
-import Data.Geometry.Vector.VectorFixed as GV
+import qualified Data.Vector.Fixed                as FV
+import qualified Data.Foldable                    as F
+import           Data.Geometry.Vector.VectorFixed as GV
 
 
 -- | Test if v is a scalar multiple of u.
