@@ -15,7 +15,7 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
-import           Data.Geometry.PolyLine
+import           Data.Geometry.Line
 
 
 import           Data.Text(Text)

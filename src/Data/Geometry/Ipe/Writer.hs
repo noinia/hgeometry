@@ -17,7 +17,7 @@ import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
+import           Data.Geometry.Line
 
 
 import           Data.Geometry.Ipe.Types

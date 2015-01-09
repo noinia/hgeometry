@@ -13,7 +13,7 @@ import           Data.Vinyl
 import           Data.Validation
 
 import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
+import           Data.Geometry.Line
 
 import           Data.Geometry.Ipe.Types
 
