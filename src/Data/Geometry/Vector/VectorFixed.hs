@@ -102,7 +102,7 @@ u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
 
 -- | Conversion to a Linear.V3
 toV3   :: Vector 3 a -> L3.V3 a
-toV3 v = let [a,b,c] = V.toList v in L3.V3 a b c
+toV3 (Vector3 a b c) = L3.V3 a b c
 
 -- | Conversion from a Linear.V3
 fromV3               :: L3.V3 a -> Vector 3 a
@@ -148,3 +148,16 @@ v2 a b = Vector $ V.mk2 a b
 -- | Construct a 3 dimensional vector
 v3      :: r -> r -> r -> Vector 3 r
 v3 a b c = Vector $ V.mk3 a b c
+
+
+-- | Destruct a 2 dim vector into a pair
+_unV2 :: Vector 2 r -> (r,r)
+_unV2 v = let [x,y] = V.toList v in (x,y)
+
+_unV3 :: Vector 3 r -> (r,r,r)
+_unV3 v = let [x,y,z] = V.toList v in (x,y,z)
+
+
+-- | Pattern synonym for two and three dim vectors
+pattern Vector2 x y   <- (_unV2 -> (x,y))
+pattern Vector3 x y z <- (_unV3 -> (x,y,z))

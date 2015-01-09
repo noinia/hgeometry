@@ -205,3 +205,21 @@ instance PointFunctor (Point d) where
 -- Point {toVec = Vector {_unV = fromList [0,0,0,0]}}
 origin :: (Arity d, Num r) => Point d r
 origin = Point $ pure 0
+
+
+--------------------------------------------------------------------------------
+-- | Functions specific to Two Dimensional points
+
+data CCW = CCW | CoLinear | CW
+         deriving (Show,Eq)
+
+-- | Given three points p q and r determine the orientation when going from p to r via q.
+ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
+ccw p q r = case compare z 0 of
+              LT -> CW
+              GT -> CCW
+              EQ -> CoLinear
+     where
+       Vector2 ux uy = q .-. p
+       Vector2 vx vy = r .-. p
+       z             = ux * vy - uy * vx
