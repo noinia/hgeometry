@@ -1,7 +1,8 @@
 import Test.DocTest
 
-main = doctest $ ["-isrc" ] ++ ghcExts ++ files
+import Data.Monoid
 
+main = doctest $ ["-isrc" ] ++ ghcExts ++ files
 
 ghcExts = map ("-X" ++)
           [ "TypeFamilies"
@@ -22,4 +23,9 @@ ghcExts = map ("-X" ++)
           , "FlexibleContexts"
           ]
 
-files = ["src/Data/Geometry/Point.hs"]
+files = geomModules
+
+geomModules = map ("src/Data/Geometry/" <>) [ "Point.hs"
+                                            , "Vector.hs"
+                                            , "PolyLine.hs"
+                                            ]
