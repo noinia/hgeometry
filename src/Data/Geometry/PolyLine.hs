@@ -15,10 +15,9 @@ import           Data.Geometry.Box
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Vector(Arity, AlwaysTrueDestruct, Vector)
+import           Data.Geometry.Vector
 import           Linear.Affine(Affine(..))
 
-import qualified Data.Vector.Fixed as V
 
 -- import           Data.Sequence((<|))
 import qualified Data.Sequence as S
@@ -27,7 +26,8 @@ import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
--- | A line is given by an anchor point and a vector indicating the direction.
+-- | A line is given by an anchor point and a vector indicating the
+-- direction.
 data Line d r = Line { _anchorPoint :: Point  d r
                      , _direction   :: Vector d r
                      }
@@ -39,24 +39,23 @@ deriving instance Arity d           => Functor (Line d)
 type instance Dimension (Line d r) = d
 type instance NumType   (Line d r) = r
 
+-- | A line may be constructed from two points.
+lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
+lineThrough p q = Line p (q .-. p)
+
+
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
 isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r -> Bool
 (Line p u) `isIdenticalTo` (Line q v) = (p,u) == (q,v)
 
 
--- | Test if v is a scalar multiple of u. Note that if the vectors are nill (i.e. d = 0)
--- we will return zero.
-isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
-                         => Vector d r -> Vector d r -> Bool
-u `isScalarMultipleOf` v = case (V.toList u, V.toList v) of
-  (u1:u',v1:v') -> let lambda  = u1 / v1
-                   in lambda /= 0 && (and $ zipWith (\ui vi -> lambda == ui / vi) u' v')
-  _             -> False
-
-
 -- | Test if the two lines are parallel.
-isParallelTo :: (Eq r, Fractional r, Arity d) => Line d r -> Line d r -> Bool
+--
+-- >>> lineThrough origin (point2 1 0) `isParallelTo` lineThrough (point2 1 1) (point2 2 1)
+-- >>> True
+isParallelTo                         :: (Eq r, Fractional r, Arity d)
+                                     => Line d r -> Line d r -> Bool
 (Line _ u) `isParallelTo` (Line _ v) = u `isScalarMultipleOf` v
 
 
@@ -74,7 +73,7 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
       | l `isParallelTo` m = if q `onLine` l then SameLine l else ParallelLines
       | otherwise          = LineLineIntersection r
     where
-      r = undefined
+      r = undefined -- TODO: Finish this
 
 
 
@@ -88,6 +87,8 @@ instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
 
 --------------------------------------------------------------------------------
 
+-- | Line segments. LineSegments have a start and end point, both of which may
+-- contain additional data of type p.
 data LineSegment d p r = LineSegment { _start :: Point d r :+ p
                                      , _end   :: Point d r :+ p
                                      }
@@ -119,24 +120,18 @@ toLineSegment (Line p v) = LineSegment (p       :+ mempty)
                                        (p .+^ v :+ mempty)
 
 toLine                                 :: (Num r, Arity d) => LineSegment d p r -> Line d r
-toLine (LineSegment (p :+ _) (q :+ _)) = Line p (q .-. p)
+toLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
 
 
+
+
+
+-- | Lines are transformable, via line segments
 instance (Num r, AlwaysTruePFT d) => IsTransformable (Line d r) where
   transformBy t = toLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => Line d r -> LineSegment d () r
       toLineSegment' = toLineSegment
-
-
-
-
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 
