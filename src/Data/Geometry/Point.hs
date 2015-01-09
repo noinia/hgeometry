@@ -215,7 +215,7 @@ data CCW = CCW | CoLinear | CW
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = case compare z 0 of
+ccw p q r = case z `compare` 0 of
               LT -> CW
               GT -> CCW
               EQ -> CoLinear
