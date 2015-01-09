@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
-module Data.Geometry.PolyLine where
+module Data.Geometry.Line where
 
 import           Control.Applicative
 import           Control.Lens
