@@ -53,13 +53,22 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 -- | Test if the two lines are parallel.
 --
 -- >>> lineThrough origin (point2 1 0) `isParallelTo` lineThrough (point2 1 1) (point2 2 1)
--- >>> True
+-- True
+-- >>> lineThrough origin (point2 1 0) `isParallelTo` lineThrough (point2 1 1) (point2 2 2)
+-- False
 isParallelTo                         :: (Eq r, Fractional r, Arity d)
                                      => Line d r -> Line d r -> Bool
 (Line _ u) `isParallelTo` (Line _ v) = u `isScalarMultipleOf` v
 
 
 -- | Test if point p lies on line l
+--
+-- >>> origin `onLine` lineThrough origin (point2 1 0)
+-- True
+-- >>> point2 10 10 `onLine` lineThrough origin (point2 2 2)
+-- True
+-- >>> point2 10 5 `onLine` lineThrough origin (point2 2 2)
+-- False
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
