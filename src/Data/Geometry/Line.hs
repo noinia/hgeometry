@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
@@ -7,6 +8,7 @@ module Data.Geometry.Line where
 import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
+import qualified Data.List as L
 
 import           Data.Monoid
 
@@ -78,10 +80,12 @@ p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
 
 instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) where
+
   data Intersection (Line 2 r) (Line 2 r) = SameLine             (Line 2 r)
                                           | LineLineIntersection (Point 2 r)
                                           | ParallelLines -- ^ No intersection
                                             deriving (Show)
+
   l@(Line p (Vector2 ux uy)) `intersect` m@(Line q v@(Vector2 vx vy))
       | areParallel = if q `onLine` l then SameLine l else ParallelLines
       | otherwise   = LineLineIntersection r
@@ -98,7 +102,6 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
       Point2 px py = p
       Point2 qx qy = q
 
-
 instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
   (SameLine l)             == (SameLine m)             = case (l `intersect` m) of
                                                            SameLine _ -> True
@@ -106,6 +109,7 @@ instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
   (LineLineIntersection p) == (LineLineIntersection q) = p == q
   ParallelLines            == ParallelLines            = True
   _                        == _                        = False
+
 
 --------------------------------------------------------------------------------
 
@@ -136,13 +140,97 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
 
 
-
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
 toLineSegment (Line p v) = LineSegment (p       :+ mempty)
                                        (p .+^ v :+ mempty)
 
 toLine                                 :: (Num r, Arity d) => LineSegment d p r -> Line d r
 toLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
+
+
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+
+  data Intersection (LineSegment 2 p r) (LineSegment 2 p r) =
+        OverlappingSegment         (LineSegment 2 p r)
+      | LineSegLineSegIntersection (Point 2 r)
+      | NoIntersection
+      deriving (Show,Eq)
+
+
+  a@(LineSegment p q) `intersect` b@(LineSegment s t) = case la `intersect` lb of
+      SameLine _                                ->
+          maybe NoIntersection OverlappingSegment $ overlap a b
+      LineLineIntersection r | onBothSegments r -> LineSegLineSegIntersection r
+      _                                         -> NoIntersection
+    where
+      la = toLine a
+      lb = toLine b
+      onBothSegments r = onSegment r a && onSegment r b
+
+
+-- | Test if a point lies on a line segment.
+--
+-- >>> (point2 1 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- True
+-- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- False
+-- >>> (point2 5 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- False
+-- >>> (point2 (-1) 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- False
+-- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 3 3 :+ ()))
+-- True
+--
+-- Note that the segments are assumed to be closed. So the end points lie on the segment.
+--
+-- >>> (point2 2 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- True
+-- >>> origin `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- True
+--
+--
+-- This function works for arbitrary dimensons.
+--
+-- >>> (point3 1 1 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- True
+-- >>> (point3 1 2 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- False
+onSegment       :: (Ord r, Fractional r, Arity d)
+                => Point d r -> LineSegment d p r -> Bool
+p `onSegment` l = let s         = l^.start.core
+                      t         = l^.end.core
+                      inRange x = (fromIntegral 0) <= x && x <= (fromIntegral 1)
+                  in maybe False inRange $ scalarMultiple (p .-. s) (t .-. s)
+
+
+
+overlap     :: (Ord r, Fractional r, Arity d)
+            => LineSegment d p r -> LineSegment d p r -> Maybe (LineSegment d p r)
+overlap l m = undefined -- mapM [sm r, sm s] >>= (f . L.sortBy fst)
+  where
+    p = l^.start
+    q = l^.end
+    r = m^.start
+    s = m^.end
+
+    u = q^.core .-. p^.core
+
+    -- sm  :: Point d r -> Maybe (r,Point d r)
+    sm x = (,x) <$> scalarMultiple u (x^.core .-. p^.core)
+
+    start' = undefined
+    end'   = undefined
+
+    -- start'   :: (r,Point d r) -> Point d r
+    -- start' a = snd $ L.maximumBy fst [(fromIntegral 0, p), a]
+
+    -- end'   b = snd $ L.minimumBy fst [(fromIntegral 1,q), b]
+
+    -- Make sure we have two elems, s.t. both r and s are colinear with pq
+    -- then select the apropriate point as minimum and as maximum
+    f [a,b] = Just $ LineSegment (start' a) (end' b)
+    f _     = Nothing
 
 
 

@@ -1,6 +1,7 @@
 module Data.Geometry.Vector( module GV
                            , module FV
                            , isScalarMultipleOf
+                           , scalarMultiple
                            ) where
 
 import qualified Data.Vector.Fixed                as FV
@@ -24,7 +25,22 @@ import           Data.Geometry.Vector.VectorFixed as GV
 -- True
 isScalarMultipleOf       :: (Eq r, Fractional r, GV.Arity d)
                          => Vector d r -> Vector d r -> Bool
-u `isScalarMultipleOf` v = fst . F.foldr allLambda (True,Nothing) $ FV.zipWith f u v
+u `isScalarMultipleOf` v = fst $  scalarMultiple' u v
+
+-- | Get the scalar labmda s.t. v = lambda * u (if it exists)
+scalarMultiple     :: (Eq r, Fractional r, GV.Arity d)
+                   => Vector d r -> Vector d r -> Maybe r
+scalarMultiple u v = case scalarMultiple' u v of
+    (False,_)             -> Nothing
+    (_, mm@(Just lambda)) -> mm
+    (_, _)                -> Just . fromIntegral $ 0
+
+-- | Helper function for computing the scalar multiple. The result is a pair
+-- (b,mm), where b indicates if v is a scalar multiple of u, and mm is a Maybe
+-- scalar multiple. If the result is Nothing, the scalar multiple is zero.
+scalarMultiple'     :: (Eq r, Fractional r, GV.Arity d)
+                    => Vector d r -> Vector d r -> (Bool,Maybe r)
+scalarMultiple' u v = F.foldr allLambda (True,Nothing) $ FV.zipWith f u v
   where
     f ui vi = (ui == 0 && vi == 0, ui / vi)
     allLambda (True,_)      x               = x
