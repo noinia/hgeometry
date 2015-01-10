@@ -17,6 +17,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Linear.Affine(Affine(..))
+import           Linear.Vector((*^))
 
 
 -- import           Data.Sequence((<|))
@@ -59,6 +60,7 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 isParallelTo                         :: (Eq r, Fractional r, Arity d)
                                      => Line d r -> Line d r -> Bool
 (Line _ u) `isParallelTo` (Line _ v) = u `isScalarMultipleOf` v
+  -- TODO: Maybe use a specialize pragma for 2D (see intersect instance for two lines.)
 
 
 -- | Test if point p lies on line l
@@ -71,6 +73,8 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 -- False
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
+  -- TODO: Maybe use a specialize pragma for 2D with an implementation using ccw
+
 
 
 instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) where
@@ -78,12 +82,21 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
                                           | LineLineIntersection (Point 2 r)
                                           | ParallelLines -- ^ No intersection
                                             deriving (Show)
-  l@(Line p u) `intersect` m@(Line q v)
-      | l `isParallelTo` m = if q `onLine` l then SameLine l else ParallelLines
-      | otherwise          = LineLineIntersection r
+  l@(Line p (Vector2 ux uy)) `intersect` m@(Line q v@(Vector2 vx vy))
+      | areParallel = if q `onLine` l then SameLine l else ParallelLines
+      | otherwise   = LineLineIntersection r
     where
-      r = undefined -- TODO: Finish this
+      r = p .+^ alpha *^ v
 
+      denom       = vy * ux - vx * uy
+      areParallel = denom == 0
+      -- Instead of using areParallel, we can also use the generic 'isParallelTo' function
+      -- for lines of arbitrary dimension, but this is a bit more efficient.
+
+      alpha        = (ux * (py - qy) + uy * (qx - px)) / denom
+
+      Point2 px py = p
+      Point2 qx qy = q
 
 
 instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
