@@ -82,6 +82,8 @@ instance Ord r => IsUnionableWith (Interval a r) (Interval a r) where
       t = b `maxOnCore` d
 
 
+maxOnCore :: Ord c => c :+ e -> c :+ e -> c :+ e
 l@(lc :+ _) `maxOnCore` r@(rc :+ _) = if lc >= rc then l else r
 
+minOnCore :: Ord c => c :+ e -> c :+ e -> c :+ e
 l@(lc :+ _) `minOnCore` r@(rc :+ _) = if lc <= rc then l else r
