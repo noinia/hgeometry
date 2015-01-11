@@ -50,11 +50,14 @@ type instance Dimension (Interval a r) = 1
 type instance NumType   (Interval a r) = r
 
 
-instance (Ord r) => IsIntersectableWith (Interval a r) (Interval a r) where
+instance Ord r => IsIntersectableWith (Interval a r) (Interval a r) where
 
   data Intersection (Interval a r) (Interval a r) = IntervalIntersection (Interval a r)
                                                   | NoOverlap
                                                   deriving (Show,Read,Eq,Ord)
+
+  nonEmptyIntersection NoOverlap = False
+  nonEmptyIntersection _         = True
 
   (Interval a b) `intersect` (Interval c d)
       | s^.core <= t^.core = IntervalIntersection $ Interval s t
@@ -64,6 +67,19 @@ instance (Ord r) => IsIntersectableWith (Interval a r) (Interval a r) where
       s = a `maxOnCore` c
       t = b `minOnCore` d
 
+
+instance Ord r => IsUnionableWith (Interval a r) (Interval a r) where
+
+  data Union (Interval a r) (Interval a r) = DisjointIntervals (Interval a r) (Interval a r)
+                                           | OneInterval       (Interval a r)
+                                           deriving (Show,Read,Eq,Ord)
+
+  i@(Interval a b) `union` j@(Interval c d)
+      | i `intersects` j = OneInterval $ Interval s t
+      | otherwise        = DisjointIntervals i j
+    where
+      s = a `minOnCore` c
+      t = b `maxOnCore` d
 
 
 l@(lc :+ _) `maxOnCore` r@(rc :+ _) = if lc >= rc then l else r

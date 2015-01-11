@@ -86,6 +86,9 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
                                           | ParallelLines -- ^ No intersection
                                             deriving (Show)
 
+  nonEmptyIntersection ParallelLines = False
+  nonEmptyIntersection _             = True
+
   l@(Line p (Vector2 ux uy)) `intersect` m@(Line q v@(Vector2 vx vy))
       | areParallel = if q `onLine` l then SameLine l else ParallelLines
       | otherwise   = LineLineIntersection r
@@ -165,6 +168,8 @@ instance (Ord r, Fractional r) =>
       | NoIntersection
       deriving (Show,Eq)
 
+  nonEmptyIntersection NoIntersection = False
+  nonEmptyIntersection _              = True
 
   a@(LineSegment p q) `intersect` b@(LineSegment s t) = case la `intersect` lb of
       SameLine _                                ->
