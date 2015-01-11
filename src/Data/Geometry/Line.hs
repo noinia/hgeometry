@@ -1,19 +1,19 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Line where
 
+
 import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List as L
-
 import           Data.Monoid
-
+import           Data.Ord(comparing)
 import           Data.Ext
 import           Data.Geometry.Box
+import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -115,10 +115,18 @@ instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
 
 -- | Line segments. LineSegments have a start and end point, both of which may
 -- contain additional data of type p.
-data LineSegment d p r = LineSegment { _start :: Point d r :+ p
-                                     , _end   :: Point d r :+ p
-                                     }
-makeLenses ''LineSegment
+newtype LineSegment d p r = LineSeg { _unLineSeg :: Interval p (Point d r) }
+pattern LineSegment s t = LineSeg (Interval s t)
+
+instance HasStart (LineSegment d p r) where
+  type StartCore  (LineSegment d p r) = Point d r
+  type StartExtra (LineSegment d p r) = p
+  start = lens (_start . _unLineSeg) (\(LineSegment _ t) s -> LineSegment s t)
+
+instance HasEnd (LineSegment d p r) where
+  type EndCore  (LineSegment d p r) = Point d r
+  type EndExtra (LineSegment d p r) = p
+  end = lens (_end . _unLineSeg) (\(LineSegment s _) t -> LineSegment s t)
 
 deriving instance (Show r, Show p, Arity d) => Show (LineSegment d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
@@ -207,7 +215,9 @@ p `onSegment` l = let s         = l^.start.core
 
 overlap     :: (Ord r, Fractional r, Arity d)
             => LineSegment d p r -> LineSegment d p r -> Maybe (LineSegment d p r)
-overlap l m = undefined -- mapM [sm r, sm s] >>= (f . L.sortBy fst)
+overlap l m = mim >>= \im -> case il `intersect` im of
+    IntervalIntersection (Interval s e) -> Just $ LineSegment (s^.extra) (e^.extra)
+    NoOverlap                           -> Nothing
   where
     p = l^.start
     q = l^.end
@@ -216,23 +226,26 @@ overlap l m = undefined -- mapM [sm r, sm s] >>= (f . L.sortBy fst)
 
     u = q^.core .-. p^.core
 
-    -- sm  :: Point d r -> Maybe (r,Point d r)
-    sm x = (,x) <$> scalarMultiple u (x^.core .-. p^.core)
+    -- lineseg l corresp to an interval from 0 1
+    il = Interval (fromIntegral 0 :+ p) (fromIntegral 1 :+ q)
 
-    start' = undefined
-    end'   = undefined
 
-    -- start'   :: (r,Point d r) -> Point d r
-    -- start' a = snd $ L.maximumBy fst [(fromIntegral 0, p), a]
+    -- let lambda x denote the scalar s.t. x = p + (lambda x) *^ u
+    --
+    -- lambda' computes lambda' and pairs it with the associated point.
+    -- lambda  :: (Point d r :+ extra) -> Maybe (r :+ (Point d r :+ extra)
+    lambda' x = (:+ x) <$> scalarMultiple u (x^.core .-. p^.core)
 
-    -- end'   b = snd $ L.minimumBy fst [(fromIntegral 1,q), b]
+    -- lineseg m corresponds to an interval
+    -- [min (lambda r, lambda s), max (lambda r, lambda s)]
+    --
+    -- mim denotes this interval, assuming it exists (i.e. that is,
+    -- assuming r and s are indeed colinear with pq.
+    mim = mapM lambda' [r, s] >>= (f . L.sortBy (comparing (^.core)))
 
     -- Make sure we have two elems, s.t. both r and s are colinear with pq
-    -- then select the apropriate point as minimum and as maximum
-    f [a,b] = Just $ LineSegment (start' a) (end' b)
+    f [a,b] = Just $ Interval a b
     f _     = Nothing
-
-
 
 
 
