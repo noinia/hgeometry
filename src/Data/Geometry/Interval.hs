@@ -2,14 +2,14 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Interval( Interval(..)
+
+                             , Intersection(..)
+                             , HasStart(..), HasEnd(..)
                              ) where
 
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Monoid
 import           Data.Geometry.Properties
-
 
 --------------------------------------------------------------------------------
 
@@ -18,7 +18,27 @@ data Interval a r = Interval { _start :: r :+ a
                              }
                   deriving (Show,Read,Eq,Functor)
 
-makeLenses ''Interval
+
+class HasStart t where
+  type StartCore t
+  type StartExtra t
+  start :: Lens' t (StartCore t :+ StartExtra t)
+
+instance HasStart (Interval a r) where
+  type StartCore (Interval a r) = r
+  type StartExtra (Interval a r) = a
+  start = lens _start (\(Interval _ e) s -> Interval s e)
+
+class HasEnd t where
+  type EndCore t
+  type EndExtra t
+  end :: Lens' t (EndCore t :+ EndExtra t)
+
+instance HasEnd (Interval a r) where
+  type EndCore (Interval a r) = r
+  type EndExtra (Interval a r) = a
+  end = lens _end (\(Interval s _) e -> Interval s e)
+
 
 -- | When comparing intervals, compare them lexicographically on
 -- (start^.core,end^.core,start^.extra,end^.extra)
