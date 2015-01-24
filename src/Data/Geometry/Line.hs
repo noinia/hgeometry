@@ -261,6 +261,15 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (Line d r) where
       toLineSegment' :: (Num r, Arity d) => Line d r -> LineSegment d () r
       toLineSegment' = toLineSegment
 
+
+
+-- | The left and right end point (or left below right if they have equal x-coords)
+orderedEndPoints   :: Ord r => LineSegment 2 p r -> (Point 2 r :+ p, Point 2 r :+ p)
+orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
+  where
+    p@(pc :+ _) = s^.start
+    q@(qc :+ _) = s^.end
+
 --------------------------------------------------------------------------------
 
 -- | A Poly line in R^d
