@@ -8,13 +8,14 @@ import           Data.Ext
 
 import           Data.ExplicitOrdSet(ExpSet)
 import           Data.Map(Map)
-import           Data.Maybe(listToMaybe)
+import           Data.Maybe(listToMaybe, fromJust)
 import           Data.Vector(Vector)
 
 import qualified Data.ExplicitOrdSet as ES
 import qualified Data.Map as M
 import qualified Data.Vector as V
 
+import           Data.Geometry.Properties
 import           Data.Geometry.Point
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
@@ -25,22 +26,45 @@ import           Data.Geometry.Line
 
 --------------------------------------------------------------------------------
 
-newtype TrapezoidId = TrapezoidId Int deriving (Show,Read,Eq)
+newtype TrapezoidId = TrapezoidId Int deriving (Show,Read,Eq,Ord)
 
-
+-- | Just the edge bounding the trapezoid, no additional information
 type Edge r = LineSegment 2 () r
+
+-- | Edge with the original segment
+type LEdge e p r = Edge r :+ (LineSegment 2 p r :+ e)
 
 
 -- | A Trapezoid, the extra data on top and bottom is the line segment containing
 -- the top and bottom edge of this trapezoid.
-data Trapezoid e p r = Trapezoid { _trapId :: TrapezoidId
-                                 , _bottom :: Edge r :+ (LineSegment 2 p r :+ e)
-                                 , _top    :: Edge r :+ (LineSegment 2 p r :+ e)
-                                 }
+data Trapezoid e p r = Trapezoid           !TrapezoidId (LEdge e p r) (LEdge e p r)
+                     | ToplessTrapezoid    !TrapezoidId (LEdge e p r)
+                     | BottomlessTrapezoid !TrapezoidId (LEdge e p r)
                      | LeftUnbounded !r -- right boundary
                      | RightUnbounded !r -- left boundary
 
-makeLenses ''Trapezoid
+
+leftUnboundedId  = TrapezoidId 0
+rightUnboundedId = TrapezoidId 1
+
+
+trapezoidId                   :: Trapezoid e p r -> TrapezoidId
+trapezoidId (Trapezoid i _ _) = i
+trapezoidId (ToplessTrapezoid i _) = i
+trapezoidId (BottomlessTrapezoid i _) = i
+trapezoidId (LeftUnbounded _) = leftUnboundedId
+trapezoidId (RightUnbounded _) = rightUnboundedId
+
+bottom :: Lens' (Trapezoid e p r) (Maybe (LEdge e p r))
+bottom = undefined
+
+top :: Lens' (Trapezoid e p r) (Maybe (LEdge e p r))
+top = undefined
+
+
+-- makeLenses ''Trapezoid
+
+
 
 
 -- | A representation of a trapezoid that we store in our TrapezoidalMap.
@@ -55,8 +79,6 @@ data TrapezoidRep e p r = TrapezoidRep { _repId     :: !TrapezoidId
                                        }
 makeLenses ''TrapezoidRep
 
-leftUnboundedId  = TrapezoidId 0
-rightUnboundedId = TrapezoidId 1
 
 -- yCoordAt   :: r -> TrapezoidRep e p r -> Maybe r
 -- yCoordAt x =
@@ -74,6 +96,8 @@ data TrapezoidQuery t e p r = TrapezoidQuery { _below :: !(Maybe (TrapezoidRep e
                                              , _self  :: !(TrapezoidRep e p r :+ t)
                                              , _above :: !(Maybe (TrapezoidRep e p r :+ t))
                                              }
+makeLenses ''TrapezoidQuery
+
 
 findTrapezoidRep                :: (Ord r, Num r)
                                 => Point 2 r -> VSlab t e p r -> TrapezoidQuery t e p r
@@ -144,7 +168,8 @@ buildTrapezoidalMap :: [LineSegment 2 p r :+ e]
 buildTrapezoidalMap = undefined
 
 
-locateTrapezoid :: (Num r, Ord r) => Point 2 r -> TrapezoidalMap t e p r -> Trapezoid e p r :+ t
+locateTrapezoid   :: (Fractional r, Ord r)
+                  => Point 2 r -> TrapezoidalMap t e p r -> Trapezoid e p r :+ t
 locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
     | px >= maxX' = RightUnbounded maxX' :+ rData
     | px <  minX' = LeftUnbounded  minX' :+ lData
@@ -154,8 +179,38 @@ locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
     minX' = _minX' xDecomp
 
 
-reconstruct :: Map TrapezoidId r -> TrapezoidQuery t e p r -> Trapezoid e p r :+ t
-reconstruct = undefined
+reconstruct         :: (Ord r, Fractional r)
+                    => Map TrapezoidId r -> TrapezoidQuery t e p r -> Trapezoid e p r :+ t
+reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
+    (Just bottomSeg, Just topSeg) -> Trapezoid           tid (trim topSeg) (trim bottomSeg)
+    (Just bottomSeg, Nothing)     -> ToplessTrapezoid    tid               (trim bottomSeg)
+    (Nothing,        Just topSeg) -> BottomlessTrapezoid tid (trim topSeg)
+
+  where
+    ((TrapezoidRep tid leftX mBottomSeg) :+ tData) = tq^.self
+
+    -- mTopSeg :: Maybe (LineSegment 2 p r :+ e)
+    mTopSeg = tq ^? above._Just.core.repBottom._Just
+
+    -- Every trapezoid should have its right coordinate stored
+    rightX = fromJust $ M.lookup tid rMap
+
+    -- | Cut the segment
+    -- trim               :: LineSegment 2 p r :+ e -> LEdge e p r
+    trim orig@(s :+ _) = LineSegment (atXCoord leftX  s :+ ())
+                                     (atXCoord rightX s :+ ())
+                         :+ orig
+
+    atXCoord x s = case s `intersect` verticalLine x of
+      LineLineSegmentIntersection q -> q
+      LineContainsSegment _         -> (s^.start.core) `min` (s^.end.core)
+                                       -- s is a vertical segment, so report
+                                       -- the lower endpoint
+      _                             -> error "atXCoord"
+                                       -- s was in the trapezoidal decompostion
+                                       -- for xCoord x so by definition s
+                                       -- should intersect the vertical line
+                                       -- through x. Hence, this case should not occur.
 
 
 -- Construct a tour traversing the trapezoids s.t. every pair of consecutive trapezoids is
