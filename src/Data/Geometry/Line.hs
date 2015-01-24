@@ -46,6 +46,12 @@ type instance NumType   (Line d r) = r
 lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
 lineThrough p q = Line p (q .-. p)
 
+verticalLine   :: Num r => r -> Line 2 r
+verticalLine x = Line (point2 x 0) (v2 0 1)
+
+horizontalLine   :: Num r => r -> Line 2 r
+horizontalLine y = Line (point2 0 y) (v2 1 0)
+
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
@@ -181,6 +187,21 @@ instance (Ord r, Fractional r) =>
       lb = toLine b
       onBothSegments r = onSegment r a && onSegment r b
 
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
+  data Intersection (LineSegment 2 p r) (Line 2 r) = LineContainsSegment (LineSegment 2 p r)
+                                                   | LineLineSegmentIntersection (Point 2 r)
+                                                   | NoLineLineSegmentIntersection
+                                                   deriving (Show,Eq)
+
+  nonEmptyIntersection NoLineLineSegmentIntersection = False
+  nonEmptyIntersection _                             = True
+
+  s `intersect` l = case (toLine s) `intersect` l of
+    SameLine _                               -> LineContainsSegment s
+    LineLineIntersection p | p `onSegment` s -> LineLineSegmentIntersection p
+    _                                        -> NoLineLineSegmentIntersection
+
 
 -- | Test if a point lies on a line segment.
 --
@@ -295,5 +316,5 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
 instance PointFunctor (PolyLine d p) where
   pmap f = over unPolyLine (fmap (fmap f))
 
-fromPoints :: (Monoid p, F.Foldable f) => f (Point 2 r) -> PolyLine 2 p r
+fromPoints :: (Monoid p, F.Foldable f) => f (Point d r) -> PolyLine d p r
 fromPoints = PolyLine . F.foldr (\p s -> (p :+ mempty) <| s) S.empty
