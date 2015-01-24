@@ -6,12 +6,18 @@ module Data.ExplicitOrdSet( ExpSet
                           , insert
                           , delete
                           , split
+                          , splitMonotone
                           , viewL
                           , viewR
+
+                          , minimum
+                          , maximum
                           ) where
 
-import Prelude hiding (filter,foldl,foldr,null,map)
+import           Prelude hiding (filter,foldl,foldr,null,map,minimum,maximum)
+
 import qualified Data.Foldable as F
+import           Data.Maybe(listToMaybe)
 import           Data.Monoid
 
 
@@ -34,7 +40,7 @@ withTree f (ExpSet cmp t) = ExpSet cmp $ f cmp t
 
 type Cmp a = a -> a -> Ordering
 
-data Tree a = Bin {-# UNPACK #-} !Size !(Tree a) a !(Tree a)
+data Tree a = Bin {-# UNPACK #-} !Size !(Tree a) !a !(Tree a)
             | Tip
               deriving (Show,Eq)
 
@@ -66,6 +72,11 @@ delete x = withTree (flip deleteT x)
 split                  :: a -> ExpSet a -> (ExpSet a, Maybe a, ExpSet a)
 split x (ExpSet cmp t) = let (l,m,r) = splitT cmp x t in (ExpSet cmp l, m, ExpSet cmp r)
 
+splitMonotone :: (a -> Bool) -> ExpSet a -> (ExpSet a, ExpSet a)
+splitMonotone p (ExpSet cmp t) = let (l,r) = splitMonotoneT cmp p t
+                                 in (ExpSet cmp l, ExpSet cmp r)
+
+
 -- | Elements in left to right oder
 viewL :: ExpSet a -> [a]
 viewL = F.toList
@@ -73,6 +84,14 @@ viewL = F.toList
 -- | Elements in right to left order
 viewR :: ExpSet a -> [a]
 viewR = reverseFoldMap (\x -> [x]) . tree
+
+-- | O(log n)
+minimum :: ExpSet a -> Maybe a
+minimum = listToMaybe . viewL
+
+-- | O(log n)
+maximum :: ExpSet a -> Maybe a
+maximum = listToMaybe . viewR
 
 --------------------------------------------------------------------------------
 
@@ -98,12 +117,23 @@ join3 cmp l@(Bin _ ll lx lr) x r@(Bin _ rl rx rr)
 
 -- | The middle parameter is a Just if we removed the x from the tree
 --  and Nothing otherwise
+
 splitT                     :: Cmp a -> a -> Tree a -> (Tree a, Maybe a, Tree a)
 splitT _   _ Tip           = (Tip,Nothing,Tip)
 splitT cmp x (Bin _ l y r) = case x `cmp` y of
   LT -> let (ll,ms,lr) = splitT cmp x l in (ll, ms, join3 cmp lr y r)
   EQ -> (l, Just x, r)
   GT -> let (rl,ms,rr) = splitT cmp x r in (join3 cmp l y rl, ms, rr)
+
+-- | Split based on a monotone predicate p. Returns a pair of trees (l,r) s.t.
+-- for all nodes v in l, p v == False, and for all v in r, p v == True.
+splitMonotoneT                     :: Cmp a
+                                   -> (a -> Bool)
+                                   -> Tree a -> (Tree a, Tree a)
+splitMonotoneT _   _ Tip    = (Tip,Tip)
+splitMonotoneT cmp p (Bin _ l y r)
+  | p y       = let (ll,lr) = splitMonotoneT cmp p l in (ll, join3 cmp lr y r)
+  | otherwise = let (rl,rr) = splitMonotoneT cmp p r in (join3 cmp l y rl, rr)
 
 
 extractMin                     :: Cmp a -> Tree a -> (Maybe a, Tree a)
