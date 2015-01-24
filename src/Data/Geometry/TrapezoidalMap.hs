@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.TrapezoidalDecomposition where
+module Data.Geometry.TrapezoidalMap where
 
 import           Control.Applicative
 import           Control.Lens
