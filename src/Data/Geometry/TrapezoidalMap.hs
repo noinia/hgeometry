@@ -1,5 +1,18 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.TrapezoidalMap where
+module Data.Geometry.TrapezoidalMap( Trapezoid(..)
+                                   , Edge , LEdge
+
+                                   , TrapezoidId
+
+                                   , TrapezoidalMap
+                                   , buildTrapezoidalMap
+
+                                   , locateTrapezoid
+
+
+                                   , constructTour
+                                   , tmap
+                                   ) where
 
 import           Control.Applicative
 import           Control.Lens
@@ -92,8 +105,7 @@ data VSlab t e p r = VSlab { _minX     :: !r
 makeLenses ''VSlab
 
 
-data TrapezoidQuery t e p r = TrapezoidQuery { _below :: !(Maybe (TrapezoidRep e p r :+ t))
-                                             , _self  :: !(TrapezoidRep e p r :+ t)
+data TrapezoidQuery t e p r = TrapezoidQuery { _self  :: !(TrapezoidRep e p r :+ t)
                                              , _above :: !(Maybe (TrapezoidRep e p r :+ t))
                                              }
 makeLenses ''TrapezoidQuery
@@ -101,13 +113,13 @@ makeLenses ''TrapezoidQuery
 
 findTrapezoidRep                :: (Ord r, Num r)
                                 => Point 2 r -> VSlab t e p r -> TrapezoidQuery t e p r
-findTrapezoidRep p (VSlab _ es) = TrapezoidQuery low cur high
+findTrapezoidRep p (VSlab _ es) = TrapezoidQuery cur high
   where
     -- Since we explicitly store the bottomless and topless trapezoid, we are guaranteed
     -- to find a traprep.
     (belowT,aboveT) = ES.splitMonotone (maybe True pred . (^.core.repBottom)) es
 
-    low         = ES.maximum belowT
+    -- low         = ES.maximum belowT
     (cur:above) = ES.viewL aboveT
     high        = listToMaybe above
 
@@ -178,7 +190,7 @@ locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
     px    = p^.xCoord
     minX' = _minX' xDecomp
 
-
+-- | Convert a TrapezoidalRep into a proper Trapezoid
 reconstruct         :: (Ord r, Fractional r)
                     => Map TrapezoidId r -> TrapezoidQuery t e p r -> Trapezoid e p r :+ t
 reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
