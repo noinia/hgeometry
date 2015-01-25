@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.TrapezoidalMap( Trapezoid(..)
-                                   , Edge , LEdge
+                                   , Seg
 
                                    , TrapezoidId
 
@@ -41,44 +41,102 @@ import           Data.Geometry.Line
 
 newtype TrapezoidId = TrapezoidId Int deriving (Show,Read,Eq,Ord)
 
--- | Just the edge bounding the trapezoid, no additional information
-type Edge r = LineSegment 2 () r
 
--- | Edge with the original segment
-type LEdge e p r = Edge r :+ (LineSegment 2 p r :+ e)
+type Seg e p r = LineSegment 2 p r :+ e
 
 
 -- | A Trapezoid, the extra data on top and bottom is the line segment containing
 -- the top and bottom edge of this trapezoid.
-data Trapezoid e p r = Trapezoid           !TrapezoidId (LEdge e p r) (LEdge e p r)
-                     | ToplessTrapezoid    !TrapezoidId (LEdge e p r)
-                     | BottomlessTrapezoid !TrapezoidId (LEdge e p r)
+data Trapezoid e p r = Trapezoid           !TrapezoidId !r !r (Seg e p r) (Seg e p r)
+                     | ToplessTrapezoid    !TrapezoidId !r !r (Seg e p r)
+                     | BottomlessTrapezoid !TrapezoidId !r !r             (Seg e p r)
                      | LeftUnbounded !r -- right boundary
                      | RightUnbounded !r -- left boundary
+
+
+trapezoidId                   :: Trapezoid e p r -> TrapezoidId
+trapezoidId (Trapezoid           i _ _ _ _) = i
+trapezoidId (ToplessTrapezoid    i _ _ _)   = i
+trapezoidId (BottomlessTrapezoid i _ _ _)   = i
+trapezoidId (LeftUnbounded             _)   = leftUnboundedId
+trapezoidId (RightUnbounded          _)     = rightUnboundedId
+
+
+leftX                                 :: Trapezoid e p r -> Maybe r
+leftX (Trapezoid           _ l _ _ _) = Just l
+leftX (ToplessTrapezoid    _ l _ _)   = Just l
+leftX (BottomlessTrapezoid _ l _ _)   = Just l
+leftX (LeftUnbounded           _)     = Nothing
+leftX (RightUnbounded        l)       = Just l
+
+rightX                                :: Trapezoid e p r -> Maybe r
+rightX (Trapezoid           _ _ r _ _) = Just r
+rightX (ToplessTrapezoid    _ _ r _)   = Just r
+rightX (BottomlessTrapezoid _ _ r _)   = Just r
+rightX (LeftUnbounded           r)     = Just r
+rightX (RightUnbounded        _)       = Nothing
+
+
+
+bottomSupport                                 :: Trapezoid e p r ->  Maybe (Seg e p r)
+bottomSupport (Trapezoid           _ _ _ b _) = Just b
+bottomSupport (ToplessTrapezoid    _ _ _ b)   = Just b
+bottomSupport _                               = Nothing
+
+topSupport                                 :: Trapezoid e p r ->  Maybe (Seg e p r)
+topSupport (Trapezoid           _ _ _ _ t) = Just t
+topSupport (BottomlessTrapezoid _ _ _   t) = Just t
+topSupport _                               = Nothing
+
+
+bottomLeftCorner t = bottom t ^? _Just.core.start
+
+-- bottomRightCorner (Trapezoid _ _ r b _) = Just $ atXCoord r b
+
+-- topLeftCorner (Trapezoid _ l _ _ t) = Just $ atXCoord l t
+
+-- topRightCorner (Trapezoid _ _ r _ t) = Just $ atXCoord r t
+
+
+atXCoord     :: (Ord r, Fractional r) => r -> LineSegment 2 p r -> Point 2 r
+atXCoord x s = case s `intersect` verticalLine x of
+  LineLineSegmentIntersection q -> q
+  LineContainsSegment _         -> (s^.start.core) `min` (s^.end.core)
+                                       -- s is a vertical segment, so report
+                                       -- the lower endpoint
+  _                             -> error "atXCoord"
+                                       -- s was in the trapezoidal decompostion
+                                       -- for xCoord x so by definition s
+                                       -- should intersect the vertical line
+                                       -- through x. Hence, this case should not occur.
+
+
+
+
+
+
+
 
 
 leftUnboundedId  = TrapezoidId 0
 rightUnboundedId = TrapezoidId 1
 
 
-trapezoidId                   :: Trapezoid e p r -> TrapezoidId
-trapezoidId (Trapezoid i _ _) = i
-trapezoidId (ToplessTrapezoid i _) = i
-trapezoidId (BottomlessTrapezoid i _) = i
-trapezoidId (LeftUnbounded _) = leftUnboundedId
-trapezoidId (RightUnbounded _) = rightUnboundedId
+bottom   :: (Ord r, Fractional r) => Trapezoid e p r ->  Maybe (Seg e () r)
+bottom t = trim <$> leftX t <*> rightX t <*> bottomSupport t
 
-bottom :: Lens' (Trapezoid e p r) (Maybe (LEdge e p r))
-bottom = undefined
+top   :: (Ord r, Fractional r) => Trapezoid e p r ->  Maybe (Seg e () r)
+top t = trim <$> leftX t <*> rightX t <*> topSupport t
 
-top :: Lens' (Trapezoid e p r) (Maybe (LEdge e p r))
-top = undefined
 
+trim              :: (Ord r, Fractional r)
+                  => r -> r -> LineSegment 2 p r :+ e -> LineSegment 2 () r :+ e
+trim l r (s :+ e) = LineSegment (atXCoord l s :+ ()) (atXCoord r s :+ ()) :+ e
 
 -- makeLenses ''Trapezoid
 
 
-
+--------------------------------------------------------------------------------
 
 -- | A representation of a trapezoid that we store in our TrapezoidalMap.
 -- The bototm segment is the original segment.
@@ -91,10 +149,6 @@ data TrapezoidRep e p r = TrapezoidRep { _repId     :: !TrapezoidId
                                        , _repBottom :: !(Maybe (LineSegment 2 p r :+ e))
                                        }
 makeLenses ''TrapezoidRep
-
-
--- yCoordAt   :: r -> TrapezoidRep e p r -> Maybe r
--- yCoordAt x =
 
 
 -- | A vertical slab has a minimum x coordinate: minX s.t. the
@@ -162,10 +216,11 @@ binarySearch p l r = case (r - l) `compare` 1 of
 -- each vertex data of type p, each edge of type e.
 --
 data TrapezoidalMap t e p r = TrapezoidalMap {
-    _maxX          :: !r
-  , _decomposition :: TrapezoidalDecomposition t e p r
-  , _rightMap      :: Map TrapezoidId r  -- ^ The x-coordinate of the right boundary of
-                                         -- each trapezoid.
+    _maxX               :: !r
+  , _decomposition      :: TrapezoidalDecomposition t e p r
+  , _rightMap           :: Map TrapezoidId r  -- ^ The x-coordinate of the
+                                              -- right boundary of each
+                                              -- trapezoid.
   , _leftUnboundedData  :: t
   , _rightUnboundedData :: t
   }
@@ -179,7 +234,7 @@ buildTrapezoidalMap :: [LineSegment 2 p r :+ e]
                        -> TrapezoidalMap () e p r
 buildTrapezoidalMap = undefined
 
-
+-- | Planar point location :): Running time: O(log n)
 locateTrapezoid   :: (Fractional r, Ord r)
                   => Point 2 r -> TrapezoidalMap t e p r -> Trapezoid e p r :+ t
 locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
@@ -194,9 +249,9 @@ locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
 reconstruct         :: (Ord r, Fractional r)
                     => Map TrapezoidId r -> TrapezoidQuery t e p r -> Trapezoid e p r :+ t
 reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
-    (Just bottomSeg, Just topSeg) -> Trapezoid           tid (trim topSeg) (trim bottomSeg)
-    (Just bottomSeg, Nothing)     -> ToplessTrapezoid    tid               (trim bottomSeg)
-    (Nothing,        Just topSeg) -> BottomlessTrapezoid tid (trim topSeg)
+    (Just bottomSeg, Just topSeg) -> Trapezoid           tid leftX rightX bottomSeg topSeg
+    (Just bottomSeg, Nothing)     -> ToplessTrapezoid    tid leftX rightX bottomSeg
+    (Nothing,        Just topSeg) -> BottomlessTrapezoid tid leftX rightX           topSeg
 
   where
     ((TrapezoidRep tid leftX mBottomSeg) :+ tData) = tq^.self
@@ -207,22 +262,7 @@ reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
     -- Every trapezoid should have its right coordinate stored
     rightX = fromJust $ M.lookup tid rMap
 
-    -- | Cut the segment
-    -- trim               :: LineSegment 2 p r :+ e -> LEdge e p r
-    trim orig@(s :+ _) = LineSegment (atXCoord leftX  s :+ ())
-                                     (atXCoord rightX s :+ ())
-                         :+ orig
 
-    atXCoord x s = case s `intersect` verticalLine x of
-      LineLineSegmentIntersection q -> q
-      LineContainsSegment _         -> (s^.start.core) `min` (s^.end.core)
-                                       -- s is a vertical segment, so report
-                                       -- the lower endpoint
-      _                             -> error "atXCoord"
-                                       -- s was in the trapezoidal decompostion
-                                       -- for xCoord x so by definition s
-                                       -- should intersect the vertical line
-                                       -- through x. Hence, this case should not occur.
 
 
 -- Construct a tour traversing the trapezoids s.t. every pair of consecutive trapezoids is
