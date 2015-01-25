@@ -126,12 +126,6 @@ atXCoord x s = case s `intersect` verticalLine x of
 
 
 
-
-
-
-
-
-
 bottom   :: (Ord r, Fractional r) => Trapezoid e p r ->  Maybe (Seg e () r)
 bottom t = trim <$> leftX t <*> rightX t <*> bottomSupport t
 
@@ -156,6 +150,14 @@ data TrapezoidRep e p r = TrapezoidRep { _repId     :: !TrapezoidId
                                        , _repBottom :: !(Maybe (LineSegment 2 p r :+ e))
                                        }
 makeLenses ''TrapezoidRep
+
+
+-- | Nothing -> -infty
+trapAtXCoord     :: (Ord r, Fractional r) => r -> TrapezoidRep e p r -> Maybe r
+trapAtXCoord x t =  (^.yCoord) . atXCoord x <$> t ^? repBottom._Just.core
+
+  -- (yCoord) . atXCoord x . ) <$>
+
 
 
 -- | When we run a query, we need the trapezoidRep found and the one above it
@@ -247,41 +249,22 @@ _minX :: TrapezoidalDecomposition t e p r -> r
 _minX = _slabMinX . V.head . _unTD
 
 
--- | An eventpoint may be a start or end point. Each eventpoint creates a new
--- vertical slab. If the line segments associated with an eventpoint are Just's
--- (which they normally are) that segment is inserted or deleted from the
--- structure.
---
--- In other words, if the segment associated with the data is a Nothing, we
--- create an extra slab without doing anything. This may be useful on some
--- ocasions. (Like computing Red-Blue Intersections).
-data EventData e p r = Start !(Maybe (LineSegment 2 p r :+ e))
-                     | End   !(Maybe (LineSegment 2 p r :+ e))
+
+----------------------------------------
+
+-- | An eventpoint may be a start or end point, or an Extra. The extra events
+--  are useful for the Red-Blue Linesegment intersection.
+data EventData e p r = Start (LineSegment 2 p r :+ e)
+                     | End   (LineSegment 2 p r :+ e)
+                     | Extra
                      deriving (Show,Eq,Ord)
 
 
 
--- | Pre: All segments are oriented left to right
---- pre: List is non-empty
-buildTrapezoidalMap      :: (Ord r, Monoid t)
-                         => [LineSegment 2 p r :+ e] -> TrapezoidalMap t e p r
-buildTrapezoidalMap segs = TrapezoidalMap mX (TD . V.fromList $ slabs) rMap mempty mempty
-  where
-    events         = L.sortBy (comparing fst) . concatMap f $ segs
-    f seg@(s :+ _) = let p = s^.start.core
-                         q = s^.end.core
-                     in [(p,Start $ Just seg), (q, End $ Just seg)]
-
-    (slabs,rMap,mX) = buildTrapezoidalMap' events
-
-
-
-
-
-data SweepStatus t e p r = SweepStatus { _sSlab    :: VSlab t e p r
-                                       , _sRMap    :: Map TrapezoidId r
-                                       , _sMaxX    :: r
-                                       , _lastUses :: TrapezoidId
+data SweepStatus t e p r = SweepStatus { _sSlab      :: VSlab t e p r
+                                       , _sRMap      :: Map TrapezoidId r
+                                       , _sMaxX      :: r
+                                       , _sfirstFree :: TrapezoidId
                                        }
 makeLenses ''SweepStatus
 
@@ -292,43 +275,50 @@ type Sweep t e p r = PersistentState (SweepStatus t e p r)
 -- persistentSweep :: state
 
 
+-- handleStart' ::
+
+compareAt'       :: (Ord r, Fractional r)
+                => r -> TrapezoidRep e p r -> TrapezoidRep e p r -> Ordering
+compareAt' x a b = trapAtXCoord x a `compare` trapAtXCoord x b
+
+compareAt x a b = compareAt' x (a^.core) (b^.core)
 
 
 -- | pre: List is non-empty
-buildTrapezoidalMap'        :: Ord r
+--   pre: First element is a Start
+buildTrapezoidalMap'        :: (Ord r, Fractional r, Monoid t)
                             => [(Point 2 r, EventData e p r)]
+                            -> (TrapezoidRep e p r -> t)
                             -> ([VSlab t e p r], Map TrapezoidId r, r)
-buildTrapezoidalMap' (e:es) = f . runPersistentState initialState act
+buildTrapezoidalMap' ((p,Start s):es) mkT = f $ runPersistentState act initialState
   where
-    f (_, lastS, ss) =
+    px      = p^.xCoord
 
-    act = initialize >> mapM_ handleEvent es
+    sndFree = nextId firstId
 
-    initialize = undefined
-    initialState
+    -- We start with two new segments,
+    low  = TrapezoidRep firstId px Nothing
+    high = TrapezoidRep firstId px (Just s)
 
+    withTData t = t :+ mkT t
 
+    -- Initial expset contains two elements, and we compare them at x-coord px
+    expSet = ES.insert (withTData low)
+           . ES.insert (withTData high)
+           $ ES.empty (compareAt px)
 
+    -- this means we start our sweep proper with the following state
+    initialState = SweepStatus (VSlab px expSet)
+                               mempty -- no right endpoints seen yet
+                               px
+                               (nextId sndFree)
+    act = mapM_ handleEvent es
 
--- modifyStatusStruct :: (ExpSet (TrapezoidRep e p r :+ t) -> ExpSet (TrapezoidRep e p r :+ t))
---                       -> Sweep t e p r ()
+    f (_, lastS, ss) = (map _sSlab ss, lastS^.sRMap, lastS^.sMaxX)
 
-
-handleEvent        :: Sweep t e p r ()
-handleEvent (p, d) = do
-  set
-
-  undefined
-
-
-  -- f . L.foldl' sweep (initial, M.empty, Nothing, nextId') $ es
-  -- where
-  --
-
-  --   initial = undefined
-  --   nextId' = undefined
-
-
+handleEvent        :: (Point 2 r, EventData e p r) -> Sweep t e p r ()
+handleEvent (p, d) = undefined
+--   undefined
 
 -- sweep                        :: (Ord r, Monoid t)
 --                              => SweepStatus t e p r
@@ -339,6 +329,19 @@ handleEvent (p, d) = do
 --     rMap' = undefined
 --     mX'   = mX `max` (Just p^.xCoord)
 --     nextId' = undefined
+
+-- | Pre: All segments are oriented left to right
+--- pre: List is non-empty
+buildTrapezoidalMap      :: (Ord r, Fractional r, Monoid t)
+                         => [LineSegment 2 p r :+ e] -> TrapezoidalMap t e p r
+buildTrapezoidalMap segs = TrapezoidalMap mX (TD . V.fromList $ slabs) rMap mempty mempty
+  where
+    events         = L.sortBy (comparing fst) . concatMap f $ segs
+    f seg@(s :+ _) = let p = s^.start.core
+                         q = s^.end.core
+                     in [(p,Start seg), (q, End seg)]
+
+    (slabs,rMap,mX) = buildTrapezoidalMap' events (const mempty)
 
 ----------------------------------------
 -- Queries
