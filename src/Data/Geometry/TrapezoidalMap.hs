@@ -21,6 +21,7 @@ import           Control.Monad.State.Persistent
 import           Data.Ext
 
 import           Data.ExplicitOrdSet(ExpSet)
+import           Data.List.NonEmpty(NonEmpty(..))
 import           Data.Map(Map)
 import           Data.Maybe(listToMaybe, fromJust)
 import           Data.Monoid
@@ -31,6 +32,8 @@ import qualified Data.ExplicitOrdSet as ES
 import qualified Data.Map            as M
 import qualified Data.Vector         as V
 import qualified Data.List           as L
+import qualified Data.List.NonEmpty  as NOL
+
 
 import           Data.Geometry.Properties
 import           Data.Geometry.Point
@@ -284,13 +287,12 @@ compareAt' x a b = trapAtXCoord x a `compare` trapAtXCoord x b
 compareAt x a b = compareAt' x (a^.core) (b^.core)
 
 
--- | pre: List is non-empty
---   pre: First element is a Start
-buildTrapezoidalMap'        :: (Ord r, Fractional r, Monoid t)
-                            => [(Point 2 r, EventData e p r)]
-                            -> (TrapezoidRep e p r -> t)
-                            -> ([VSlab t e p r], Map TrapezoidId r, r)
-buildTrapezoidalMap' ((p,Start s):es) mkT = f $ runPersistentState act initialState
+-- | pre: First element is a Start
+buildTrapezoidalMap'                         :: (Ord r, Fractional r)
+                                             => NonEmpty ((Point 2 r, EventData e p r))
+                                             -> (TrapezoidRep e p r -> t)
+                                             -> ([VSlab t e p r], Map TrapezoidId r, r)
+buildTrapezoidalMap' ((p,Start s) :| es) mkT = f $ runPersistentState act initialState
   where
     px      = p^.xCoord
 
@@ -315,6 +317,7 @@ buildTrapezoidalMap' ((p,Start s):es) mkT = f $ runPersistentState act initialSt
     act = mapM_ handleEvent es
 
     f (_, lastS, ss) = (map _sSlab ss, lastS^.sRMap, lastS^.sMaxX)
+buildTrapezoidalMap' _ _ = error "buildTrapezoidalMap': Starting with a non-start event."
 
 handleEvent        :: (Point 2 r, EventData e p r) -> Sweep t e p r ()
 handleEvent (p, d) = undefined
@@ -333,10 +336,13 @@ handleEvent (p, d) = undefined
 -- | Pre: All segments are oriented left to right
 --- pre: List is non-empty
 buildTrapezoidalMap      :: (Ord r, Fractional r, Monoid t)
-                         => [LineSegment 2 p r :+ e] -> TrapezoidalMap t e p r
+                         => NonEmpty (LineSegment 2 p r :+ e) -> TrapezoidalMap t e p r
 buildTrapezoidalMap segs = TrapezoidalMap mX (TD . V.fromList $ slabs) rMap mempty mempty
   where
-    events         = L.sortBy (comparing fst) . concatMap f $ segs
+    events         = NOL.fromList
+                   . L.sortBy (comparing fst) . concatMap f
+                   . NOL.toList $ segs
+
     f seg@(s :+ _) = let p = s^.start.core
                          q = s^.end.core
                      in [(p,Start seg), (q, End seg)]
