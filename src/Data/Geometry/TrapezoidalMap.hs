@@ -16,17 +16,21 @@ module Data.Geometry.TrapezoidalMap( Trapezoid(..)
 
 import           Control.Applicative
 import           Control.Lens
+import           Control.Monad.State.Persistent
 
 import           Data.Ext
 
 import           Data.ExplicitOrdSet(ExpSet)
 import           Data.Map(Map)
 import           Data.Maybe(listToMaybe, fromJust)
+import           Data.Monoid
+import           Data.Ord(comparing)
 import           Data.Vector(Vector)
 
 import qualified Data.ExplicitOrdSet as ES
-import qualified Data.Map as M
-import qualified Data.Vector as V
+import qualified Data.Map            as M
+import qualified Data.Vector         as V
+import qualified Data.List           as L
 
 import           Data.Geometry.Properties
 import           Data.Geometry.Point
@@ -40,6 +44,15 @@ import           Data.Geometry.Line
 --------------------------------------------------------------------------------
 
 newtype TrapezoidId = TrapezoidId Int deriving (Show,Read,Eq,Ord)
+
+
+leftUnboundedId  = TrapezoidId 0
+rightUnboundedId = TrapezoidId 1
+
+firstId = TrapezoidId 2
+
+nextId                 :: TrapezoidId -> TrapezoidId
+nextId (TrapezoidId i) = TrapezoidId $ i + 1
 
 
 type Seg e p r = LineSegment 2 p r :+ e
@@ -118,9 +131,6 @@ atXCoord x s = case s `intersect` verticalLine x of
 
 
 
-leftUnboundedId  = TrapezoidId 0
-rightUnboundedId = TrapezoidId 1
-
 
 bottom   :: (Ord r, Fractional r) => Trapezoid e p r ->  Maybe (Seg e () r)
 bottom t = trim <$> leftX t <*> rightX t <*> bottomSupport t
@@ -133,9 +143,6 @@ trim              :: (Ord r, Fractional r)
                   => r -> r -> LineSegment 2 p r :+ e -> LineSegment 2 () r :+ e
 trim l r (s :+ e) = LineSegment (atXCoord l s :+ ()) (atXCoord r s :+ ()) :+ e
 
--- makeLenses ''Trapezoid
-
-
 --------------------------------------------------------------------------------
 
 -- | A representation of a trapezoid that we store in our TrapezoidalMap.
@@ -143,7 +150,7 @@ trim l r (s :+ e) = LineSegment (atXCoord l s :+ ()) (atXCoord r s :+ ()) :+ e
 -- the leftOn is the x-coordinate through which the left boundary of this trapezoid
 -- lies on.
 --
--- Ifd the bottomOn is empty, the trapezoid is unbounded from below.
+-- If the bottomOn is empty, the trapezoid is unbounded from below.
 data TrapezoidRep e p r = TrapezoidRep { _repId     :: !TrapezoidId
                                        , _repMinX   :: !r
                                        , _repBottom :: !(Maybe (LineSegment 2 p r :+ e))
@@ -151,20 +158,24 @@ data TrapezoidRep e p r = TrapezoidRep { _repId     :: !TrapezoidId
 makeLenses ''TrapezoidRep
 
 
--- | A vertical slab has a minimum x coordinate: minX s.t. the
--- slabData stored here is valid on the interval [minX, maxX), for some maxX >= minX
-data VSlab t e p r = VSlab { _minX     :: !r
-                           , _slabData :: ExpSet (TrapezoidRep e p r :+ t)
-                           }
-makeLenses ''VSlab
-
-
+-- | When we run a query, we need the trapezoidRep found and the one above it
+-- (if it exists) to reconstruct a Trapezoid
 data TrapezoidQuery t e p r = TrapezoidQuery { _self  :: !(TrapezoidRep e p r :+ t)
                                              , _above :: !(Maybe (TrapezoidRep e p r :+ t))
                                              }
 makeLenses ''TrapezoidQuery
 
+----------------------------------------
 
+-- | A vertical slab has a minimum x coordinate: minX s.t. the
+-- slabData stored here is valid on the interval [minX, maxX), for some maxX >= minX
+data VSlab t e p r = VSlab { _slabMinX :: !r
+                           , _slabData :: ExpSet (TrapezoidRep e p r :+ t)
+                           }
+makeLenses ''VSlab
+
+
+-- | Given a vertical slab of Trapezoids, locate the trapezoid containing the query point
 findTrapezoidRep                :: (Ord r, Num r)
                                 => Point 2 r -> VSlab t e p r -> TrapezoidQuery t e p r
 findTrapezoidRep p (VSlab _ es) = TrapezoidQuery cur high
@@ -181,22 +192,29 @@ findTrapezoidRep p (VSlab _ es) = TrapezoidQuery cur high
              -- if we turn clockwise then p is below the segment
              -- hence we should return False
     pred (s :+ _) = let (l,r) = orderedEndPoints s in ccw (l^.core) (r^.core) p /= CW
+                   -- TODO: For degenereate cases, i.e. vertical segments we
+                                                      -- may have to do some
+                                                      -- additional check here.
 
--- -- |
--- compareByPoint :: Point TrapezoidRep e p r -> TrapezoidRep e p r -> Ordering
 
+----------------------------------------
 
-
+-- | A TrapezoidalDecomposition is an sorted array of vertical slabs
 newtype TrapezoidalDecomposition t e p r = TD { _unTD :: Vector (VSlab t e p r) }
 
+-- | Given an x-coordinate, find the vertcal slab containing this x-coordinate.
+-- The TrapezoidalDecomposition is 'valid' on a certain x-interval, as
+-- precondition we require that the x-coordinate lies in this interval.
+--
+-- pre: x in xRange td
 findSlab :: Ord r => r -- ^ The x-coordinate of the input point
          -> TrapezoidalDecomposition t e p r  -- ^ the td
-         -> VSlab t e p r -- ^ The vertical slab containing the input point,
-                                  -- if it exists
+         -> VSlab t e p r -- ^ The vertical slab containing the input point
+
 findSlab x (TD v) = v V.! i
   where
     i   = binarySearch p 0 (V.length v - 1) -- the last one is guaranteed to be OK
-    p i = x < _minX (v V.! i)
+    p i = x < _slabMinX (v V.! i)
 
 -- | p, low, high, vec:
 --  pre: p low = false
@@ -209,8 +227,7 @@ binarySearch p l r = case (r - l) `compare` 1 of
   GT -> let h = l + r `div` 2 in
         if p h then binarySearch p l h else binarySearch p h r
 
-
-
+----------------------------------------
 
 -- | A trapezoidal map in which each trapezoid has extra data of type t,
 -- each vertex data of type p, each edge of type e.
@@ -224,15 +241,107 @@ data TrapezoidalMap t e p r = TrapezoidalMap {
   , _leftUnboundedData  :: t
   , _rightUnboundedData :: t
   }
--- makeLenses ''TrapezoidalMap
+makeLenses ''TrapezoidalMap
 
-_minX' :: TrapezoidalDecomposition t e p r -> r
-_minX' = _minX . V.head . _unTD
+_minX :: TrapezoidalDecomposition t e p r -> r
+_minX = _slabMinX . V.head . _unTD
 
 
-buildTrapezoidalMap :: [LineSegment 2 p r :+ e]
-                       -> TrapezoidalMap () e p r
-buildTrapezoidalMap = undefined
+-- | An eventpoint may be a start or end point. Each eventpoint creates a new
+-- vertical slab. If the line segments associated with an eventpoint are Just's
+-- (which they normally are) that segment is inserted or deleted from the
+-- structure.
+--
+-- In other words, if the segment associated with the data is a Nothing, we
+-- create an extra slab without doing anything. This may be useful on some
+-- ocasions. (Like computing Red-Blue Intersections).
+data EventData e p r = Start !(Maybe (LineSegment 2 p r :+ e))
+                     | End   !(Maybe (LineSegment 2 p r :+ e))
+                     deriving (Show,Eq,Ord)
+
+
+
+-- | Pre: All segments are oriented left to right
+--- pre: List is non-empty
+buildTrapezoidalMap      :: (Ord r, Monoid t)
+                         => [LineSegment 2 p r :+ e] -> TrapezoidalMap t e p r
+buildTrapezoidalMap segs = TrapezoidalMap mX (TD . V.fromList $ slabs) rMap mempty mempty
+  where
+    events         = L.sortBy (comparing fst) . concatMap f $ segs
+    f seg@(s :+ _) = let p = s^.start.core
+                         q = s^.end.core
+                     in [(p,Start $ Just seg), (q, End $ Just seg)]
+
+    (slabs,rMap,mX) = buildTrapezoidalMap' events
+
+
+
+
+
+data SweepStatus t e p r = SweepStatus { _sSlab    :: VSlab t e p r
+                                       , _sRMap    :: Map TrapezoidId r
+                                       , _sMaxX    :: r
+                                       , _lastUses :: TrapezoidId
+                                       }
+makeLenses ''SweepStatus
+
+
+type Sweep t e p r = PersistentState (SweepStatus t e p r)
+
+
+-- persistentSweep :: state
+
+
+
+
+-- | pre: List is non-empty
+buildTrapezoidalMap'        :: Ord r
+                            => [(Point 2 r, EventData e p r)]
+                            -> ([VSlab t e p r], Map TrapezoidId r, r)
+buildTrapezoidalMap' (e:es) = f . runPersistentState initialState act
+  where
+    f (_, lastS, ss) =
+
+    act = initialize >> mapM_ handleEvent es
+
+    initialize = undefined
+    initialState
+
+
+
+
+-- modifyStatusStruct :: (ExpSet (TrapezoidRep e p r :+ t) -> ExpSet (TrapezoidRep e p r :+ t))
+--                       -> Sweep t e p r ()
+
+
+handleEvent        :: Sweep t e p r ()
+handleEvent (p, d) = do
+  set
+
+  undefined
+
+
+  -- f . L.foldl' sweep (initial, M.empty, Nothing, nextId') $ es
+  -- where
+  --
+
+  --   initial = undefined
+  --   nextId' = undefined
+
+
+
+-- sweep                        :: (Ord r, Monoid t)
+--                              => SweepStatus t e p r
+--                              -> (Point 2 r, EventData e p r) -> SweepStatus t e p r
+-- sweep (xDecomp@(slab:_), rMap, mX, i) (p,ed) = (slab':xDecomp, rMap', mX', nextId')
+--   where
+--     slab' = undefined
+--     rMap' = undefined
+--     mX'   = mX `max` (Just p^.xCoord)
+--     nextId' = undefined
+
+----------------------------------------
+-- Queries
 
 -- | Planar point location :): Running time: O(log n)
 locateTrapezoid   :: (Fractional r, Ord r)
@@ -243,9 +352,11 @@ locateTrapezoid p (TrapezoidalMap maxX' xDecomp rMap lData rData)
     | otherwise   = reconstruct rMap . findTrapezoidRep p $ findSlab px xDecomp
   where
     px    = p^.xCoord
-    minX' = _minX' xDecomp
+    minX' = _minX xDecomp
 
--- | Convert a TrapezoidalRep into a proper Trapezoid
+-- | Convert a TrapezoidalRep into a proper Trapezoid. This requires a TrapezoidQuery
+-- as well as the x-coordinate of the right-window of the trapezoid. We store these
+-- x-coordinates in a Map.
 reconstruct         :: (Ord r, Fractional r)
                     => Map TrapezoidId r -> TrapezoidQuery t e p r -> Trapezoid e p r :+ t
 reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
@@ -263,7 +374,8 @@ reconstruct rMap tq = (:+ tData) $ case (mBottomSeg,mTopSeg) of
     rightX = fromJust $ M.lookup tid rMap
 
 
-
+----------------------------------------
+-- | Traversals
 
 -- Construct a tour traversing the trapezoids s.t. every pair of consecutive trapezoids is
 -- consecutive
