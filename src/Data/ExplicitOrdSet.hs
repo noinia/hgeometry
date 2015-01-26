@@ -4,6 +4,7 @@ module Data.ExplicitOrdSet( ExpSet
                           , emptyOrdSet
 
                           , insert
+                          , insertAll
                           , delete
                           , split
                           , splitMonotone
@@ -63,6 +64,10 @@ emptyOrdSet = empty compare
 -- | Insert element
 insert   :: a -> ExpSet a -> ExpSet a
 insert x = withTree (flip insertT x)
+
+insertAll      :: [a] -> ExpSet a -> ExpSet a
+insertAll xs t = F.foldr insert t xs
+
 
 -- | Delete an element from the set
 delete :: a -> ExpSet a -> ExpSet a
