@@ -23,7 +23,7 @@ import           Linear.Vector((*^))
 
 
 -- import           Data.Sequence((<|))
-import qualified Data.Sequence as S
+import qualified Data.Seq2 as S2
 
 import           GHC.TypeLits
 
@@ -294,7 +294,7 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 --------------------------------------------------------------------------------
 
 -- | A Poly line in R^d
-newtype PolyLine d p r = PolyLine { _unPolyLine :: S.Seq (Point d r :+ p) }
+newtype PolyLine d p r = PolyLine { _unPolyLine :: S2.Seq2 (Point d r :+ p) }
 makeLenses ''PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
@@ -316,5 +316,10 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
 instance PointFunctor (PolyLine d p) where
   pmap f = over unPolyLine (fmap (fmap f))
 
-fromPoints :: (Monoid p, F.Foldable f) => f (Point d r) -> PolyLine d p r
-fromPoints = PolyLine . F.foldr (\p s -> (p :+ mempty) <| s) S.empty
+
+-- | pre: The input list contains at least two points
+fromPoints          :: (Monoid p) => [Point d r] -> PolyLine d p r
+fromPoints (a:b:ps) = let wrap x = x :+ mempty
+                          init   = S2.duo (wrap a) (wrap b)
+                      in PolyLine $ F.foldl' (\s p -> s S2.|> (wrap p)) init ps
+fromPoints _        = error "Polyline.fromPoints: Not enough points"
