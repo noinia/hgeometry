@@ -18,14 +18,9 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import qualified Data.Seq2 as S2
 import           Linear.Affine(Affine(..))
 import           Linear.Vector((*^))
-
-
--- import           Data.Sequence((<|))
-import qualified Data.Seq2 as S2
-
-import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -319,7 +314,4 @@ instance PointFunctor (PolyLine d p) where
 
 -- | pre: The input list contains at least two points
 fromPoints          :: (Monoid p) => [Point d r] -> PolyLine d p r
-fromPoints (a:b:ps) = let wrap x = x :+ mempty
-                          init   = S2.duo (wrap a) (wrap b)
-                      in PolyLine $ F.foldl' (\s p -> s S2.|> (wrap p)) init ps
-fromPoints _        = error "Polyline.fromPoints: Not enough points"
+fromPoints = PolyLine . S2.fromList . map (\p -> p :+ mempty)

@@ -11,14 +11,15 @@ import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import qualified Data.Sequence as S
 
-
+-- | Basically Data.Sequence but with the guarantee that the list contains at
+-- least two elements.
 data Seq2 a = Seq2 a (S.Seq a) a
                 deriving (Eq,Ord,Show,Read)
 
 
 instance T.Traversable Seq2 where
   -- Applicative f => (a -> f b) -> t a -> f (t b)
-  traverse f (Seq2 l s r) = Seq2 <$> f l <*> T.traverse f s <*>  f r
+  traverse f ~(Seq2 l s r) = Seq2 <$> f l <*> T.traverse f s <*>  f r
 
 instance Functor Seq2 where
   fmap = T.fmapDefault
@@ -32,7 +33,7 @@ instance Semigroup (Seq2 a) where
 duo     :: a -> a -> Seq2 a
 duo a b = Seq2 a S.empty b
 
-length :: Seq2 a -> Int
+length               :: Seq2 a -> Int
 length ~(Seq2 _ s _) = 2 + S.length s
 
 
@@ -60,6 +61,10 @@ x <| ~(Seq2 l s r) = Seq2 x (l S.<| s) r
 ~(Seq2 ll ls lr) >< ~(Seq2 rl rs rr) = Seq2 ll ((ls S.|> lr) S.>< (rl S.<| rs)) rr
 
 
+-- | pre: the list contains at least two elements
+fromList          :: [a] -> Seq2 a
+fromList (a:b:xs) = F.foldl' (\s x -> s |> x) (duo a b) xs
+fromList _        = error "Seq2.fromList: Not enough values"
 
 --------------------------------------------------------------------------------
 -- | Left views
