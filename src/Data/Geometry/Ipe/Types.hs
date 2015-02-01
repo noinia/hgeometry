@@ -239,7 +239,7 @@ filterRec' = undefined
 type XmlTree = Text
 
 
-type Layer = Text
+newtype Layer = Layer {_layerName :: Text } deriving (Show,Read,Eq,Ord,IsString)
 
 
 -- | The definition of a view
