@@ -33,37 +33,6 @@ import qualified Data.Seq2     as S2
 --------------------------------------------------------------------------------
 
 
-type XmlTree = Text
-
-
-type Layer = Text
-
-
--- | The definition of a view
--- make active layer into an index ?
-data View = View { _layerNames      :: [Layer]
-                 , _activeLayer     :: Layer
-                 }
-          deriving (Eq, Ord, Show)
-makeLenses ''View
-
-
--- | for now we pretty much ignore these
-data IpeStyle = IpeStyle { _styleName :: Maybe Text
-                         , _styleData :: XmlTree
-                         }
-              deriving (Eq,Show,Read,Ord)
-makeLenses ''IpeStyle
-
--- | The maybe string is the encoding
-data IpePreamble  = IpePreamble { _encoding     :: Maybe Text
-                                , _preambleData :: XmlTree
-                                }
-                  deriving (Eq,Read,Show,Ord)
-makeLenses ''IpePreamble
-
-type IpeBitmap = XmlTree
-
 --------------------------------------------------------------------------------
 -- | Image Objects
 
@@ -144,10 +113,18 @@ type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
 newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
 
 --------------------------------------------------------------------------------
+-- | Groups
 
--- | Poly kinded, type-level, tuples
+-- | To define groups, we need some poly kinded, type-level only, 2-tuples.
 data (a :: ka) :.: (b :: kb)
 
+-- | An IpeGroup can store IpeObjects. We distinguish the following different
+-- ipeObjects. The parameter t will cary additional information about the
+-- particular object. In particular, we will use it to keep track of the
+-- attributes each item has.
+--
+-- Note: We will use this type on the type-level only! In particular, we will
+-- use it as a Label in a Vinyl Rec.
 data IpeObjectType t = IpeGroup     t
                      | IpeImage     t
                      | IpeTextLabel t
@@ -156,14 +133,24 @@ data IpeObjectType t = IpeGroup     t
                      | IpePath      t
                      deriving (Show,Read,Eq)
 
-
-
-
-
-
+-- | A group is essentially a hetrogenious list of IpeObjects. We represent a
+-- group by means of a Vinyl Rec.
 type Group gt r = Rec (IpeObject r) gt
 
-
+-- | This type family links each 'IpeObjectType' to the type (in Haskell) that
+-- we use to represent such an IpeObject. In principle we represent each object
+-- by means of an Ext (:+), in which the 'core' is one of the previously seen types
+-- (i.e. an Image, TextLabel, IpeSymbol, Path, etc), and the extra is a Vinyl record
+-- storing the attributes.
+--
+-- The different ipe types use a different Universe to draw the labels form, to
+-- make sure that i.e. a Path only has attributes applicable to a Path.
+--
+-- We also see the parameter of the IpeObjectType here: in all but the group case it is
+-- a type level list that tells which attributes the object has. In case of a group it is a
+-- poly-kinded pair (i.e. a `gt :.: gs`)  where the gt is a type level list that captures
+-- *ALL* type information of the objects stored in this group, and the *gs* is a type level
+-- list that specifies which attributes this group itself has.
 type family IpeObjectElF r (f :: IpeObjectType k) :: * where
   IpeObjectElF r (IpeGroup (gt :.: gs)) = Group gt r  :+ Rec (GroupAttribute     r) gs
   IpeObjectElF r (IpeImage is)          = Image r     :+ Rec (CommonAttribute    r) is
@@ -172,31 +159,13 @@ type family IpeObjectElF r (f :: IpeObjectType k) :: * where
   IpeObjectElF r (IpeUse  ss)           = IpeSymbol r :+ Rec (SymbolAttribute    r) ss
   IpeObjectElF r (IpePath ps)           = Path r      :+ Rec (PathAttribute      r) ps
 
-
+-- | An ipe Object is then simply a thin wrapper around the IpeObjectELF type family.
 newtype IpeObject r (fld :: IpeObjectType k) =
   IpeObject { _ipeObject :: IpeObjectElF r fld }
 
 makeLenses ''IpeObject
 
-
-
--- data IpeObject gt gs is ts mps ss ps r =
---     IpeGroup     (Group gt r  :+ Rec GroupAttrs     gs)
---   | IpeImage     (Image r     :+ Rec CommonAttrs    is)
---   | IpeTextLabel (TextLabel r :+ Rec TextLabelAttrs ts)
---   | IpeMiniPage  (MiniPage r  :+ Rec MiniPageAttrs  mps)
---   | IpeUse       (IpeSymbol r :+ Rec SymbolAttrs    ss)
---   | IpePath      (Path r      :+ Rec PathAttrs      ps)
-    -- deriving (Show,Eq)
-
--- deriving instance (Show (Group gt r), Show (Rec GroupAttrs gs)) =>
---                   Show (IpeObject gt gs is ts mps ss ps r)
-
 --------------------------------------------------------------------------------
-
--- | Poly kinded 7 tuple
--- data T7 (a :: ka) (b :: kb) (c :: kc) (d :: kd) (e :: ke) (f :: kf) (g :: kg) = T7
---         deriving (Show,Read,Eq,Ord)
 
 
 symb'' :: IpeObjectElF Int (IpeUse '[Size])
@@ -234,14 +203,61 @@ filterRec' :: forall gt r fld. (fld ~ IpeUse '[Size]) =>
 filterRec' = undefined
 -- filterRec' = filterRec (Proxy :: Proxy fld)
 
+
+
+
+
 --------------------------------------------------------------------------------
 
-newtype Group' gs r = Group' (Group gs r)
 
--- | Represents a page in ipe
+
+type XmlTree = Text
+
+
+type Layer = Text
+
+
+-- | The definition of a view
+-- make active layer into an index ?
+data View = View { _layerNames      :: [Layer]
+                 , _activeLayer     :: Layer
+                 }
+          deriving (Eq, Ord, Show)
+makeLenses ''View
+
+
+-- | for now we pretty much ignore these
+data IpeStyle = IpeStyle { _styleName :: Maybe Text
+                         , _styleData :: XmlTree
+                         }
+              deriving (Eq,Show,Read,Ord)
+makeLenses ''IpeStyle
+
+-- | The maybe string is the encoding
+data IpePreamble  = IpePreamble { _encoding     :: Maybe Text
+                                , _preambleData :: XmlTree
+                                }
+                  deriving (Eq,Read,Show,Ord)
+makeLenses ''IpePreamble
+
+type IpeBitmap = XmlTree
+
+
+
+--------------------------------------------------------------------------------
+-- Ipe Pages
+
+
+
+
+
+
+
+-- | An IpePage is essentially a Group, together with a list of layers and a
+-- list of views.
 data IpePage gs r = IpePage { _layers :: [Layer]
                             , _views  :: [View]
-                            , _pages  :: Group' gs r
+                            , _pages  :: Group gs r
                             }
               -- deriving (Eq, Show)
 makeLenses ''IpePage
