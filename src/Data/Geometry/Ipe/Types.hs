@@ -91,6 +91,8 @@ newtype PathAttrs ps       = PathAttrs      () deriving (Show,Eq,Functor)
 newtype SymbolAttrs ps       = SymbolAttrs      () deriving (Show,Eq,Functor)
 
 
+
+
 --------------------------------------------------------------------------------
 
 data Image r = Image { _imageData :: ()
@@ -141,6 +143,17 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           }
                  deriving (Show,Eq,Ord)
 makeLenses ''IpeSymbol
+
+
+
+
+sizeSymbol'' :: SymbolAttribute Int Size
+sizeSymbol'' = SymbolAttribute . IpeSize $ Named "large"
+
+
+sizeSymbol = undefined
+
+
 
 --------------------------------------------------------------------------------
 
@@ -229,19 +242,39 @@ data IpeObjectType t = IpeGroup     t
                      | IpePath      t
                      deriving (Show,Read,Eq)
 
-type family IpeObjectElF r (f :: IpeObjectType [k]) :: * where
-  -- IpeObjectElF r (IpeGroup (T2 gt gs))    = Group gt r  :+ Rec GroupAttrs     gs
+
+
+data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
+
+type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
+  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
+
+newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
+
+-- data Group gt r where
+--   GNil  ::                     Group '[] r
+--   GCons :: IpeObject gt gs is ts mps ss ps r
+--         -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
+
+type Group gt r = Rec (IpeObject r) gt
+
+
+type family IpeObjectElF r (f :: IpeObjectType k) :: * where
+  IpeObjectElF r (IpeGroup (T2 gt gs))    = Group gt r  :+ Rec GroupAttrs     gs
   IpeObjectElF r (IpeImage is)            = Image r     :+ Rec CommonAttrs    is
   IpeObjectElF r (IpeTextLabel ts)        = TextLabel r :+ Rec TextLabelAttrs ts
   IpeObjectElF r (IpeMiniPage mps)        = MiniPage r  :+ Rec MiniPageAttrs  mps
-  -- IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttrs r) ss
-  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
+  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttribute r) ss
+  -- IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
   IpeObjectElF r (IpePath ps)             = Path r      :+ Rec PathAttrs      ps
 
-newtype IpeObject r (fld :: IpeObjectType [k]) =
+newtype IpeObject r (fld :: IpeObjectType k) =
   IpeObject { _ipeObject :: IpeObjectElF r fld }
 
 makeLenses ''IpeObject
+
+
+
 
 -- data IpeObject gt gs is ts mps ss ps r =
 --     IpeGroup     (Group gt r  :+ Rec GroupAttrs     gs)
@@ -262,34 +295,36 @@ makeLenses ''IpeObject
 --         deriving (Show,Read,Eq,Ord)
 
 
-data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
+symb'' :: IpeObjectElF Int (IpeUse '[Size])
+symb'' = Symbol origin "myLargesymbol"  :+ ( sizeSymbol :& RNil )
 
-type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
-  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
-
-newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
-
--- data Group gt r where
---   GNil  ::                     Group '[] r
---   GCons :: IpeObject gt gs is ts mps ss ps r
---         -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
-
-type Group gt r = Rec (IpeObject r) gt
-
-symb :: IpeObjectElF Int (IpeUse '[])
+symb :: IpeObjectElF Int (IpeUse ('[] :: [SymbolAttributeUniverse]))
 symb = Symbol origin "foo" :+ RNil
 
-symb' :: IpeObject Int (IpeUse '[])
-symb' = IpeObject symb
+symb' :: IpeObject Int (IpeUse '[Size])
+symb' = IpeObject symb''
 
-gr :: Group '[IpeUse '[]] Int
+gr :: Group '[IpeUse '[Size]] Int
 gr = symb' :& RNil
+
+grr :: IpeObjectElF Int (IpeGroup (T2 '[IpeUse '[Size]]
+                                      ('[] :: [GroupAttributeUniverse])
+                                  )
+                        )
+grr = gr :+ RNil
+
+
+grrr :: IpeObject Int (IpeGroup (T2 '[IpeUse '[Size]]
+                                      ('[] :: [GroupAttributeUniverse])
+                                )
+                      )
+grrr = IpeObject grr
 
 
 points' :: forall gt r. Group gt r -> [Point 2 r]
 points' = fmap (^.ipeObject.core.symbolPoint) . filterRec'
 
-filterRec' :: forall gt r fld. (fld ~ IpeUse '[]) =>
+filterRec' :: forall gt r fld. (fld ~ IpeUse '[Size]) =>
               Rec (IpeObject r) gt -> [IpeObject r fld]
 filterRec' = undefined
 -- filterRec' = filterRec (Proxy :: Proxy fld)
