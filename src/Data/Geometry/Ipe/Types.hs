@@ -11,13 +11,15 @@ import           Control.Lens
 import           Data.Proxy
 import           Data.Vinyl
 
+
+
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
 
-
+import           Data.Geometry.Ipe.Attributes
 import           Data.Text(Text)
 import           Data.TypeLevel.Filter
 
@@ -26,6 +28,7 @@ import           GHC.Exts
 import           GHC.TypeLits
 
 import qualified Data.Sequence as S
+import qualified Data.Seq2     as S2
 
 --------------------------------------------------------------------------------
 
@@ -62,38 +65,8 @@ makeLenses ''IpePreamble
 type IpeBitmap = XmlTree
 
 --------------------------------------------------------------------------------
+-- | Image Objects
 
--- | Possible values for Pin
-data PinType = No | Yes | Horizontal | Vertical
-             deriving (Eq,Show,Read)
-
--- | Possible values for Transformation
-data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
-
-
--- | Some common attributes applicable for all ipe objects
-data CommonAttributeUniverse = Layer | Matrix | Pin | Transformations
-                             deriving (Show,Read,Eq)
-
-type family CommonAttrElf (a :: CommonAttributeUniverse) (r :: *) where
-  CommonAttrElf 'Layer          r = Text
-  CommonAttrElf 'Matrix         r = Matrix 3 3 r
-  CommonAttrElf Pin             r = PinType
-  CommonAttrElf Transformations r = TransformationTypes
-
-
-newtype CommonAttrs cs     = CommonAttrs    () deriving (Show,Eq,Functor)
-newtype GroupAttrs gs      = GroupAttrs     () deriving (Show,Eq,Functor)
-newtype TextLabelAttrs tls = TextLabelAttrs () deriving (Show,Eq,Functor)
-newtype MiniPageAttrs mps  = MiniPageAttrs  () deriving (Show,Eq,Functor)
-newtype PathAttrs ps       = PathAttrs      () deriving (Show,Eq,Functor)
-
-newtype SymbolAttrs ps       = SymbolAttrs      () deriving (Show,Eq,Functor)
-
-
-
-
---------------------------------------------------------------------------------
 
 data Image r = Image { _imageData :: ()
                      , _rect      :: Rectangle () r
@@ -101,6 +74,7 @@ data Image r = Image { _imageData :: ()
 makeLenses ''Image
 
 --------------------------------------------------------------------------------
+-- | Text Objects
 
 data TextLabel r = Label Text (Point 2 r)
                  deriving (Show,Eq,Ord)
@@ -112,30 +86,7 @@ width                  :: MiniPage t -> t
 width (MiniPage _ _ w) = w
 
 --------------------------------------------------------------------------------
-
--- | Many types either consist of a symbolc value, or a value of type v
-data IpeValue v = Named Text | Valued v deriving (Show,Eq,Ord)
-
-type Colour = Text -- TODO: Make this a Colour.Colour
-
-newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
-newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
-newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
-
--- | The optional Attributes for a symbol
-data SymbolAttributeUniverse = SymbolStroke | SymbolFill | SymbolPen | Size
-                             deriving (Show,Eq)
-
-
-type family SymbolAttrElf (s :: SymbolAttributeUniverse) (r :: *) :: * where
-  SymbolAttrElf SymbolStroke r = IpeColor
-  SymbolAttrElf SymbolPen    r = IpePen r
-  SymbolAttrElf SymbolFill   r = IpeColor
-  SymbolAttrElf Size         r = IpeSize r
-
-
-newtype SymbolAttribute r s = SymbolAttribute (SymbolAttrElf s r)
-
+-- | Ipe Symbols, i.e. Points
 
 -- | A symbol (point) in ipe
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
@@ -144,61 +95,14 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                  deriving (Show,Eq,Ord)
 makeLenses ''IpeSymbol
 
-
-
-
-sizeSymbol'' :: SymbolAttribute Int Size
-sizeSymbol'' = SymbolAttribute . IpeSize $ Named "large"
-
-
-sizeSymbol = undefined
-
-
+-- | Example of an IpeSymbol. I.e. A symbol that expresses that the size is 'large'
+sizeSymbol :: SymbolAttribute Int Size
+sizeSymbol = SymbolAttribute . IpeSize $ Named "large"
 
 --------------------------------------------------------------------------------
+-- | Paths
 
--- | Possible attributes for a path
-data PathAttributeUniverse = Stroke | Fill | Dash | Pen | LineCap | LineJoin
-                           | FillRule | Arrow | RArrow | Opacity | Tiling | Gradient
-                           deriving (Show,Eq)
-
--- | Possible values for Dash
-data IpeDash r = DashNamed Text
-               | DashPattern [r] r
-
--- | Possible values for an ipe arrow
-data IpeArrow r = IpeArrow { _arrowName :: Text
-                           , _arrowSize :: IpeSize r
-                           } deriving (Show,Eq)
-makeLenses ''IpeArrow
-
--- | Allowed Fill types
-data FillType = Wind | EOFill deriving (Show,Read,Eq)
-
--- | IpeOpacity, IpeTyling, and IpeGradient are all symbolic values
-type IpeOpacity  = Text
-type IpeTiling   = Text
-type IpeGradient = Text
-
-type family PathAttrElf (s :: PathAttributeUniverse) (r :: *) :: * where
-  PathAttrElf Stroke   r = IpeColor
-  PathAttrElf Fill     r = IpeColor
-  PathAttrElf Dash     r = IpeDash r
-  PathAttrElf Pen      r = IpePen r
-  PathAttrElf LineCap  r = Int
-  PathAttrElf LineJoin r = Int
-  PathAttrElf FillRule r = FillType
-  PathAttrElf Arrow    r = IpeArrow r
-  PathAttrElf RArrow   r = IpeArrow r
-  PathAttrElf Opacity  r = IpeOpacity
-  PathAttrElf Tiling   r = IpeTiling
-  PathAttrElf Gradient r = IpeGradient
-
-
-newtype PathAttribute r s = PathAttribute (PathAttrElf s r)
-
-
-
+-- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                      -- TODO
                    | PolygonPath
@@ -211,8 +115,8 @@ data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    deriving (Show,Eq,Ord)
 makePrisms ''PathSegment
 
-
-newtype Path r = Path { _pathSegments :: S.Seq (PathSegment r) }
+-- | A path is a non-empty sequence of PathSegments.
+newtype Path r = Path { _pathSegments :: S2.ViewL1 (PathSegment r) }
                  deriving (Show,Eq,Ord)
 makeLenses ''Path
 
@@ -231,8 +135,18 @@ data Operation r = MoveTo (Point 2 r)
 makePrisms ''Operation
 
 --------------------------------------------------------------------------------
+-- | Group Attributes
 
-data T2 (a :: ka) (b :: kb)
+-- | Now that we know what a Path is we can define the Attributes of a Group.
+type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
+  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
+
+newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
+
+--------------------------------------------------------------------------------
+
+-- | Poly kinded, type-level, tuples
+data (a :: ka) :.: (b :: kb)
 
 data IpeObjectType t = IpeGroup     t
                      | IpeImage     t
@@ -244,35 +158,25 @@ data IpeObjectType t = IpeGroup     t
 
 
 
-data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 
-type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
-  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
 
-newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
-
--- data Group gt r where
---   GNil  ::                     Group '[] r
---   GCons :: IpeObject gt gs is ts mps ss ps r
---         -> Group gtt r ->      Group (T7 gt gs is ts mps ss ps ': gtt) r
 
 type Group gt r = Rec (IpeObject r) gt
 
 
 type family IpeObjectElF r (f :: IpeObjectType k) :: * where
-  IpeObjectElF r (IpeGroup (T2 gt gs))    = Group gt r  :+ Rec GroupAttrs     gs
-  IpeObjectElF r (IpeImage is)            = Image r     :+ Rec CommonAttrs    is
-  IpeObjectElF r (IpeTextLabel ts)        = TextLabel r :+ Rec TextLabelAttrs ts
-  IpeObjectElF r (IpeMiniPage mps)        = MiniPage r  :+ Rec MiniPageAttrs  mps
-  IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec (SymbolAttribute r) ss
-  -- IpeObjectElF r (IpeUse  ss)             = IpeSymbol r :+ Rec SymbolAttrs    ss
-  IpeObjectElF r (IpePath ps)             = Path r      :+ Rec PathAttrs      ps
+  IpeObjectElF r (IpeGroup (gt :.: gs)) = Group gt r  :+ Rec (GroupAttribute     r) gs
+  IpeObjectElF r (IpeImage is)          = Image r     :+ Rec (CommonAttribute    r) is
+  IpeObjectElF r (IpeTextLabel ts)      = TextLabel r :+ Rec (TextLabelAttribute r) ts
+  IpeObjectElF r (IpeMiniPage mps)      = MiniPage r  :+ Rec (MiniPageAttribute  r) mps
+  IpeObjectElF r (IpeUse  ss)           = IpeSymbol r :+ Rec (SymbolAttribute    r) ss
+  IpeObjectElF r (IpePath ps)           = Path r      :+ Rec (PathAttribute      r) ps
+
 
 newtype IpeObject r (fld :: IpeObjectType k) =
   IpeObject { _ipeObject :: IpeObjectElF r fld }
 
 makeLenses ''IpeObject
-
 
 
 
@@ -307,14 +211,15 @@ symb' = IpeObject symb''
 gr :: Group '[IpeUse '[Size]] Int
 gr = symb' :& RNil
 
-grr :: IpeObjectElF Int (IpeGroup (T2 '[IpeUse '[Size]]
-                                      ('[] :: [GroupAttributeUniverse])
+grr :: IpeObjectElF Int (IpeGroup ('[IpeUse '[Size]]
+                                   :.:
+                                   ('[] :: [GroupAttributeUniverse])
                                   )
                         )
 grr = gr :+ RNil
 
 
-grrr :: IpeObject Int (IpeGroup (T2 '[IpeUse '[Size]]
+grrr :: IpeObject Int (IpeGroup ('[IpeUse '[Size]] :.:
                                       ('[] :: [GroupAttributeUniverse])
                                 )
                       )

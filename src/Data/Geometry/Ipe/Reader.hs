@@ -16,6 +16,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Line
 
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Attributes
 
 import qualified Data.ByteString as B
 import           Data.Monoid

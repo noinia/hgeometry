@@ -21,6 +21,7 @@ import           Data.Geometry.Line
 
 
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
 
 import qualified Data.ByteString as B
@@ -28,6 +29,7 @@ import           Data.Maybe(mapMaybe)
 import           Data.List(nub)
 import           Data.Monoid
 import qualified Data.Sequence as S
+import qualified Data.Seq2     as S2
 import           Data.Text(Text)
 
 import           Text.XML.Expat.Tree
@@ -249,7 +251,7 @@ ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
     ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
 
     f (pl,ats) = ipeWrite (mkPath pl) `mAddAtts` ats
-    mkPath     = Path . S.singleton . PolyLineSegment
+    mkPath     = Path . S2.l1Singleton . PolyLineSegment
     layers     = map mkLayer . nub . mapMaybe (lookup "layer" . snd)
     mkLayer n  = Element "layer" [("name",n)] []
 

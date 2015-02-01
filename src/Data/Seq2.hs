@@ -100,6 +100,9 @@ viewl                 :: Seq2 a -> ViewL2 a
 viewl ~(Seq2 l s r) = l :<< (s :> r)
 
 
+l1Singleton :: a -> ViewL1 a
+l1Singleton = (:< S.empty)
+
 --------------------------------------------------------------------------------
 -- | Right views
 
@@ -134,3 +137,6 @@ instance F.Foldable ViewR1 where
 -- | O(1) get a right view
 viewr                 :: Seq2 a -> ViewR2 a
 viewr ~(Seq2 l s r) = (l :< s) :>> r
+
+r1Singleton :: a -> ViewR1 a
+r1Singleton = (S.empty :>)
