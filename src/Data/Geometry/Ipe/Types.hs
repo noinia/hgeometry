@@ -15,6 +15,7 @@ import           Data.Vinyl
 
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Properties
 import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
@@ -64,6 +65,9 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                  deriving (Show,Eq,Ord)
 makeLenses ''IpeSymbol
 
+type instance NumType (IpeSymbol r) = r
+
+
 -- | Example of an IpeSymbol. I.e. A symbol that expresses that the size is 'large'
 sizeSymbol :: SymbolAttribute Int Size
 sizeSymbol = SymbolAttribute . IpeSize $ Named "large"
@@ -88,6 +92,8 @@ makePrisms ''PathSegment
 newtype Path r = Path { _pathSegments :: S2.ViewL1 (PathSegment r) }
                  deriving (Show,Eq,Ord)
 makeLenses ''Path
+
+type instance NumType (Path r) = r
 
 
 -- | type that represents a path in ipe.
@@ -137,6 +143,8 @@ data IpeObjectType t = IpeGroup     t
 -- group by means of a Vinyl Rec.
 type Group gt r = Rec (IpeObject r) gt
 
+type instance NumType (Group gt r) = r
+
 -- | This type family links each 'IpeObjectType' to the type (in Haskell) that
 -- we use to represent such an IpeObject. In principle we represent each object
 -- by means of an Ext (:+), in which the 'core' is one of the previously seen types
@@ -159,11 +167,28 @@ type family IpeObjectElF r (f :: IpeObjectType k) :: * where
   IpeObjectElF r (IpeUse  ss)           = IpeSymbol r :+ Rec (SymbolAttribute    r) ss
   IpeObjectElF r (IpePath ps)           = Path r      :+ Rec (PathAttribute      r) ps
 
+
+-- type family IpeObjectAttrElF r (f :: IpeObjectType k) :: * where
+--   IpeObjectElF r (IpeGroup (gt :.: gs)) = Rec (GroupAttribute     r) gs
+--   IpeObjectElF r (IpeImage is)          = Rec (CommonAttribute    r) is
+--   IpeObjectElF r (IpeTextLabel ts)      = Rec (TextLabelAttribute r) ts
+--   IpeObjectElF r (IpeMiniPage mps)      = Rec (MiniPageAttribute  r) mps
+--   IpeObjectElF r (IpeUse  ss)           = Rec (SymbolAttribute    r) ss
+--   IpeObjectElF r (IpePath ps)           = Rec (PathAttribute      r) ps
+
+
+
+-- TODO: Maybe split this TF into two TFS' one that determines the core type, the other
+-- that gives the Attribute wrapper type
+-- It would be nice if we could tell taht IpeObjecTELF was injective ...
+
 -- | An ipe Object is then simply a thin wrapper around the IpeObjectELF type family.
 newtype IpeObject r (fld :: IpeObjectType k) =
   IpeObject { _ipeObject :: IpeObjectElF r fld }
 
 makeLenses ''IpeObject
+
+type instance NumType (IpeObject r t) = r
 
 --------------------------------------------------------------------------------
 
