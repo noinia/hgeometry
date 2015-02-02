@@ -5,10 +5,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Writer where
 
-
 import           Control.Applicative hiding (Const(..))
+import           Control.Lens((^.),(^..))
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry.Ipe.Types
+import qualified Data.Geometry.Ipe.Types as IT
+import           Data.Geometry.Line
+import           Data.Geometry.Point
 import           Data.Maybe(catMaybes)
 import           Data.Monoid
 import           Data.Proxy
@@ -16,10 +20,6 @@ import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           Data.Geometry.Point
-import           Data.Geometry.Line
-import           Data.Geometry.Ipe.Types
-import qualified Data.Geometry.Ipe.Types as IT
 
 import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
@@ -208,9 +208,10 @@ instance IpeWriteText r => IpeWriteText (Operation r) where
 
 
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
-  ipeWriteText pl = case points pl of
-    (p:rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
-    -- the empty case is guaranteed not to occur
+  ipeWriteText pl = case pl^..points.Tr.traverse.core of
+    (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
+    -- the polyline type guarantees that there is at least one point
+
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
@@ -274,7 +275,7 @@ instance IpeWrite (Group gs r) => IpeWrite (IpePage gs r) where
 instance RecAll (Page r) gs IpeWrite => IpeWrite (IpeFile gs r) where
   ipeWrite (IpeFile p s pgs) = Just $ Element "ipe" ipeAtts chs
     where
-    ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
+    ipeAtts = [("version","70005"),("creator", "HGeometry")]
     -- TODO: Add preamble and styles
     chs = ipeWriteRec pgs
 

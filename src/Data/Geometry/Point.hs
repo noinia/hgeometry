@@ -185,9 +185,6 @@ zCoord = coord (C :: C 3)
 
 --------------------------------------------------------------------------------
 
--- | A class for types that store points
-class HasPoints g where
-  points :: g -> [Point (Dimension g) (NumType g)]
 
 class PointFunctor g where
   pmap :: (Point (Dimension (g r)) r -> Point (Dimension (g s)) s) -> g r -> g s

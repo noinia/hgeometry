@@ -41,9 +41,6 @@ instance (Arity d, Ord r, Semigroup p) => Monoid (Box d p r) where
   mempty = Empty
   b `mappend` b' = b <> b'
 
-instance HasPoints (Box d p r) where
-  points b = map (^.core) . catMaybes $ [b^.minPoint, b^.maxPoint]
-
 
 -- Note that this does not guarantee the box is still a proper box
 instance PointFunctor (Box d p) where

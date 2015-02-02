@@ -139,14 +139,11 @@ deriving instance Arity d                   => Functor (LineSegment d p)
 type instance Dimension (LineSegment d p r) = d
 type instance NumType   (LineSegment d p r) = r
 
-instance HasPoints (LineSegment d p r) where
-  points l = [l^.start.core, l^.end.core]
-
 instance PointFunctor (LineSegment d p) where
   pmap f (LineSegment s e) = LineSegment (f <$> s) (f <$> e)
 
 instance Arity d => IsBoxable (LineSegment d p r) where
-  boundingBox = boundingBoxList . points
+  boundingBox l = boundingBoxList [l^.start.core, l^.end.core]
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
@@ -289,7 +286,7 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 --------------------------------------------------------------------------------
 
 -- | A Poly line in R^d
-newtype PolyLine d p r = PolyLine { _unPolyLine :: S2.Seq2 (Point d r :+ p) }
+newtype PolyLine d p r = PolyLine { _points :: S2.Seq2 (Point d r :+ p) }
 makeLenses ''PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
@@ -299,19 +296,16 @@ deriving instance Arity d                   => Functor (PolyLine d p)
 type instance Dimension (PolyLine d p r) = d
 type instance NumType   (PolyLine d p r) = r
 
-instance HasPoints (PolyLine d p r) where
-  points = F.toList . fmap _core . _unPolyLine
-
 instance Arity d => IsBoxable (PolyLine d p r) where
-  boundingBox = boundingBoxList . points
+  boundingBox = boundingBoxList . toListOf (points.traverse.core)
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor
 
 instance PointFunctor (PolyLine d p) where
-  pmap f = over unPolyLine (fmap (fmap f))
+  pmap f = over points (fmap (fmap f))
 
 
 -- | pre: The input list contains at least two points
-fromPoints          :: (Monoid p) => [Point d r] -> PolyLine d p r
+fromPoints :: (Monoid p) => [Point d r] -> PolyLine d p r
 fromPoints = PolyLine . S2.fromList . map (\p -> p :+ mempty)
