@@ -16,6 +16,7 @@ module Data.Geometry.TrapezoidalMap( Trapezoid(..)
 
 import           Control.Applicative
 import           Control.Lens
+import           Control.Monad.State.Class
 import           Control.Monad.State.Persistent
 
 import           Data.Ext
@@ -263,11 +264,15 @@ data EventData e p r = Start (LineSegment 2 p r :+ e)
                      deriving (Show,Eq,Ord)
 
 
-
+-- | The status during our sweep, consisting of
+--   sSlab: the vertical slab currently intersected,
+--   sRMap: A Map containing the right endpoints of all trapezoids seen so far,
+--   sMaxX: the maximum x coordinate seen so far, and
+--   sLastUsed: The last trapezoidId that has been used.
 data SweepStatus t e p r = SweepStatus { _sSlab      :: VSlab t e p r
                                        , _sRMap      :: Map TrapezoidId r
                                        , _sMaxX      :: r
-                                       , _sfirstFree :: TrapezoidId
+                                       , _sLastUsed  :: TrapezoidId
                                        }
 makeLenses ''SweepStatus
 
@@ -294,34 +299,59 @@ buildTrapezoidalMap'                         :: (Ord r, Fractional r)
                                              -> ([VSlab t e p r], Map TrapezoidId r, r)
 buildTrapezoidalMap' ((p,Start s) :| es) mkT = f $ runPersistentState act initialState
   where
-    px      = p^.xCoord
-
-    sndFree = nextId firstId
+    px    = p^.xCoord
+    sndId = nextId firstId
 
     -- We start with two new segments,
     low  = TrapezoidRep firstId px Nothing
-    high = TrapezoidRep firstId px (Just s)
+    high = TrapezoidRep sndId   px (Just s)
 
     withTData t = t :+ mkT t
 
     -- Initial expset contains two elements, and we compare them at x-coord px
-    expSet = ES.insert (withTData low)
-           . ES.insert (withTData high)
+    expSet = ES.insertAll [ withTData low , withTData high ]
            $ ES.empty (compareAt px)
 
     -- this means we start our sweep proper with the following state
     initialState = SweepStatus (VSlab px expSet)
                                mempty -- no right endpoints seen yet
                                px
-                               (nextId sndFree)
-    act = mapM_ handleEvent es
+                               sndId -- last id used is sndId
+
+    act = store >> mapM_ handleEvent withTData es
 
     f (_, lastS, ss) = (map _sSlab ss, lastS^.sRMap, lastS^.sMaxX)
 buildTrapezoidalMap' _ _ = error "buildTrapezoidalMap': Starting with a non-start event."
 
-handleEvent        :: (Point 2 r, EventData e p r) -> Sweep t e p r ()
-handleEvent (p, d) = undefined
---   undefined
+
+-- get the next available trapezoidId
+takeNextId :: Sweep TrapezoidId
+takeNextId = sLastUsed %~ nextId
+
+  -- modify (sLastUsed %- nextId)
+
+
+
+
+handleEvent              :: (TrapezoidRep e p r -> TrapezoidRep e p r :+ t)
+                         -> (Point 2 r, EventData e p r) -> Sweep t e p r ()
+handleEvent mkT (p, Start s) = do
+    i <- takeNextId
+    let --i      = st^.sFirstFree
+--        exTree = st^.sSlab.slabData
+        px     = p^.xCoord
+        low    = TrapezoidRep i px Nothing -- TODO: Check the nothing
+    j <- takeNextId
+
+    let high = TrapezoidRep j px (Just s)
+
+
+
+        slab'  = VSlab px (ES.insertAll [mkT low, mkT high] $ exTree { ES.compareBy = compareAt px})
+    put $ SweepStatus slab' (st^.sRMap) px (nextId j)
+
+
+
 
 -- sweep                        :: (Ord r, Monoid t)
 --                              => SweepStatus t e p r
