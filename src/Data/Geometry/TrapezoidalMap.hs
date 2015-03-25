@@ -182,18 +182,28 @@ makeLenses ''VSlab
 
 
 -- | Given a vertical slab of Trapezoids, locate the trapezoid containing the query point
-findTrapezoidRep                :: (Ord r, Num r)
-                                => Point 2 r -> VSlab t e p r -> TrapezoidQuery t e p r
-findTrapezoidRep p (VSlab _ es) = TrapezoidQuery cur high
+findTrapezoidRep    :: (Ord r, Num r)
+                    => Point 2 r -> VSlab t e p r -> TrapezoidQuery t e p r
+findTrapezoidRep p s = TrapezoidQuery cur high
   where
-    -- Since we explicitly store the bottomless and topless trapezoid, we are guaranteed
-    -- to find a traprep.
-    (belowT,aboveT) = ES.splitMonotone (maybe True pred . (^.core.repBottom)) es
+    (belowT,aboveT) = splitSlabAt p s
 
     -- low         = ES.maximum belowT
     (cur:above) = ES.viewL aboveT
     high        = listToMaybe above
 
+
+-- | Given a point p, split the Expset into two sets; the first containing everything
+-- below p, the second everything above p. Hence, the trap. containing p is actually the
+-- first trapezoid from the above list.
+splitSlabAt                :: (Ord r, Num r) => Point 2 r -> VSlab t e p r ->
+                              ( ExpSet (TrapezoidRep e p r :+ t)
+                              , ExpSet (TrapezoidRep e p r :+ t)
+                              )
+splitSlabAt p (VSlab _ es) = ES.splitMonotone (maybe True pred . (^.core.repBottom)) es
+                             -- Since we explicitly store the bottomless and
+                             -- topless trapezoid, we are guaranteed to find a traprep.
+  where
             -- Test if p lies above or on the segment s.
              -- if we turn clockwise then p is below the segment
              -- hence we should return False
@@ -318,37 +328,49 @@ buildTrapezoidalMap' ((p,Start s) :| es) mkT = f $ runPersistentState act initia
                                px
                                sndId -- last id used is sndId
 
-    act = store >> mapM_ handleEvent withTData es
+    -- act :: Sweep t e p r ()
+    act = store >> mapM_ (handleEvent withTData) es
 
     f (_, lastS, ss) = (map _sSlab ss, lastS^.sRMap, lastS^.sMaxX)
 buildTrapezoidalMap' _ _ = error "buildTrapezoidalMap': Starting with a non-start event."
 
 
 -- get the next available trapezoidId
-takeNextId :: Sweep TrapezoidId
-takeNextId = sLastUsed %~ nextId
+takeNextId :: Sweep t e p r TrapezoidId
+takeNextId = sLastUsed %= nextId >> fmap (^.sLastUsed) get
 
-  -- modify (sLastUsed %- nextId)
+-- | Given a new x value, a list of new trapezoids and a VSlab, construct the
+-- new slab starting at x.
+insertAllAt                  :: (Ord r, Fractional r) => r -> [TrapezoidRep e p r :+ t]
+                                -> VSlab t e p r -> VSlab t e p r
+insertAllAt x vs (VSlab _ t) = VSlab x . ES.insertAll vs $ t { ES.compareBy  = compareAt x }
 
 
-
-
-handleEvent              :: (TrapezoidRep e p r -> TrapezoidRep e p r :+ t)
+handleEvent              :: (Ord r, Fractional r)
+                         => (TrapezoidRep e p r -> TrapezoidRep e p r :+ t)
                          -> (Point 2 r, EventData e p r) -> Sweep t e p r ()
 handleEvent mkT (p, Start s) = do
+    -- Find the segment b just below p
+    (below,above') <- uses sSlab (splitSlabAt p)
+    let (containingP, above) = undefined -- ES.extractMinimum
+        b                    = containingP^.core.repBottom
+    -- create a new segment with b as bottom segment
     i <- takeNextId
-    let --i      = st^.sFirstFree
---        exTree = st^.sSlab.slabData
-        px     = p^.xCoord
-        low    = TrapezoidRep i px Nothing -- TODO: Check the nothing
+    let px     = p^.xCoord
+        low    = TrapezoidRep i px b
     j <- takeNextId
-
     let high = TrapezoidRep j px (Just s)
+    -- update the vertical slab, by replacing the old trapezoid containing p by
+    -- the two new ones
+    sSlab %= undefined -- combine: below <> fromLisst <> above insertAllAt px [mkT low, mkT high]
 
 
 
-        slab'  = VSlab px (ES.insertAll [mkT low, mkT high] $ exTree { ES.compareBy = compareAt px})
-    put $ SweepStatus slab' (st^.sRMap) px (nextId j)
+
+handleEvent mkT (p, End s) = undefined
+
+    --     slab'  = VSlab px (ES.insertAll [mkT low, mkT high] $ exTree { ES.compareBy = compareAt px})
+    -- put $ SweepStatus slab' (st^.sRMap) px (nextId j)
 
 
 
