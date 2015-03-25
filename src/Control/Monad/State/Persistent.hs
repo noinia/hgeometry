@@ -4,6 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Control.Monad.State.Persistent( PersistentStateT
                                      , PersistentState
+                                     , store
                                      , runPersistentStateT
                                      , runPersistentState
                                      ) where
@@ -18,17 +19,25 @@ import Data.List.NonEmpty(NonEmpty(..),(<|),toList)
 
 --------------------------------------------------------------------------------
 
--- | A State monad that stores all earlier versions of the state.
+-- | A State monad that can store earlier versions of the state.
 newtype PersistentStateT s m a =
   PersistentStateT { runPersistentStateT' :: StateT (NonEmpty s) m a }
   deriving (Functor,Applicative,Monad)
            -- We store all the versions in reverse order
 
+-- | Create a snapshot of the current state and add it to the list of states
+-- that we store.
+store :: Monad m => PersistentStateT s m ()
+store = PersistentStateT $ do
+  ss@(s :| _) <- get
+  put (s <| ss)
+
+
 instance Monad m => MonadState s (PersistentStateT s m) where
   state f = PersistentStateT $ do
-              ss@(s :| _) <- get
+              (s :| os) <- get
               let (x,s') = f s
-              put (s' <| ss)
+              put (s' :| os)
               return x
 
 -- | run a persistentStateT, returns a triplet with the value, the last state
