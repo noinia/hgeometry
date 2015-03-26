@@ -6,13 +6,15 @@
 module Data.Geometry.Ipe.Writer where
 
 import           Control.Applicative hiding (Const(..))
-import           Control.Lens((^.),(^..))
+import           Control.Lens((^.),(^..),(.~),(&))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.Line
+import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
+import           Data.Geometry.Vector
 import           Data.Maybe(catMaybes)
 import           Data.Monoid
 import           Data.Proxy
@@ -196,13 +198,23 @@ instance IpeAttrName Clip     where attrName _ = "clip"
 
 --------------------------------------------------------------------------------
 
+instance IpeWriteText r => IpeWriteText (GT.Matrix 3 3 r) where
+  ipeWriteText (GT.Matrix m) = unwords' [a,b,c,d,e,f]
+    where
+      (Vector3 r1 r2 _) = m
+
+      (Vector3 a c e) = ipeWriteText <$> r1
+      (Vector3 b d f) = ipeWriteText <$> r2
+      -- TODO: The third row should be (0,0,1) I guess.
+
 
 instance IpeWriteText r => IpeWriteText (Operation r) where
-  ipeWriteText (MoveTo p)      = unwords' [ipeWriteText p, Just "m"]
-  ipeWriteText (LineTo p)      = unwords' [ipeWriteText p, Just "l"]
+  ipeWriteText (MoveTo p)      = unwords' [ ipeWriteText p, Just "m"]
+  ipeWriteText (LineTo p)      = unwords' [ ipeWriteText p, Just "l"]
   ipeWriteText (CurveTo p q r) = unwords' [ ipeWriteText p
                                           , ipeWriteText q
                                           , ipeWriteText r, Just "m"]
+  ipeWriteText (Ellipse m)     = unwords' [ ipeWriteText m, Just "e"]
   -- TODO: The rest
   ipeWriteText ClosePath       = Just "h"
 
@@ -299,6 +311,34 @@ ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
 
 writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
 writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
+
+
+instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
+  ipeWrite p = ipeWrite path
+    where
+      path = fromPolyLine $ p & points.Tr.traverse.extra .~ ()
+      -- TODO: Do something with the p's
+
+fromPolyLine = Path . S2.l1Singleton . PolyLineSegment
+
+
+instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
+  ipeWrite (LineSegment p q) = ipeWrite . fromPolyLine . fromPoints . map (^.core) $ [p,q]
+
+
+instance IpeWrite () where
+  ipeWrite = const Nothing
+
+-- instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
+--   ipeWrite (a,b) =
+
+-- | The default symbol for a point
+ipeWritePoint :: IpeWriteText r => Point 2 r -> Maybe (Node Text Text)
+ipeWritePoint = ipeWrite . flip Symbol "mark/disk(sx)"
+
+
+-- instance (IpeWriteText r) => IpeWrite (Circle r) where
+--   ipeWrite
 
 
 
