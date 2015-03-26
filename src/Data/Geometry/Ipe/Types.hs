@@ -120,7 +120,7 @@ fromCircle (Ball c r) = Ellipse m
     -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
     -- get the input circle.
 
-fromEllipse :: Num r => Operation r -> Maybe (Circle r)
+fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Circle r)
 fromEllipse (Ellipse m) | q `onBall` b = Just b
                         | otherwise    = Nothing
   where
