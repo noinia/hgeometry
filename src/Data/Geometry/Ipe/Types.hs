@@ -11,12 +11,14 @@ import           Control.Lens
 import           Data.Proxy
 import           Data.Vinyl
 
-
+import           Linear.Affine((.-.))
 
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Ball
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation(Matrix)
+import           Data.Geometry.Transformation(Matrix, transformationMatrix
+                                             , translation, uniformScaling, (|.|))
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
 
@@ -108,6 +110,15 @@ data Operation r = MoveTo (Point 2 r)
                  | ClosePath
                  deriving (Eq, Show)
 makePrisms ''Operation
+
+fromCircle            :: Floating r => Circle r -> Operation r
+fromCircle (Ball c r) = Ellipse m
+  where
+    m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
+
+-- fromEllipse :: Operation r -> Maybe (Circle r)
+-- fromEllipse (Ellipse m) = undefined
+
 
 --------------------------------------------------------------------------------
 -- | Group Attributes
