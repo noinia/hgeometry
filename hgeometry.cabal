@@ -36,6 +36,7 @@ library
 
 
                     Data.Geometry.Algorithms.ConvexHull
+                    Data.Geometry.Algorithms.SmallestEnclosingBall
 
                     Data.TypeLevel.Common
                     Data.TypeLevel.Filter
@@ -59,10 +60,14 @@ library
                    Data.Ext
 
                    Data.Seq2
-                   Control.Monad.State.Persistent
 
   other-modules:
                    Data.Geometry.Ipe.ParserPrimitives
+
+                   System.Random.Shuffle
+                   Control.Monad.State.Persistent
+
+
 
   -- other-extensions:
   build-depends: base             >= 4.7
@@ -90,6 +95,7 @@ library
 
                , hexpat           >= 0.20.7
                , mtl
+               , random
 
 
   hs-source-dirs: src

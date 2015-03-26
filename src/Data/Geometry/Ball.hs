@@ -28,6 +28,9 @@ type instance NumType   (Ball d r) = r
 type instance Dimension (Ball d r) = d
 
 
+-- | Given two points on the diameter of the ball, construct a ball.
+fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d r
+fromDiameter p q = let c = p .+^ (q .-. p ^/ 2) in Ball c (qdA c p)
 
 
 data PointBallQueryResult = Inside | On | Outside deriving (Show,Read,Eq)
@@ -42,7 +45,7 @@ p `inBall` (Ball c sr) = case qdA p c `compare` sr of
 p `insideBall` b = p `inBall` b == Inside
 
 
-
+p `inClosedBall` b = p `inBall` b /= Outside
 
 
 --------------------------------------------------------------------------------
@@ -53,7 +56,7 @@ type Circle = Ball 2
 -- input points are colinear we return Nothing
 --
 -- >>> circle (point2 0 10) (point2 10 0) (point2 (-10) 0)
-
+-- Just (Ball {_center = Point {toVec = Vector {_unV = fromList [0.0,0.0]}}, _squaredRadius = 100.0})
 circle       :: (Eq r, Fractional r)
              => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Circle r)
 circle p q r = case f p `intersect` f q of
