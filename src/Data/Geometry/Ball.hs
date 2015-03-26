@@ -32,7 +32,15 @@ type instance Dimension (Ball d r) = d
 fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d r
 fromDiameter p q = let c = p .+^ (q .-. p ^/ 2) in Ball c (qdA c p)
 
+-- | Construct a ball given the center point and a point p on the boundary.
+fromCenterAndPoint     :: (Arity d, Num r) => Point d r -> Point d r -> Ball d r
+fromCenterAndPoint c p = Ball c (qdA c p)
 
+-- | A d dimensional unit ball centered at the origin.
+unitBall :: (Arity d, Num r) => Ball d r
+unitBall = Ball origin (fromInteger 1)
+
+-- | Result of a inBall query
 data PointBallQueryResult = Inside | On | Outside deriving (Show,Read,Eq)
 
 inBall                 :: (Arity d, Ord r, Num r)
@@ -42,10 +50,35 @@ p `inBall` (Ball c sr) = case qdA p c `compare` sr of
                            EQ -> On
                            GT -> Outside
 
+-- | Test if a point lies strictly inside a ball
+--
+-- >>> (point2 0.5 0) `insideBall` unitBall
+-- True
+-- >>> (point2 1 0) `insideBall` unitBall
+-- False
+-- >>> (point2 2 0) `insideBall` unitBall
+-- False
+insideBall       :: (Arity d, Ord r, Num r)
+                 => Point d r -> Ball d r -> Bool
 p `insideBall` b = p `inBall` b == Inside
 
-
+-- | Test if a point lies in or on the ball
+--
+inClosedBall       :: (Arity d, Ord r, Num r)
+                    => Point d r -> Ball d r -> Bool
 p `inClosedBall` b = p `inBall` b /= Outside
+
+-- TODO: Add test cases
+
+-- | Test if a point lies on the boundary of a ball.
+--
+-- >>> (point2 1 0) `onBall` unitBall
+-- True
+-- >>> (point3 1 1 0) `onBall` unitBall
+-- False
+onBall       :: (Arity d, Ord r, Num r)
+             => Point d r -> Ball d r -> Bool
+p `onBall` b = p `inBall` b == On
 
 
 --------------------------------------------------------------------------------
