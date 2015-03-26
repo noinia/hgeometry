@@ -48,6 +48,13 @@ horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (v2 1 0)
 
 
+perpendicularTo                          :: Num r => Line 2 r -> Line 2 r
+perpendicularTo (Line p (Vector2 vx vy)) = Line p (v2 (-vy) vx)
+
+
+
+
+
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
 isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r -> Bool
@@ -94,7 +101,7 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
       | areParallel = if q `onLine` l then SameLine l else ParallelLines
       | otherwise   = LineLineIntersection r
     where
-      r = p .+^ alpha *^ v
+      r = q .+^ alpha *^ v
 
       denom       = vy * ux - vx * uy
       areParallel = denom == 0
