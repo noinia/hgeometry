@@ -15,7 +15,7 @@ import           Data.Geometry.Line
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import           Data.Maybe(catMaybes)
+import           Data.Maybe(catMaybes, mapMaybe)
 import           Data.Monoid
 import           Data.Proxy
 import qualified Data.Traversable as Tr
@@ -27,9 +27,7 @@ import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
 
 import qualified Data.ByteString as B
-import           Data.Maybe(mapMaybe)
 import           Data.List(nub)
-import           Data.Monoid
 import qualified Data.Sequence as S
 import qualified Data.Seq2     as S2
 import           Data.Text(Text)
@@ -234,7 +232,7 @@ instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttribute r rs) wh
 instance IpeWriteText r => IpeWrite (Path r) where
   ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt
     where
-      concat' = F.foldr1 (<>)
+      concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
       mt      = fmap concat' . Tr.sequence . fmap ipeWriteText $ segs
 
 --------------------------------------------------------------------------------
@@ -328,6 +326,14 @@ instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
 
 instance IpeWrite () where
   ipeWrite = const Nothing
+
+-- | slightly clever instance that produces a group if there is more than one
+-- element and just an element if there is only one value produced
+instance IpeWrite a => IpeWrite [a] where
+  ipeWrite xs = case mapMaybe ipeWrite xs of
+                  []  -> Nothing
+                  [n] -> Just n
+                  ns  -> Just $ Element "group" [] ns
 
 -- instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
 --   ipeWrite (a,b) =
