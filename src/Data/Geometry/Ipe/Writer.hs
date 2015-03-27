@@ -42,6 +42,11 @@ import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
 
+toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
+toIpeSelectionXML = fmap (format' . ipeSelection) . ipeWrite
+  where
+    ipeSelection x = Element "ipeselection" [] [x]
+
 toIpeXML :: IpeWrite t => t -> Maybe B.ByteString
 toIpeXML = fmap format' . ipeWrite
 
