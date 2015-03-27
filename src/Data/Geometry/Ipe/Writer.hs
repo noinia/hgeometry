@@ -225,6 +225,7 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
+  ipeWriteText (EllipseSegment  m) = ipeWriteText $ Ellipse m
 
 instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttribute r rs) where
   ipeWriteText (PathAttribute x) = ipeWriteText x

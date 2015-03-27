@@ -84,7 +84,7 @@ data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    | PolygonPath
                    | CubicBezierSegment     -- (CubicBezier 2 r)
                    | QuadraticBezierSegment -- (QuadraticBezier 2 r)
-                   | EllipseSegment
+                   | EllipseSegment (Matrix 3 3 r)
                    | ArcSegment
                    | SplineSegment          -- (Spline 2 r)
                    | ClosedSplineSegment    -- (ClosedSpline 2 r)
