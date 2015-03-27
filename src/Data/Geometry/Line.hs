@@ -9,7 +9,7 @@ import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List as L
-import           Data.Monoid
+import           Data.Semigroup
 import           Data.Ord(comparing)
 import           Data.Ext
 import           Data.Geometry.Box
@@ -302,6 +302,9 @@ deriving instance (Ord r, Ord p, Arity d)   => Ord     (PolyLine d p r)
 deriving instance Arity d                   => Functor (PolyLine d p)
 type instance Dimension (PolyLine d p r) = d
 type instance NumType   (PolyLine d p r) = r
+
+instance Semigroup (PolyLine d p r) where
+  (PolyLine pts) <> (PolyLine pts') = PolyLine $ pts <> pts'
 
 instance Arity d => IsBoxable (PolyLine d p r) where
   boundingBox = boundingBoxList . toListOf (points.traverse.core)
