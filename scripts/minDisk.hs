@@ -7,7 +7,7 @@ import           Data.Geometry.Algorithms.SmallestEnclosingBall
 import           Data.Geometry.Ball
 import           Data.Geometry.Line
 import           Data.Geometry.Point
-import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as B
 
 import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Writer
@@ -31,7 +31,8 @@ main = do
 main' fp = do
   pls    <- polylinesFromIpeFile fp
   gen <- getStdGen
-  mapM_ (B.putStr . fromJust . toIpeXML . minDisk' gen) pls
+  mapM_ (print . (^.enclosingDisk) . minDisk' gen) pls
+  mapM_ (B.putStrLn . fromJust . toIpeSelectionXML . minDisk' gen) pls
 
 
 minDisk' :: RandomGen g => g -> PolyLine 2 () Double -> DiskResult () Double

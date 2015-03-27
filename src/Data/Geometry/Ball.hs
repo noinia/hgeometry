@@ -30,7 +30,7 @@ type instance Dimension (Ball d r) = d
 
 -- | Given two points on the diameter of the ball, construct a ball.
 fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d r
-fromDiameter p q = let c = p .+^ (q .-. p ^/ 2) in Ball c (qdA c p)
+fromDiameter p q = let c = p .+^ ((q .-. p) ^/ 2) in Ball c (qdA c p)
 
 -- | Construct a ball given the center point and a point p on the boundary.
 fromCenterAndPoint     :: (Arity d, Num r) => Point d r -> Point d r -> Ball d r
