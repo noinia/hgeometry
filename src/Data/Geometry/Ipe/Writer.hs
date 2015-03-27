@@ -12,6 +12,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.Line
+import           Data.Geometry.Ball
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
@@ -331,21 +332,26 @@ instance IpeWrite () where
 -- | slightly clever instance that produces a group if there is more than one
 -- element and just an element if there is only one value produced
 instance IpeWrite a => IpeWrite [a] where
-  ipeWrite xs = case mapMaybe ipeWrite xs of
-                  []  -> Nothing
-                  [n] -> Just n
-                  ns  -> Just $ Element "group" [] ns
+  ipeWrite = combine . mapMaybe ipeWrite
 
--- instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
---   ipeWrite (a,b) =
+
+combine     :: [Node Text Text] -> Maybe (Node Text Text)
+combine []  = Nothing
+combine [n] = Just n
+combine ns  = Just $ Element "group" [] ns
+
+instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
+  ipeWrite (a,b) = combine . catMaybes $ [ipeWrite a, ipeWrite b]
+
+
 
 -- | The default symbol for a point
 ipeWritePoint :: IpeWriteText r => Point 2 r -> Maybe (Node Text Text)
 ipeWritePoint = ipeWrite . flip Symbol "mark/disk(sx)"
 
 
--- instance (IpeWriteText r) => IpeWrite (Circle r) where
---   ipeWrite
+instance (IpeWriteText r, Floating r) => IpeWrite (Circle r) where
+  ipeWrite = ipeWrite . Path . S2.l1Singleton . fromCircle
 
 
 

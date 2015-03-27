@@ -2,14 +2,15 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Algorithms.SmallestEnclosingBall where
 
-import qualified Data.List as L
-
 import           Control.Lens
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Point
+import qualified Data.List as L
 import           Data.List.NonEmpty
 import           Data.Maybe(fromMaybe)
+import           Data.Monoid
 
 import           System.Random
 import           System.Random.Shuffle(shuffle)
@@ -18,6 +19,10 @@ import           System.Random.Shuffle(shuffle)
 
 -- | List of two or three elements
 data TwoOrThree a = Two !a !a | Three !a !a !a deriving (Show,Read,Eq,Ord,Functor)
+
+instance F.Foldable TwoOrThree where
+  foldMap f (Two   a b)   = f a <> f b
+  foldMap f (Three a b c) = f a <> f b <> f c
 
 -- | The result of a smallest enclosing disk computation: The smallest ball
 --    and the points defining it

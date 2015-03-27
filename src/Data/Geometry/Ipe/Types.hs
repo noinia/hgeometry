@@ -113,8 +113,8 @@ data Operation r = MoveTo (Point 2 r)
 makePrisms ''Operation
 
 
-fromCircle            :: Floating r => Circle r -> Operation r
-fromCircle (Ball c r) = Ellipse m
+fromCircle            :: Floating r => Circle r -> PathSegment r
+fromCircle (Ball c r) = EllipseSegment m
   where
     m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
     -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
