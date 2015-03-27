@@ -16,7 +16,7 @@ import           Data.Geometry.Ball
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import           Data.Maybe(catMaybes, mapMaybe)
+import           Data.Maybe(catMaybes, mapMaybe, fromMaybe)
 import           Data.Monoid
 import           Data.Proxy
 import qualified Data.Traversable as Tr
@@ -28,6 +28,7 @@ import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
 
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as C
 import           Data.List(nub)
 import qualified Data.Sequence as S
 import qualified Data.Seq2     as S2
@@ -41,6 +42,9 @@ import           System.IO(hPutStrLn,stderr)
 import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
+
+printAsIpeSelection :: IpeWrite t => t -> IO ()
+printAsIpeSelection = C.putStrLn . fromMaybe "" . toIpeSelectionXML
 
 toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
 toIpeSelectionXML = fmap (format' . ipeSelection) . ipeWrite
