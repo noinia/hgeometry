@@ -2,9 +2,9 @@ module Data.Seq2 where
 
 import           Prelude hiding (foldr,foldl,head,tail,last)
 
-import           Data.Semigroup
-
 import           Control.Applicative
+import           Data.List.NonEmpty
+import           Data.Semigroup
 
 
 import qualified Data.Traversable as T
@@ -93,6 +93,14 @@ instance Functor ViewL1 where
 
 instance F.Foldable ViewL1 where
   foldMap = T.foldMapDefault
+
+-- | We throw away information here; namely that the combined list contains two elements.
+instance Semigroup (ViewL1 a) where
+  ~(a :< s) <> ~(b :< t) = a :< (s <> S.singleton b <> t)
+
+
+toNonEmpty          :: ViewL1 a -> NonEmpty a
+toNonEmpty ~(a :< s) = (a :| F.toList s)
 
 
 -- | O(1) get a left view
