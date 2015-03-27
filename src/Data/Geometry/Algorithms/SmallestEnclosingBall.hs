@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Algorithms.SmallestEnclosingBall where
 
 import qualified Data.List as L
@@ -20,9 +21,10 @@ data TwoOrThree a = Two !a !a | Three !a !a !a deriving (Show,Read,Eq,Ord,Functo
 
 -- | The result of a smallest enclosing disk computation: The smallest ball
 --    and the points defining it
-data DiskResult d p r = DiskResult { _enclosingBall  :: Ball d r
-                                   , _definingPoints :: TwoOrThree (Point d r :+ p)
-                                   }
+data DiskResult p r = DiskResult { _enclosingDisk  :: Circle r
+                                 , _definingPoints :: TwoOrThree (Point 2 r :+ p)
+                                 }
+makeLenses ''DiskResult
 
 -- | O(n) expected time algorithm to compute the smallest enclosing disk of a
 -- set of points. we need at least two points.
@@ -30,7 +32,7 @@ data DiskResult d p r = DiskResult { _enclosingBall  :: Ball d r
 smallestEnclosingDisk           :: (Ord r, Fractional r, RandomGen g)
                                 => g
                                 -> Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
-                                -> DiskResult 2 p r
+                                -> DiskResult p r
 smallestEnclosingDisk g p q pts = let (p':q':pts') = shuffle g (p:q:pts)
                                   in smallestEnclosingDisk' p' q' pts'
 
@@ -38,7 +40,7 @@ smallestEnclosingDisk g p q pts = let (p':q':pts') = shuffle g (p:q:pts)
 -- | Smallest enclosing disk.
 smallestEnclosingDisk'     :: (Ord r, Fractional r)
                            => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
-                           -> DiskResult 2 p r
+                           -> DiskResult p r
 smallestEnclosingDisk' a b = foldr addPoint (initial a b) . L.tails
   where
     -- The epty case occurs only initially
@@ -51,7 +53,7 @@ smallestEnclosingDisk' a b = foldr addPoint (initial a b) . L.tails
 -- | Smallest enclosing disk, given that p should be on it.
 smallestEnclosingDiskWithPoint              :: (Ord r, Fractional r)
                                             => Point 2 r :+ p -> NonEmpty (Point 2 r :+ p)
-                                               -> DiskResult 2 p r
+                                               -> DiskResult p r
 smallestEnclosingDiskWithPoint p (a :| pts) = foldr addPoint (initial p a) $ L.tails pts
   where
     addPoint []      br   = br
@@ -64,7 +66,7 @@ smallestEnclosingDiskWithPoint p (a :| pts) = foldr addPoint (initial p a) $ L.t
 -- | Smallest enclosing disk, given that p and q should be on it
 smallestEnclosingDiskWithPoints     :: (Ord r, Fractional r)
                                     => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
-                                    -> DiskResult 2 p r
+                                    -> DiskResult p r
 smallestEnclosingDiskWithPoints p q = foldr addPoint (initial p q)
   where
     addPoint r br@(DiskResult d _)
@@ -75,5 +77,5 @@ smallestEnclosingDiskWithPoints p q = foldr addPoint (initial p q)
 
 
 -- | Constructs the initial 'DiskResult' from two points
-initial     :: Fractional r => Point 2 r :+ p -> Point 2 r :+ p -> DiskResult 2 p r
+initial     :: Fractional r => Point 2 r :+ p -> Point 2 r :+ p -> DiskResult p r
 initial p q = DiskResult (fromDiameter (p^.core) (q^.core)) (Two p q)
