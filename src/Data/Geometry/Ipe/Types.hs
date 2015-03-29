@@ -181,17 +181,7 @@ type instance NumType (Group gt r) = r
 -- poly-kinded pair (i.e. a `gt :.: gs`)  where the gt is a type level list that captures
 -- *ALL* type information of the objects stored in this group, and the *gs* is a type level
 -- list that specifies which attributes this group itself has.
-
--- type family IpeObjectElF r (f :: IpeObjectType k) :: * where
---   IpeObjectElF r (IpeGroup (gt :.: gs)) = Group gt r  :+ Rec (GroupAttribute     r) gs
---   IpeObjectElF r (IpeImage is)          = Image r     :+ Rec (CommonAttribute    r) is
---   IpeObjectElF r (IpeTextLabel ts)      = TextLabel r :+ Rec (TextLabelAttribute r) ts
---   IpeObjectElF r (IpeMiniPage mps)      = MiniPage r  :+ Rec (MiniPageAttribute  r) mps
---   IpeObjectElF r (IpeUse  ss)           = IpeSymbol r :+ Rec (SymbolAttribute    r) ss
---   IpeObjectElF r (IpePath ps)           = Path r      :+ Rec (PathAttribute      r) ps
-
 type IpeObjectElF r (f :: IpeObjectType k) = IpeObjectValueElF r f :+ IpeObjectAttrElF r f
-
 
 type family IpeObjectValueElF r (f :: IpeObjectType k) :: * where
   IpeObjectValueElF r (IpeGroup (gt :.: gs)) = Group gt r
@@ -202,6 +192,17 @@ type family IpeObjectValueElF r (f :: IpeObjectType k) :: * where
   IpeObjectValueElF r (IpePath ps)           = Path r
 
 
+type family RevIpeObjectValueElF (t :: *) :: (k -> IpeObjectType k) where
+  RevIpeObjectValueElF (Group gt r)   = IpeGroup
+  RevIpeObjectValueElF (Image r)      = IpeImage
+  RevIpeObjectValueElF (TextLabel r)  = IpeTextLabel
+  RevIpeObjectValueElF (MiniPage r)   = IpeMiniPage
+  RevIpeObjectValueElF (IpeSymbol r ) = IpeUse
+  RevIpeObjectValueElF (Path r)       = IpePath
+
+
+
+
 type family IpeObjectAttrElF r (f :: IpeObjectType k) :: * where
   IpeObjectAttrElF r (IpeGroup (gt :.: gs)) = Rec (GroupAttribute     r) gs
   IpeObjectAttrElF r (IpeImage is)          = Rec (CommonAttribute    r) is
@@ -209,6 +210,16 @@ type family IpeObjectAttrElF r (f :: IpeObjectType k) :: * where
   IpeObjectAttrElF r (IpeMiniPage mps)      = Rec (MiniPageAttribute  r) mps
   IpeObjectAttrElF r (IpeUse  ss)           = Rec (SymbolAttribute    r) ss
   IpeObjectAttrElF r (IpePath ps)           = Rec (PathAttribute      r) ps
+
+
+
+type family IpeObjectAttrFunctorElF (f :: IpeObjectType k) :: (* -> u -> *) where
+  IpeObjectAttrFunctorElF (IpeGroup (gt :.: gs)) = GroupAttribute
+  IpeObjectAttrFunctorElF (IpeImage is)          = CommonAttribute
+  IpeObjectAttrFunctorElF (IpeTextLabel ts)      = TextLabelAttribute
+  IpeObjectAttrFunctorElF (IpeMiniPage mps)      = MiniPageAttribute
+  IpeObjectAttrFunctorElF (IpeUse  ss)           = SymbolAttribute
+  IpeObjectAttrFunctorElF (IpePath ps)           = PathAttribute
 
 
 

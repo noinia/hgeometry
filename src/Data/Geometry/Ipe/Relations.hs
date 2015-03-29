@@ -39,6 +39,8 @@ asIpe p g = p # g
 _ =: x = SymbolAttribute x :& RNil
 
 
+
+
 -- asIpe'       :: Prism' i g -> g -> Rec a ats -> i :+ Rec a ats
 -- asIpe' p g r = p # g :+ r
 
@@ -54,13 +56,68 @@ asIpe''       :: (Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
 asIpe'' p g r = IpeObject $ asIpe' p g r
 -- TODO: we need that IpeObjectValueElF is injective, so that i determines f. I guess
 -- the test below should compile then:
+-- TODO: We also need that it is injective?
 -- test = asIpe'' _diskMark origin $ (SSymbolStroke =: IpeColor (Named "red"))
 --                                  <+>
 --                                  RNil
 
-test = asIpe' _diskMark origin $ (SSymbolStroke =: IpeColor (Named "red"))
+-- asIpe'''       :: (Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
+--                   , r            ~ NumType i
+--                   , i            ~ IpeObjectValueElF r (it ats)
+--                   )
+--                   => Prism' i g -> g -> Rec (f r) ats -> IpeObject r (it ats)
+-- asIpe''' p g r = IpeObject $ asIpe' p g r
+-- | We need to expose ats to the outside world as well
+
+
+-- asIpe''' :: (
+
+--             )
+
+
+
+
+-- | IpeObjectValueElF/IpeObjectAttrElF needs to be injective in 'it'.
+asObject       :: Proxy it -> Proxy ats -> IpeObjectValueElF r (it ats) -> IpeObjectAttrElF r (it ats)
+               -> IpeObject r (it ats)
+asObject _ _ x r = IpeObject $ x :+ r
+
+asObject''       :: ( Rec (f r) ats    ~ IpeObjectAttrElF r (it ats)
+                    , RevIpeObjectValueElF (IpeObjectValueElF r (it ats)) ~ it
+                   )
+                => IpeObjectValueElF r (it ats) -> IpeObjectAttrElF r (it ats)
+               -> IpeObject r (it ats)
+asObject'' x r = IpeObject $ x :+ r
+
+
+asObject'       :: ( Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
+                   )
+                => Proxy it ->
+                   IpeObjectValueElF r (it ats) -> IpeObjectAttrElF r (it ats)
+               -> IpeObject r (it ats)
+asObject' _ x r = IpeObject $ x :+ r
+
+
+-- foo
+--   :: IpeObjectValueElF r fld
+--      -> IpeObjectAttrElF r fld -> IpeObject r fld
+-- foo x r = IpeObject $ x :+ r
+
+test2 = asObject'' -- (Proxy :: Proxy IpeUse)
+                  (Symbol origin "foo")
+                  ((SSymbolStroke =: IpeColor (Named "red")))
+
+-- test = asIpe''' _diskMark origin $ (SSymbolStroke =: IpeColor (Named "red"))
+--                                  <+>
+--                                  RNil
+--   where
+--     pr = Proxy :: Proxy SymbolAttribute
+
+
+test1 = asIpe' _diskMark origin $ (SSymbolStroke =: IpeColor (Named "red"))
                                  <+>
                                  RNil
+
 
 --------------------------------------------------------------------------------
 
