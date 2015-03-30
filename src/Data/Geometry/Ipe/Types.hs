@@ -14,12 +14,10 @@ import           Data.Vinyl
 import           Linear.Affine((.-.), qdA)
 
 import           Data.Ext
-import           Data.Geometry.Point
 import           Data.Geometry.Ball
+import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation(Transformation(..), Matrix
-                                             , transformBy, transformationMatrix
-                                             , translation, uniformScaling, (|.|))
+import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
 
@@ -113,23 +111,6 @@ data Operation r = MoveTo (Point 2 r)
                  deriving (Eq, Show)
 makePrisms ''Operation
 
-
-fromCircle            :: Floating r => Circle r -> PathSegment r
-fromCircle (Ball c r) = EllipseSegment m
-  where
-    m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
-    -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
-    -- get the input circle.
-
-fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Circle r)
-fromEllipse (Ellipse m) | q `onBall` b = Just b
-                        | otherwise    = Nothing
-  where
-    t = Transformation m
-    c = transformBy t origin
-    p = transformBy t (point2 1 0)
-    q = transformBy t (point2 0 1)
-    b = fromCenterAndPoint c p
 
 --------------------------------------------------------------------------------
 -- | Group Attributes
