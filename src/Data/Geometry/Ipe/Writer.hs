@@ -6,10 +6,11 @@
 module Data.Geometry.Ipe.Writer where
 
 import           Control.Applicative hiding (Const(..))
-import           Control.Lens((^.),(^..),(.~),(&))
+import           Control.Lens((^.),(^..),(.~),(&), Prism', (#))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
+-- import           Data.Geometry.Ipe.Relations
 import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.Line
 import           Data.Geometry.Ball
@@ -43,19 +44,39 @@ import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
 
+-- | Given a prism to convert something of type g into an ipe file, a file path,
+-- and a g. Convert the geometry and write it to file.
+writeIpe        :: ( RecAll (Page r) gs IpeWrite
+                   , IpeWriteText r
+                   ) => Prism' (IpeFile gs r) g -> FilePath -> g -> IO ()
+writeIpe p fp g = writeIpeFile (p # g) fp
+
+-- | Write an IpeFiele to file.
+writeIpeFile :: ( RecAll (Page r) gs IpeWrite
+                , IpeWriteText r
+                ) => IpeFile gs r -> FilePath -> IO ()
+writeIpeFile = writeIpeFile'
+
+-- | Convert the input to ipeXml, and prints it to standard out in such a way
+-- that the copied text can be pasted into ipe as a geometry object.
 printAsIpeSelection :: IpeWrite t => t -> IO ()
 printAsIpeSelection = C.putStrLn . fromMaybe "" . toIpeSelectionXML
 
+-- | Convert input into an ipe selection.
 toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
 toIpeSelectionXML = fmap (format' . ipeSelection) . ipeWrite
   where
     ipeSelection x = Element "ipeselection" [] [x]
 
+
+-- | Convert to Ipe xml
 toIpeXML :: IpeWrite t => t -> Maybe B.ByteString
 toIpeXML = fmap format' . ipeWrite
 
-writeIpeFile    :: IpeWrite t => FilePath -> t -> IO ()
-writeIpeFile fp = maybe err (B.writeFile fp) . toIpeXML
+
+-- | Convert to ipe XML and write the output to a file.
+writeIpeFile'      :: IpeWrite t => t -> FilePath -> IO ()
+writeIpeFile' i fp = maybe err (B.writeFile fp) . toIpeXML $ i
   where
     err = hPutStrLn stderr $
           "writeIpeFile: error converting to xml. File '" <> fp <> "'not written"
@@ -338,10 +359,10 @@ instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
 instance IpeWrite () where
   ipeWrite = const Nothing
 
--- | slightly clever instance that produces a group if there is more than one
--- element and just an element if there is only one value produced
-instance IpeWrite a => IpeWrite [a] where
-  ipeWrite = combine . mapMaybe ipeWrite
+-- -- | slightly clever instance that produces a group if there is more than one
+-- -- element and just an element if there is only one value produced
+-- instance IpeWrite a => IpeWrite [a] where
+--   ipeWrite = combine . mapMaybe ipeWrite
 
 
 combine     :: [Node Text Text] -> Maybe (Node Text Text)
@@ -349,18 +370,18 @@ combine []  = Nothing
 combine [n] = Just n
 combine ns  = Just $ Element "group" [] ns
 
-instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
-  ipeWrite (a,b) = combine . catMaybes $ [ipeWrite a, ipeWrite b]
+-- instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
+--   ipeWrite (a,b) = combine . catMaybes $ [ipeWrite a, ipeWrite b]
 
 
 
--- | The default symbol for a point
-ipeWritePoint :: IpeWriteText r => Point 2 r -> Maybe (Node Text Text)
-ipeWritePoint = ipeWrite . flip Symbol "mark/disk(sx)"
+-- -- | The default symbol for a point
+-- ipeWritePoint :: IpeWriteText r => Point 2 r -> Maybe (Node Text Text)
+-- ipeWritePoint = ipeWrite . flip Symbol "mark/disk(sx)"
 
 
-instance (IpeWriteText r, Floating r) => IpeWrite (Circle r) where
-  ipeWrite = ipeWrite . Path . S2.l1Singleton . fromCircle
+-- instance (IpeWriteText r, Floating r) => IpeWrite (Circle r) where
+--   ipeWrite = ipeWrite . Path . S2.l1Singleton . fromCircle
 
 
 
