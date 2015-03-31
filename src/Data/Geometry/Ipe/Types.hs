@@ -313,7 +313,21 @@ data IpePage gs r = IpePage { _layers :: [Layer]
               -- deriving (Eq, Show)
 makeLenses ''IpePage
 
-newtype Page r gs = Page { _unP :: Page gs r }
+
+
+
+
+-- pGr :: IpePage '[IpeUse '[Size]] Int
+pGr = IpePage [] [] gr
+
+
+
+
+newtype Page r gs = Page { _unP :: IpePage gs r }
+makeLenses ''Page
+
+
+ppGr = Page pGr
 
 type IpePages gss r = Rec (Page r) gss
 
@@ -325,5 +339,8 @@ data IpeFile gs r = IpeFile { _preamble :: Maybe IpePreamble
                             , _ipePages :: IpePages gs r
                             }
                   -- deriving (Eq,Show)
+
+-- ifP :: IpeFile '[ '[IpeUse '[Size]]] Int
+ifP = IpeFile Nothing [] (ppGr :& RNil)
 
 makeLenses ''IpeFile
