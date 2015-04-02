@@ -89,8 +89,8 @@ p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
 instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) where
 
-  data Intersection (Line 2 r) (Line 2 r) = SameLine             (Line 2 r)
-                                          | LineLineIntersection (Point 2 r)
+  data Intersection (Line 2 r) (Line 2 r) = SameLine             !(Line 2 r)
+                                          | LineLineIntersection !(Point 2 r)
                                           | ParallelLines -- ^ No intersection
                                             deriving (Show)
 
@@ -168,8 +168,8 @@ instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
 
   data Intersection (LineSegment 2 p r) (LineSegment 2 p r) =
-        OverlappingSegment         (LineSegment 2 p r)
-      | LineSegLineSegIntersection (Point 2 r)
+        OverlappingSegment         !(LineSegment 2 p r)
+      | LineSegLineSegIntersection !(Point 2 r)
       | NoIntersection
       deriving (Show,Eq)
 
@@ -188,10 +188,11 @@ instance (Ord r, Fractional r) =>
 
 instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
-  data Intersection (LineSegment 2 p r) (Line 2 r) = LineContainsSegment (LineSegment 2 p r)
-                                                   | LineLineSegmentIntersection (Point 2 r)
-                                                   | NoLineLineSegmentIntersection
-                                                   deriving (Show,Eq)
+  data Intersection (LineSegment 2 p r) (Line 2 r) =
+           LineContainsSegment !(LineSegment 2 p r)
+         | LineLineSegmentIntersection !(Point 2 r)
+         | NoLineLineSegmentIntersection
+         deriving (Show,Eq)
 
   nonEmptyIntersection NoLineLineSegmentIntersection = False
   nonEmptyIntersection _                             = True
