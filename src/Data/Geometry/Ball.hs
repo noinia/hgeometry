@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
