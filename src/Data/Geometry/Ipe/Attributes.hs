@@ -4,7 +4,8 @@ module Data.Geometry.Ipe.Attributes where
 import           Control.Lens
 import           Data.Text(Text)
 import           Data.Geometry.Transformation(Matrix)
-
+import           Data.Singletons
+import           Data.Singletons.TH
 
 
 --------------------------------------------------------------------------------
@@ -130,3 +131,13 @@ data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 
 -- A clipping path is a Path. Which is defined in Data.Geometry.Ipe.Types. To
 -- avoid circular imports, we define GroupAttrElf and GroupAttribute there.
+
+
+--------------------------------------------------------------------------------
+
+-- | Generate singletons for all the Universes
+genSingletons [ ''CommonAttributeUniverse
+              , ''SymbolAttributeUniverse
+              , ''PathAttributeUniverse
+              , ''GroupAttributeUniverse
+              ]

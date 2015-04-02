@@ -5,12 +5,12 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Algorithms.SmallestEnclosingBall
 import           Data.Geometry.Ball
+import           Data.Geometry
 import           Data.Geometry.Line
-import           Data.Geometry.Point
-import qualified Data.ByteString as B
 
-import           Data.Geometry.Ipe.Reader
+import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Writer
+import           Data.Geometry.Ipe.Reader
 import           Data.Maybe
 import           Data.Seq2
 import           System.Environment(getArgs)
@@ -31,7 +31,8 @@ main = do
 main' fp = do
   pls    <- polylinesFromIpeFile fp
   gen <- getStdGen
-  mapM_ (B.putStr . fromJust . toIpeXML . minDisk' gen) pls
+  mapM_ (print . (^.enclosingDisk) . minDisk' gen) pls
+  mapM_ (printAsIpeSelection . minDisk' gen) pls
 
 
 minDisk' :: RandomGen g => g -> PolyLine 2 () Double -> DiskResult () Double
