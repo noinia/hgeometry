@@ -77,7 +77,7 @@ size                                 :: (Arity d, Num r) => Box d p r -> Vector 
 size Empty                           = pure 0
 size (Box (Min a :+ _) (Max b :+ _)) = b .-. a
 
--- | Given a dimension, get the width of the box in that dimension.
+-- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
 -- >>> widthIn (C :: C 1) (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
 -- 1
