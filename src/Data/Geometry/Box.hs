@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Box( Box(..) , Rectangle
@@ -43,6 +44,24 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 instance (Arity d, Ord r, Semigroup p) => Monoid (Box d p r) where
   mempty = Empty
   b `mappend` b' = b <> b'
+
+
+instance (Arity d, Ord r) => (Box d p r) `IsIntersectableWith` (Box d p r) where
+  data Intersection (Box d p r) (Box d p r) = BoxBoxIntersection !(Box d () r)
+
+  nonEmptyIntersection (BoxBoxIntersection Empty) = True
+  nonEmptyIntersection _                          = False
+
+  (Box a b) `intersect` (Box c d) = BoxBoxIntersection $ Box (mi :+ ()) (ma :+ ())
+    where
+      mi = (a^.core) `max` (c^.core)
+      ma = (b^.core) `min` (d^.core)
+
+deriving instance (Show r, Show p, Arity d) => Show (Intersection (Box d p r) (Box d p r))
+deriving instance (Eq r, Eq p, Arity d)     => Eq   (Intersection (Box d p r) (Box d p r))
+deriving instance (Ord r, Ord p, Arity d)   => Ord  (Intersection (Box d p r) (Box d p r))
+
+
 
 
 -- Note that this does not guarantee the box is still a proper box
