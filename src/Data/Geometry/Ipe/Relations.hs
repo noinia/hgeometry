@@ -22,7 +22,7 @@ import           Data.Geometry.Transformation( Transformation(..), Matrix
 import           Data.Semigroup
 import qualified Data.Seq2     as S2
 import           Data.Text(Text)
-import           Data.Vinyl
+import           Data.Vinyl hiding ((=:))
 
 
 --------------------------------------------------------------------------------
