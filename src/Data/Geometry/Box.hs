@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Box( Box(..) , Rectangle
                         , IsBoxable(..)
@@ -12,14 +13,16 @@ import qualified Data.Foldable as F
 import           Data.Maybe(catMaybes)
 import           Data.Semigroup
 
-import           Control.Lens(Getter,to,(^.))
+import           Control.Lens(Getter,to,(^.),view)
+import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Vector(Arity)
+import qualified Data.Geometry.Vector as V
+import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
+import           Linear.Affine((.-.))
 
-import           Data.Ext
-
+import           GHC.TypeLits
 --------------------------------------------------------------------------------
 
 data Box d p r = Empty
@@ -64,9 +67,43 @@ minPoint = to' getMin _minP
 
 maxPoint :: Getter (Box d p r) (Maybe (Point d r :+ p))
 maxPoint = to' getMax _maxP
+
+-- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
+-- whereas one would normally count dimensions starting at zero.
+--
+-- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- Vector {_unV = fromList [1,2,3]}
+size                                 :: (Arity d, Num r) => Box d p r -> Vector d r
+size Empty                           = pure 0
+size (Box (Min a :+ _) (Max b :+ _)) = b .-. a
+
+-- | Given a dimension, get the width of the box in that dimension.
+--
+-- >>> widthIn (C :: C 1) (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- 1
+-- >>> widthIn (C :: C 3) (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- 3
+widthIn   :: forall proxy p i d r. (Arity d, Num r, Index' (i-1) d) => proxy i -> Box d p r -> r
+widthIn _ = view (V.element (C :: C (i - 1))) . size
+
 ----------------------------------------
 
 type Rectangle = Box 2
+
+-- >>> width (boundingBoxList [origin, point2 1 2] :: Rectangle () Int)
+-- 1
+-- >>> width (boundingBoxList [origin] :: Rectangle () Int)
+-- 0
+width :: Num r => Rectangle p r -> r
+width = widthIn (C :: C 1)
+
+-- >>> height (boundingBoxList [origin, point2 1 2] :: Rectangle () Int)
+-- 2
+-- >>> height (boundingBoxList [origin] :: Rectangle () Int)
+-- 0
+height :: Num r => Rectangle p r -> r
+height = widthIn (C :: C 2)
+
 
 --------------------------------------------------------------------------------
 
