@@ -164,10 +164,10 @@ combine = sconcat . S2.toNonEmpty
 -- _singlePage = prism' (IpePage [] [])
 
 singlePageFile :: Lens' (IpeFile '[gs] r) (IpePage gs r)
-singlePageFile = ipePages.singleLens.unP
+singlePageFile = ipePages.singletonRec.unP
 
-singleLens :: Lens' (Rec f '[r]) (f r)
-singleLens = lens (\(x :& RNil) -> x) (\_ x -> x :& RNil)
+singletonRec :: Lens' (Rec f '[r]) (f r)
+singletonRec = lens (\(x :& RNil) -> x) (\_ x -> x :& RNil)
 
 --------------------------------------------------------------------------------
 
