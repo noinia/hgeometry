@@ -27,5 +27,7 @@ files = geomModules
 
 geomModules = map ("src/Data/Geometry/" <>) [ "Point.hs"
                                             , "Vector.hs"
-                                            , "PolyLine.hs"
+                                            , "Line.hs"
+                                            , "Ball.hs"
+                                            , "Box.hs"
                                             ]
