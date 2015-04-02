@@ -91,7 +91,7 @@ unsafeCoord i = vector . FV.element (i-1)
 -- Point {toVec = Vector {_unV = fromList [10,2,3]}}
 -- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
 -- Point {toVec = Vector {_unV = fromList [1,2,4]}}
-coord   :: forall i d r. (Index' (i-1) d, Arity d) => C i -> Lens' (Point d r) r
+coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 
 
