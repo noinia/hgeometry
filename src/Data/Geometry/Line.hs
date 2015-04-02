@@ -19,7 +19,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Seq2 as S2
-import           Linear.Affine(Affine(..))
+import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
 
 --------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ p `onSegment` l = let s         = l^.start.core
                   in maybe False inRange $ scalarMultiple (p .-. s) (t .-. s)
 
 
-
+-- | Compute the overlap between the two segments (if they overlap/intersect)
 overlap     :: (Ord r, Fractional r, Arity d)
             => LineSegment d p r -> LineSegment d p r -> Maybe (LineSegment d p r)
 overlap l m = mim >>= \im -> case il `intersect` im of
@@ -289,6 +289,11 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
   where
     p@(pc :+ _) = s^.start
     q@(qc :+ _) = s^.end
+
+
+-- | Length of the line segment
+segmentLength                   :: (Arity d, Floating r) => LineSegment d p r -> r
+segmentLength (LineSegment p q) = distanceA (p^.core) (q^.core)
 
 --------------------------------------------------------------------------------
 
