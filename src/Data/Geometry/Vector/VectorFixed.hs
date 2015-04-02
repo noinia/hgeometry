@@ -28,6 +28,7 @@ import qualified Linear.V3 as L3
 
 --------------------------------------------------------------------------------
 
+-- | A proxy which can be used for the coordinates.
 data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 
 --------------------------------------------------------------------------------
@@ -45,7 +46,7 @@ type Arity  (n :: Nat)  = V.Arity (ToPeano n)
 
 type Index' i d = V.Index (ToPeano i) (ToPeano d)
 
-element   :: forall i d r. (Arity d, Index' i d) => Proxy i -> Lens' (Vector d r) r
+element   :: forall proxy i d r. (Arity d, Index' i d) => proxy i -> Lens' (Vector d r) r
 element _ = V.elementTy (undefined :: (ToPeano i))
 
 

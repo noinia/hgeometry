@@ -1,17 +1,18 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
 
 import Control.Lens
-
+import qualified Data.List as L
 import Data.Geometry.Line
 import Data.Geometry.Point
 import Data.Geometry.Properties
 import Data.Geometry.Vector
 import GHC.TypeLits
 import Linear.Affine(qdA, (.-.), (.+^))
-import Linear.Vector((^/))
+import Linear.Vector((^/),(*^),(^+^))
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ fromCenterAndPoint c p = Ball c (qdA c p)
 
 -- | A d dimensional unit ball centered at the origin.
 unitBall :: (Arity d, Num r) => Ball d r
-unitBall = Ball origin (fromInteger 1)
+unitBall = Ball origin 1
 
 -- | Result of a inBall query
 data PointBallQueryResult = Inside | On | Outside deriving (Show,Read,Eq)
@@ -103,3 +104,64 @@ circle p q r = case f p `intersect` f q of
     f p' = let v        = r .-. p'
                midPoint = p' .+^ (v ^/ 2)
            in perpendicularTo (Line midPoint v)
+
+
+instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle r) where
+
+  data Intersection (Line 2 r) (Circle r) = NoLineCircleIntersection
+                                          | LineTouchesCircle        (Point 2 r)
+                                          | LineCircleIntersection   (Point 2 r) (Point 2 r)
+                                            deriving (Show,Eq)
+
+  nonEmptyIntersection NoLineCircleIntersection = False
+  nonEmptyIntersection _                        = True
+
+  (Line p' v) `intersect` (Ball c r) = case discr `compare` 0 of
+                                          LT -> NoLineCircleIntersection
+                                          EQ -> LineTouchesCircle $ q' (lambda (+))
+                                          GT -> let [l1,l2] = L.sort [lambda (-), lambda (+)]
+                                                in LineCircleIntersection (q' l1) (q' l2)
+    where
+      (Vector2 vx vy)   = v
+      -- (px, py) is the vector/point after translating the circle s.t. it is centered at the
+      -- origin
+      pv@(Vector2 px py) = p' .-. c
+
+      -- q alpha is a point on the translated line
+      q alpha = Point $ pv ^+^ alpha *^ v
+      -- a point q alpha after translating it back in the situation where c is the center of the circle.
+      q' alpha = q alpha .+^ toVec c
+
+      -- let q lambda be the intersection point. We solve the following equation
+      -- solving the equation (q_x)^2 + (q_y)^2 = r^2 then yields the equation
+      -- L^2(vx^2 + vy^2) + L2(px*vx + py*vy) + px^2 + py^2 = 0
+      -- where L = \lambda
+      aa                   = vx^2 + vy^2
+      bb                   = 2 * (px * vx + py * vy)
+      cc                   = px^2 + py^2 - r^2
+      discr                = bb^2 - 4*aa*cc
+      discr'               = sqrt discr
+      -- This thus gives us the following value(s) for lambda
+      lambda (|+-|)        = (-bb |+-| discr') / (2*aa)
+
+
+instance (Ord r, Floating r) => (LineSegment 2 p r) `IsIntersectableWith` (Circle r) where
+
+  data Intersection (LineSegment 2 p r) (Circle r) = NoLineSegmentCircleIntersection
+                                                   | LineSegmentTouchesCircle    (Point 2 r)
+                                                   | LineSegmentIntersectsCircle (Point 2 r)
+                                                   | LineSegmentCrossesCircle    (Point 2 r) (Point 2 r)
+                                                   deriving (Show,Eq)
+
+  nonEmptyIntersection NoLineSegmentCircleIntersection = False
+  nonEmptyIntersection _                               = True
+
+  s `intersect` c = case toLine s `intersect` c of
+    NoLineCircleIntersection    -> NoLineSegmentCircleIntersection
+    LineTouchesCircle p         -> if p `onSegment` s then LineSegmentTouchesCircle p
+                                                      else NoLineSegmentCircleIntersection
+    LineCircleIntersection p q -> case (p `onSegment` s, q `onSegment` s) of
+                                    (False,False) -> NoLineSegmentCircleIntersection
+                                    (False,True)  -> LineSegmentIntersectsCircle q
+                                    (True, False) -> LineSegmentIntersectsCircle p
+                                    (True, True)  -> LineSegmentCrossesCircle p q
