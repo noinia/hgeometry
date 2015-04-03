@@ -3,8 +3,13 @@
 
 name:                hgeometry
 version:             0.4.0.0
-synopsis:            Geometric Primitives
--- description:
+synopsis:            Basic data types for geometric data, and geometric algorithms and data  structures.
+description:
+  HGeometry provides some basic geometry types, and geometric algorithms and
+  data structures for them. The main two focusses are: (1) Strong type safety,
+  and (2) implementations of geometric algorithms and data structures with good
+  asymptotic running time guarantees.
+
 homepage:            http://fstaals.net/software/hgeometry
 license:             BSD3
 license-file:        LICENSE
@@ -15,6 +20,10 @@ category:            Geometry
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+source-repository head
+  type:     git
+  location: http://github.com/noinia/hgeometry
+
 
 library
   exposed-modules:  Data.Geometry
