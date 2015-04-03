@@ -43,18 +43,10 @@ import           Linear.Affine hiding (Point(..), origin)
 
 
 --------------------------------------------------------------------------------
+-- * A d-dimensional Point
 
 -- | A d-dimensional point.
 newtype Point d r = Point { toVec :: Vector d r }
-
--- | Lens to access the vector corresponding to this point.
---
--- >>> (point3 1 2 3) ^. vector
--- Vector {_unV = fromList [1,2,3]}
--- >>> origin & vector .~ v3 1 2 3
--- Point {toVec = Vector {_unV = fromList [1,2,3]}}
-vector :: Lens' (Point d r) (Vector d r)
-vector = lens toVec (const Point)
 
 deriving instance (Show r, Arity d) => Show (Point d r)
 deriving instance (Eq r, Arity d)   => Eq (Point d r)
@@ -72,6 +64,27 @@ instance Arity d =>  Affine (Point d) where
 
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
+
+
+-- | Point representing the origin in d dimensions
+--
+-- >>> origin :: Point 4 Int
+-- Point {toVec = Vector {_unV = fromList [0,0,0,0]}}
+origin :: (Arity d, Num r) => Point d r
+origin = Point $ pure 0
+
+
+-- ** Accessing points
+
+-- | Lens to access the vector corresponding to this point.
+--
+-- >>> (point3 1 2 3) ^. vector
+-- Vector {_unV = fromList [1,2,3]}
+-- >>> origin & vector .~ v3 1 2 3
+-- Point {toVec = Vector {_unV = fromList [1,2,3]}}
+vector :: Lens' (Point d r) (Vector d r)
+vector = lens toVec (const Point)
+
 
 -- | Get the coordinate in a given dimension. This operation is unsafe in the
 -- sense that no bounds are checked. Consider using `coord` instead.
@@ -95,8 +108,10 @@ coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Po
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 
 
+
+
 --------------------------------------------------------------------------------
--- | Convenience functions to construct 2 and 3 dimensional points
+-- * Convenience functions to construct 2 and 3 dimensional points
 
 
 -- | We provide pattern synonyms Point2 and Point3 for 2 and 3 dimensional points. i.e.
@@ -184,8 +199,9 @@ zCoord :: (3 <=. d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
 
 --------------------------------------------------------------------------------
+-- * Point Functors
 
-
+-- | Types that we can transform by mapping a function on each point in the structure
 class PointFunctor g where
   pmap :: (Point (Dimension (g r)) r -> Point (Dimension (g s)) s) -> g r -> g s
 
@@ -196,16 +212,8 @@ instance PointFunctor (Point d) where
   pmap f = f
 
 
--- | Point representing the origin in d dimensions
---
--- >>> origin :: Point 4 Int
--- Point {toVec = Vector {_unV = fromList [0,0,0,0]}}
-origin :: (Arity d, Num r) => Point d r
-origin = Point $ pure 0
-
-
 --------------------------------------------------------------------------------
--- | Functions specific to Two Dimensional points
+-- * Functions specific to Two Dimensional points
 
 data CCW = CCW | CoLinear | CW
          deriving (Show,Eq)

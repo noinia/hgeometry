@@ -2,11 +2,23 @@
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE DeriveFunctor  #-}
-module Data.Geometry.Box( Box(..) , Rectangle
+module Data.Geometry.Box(
+                        -- * d-dimensional boxes
+                          Box(..)
+
+                        -- * Constructing bounding boxes
                         , IsBoxable(..)
                         , IsAlwaysTrueBoundingBox
-                        , minPoint, maxPoint
                         , boundingBoxList
+
+                        -- * Functions on d-dimensonal boxes
+                        , minPoint, maxPoint
+                        , extent, size, widthIn
+                        , inBox
+
+                        -- * Rectangles, aka 2-dimensional boxes
+                        , Rectangle
+                        , width , height
                         ) where
 
 import           Control.Applicative

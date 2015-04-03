@@ -16,7 +16,7 @@ import           Data.Geometry.Box
 import qualified Data.CircularList as C
 
 --------------------------------------------------------------------------------
-
+-- * Polygons
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
 data PolygonType = Simple | Multi
@@ -34,7 +34,7 @@ type MultiPolygon  = Polygon Multi
 type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
 
-
+-- * Functions on Polygons
 
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (C.CList (Point 2 r :+ p))
 outerBoundary = lens get set

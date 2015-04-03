@@ -1,10 +1,14 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor  #-}
-module Data.Geometry.Interval( Interval(..)
-
+module Data.Geometry.Interval(
+                             -- * 1 dimensional Intervals
+                               Interval(..)
                              , Intersection(..)
+
+                             -- * querying the start and end of intervals
                              , HasStart(..), HasEnd(..)
+                             -- * Working with intervals
                              , width
                              , inInterval
                              ) where

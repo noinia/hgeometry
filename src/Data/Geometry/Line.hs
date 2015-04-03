@@ -23,6 +23,7 @@ import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
 
 --------------------------------------------------------------------------------
+-- * d-dimensional Lines
 
 -- | A line is given by an anchor point and a vector indicating the
 -- direction.
@@ -37,6 +38,8 @@ deriving instance Arity d           => Functor (Line d)
 type instance Dimension (Line d r) = d
 type instance NumType   (Line d r) = r
 
+-- ** Functions on lines
+
 -- | A line may be constructed from two points.
 lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
 lineThrough p q = Line p (q .-. p)
@@ -46,7 +49,6 @@ verticalLine x = Line (point2 x 0) (v2 0 1)
 
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (v2 1 0)
-
 
 perpendicularTo                          :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p (Vector2 vx vy)) = Line p (v2 (-vy) vx)
@@ -123,6 +125,7 @@ instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
 
 
 --------------------------------------------------------------------------------
+-- * d-dimensional LineSegments
 
 -- | Line segments. LineSegments have a start and end point, both of which may
 -- contain additional data of type p.
@@ -156,6 +159,8 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
 
 
+-- ** Converting between Lines and LineSegments
+
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
 toLineSegment (Line p v) = LineSegment (p       :+ mempty)
                                        (p .+^ v :+ mempty)
@@ -163,6 +168,8 @@ toLineSegment (Line p v) = LineSegment (p       :+ mempty)
 toLine                                 :: (Num r, Arity d) => LineSegment d p r -> Line d r
 toLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
 
+
+-- *** Intersecting LineSegments
 
 instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
@@ -202,6 +209,8 @@ instance (Ord r, Fractional r) =>
     LineLineIntersection p | p `onSegment` s -> LineLineSegmentIntersection p
     _                                        -> NoLineLineSegmentIntersection
 
+
+-- * Functions on LineSegments
 
 -- | Test if a point lies on a line segment.
 --
@@ -297,6 +306,7 @@ segmentLength                   :: (Arity d, Floating r) => LineSegment d p r ->
 segmentLength (LineSegment p q) = distanceA (p^.core) (q^.core)
 
 --------------------------------------------------------------------------------
+-- * d-dimensional Polygonal Lines (PolyLines)
 
 -- | A Poly line in R^d
 newtype PolyLine d p r = PolyLine { _points :: S2.Seq2 (Point d r :+ p) }

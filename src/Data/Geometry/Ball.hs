@@ -15,6 +15,7 @@ import Linear.Affine(qdA, (.-.), (.+^))
 import Linear.Vector((^/),(*^),(^+^))
 
 --------------------------------------------------------------------------------
+-- * A d-dimensional ball
 
 data Ball d r = Ball { _center        :: Point d r
                      , _squaredRadius :: r
@@ -28,6 +29,7 @@ deriving instance Arity d           => Functor (Ball d)
 type instance NumType   (Ball d r) = r
 type instance Dimension (Ball d r) = d
 
+-- * Constructing Balls
 
 -- | Given two points on the diameter of the ball, construct a ball.
 fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d r
@@ -40,6 +42,8 @@ fromCenterAndPoint c p = Ball c (qdA c p)
 -- | A d dimensional unit ball centered at the origin.
 unitBall :: (Arity d, Num r) => Ball d r
 unitBall = Ball origin 1
+
+-- * Querying if a point lies in a ball
 
 -- | Result of a inBall query
 data PointBallQueryResult = Inside | On | Outside deriving (Show,Read,Eq)
@@ -83,6 +87,7 @@ p `onBall` b = p `inBall` b == On
 
 
 --------------------------------------------------------------------------------
+-- * Circles, aka 2-dimensional Balls
 
 type Circle = Ball 2
 

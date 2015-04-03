@@ -32,6 +32,7 @@ import qualified Linear.V3 as L3
 data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 
 --------------------------------------------------------------------------------
+-- * d dimensional Vectors
 
 -- | Datatype representing d dimensional vectors. Our implementation wraps the
 -- implementation provided by fixed-vector.
@@ -141,6 +142,7 @@ imap :: Arity d => (Int -> r -> s ) -> Vector d r -> Vector d s
 imap = V.imap
 
 --------------------------------------------------------------------------------
+-- * Functions specific to two and three dimensional vectors.
 
 -- | Construct a 2 dimensional vector
 v2     :: r -> r -> Vector 2 r

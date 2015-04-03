@@ -25,6 +25,7 @@ import qualified Data.Geometry.Vector as V
 import           Data.Vinyl.TypeLevel hiding (Nat)
 
 --------------------------------------------------------------------------------
+-- * Matrices
 
 -- | a matrix of n rows, each of m columns, storing values of type r
 newtype Matrix n m r = Matrix (Vector n (Vector m r))
@@ -41,6 +42,7 @@ mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
 (Matrix m) `mult` v = m !* v
 
 --------------------------------------------------------------------------------
+-- * Transformations
 
 -- | A type representing a Transformation for d dimensional objects
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (1 + d) (1 + d) r }
@@ -61,6 +63,7 @@ type instance NumType (Transformation d r) = r
 (Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
 
 --------------------------------------------------------------------------------
+-- * Transformable geometry objects
 
 -- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
@@ -88,7 +91,7 @@ instance ( Num r
 
 
 --------------------------------------------------------------------------------
--- | Common transformations
+-- * Common transformations
 
 translation   :: ( Num r, Arity (1 + d)
                  , AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
@@ -103,7 +106,7 @@ uniformScaling :: (Num r, Arity (1 + d), AlwaysTrueSnoc d, Arity d) => r -> Tran
 uniformScaling = scaling . pure
 
 --------------------------------------------------------------------------------
--- | Functions that execute transformations
+-- * Functions that execute transformations
 
 type AlwaysTrueTransformation d = (Arity (1 + d), AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
 
@@ -125,7 +128,7 @@ scaleUniformlyBy = transformBy  . uniformScaling
 
 
 --------------------------------------------------------------------------------
--- | Helper functions to easily create matrices
+-- * Helper functions to easily create matrices
 
 -- | Creates a row with zeroes everywhere, except at position i, where the
 -- value is the supplied value.
