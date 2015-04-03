@@ -11,17 +11,20 @@ module Data.Geometry.Box( Box(..) , Rectangle
 
 import           Control.Applicative
 import qualified Data.Foldable as F
-import           Data.Maybe(catMaybes)
+import           Data.Maybe(catMaybes, maybe)
 import           Data.Semigroup
 
 import           Control.Lens(Getter,to,(^.),view)
 import           Data.Ext
 import           Data.Geometry.Point
+import qualified Data.Geometry.Interval as I
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.Geometry.Vector as V
 import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
 import           Linear.Affine((.-.))
+
+import qualified Data.Vector.Fixed                as FV
 
 import           GHC.TypeLits
 --------------------------------------------------------------------------------
@@ -87,14 +90,39 @@ minPoint = to' getMin _minP
 maxPoint :: Getter (Box d p r) (Maybe (Point d r :+ p))
 maxPoint = to' getMax _maxP
 
+-- | Check if a point lies a box
+--
+-- >>> origin `inBox` (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- False
+-- >>> origin `inBox` (boundingBoxList [point3 (-1) (-2) (-3), point3 10 20 30] :: Box 3 () Int)
+-- True
+inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
+p `inBox` b = maybe False f $ extent b
+  where
+    f = FV.and . FV.zipWith I.inInterval (toVec p)
+
+
+
+-- | Get a vector with the extent of the box in each dimension. Note that the
+-- resulting vector is 0 indexed whereas one would normally count dimensions
+-- starting at zero.
+--
+-- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- Just (Vector {_unV = fromList [Interval {_start = 1 :+ (), _end = 10 :+ ()},Interval {_start = 2 :+ (), _end = 20 :+ ()},Interval {_start = 3 :+ (), _end = 30 :+ ()}]})
+extent                                 :: (Arity d)
+                                       => Box d p r -> Maybe (Vector d (I.Interval p r))
+extent Empty                           = Nothing
+extent (Box (Min a :+ p) (Max b :+ q)) = Just $ FV.zipWith f (toVec a) (toVec b)
+  where
+    f x y = I.Interval (x :+ p) (y :+ q)
+
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
 --
 -- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
 -- Vector {_unV = fromList [1,2,3]}
-size                                 :: (Arity d, Num r) => Box d p r -> Vector d r
-size Empty                           = pure 0
-size (Box (Min a :+ _) (Max b :+ _)) = b .-. a
+size :: (Arity d, Num r) => Box d p r -> Vector d r
+size = maybe (pure 0) (fmap I.width) . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --

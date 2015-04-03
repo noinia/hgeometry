@@ -5,6 +5,8 @@ module Data.Geometry.Interval( Interval(..)
 
                              , Intersection(..)
                              , HasStart(..), HasEnd(..)
+                             , width
+                             , inInterval
                              ) where
 
 import           Control.Lens
@@ -87,3 +89,11 @@ l@(lc :+ _) `maxOnCore` r@(rc :+ _) = if lc >= rc then l else r
 
 minOnCore :: Ord c => c :+ e -> c :+ e -> c :+ e
 l@(lc :+ _) `minOnCore` r@(rc :+ _) = if lc <= rc then l else r
+
+
+-- | Get the width of the interval
+width   :: Num r => Interval a r -> r
+width i = i^.end.core - i^.start.core
+
+inInterval       :: Ord r => r -> Interval a r -> Bool
+x `inInterval` i = i^.start.core <= x && x <= i^.end.core
