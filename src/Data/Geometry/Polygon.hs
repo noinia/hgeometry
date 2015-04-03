@@ -56,9 +56,11 @@ holes = lens get set
     set (MultiPolygon vs _) hs = MultiPolygon vs hs
 
 
--- vertices :: Polygon t p r -> [Point 2 r :+ p]
--- vertices (SimplePolygon vs)   = F.toList vs
--- vertices (MultiPolygon vs hs) = concat (F.toList vs : hs)
+-- | The vertices in the polygon. No guarantees are given on the order in which
+-- they appear!
+vertices :: Polygon t p r -> [Point 2 r :+ p]
+vertices (SimplePolygon vs)   = C.toList vs
+vertices (MultiPolygon vs hs) = C.toList vs ++ concatMap vertices hs
 
 
 
