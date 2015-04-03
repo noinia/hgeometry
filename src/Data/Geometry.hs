@@ -3,7 +3,7 @@ module Data.Geometry( module Prop
                     , module P
                     , module V
                     , module L
-                    , module A
+                    , module Linear.Affine
                     ) where
 
 
@@ -14,5 +14,5 @@ import Data.Geometry.Point as P
 import Data.Geometry.Vector as V
 import Data.Geometry.Line as L
 
-import Linear.Affine hiding (Point) as A
+import Linear.Affine hiding (Point, origin)
 import Linear.Vector as V
