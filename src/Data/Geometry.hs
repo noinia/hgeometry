@@ -1,12 +1,18 @@
-module Data.Geometry( module G ) where
+module Data.Geometry( module Prop
+                    , module T
+                    , module P
+                    , module V
+                    , module L
+                    , module A
+                    ) where
 
 
-import qualified Data.Geometry.Properties as G
-import qualified Data.Geometry.Transformation as G
+import Data.Geometry.Properties as Prop
+import Data.Geometry.Transformation as T
 
-import qualified Data.Geometry.Point as G
-import qualified Data.Geometry.Vector as G
-import qualified Data.Geometry.Line as G
+import Data.Geometry.Point as P
+import Data.Geometry.Vector as V
+import Data.Geometry.Line as L
 
-import qualified Linear.Affine as G
-import qualified Linear.Vector as G
+import Linear.Affine hiding (Point) as A
+import Linear.Vector as V
