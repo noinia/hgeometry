@@ -1,7 +1,8 @@
-[![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
-
 HGeometry
 =========
+
+[![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
+[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg)](https://hackage.haskell.org/package/hgeometry)
 
 HGeometry provides some basic geometry types, and geometric algorithms and data
 structures for them. The main two focusses are: (1) Strong type safety, and (2)
