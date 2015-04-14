@@ -161,7 +161,7 @@ instance (Ord r, Floating r) => (LineSegment 2 p r) `IsIntersectableWith` (Circl
   nonEmptyIntersection NoLineSegmentCircleIntersection = False
   nonEmptyIntersection _                               = True
 
-  s `intersect` c = case toLine s `intersect` c of
+  s `intersect` c = case supportingLine s `intersect` c of
     NoLineCircleIntersection    -> NoLineSegmentCircleIntersection
     LineTouchesCircle p         -> if p `onSegment` s then LineSegmentTouchesCircle p
                                                       else NoLineSegmentCircleIntersection
