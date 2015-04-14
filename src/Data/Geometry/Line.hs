@@ -128,6 +128,7 @@ instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
 --------------------------------------------------------------------------------
 -- * Supporting Lines
 
+-- | Types for which we can compute a supporting line, i.e. a line that contains the thing of type t.
 class HasSupportingLine t where
   supportingLine :: t -> Line (Dimension t) (NumType t)
 
@@ -137,12 +138,11 @@ instance HasSupportingLine (Line d r) where
 --------------------------------------------------------------------------------
 -- * d-dimensional Half-Lines
 
+-- | d-dimensional Half-Lines
 data HalfLine d r = HalfLine { _startPoint        :: Point  d r
                              , _halfLineDirection :: Vector d r
                              }
 makeLenses ''HalfLine
-
-
 
 deriving instance (Show r, Arity d) => Show    (HalfLine d r)
 deriving instance (Eq r, Arity d)   => Eq      (HalfLine d r)
@@ -160,7 +160,7 @@ instance HasStart (HalfLine d r) where
 instance HasSupportingLine (HalfLine d r) where
   supportingLine ~(HalfLine p v) = Line p v
 
--- | Half-Lines are transformable
+-- Half-Lines are transformable
 instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
   transformBy t = toHalfLine . transformPointFunctor t . toLineSegment'
     where
@@ -391,7 +391,7 @@ overlap l m = mim >>= \im -> case il `intersect` im of
     u = q^.core .-. p^.core
 
     -- lineseg l corresp to an interval from 0 1
-    il = Interval (fromIntegral 0 :+ p) (fromIntegral 1 :+ q)
+    il = Interval (0 :+ p) (1 :+ q)
 
 
     -- let lambda x denote the scalar s.t. x = p + (lambda x) *^ u
