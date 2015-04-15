@@ -1,9 +1,9 @@
-module Data.Geometry.Algorithms.ConvexHull( ConvexHull(..)
-                                          , DegenerateCH
-                                          , convexHull
-                                          , upperHull
-                                          , lowerHull
-                                          ) where
+module Algorithms.Geometry.ConvexHull.GrahamScan( ConvexHull(..)
+                                                , DegenerateCH
+                                                , convexHull
+                                                , upperHull
+                                                , lowerHull
+                                                ) where
 
 import           Control.Lens((^.))
 import           Data.Ext

@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
-module Data.Geometry.Algorithms.SmallestEnclosingBall where
+module Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction where
 
 import           Control.Lens
 import           Data.Ext
