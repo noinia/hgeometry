@@ -34,3 +34,7 @@ core = lens _core (\(_ :+ e) c -> (c :+ e))
 
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
 extra = lens _extra (\(c :+ _) e -> (c :+ e))
+
+
+only   :: a -> a :+ ()
+only x = x :+ ()
