@@ -18,18 +18,33 @@ Credits: http://2012.bapc.eu/
 Problem Statement
 =================
 
-The quickly shooting, maiden saving, gunslinging cowboy Luke finds himself in the den of his archenemy: the Dalton gang. He is trying to escape but is in constant danger of being shot. Fortunately his excellent marksmanship and quick reflexes give him the upper hand in a firefight: the gang members are all too scared to move, let alone draw their guns. That is, as long as Luke can see them. If he cannot see one of the thugs, then that Dalton will immediately fire upon Luke and kill the cowboy without fear of retaliation. Luke’s amazing eyesight allows him to cover a field of view of 180 degrees all the time. While doing so he can move around freely, even walking backward if necessary.
-Luke’s goal is to walk to the escape hatch in the den while turning in such a way that he will not be shot. He does not want to shoot any of the Daltons because that will surely result in a big fire fight. The Daltons all have varying heights, but you may assume that all the people and the hatch are of infinitesimal size.
+The quickly shooting, maiden saving, gunslinging cowboy Luke finds himself in
+the den of his archenemy: the Dalton gang. He is trying to escape but is in
+constant danger of being shot. Fortunately his excellent marksmanship and quick
+reflexes give him the upper hand in a firefight: the gang members are all too
+scared to move, let alone draw their guns. That is, as long as Luke can see
+them. If he cannot see one of the thugs, then that Dalton will immediately fire
+upon Luke and kill the cowboy without fear of retaliation. Luke’s amazing
+eyesight allows him to cover a field of view of 180 degrees all the time. While
+doing so he can move around freely, even walking backward if necessary.  Luke’s
+goal is to walk to the escape hatch in the den while turning in such a way that
+he will not be shot. He does not want to shoot any of the Daltons because that
+will surely result in a big fire fight. The Daltons all have varying heights,
+but you may assume that all the people and the hatch are of infinitesimal size.
 
 Input
 -----
 
-On the first line one positive number: the number of test cases, at most 100. After that per test case:
+On the first line one positive number: the number of test cases, at most
+100. After that per test case:
+
 * one line with two space-separated integers xL and yL: Luke’s starting position.
 * one line with two space-separated integers xE and yE : the position of the escape hatch.
 * one line with an integer n (1 <= n <= 1 000): the number of Dalton gang members.
 * n lines with two space-separated integers xi and yi: the position of the i-th Dalton.
-All x and y are in the range −10000 <= x,y <= 10000. Luke, the escape hatch and all Daltons all have distinct positions.
+
+All x and y are in the range −10000 <= x,y <= 10000. Luke, the escape hatch and
+all Daltons all have distinct positions.
 
 Output
 -----
