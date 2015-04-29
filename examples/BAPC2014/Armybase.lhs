@@ -15,22 +15,25 @@ $O(n^2 \log n)$ solution.
 > module BAPC2014.Armybase where
 
 > import Control.Applicative
-
+> import Control.Lens((^.))
 > import Data.Monoid
 > import Data.Ix
+> import Data.Ext
 
 > import Data.Geometry.Triangle
 > import Data.Geometry.Point
+> import Data.Geometry.Polygon
 > import Algorithms.Geometry.ConvexHull.GrahamScan
 > import qualified Data.Array   as A
 > import qualified Data.List     as L
+> import qualified Data.CircularList as C
 
 
 Preliminaries
 -------------
 
 
-> type PointSet = [Point 2 r]
+> type PointSet = [Point 2 Int]
 
 
 A value of type Half should still be halved. I.e. 'Half 2x = x'
@@ -85,16 +88,12 @@ Main Algorithm
 ---------------
 
 > maxBaseArea   :: PointSet -> Area
-> maxBaseArea p = case convexHull p of
->                   ConvexHull ch | isDegen ch -> fromInteger 0
->                   ConvexHull [a,b,c]         -> area $ Triangle (only a) (only b) (only c)
->                   ch                         -> maxAreaQuadrangle ch
->   where
->     isDegen []    = True
->     isDegen [_]   = True
->     isDegen [_,_] = True
->     isDegen _     = False
-
+> maxBaseArea p = case convexHull $ map only p of
+>     Left _                  -> 0
+>     Right ch@(ConvexHull h) -> case C.toList $ h ^. outerBoundary of
+>                                  [_,_]   -> 0
+>                                  [a,b,c] -> triangArea $ Triangle a b c
+>                                  _       -> maxAreaQuadrangle ch
 
 
 <div class="observation">
@@ -122,8 +121,8 @@ vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 > allChains (ConvexHull ch) =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
 >   where
->     n   = length ch
->     chA = listArray (1,n) ch
+>     n   = C.size $ ch^.outerBoundary
+>     chA = listArray (1,n) . map (^.core) . C.toList $ ch^.outerBoundary
 >     rest i = [i+2.. if i == 1 then n - 1 else n ]
 
 we make sure that we only select non-neighbouring pairs. Hence the i+2 in rest
@@ -147,8 +146,8 @@ diagonals $p$ and $q$ (and the chains connecting $p$ and $q$).
 > maxAreaQuadrangleWith             :: Point 2 Int -> Point 2 Int -> (Chain,Chain) -> Area
 > maxAreaQuadrangleWith p q (us,vs) = let pqu = findLargestTriang p q (Unimodal us)
 >                                         pqv = findLargestTriang q p (Unimodal vs)
-> --                                    in area pqu + area pqv
->                                     in (pqu `seq` area pqu) + (pqv `seq` area pqv)
+>                                     in (pqu `seq` triangArea pqu)
+>                                      + (pqv `seq` triangArea pqv)
 
 
 To efficiently find the largest triangle we use that the area is a unimodal
@@ -234,7 +233,7 @@ Input & Output
 > readPointSet :: [String] -> PointSet
 > readPointSet = map readPoint
 >   where
->     readPoint s = let [x,y] = map read . words $ s in Point (x,y)
+>     readPoint s = let [x,y] = map read . words $ s in point2 x y
 
 > readInput           :: [String] -> [PointSet]
 > readInput []        = []
@@ -242,12 +241,17 @@ Input & Output
 >                           (xs,ys) = L.splitAt n rest
 >                       in readPointSet xs : readInput ys
 
-> main :: IO ()
-> main = interact $
->          unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+
+> main :: String -> String
+> main = unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+
+
+-- -- > main :: IO ()
+-- -- > main = interact $
+-- -- >          unlines . map (showValue . maxBaseArea) . readInput . tail . lines
 
 -- > main :: IO ()
--- > main = readFile "testdata_ipe.in" >>=
+-- > main = readFile "examples/BAPC2014/testdata.in" >>=
 -- >        putStr . unlines . map (showValue . maxBaseArea) . readInput . tail . lines
 
 
