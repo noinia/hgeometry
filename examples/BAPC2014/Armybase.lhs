@@ -242,17 +242,12 @@ Input & Output
 >                       in readPointSet xs : readInput ys
 
 
-> main :: String -> String
-> main = unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+> armybase :: String -> String
+> armybase = unlines . map (showValue . maxBaseArea) . readInput . tail . lines
 
 
--- -- > main :: IO ()
--- -- > main = interact $
--- -- >          unlines . map (showValue . maxBaseArea) . readInput . tail . lines
-
--- > main :: IO ()
--- > main = readFile "examples/BAPC2014/testdata.in" >>=
--- >        putStr . unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+> main :: IO ()
+> main = interact armybase
 
 
 > show' (p,q,(a,b)) = (p,q,elems a, elems b)
