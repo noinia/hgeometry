@@ -12,6 +12,9 @@ import           Data.Maybe
 import           Linear.Affine(distanceA)
 
 {-
+
+Credits: http://2012.bapc.eu/
+
 Problem Statement
 =================
 
