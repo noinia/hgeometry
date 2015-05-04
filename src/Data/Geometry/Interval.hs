@@ -19,6 +19,26 @@ import           Data.Geometry.Properties
 
 --------------------------------------------------------------------------------
 
+data EndPointType = Open | Closed deriving (Show, Eq, Ord)
+
+newtype EndPoint (t :: EndPointType) a = EndPoint a deriving (Show,Read,Eq,Ord)
+
+
+data Range l u a = Range { _lower :: EndPoint l a
+                         , _upper :: EndPoint u a
+                         } deriving (Show,Read,Eq,Ord)
+
+
+-- newtype GLineSegment s t d p r = GLineSegment (GInterval s t p (Point d r))
+
+-- newtype GInterval s t a r = GInterval (Range s t (r :+ a))
+
+-- data CurveSegment c s t r = SubLine { _support :: c , _range :: Range s t r }
+
+
+
+--------------------------------------------------------------------------------
+
 data Interval a r = Interval { _start :: r :+ a
                              , _end   :: r :+ a
                              }
