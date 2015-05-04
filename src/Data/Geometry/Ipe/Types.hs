@@ -20,6 +20,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
+import           Data.Geometry.PolyLine
 
 import           Data.Geometry.Ipe.Attributes
 import           Data.Text(Text)

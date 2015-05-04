@@ -14,7 +14,8 @@ import           Data.Validation
 
 import           Data.Geometry.Point
 import           Data.Geometry.Line
-
+import           Data.Geometry.LineSegment
+import           Data.Geometry.PolyLine
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Attributes
 

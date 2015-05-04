@@ -9,7 +9,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Line
+import           Data.Geometry.PolyLine
 import           Data.Geometry.Point
 import qualified Data.List.NonEmpty as NE
 import           Data.Proxy

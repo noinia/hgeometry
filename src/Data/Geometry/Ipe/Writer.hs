@@ -10,10 +10,9 @@ import           Control.Lens((^.),(^..),(.~),(&), Prism', (#))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
--- import           Data.Geometry.Ipe.Relations
 import qualified Data.Geometry.Ipe.Types as IT
-import           Data.Geometry.Line
-import           Data.Geometry.Ball
+import           Data.Geometry.LineSegment
+import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
@@ -31,7 +30,6 @@ import           GHC.Exts
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.List(nub)
-import qualified Data.Sequence as S
 import qualified Data.Seq2     as S2
 import           Data.Text(Text)
 

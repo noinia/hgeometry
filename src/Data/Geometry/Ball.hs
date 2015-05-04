@@ -7,6 +7,7 @@ module Data.Geometry.Ball where
 import Control.Lens
 import qualified Data.List as L
 import Data.Geometry.Line
+import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Properties
 import Data.Geometry.Vector

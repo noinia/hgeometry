@@ -28,6 +28,8 @@ files = geomModules
 geomModules = map ("src/Data/Geometry/" <>) [ "Point.hs"
                                             , "Vector.hs"
                                             , "Line.hs"
+                                            , "LineSegment.hs"
+                                            , "PolyLine.hs"
                                             , "Ball.hs"
                                             , "Box.hs"
                                             ]
