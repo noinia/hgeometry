@@ -3,7 +3,7 @@ module Data.Geometry.Ipe.Relations where
 
 
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ball
@@ -82,21 +82,21 @@ _diskMark = _mark "mark/disk(sx)"
 
 -- | For PathSegment -> Circle we only need Num, so use the `fromCircle'
 -- function instead if that is the goal.
-_ellipseSegment :: (Floating r, Ord r) => Prism' (PathSegment r) (Circle r)
+_ellipseSegment :: (Floating r, Ord r) => Prism' (PathSegment r) (Circle () r)
 _ellipseSegment = prism' fromCircle f
   where
     f (EllipseSegment m) = fromEllipse (Ellipse m)
     f _                  = Nothing
 
 
-fromCircle            :: Floating r => Circle r -> PathSegment r
-fromCircle (Ball c r) = EllipseSegment m
+fromCircle                   :: Floating r => Circle p r -> PathSegment r
+fromCircle (Ball (c :+ _) r) = EllipseSegment m
   where
     m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
     -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
     -- get the input circle.
 
-fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Circle r)
+fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Circle () r)
 fromEllipse (Ellipse m) | q `onBall` b = Just b
                         | otherwise    = Nothing
   where
@@ -104,7 +104,7 @@ fromEllipse (Ellipse m) | q `onBall` b = Just b
     c = transformBy t origin
     p = transformBy t (point2 1 0)
     q = transformBy t (point2 0 1)
-    b = fromCenterAndPoint c p
+    b = fromCenterAndPoint (only c) (only p)
 
 
 
