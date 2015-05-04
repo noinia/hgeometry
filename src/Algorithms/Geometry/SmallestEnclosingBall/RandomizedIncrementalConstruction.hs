@@ -26,7 +26,7 @@ instance F.Foldable TwoOrThree where
 
 -- | The result of a smallest enclosing disk computation: The smallest ball
 --    and the points defining it
-data DiskResult p r = DiskResult { _enclosingDisk  :: Circle r
+data DiskResult p r = DiskResult { _enclosingDisk  :: Circle () r
                                  , _definingPoints :: TwoOrThree (Point 2 r :+ p)
                                  }
 makeLenses ''DiskResult

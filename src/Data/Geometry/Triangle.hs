@@ -4,6 +4,7 @@ module Data.Geometry.Triangle where
 import Control.Lens
 import Data.Ext
 import Data.Geometry.Point
+import Data.Geometry.Ball
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 
@@ -36,3 +37,9 @@ doubleArea (Triangle a b c) = abs $ ax*by - ax*cy
     Point2 ax ay = a^.core
     Point2 bx by = b^.core
     Point2 cx cy = c^.core
+
+
+-- | get the inscribed circle. Returns Nothing if the triangle is degenerate,
+-- i.e. if the points are colinear.
+inscribedCircle                  :: (Eq r, Fractional r) => Triangle p r -> Maybe (Circle () r)
+inscribedCircle (Triangle p q r) = circle (p^.core) (q^.core) (r^.core)
