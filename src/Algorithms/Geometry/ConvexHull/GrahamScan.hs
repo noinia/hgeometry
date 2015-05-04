@@ -1,9 +1,9 @@
-module Data.Geometry.Algorithms.ConvexHull( ConvexHull(..)
-                                          , DegenerateCH
-                                          , convexHull
-                                          , upperHull
-                                          , lowerHull
-                                          ) where
+module Algorithms.Geometry.ConvexHull.GrahamScan( ConvexHull(..)
+                                                , DegenerateCH
+                                                , convexHull
+                                                , upperHull
+                                                , lowerHull
+                                                ) where
 
 import           Control.Lens((^.))
 import           Data.Ext
@@ -14,7 +14,7 @@ import           Data.Monoid
 
 
 -- | Two dimensional convex hulls
-newtype ConvexHull p r = ConvexHull (SimplePolygon p r)
+newtype ConvexHull p r = ConvexHull { _hull :: (SimplePolygon p r) }
 --                       deriving (Show,Eq)
 
 type DegenerateCH p r = Maybe (Point 2 r :+ p)

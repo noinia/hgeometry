@@ -24,7 +24,6 @@ source-repository head
   type:     git
   location: http://github.com/noinia/hgeometry
 
-
 library
   exposed-modules:  Data.Geometry
                     Data.Geometry.Properties
@@ -36,6 +35,7 @@ library
 
                     Data.Geometry.Point
                     Data.Geometry.Line
+                    Data.Geometry.Triangle
 
 
                     -- Data.Geometry.Plane
@@ -45,8 +45,8 @@ library
                     Data.Geometry.Polygon
 
 
-                    Data.Geometry.Algorithms.ConvexHull
-                    Data.Geometry.Algorithms.SmallestEnclosingBall
+                    Algorithms.Geometry.ConvexHull.GrahamScan
+                    Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction
 
                     Data.TypeLevel.Common
                     Data.TypeLevel.Filter
@@ -131,6 +131,9 @@ library
                     , FlexibleContexts
 
 
+
+
+
 test-suite doctests
   type:          exitcode-stdio-1.0
   ghc-options:   -threaded
@@ -141,3 +144,28 @@ test-suite doctests
 
   -- Extensions are enabled in doctests.hs
   --  default-extensions:
+
+test-suite bapc_examples
+  type:          exitcode-stdio-1.0
+  ghc-options:   -O2
+  main-is:       bapc_examples.hs
+  hs-source-dirs: examples
+  build-depends: base
+               , doctest    >= 0.8
+               , array      >= 0.5
+               , hgeometry
+               , lens
+               , data-clist
+               , linear
+
+
+  default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , PatternSynonyms
+                    , ViewPatterns
