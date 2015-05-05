@@ -24,7 +24,6 @@ import           Data.Geometry.PolyLine
 
 import           Data.Geometry.Ipe.Attributes
 import           Data.Text(Text)
-import           Data.TypeLevel.Filter
 
 import           GHC.Exts
 
