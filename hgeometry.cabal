@@ -64,21 +64,21 @@ library
                     -- Data.Vinyl.Show
                     -- Data.Vinyl.Extra
 
---                    Data.Geometry.Vector
+                    Data.Geometry.Ipe
+                    Data.Geometry.Ipe.Attributes
+                    Data.Geometry.Ipe.Types
+                    Data.Geometry.Ipe.Writer
+                    Data.Geometry.Ipe.Reader
+                    Data.Geometry.Ipe.PathParser
+                    Data.Geometry.Ipe.Relations
 
-                   Data.Geometry.Ipe
-                   Data.Geometry.Ipe.Attributes
-                   Data.Geometry.Ipe.Types
-                   Data.Geometry.Ipe.Writer
-                   Data.Geometry.Ipe.Reader
-                   Data.Geometry.Ipe.PathParser
 
 
-                   Data.Ext
+                    Data.Ext
 
-                   Data.Seq2
-                   System.Random.Shuffle
-                   Control.Monad.State.Persistent
+                    Data.Seq2
+                    System.Random.Shuffle
+                    Control.Monad.State.Persistent
 
 
   other-modules:
@@ -95,8 +95,9 @@ library
                , lens             >= 4.2
                , singletons       >= 1.0       &&     < 1.1
                , bifunctors       >= 4.0
+--               , Frames           >= 0.1.0.0
 
-               , text             >= 0.11
+               , text             >= 1.1.1.0
                , bytestring       >= 0.10
 
                , semigroups       >= 0.15
@@ -112,7 +113,7 @@ library
                , data-clist       >= 0.0.7.2
                -- , HList            >= 0.3       &&     < 0.4
 
-               , hexpat           >= 0.20.7
+               , hexpat           >= 0.20.9
                , mtl
                , random
 
