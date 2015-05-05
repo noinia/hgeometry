@@ -1,5 +1,7 @@
 module Data.Geometry.Vector( module GV
                            , module FV
+                           , module LV
+                           , Affine(..)
                            , isScalarMultipleOf
                            , scalarMultiple
                            ) where
@@ -7,6 +9,8 @@ module Data.Geometry.Vector( module GV
 import qualified Data.Vector.Fixed                as FV
 import qualified Data.Foldable                    as F
 import           Data.Geometry.Vector.VectorFixed as GV
+import Linear.Affine(Affine(..))
+import Linear.Vector as LV
 
 
 -- | Test if v is a scalar multiple of u.
