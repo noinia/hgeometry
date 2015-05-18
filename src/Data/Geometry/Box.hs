@@ -22,18 +22,20 @@ module Data.Geometry.Box(
                         ) where
 
 import           Control.Applicative
-import qualified Data.Foldable as F
-import           Data.Maybe(catMaybes, maybe)
-import           Data.Semigroup
-
 import           Control.Lens(Getter,to,(^.),view)
+import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.Point
+import qualified Data.Foldable as F
 import qualified Data.Geometry.Interval as I
+import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.Geometry.Vector as V
 import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
+import           Data.Maybe(catMaybes, maybe)
+import           Data.Semigroup
+import           Data.Vinyl
+import           Frames.CoRec
 import           Linear.Affine((.-.))
 
 import qualified Data.Vector.Fixed                as FV
@@ -60,30 +62,30 @@ instance (Arity d, Ord r, Semigroup p) => Monoid (Box d p r) where
   mempty = Empty
   b `mappend` b' = b <> b'
 
+type instance IntersectionOf (Box d p r) (Box d q r) = '[ Box d () r]
+
 
 instance (Arity d, Ord r) => (Box d p r) `IsIntersectableWith` (Box d p r) where
-  data Intersection (Box d p r) (Box d p r) = BoxBoxIntersection !(Box d () r)
 
-  nonEmptyIntersection (BoxBoxIntersection Empty) = True
-  nonEmptyIntersection _                          = False
+  nonEmptyIntersection _ _ x = match x (H f :& RNil)
+    where
+      f Empty = True
+      f _     = False
 
-  (Box a b) `intersect` (Box c d) = BoxBoxIntersection $ Box (mi :+ ()) (ma :+ ())
+  bx@(Box a b) `intersect` by@(Box c d) = coRec $ Box (mi :+ ()) (ma :+ ())
     where
       mi = (a^.core) `max` (c^.core)
       ma = (b^.core) `min` (d^.core)
 
-deriving instance (Show r, Show p, Arity d) => Show (Intersection (Box d p r) (Box d p r))
-deriving instance (Eq r, Eq p, Arity d)     => Eq   (Intersection (Box d p r) (Box d p r))
-deriving instance (Ord r, Ord p, Arity d)   => Ord  (Intersection (Box d p r) (Box d p r))
 
-
-
-
--- Note that this does not guarantee the box is still a proper box
 instance PointFunctor (Box d p) where
-  pmap f (Box mi ma) = Box (fmap f <$> mi) (fmap f <$> ma)
+  pmap f (Box mi ma) = Box (first (fmap f) mi) (first (fmap f) ma)
+
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (Box d p r) where
+  -- Note that this does not guarantee the box is still a proper box Only use
+  -- this to do translations and scalings. Other transformations may produce
+  -- unexpected results.
   transformBy = transformPointFunctor
 
 
@@ -94,7 +96,7 @@ to'     :: (m -> Point d r) -> (Box d p r -> m :+ p) ->
            Getter (Box d p r) (Maybe (Point d r :+ p))
 to' f g = to $ \x -> case x of
                   Empty -> Nothing
-                  b     -> Just . fmap f . g $ b
+                  b     -> Just . first f . g $ b
 
 minPoint :: Getter (Box d p r) (Maybe (Point d r :+ p))
 minPoint = to' getMin _minP
@@ -111,7 +113,7 @@ maxPoint = to' getMax _maxP
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `inBox` b = maybe False f $ extent b
   where
-    f = FV.and . FV.zipWith I.inInterval (toVec p)
+    f = FV.and . FV.zipWith I.inRange (toVec p)
 
 
 
@@ -120,13 +122,11 @@ p `inBox` b = maybe False f $ extent b
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
--- Just (Vector {_unV = fromList [Interval {_start = 1 :+ (), _end = 10 :+ ()},Interval {_start = 2 :+ (), _end = 20 :+ ()},Interval {_start = 3 :+ (), _end = 30 :+ ()}]})
+-- Just (Vector {_unV = fromList [GRange {_lower = EndPoint {_unEndPoint = 1}, _upper = EndPoint {_unEndPoint = 10}},GRange {_lower = EndPoint {_unEndPoint = 2}, _upper = EndPoint {_unEndPoint = 20}},GRange {_lower = EndPoint {_unEndPoint = 3}, _upper = EndPoint {_unEndPoint = 30}}]})
 extent                                 :: (Arity d)
-                                       => Box d p r -> Maybe (Vector d (I.Interval p r))
+                                       => Box d p r -> Maybe (Vector d (I.SymRange I.Closed r))
 extent Empty                           = Nothing
-extent (Box (Min a :+ p) (Max b :+ q)) = Just $ FV.zipWith f (toVec a) (toVec b)
-  where
-    f x y = I.Interval (x :+ p) (y :+ q)
+extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith I.closedRange (toVec a) (toVec b)
 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.

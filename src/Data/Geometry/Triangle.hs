@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 module Data.Geometry.Triangle where
 
+import Data.Bifunctor
 import Control.Lens
 import Data.Ext
 import Data.Geometry.Point
@@ -11,7 +12,11 @@ import Data.Geometry.Transformation
 data Triangle p r = Triangle (Point 2 r :+ p)
                              (Point 2 r :+ p)
                              (Point 2 r :+ p)
-                    deriving (Show,Eq,Functor)
+                    deriving (Show,Eq)
+
+instance Functor (Triangle p) where
+  fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)
+
 
 type instance NumType   (Triangle p r) = r
 type instance Dimension (Triangle p r) = 2

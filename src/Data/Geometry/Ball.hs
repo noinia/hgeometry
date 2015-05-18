@@ -1,20 +1,21 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
 
-import Data.Ext
-import Control.Lens hiding (only)
+import           Control.Lens hiding (only)
+import           Data.Bifunctor
+import           Data.Ext
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.Vector
 import qualified Data.List as L
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Vector
-import GHC.TypeLits
-import Linear.Affine(qdA, (.-.), (.+^))
-import Linear.Vector((^/),(*^),(^+^))
+import           Data.Vinyl
+import           GHC.TypeLits
+import           Linear.Affine(qdA, (.-.), (.+^))
+import           Linear.Vector((^/),(*^),(^+^))
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
@@ -26,10 +27,13 @@ makeLenses ''Ball
 
 deriving instance (Show r, Show p, Arity d) => Show (Ball d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq (Ball d p r)
-deriving instance Arity d                   => Functor (Ball d p)
 
 type instance NumType   (Ball d p r) = r
 type instance Dimension (Ball d p r) = d
+
+instance Arity d => Functor (Ball d p) where
+  fmap f (Ball c r) = Ball (first (fmap f) c) (f r)
+
 
 -- * Constructing Balls
 
@@ -100,11 +104,12 @@ type Circle = Ball 2
 -- Just (Ball {_center = Point {toVec = Vector {_unV = fromList [0.0,0.0]}} :+ (), _squaredRadius = 100.0})
 circle       :: (Eq r, Fractional r)
              => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Circle () r)
-circle p q r = case f p `intersect` f q of
-                 LineLineIntersection c -> Just $ Ball (only c) (qdA c p)
-                 _                      -> Nothing -- The two lines f p and f q are
-                                                   -- parallel, that means the three
-                                                   -- input points where colinear.
+circle p q r = undefined
+-- circle p q r = case f p `intersect` f q of
+--                  LineLineIntersection c -> Just $ Ball (only c) (qdA c p)
+--                  _                      -> Nothing -- The two lines f p and f q are
+--                                                    -- parallel, that means the three
+--                                                    -- input points where colinear.
   where
     -- Given a point p', get the line perpendicular, and through the midpoint
     -- of the line segment p'r
@@ -113,21 +118,24 @@ circle p q r = case f p `intersect` f q of
            in perpendicularTo (Line midPoint v)
 
 
+newtype Touching p = Touching p deriving (Show,Eq,Ord)
+
+-- | No intersection, one touching point, or two points
+type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection
+                                                       , Touching (Point 2 r)
+                                                       , (Point 2 r, Point 2 r)
+                                                       ]
+
+
 instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) where
 
-  data Intersection (Line 2 r) (Circle p r) = NoLineCircleIntersection
-                                            | LineTouchesCircle        (Point 2 r)
-                                            | LineCircleIntersection   (Point 2 r) (Point 2 r)
-                                              deriving (Show,Eq)
-
-  nonEmptyIntersection NoLineCircleIntersection = False
-  nonEmptyIntersection _                        = True
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Line p' v) `intersect` (Ball (c :+ _) r) = case discr `compare` 0 of
-                                                LT -> NoLineCircleIntersection
-                                                EQ -> LineTouchesCircle $ q' (lambda (+))
+                                                LT -> coRec $ NoIntersection
+                                                EQ -> coRec . Touching $ q' (lambda (+))
                                                 GT -> let [l1,l2] = L.sort [lambda (-), lambda (+)]
-                                                      in LineCircleIntersection (q' l1) (q' l2)
+                                                      in coRec $ (q' l1, q' l2)
     where
       (Vector2 vx vy)   = v
       -- (px, py) is the vector/point after translating the circle s.t. it is centered at the
@@ -152,23 +160,28 @@ instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) wh
       lambda (|+-|)        = (-bb |+-| discr') / (2*aa)
 
 
+-- | A line segment may not intersect a circle, touch it, or intersect it
+-- properly in one or two points.
+type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
+                                                                , Touching (Point 2 r)
+                                                                , Point 2 r
+                                                                , (Point 2 r, Point 2 r)
+                                                                ]
+
+
 instance (Ord r, Floating r) => (LineSegment 2 p r) `IsIntersectableWith` (Circle q r) where
 
-  data Intersection (LineSegment 2 p r) (Circle q r) = NoLineSegmentCircleIntersection
-                                                     | LineSegmentTouchesCircle    (Point 2 r)
-                                                     | LineSegmentIntersectsCircle (Point 2 r)
-                                                     | LineSegmentCrossesCircle    (Point 2 r) (Point 2 r)
-                                                     deriving (Show,Eq)
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
-  nonEmptyIntersection NoLineSegmentCircleIntersection = False
-  nonEmptyIntersection _                               = True
-
-  s `intersect` c = case supportingLine s `intersect` c of
-    NoLineCircleIntersection    -> NoLineSegmentCircleIntersection
-    LineTouchesCircle p         -> if p `onSegment` s then LineSegmentTouchesCircle p
-                                                      else NoLineSegmentCircleIntersection
-    LineCircleIntersection p q -> case (p `onSegment` s, q `onSegment` s) of
-                                    (False,False) -> NoLineSegmentCircleIntersection
-                                    (False,True)  -> LineSegmentIntersectsCircle q
-                                    (True, False) -> LineSegmentIntersectsCircle p
-                                    (True, True)  -> LineSegmentCrossesCircle p q
+  s `intersect` c = match (supportingLine s `intersect` c) $
+       (H $ \NoIntersection -> coRec $ NoIntersection)
+    :& (H $ \(Touching p)   -> if p `onSegment` s then coRec $ Touching p
+                                                 else coRec $ NoIntersection
+       )
+    :& (H $ \(p,q)          -> case (p `onSegment` s, q `onSegment` s) of
+                                 (False,False) -> coRec NoIntersection
+                                 (False,True)  -> coRec q
+                                 (True, False) -> coRec p
+                                 (True, True)  -> coRec (p,q)
+       )
+    :& RNil

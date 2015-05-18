@@ -4,6 +4,7 @@ module Data.Geometry.PolyLine where
 
 import           Control.Applicative
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
@@ -25,7 +26,10 @@ makeLenses ''PolyLine
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq      (PolyLine d p r)
 deriving instance (Ord r, Ord p, Arity d)   => Ord     (PolyLine d p r)
-deriving instance Arity d                   => Functor (PolyLine d p)
+
+instance Arity d => Functor (PolyLine d p) where
+  fmap f (PolyLine ps) = PolyLine $ fmap (first (fmap f)) ps
+
 type instance Dimension (PolyLine d p r) = d
 type instance NumType   (PolyLine d p r) = r
 
@@ -39,7 +43,7 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor
 
 instance PointFunctor (PolyLine d p) where
-  pmap f = over points (fmap (fmap f))
+  pmap f = over points (fmap (first f))
 
 
 -- | pre: The input list contains at least two points

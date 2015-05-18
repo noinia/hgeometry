@@ -83,20 +83,21 @@ p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
   -- TODO: Maybe use a specialize pragma for 2D with an implementation using ccw
 
 
+-- | The intersection of two lines is either: NoIntersection, a point or a line.
+type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
+                                                     , Point 2 r
+                                                     , Line 2 r
+                                                     ]
 
 instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) where
 
-  data Intersection (Line 2 r) (Line 2 r) = SameLine             !(Line 2 r)
-                                          | LineLineIntersection !(Point 2 r)
-                                          | ParallelLines -- ^ No intersection
-                                            deriving (Show)
 
-  nonEmptyIntersection ParallelLines = False
-  nonEmptyIntersection _             = True
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
   l@(Line p (Vector2 ux uy)) `intersect` m@(Line q v@(Vector2 vx vy))
-      | areParallel = if q `onLine` l then SameLine l else ParallelLines
-      | otherwise   = LineLineIntersection r
+      | areParallel = if q `onLine` l then coRec l
+                                      else coRec NoIntersection
+      | otherwise   = coRec r
     where
       r = q .+^ alpha *^ v
 
@@ -109,15 +110,6 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
 
       Point2 px py = p
       Point2 qx qy = q
-
-instance (Eq r, Fractional r) => Eq (Intersection (Line 2 r) (Line 2 r)) where
-  (SameLine l)             == (SameLine m)             = case (l `intersect` m) of
-                                                           SameLine _ -> True
-                                                           _          -> False
-  (LineLineIntersection p) == (LineLineIntersection q) = p == q
-  ParallelLines            == ParallelLines            = True
-  _                        == _                        = False
-
 
 
 --------------------------------------------------------------------------------

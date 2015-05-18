@@ -49,69 +49,69 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
       toLineSegment' :: (Num r, Arity d) => HalfLine d r -> LineSegment d () r
       toLineSegment' (HalfLine p v) = LineSegment (p :+ ()) ((p .+^ v) :+ ())
 
-instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
-  data Intersection (HalfLine 2 r) (Line 2 r) = NoHalfLineLineIntersection
-                                              | HalfLineLineIntersection !(Point 2 r)
-                                              | HalfLineLineOverlap      !(HalfLine 2 r)
-                                              deriving (Show,Eq)
+-- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
+--   data Intersection (HalfLine 2 r) (Line 2 r) = NoHalfLineLineIntersection
+--                                               | HalfLineLineIntersection !(Point 2 r)
+--                                               | HalfLineLineOverlap      !(HalfLine 2 r)
+--                                               deriving (Show,Eq)
 
-  nonEmptyIntersection NoHalfLineLineIntersection = False
-  nonEmptyIntersection _                          = True
+--   nonEmptyIntersection NoHalfLineLineIntersection = False
+--   nonEmptyIntersection _                          = True
 
-  hl `intersect` l = case supportingLine hl `intersect` l of
-    SameLine _             -> HalfLineLineOverlap hl
-    LineLineIntersection p -> if p `onHalfLine` hl then HalfLineLineIntersection p
-                                                   else NoHalfLineLineIntersection
-    ParallelLines          -> NoHalfLineLineIntersection
-
-
-instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (HalfLine 2 r) where
-  data Intersection (HalfLine 2 r) (HalfLine 2 r) = NoHalfLineHalfLineIntersection
-                                                  | HLHLIntersectInPoint    !(Point 2 r)
-                                                  | HLHLIntersectInSegment  !(LineSegment 2 () r)
-                                                  | HLHLIntersectInHalfLine !(HalfLine 2 r)
-                                                  deriving (Show,Eq)
-
-  nonEmptyIntersection NoHalfLineHalfLineIntersection = False
-  nonEmptyIntersection _                              = True
-
-  hl' `intersect` hl = case supportingLine hl' `intersect` supportingLine hl of
-    ParallelLines          -> NoHalfLineHalfLineIntersection
-    LineLineIntersection p -> if p `onHalfLine` hl' && p `onHalfLine` hl then HLHLIntersectInPoint p
-                                                                         else NoHalfLineHalfLineIntersection
-    SameLine _             -> let p   = _startPoint hl'
-                                  q   = _startPoint hl
-                                  seg = LineSegment (p :+ ()) (q :+ ())
-                              in case (p `onHalfLine` hl, q `onHalfLine` hl') of
-                                   (False,False) -> NoHalfLineHalfLineIntersection
-                                   (False,True)  -> HLHLIntersectInHalfLine hl
-                                   (True, False) -> HLHLIntersectInHalfLine hl'
-                                   (True, True)  -> if hl == hl' then HLHLIntersectInHalfLine hl
-                                                                 else HLHLIntersectInSegment seg
+--   hl `intersect` l = case supportingLine hl `intersect` l of
+--     SameLine _             -> HalfLineLineOverlap hl
+--     LineLineIntersection p -> if p `onHalfLine` hl then HalfLineLineIntersection p
+--                                                    else NoHalfLineLineIntersection
+--     ParallelLines          -> NoHalfLineLineIntersection
 
 
+-- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (HalfLine 2 r) where
+--   data Intersection (HalfLine 2 r) (HalfLine 2 r) = NoHalfLineHalfLineIntersection
+--                                                   | HLHLIntersectInPoint    !(Point 2 r)
+--                                                   | HLHLIntersectInSegment  !(LineSegment 2 () r)
+--                                                   | HLHLIntersectInHalfLine !(HalfLine 2 r)
+--                                                   deriving (Show,Eq)
 
-instance (Ord r, Fractional r) => (LineSegment 2 p r) `IsIntersectableWith` (HalfLine 2 r) where
-  data Intersection (LineSegment 2 p r) (HalfLine 2 r) = NoSegmentHalfLineIntersection
-                                                       | SegmentHalfLineIntersection !(Point 2 r)
-                                                       | SegmentOnHalfLine           !(LineSegment 2 () r)
+--   nonEmptyIntersection NoHalfLineHalfLineIntersection = False
+--   nonEmptyIntersection _                              = True
 
-  nonEmptyIntersection NoSegmentHalfLineIntersection = False
-  nonEmptyIntersection _                             = True
+--   hl' `intersect` hl = case supportingLine hl' `intersect` supportingLine hl of
+--     ParallelLines          -> NoHalfLineHalfLineIntersection
+--     LineLineIntersection p -> if p `onHalfLine` hl' && p `onHalfLine` hl then HLHLIntersectInPoint p
+--                                                                          else NoHalfLineHalfLineIntersection
+--     SameLine _             -> let p   = _startPoint hl'
+--                                   q   = _startPoint hl
+--                                   seg = LineSegment (p :+ ()) (q :+ ())
+--                               in case (p `onHalfLine` hl, q `onHalfLine` hl') of
+--                                    (False,False) -> NoHalfLineHalfLineIntersection
+--                                    (False,True)  -> HLHLIntersectInHalfLine hl
+--                                    (True, False) -> HLHLIntersectInHalfLine hl'
+--                                    (True, True)  -> if hl == hl' then HLHLIntersectInHalfLine hl
+--                                                                  else HLHLIntersectInSegment seg
 
-  s `intersect` hl = case supportingLine s `intersect` supportingLine hl of
-    ParallelLines          -> NoSegmentHalfLineIntersection
-    LineLineIntersection p -> if p `onSegment` s && p `onHalfLine` hl then SegmentHalfLineIntersection p
-                                                                      else NoSegmentHalfLineIntersection
-    SameLine _             -> let p = s  ^.start.core
-                                  q = s  ^.end.core
-                                  r = hl ^.start.core
-                                  seg a b = LineSegment (a :+ ()) (b :+ ())
-                              in case (p `onHalfLine` hl, q `onHalfLine` hl) of
-                                   (False, False)   -> NoSegmentHalfLineIntersection
-                                   (False, True)    -> SegmentOnHalfLine $ seg r q
-                                   (True,  False)   -> SegmentOnHalfLine $ seg p r
-                                   (True,  True)    -> SegmentOnHalfLine $ seg p q
+
+
+-- instance (Ord r, Fractional r) => (LineSegment 2 p r) `IsIntersectableWith` (HalfLine 2 r) where
+--   data Intersection (LineSegment 2 p r) (HalfLine 2 r) = NoSegmentHalfLineIntersection
+--                                                        | SegmentHalfLineIntersection !(Point 2 r)
+--                                                        | SegmentOnHalfLine           !(LineSegment 2 () r)
+
+--   nonEmptyIntersection NoSegmentHalfLineIntersection = False
+--   nonEmptyIntersection _                             = True
+
+--   s `intersect` hl = case supportingLine s `intersect` supportingLine hl of
+--     ParallelLines          -> NoSegmentHalfLineIntersection
+--     LineLineIntersection p -> if p `onSegment` s && p `onHalfLine` hl then SegmentHalfLineIntersection p
+--                                                                       else NoSegmentHalfLineIntersection
+--     SameLine _             -> let p = s  ^.start.core
+--                                   q = s  ^.end.core
+--                                   r = hl ^.start.core
+--                                   seg a b = LineSegment (a :+ ()) (b :+ ())
+--                               in case (p `onHalfLine` hl, q `onHalfLine` hl) of
+--                                    (False, False)   -> NoSegmentHalfLineIntersection
+--                                    (False, True)    -> SegmentOnHalfLine $ seg r q
+--                                    (True,  False)   -> SegmentOnHalfLine $ seg p r
+--                                    (True,  True)    -> SegmentOnHalfLine $ seg p q
 
 
 

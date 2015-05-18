@@ -3,25 +3,42 @@ module Data.Ext where
 import Control.Applicative
 import Control.Lens
 import Data.Semigroup
+import Data.Biapplicative
+import Data.Bifunctor.Apply
+import Data.Bifoldable
+import Data.Bitraversable
+import Data.Semigroup.Bifoldable
+import Data.Semigroup.Bitraversable
 
 --------------------------------------------------------------------------------
 
-data Ext extra core = core :+ extra deriving (Show,Read,Eq,Ord)
+data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord)
+infixr 1 :+
 
-instance Functor (Ext e) where
-  fmap f (c :+ e) = f c :+ e
+-- data Ext extra core = core :+ extra deriving (Show,Read,Eq,Ord)
 
-instance Monoid e => Applicative (Ext e) where
-  pure x = x :+ mempty
-  -- | This implementation ignores any extra values f may have
-  (f :+ _) <*> (c :+ce) = f c :+ ce
+instance Bifunctor (:+) where
+  bimap f g (c :+ e) = f c :+ g e
 
-instance (Semigroup core, Semigroup extra) => Semigroup (Ext extra core) where
+instance Biapply (:+) where
+  (f :+ g) <<.>> (c :+ e) = f c :+ g e
+
+instance Biapplicative (:+) where
+  bipure = (:+)
+  (f :+ g) <<*>> (c :+ e) = f c :+ g e
+
+instance Bifoldable (:+) where
+  bifoldMap f g (c :+ e) = f c `mappend` g e
+
+instance Bitraversable (:+) where
+  bitraverse f g (c :+ e) = (:+) <$> f c <*> g e
+
+instance Bifoldable1 (:+)
+-- instance Bitraversable1 (:+)
+
+instance (Semigroup core, Semigroup extra) => Semigroup (core :+ extra) where
   (c :+ e) <> (c' :+ e') = c <> c' :+ e <> e'
 
-
-type core :+ extra = Ext extra core
-infixr 1 :+
 
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c

@@ -75,8 +75,9 @@ library
 
 
                     Data.Ext
-
                     Data.Seq2
+                    Data.BinaryTree
+
                     System.Random.Shuffle
                     Control.Monad.State.Persistent
 
@@ -93,9 +94,10 @@ library
                , vinyl            >= 0.5       &&     < 0.6
                , linear           >= 1.10
                , lens             >= 4.2
-               , singletons       >= 1.0       &&     < 1.1
+               , singletons       >= 1.0
+               --    &&     < 1.1
                , bifunctors       >= 4.0
---               , Frames           >= 0.1.0.0
+               , Frames           >= 0.1.0.0
 
                , text             >= 1.1.1.0
                , bytestring       >= 0.10
@@ -109,7 +111,7 @@ library
                -- , tranformers      >= 0.3
 
                , vector           >= 0.10
-               , fixed-vector     >= 0.6.4.0   &&     < 0.7
+               , fixed-vector     >= 0.6.4.0
                , data-clist       >= 0.0.7.2
                -- , HList            >= 0.3       &&     < 0.4
 
