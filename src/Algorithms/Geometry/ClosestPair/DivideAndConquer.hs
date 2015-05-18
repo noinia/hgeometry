@@ -15,7 +15,6 @@ import qualified Data.List.NonEmpty as NE
 import           Data.Semigroup
 import qualified Data.Traversable as Tr
 import qualified Data.Vector.Fixed as FV
-import
 
 import qualified Data.BinaryTree as BT
 
@@ -50,14 +49,14 @@ data Tree v a = Leaf a
 node     :: (Measure v a, Semigroup v) => Tree v a -> Tree v a -> Tree v a
 node l r = Node l (measure l <> measure r) r
 
-class Monoid v => Measure v a | a -> v where
+class Semigroup v => Measure v a | a -> v where
   measure :: a -> v
 
 instance Measure v a => Measure v (Tree v a) where
   measure (Leaf a)     = measure a
   measure (Node _ v _) = v
 
-instance Semigroup (Tree v a) where
+instance Measure v a => Semigroup (Tree v a) where
   (<>) = node
 
 
@@ -67,5 +66,5 @@ traverse' f (Leaf a)     = Leaf <$> f a
 traverse' f (Node l _ r) = node <$> traverse' f l <*> traverse' f r
 
 
-annotate :: BinLeafTree a -> Tree (Lab a) a
-annotate =  traverse (\x -> Leaf $ Lab (Max x mempty))
+-- annotate :: BinLeafTree a -> Tree (Lab a) a
+-- annotate =  traverse (\x -> Leaf $ Lab (Max x mempty))
