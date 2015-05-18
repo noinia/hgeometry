@@ -52,7 +52,7 @@ hull f ps  = Right . hull' . f . L.sortBy incXdecY $ ps
 
 
 
-incXdecY  :: Ord a => Ext t (Point 2 a) -> Ext t1 (Point 2 a) -> Ordering
+incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
 
