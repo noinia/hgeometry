@@ -4,14 +4,16 @@
 {-# LANGUAGE UnicodeSyntax #-}
 module Data.Geometry.Properties where
 
-import Control.Applicative
-import Data.Maybe(isJust, mapMaybe, listToMaybe, fromJust)
-import Data.Proxy
-import Data.Vinyl.Core
-import Data.Vinyl.Functor
-import Data.Vinyl.Lens
-import Frames.CoRec
-import GHC.TypeLits
+import           Control.Applicative
+import           Data.Maybe(isJust, mapMaybe, listToMaybe, fromJust)
+import           Data.Proxy
+import           Data.Vinyl.Core
+import           Data.Vinyl.Functor
+import           Data.Vinyl.Lens
+import           Frames.CoRec
+import           GHC.TypeLits
+
+import qualified Data.Vinyl.TypeLevel as VTL
 
 --------------------------------------------------------------------------------
 
@@ -31,17 +33,9 @@ type Intersection g h = CoRec Identity (IntersectionOf g h)
 -- intersection.
 type family IntersectionOf g h :: [*]
 
-
--- class NonEmptyIntersection g h where
-
-
+-- | Helper to produce a corec
 coRec :: (a ∈ as) => a -> CoRec Identity as
 coRec = Col . Identity
-
-
-toIntersection     :: (a ∈ IntersectionOf g h)
-                   =>  proxy g -> proxy h -> a -> Intersection g h
-toIntersection _ _ = Col . Identity
 
 
 class IsIntersectableWith g h where
@@ -107,8 +101,31 @@ match' c hs = match'' hs $ corecToRec' c
 -- foo :: CoRec Identity [NoIntersection, Int]
 -- foo = Col (Identity NoIntersection)
 
--- bar :: CoRec Identity [NoIntersection, Int]
--- bar = Col (Identity (5 :: Int))
+bar :: CoRec Identity [NoIntersection, Int]
+bar = Col (Identity (5 :: Int))
+
+bar' :: CoRec Identity [NoIntersection, Int]
+bar' = coRec (5 :: Int)
+
+
+type IsAlwaysTrueFromEither a b = (VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z)))
+                                  -- VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))(b  ∈ [a,b])
+
+-- | Convert an either to a CoRec. The type class constraint is silly, and is
+-- triviall true. Somehow GHC does not see that though.
+fromEither           :: IsAlwaysTrueFromEither a b => Either a b -> CoRec Identity [a,b]
+fromEither (Left x)  = coRec x
+fromEither (Right x) = coRec x
+
+
+-- fromEither'           :: ( RElem b [a,b] ((VTL.S VTL.Z))
+--                          ) => Either a b -> CoRec Identity [a,b]
+
+fromEither'           :: ( VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))
+--                           VTL.RIndex b '[b] ~ VTL.Z
+                         ) => Either a b -> CoRec Identity [a,b]
+fromEither' (Left x)  = coRec x
+fromEither' (Right x) = coRec x
 
 
 -- handlers =  H (\NoIntersection -> "No Intersection")
