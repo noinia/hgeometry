@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE FunctionalDependencies  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Interval-- (
                              -- -- * 1 dimensional Intervals
                              --   Interval(..)
@@ -19,11 +20,11 @@ module Data.Geometry.Interval-- (
 import Control.Lens(makeLenses, (^.),(%~),(.~),(&), Lens')
 import Data.Ext
 import Data.Geometry.Properties
+import Data.Maybe(fromJust)
 import Data.Proxy
 import Data.Semigroup
-import Data.Type.Equality
+import Data.Vinyl
 import Data.Vinyl.Functor
-import Data.Vinyl.Lens
 import Frames.CoRec
 
 --------------------------------------------------------------------------------
@@ -38,7 +39,11 @@ newtype EndPoint (t :: EndPointType) a = EndPoint { _unEndPoint :: a }
                                                 )
 makeLenses ''EndPoint
 
+openEndPoint :: a -> EndPoint Open a
+openEndPoint = EndPoint
 
+closedEndPoint :: a -> EndPoint Closed a
+closedEndPoint = EndPoint
 
 
 
@@ -174,51 +179,79 @@ instance ( AlwaysTrueIntersectionRanges l u l' u' a
       --              (Left l, Left u) -> coRec $ GRange l u
 
 
--- type family ClipLowerResult l' l u a :: [*] where
---   ClipLowerResult l  l u a = '[ Range l u a ]
---   ClipLowerResult l' l u a =  [ Range l u a, Range l' u a ]
-
--- class ClipLower' (b :: Bool) l' l u a where
---   clipLower'' :: Ord a => proxy b
---             -> EndPoint l' a -> Range l u a -> CoRec Identity (ClipLowerResult l' l u a)
+type family OnlyA (bool :: Bool) a b where
+   OnlyA False a b = [a,b]
+   OnlyA True  a b = '[a]
 
 
--- type family EndPointEQ t t' where
---   EndPointEQ t t  = True
---   EndPointEQ t t' = False
+-- type family ClipLowerResult b l' l u a :: [*] where
+--   ClipLowerResult True  l  l u a = '[ Range l u a ]
+--   ClipLowerResult False l' l u a =  [ Range l u a, Range l' u a ]
 
-
--- clipLower :: forall b l' l u a. (ClipLower' b l' l u a, b ~ EndPointEQ l' l) =>
---           EndPoint l' a -> Range l u a -> CoRec Identity (ClipLowerResult l' l u a)
--- clipLower = clipLower'' (Proxy :: Proxy b)
-
--- instance ClipLower' True l l u a where
---   clipLower'' _ p = either coRec coRec . clipLower' p
-
--- instance ( Range l  u a ∈ ClipLowerResult l' l u a
---          , Range l' u a ∈ ClipLowerResult l' l u a
---          ) => ClipLower' b l' l u a where
---   clipLower'' _ p r = case clipLower' p r of
---                       Left _   -> coRec r
---                       Right r' -> coRec r'
-
-  -- type family ClipLower l' l a where
---   clipLo
+-- type family ClipUpperResult b l u u' a :: [*] where
+--   ClipUpperResult True  l u u' a = '[ Range l u a ]
+--   ClipUpperResult False l u u' a =  [ Range l u a, Range l u' a ]
 
 
 
-clipLower'     :: Ord a
-              => EndPoint l' a -> Range l u a -> Either (Range l u a) (Range l' u a)
-clipLower' p r = case argEndPoint max (r^.lower) p of
+type family t ==~ t' where
+  t ==~ t  = True
+  t ==~ t' = False
+
+
+
+class ClipLower (b :: Bool) l' l u a where
+  -- clipLower'' :: Ord a => proxy b
+  --           -> EndPoint l' a -> Range l u a -> CoRec Identity (ClipLowerResult b l' l u a)
+  clipLower' :: Ord a => proxy b
+             -> EndPoint l' a -> Range l u a -> CoRec Identity (OnlyA b (Range l  u a)
+                                                                        (Range l' u a))
+instance ClipLower True l l u a where
+  clipLower' _ p = either coRec coRec . clipLower'' p
+
+instance (IsAlwaysTrueFromEither (Range l u a) (Range l' u a)) =>
+         ClipLower False l' l u a where
+  clipLower' _ p r = fromEither $ clipLower'' p r
+
+clipLower''     :: Ord a
+                => EndPoint l' a -> Range l u a -> Either (Range l u a) (Range l' u a)
+clipLower'' p r = case argEndPoint max (r^.lower) p of
                   Left  l -> Left r
                   Right l -> Right $ r&lower .~ l
 
-clipUpper     :: Ord a
-              => EndPoint u' a -> Range l u a -> Either (Range l u a) (Range l u' a)
-clipUpper p r = case argEndPoint min (r^.upper) p of
+
+class ClipUpper (b :: Bool) l u u' a where
+  clipUpper' :: Ord a => proxy b
+             -> EndPoint u' a -> Range l u a -> CoRec Identity (OnlyA b (Range l u  a)
+                                                                        (Range l u' a))
+
+clipLower :: forall b l' l u a. (Ord a, ClipLower b l' l u a, b ~ (l' ==~ l)) =>
+          EndPoint l' a -> Range l u a -> CoRec Identity (OnlyA b (Range l  u a)
+                                                                  (Range l' u a))
+clipLower = clipLower' (Proxy :: Proxy b)
+
+
+-- | FIXME: dunno why this instance does not want to typecheck
+instance ClipUpper True l u u' a where
+  clipUpper' _ p = either coRec coRec . clipUpper'' p
+
+
+instance (IsAlwaysTrueFromEither (Range l u a) (Range l u' a)) =>
+         ClipUpper False l u u' a where
+  clipUpper' _ p r = fromEither $ clipUpper'' p r
+
+
+clipUpper''     :: Ord a
+                => EndPoint u' a -> Range l u a -> Either (Range l u a) (Range l u' a)
+clipUpper'' p r = case argEndPoint min (r^.upper) p of
                   Left  l -> Left r
                   Right l -> Right $ r&upper .~ l
 
+
+clipUpper :: forall b l u u' a. (Ord a, ClipUpper b l u u' a, b ~ (u' ==~ u)) =>
+          EndPoint u' a -> Range l u a -> CoRec Identity (OnlyA b (Range l u  a)
+                                                                  (Range l u' a))
+clipUpper = clipUpper' (Proxy :: Proxy b)
 
 
 
