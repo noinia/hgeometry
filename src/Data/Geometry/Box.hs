@@ -26,7 +26,7 @@ import           Control.Lens(Getter,to,(^.),view)
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.Geometry.Interval as I
+import qualified Data.Range as R
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -113,7 +113,7 @@ maxPoint = to' getMax _maxP
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `inBox` b = maybe False f $ extent b
   where
-    f = FV.and . FV.zipWith I.inRange (toVec p)
+    f = FV.and . FV.zipWith R.inRange (toVec p)
 
 
 
@@ -124,9 +124,9 @@ p `inBox` b = maybe False f $ extent b
 -- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
 -- Just (Vector {_unV = fromList [GRange {_lower = EndPoint {_unEndPoint = 1}, _upper = EndPoint {_unEndPoint = 10}},GRange {_lower = EndPoint {_unEndPoint = 2}, _upper = EndPoint {_unEndPoint = 20}},GRange {_lower = EndPoint {_unEndPoint = 3}, _upper = EndPoint {_unEndPoint = 30}}]})
 extent                                 :: (Arity d)
-                                       => Box d p r -> Maybe (Vector d (I.SymRange I.Closed r))
+                                       => Box d p r -> Maybe (Vector d (R.Range r))
 extent Empty                           = Nothing
-extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith I.closedRange (toVec a) (toVec b)
+extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith R.ClosedRange (toVec a) (toVec b)
 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
@@ -134,7 +134,7 @@ extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith I.closedRange (toVec 
 -- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
 -- Vector {_unV = fromList [1,2,3]}
 size :: (Arity d, Num r) => Box d p r -> Vector d r
-size = maybe (pure 0) (fmap I.width) . extent
+size = maybe (pure 0) (fmap R.width) . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
