@@ -174,9 +174,9 @@ instance (Ord r, Floating r) => (LineSegment 2 p r) `IsIntersectableWith` (Circl
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   s `intersect` c = match (supportingLine s `intersect` c) $
-       (H $ \NoIntersection -> coRec $ NoIntersection)
+       (H $ \NoIntersection -> coRec NoIntersection)
     :& (H $ \(Touching p)   -> if p `onSegment` s then coRec $ Touching p
-                                                 else coRec $ NoIntersection
+                                                 else  coRec   NoIntersection
        )
     :& (H $ \(p,q)          -> case (p `onSegment` s, q `onSegment` s) of
                                  (False,False) -> coRec NoIntersection
