@@ -1,16 +1,16 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
                  , Range(..)
                  , lower, upper
-                 , pattern OpenRange, pattern ClosedRange
+                 , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper
                  , isValid
                  ) where
 
 import           Control.Applicative
+import           Control.Arrow((&&&))
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
@@ -73,10 +73,12 @@ instance T.Traversable Range where
                                  <*> T.traverse f u
 
 
+
 pattern OpenRange   l u = Range (Open l)   (Open u)
 pattern ClosedRange l u = Range (Closed l) (Closed u)
 
-
+-- | A range from l to u, ignoring/forgetting the type of the enpoints
+pattern Range' l u <- (_lower &&& _upper -> (l,u))
 
 prettyShow             :: Show a => Range a -> String
 prettyShow (Range l u) = concat [ lowerB, show (l^.unEndPoint), ", "
