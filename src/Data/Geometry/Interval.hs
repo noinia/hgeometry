@@ -82,9 +82,7 @@ type instance Dimension (Interval a r) = 1
 type instance NumType   (Interval a r) = r
 
 
--- TODO: We should be able to retain the a in the result of the intersection.
-type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval () r]
-
+type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
 
 instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
 
@@ -92,9 +90,12 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
 
   (Interval r) `intersect` (Interval s) = match (r' `intersect` s') $
          (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \(Range l u)    -> coRec . Interval $ Range (l&unEndPoint %~ only)
-                                                          (u&unEndPoint %~ only) )
+      :& (H $ \(Range l u)    -> coRec . Interval $ Range (l&unEndPoint %~ g)
+                                                          (u&unEndPoint %~ g) )
       :& RNil
     where
-      r' = fmap (^.core) r
-      s' = fmap (^.core) r
+      f x = Arg (x^.core) x
+      r' = fmap f r
+      s' = fmap f r
+
+      g (Arg _ x) = x
