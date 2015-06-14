@@ -5,14 +5,16 @@
 module Data.Geometry.HalfLine where
 
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Data.Ext
+import           Data.Range
 import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Geometry.Line
+import           Data.Geometry.SubLine
 import           Data.Geometry.LineSegment
 import           Linear.Vector((*^))
 import           Linear.Affine(Affine(..),distanceA)
@@ -48,6 +50,30 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
     where
       toLineSegment' :: (Num r, Arity d) => HalfLine d r -> LineSegment d () r
       toLineSegment' (HalfLine p v) = LineSegment (p :+ ()) ((p .+^ v) :+ ())
+
+--------------------------------------------------------------------------------
+
+data Top a = Val { _unTop :: a }  | Top
+           deriving (Show,Read,Eq,Ord)
+
+
+halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
+halflineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
+                                   in SubLine l (Interval $ Range (Closed $ only (Val 0))
+                                                                  (Open   $ only Top))
+
+
+fromSubLine (SubLine l i) = undefined --HalfLine (fmap _unTop $ l^.anchorPoint) (^)
+
+
+
+-- _HalfLineSubLine :: Iso' (HalfLine d r) (SubLine d () (Top r))
+-- _HalfLineSubLine
+
+
+
+
+
 
 -- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
 --   data Intersection (HalfLine 2 r) (Line 2 r) = NoHalfLineLineIntersection
