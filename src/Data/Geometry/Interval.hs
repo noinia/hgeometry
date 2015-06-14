@@ -29,6 +29,7 @@ import Data.Vinyl
 
 --------------------------------------------------------------------------------
 
+-- | An Interval is essentially a 'Data.Range' but with possible payload
 newtype Interval a r = Interval { _unInterval :: Range (r :+ a) }
                      deriving (Show,Read,Eq)
 makeLenses ''Interval
@@ -99,3 +100,7 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
       s' = fmap f r
 
       g (Arg _ x) = x
+
+
+shiftLeft'   :: Num r => r -> Interval a r -> Interval a r
+shiftLeft' x = fmap (`subtract` x)

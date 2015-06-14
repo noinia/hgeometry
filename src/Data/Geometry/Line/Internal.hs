@@ -8,6 +8,7 @@ import           Control.Applicative
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
+import qualified Data.Traversable as T
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Point
@@ -29,6 +30,8 @@ makeLenses ''Line
 
 deriving instance (Show r, Arity d) => Show    (Line d r)
 deriving instance Arity d           => Functor (Line d)
+
+
 
 type instance Dimension (Line d r) = d
 type instance NumType   (Line d r) = r

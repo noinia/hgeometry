@@ -10,6 +10,7 @@ import           Data.Ext
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Line.Internal
+import           Data.Geometry.SubLine
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -24,58 +25,53 @@ import           Linear.Vector((*^))
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
 
-newtype GLineSegment d s t p r = GLineSegment { _unLineSeg :: GInterval s t p (Point d r) }
-pattern LineSegment s t = GLineSegment (Range s t)
 
-makeLenses ''GLineSegment
+-- | Line segments. LineSegments have a start and end point, both of which may
+-- contain additional data of type p.
+data LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
-type SymLineSegment d t = GLineSegment d t t
-type LineSegment d = SymLineSegment d Closed
+makeLenses ''LineSegment
 
--- -- | Line segments. LineSegments have a start and end point, both of which may
--- -- contain additional data of type p.
--- newtype LineSegment d p r = LineSeg { _unLineSeg :: Interval p (Point d r) }
--- pattern LineSegment s t = LineSeg (Interval s t)
+pattern LineSegment s t = GLineSegment (ClosedInterval s t)
 
-instance HasStart (GLineSegment d s t p r) where
-  type StartCore  (GLineSegment d s t p r) = Point d r
-  type StartExtra (GLineSegment d s t p r) = p
-  start = unLineSeg.lower.unEndPoint
+type instance Dimension (LineSegment d p r) = d
+type instance NumType   (LineSegment d p r) = r
 
-    -- lens (_start . _unLineSeg) (\(LineSegment _ t) s -> LineSegment s t)
+instance HasStart (LineSegment d p r) where
+  type StartCore  (LineSegment d p r) = Point d r
+  type StartExtra (LineSegment d p r) = p
+  start = unLineSeg.start
 
-instance HasEnd (GLineSegment d s t p r) where
-  type EndCore  (GLineSegment d s t p r) = Point d r
-  type EndExtra (GLineSegment d s t p r) = p
-  end = unLineSeg.upper.unEndPoint
+instance HasEnd (LineSegment d p r) where
+  type EndCore  (LineSegment d p r) = Point d r
+  type EndExtra (LineSegment d p r) = p
+  end = unLineSeg.end
 
---    lens (_end . _unLineSeg) (\(LineSegment s _) t -> LineSegment s t)
+-- _SubLine :: Iso' (LineSegment d p r) (SubLine d p r)
+-- _SubLine = iso seg2sub sub2seg
+--   where
+--     seg2sub s@(LineSegment p q) = SubLine (supportingLine s)
+--                                           undefined
+-- sub2seg (SubLine l i) = LineSegment $ fmap (flip pointAt l) i
 
-instance (Num r, Arity d) => HasSupportingLine (GLineSegment d s t p r) where
+
+
+instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
   supportingLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
 
-deriving instance (AlwaysTruePrettyShow s t
-                  ,Show r, Show p, Arity d) => Show (GLineSegment d s t p r)
-deriving instance (Eq r, Eq p, Arity d)     => Eq (GLineSegment d s t p r)
-deriving instance (Ord r, Ord p, Arity d)   => Ord (GLineSegment d s t p r)
--- deriving instance Arity d                   => Functor (GLineSegment d p)
-type instance Dimension (GLineSegment d s t p r) = d
-type instance NumType   (GLineSegment d s t p r) = r
+deriving instance (Show r, Show p, Arity d) => Show (LineSegment d p r)
+deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
+-- deriving instance (Ord r, Ord p, Arity d)   => Ord (LineSegment d p r)
+deriving instance Arity d                   => Functor (LineSegment d p)
 
-instance PointFunctor (GLineSegment d s t p) where
+instance PointFunctor (LineSegment d p) where
   pmap f (LineSegment s e) = LineSegment (first f s) (first f e)
 
--- | Only for closed segs, since boxes are closed
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBoxList [l^.start.core, l^.end.core]
 
--- instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
---   transformBy = transformPointFunctor
-
-
-
-
-
+instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
+  transformBy = transformPointFunctor
 
 
 
