@@ -103,4 +103,4 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
 
 
 shiftLeft'   :: Num r => r -> Interval a r -> Interval a r
-shiftLeft' x = fmap (`subtract` x)
+shiftLeft' x = fmap (subtract x)
