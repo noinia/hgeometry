@@ -16,6 +16,7 @@ ghcExts = map ("-X" ++)
 
           , "PatternSynonyms"
           , "ViewPatterns"
+          , "MultiParamTypeClasses"
 
           , "StandaloneDeriving"
           , "GeneralizedNewtypeDeriving"

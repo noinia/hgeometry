@@ -104,12 +104,13 @@ type Circle = Ball 2
 -- Just (Ball {_center = Point {toVec = Vector {_unV = fromList [0.0,0.0]}} :+ (), _squaredRadius = 100.0})
 circle       :: (Eq r, Fractional r)
              => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Circle () r)
-circle p q r = undefined
--- circle p q r = case f p `intersect` f q of
---                  LineLineIntersection c -> Just $ Ball (only c) (qdA c p)
---                  _                      -> Nothing -- The two lines f p and f q are
---                                                    -- parallel, that means the three
---                                                    -- input points where colinear.
+circle p q r = match ((f p) `intersect` (f q)) $
+       (H $ \NoIntersection -> Nothing)
+    :& (H $ \c@(Point _)    -> Just $ Ball (only c) (qdA c p))
+    :& (H $ \_              -> Nothing)
+    :& RNil
+       -- If the intersection is not a point, The two lines f p and f q are
+       -- parallel, that means the three input points where colinear.
   where
     -- Given a point p', get the line perpendicular, and through the midpoint
     -- of the line segment p'r
