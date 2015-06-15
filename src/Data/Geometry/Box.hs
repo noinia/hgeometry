@@ -122,7 +122,7 @@ p `inBox` b = maybe False f $ extent b
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
--- Just (Vector {_unV = fromList [GRange {_lower = EndPoint {_unEndPoint = 1}, _upper = EndPoint {_unEndPoint = 10}},GRange {_lower = EndPoint {_unEndPoint = 2}, _upper = EndPoint {_unEndPoint = 20}},GRange {_lower = EndPoint {_unEndPoint = 3}, _upper = EndPoint {_unEndPoint = 30}}]})
+-- Just (Vector {_unV = fromList [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]})
 extent                                 :: (Arity d)
                                        => Box d p r -> Maybe (Vector d (R.Range r))
 extent Empty                           = Nothing

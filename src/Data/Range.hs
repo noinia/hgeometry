@@ -215,17 +215,17 @@ cmpUpper a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
 -- | Shift a range x units to the left
 --
 -- >>> prettyShow $ shiftLeft 10 (ClosedRange 10 20)
--- [0, 10]
+-- "[0, 10]"
 -- >>> prettyShow $ shiftLeft 10 (OpenRange 15 25)
--- (5, 15)
+-- "(5, 15)"
 shiftLeft   :: Num r => r -> Range r -> Range r
 shiftLeft x = shiftRight (-x)
 
 -- | Shifts the range to the right
 --
 -- >>> prettyShow $ shiftRight 10 (ClosedRange 10 20)
--- [20, 30]
+-- "[20, 30]"
 -- >>> prettyShow $ shiftRight 10 (OpenRange 15 25)
--- (25, 35)
+-- "(25, 35)"
 shiftRight   :: Num r => r -> Range r -> Range r
 shiftRight x = fmap (+x)
