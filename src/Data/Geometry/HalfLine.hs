@@ -18,6 +18,9 @@ import           Data.Geometry.SubLine
 import           Data.Geometry.LineSegment
 import           Linear.Vector((*^))
 import           Linear.Affine(Affine(..),distanceA)
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Half-Lines
@@ -31,6 +34,13 @@ makeLenses ''HalfLine
 deriving instance (Show r, Arity d) => Show    (HalfLine d r)
 deriving instance (Eq r, Arity d)   => Eq      (HalfLine d r)
 deriving instance Arity d           => Functor (HalfLine d)
+
+instance Arity d => F.Foldable (HalfLine d) where
+  foldMap = T.foldMapDefault
+
+instance Arity d => T.Traversable (HalfLine d) where
+  traverse f (HalfLine p v) = HalfLine <$> T.traverse f p
+                                       <*> T.traverse f v
 
 type instance Dimension (HalfLine d r) = d
 type instance NumType   (HalfLine d r) = r
@@ -54,25 +64,54 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
 --------------------------------------------------------------------------------
 
 data Top a = Val { _unTop :: a }  | Top
-           deriving (Show,Read,Eq,Ord)
+           deriving (Show,Read,Eq,Ord,Functor)
 
+instance Applicative Top where
+  pure = Val
+  (Val f) <*> (Val x) = Val $ f x
+  _       <*> _       = Top
+
+instance Monad Top where
+  return = Val
+  (Val m) >>= k = k m
+  Top     >>= _ = Top
+
+
+
+toMaybe (Val x) = Just x
+toMaybe Top     = Nothing
 
 halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
-halflineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
+halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
                                    in SubLine l (Interval $ Range (Closed $ only (Val 0))
                                                                   (Open   $ only Top))
 
 
-fromSubLine (SubLine l i) = undefined --HalfLine (fmap _unTop $ l^.anchorPoint) (^)
+fromSubLine               :: (Num r, Arity d) => SubLine d p (Top r) -> Maybe (HalfLine d r)
+fromSubLine (SubLine l' i) = toMaybe $ do
+                              l@(Line _ v) <- T.sequence l'
+                              let ts = i^.start.core
+                                  te = i^.end.core
+                              case (ts,te) of
+                                (Top,Top)  -> Top
+                                (Val x,_)  -> Val $ HalfLine (pointAt x l) v
+                                (_, Val x) -> Val $ HalfLine (pointAt x l) v
 
 
+type instance IntersectionOf (HalfLine 2 r) (Line 2 r) = [ NoIntersection
+                                                         , Point 2 r
+                                                         , HalfLine 2 r
+                                                         ]
 
--- _HalfLineSubLine :: Iso' (HalfLine d r) (SubLine d () (Top r))
--- _HalfLineSubLine
+type instance IntersectionOf (HalfLine 2 r) (HalfLine 2 r) = [ NoIntersection
+                                                             , Point 2 r
+--                                                             , LineSegment 2 r
+                                                             , HalfLine 2 r
+                                                             ]
 
 
-
-
+-- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
+  -- hl `intersect` l = match (halfLineToSubLine hl, l)
 
 
 -- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
