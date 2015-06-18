@@ -31,6 +31,12 @@ makeLenses ''Line
 deriving instance (Show r, Arity d) => Show    (Line d r)
 deriving instance Arity d           => Functor (Line d)
 
+instance Arity d => F.Foldable (Line d) where
+  foldMap = T.foldMapDefault
+
+instance Arity d => T.Traversable (Line d) where
+  traverse f (Line p v) = Line <$> T.traverse f p
+                               <*> T.traverse f v
 
 
 type instance Dimension (Line d r) = d

@@ -18,6 +18,8 @@ import qualified Data.Vinyl.TypeLevel as TV
 
 import           Data.Vinyl.TypeLevel hiding (Nat)
 
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
 -- import qualified Data.Vector.Fixed.Cont as C
 
@@ -57,7 +59,11 @@ deriving instance Arity d           => Functor (Point d)
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
 
+instance Arity d => F.Foldable (Point d) where
+  foldMap = T.foldMapDefault
 
+instance Arity d => T.Traversable (Point d) where
+  traverse f (Point v) = Point <$> T.traverse f v
 
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
