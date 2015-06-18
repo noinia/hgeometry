@@ -1,7 +1,5 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Line.Internal where
 
 import           Control.Applicative
@@ -28,15 +26,10 @@ data Line d r = Line { _anchorPoint :: Point  d r
                      }
 makeLenses ''Line
 
-deriving instance (Show r, Arity d) => Show    (Line d r)
-deriving instance Arity d           => Functor (Line d)
-
-instance Arity d => F.Foldable (Line d) where
-  foldMap = T.foldMapDefault
-
-instance Arity d => T.Traversable (Line d) where
-  traverse f (Line p v) = Line <$> T.traverse f p
-                               <*> T.traverse f v
+deriving instance (Show r, Arity d) => Show          (Line d r)
+deriving instance Arity d           => Functor       (Line d)
+deriving instance Arity d           => F.Foldable    (Line d)
+deriving instance Arity d           => T.Traversable (Line d)
 
 
 type instance Dimension (Line d r) = d

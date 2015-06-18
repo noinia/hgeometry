@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
@@ -7,6 +7,11 @@ module Data.Range( EndPoint(..)
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper
                  , isValid
+
+
+                 , Top(..), toMaybe
+                 , Bottom
+                 , UnBounded(..)
                  ) where
 
 import           Control.Applicative
@@ -21,18 +26,7 @@ import qualified Data.Traversable as T
 
 data EndPoint a = Open   a
                 | Closed a
-                deriving (Show,Read,Eq)
-
-instance Functor EndPoint where
-  fmap = T.fmapDefault
-
-instance F.Foldable EndPoint where
-  foldMap = T.foldMapDefault
-
-instance T.Traversable EndPoint where
-  traverse f (Open a)   = Open <$> f a
-  traverse f (Closed a) = Closed <$> f a
-
+                deriving (Show,Read,Eq,Functor,F.Foldable,T.Traversable)
 
 _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
@@ -58,21 +52,9 @@ isClosed = not . isOpen
 data Range a = Range { _lower :: EndPoint a
                      , _upper :: EndPoint a
                      }
-               deriving (Show,Read,Eq)
+               deriving (Show,Read,Eq,Functor,F.Foldable,T.Traversable)
 
 makeLenses ''Range
-
-instance Functor Range where
-  fmap = T.fmapDefault
-
-instance F.Foldable Range where
-  foldMap = T.foldMapDefault
-
-instance T.Traversable Range where
-  traverse f (Range l u) = Range <$> T.traverse f l
-                                 <*> T.traverse f u
-
-
 
 pattern OpenRange   l u = Range (Open l)   (Open u)
 pattern ClosedRange l u = Range (Closed l) (Closed u)
@@ -229,3 +211,30 @@ shiftLeft x = shiftRight (-x)
 -- "(25, 35)"
 shiftRight   :: Num r => r -> Range r -> Range r
 shiftRight x = fmap (+x)
+
+
+--------------------------------------------------------------------------------
+-- * Top and Bottom
+
+
+data Top a = Val { _unTop :: a }  | Top
+           deriving (Show,Read,Eq,Ord,Functor,F.Foldable,T.Traversable)
+
+instance Applicative Top where
+  pure = Val
+  (Val f) <*> (Val x) = Val $ f x
+  _       <*> _       = Top
+
+instance Monad Top where
+  return = Val
+  (Val m) >>= k = k m
+  Top     >>= _ = Top
+
+toMaybe         :: Top a -> Maybe a
+toMaybe (Val x) = Just x
+toMaybe Top     = Nothing
+
+type Bottom a = Maybe a
+
+data UnBounded a = BottomU | ValU { _unUnBounded :: a }  | TopU
+                 deriving (Show,Read,Eq,Ord,Functor,F.Foldable,T.Traversable)

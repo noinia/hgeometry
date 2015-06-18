@@ -1,6 +1,4 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.HalfLine where
 
@@ -34,13 +32,8 @@ makeLenses ''HalfLine
 deriving instance (Show r, Arity d) => Show    (HalfLine d r)
 deriving instance (Eq r, Arity d)   => Eq      (HalfLine d r)
 deriving instance Arity d           => Functor (HalfLine d)
-
-instance Arity d => F.Foldable (HalfLine d) where
-  foldMap = T.foldMapDefault
-
-instance Arity d => T.Traversable (HalfLine d) where
-  traverse f (HalfLine p v) = HalfLine <$> T.traverse f p
-                                       <*> T.traverse f v
+deriving instance Arity d           => F.Foldable    (HalfLine d)
+deriving instance Arity d           => T.Traversable (HalfLine d)
 
 type instance Dimension (HalfLine d r) = d
 type instance NumType   (HalfLine d r) = r
@@ -62,24 +55,6 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
       toLineSegment' (HalfLine p v) = LineSegment (p :+ ()) ((p .+^ v) :+ ())
 
 --------------------------------------------------------------------------------
-
-data Top a = Val { _unTop :: a }  | Top
-           deriving (Show,Read,Eq,Ord,Functor)
-
-instance Applicative Top where
-  pure = Val
-  (Val f) <*> (Val x) = Val $ f x
-  _       <*> _       = Top
-
-instance Monad Top where
-  return = Val
-  (Val m) >>= k = k m
-  Top     >>= _ = Top
-
-
-
-toMaybe (Val x) = Just x
-toMaybe Top     = Nothing
 
 halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
 halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
@@ -105,7 +80,7 @@ type instance IntersectionOf (HalfLine 2 r) (Line 2 r) = [ NoIntersection
 
 type instance IntersectionOf (HalfLine 2 r) (HalfLine 2 r) = [ NoIntersection
                                                              , Point 2 r
---                                                             , LineSegment 2 r
+                                                             , LineSegment 2 () r
                                                              , HalfLine 2 r
                                                              ]
 

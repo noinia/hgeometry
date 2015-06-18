@@ -1,7 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Point where
 
 import           Data.Proxy
@@ -54,16 +52,12 @@ deriving instance (Show r, Arity d) => Show (Point d r)
 deriving instance (Eq r, Arity d)   => Eq (Point d r)
 deriving instance (Ord r, Arity d)  => Ord (Point d r)
 deriving instance Arity d           => Functor (Point d)
+deriving instance Arity d           => F.Foldable (Point d)
+deriving instance Arity d           => T.Traversable (Point d)
 
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
-
-instance Arity d => F.Foldable (Point d) where
-  foldMap = T.foldMapDefault
-
-instance Arity d => T.Traversable (Point d) where
-  traverse f (Point v) = Point <$> T.traverse f v
 
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
