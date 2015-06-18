@@ -84,6 +84,11 @@ type instance IntersectionOf (HalfLine 2 r) (HalfLine 2 r) = [ NoIntersection
                                                              , HalfLine 2 r
                                                              ]
 
+type instance IntersectionOf (HalfLine 2 r) (LineSegment 2 p r) = [ NoIntersection
+                                                                  , Point 2 r
+                                                                  , LineSegment 2 () r
+                                                                  ]
+
 
 -- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
   -- hl `intersect` l = match (halfLineToSubLine hl, l)
