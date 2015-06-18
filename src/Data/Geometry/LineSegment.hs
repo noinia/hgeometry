@@ -10,17 +10,19 @@ import           Data.Ext
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Line.Internal
-import           Data.Geometry.SubLine
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           Data.Maybe(maybe)
 import           Data.Ord(comparing)
 import           Data.Semigroup
+import           Data.Vinyl
 import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -47,14 +49,25 @@ instance HasEnd (LineSegment d p r) where
   type EndExtra (LineSegment d p r) = p
   end = unLineSeg.end
 
--- _SubLine :: Iso' (LineSegment d p r) (SubLine d p r)
--- _SubLine = iso seg2sub sub2seg
---   where
---     seg2sub s@(LineSegment p q) = SubLine (supportingLine s)
---                                           undefined
--- sub2seg (SubLine l i) = LineSegment $ fmap (flip pointAt l) i
+_SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
+_SubLine = iso segment2SubLine subLineToSegment
 
+segment2SubLine                      :: (Fractional r, Eq r, Arity d)
+                                     => LineSegment d p r -> SubLine d p r
+segment2SubLine ss@(LineSegment p q) = SubLine l (ClosedInterval s e)
+  where
+    l = supportingLine ss
+    -- f ::  => Point d r -> r
+    f = flip toOffset l
 
+    s = p&core %~ f
+    e = q&core %~ f
+
+subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
+subLineToSegment sl = let r = (fixEndPoints sl)^.subRange
+                          s = r^.start.extra
+                          e = r^.end.extra
+                      in LineSegment s e
 
 instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
   supportingLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
@@ -83,27 +96,27 @@ toLineSegment (Line p v) = LineSegment (p       :+ mempty)
 
 -- *** Intersecting LineSegments
 
+type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoIntersection
+                                                                       , Point 2 r
+                                                                       , LineSegment 2 p r
+                                                                       ]
+
 -- instance (Ord r, Fractional r) =>
 --          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+--   nonEmptyIntersection = defaultNonEmptyIntersection
 
---   data Intersection (LineSegment 2 p r) (LineSegment 2 p r) =
---         OverlappingSegment         !(LineSegment 2 p r)
---       | LineSegLineSegIntersection !(Point 2 r)
---       | NoIntersection
---       deriving (Show,Eq)
+--   a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
+--          (H coRec)
+--       :& (H coRec)
+--       :& (H $ coRec . subLineToSegment)
+--       :& RNil
 
---   nonEmptyIntersection NoIntersection = False
---   nonEmptyIntersection _              = True
 
---   a@(LineSegment p q) `intersect` b@(LineSegment s t) = case la `intersect` lb of
---       SameLine _                                ->
---           maybe NoIntersection OverlappingSegment $ overlap a b
---       LineLineIntersection r | onBothSegments r -> LineSegLineSegIntersection r
---       _                                         -> NoIntersection
---     where
---       la = supportingLine a
---       lb = supportingLine b
---       onBothSegments r = onSegment r a && onSegment r b
+
+
+
+
+
 
 -- instance (Ord r, Fractional r) =>
 --          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
