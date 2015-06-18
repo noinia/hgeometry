@@ -20,6 +20,10 @@ ghcExts = map ("-X" ++)
 
           , "StandaloneDeriving"
           , "GeneralizedNewtypeDeriving"
+          , "DeriveFunctor"
+          , "DeriveFoldable"
+          , "DeriveTraversable"
+          , "AutoDeriveTypeable"
           , "FlexibleInstances"
           , "FlexibleContexts"
           ]

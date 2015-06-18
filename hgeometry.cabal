@@ -148,8 +148,46 @@ test-suite doctests
 
   default-language:    Haskell2010
 
-  -- Extensions are enabled in doctests.hs
-  --  default-extensions:
+test-suite hspec
+  type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
+  hs-source-dirs:       test
+  ghc-options:          -Wall
+  main-is:              Spec.hs
+
+  other-modules: RangeSpec
+
+  build-depends:        base
+                      , hspec >= 2.1
+                      , hgeometry
+                      , Frames
+                      , lens
+                      , data-clist
+                      , linear
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+
+                    , PatternSynonyms
+                    , ViewPatterns
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , AutoDeriveTypeable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
 
 test-suite bapc_examples
   type:          exitcode-stdio-1.0

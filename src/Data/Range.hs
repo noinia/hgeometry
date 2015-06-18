@@ -105,6 +105,8 @@ instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
+  -- |
+  --
   -- >>> (ClosedRange 1 10) `intersect` (OpenRange 5 10)
   -- (Col Range {_lower = Open 5, _upper = Closed 10})
   -- >>> (OpenRange 1 10) `intersect` (OpenRange 5 10)
@@ -115,6 +117,8 @@ instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
   -- (Col NoIntersection)
   -- >>> (OpenRange 1 10) `intersect` (ClosedRange 10 12)
   -- (Col Range {_lower = Closed 10, _upper = Open 10})
+  -- >>> (OpenRange 1 10) `intersect` (ClosedRange 10 12)
+  -- FALSE
   --
   -- The intersection is empty, if after clipping, the order of the end points is inverted
   -- or if the endpoints are the same, but both are open.
