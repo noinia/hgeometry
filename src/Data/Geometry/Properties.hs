@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE DefaultSignatures #-}
 module Data.Geometry.Properties where
 
 import           Control.Applicative
@@ -52,6 +53,12 @@ class IsIntersectableWith g h where
   -- | Helper to implement `intersects`.
   nonEmptyIntersection :: proxy g -> proxy h -> Intersection g h -> Bool
   {-# MINIMAL intersect , nonEmptyIntersection #-}
+
+  default nonEmptyIntersection :: ( NoIntersection ∈ IntersectionOf g h
+                                  , RecApplicative (IntersectionOf g h)
+                                  )
+                                  => proxy g -> proxy h -> Intersection g h -> Bool
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
 
 -- | When using IntersectionOf we may need some constraints that are always
