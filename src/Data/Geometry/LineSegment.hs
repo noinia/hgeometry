@@ -3,6 +3,8 @@
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.LineSegment where
 
+
+import Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens
 import           Data.Bifunctor
@@ -35,7 +37,12 @@ data LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
 makeLenses ''LineSegment
 
-pattern LineSegment s t = GLineSegment (ClosedInterval s t)
+pattern LineSegment       s t = GLineSegment (Interval s t)
+
+-- | Gets the start and end point, but forgetting if they are open or closed.
+pattern LineSegment'      s t <- ((^.start) &&& (^.end) -> (s,t))
+
+pattern ClosedLineSegment s t = GLineSegment (ClosedInterval s t)
 
 type instance Dimension (LineSegment d p r) = d
 type instance NumType   (LineSegment d p r) = r
@@ -65,13 +72,13 @@ segment2SubLine ss = SubLine l (Interval s e)
     e = q&unEndPoint.core %~ f
 
 subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
-subLineToSegment sl = let r = (fixEndPoints sl)^.subRange
-                          s = r^.start.extra
-                          e = r^.end.extra
+subLineToSegment sl = let r@(Interval s' e') = (fixEndPoints sl)^.subRange
+                          s = s'&unEndPoint %~ (^.extra)
+                          e = e'&unEndPoint %~ (^.extra)
                       in LineSegment s e
 
 instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
-  supportingLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
+  supportingLine s = lineThrough (s^.start.core) (s^.end.core)
 
 deriving instance (Show r, Show p, Arity d) => Show (LineSegment d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
@@ -79,7 +86,7 @@ deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
 deriving instance Arity d                   => Functor (LineSegment d p)
 
 instance PointFunctor (LineSegment d p) where
-  pmap f (LineSegment s e) = LineSegment (first f s) (first f e)
+  pmap f (LineSegment s e) = LineSegment (s&unEndPoint %~ first f) (e&unEndPoint %~ first f)
 
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBoxList [l^.start.core, l^.end.core]
@@ -92,8 +99,8 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
 -- ** Converting between Lines and LineSegments
 
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
-toLineSegment (Line p v) = LineSegment (p       :+ mempty)
-                                       (p .+^ v :+ mempty)
+toLineSegment (Line p v) = ClosedLineSegment (p       :+ mempty)
+                                             (p .+^ v :+ mempty)
 
 -- *** Intersecting LineSegments
 
@@ -101,6 +108,12 @@ type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoInter
                                                                        , Point 2 r
                                                                        , LineSegment 2 p r
                                                                        ]
+
+type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
+                                                              , Point 2 r
+                                                              , LineSegment 2 p r
+                                                              ]
+
 
 instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
@@ -113,8 +126,17 @@ instance (Ord r, Fractional r) =>
       :& RNil
 
 
+-- instance (Ord r, Fractional r) =>
+--          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
+--   nonEmptyIntersection = defaultNonEmptyIntersection
 
+--   s `intersect` l = let s' =
 
+--     match (s'^._SubLine) `intersect` (fromLine l)) $
+--          (H   coRec)
+--       :& (H $ coRec . fmap (_unUnBounded))
+--       :& (H $ const (coRec s))
+--       :& RNil
 
 
 
@@ -218,5 +240,5 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 
 
 -- | Length of the line segment
-segmentLength                   :: (Arity d, Floating r) => LineSegment d p r -> r
-segmentLength (LineSegment p q) = distanceA (p^.core) (q^.core)
+segmentLength                    :: (Arity d, Floating r) => LineSegment d p r -> r
+segmentLength (LineSegment' p q) = distanceA (p^.core) (q^.core)
