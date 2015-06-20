@@ -18,6 +18,7 @@ import           Data.Geometry.Vector
 import qualified Data.List as L
 import           Data.Maybe(maybe)
 import           Data.Ord(comparing)
+import           Data.Range
 import           Data.Semigroup
 import           Data.Vinyl
 import           Linear.Affine(Affine(..),distanceA)
@@ -52,16 +53,16 @@ instance HasEnd (LineSegment d p r) where
 _SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
 _SubLine = iso segment2SubLine subLineToSegment
 
-segment2SubLine                      :: (Fractional r, Eq r, Arity d)
-                                     => LineSegment d p r -> SubLine d p r
-segment2SubLine ss@(LineSegment p q) = SubLine l (ClosedInterval s e)
+segment2SubLine    :: (Fractional r, Eq r, Arity d)
+                   => LineSegment d p r -> SubLine d p r
+segment2SubLine ss = SubLine l (Interval s e)
   where
     l = supportingLine ss
-    -- f ::  => Point d r -> r
     f = flip toOffset l
+    (Interval p q)  = ss^.unLineSeg
 
-    s = p&core %~ f
-    e = q&core %~ f
+    s = p&unEndPoint.core %~ f
+    e = q&unEndPoint.core %~ f
 
 subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
 subLineToSegment sl = let r = (fixEndPoints sl)^.subRange

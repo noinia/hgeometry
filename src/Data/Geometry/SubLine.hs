@@ -53,10 +53,10 @@ pointAt a (Line p v) = p .+^ (a *^ v)
 fixEndPoints    :: (Num r, Arity d) => SubLine d p r -> SubLine d (Point d r :+ p) r
 fixEndPoints sl = sl&subRange %~ f
   where
-    ptAt           = flip pointAt (sl^.line)
-    label (c :+ e) = (c :+ (ptAt c :+ e))
-    f (Interval (Range l u)) = Interval $ Range (l&unEndPoint %~ label)
-                                                (u&unEndPoint %~ label)
+    ptAt             = flip pointAt (sl^.line)
+    label (c :+ e)   = (c :+ (ptAt c :+ e))
+    f (Interval l u) = Interval (l&unEndPoint %~ label)
+                                (u&unEndPoint %~ label)
 
 
 -- | given point p on line (Line q v), Get the scalar lambda s.t.
@@ -90,5 +90,8 @@ instance (Ord r, Fractional r) =>
       :& RNil
     where
       s' = shiftLeft' (toOffset (m^.anchorPoint) l) s
+      f (GInterval r') = GInterval $ fmap (set extra ()) r'
 
-      f (Interval r') = Interval $ fmap (set extra ()) r'
+
+-- fromLine   ::
+-- fromLine l =

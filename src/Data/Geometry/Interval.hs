@@ -30,7 +30,7 @@ import Data.Vinyl
 --------------------------------------------------------------------------------
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
-newtype Interval a r = Interval { _unInterval :: Range (r :+ a) }
+newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
                      deriving (Show,Read,Eq)
 makeLenses ''Interval
 
@@ -41,7 +41,7 @@ instance F.Foldable (Interval a) where
   foldMap = T.foldMapDefault
 
 instance T.Traversable (Interval a) where
-  traverse f (Interval r) = Interval <$> T.traverse f' r
+  traverse f (GInterval r) = GInterval <$> T.traverse f' r
     where
       f' = bitraverse f pure
 
@@ -53,8 +53,11 @@ x `inInterval` r = x `inRange` (fmap (^.core) $ r^.unInterval )
 
 
 -- :: (r :+ a) -> (r :+ a) -> OpenInterval a r
-pattern OpenInterval   l u = Interval (OpenRange   l u)
-pattern ClosedInterval l u = Interval (ClosedRange l u)
+pattern OpenInterval   l u = GInterval (OpenRange   l u)
+pattern ClosedInterval l u = GInterval (ClosedRange l u)
+
+-- | :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
+pattern Interval l u = GInterval (Range l u)
 
 
 --------------------------------------------------------------------------------
@@ -89,10 +92,10 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  (Interval r) `intersect` (Interval s) = match (r' `intersect` s') $
+  (GInterval r) `intersect` (GInterval s) = match (r' `intersect` s') $
          (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \(Range l u)    -> coRec . Interval $ Range (l&unEndPoint %~ g)
-                                                          (u&unEndPoint %~ g) )
+      :& (H $ \(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
+                                                           (u&unEndPoint %~ g) )
       :& RNil
     where
       f x = Arg (x^.core) x
