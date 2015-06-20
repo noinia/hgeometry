@@ -66,7 +66,7 @@ toOffset p (Line q v) = fromJust $ scalarMultiple (q .-. p) v
 
 type instance IntersectionOf (SubLine 2 p r) (SubLine 2 q r) = [ NoIntersection
                                                                , Point 2 r
-                                                               , SubLine 2 () r
+                                                               , SubLine 2 p r
                                                                ]
 
 
@@ -84,14 +84,12 @@ instance (Ord r, Fractional r) =>
                                  else coRec NoIntersection)
       :& (H $ \l              -> match (r `intersect` s') $
                                       (H $ \NoIntersection -> coRec NoIntersection)
-                                   :& (H $ \i              -> coRec $ SubLine l (f i))
+                                   :& (H $ \i              -> coRec $ SubLine l i)
                                    :& RNil
            )
       :& RNil
     where
       s' = shiftLeft' (toOffset (m^.anchorPoint) l) s
-      f (GInterval r') = GInterval $ fmap (set extra ()) r'
-
 
 -- fromLine   ::
 -- fromLine l =

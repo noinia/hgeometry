@@ -102,15 +102,15 @@ type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoInter
                                                                        , LineSegment 2 p r
                                                                        ]
 
--- instance (Ord r, Fractional r) =>
---          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
---   nonEmptyIntersection = defaultNonEmptyIntersection
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
---   a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
---          (H coRec)
---       :& (H coRec)
---       :& (H $ coRec . subLineToSegment)
---       :& RNil
+  a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
+         (H coRec)
+      :& (H coRec)
+      :& (H $ coRec . subLineToSegment)
+      :& RNil
 
 
 
