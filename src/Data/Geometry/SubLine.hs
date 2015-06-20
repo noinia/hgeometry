@@ -4,7 +4,7 @@ module Data.Geometry.SubLine where
 import           Control.Applicative
 import qualified Data.Foldable as F
 import qualified Data.Traversable as T
-import Control.Lens
+import Control.Lens hiding (only)
 import Data.Ext
 import Data.Geometry.Interval
 import Data.Geometry.Line.Internal
@@ -24,24 +24,17 @@ data SubLine d p r = SubLine { _line     :: Line d r
                              , _subRange :: Interval p r
                              }
 
+
 makeLenses ''SubLine
 
 type instance Dimension (SubLine d p r) = d
 type instance NumType   (SubLine d p r) = r
 
-
--- instance Functor (SubLine d p) where
---   fmap = T.fmapDefault
-
--- instance F.Foldable (SubLine d p) where
---   foldMap = T.foldMapDefault
-
--- instance T.Traversable (SubLine d p) where
---   traverse f (SubLine l r) = SubLine <$> T.traverse l
---                                      <*> T.traverse f r
-
--- instance Functor (SubLine d p) where
---   fmap f (SubLine l r) = SubLine ()
+deriving instance (Show r, Show p, Arity d) => Show (SubLine d p r)
+deriving instance (Eq r, Eq p, Arity d)     => Eq (SubLine d p r)
+deriving instance Arity d                   => Functor (SubLine d p)
+deriving instance Arity d                   => F.Foldable (SubLine d p)
+deriving instance Arity d                   => T.Traversable (SubLine d p)
 
 
 -- | Get the point at the given position along line, where 0 corresponds to the
@@ -91,5 +84,6 @@ instance (Ord r, Fractional r) =>
     where
       s' = shiftLeft' (toOffset (m^.anchorPoint) l) s
 
--- fromLine   ::
--- fromLine l =
+
+fromLine   :: Line 2 r -> SubLine 2 () (UnBounded r)
+fromLine l = SubLine (fmap ValU l) (OpenInterval (only BottomU) (only TopU))
