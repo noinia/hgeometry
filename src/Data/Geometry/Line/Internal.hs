@@ -27,6 +27,7 @@ data Line d r = Line { _anchorPoint :: Point  d r
 makeLenses ''Line
 
 deriving instance (Show r, Arity d) => Show          (Line d r)
+deriving instance (Eq r,   Arity d) => Eq            (Line d r)
 deriving instance Arity d           => Functor       (Line d)
 deriving instance Arity d           => F.Foldable    (Line d)
 deriving instance Arity d           => T.Traversable (Line d)
