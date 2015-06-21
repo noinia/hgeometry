@@ -44,7 +44,7 @@ doubleArea (Triangle a b c) = abs $ ax*by - ax*cy
     Point2 cx cy = c^.core
 
 
--- | get the inscribed circle. Returns Nothing if the triangle is degenerate,
+-- | get the inscribed disk. Returns Nothing if the triangle is degenerate,
 -- i.e. if the points are colinear.
-inscribedCircle                  :: (Eq r, Fractional r) => Triangle p r -> Maybe (Circle () r)
-inscribedCircle (Triangle p q r) = circle (p^.core) (q^.core) (r^.core)
+inscribedDisk                  :: (Eq r, Fractional r) => Triangle p r -> Maybe (Disk () r)
+inscribedDisk (Triangle p q r) = disk (p^.core) (q^.core) (r^.core)

@@ -1,4 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
@@ -18,7 +17,8 @@ import qualified Data.Vinyl.TypeLevel as VTL
 
 --------------------------------------------------------------------------------
 
--- | A type family for types that are associated with a dimension.
+-- | A type family for types that are associated with a dimension. The
+-- dimension is the dimension of the geometry they are embedded in.
 type family Dimension t :: Nat
 
 -- | A type family for types that have an associated numeric type.

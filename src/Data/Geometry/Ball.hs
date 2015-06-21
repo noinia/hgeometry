@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
 
@@ -16,10 +15,12 @@ import           Data.Vinyl
 import           GHC.TypeLits
 import           Linear.Affine(qdA, (.-.), (.+^))
 import           Linear.Vector((^/),(*^),(^+^))
+import           Data.Geometry.Boundary
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
 
+-- | A d-dimensional ball.
 data Ball d p r = Ball { _center        :: Point d r :+ p
                        , _squaredRadius :: r
                        }
@@ -93,18 +94,35 @@ p `onBall` b = p `inBall` b == On
 
 
 --------------------------------------------------------------------------------
--- * Circles, aka 2-dimensional Balls
+-- | Spheres, i.e. the boundary of a ball.
 
-type Circle = Ball 2
+type Sphere d p r = Boundary (Ball d p r)
 
--- | Given three points, get the circle through the three points. If the three
+pattern Sphere c r = Boundary (Ball c r)
+
+
+
+
+--------------------------------------------------------------------------------
+-- * Disks and Circles, aka 2-dimensional Balls and Spheres
+
+type Disk p r = Ball 2 p r
+
+pattern Disk c r = Ball c r
+
+
+type Circle p r = Sphere 2 p r
+
+pattern Circle c r = Sphere c r
+
+-- | Given three points, get the disk through the three points. If the three
 -- input points are colinear we return Nothing
 --
--- >>> circle (point2 0 10) (point2 10 0) (point2 (-10) 0)
+-- >>> disk (point2 0 10) (point2 10 0) (point2 (-10) 0)
 -- Just (Ball {_center = Point {toVec = Vector {_unV = fromList [0.0,0.0]}} :+ (), _squaredRadius = 100.0})
-circle       :: (Eq r, Fractional r)
-             => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Circle () r)
-circle p q r = match ((f p) `intersect` (f q)) $
+disk       :: (Eq r, Fractional r)
+           => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
+disk p q r = match ((f p) `intersect` (f q)) $
        (H $ \NoIntersection -> Nothing)
     :& (H $ \c@(Point _)    -> Just $ Ball (only c) (qdA c p))
     :& (H $ \_              -> Nothing)
@@ -132,7 +150,7 @@ instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) wh
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  (Line p' v) `intersect` (Ball (c :+ _) r) = case discr `compare` 0 of
+  (Line p' v) `intersect` (Circle (c :+ _) r) = case discr `compare` 0 of
                                                 LT -> coRec $ NoIntersection
                                                 EQ -> coRec . Touching $ q' (lambda (+))
                                                 GT -> let [l1,l2] = L.sort [lambda (-), lambda (+)]
