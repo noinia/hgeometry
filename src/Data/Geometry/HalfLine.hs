@@ -52,14 +52,14 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
   transformBy t = toHalfLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => HalfLine d r -> LineSegment d () r
-      toLineSegment' (HalfLine p v) = LineSegment (p :+ ()) ((p .+^ v) :+ ())
+      toLineSegment' (HalfLine p v) = ClosedLineSegment (p :+ ()) ((p .+^ v) :+ ())
 
 --------------------------------------------------------------------------------
 
 halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
 halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
-                                   in SubLine l (Interval $ Range (Closed $ only (Val 0))
-                                                                  (Open   $ only Top))
+                                   in SubLine l (Interval (Closed $ only (Val 0))
+                                                          (Open   $ only Top))
 
 
 fromSubLine               :: (Num r, Arity d) => SubLine d p (Top r) -> Maybe (HalfLine d r)
@@ -170,7 +170,8 @@ p `onHalfLine` (HalfLine q v) = maybe False (>= 0) $ scalarMultiple (p .-. q) v
 
 
 -- | Transform a LineSegment into a half-line, by forgetting the second endpoint.
-toHalfLine                     :: (Num r, Arity d) => LineSegment d p r -> HalfLine d r
-toHalfLine (LineSegment p' q') = let p = p' ^.core
-                                     q = q' ^.core
-                                 in HalfLine p (q .-. p)
+-- Note that this also forgets about if the starting point was open or closed.
+toHalfLine   :: (Num r, Arity d) => LineSegment d p r -> HalfLine d r
+toHalfLine s = let p = s^.start.core
+                   q = s^.end.core
+               in HalfLine p (q .-. p)
