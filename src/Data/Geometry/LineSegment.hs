@@ -126,37 +126,18 @@ instance (Ord r, Fractional r) =>
       :& RNil
 
 
--- instance (Ord r, Fractional r) =>
---          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
---   nonEmptyIntersection = defaultNonEmptyIntersection
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
---   s `intersect` l = let s' =
-
---     match (s'^._SubLine) `intersect` (fromLine l)) $
---          (H   coRec)
---       :& (H $ coRec . fmap (_unUnBounded))
---       :& (H $ const (coRec s))
---       :& RNil
-
-
-
-
--- instance (Ord r, Fractional r) =>
---          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
---   data Intersection (LineSegment 2 p r) (Line 2 r) =
---            LineContainsSegment !(LineSegment 2 p r)
---          | LineLineSegmentIntersection !(Point 2 r)
---          | NoLineLineSegmentIntersection
---          deriving (Show,Eq)
-
---   nonEmptyIntersection NoLineLineSegmentIntersection = False
---   nonEmptyIntersection _                             = True
-
---   s `intersect` l = case (supportingLine s) `intersect` l of
---     SameLine _                               -> LineContainsSegment s
---     LineLineIntersection p | p `onSegment` s -> LineLineSegmentIntersection p
---     _                                        -> NoLineLineSegmentIntersection
-
+  s@(LineSegment p q) `intersect` l = let f = bimap (fmap ValU) (const ())
+                                          s' = LineSegment (p&unEndPoint %~ f)
+                                                           (q&unEndPoint %~ f)
+                                    in match ((s'^._SubLine) `intersect` (fromLine l)) $
+         (H   coRec)
+      :& (H $ coRec . fmap (_unUnBounded))
+      :& (H $ const (coRec s))
+      :& RNil
 
 -- * Functions on LineSegments
 

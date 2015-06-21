@@ -227,4 +227,38 @@ type Bottom a = Maybe a
 
 data UnBounded a = BottomU | ValU { _unUnBounded :: a }  | TopU
                  deriving (Show,Read,Eq,Ord,Functor,F.Foldable,T.Traversable)
+
+                          -- ,Num,Bounded,Integral,Fractional,Floating,RealFrac,RealFloat)
 makeLenses ''UnBounded
+
+
+instance Num a => Num (UnBounded a) where
+  BottomU  + _        = BottomU
+  (ValU x) + (ValU y) = ValU $ x + y
+  _        + TopU     = TopU
+
+  BottomU  * _        = BottomU
+  (ValU x) * (ValU y) = ValU $ x * y
+  _        * TopU     = TopU
+
+  abs BottomU  = BottomU
+  abs (ValU x) = ValU $ abs x
+  abs TopU     = TopU
+
+  signum BottomU  = -1
+  signum (ValU x) = ValU $ signum x
+  signum TopU     = 1
+
+  fromInteger = ValU . fromInteger
+
+  negate BottomU  = TopU
+  negate (ValU x) = ValU $ negate x
+  negate TopU     = BottomU
+
+instance Fractional a => Fractional (UnBounded a) where
+  BottomU  / _        = BottomU
+  (ValU x) / (ValU y) = ValU $ x / y
+  (ValU _) / _        = 0
+  TopU     / _        = TopU
+
+  fromRational = ValU . fromRational
