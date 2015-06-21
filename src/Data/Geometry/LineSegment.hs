@@ -143,30 +143,30 @@ instance (Ord r, Fractional r) =>
 
 -- | Test if a point lies on a line segment.
 --
--- >>> (point2 1 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 1 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
--- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 5 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 5 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 (-1) 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 (-1) 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 3 3 :+ ()))
+-- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 3 3 :+ ()))
 -- True
 --
 -- Note that the segments are assumed to be closed. So the end points lie on the segment.
 --
--- >>> (point2 2 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 2 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
--- >>> origin `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> origin `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
 --
 --
 -- This function works for arbitrary dimensons.
 --
--- >>> (point3 1 1 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (point3 1 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
 -- True
--- >>> (point3 1 2 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (point3 1 2 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
 -- False
 onSegment       :: (Ord r, Fractional r, Arity d)
                 => Point d r -> LineSegment d p r -> Bool
