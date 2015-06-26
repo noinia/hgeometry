@@ -9,6 +9,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -47,5 +48,15 @@ instance PointFunctor (PolyLine d p) where
 
 
 -- | pre: The input list contains at least two points
-fromPoints :: (Monoid p) => [Point d r] -> PolyLine d p r
-fromPoints = PolyLine . S2.fromList . map (\p -> p :+ mempty)
+fromPoints :: [Point d r :+ p] -> PolyLine d p r
+fromPoints = PolyLine . S2.fromList
+
+-- | pre: The input list contains at least two points. All extra vields are
+-- initialized with mempty.
+fromPoints' :: (Monoid p) => [Point d r] -> PolyLine d p r
+fromPoints' = fromPoints . map (\p -> p :+ mempty)
+
+
+-- | We consider the line-segment as closed.
+fromLineSegment                    :: LineSegment d p r -> PolyLine d p r
+fromLineSegment (LineSegment' p q) = fromPoints [p,q]
