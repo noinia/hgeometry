@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Line.Internal where
 
@@ -6,15 +7,16 @@ import           Control.Applicative
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.Traversable as T
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
+import           Data.Maybe(fromJust)
+import qualified Data.Traversable as T
+import           Data.Vinyl
 import           Linear.Affine(Affine(..))
 import           Linear.Vector((*^))
-
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -124,3 +126,34 @@ class HasSupportingLine t where
 
 instance HasSupportingLine (Line d r) where
   supportingLine = id
+
+
+--------------------------------------------------------------------------------
+-- * Standard Point-Line duality in R^2
+
+-- | Create a line from the linear function ax + b
+fromLinearFunction     :: Num r => r -> r -> Line 2 r
+fromLinearFunction a b = Line (point2 0 b) (v2 1 a)
+
+-- | get values a,b s.t. the input line is described by y = ax + b.
+-- returns Nothing if the line is vertical
+toLinearFunction                            :: forall r. (Fractional r, Eq r)
+                                            => Line 2 r -> Maybe (r,r)
+toLinearFunction l@(Line _ (Vector2 vx vy)) = match (l `intersect` verticalLine (0 :: r)) $
+       (H $ \NoIntersection -> Nothing)    -- l is a vertical line
+    :& (H $ \(Point2 _ b)   -> Just (vy / vx,b))
+    :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
+    :& RNil
+
+-- | Maps a line point (px,py) to a line (y=px*x - py)
+dualLine              :: Num r => Point 2 r -> Line 2 r
+dualLine (Point2 x y) = fromLinearFunction x (-y)
+
+-- | Returns Nothing if the input line is vertical
+-- Maps a line l: y = ax + b to a point (a,-b)
+dualPoint   :: (Fractional r, Eq r) => Line 2 r -> Maybe (Point 2 r)
+dualPoint l = (\(a,b) -> point2 a (-b)) <$> toLinearFunction l
+
+-- | Pre: the input line is not vertical
+dualPoint' :: (Fractional r, Eq r) => Line 2 r -> Point 2 r
+dualPoint' = fromJust . dualPoint
