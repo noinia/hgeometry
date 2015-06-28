@@ -1,12 +1,10 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.LineSegment where
 
 
 import Control.Arrow((&&&))
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Box
@@ -80,7 +78,9 @@ subLineToSegment sl = let r@(Interval s' e') = (fixEndPoints sl)^.subRange
 instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
   supportingLine s = lineThrough (s^.start.core) (s^.end.core)
 
-deriving instance (Show r, Show p, Arity d) => Show (LineSegment d p r)
+instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
+  show (LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
+
 deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
 -- deriving instance (Ord r, Ord p, Arity d)   => Ord (LineSegment d p r)
 deriving instance Arity d                   => Functor (LineSegment d p)
@@ -223,3 +223,21 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 -- | Length of the line segment
 segmentLength                    :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength (LineSegment' p q) = distanceA (p^.core) (q^.core)
+
+
+testSeg :: LineSegment 2 () Rational
+testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
+
+horL' :: Line 2 Rational
+horL' = horizontalLine 0
+
+testI = testSeg `intersect` horL'
+
+
+ff = bimap (fmap ValU) (const ())
+
+ss' = let (LineSegment p q) = testSeg in
+      LineSegment (p&unEndPoint %~ ff)
+                  (q&unEndPoint %~ ff)
+
+ss'' = ss'^._SubLine

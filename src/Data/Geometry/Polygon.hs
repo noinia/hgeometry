@@ -4,7 +4,7 @@ module Data.Geometry.Polygon where
 
 
 import           Control.Applicative
-import           Control.Lens hiding (Simple)
+import           Control.Lens hiding (Simple, only)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
@@ -116,3 +116,18 @@ q `inPolygon` pg@(SimplePolygon _)    = odd k
 --                                             : [ not $ q `inPolygon` h
 --                                               | h <- hs
 --                                               ]
+
+testQ = map (`inPolygon` testPoly) [ point2 1 1    -- True
+                                   , point2 0 0    -- False
+                                   , point2 5 14   -- True
+                                   , point2 5 10   -- True
+                                   , point2 10 5   -- False
+                                   ]
+
+testPoly :: SimplePolygon () Rational
+testPoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
+                                                   , point2 10 0
+                                                   , point2 10 10
+                                                   , point2 5 15
+                                                   , point2 1 11
+                                                   ]

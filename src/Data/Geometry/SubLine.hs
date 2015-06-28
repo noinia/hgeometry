@@ -87,3 +87,13 @@ instance (Ord r, Fractional r) =>
 
 fromLine   :: Line 2 r -> SubLine 2 () (UnBounded r)
 fromLine l = SubLine (fmap ValU l) (OpenInterval (only BottomU) (only TopU))
+
+
+testL :: SubLine 2 () (UnBounded Rational)
+testL = SubLine (horizontalLine 0) (Interval (Closed (only 0)) (Open $ only 10))
+
+horL :: SubLine 2 () (UnBounded Rational)
+horL = fromLine $ horizontalLine 0
+
+
+test = (testL^.subRange) `intersect` (horL^.subRange)

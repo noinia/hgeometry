@@ -31,8 +31,11 @@ import Data.Vinyl
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
 newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
-                     deriving (Show,Read,Eq)
+                     deriving (Eq)
 makeLenses ''Interval
+
+instance (Show a, Show r) => Show (Interval a r) where
+  show (Interval l u) = concat [ "Interval (", show l, ") (", show u,")"]
 
 instance Functor (Interval a) where
   fmap = T.fmapDefault

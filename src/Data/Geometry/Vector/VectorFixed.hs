@@ -4,8 +4,8 @@
 module Data.Geometry.Vector.VectorFixed where
 
 import           Control.Applicative
-
 import           Control.Lens
+import           Data.Monoid
 
 import           Data.Proxy
 
@@ -51,8 +51,11 @@ element   :: forall proxy i d r. (Arity d, Index' i d) => proxy i -> Lens' (Vect
 element _ = V.elementTy (undefined :: (ToPeano i))
 
 
+instance (Show r, Arity d) => Show (Vector d r) where
+  show (Vector v) = mconcat [ "Vector", show $ V.length v , " "
+                            , show $ toList v
+                            ]
 
-deriving instance (Show r, Arity d) => Show (Vector d r)
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
 deriving instance (Ord r, Arity d)  => Ord (Vector d r)
 deriving instance Arity d  => Functor (Vector d)
