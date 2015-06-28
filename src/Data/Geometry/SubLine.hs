@@ -55,7 +55,7 @@ fixEndPoints sl = sl&subRange %~ f
 -- | given point p on line (Line q v), Get the scalar lambda s.t.
 -- p = q + lambda v
 toOffset              :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
-toOffset p (Line q v) = fromJust $ scalarMultiple (q .-. p) v
+toOffset p (Line q v) = fromJust $ scalarMultiple (p .-. q) v
 
 type instance IntersectionOf (SubLine 2 p r) (SubLine 2 q r) = [ NoIntersection
                                                                , Point 2 r
