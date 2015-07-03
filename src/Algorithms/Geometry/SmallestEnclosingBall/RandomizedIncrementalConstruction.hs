@@ -26,7 +26,7 @@ instance F.Foldable TwoOrThree where
 
 -- | The result of a smallest enclosing disk computation: The smallest ball
 --    and the points defining it
-data DiskResult p r = DiskResult { _enclosingDisk  :: Circle () r
+data DiskResult p r = DiskResult { _enclosingDisk  :: Disk () r
                                  , _definingPoints :: TwoOrThree (Point 2 r :+ p)
                                  }
 makeLenses ''DiskResult
@@ -78,7 +78,7 @@ smallestEnclosingDiskWithPoints p q = foldr addPoint (initial p q)
       | (r^.core) `inClosedBall` d = br
       | otherwise                  = DiskResult (circle' r) (Three p q r)
 
-    circle' r = fromMaybe degen $ circle (p^.core) (q^.core) (r^.core)
+    circle' r = fromMaybe degen $ disk (p^.core) (q^.core) (r^.core)
     degen = error "smallestEnclosingDisk: Unhandled degeneracy"
     -- TODO: handle degenerate case
 

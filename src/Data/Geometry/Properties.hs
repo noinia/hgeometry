@@ -1,7 +1,7 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE DefaultSignatures #-}
 module Data.Geometry.Properties where
 
 import           Control.Applicative
@@ -17,7 +17,8 @@ import qualified Data.Vinyl.TypeLevel as VTL
 
 --------------------------------------------------------------------------------
 
--- | A type family for types that are associated with a dimension.
+-- | A type family for types that are associated with a dimension. The
+-- dimension is the dimension of the geometry they are embedded in.
 type family Dimension t :: Nat
 
 -- | A type family for types that have an associated numeric type.
@@ -52,6 +53,12 @@ class IsIntersectableWith g h where
   -- | Helper to implement `intersects`.
   nonEmptyIntersection :: proxy g -> proxy h -> Intersection g h -> Bool
   {-# MINIMAL intersect , nonEmptyIntersection #-}
+
+  default nonEmptyIntersection :: ( NoIntersection ∈ IntersectionOf g h
+                                  , RecApplicative (IntersectionOf g h)
+                                  )
+                                  => proxy g -> proxy h -> Intersection g h -> Bool
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
 
 -- | When using IntersectionOf we may need some constraints that are always

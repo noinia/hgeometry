@@ -1,10 +1,10 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.LineSegment where
 
+
+import Control.Arrow((&&&))
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Box
@@ -12,148 +12,161 @@ import           Data.Geometry.Interval
 import           Data.Geometry.Line.Internal
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           Data.Maybe(maybe)
 import           Data.Ord(comparing)
+import           Data.Range
 import           Data.Semigroup
+import           Data.Vinyl
 import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
 
-newtype GLineSegment d s t p r = GLineSegment { _unLineSeg :: GInterval s t p (Point d r) }
-pattern LineSegment s t = GLineSegment (Range s t)
 
-makeLenses ''GLineSegment
+-- | Line segments. LineSegments have a start and end point, both of which may
+-- contain additional data of type p.
+data LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
-type SymLineSegment d t = GLineSegment d t t
-type LineSegment d = SymLineSegment d Closed
+makeLenses ''LineSegment
 
--- -- | Line segments. LineSegments have a start and end point, both of which may
--- -- contain additional data of type p.
--- newtype LineSegment d p r = LineSeg { _unLineSeg :: Interval p (Point d r) }
--- pattern LineSegment s t = LineSeg (Interval s t)
+pattern LineSegment       s t = GLineSegment (Interval s t)
 
-instance HasStart (GLineSegment d s t p r) where
-  type StartCore  (GLineSegment d s t p r) = Point d r
-  type StartExtra (GLineSegment d s t p r) = p
-  start = unLineSeg.lower.unEndPoint
+-- | Gets the start and end point, but forgetting if they are open or closed.
+pattern LineSegment'      s t <- ((^.start) &&& (^.end) -> (s,t))
 
-    -- lens (_start . _unLineSeg) (\(LineSegment _ t) s -> LineSegment s t)
+pattern ClosedLineSegment s t = GLineSegment (ClosedInterval s t)
 
-instance HasEnd (GLineSegment d s t p r) where
-  type EndCore  (GLineSegment d s t p r) = Point d r
-  type EndExtra (GLineSegment d s t p r) = p
-  end = unLineSeg.upper.unEndPoint
+type instance Dimension (LineSegment d p r) = d
+type instance NumType   (LineSegment d p r) = r
 
---    lens (_end . _unLineSeg) (\(LineSegment s _) t -> LineSegment s t)
+instance HasStart (LineSegment d p r) where
+  type StartCore  (LineSegment d p r) = Point d r
+  type StartExtra (LineSegment d p r) = p
+  start = unLineSeg.start
 
-instance (Num r, Arity d) => HasSupportingLine (GLineSegment d s t p r) where
-  supportingLine (LineSegment (p :+ _) (q :+ _)) = lineThrough p q
+instance HasEnd (LineSegment d p r) where
+  type EndCore  (LineSegment d p r) = Point d r
+  type EndExtra (LineSegment d p r) = p
+  end = unLineSeg.end
 
-deriving instance (AlwaysTruePrettyShow s t
-                  ,Show r, Show p, Arity d) => Show (GLineSegment d s t p r)
-deriving instance (Eq r, Eq p, Arity d)     => Eq (GLineSegment d s t p r)
-deriving instance (Ord r, Ord p, Arity d)   => Ord (GLineSegment d s t p r)
--- deriving instance Arity d                   => Functor (GLineSegment d p)
-type instance Dimension (GLineSegment d s t p r) = d
-type instance NumType   (GLineSegment d s t p r) = r
+_SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
+_SubLine = iso segment2SubLine subLineToSegment
 
-instance PointFunctor (GLineSegment d s t p) where
-  pmap f (LineSegment s e) = LineSegment (first f s) (first f e)
+segment2SubLine    :: (Fractional r, Eq r, Arity d)
+                   => LineSegment d p r -> SubLine d p r
+segment2SubLine ss = SubLine l (Interval s e)
+  where
+    l = supportingLine ss
+    f = flip toOffset l
+    (Interval p q)  = ss^.unLineSeg
 
--- | Only for closed segs, since boxes are closed
+    s = p&unEndPoint.core %~ f
+    e = q&unEndPoint.core %~ f
+
+subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
+subLineToSegment sl = let r@(Interval s' e') = (fixEndPoints sl)^.subRange
+                          s = s'&unEndPoint %~ (^.extra)
+                          e = e'&unEndPoint %~ (^.extra)
+                      in LineSegment s e
+
+instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
+  supportingLine s = lineThrough (s^.start.core) (s^.end.core)
+
+instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
+  show (LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
+
+deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
+-- deriving instance (Ord r, Ord p, Arity d)   => Ord (LineSegment d p r)
+deriving instance Arity d                   => Functor (LineSegment d p)
+
+instance PointFunctor (LineSegment d p) where
+  pmap f (LineSegment s e) = LineSegment (s&unEndPoint %~ first f) (e&unEndPoint %~ first f)
+
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBoxList [l^.start.core, l^.end.core]
 
--- instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
---   transformBy = transformPointFunctor
-
-
-
-
-
+instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
+  transformBy = transformPointFunctor
 
 
 
 -- ** Converting between Lines and LineSegments
 
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
-toLineSegment (Line p v) = LineSegment (p       :+ mempty)
-                                       (p .+^ v :+ mempty)
+toLineSegment (Line p v) = ClosedLineSegment (p       :+ mempty)
+                                             (p .+^ v :+ mempty)
 
 -- *** Intersecting LineSegments
 
--- instance (Ord r, Fractional r) =>
---          (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+type instance IntersectionOf (LineSegment 2 p r) (LineSegment 2 p r) = [ NoIntersection
+                                                                       , Point 2 r
+                                                                       , LineSegment 2 p r
+                                                                       ]
 
---   data Intersection (LineSegment 2 p r) (LineSegment 2 p r) =
---         OverlappingSegment         !(LineSegment 2 p r)
---       | LineSegLineSegIntersection !(Point 2 r)
---       | NoIntersection
---       deriving (Show,Eq)
+type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
+                                                              , Point 2 r
+                                                              , LineSegment 2 p r
+                                                              ]
 
---   nonEmptyIntersection NoIntersection = False
---   nonEmptyIntersection _              = True
 
---   a@(LineSegment p q) `intersect` b@(LineSegment s t) = case la `intersect` lb of
---       SameLine _                                ->
---           maybe NoIntersection OverlappingSegment $ overlap a b
---       LineLineIntersection r | onBothSegments r -> LineSegLineSegIntersection r
---       _                                         -> NoIntersection
---     where
---       la = supportingLine a
---       lb = supportingLine b
---       onBothSegments r = onSegment r a && onSegment r b
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
--- instance (Ord r, Fractional r) =>
---          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
---   data Intersection (LineSegment 2 p r) (Line 2 r) =
---            LineContainsSegment !(LineSegment 2 p r)
---          | LineLineSegmentIntersection !(Point 2 r)
---          | NoLineLineSegmentIntersection
---          deriving (Show,Eq)
+  a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
+         (H coRec)
+      :& (H coRec)
+      :& (H $ coRec . subLineToSegment)
+      :& RNil
 
---   nonEmptyIntersection NoLineLineSegmentIntersection = False
---   nonEmptyIntersection _                             = True
 
---   s `intersect` l = case (supportingLine s) `intersect` l of
---     SameLine _                               -> LineContainsSegment s
---     LineLineIntersection p | p `onSegment` s -> LineLineSegmentIntersection p
---     _                                        -> NoLineLineSegmentIntersection
+instance (Ord r, Fractional r) =>
+         (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
+  s@(LineSegment p q) `intersect` l = let f = bimap (fmap ValU) (const ())
+                                          s' = LineSegment (p&unEndPoint %~ f)
+                                                           (q&unEndPoint %~ f)
+                                    in match ((s'^._SubLine) `intersect` (fromLine l)) $
+         (H   coRec)
+      :& (H $ coRec . fmap (_unUnBounded))
+      :& (H $ const (coRec s))
+      :& RNil
 
 -- * Functions on LineSegments
 
 -- | Test if a point lies on a line segment.
 --
--- >>> (point2 1 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 1 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
--- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 5 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 5 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 (-1) 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 (-1) 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- False
--- >>> (point2 1 1) `onSegment` (LineSegment (origin :+ ()) (point2 3 3 :+ ()))
+-- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 3 3 :+ ()))
 -- True
 --
 -- Note that the segments are assumed to be closed. So the end points lie on the segment.
 --
--- >>> (point2 2 0) `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (point2 2 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
--- >>> origin `onSegment` (LineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> origin `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
 -- True
 --
 --
 -- This function works for arbitrary dimensons.
 --
--- >>> (point3 1 1 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (point3 1 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
 -- True
--- >>> (point3 1 2 1) `onSegment` (LineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (point3 1 2 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
 -- False
 onSegment       :: (Ord r, Fractional r, Arity d)
                 => Point d r -> LineSegment d p r -> Bool
@@ -208,5 +221,23 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 
 
 -- | Length of the line segment
-segmentLength                   :: (Arity d, Floating r) => LineSegment d p r -> r
-segmentLength (LineSegment p q) = distanceA (p^.core) (q^.core)
+segmentLength                    :: (Arity d, Floating r) => LineSegment d p r -> r
+segmentLength (LineSegment' p q) = distanceA (p^.core) (q^.core)
+
+
+testSeg :: LineSegment 2 () Rational
+testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
+
+horL' :: Line 2 Rational
+horL' = horizontalLine 0
+
+testI = testSeg `intersect` horL'
+
+
+ff = bimap (fmap ValU) (const ())
+
+ss' = let (LineSegment p q) = testSeg in
+      LineSegment (p&unEndPoint %~ ff)
+                  (q&unEndPoint %~ ff)
+
+ss'' = ss'^._SubLine

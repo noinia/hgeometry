@@ -59,7 +59,7 @@ extract = undefined
 instance IpeReadText (PolyLine 2 ()) where
   ipeReadText t = readPathOperations t >>= fromOps
     where
-      fromOps (MoveTo p:LineTo q:ops) = (\ps -> fromPoints $ [p,q] ++ ps)
+      fromOps (MoveTo p:LineTo q:ops) = (\ps -> fromPoints' $ [p,q] ++ ps)
                                      <$> validateAll "Expected LineTo p" _LineTo ops
       fromOps _                       = Left "Expected MoveTo p:LineTo q:... "
 

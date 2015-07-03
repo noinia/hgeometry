@@ -1,21 +1,24 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.HalfLine where
 
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Data.Ext
+import           Data.Range
 import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Geometry.Line
+import           Data.Geometry.SubLine
 import           Data.Geometry.LineSegment
 import           Linear.Vector((*^))
 import           Linear.Affine(Affine(..),distanceA)
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Half-Lines
@@ -29,6 +32,8 @@ makeLenses ''HalfLine
 deriving instance (Show r, Arity d) => Show    (HalfLine d r)
 deriving instance (Eq r, Arity d)   => Eq      (HalfLine d r)
 deriving instance Arity d           => Functor (HalfLine d)
+deriving instance Arity d           => F.Foldable    (HalfLine d)
+deriving instance Arity d           => T.Traversable (HalfLine d)
 
 type instance Dimension (HalfLine d r) = d
 type instance NumType   (HalfLine d r) = r
@@ -47,7 +52,47 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
   transformBy t = toHalfLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => HalfLine d r -> LineSegment d () r
-      toLineSegment' (HalfLine p v) = LineSegment (p :+ ()) ((p .+^ v) :+ ())
+      toLineSegment' (HalfLine p v) = ClosedLineSegment (p :+ ()) ((p .+^ v) :+ ())
+
+--------------------------------------------------------------------------------
+
+halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
+halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
+                                   in SubLine l (Interval (Closed $ only (Val 0))
+                                                          (Open   $ only Top))
+
+
+fromSubLine               :: (Num r, Arity d) => SubLine d p (Top r) -> Maybe (HalfLine d r)
+fromSubLine (SubLine l' i) = toMaybe $ do
+                              l@(Line _ v) <- T.sequence l'
+                              let ts = i^.start.core
+                                  te = i^.end.core
+                              case (ts,te) of
+                                (Top,Top)  -> Top
+                                (Val x,_)  -> Val $ HalfLine (pointAt x l) v
+                                (_, Val x) -> Val $ HalfLine (pointAt x l) v
+
+
+type instance IntersectionOf (HalfLine 2 r) (Line 2 r) = [ NoIntersection
+                                                         , Point 2 r
+                                                         , HalfLine 2 r
+                                                         ]
+
+type instance IntersectionOf (HalfLine 2 r) (HalfLine 2 r) = [ NoIntersection
+                                                             , Point 2 r
+                                                             , LineSegment 2 () r
+                                                             , HalfLine 2 r
+                                                             ]
+
+type instance IntersectionOf (HalfLine 2 r) (LineSegment 2 p r) = [ NoIntersection
+                                                                  , Point 2 r
+                                                                  , LineSegment 2 () r
+                                                                  ]
+
+
+-- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
+  -- hl `intersect` l = match (halfLineToSubLine hl, l)
+
 
 -- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
 --   data Intersection (HalfLine 2 r) (Line 2 r) = NoHalfLineLineIntersection
@@ -125,7 +170,8 @@ p `onHalfLine` (HalfLine q v) = maybe False (>= 0) $ scalarMultiple (p .-. q) v
 
 
 -- | Transform a LineSegment into a half-line, by forgetting the second endpoint.
-toHalfLine                     :: (Num r, Arity d) => LineSegment d p r -> HalfLine d r
-toHalfLine (LineSegment p' q') = let p = p' ^.core
-                                     q = q' ^.core
-                                 in HalfLine p (q .-. p)
+-- Note that this also forgets about if the starting point was open or closed.
+toHalfLine   :: (Num r, Arity d) => LineSegment d p r -> HalfLine d r
+toHalfLine s = let p = s^.start.core
+                   q = s^.end.core
+               in HalfLine p (q .-. p)

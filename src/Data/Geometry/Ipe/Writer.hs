@@ -351,7 +351,7 @@ fromPolyLine = Path . S2.l1Singleton . PolyLineSegment
 
 
 instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
-  ipeWrite (LineSegment p q) = ipeWrite . fromPolyLine . fromPoints . map (^.core) $ [p,q]
+  ipeWrite (LineSegment' p q) = ipeWrite . fromPolyLine . fromPoints . map (^.core) $ [p,q]
 
 
 instance IpeWrite () where

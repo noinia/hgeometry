@@ -1,13 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Point where
-
-import           Data.Proxy
 
 import           Control.Applicative
 import           Control.Lens
+import           Data.Monoid
+import           Data.Proxy
 
 -- import Data.TypeLevel.Common
 import           Data.Typeable
@@ -18,6 +16,8 @@ import qualified Data.Vinyl.TypeLevel as TV
 
 import           Data.Vinyl.TypeLevel hiding (Nat)
 
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
 -- import qualified Data.Vector.Fixed.Cont as C
 
@@ -48,16 +48,22 @@ import           Linear.Affine hiding (Point(..), origin)
 -- | A d-dimensional point.
 newtype Point d r = Point { toVec :: Vector d r }
 
-deriving instance (Show r, Arity d) => Show (Point d r)
+instance (Show r, Arity d) => Show (Point d r) where
+  show (Point (Vector v)) = mconcat [ "Point", show $ FV.length v , " "
+                                    , show $ F.toList v
+                                    ]
+
+
+
 deriving instance (Eq r, Arity d)   => Eq (Point d r)
 deriving instance (Ord r, Arity d)  => Ord (Point d r)
 deriving instance Arity d           => Functor (Point d)
+deriving instance Arity d           => F.Foldable (Point d)
+deriving instance Arity d           => T.Traversable (Point d)
 
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
-
-
 
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
@@ -69,7 +75,7 @@ instance Arity d =>  Affine (Point d) where
 -- | Point representing the origin in d dimensions
 --
 -- >>> origin :: Point 4 Int
--- Point {toVec = Vector {_unV = fromList [0,0,0,0]}}
+-- Point4 [0,0,0,0]
 origin :: (Arity d, Num r) => Point d r
 origin = Point $ pure 0
 
@@ -79,9 +85,9 @@ origin = Point $ pure 0
 -- | Lens to access the vector corresponding to this point.
 --
 -- >>> (point3 1 2 3) ^. vector
--- Vector {_unV = fromList [1,2,3]}
+-- Vector3 [1,2,3]
 -- >>> origin & vector .~ v3 1 2 3
--- Point {toVec = Vector {_unV = fromList [1,2,3]}}
+-- Point3 [1,2,3]
 vector :: Lens' (Point d r) (Vector d r)
 vector = lens toVec (const Point)
 
@@ -101,9 +107,9 @@ unsafeCoord i = vector . FV.element (i-1)
 -- >>> point3 1 2 3 ^. coord (C :: C 2)
 -- 2
 -- >>> point3 1 2 3 & coord (C :: C 1) .~ 10
--- Point {toVec = Vector {_unV = fromList [10,2,3]}}
+-- Point3 [10,2,3]
 -- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
--- Point {toVec = Vector {_unV = fromList [1,2,4]}}
+-- Point3 [1,2,4]
 coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 
@@ -142,7 +148,7 @@ pattern Point3 x y z <- (_point3 -> (x,y,z))
 -- | Construct a 2 dimensional point
 --
 -- >>> point2 1 2
--- Point {toVec = Vector {_unV = fromList [1,2]}}
+-- Point2 [1,2]
 point2     :: r -> r -> Point 2 r
 point2 x y = Point $ v2 x y
 
@@ -157,7 +163,7 @@ _point2 p = (p^.xCoord, p^.yCoord)
 -- | Construct a 3 dimensional point
 --
 -- >>> point3 1 2 3
--- Point {toVec = Vector {_unV = fromList [1,2,3]}}
+-- Point3 [1,2,3]
 point3       :: r -> r -> r -> Point 3 r
 point3 x y z = Point $ v3 x y z
 
@@ -176,7 +182,7 @@ type i <=. d = (Index' (i-1) d, Arity d)
 -- >>> point3 1 2 3 ^. xCoord
 -- 1
 -- >>> point2 1 2 & xCoord .~ 10
--- Point {toVec = Vector {_unV = fromList [10,2]}}
+-- Point2 [10,2]
 xCoord :: (1 <=. d) => Lens' (Point d r) r
 xCoord = coord (C :: C 1)
 
@@ -185,7 +191,7 @@ xCoord = coord (C :: C 1)
 -- >>> point2 1 2 ^. yCoord
 -- 2
 -- >>> point3 1 2 3 & yCoord %~ (+1)
--- Point {toVec = Vector {_unV = fromList [1,3,3]}}
+-- Point3 [1,3,3]
 yCoord :: (2 <=. d) => Lens' (Point d r) r
 yCoord = coord (C :: C 2)
 
@@ -194,7 +200,7 @@ yCoord = coord (C :: C 2)
 -- >>> point3 1 2 3 ^. zCoord
 -- 3
 -- >>> point3 1 2 3 & zCoord %~ (+1)
--- Point {toVec = Vector {_unV = fromList [1,2,4]}}
+-- Point3 [1,2,4]
 zCoord :: (3 <=. d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
 

@@ -82,21 +82,21 @@ _diskMark = _mark "mark/disk(sx)"
 
 -- | For PathSegment -> Circle we only need Num, so use the `fromCircle'
 -- function instead if that is the goal.
-_ellipseSegment :: (Floating r, Ord r) => Prism' (PathSegment r) (Circle () r)
+_ellipseSegment :: (Floating r, Ord r) => Prism' (PathSegment r) (Disk () r)
 _ellipseSegment = prism' fromCircle f
   where
     f (EllipseSegment m) = fromEllipse (Ellipse m)
     f _                  = Nothing
 
 
-fromCircle                   :: Floating r => Circle p r -> PathSegment r
-fromCircle (Ball (c :+ _) r) = EllipseSegment m
+fromCircle                   :: Floating r => Disk p r -> PathSegment r
+fromCircle (Disk (c :+ _) r) = EllipseSegment m
   where
     m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
     -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
     -- get the input circle.
 
-fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Circle () r)
+fromEllipse :: (Num r, Ord r) => Operation r -> Maybe (Disk () r)
 fromEllipse (Ellipse m) | q `onBall` b = Just b
                         | otherwise    = Nothing
   where
