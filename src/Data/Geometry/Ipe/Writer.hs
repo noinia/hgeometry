@@ -351,7 +351,7 @@ fromPolyLine = Path . S2.l1Singleton . PolyLineSegment
 
 
 instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
-  ipeWrite (LineSegment' p q) = ipeWrite . fromPolyLine . fromPoints . map (^.core) $ [p,q]
+  ipeWrite (LineSegment' p q) = ipeWrite . fromPolyLine . fromPoints . map (extra .~ ()) $ [p,q]
 
 
 instance IpeWrite () where
@@ -388,7 +388,7 @@ combine ns  = Just $ Element "group" [] ns
 
 
 testPoly :: PolyLine 2 () Double
-testPoly = fromPoints [origin, point2 0 10, point2 10 10, point2 100 100]
+testPoly = fromPoints' [origin, point2 0 10, point2 10 10, point2 100 100]
 
 
 
