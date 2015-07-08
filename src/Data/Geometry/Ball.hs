@@ -5,6 +5,7 @@ module Data.Geometry.Ball where
 import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
+import           Data.Geometry.Boundary
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -16,7 +17,6 @@ import           Frames.CoRec
 import           GHC.TypeLits
 import           Linear.Affine(qdA, (.-.), (.+^))
 import           Linear.Vector((^/),(*^),(^+^))
-import           Data.Geometry.Boundary
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
@@ -53,14 +53,11 @@ unitBall = Ball (only origin) 1
 
 -- * Querying if a point lies in a ball
 
--- | Result of a inBall query
-data PointBallQueryResult = Inside | On | Outside deriving (Show,Read,Eq)
-
 inBall                 :: (Arity d, Ord r, Num r)
-                       => Point d r -> Ball d p r -> PointBallQueryResult
+                       => Point d r -> Ball d p r -> PointLocationResult
 p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
                            LT -> Inside
-                           EQ -> On
+                           EQ -> OnBoundary
                            GT -> Outside
 
 -- | Test if a point lies strictly inside a ball
@@ -91,7 +88,7 @@ p `inClosedBall` b = p `inBall` b /= Outside
 -- False
 onBall       :: (Arity d, Ord r, Num r)
              => Point d r -> Ball d p r -> Bool
-p `onBall` b = p `inBall` b == On
+p `onBall` b = p `inBall` b == OnBoundary
 
 
 --------------------------------------------------------------------------------

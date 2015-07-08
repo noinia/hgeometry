@@ -44,6 +44,7 @@ geomModules = prefixWith "Data/Geometry/" [ "Point.hs"
                                           , "Line/Internal.hs"                                                                        , "Interval.hs"
                                           , "LineSegment.hs"
                                           , "PolyLine.hs"
+                                          , "Polygon.hs"
                                           , "Ball.hs"
                                           , "Box.hs"
                                           ]

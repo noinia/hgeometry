@@ -8,6 +8,7 @@ import           Control.Lens hiding (Simple, only)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
+import           Data.Geometry.Boundary
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Line
@@ -21,6 +22,17 @@ import qualified Data.CircularList as C
 
 --------------------------------------------------------------------------------
 -- * Polygons
+
+{- $setup
+>>> :{
+let simplePoly :: SimplePolygon () Rational
+    simplePoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
+                                                         , point2 10 0
+                                                         , point2 10 10
+                                                         , point2 5 15
+                                                         , point2 1 11
+                                                         ]
+:} -}
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
 data PolygonType = Simple | Multi
@@ -60,6 +72,12 @@ holes = lens get set
     set (MultiPolygon vs _) hs = MultiPolygon vs hs
 
 
+-- | Get all holes in a polygon
+holeList                     :: Polygon t p r -> [Polygon Simple p r]
+holeList (SimplePolygon _)   = []
+holeList (MultiPolygon _ hs) = hs
+
+
 -- | The vertices in the polygon. No guarantees are given on the order in which
 -- they appear!
 vertices :: Polygon t p r -> [Point 2 r :+ p]
@@ -82,10 +100,57 @@ toEdges    :: C.CList (Point 2 r :+ p) -> C.CList (LineSegment 2 p r)
 toEdges vs = let vs' = C.toList vs in
   C.fromList $ zipWith (\p q -> LineSegment (Closed p) (Open q)) vs' (tail vs' ++ vs')
 
--- | Check if a point lies strictly inside a polygon
-inPolygon                             :: forall p r. (Fractional r, Ord r)
-                                      => Point 2 r -> Polygon Simple p r -> Bool
-q `inPolygon` pg@(SimplePolygon _)    = odd k
+
+-- | Test if q lies on the boundary of the polygon. Running time: O(n)
+--
+-- >>> point2 1 1 `onBoundary` simplePoly
+-- False
+-- >>> point2 0 0 `onBoundary` simplePoly
+-- True
+-- >>> point2 10 0 `onBoundary` simplePoly
+-- True
+-- >>> point2 5 13 `onBoundary` simplePoly
+-- False
+-- >>> point2 5 10 `onBoundary` simplePoly
+-- False
+-- >>> point2 10 5 `onBoundary` simplePoly
+-- True
+-- >>> point2 20 5 `onBoundary` simplePoly
+-- False
+--
+-- TODO: testcases multipolygon
+onBoundary        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
+q `onBoundary` pg = any (q `onSegment`) es
+  where
+    out = SimplePolygon $ pg^.outerBoundary
+    es = concatMap (C.toList . outerBoundaryEdges) $ out : holeList pg
+
+-- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.
+-- Running time: O(n).
+--
+-- >>> point2 1 1 `inPolygon` simplePoly
+-- Inside
+-- >>> point2 0 0 `inPolygon` simplePoly
+-- OnBoundary
+-- >>> point2 10 0 `inPolygon` simplePoly
+-- OnBoundary
+-- >>> point2 5 13 `inPolygon` simplePoly
+-- Inside
+-- >>> point2 5 10 `inPolygon` simplePoly
+-- Inside
+-- >>> point2 10 5 `inPolygon` simplePoly
+-- OnBoundary
+-- >>> point2 20 5 `inPolygon` simplePoly
+-- Outside
+--
+-- TODO: Add some testcases with multiPolygons
+inPolygon                                :: forall t p r. (Fractional r, Ord r)
+                                         => Point 2 r -> Polygon t p r
+                                         -> PointLocationResult
+q `inPolygon` pg
+    | q `onBoundary` pg                  = OnBoundary
+    | odd k && not (any (q `inHole`) hs) = Inside
+    | otherwise                          = Outside
   where
     l = horizontalLine $ q^.yCoord
 
@@ -109,19 +174,21 @@ q `inPolygon` pg@(SimplePolygon _)    = odd k
       . filter (\p -> p^.xCoord > q^.xCoord)
       . mapMaybe intersectionPoint . C.toList . outerBoundaryEdges $ pg
 
+    -- For multi polygons we have to test if we do not lie in a hole .
+    inHole = insidePolygon
+    hs     = holeList pg
 
--- TODO: The code below would work for a multipolgyon, appart from the boundary case if the
---  point is on the boundary of a hole.
--- q `inPolygon` pg@(MultiPolygon vs hs) = and $ q `inPolygon` SimplePolygon vs
---                                             : [ not $ q `inPolygon` h
---                                               | h <- hs
---                                               ]
+-- | Test if a point lies strictly inside the polgyon.
+insidePolygon        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
+q `insidePolygon` pg = q `inPolygon` pg == Inside
 
-testQ = map (`inPolygon` testPoly) [ point2 1 1    -- True
-                                   , point2 0 0    -- False
-                                   , point2 5 14   -- True
-                                   , point2 5 10   -- True
-                                   , point2 10 5   -- False
+
+testQ = map (`inPolygon` testPoly) [ point2 1 1    -- Inside
+                                   , point2 0 0    -- OnBoundary
+                                   , point2 5 14   -- Inside
+                                   , point2 5 10   -- Inside
+                                   , point2 10 5   -- OnBoundary
+                                   , point2 20 5   -- Outside
                                    ]
 
 testPoly :: SimplePolygon () Rational
