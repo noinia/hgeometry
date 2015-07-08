@@ -21,6 +21,7 @@ import           Data.Ord(comparing)
 import           Data.Range
 import           Data.Semigroup
 import           Data.Vinyl
+import           Data.UnBounded
 import           Frames.CoRec
 import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
@@ -31,11 +32,18 @@ import           Linear.Vector((*^))
 
 
 -- | Line segments. LineSegments have a start and end point, both of which may
--- contain additional data of type p.
-data LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
+-- contain additional data of type p. We can think of a Line-Segment being defined as
+--
+-- <<< data LineSegment d p r = LineSegment (EndPoint ((Point d r) :+ p))
+-- <<<                                      (EndPoint ((Point d r) :+ p))
+newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
 makeLenses ''LineSegment
 
+-- | Pattern that essentially models the line segment as a:
+--
+-- <<< data LineSegment d p r = LineSegment (EndPoint ((Point d r) :+ p))
+-- <<<                                      (EndPoint ((Point d r) :+ p))
 pattern LineSegment       s t = GLineSegment (Interval s t)
 
 -- | Gets the start and end point, but forgetting if they are open or closed.
@@ -131,7 +139,7 @@ instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  s@(LineSegment p q) `intersect` l = let f = bimap (fmap ValU) (const ())
+  s@(LineSegment p q) `intersect` l = let f = bimap (fmap Val) (const ())
                                           s' = LineSegment (p&unEndPoint %~ f)
                                                            (q&unEndPoint %~ f)
                                     in match ((s'^._SubLine) `intersect` (fromLine l)) $
@@ -235,7 +243,7 @@ horL' = horizontalLine 0
 testI = testSeg `intersect` horL'
 
 
-ff = bimap (fmap ValU) (const ())
+ff = bimap (fmap Val) (const ())
 
 ss' = let (LineSegment p q) = testSeg in
       LineSegment (p&unEndPoint %~ ff)

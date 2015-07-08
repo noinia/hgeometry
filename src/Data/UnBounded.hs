@@ -1,5 +1,14 @@
 {-# LANGUAGE TemplateHaskell   #-}
-module Data.UnBounded where
+module Data.UnBounded( Top, topToMaybe
+                     , pattern ValT, pattern Top
+
+                     , Bottom, bottomToMaybe
+                     , pattern Bottom, pattern ValB
+
+                     , UnBounded(..)
+                     , unUnBounded
+                     , unBoundedToMaybe
+                     ) where
 
 import           Control.Applicative
 import           Control.Lens
@@ -10,62 +19,90 @@ import qualified Data.Traversable as T
 --------------------------------------------------------------------------------
 -- * Top and Bottom
 
+-- | `Top a` represents the type a, together with a 'Top' element, i.e. an element
+-- that is greater than any other element. We can think of `Top a` being defined as:
+--
+-- >>> data Top a = ValT a | Top
+newtype Top a = GTop { topToMaybe :: Maybe a }
+                deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
-data Top a = Val { _unTop :: a }  | Top
-           deriving (Show,Read,Eq,Ord,Functor,F.Foldable,T.Traversable)
+pattern ValT x = GTop (Just x)
+pattern Top    = GTop Nothing
 
-instance Applicative Top where
-  pure = Val
-  (Val f) <*> (Val x) = Val $ f x
-  _        <*> _        = Top
+instance Ord a => Ord (Top a) where
+  Top      `compare` Top      = EQ
+  _        `compare` Top      = LT
+  Top      `compare` _        = GT
+  (ValT x) `compare` (ValT y) = x `compare` y
 
-instance Monad Top where
-  return = Val
-  (Val m) >>= k = k m
-  Top      >>= _ = Top
+instance Show a => Show (Top a) where
+  show (ValT x) = "ValT " ++ show x
+  show Top      = "Top"
 
-toMaybe         :: Top a -> Maybe a
-toMaybe (Val x) = Just x
-toMaybe Top     = Nothing
+--------------------------------------------------------------------------------
 
-type Bottom a = Maybe a
+-- | `Bottom a` represents the type a, together with a 'Bottom' element,
+-- i.e. an element that is smaller than any other element. We can think of
+-- `Bottom a` being defined as:
+--
+-- >>> data Bottom a = ValB
+newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
+                 deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
-data UnBounded a = BottomU | ValU { _unUnBounded :: a }  | TopU
+pattern Bottom = GBottom Nothing
+pattern ValB x = GBottom (Just x)
+
+instance Show a => Show (Bottom a) where
+  show Bottom   = "Bottom"
+  show (ValB x) = "ValB " ++ show x
+
+--------------------------------------------------------------------------------
+
+-- | `UnBounded a` represents the type a, together with an element
+-- `MaxInfinity` larger than any other element, and an element `MinInfinity`,
+-- smaller than any other element.
+data UnBounded a = MinInfinity | Val { _unUnBounded :: a }  | MaxInfinity
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable)
 
-instance Show a => Show (UnBounded a) where
-  show BottomU  = "BottomU"
-  show (ValU x) = "ValU (" ++ show x ++ ")"
-  show TopU     = "TopU"
 makeLenses ''UnBounded
 
+instance Show a => Show (UnBounded a) where
+  show MinInfinity = "MinInfinity"
+  show (Val x)     = "Val " ++ show x
+  show MaxInfinity = "MaxInfinity"
+
 instance Num a => Num (UnBounded a) where
-  BottomU  + _        = BottomU
-  (ValU x) + (ValU y) = ValU $ x + y
-  _        + TopU     = TopU
+  MinInfinity + _           = MinInfinity
+  (Val x)     + (Val y)     = Val $ x + y
+  _           + MaxInfinity = MaxInfinity
 
-  BottomU  * _        = BottomU
-  (ValU x) * (ValU y) = ValU $ x * y
-  _        * TopU     = TopU
+  MinInfinity * _           = MinInfinity
+  (Val x)     * (Val y)     = Val $ x * y
+  _           * MaxInfinity = MaxInfinity
 
-  abs BottomU  = BottomU
-  abs (ValU x) = ValU $ abs x
-  abs TopU     = TopU
+  abs MinInfinity = MinInfinity
+  abs (Val x)     = Val $ abs x
+  abs MaxInfinity = MaxInfinity
 
-  signum BottomU  = -1
-  signum (ValU x) = ValU $ signum x
-  signum TopU     = 1
+  signum MinInfinity = -1
+  signum (Val x)     = Val $ signum x
+  signum MaxInfinity = 1
 
-  fromInteger = ValU . fromInteger
+  fromInteger = Val . fromInteger
 
-  negate BottomU  = TopU
-  negate (ValU x) = ValU $ negate x
-  negate TopU     = BottomU
+  negate MinInfinity = MaxInfinity
+  negate (Val x)     = Val $ negate x
+  negate MaxInfinity = MinInfinity
 
 instance Fractional a => Fractional (UnBounded a) where
-  BottomU  / _        = BottomU
-  (ValU x) / (ValU y) = ValU $ x / y
-  (ValU _) / _        = 0
-  TopU     / _        = TopU
+  MinInfinity / _       = MinInfinity
+  (Val x)     / (Val y) = Val $ x / y
+  (Val _)     / _       = 0
+  MaxInfinity / _       = MaxInfinity
 
-  fromRational = ValU . fromRational
+  fromRational = Val . fromRational
+
+
+unBoundedToMaybe         :: UnBounded a -> Maybe a
+unBoundedToMaybe (Val x) = Just x
+unBoundedToMaybe _       = Nothing

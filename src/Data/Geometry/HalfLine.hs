@@ -5,19 +5,21 @@ module Data.Geometry.HalfLine where
 import           Control.Applicative
 import           Control.Lens hiding (only)
 import           Data.Ext
-import           Data.Range
+import qualified Data.Foldable as F
 import           Data.Geometry.Interval
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.Geometry.Line
-import           Data.Geometry.SubLine
-import           Data.Geometry.LineSegment
-import           Linear.Vector((*^))
-import           Linear.Affine(Affine(..),distanceA)
+import           Data.Range
 import qualified Data.Traversable as T
-import qualified Data.Foldable as F
+import           Data.UnBounded
+import           Frames.CoRec
+import           Linear.Affine(Affine(..),distanceA)
+import           Linear.Vector((*^))
 
 
 --------------------------------------------------------------------------------
@@ -56,21 +58,23 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
 
 --------------------------------------------------------------------------------
 
-halfLineToSubLine                :: (Arity d, Num r) => HalfLine d r -> SubLine d () (Top r)
+halfLineToSubLine                :: (Arity d, Num r)
+                                 => HalfLine d r -> SubLine d () (UnBounded r)
 halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
                                    in SubLine l (Interval (Closed $ only (Val 0))
-                                                          (Open   $ only Top))
+                                                          (Open   $ only MaxInfinity))
 
 
-fromSubLine               :: (Num r, Arity d) => SubLine d p (Top r) -> Maybe (HalfLine d r)
-fromSubLine (SubLine l' i) = toMaybe $ do
-                              l@(Line _ v) <- T.sequence l'
-                              let ts = i^.start.core
-                                  te = i^.end.core
-                              case (ts,te) of
-                                (Top,Top)  -> Top
-                                (Val x,_)  -> Val $ HalfLine (pointAt x l) v
-                                (_, Val x) -> Val $ HalfLine (pointAt x l) v
+fromSubLine               :: (Num r, Arity d) => SubLine d p (UnBounded r) -> Maybe (HalfLine d r)
+fromSubLine (SubLine l' i) = case (i^.start.core, i^.end.core) of
+                               (Val x, MaxInfinity) -> f x
+                               (MinInfinity, Val x) -> f x
+                               _                    -> Nothing
+  where
+    f x = (\l@(Line _ v) -> HalfLine (pointAt x l) v)
+       <$> T.mapM unBoundedToMaybe l'
+
+
 
 
 type instance IntersectionOf (HalfLine 2 r) (Line 2 r) = [ NoIntersection

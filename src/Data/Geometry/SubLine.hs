@@ -13,6 +13,7 @@ import Data.Geometry.Properties
 import Data.Geometry.Vector
 import Data.Maybe
 import Data.Range
+import Data.UnBounded
 import           Frames.CoRec
 import Data.Vinyl
 
@@ -86,7 +87,7 @@ instance (Ord r, Fractional r) =>
 
 
 fromLine   :: Line 2 r -> SubLine 2 () (UnBounded r)
-fromLine l = SubLine (fmap ValU l) (OpenInterval (only BottomU) (only TopU))
+fromLine l = SubLine (fmap Val l) (OpenInterval (only MinInfinity) (only MaxInfinity))
 
 
 testL :: SubLine 2 () (UnBounded Rational)

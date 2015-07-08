@@ -7,11 +7,6 @@ module Data.Range( EndPoint(..)
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper
                  , isValid
-
-
-                 , Top(..), toMaybe
-                 , Bottom
-                 , UnBounded(..)
                  ) where
 
 import           Control.Applicative
