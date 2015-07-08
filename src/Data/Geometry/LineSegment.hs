@@ -2,7 +2,7 @@
 module Data.Geometry.LineSegment where
 
 
-import Control.Arrow((&&&))
+import           Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens hiding (only)
 import           Data.Bifunctor
@@ -21,6 +21,7 @@ import           Data.Ord(comparing)
 import           Data.Range
 import           Data.Semigroup
 import           Data.Vinyl
+import           Frames.CoRec
 import           Linear.Affine(Affine(..),distanceA)
 import           Linear.Vector((*^))
 

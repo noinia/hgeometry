@@ -12,6 +12,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           Data.Vinyl
+import           Frames.CoRec
 import           GHC.TypeLits
 import           Linear.Affine(qdA, (.-.), (.+^))
 import           Linear.Vector((^/),(*^),(^+^))
