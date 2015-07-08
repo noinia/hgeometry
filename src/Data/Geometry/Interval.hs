@@ -23,9 +23,8 @@ import           Data.Geometry.Properties
 import           Data.Range
 import           Data.Semigroup
 import qualified Data.Traversable as T
-import Data.Vinyl
--- import Data.Vinyl.Functor
--- import Frames.CoRec
+import           Data.Vinyl
+import           Frames.CoRec
 
 --------------------------------------------------------------------------------
 

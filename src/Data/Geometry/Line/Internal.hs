@@ -17,6 +17,8 @@ import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Linear.Affine(Affine(..))
 import           Linear.Vector((*^))
+import           Frames.CoRec
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines

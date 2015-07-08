@@ -13,7 +13,7 @@ import Data.Geometry.Properties
 import Data.Geometry.Vector
 import Data.Maybe
 import Data.Range
-
+import           Frames.CoRec
 import Data.Vinyl
 
 --------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           Data.Vinyl
+import           Frames.CoRec
 import           GHC.TypeLits
 import           Linear.Affine(qdA, (.-.), (.+^))
 import           Linear.Vector((^/),(*^),(^+^))
@@ -119,7 +120,7 @@ pattern Circle c r = Sphere c r
 -- input points are colinear we return Nothing
 --
 -- >>> disk (point2 0 10) (point2 10 0) (point2 (-10) 0)
--- Just (Ball {_center = Point {toVec = Vector {_unV = fromList [0.0,0.0]}} :+ (), _squaredRadius = 100.0})
+-- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 disk p q r = match ((f p) `intersect` (f q)) $

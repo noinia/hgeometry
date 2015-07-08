@@ -75,73 +75,24 @@ defaultNonEmptyIntersection :: forall g h proxy.
 defaultNonEmptyIntersection _ _ = isJust . asA (Proxy :: Proxy NoIntersection)
 
 
--- | Given a proxy of type t and a corec, test if the corec is a t.
-asA             :: (t ∈ ts, RecApplicative ts) => proxy t -> CoRec Identity ts -> Maybe t
-asA p c@(Col _) = rget p $ corecToRec' c
+-- type IsAlwaysTrueFromEither a b = (VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z)))
+--                                   -- VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))(b  ∈ [a,b])
+
+-- -- | Convert an either to a CoRec. The type class constraint is silly, and is
+-- -- triviall true. Somehow GHC does not see that though.
+-- fromEither           :: IsAlwaysTrueFromEither a b => Either a b -> CoRec Identity [a,b]
+-- fromEither (Left x)  = coRec x
+-- fromEither (Right x) = coRec x
 
 
--- | Newtype around functions for a to b
-newtype Handler b a = H (a -> b)
+-- -- fromEither'           :: ( RElem b [a,b] ((VTL.S VTL.Z))
+-- --                          ) => Either a b -> CoRec Identity [a,b]
 
-type Handlers ts b = Rec (Handler b) ts
-
-
--- | Pattern match on a CoRec by specifying handlers for each case. If the
--- CoRec is non-empty this function is total.
-match      :: RecApplicative (t ': ts)
-           => CoRec Identity (t ': ts) -> Handlers (t ': ts) b -> b
-match c hs = fromJust $ match' c hs
-           -- Since we require 'ts' both for the Handlers and the CoRec, Handlers
-           -- effectively defines a total function. Hence, we can safely use fromJust
-
--- | Pattern match on a CoRec by specifying handlers for each case. The only case
--- in which this can produce a Nothing is if the list ts is empty.
-match'      :: RecApplicative ts => CoRec Identity ts -> Handlers ts b -> Maybe b
-match' c hs = match'' hs $ corecToRec' c
-  where
-    match''                            :: Handlers ts b -> Rec Maybe ts -> Maybe b
-    match'' RNil         RNil          = Nothing
-    match'' (H f :& _)  (Just x :& _)  = Just $ f x
-    match'' (H _ :& fs) (Nothing :& c) = match'' fs c
-
-
--- foo :: CoRec Identity [NoIntersection, Int]
--- foo = Col (Identity NoIntersection)
-
-bar :: CoRec Identity [NoIntersection, Int]
-bar = Col (Identity (5 :: Int))
-
-bar' :: CoRec Identity [NoIntersection, Int]
-bar' = coRec (5 :: Int)
-
-
-type IsAlwaysTrueFromEither a b = (VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z)))
-                                  -- VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))(b  ∈ [a,b])
-
--- | Convert an either to a CoRec. The type class constraint is silly, and is
--- triviall true. Somehow GHC does not see that though.
-fromEither           :: IsAlwaysTrueFromEither a b => Either a b -> CoRec Identity [a,b]
-fromEither (Left x)  = coRec x
-fromEither (Right x) = coRec x
-
-
--- fromEither'           :: ( RElem b [a,b] ((VTL.S VTL.Z))
+-- fromEither'           :: ( VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))
+-- --                           VTL.RIndex b '[b] ~ VTL.Z
 --                          ) => Either a b -> CoRec Identity [a,b]
-
-fromEither'           :: ( VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z))
---                           VTL.RIndex b '[b] ~ VTL.Z
-                         ) => Either a b -> CoRec Identity [a,b]
-fromEither' (Left x)  = coRec x
-fromEither' (Right x) = coRec x
-
-
--- handlers =  H (\NoIntersection -> "No Intersection")
---          :& H (\(x :: Int)     -> show x)
---          :& RNil
-
-
--- testMatch = match handlers bar
-
+-- fromEither' (Left x)  = coRec x
+-- fromEither' (Right x) = coRec x
 
 type family Union g h :: *
 

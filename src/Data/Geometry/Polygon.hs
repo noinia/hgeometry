@@ -16,7 +16,7 @@ import           Data.Geometry.Transformation
 import           Data.Maybe(mapMaybe)
 import           Data.Proxy
 import           Data.Range
-
+import           Frames.CoRec(asA)
 import qualified Data.CircularList as C
 
 --------------------------------------------------------------------------------
