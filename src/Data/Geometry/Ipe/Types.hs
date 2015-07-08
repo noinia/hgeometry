@@ -216,6 +216,10 @@ makeLenses ''IpeObject
 
 type instance NumType (IpeObject r t) = r
 
+
+-- data SomeIpeObject r where
+--   SomeIpeObject :: IpeObject r fld -> SomeIpeObject r
+
 --------------------------------------------------------------------------------
 
 
