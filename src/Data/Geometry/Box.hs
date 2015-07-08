@@ -122,7 +122,7 @@ p `inBox` b = maybe False f $ extent b
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
--- Just (Vector {_unV = fromList [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]})
+-- Just Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
 extent                                 :: (Arity d)
                                        => Box d p r -> Maybe (Vector d (R.Range r))
 extent Empty                           = Nothing
@@ -132,7 +132,7 @@ extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith R.ClosedRange (toVec 
 -- whereas one would normally count dimensions starting at zero.
 --
 -- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
--- Vector {_unV = fromList [1,2,3]}
+-- Vector3 [1,2,3]
 size :: (Arity d, Num r) => Box d p r -> Vector d r
 size = maybe (pure 0) (fmap R.width) . extent
 
