@@ -25,6 +25,7 @@ import           Data.Semigroup
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
+import           Data.Bifunctor
 
 --------------------------------------------------------------------------------
 
@@ -46,6 +47,11 @@ instance T.Traversable (Interval a) where
   traverse f (GInterval r) = GInterval <$> T.traverse f' r
     where
       f' = bitraverse f pure
+
+instance Bifunctor Interval where
+  bimap f g (GInterval r) = GInterval $ fmap (bimap g f) r
+
+
 
 -- | Test if a value lies in an interval. Note that the difference between
 --  inInterval and inRange is that the extra value is *not* used in the

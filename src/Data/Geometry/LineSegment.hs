@@ -1,7 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.LineSegment where
 
 
+import Data.Bifunctor
 import           Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens hiding (only)
@@ -102,6 +104,9 @@ instance Arity d => IsBoxable (LineSegment d p r) where
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
+
+instance Arity d => Bifunctor (LineSegment d) where
+  bimap f g (GLineSegment i) = GLineSegment $ bimap f (fmap g) i
 
 
 
