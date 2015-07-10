@@ -72,6 +72,10 @@ class HasDefaultIpeOut g where
 
   -- defaultAttributes :: Rec (f r) ats
 
+instance HasDefaultIpeOut (Point 2 r) where
+  type DefaultIpeOut (Point 2 r) = IpeSymbol r
+  defaultIpeOut = diskMark
+
 instance HasDefaultIpeOut (LineSegment 2 p r) where
   type DefaultIpeOut (LineSegment 2 p r) = Path r
   defaultIpeOut = lineSegment
@@ -80,6 +84,9 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path r
   defaultIpeOut = disk
 
+
+coreOut    :: IpeOut g i -> IpeOut (g :+ a) i
+coreOut io = IpeOut $ asIpe io . (^.core)
 
 --------------------------------------------------------------------------------
 
