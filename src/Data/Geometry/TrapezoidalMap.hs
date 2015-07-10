@@ -46,6 +46,7 @@ import           Frames.CoRec
 -- we report the right and/or topmost one
 
 --------------------------------------------------------------------------------
+-- * Data Types
 
 newtype TrapezoidId = TrapezoidId Int deriving (Show,Read,Eq,Ord)
 
@@ -140,7 +141,9 @@ trim              :: (Ord r, Fractional r)
                   => r -> r -> LineSegment 2 p r :+ e -> LineSegment 2 () r :+ e
 trim l r (s :+ e) = let closed = Closed . only in
                     LineSegment (closed $ atXCoord l s) (closed $ atXCoord r s) :+ e
+
 --------------------------------------------------------------------------------
+-- ** A Data type for a Trapezoid
 
 -- | A representation of a trapezoid that we store in our TrapezoidalMap.
 -- The bototm segment is the original segment.
@@ -158,10 +161,6 @@ makeLenses ''TrapezoidRep
 -- | Nothing -> -infty
 trapAtXCoord     :: (Ord r, Fractional r) => r -> TrapezoidRep e p r -> Maybe r
 trapAtXCoord x t =  (^.yCoord) . atXCoord x <$> t ^? repBottom._Just.core
-
-  -- (yCoord) . atXCoord x . ) <$>
-
-
 
 -- | When we run a query, we need the trapezoidRep found and the one above it
 -- (if it exists) to reconstruct a Trapezoid
@@ -309,11 +308,6 @@ makeLenses ''SweepStatus
 type Sweep t e p r = PersistentState (SweepStatus t e p r)
 
 
--- persistentSweep :: state
-
-
--- handleStart' ::
-
 compareAt'       :: (Ord r, Fractional r)
                 => r -> TrapezoidRep e p r -> TrapezoidRep e p r -> Ordering
 compareAt' x a b = trapAtXCoord x a `compare` trapAtXCoord x b
@@ -358,28 +352,15 @@ buildTrapezoidalMap' _ _ = error "buildTrapezoidalMap': Starting with a non-star
 takeNextId :: Sweep t e p r TrapezoidId
 takeNextId = sLastUsed %= nextId >> fmap (^.sLastUsed) get
 
--- | Given a new x value, a list of new trapezoids and a VSlab, construct the
--- new slab starting at x.
-insertAllAt                  :: (Ord r, Fractional r) => r -> [TrapezoidRep e p r :+ t]
-                                -> VSlab t e p r -> VSlab t e p r
-insertAllAt x vs (VSlab _ t) = VSlab x $ foldr (insertAt x) t vs
-
-insertAt         :: (Ord r, Fractional r) => r -> TrapezoidRep e p r :+ t
-                 -> Seq (TrapezoidRep e p r :+ t) -> Seq (TrapezoidRep e p r :+ t)
-insertAt x t seq = bottom <> S.singleton t <> top
-  where
-    (bottom,top) = splitMonotone (\tr -> compareAt x t tr == LT) seq
-
-
-
+-- Event handling during a sweep
 handleEvent              :: (Ord r, Fractional r)
                          => (TrapezoidRep e p r -> TrapezoidRep e p r :+ t)
                          -> (Point 2 r, EventData e p r) -> Sweep t e p r ()
 handleEvent mkT (p, Start s) = do
     -- Find the segment b just below p
     (below,above') <- uses sSlab (splitSlabAt p)
-    let (containingP, above) = undefined -- ES.extractMinimum
-        b                    = containingP^.core.repBottom
+    let (containingP S.:< above) = S.viewl above'
+        b                        = containingP^.core.repBottom
     -- create a new segment with b as bottom segment
     i <- takeNextId
     let px     = p^.xCoord
@@ -388,28 +369,26 @@ handleEvent mkT (p, Start s) = do
     let high = TrapezoidRep j px (Just s)
     -- update the vertical slab, by replacing the old trapezoid containing p by
     -- the two new ones
-    sSlab %= undefined -- combine: below <> fromLisst <> above insertAllAt px [mkT low, mkT high]
+    sSlab .= VSlab px (below <> S.fromList [mkT low, mkT high] <> above)
+
+handleEvent mkT (p, End _) = do
+    -- Find the segment b just below p
+    (below',above') <- uses sSlab (splitSlabAt p)
+    let (containingP S.:< above)  = S.viewl above'
+        (below       S.:> belowP) = S.viewr below'
+        -- For a point p' just right of p, b is now the bottom-segment of
+        -- the trapezoid containing p'
+        b                         = belowP^.core.repBottom
+    -- create a new segment with b as bottom segment
+    i <- takeNextId
+    let px         = p^.xCoord
+        newBottomP = TrapezoidRep i px b
+    -- update the vertical slab, by replacing currentP and belowP by a new
+    -- trapezoid newBottomP
+    sSlab .= VSlab px (below <> S.singleton (mkT newBottomP) <> above)
+handleEvent _ (p, Extra) = return () -- skip
 
 
-
-
-handleEvent mkT (p, End s) = undefined
-
-    --     slab'  = VSlab px (ES.insertAll [mkT low, mkT high] $ exTree { ES.compareBy = compareAt px})
-    -- put $ SweepStatus slab' (st^.sRMap) px (nextId j)
-
-
-
-
--- sweep                        :: (Ord r, Monoid t)
---                              => SweepStatus t e p r
---                              -> (Point 2 r, EventData e p r) -> SweepStatus t e p r
--- sweep (xDecomp@(slab:_), rMap, mX, i) (p,ed) = (slab':xDecomp, rMap', mX', nextId')
---   where
---     slab' = undefined
---     rMap' = undefined
---     mX'   = mX `max` (Just p^.xCoord)
---     nextId' = undefined
 
 -- | Pre: All segments are oriented left to right
 --- pre: List is non-empty
@@ -427,8 +406,24 @@ buildTrapezoidalMap segs = TrapezoidalMap mX (TD . V.fromList $ slabs) rMap memp
 
     (slabs,rMap,mX) = buildTrapezoidalMap' events (const mempty)
 
+
+
+
+
+-- | Given a new x value, a list of new trapezoids and a VSlab, construct the
+-- new slab starting at x.
+insertAllAt                  :: (Ord r, Fractional r) => r -> [TrapezoidRep e p r :+ t]
+                                -> VSlab t e p r -> VSlab t e p r
+insertAllAt x vs (VSlab _ t) = VSlab x $ foldr (insertAt x) t vs
+
+insertAt         :: (Ord r, Fractional r) => r -> TrapezoidRep e p r :+ t
+                 -> Seq (TrapezoidRep e p r :+ t) -> Seq (TrapezoidRep e p r :+ t)
+insertAt x t seq = bottom <> S.singleton t <> top
+  where
+    (bottom,top) = splitMonotone (\tr -> compareAt x t tr == LT) seq
+
 ----------------------------------------
--- Queries
+-- * Queries
 
 -- | Planar point location :): Running time: O(log n)
 locateTrapezoid   :: (Fractional r, Ord r)
