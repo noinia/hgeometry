@@ -15,32 +15,32 @@ module Data.Geometry.TrapezoidalMap( Trapezoid(..)
                                    ) where
 
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 import           Control.Monad.State.Class
 import           Control.Monad.State.Persistent
-
 import           Data.Ext
-
-import           Data.ExplicitOrdSet(ExpSet)
+-- import           Data.ExplicitOrdSet(ExpSet)
 import           Data.List.NonEmpty(NonEmpty(..))
 import           Data.Map(Map)
 import           Data.Maybe(listToMaybe, fromJust)
 import           Data.Monoid
 import           Data.Ord(comparing)
+import           Data.Range
+import           Data.Sequence(Seq)
+import qualified Data.Sequence as S
 import           Data.Vector(Vector)
-
-import qualified Data.ExplicitOrdSet as ES
+--import qualified Data.ExplicitOrdSet as ES
 import qualified Data.Map            as M
 import qualified Data.Vector         as V
 import qualified Data.List           as L
 import qualified Data.List.NonEmpty  as NOL
-
-
-import           Data.Geometry.Properties
-import           Data.Geometry.Point
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
-
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Vinyl
+import           Frames.CoRec
 
 -- We bias to the RIGHT and to the TOP. i.e. if query point on the boundary of two traps
 -- we report the right and/or topmost one
@@ -116,18 +116,17 @@ bottomLeftCorner t = bottom t ^? _Just.core.start
 
 
 atXCoord     :: (Ord r, Fractional r) => r -> LineSegment 2 p r -> Point 2 r
-atXCoord x s = case s `intersect` verticalLine x of
-  LineLineSegmentIntersection q -> q
-  LineContainsSegment _         -> (s^.start.core) `min` (s^.end.core)
-                                       -- s is a vertical segment, so report
+atXCoord x s = match (s `intersect` verticalLine x) $
+     (H $ \NoIntersection -> error "atXCoord")
+                             -- s was in the trapezoidal decompostion
+                             -- for xCoord x so by definition s
+                             -- should intersect the vertical line
+                             -- through x. Hence, this case should not occur.
+  :& (H $ id)                -- propper intersection point
+  :& (H $ \s -> (s^.start.core) `min` (s^.end.core))
+                             -- s is a vertical segment, so report
                                        -- the lower endpoint
-  _                             -> error "atXCoord"
-                                       -- s was in the trapezoidal decompostion
-                                       -- for xCoord x so by definition s
-                                       -- should intersect the vertical line
-                                       -- through x. Hence, this case should not occur.
-
-
+  :& RNil
 
 
 bottom   :: (Ord r, Fractional r) => Trapezoid e p r ->  Maybe (Seg e () r)
@@ -139,8 +138,8 @@ top t = trim <$> leftX t <*> rightX t <*> topSupport t
 
 trim              :: (Ord r, Fractional r)
                   => r -> r -> LineSegment 2 p r :+ e -> LineSegment 2 () r :+ e
-trim l r (s :+ e) = LineSegment (atXCoord l s :+ ()) (atXCoord r s :+ ()) :+ e
-
+trim l r (s :+ e) = let closed = Closed . only in
+                    LineSegment (closed $ atXCoord l s) (closed $ atXCoord r s) :+ e
 --------------------------------------------------------------------------------
 
 -- | A representation of a trapezoid that we store in our TrapezoidalMap.
@@ -176,7 +175,7 @@ makeLenses ''TrapezoidQuery
 -- | A vertical slab has a minimum x coordinate: minX s.t. the
 -- slabData stored here is valid on the interval [minX, maxX), for some maxX >= minX
 data VSlab t e p r = VSlab { _slabMinX :: !r
-                           , _slabData :: ExpSet (TrapezoidRep e p r :+ t)
+                           , _slabData :: !(Seq (TrapezoidRep e p r :+ t))
                            }
 makeLenses ''VSlab
 
@@ -189,18 +188,21 @@ findTrapezoidRep p s = TrapezoidQuery cur high
     (belowT,aboveT) = splitSlabAt p s
 
     -- low         = ES.maximum belowT
-    (cur:above) = ES.viewL aboveT
-    high        = listToMaybe above
+    (cur S.:< above) = S.viewl aboveT
+
+    high = case S.viewl above of
+             S.EmptyL   -> Nothing
+             (x S.:< _) -> Just x
 
 
 -- | Given a point p, split the Expset into two sets; the first containing everything
 -- below p, the second everything above p. Hence, the trap. containing p is actually the
 -- first trapezoid from the above list.
 splitSlabAt                :: (Ord r, Num r) => Point 2 r -> VSlab t e p r ->
-                              ( ExpSet (TrapezoidRep e p r :+ t)
-                              , ExpSet (TrapezoidRep e p r :+ t)
+                              ( Seq (TrapezoidRep e p r :+ t)
+                              , Seq (TrapezoidRep e p r :+ t)
                               )
-splitSlabAt p (VSlab _ es) = ES.splitMonotone (maybe True pred . (^.core.repBottom)) es
+splitSlabAt p (VSlab _ es) = splitMonotone (maybe True pred . (^.core.repBottom)) es
                              -- Since we explicitly store the bottomless and
                              -- topless trapezoid, we are guaranteed to find a traprep.
   where
@@ -211,6 +213,23 @@ splitSlabAt p (VSlab _ es) = ES.splitMonotone (maybe True pred . (^.core.repBott
                    -- TODO: For degenereate cases, i.e. vertical segments we
                                                       -- may have to do some
                                                       -- additional check here.
+
+
+-- | Split based on a monotone predicate p. Returns a pair of Seqs (l,r) s.t.
+-- for all nodes v in l, p v == False, and for all v in r, p v == True.
+splitMonotone     :: (a -> Bool) -> Seq a -> (Seq a, Seq a)
+splitMonotone p s
+    | S.null s  = (mempty,mempty)
+    | p x       = let (l',r') = splitMonotone p l
+                  in (l',r' <> r)
+    | otherwise = let (l',r') = splitMonotone p rr
+                  in (l <> S.singleton x <> l',r')
+  where
+    (l,r) = S.splitAt (S.length s `div` 2) s
+            -- since S is not null, and we div, it follows that r will contain
+            -- at least element
+    (x S.:< rr) = S.viewl r
+
 
 
 ----------------------------------------
@@ -271,7 +290,7 @@ _minX = _slabMinX . V.head . _unTD
 data EventData e p r = Start (LineSegment 2 p r :+ e)
                      | End   (LineSegment 2 p r :+ e)
                      | Extra
-                     deriving (Show,Eq,Ord)
+                     deriving (Show,Eq)
 
 
 -- | The status during our sweep, consisting of
@@ -318,9 +337,9 @@ buildTrapezoidalMap' ((p,Start s) :| es) mkT = f $ runPersistentState act initia
 
     withTData t = t :+ mkT t
 
-    -- Initial expset contains two elements, and we compare them at x-coord px
-    expSet = ES.insertAll [ withTData low , withTData high ]
-           $ ES.empty (compareAt px)
+    -- Initial expset contains two elements
+    expSet = S.fromList [ withTData low , withTData high ]
+
 
     -- this means we start our sweep proper with the following state
     initialState = SweepStatus (VSlab px expSet)
@@ -343,7 +362,14 @@ takeNextId = sLastUsed %= nextId >> fmap (^.sLastUsed) get
 -- new slab starting at x.
 insertAllAt                  :: (Ord r, Fractional r) => r -> [TrapezoidRep e p r :+ t]
                                 -> VSlab t e p r -> VSlab t e p r
-insertAllAt x vs (VSlab _ t) = VSlab x . ES.insertAll vs $ t { ES.compareBy  = compareAt x }
+insertAllAt x vs (VSlab _ t) = VSlab x $ foldr (insertAt x) t vs
+
+insertAt         :: (Ord r, Fractional r) => r -> TrapezoidRep e p r :+ t
+                 -> Seq (TrapezoidRep e p r :+ t) -> Seq (TrapezoidRep e p r :+ t)
+insertAt x t seq = bottom <> S.singleton t <> top
+  where
+    (bottom,top) = splitMonotone (\tr -> compareAt x t tr == LT) seq
+
 
 
 handleEvent              :: (Ord r, Fractional r)
