@@ -5,6 +5,7 @@ module Data.Geometry.Ball where
 import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -12,6 +13,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List as L
+import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
 import           GHC.TypeLits
@@ -35,6 +37,9 @@ type instance Dimension (Ball d p r) = d
 
 instance Arity d => Functor (Ball d p) where
   fmap f (Ball c r) = Ball (first (fmap f) c) (f r)
+
+instance Arity d => Bifunctor (Ball d) where
+  bimap f g (Ball c r) = Ball (bimap (fmap g) f c) (g r)
 
 
 -- * Constructing Balls
@@ -135,7 +140,7 @@ disk p q r = match ((f p) `intersect` (f q)) $
            in perpendicularTo (Line midPoint v)
 
 
-newtype Touching p = Touching p deriving (Show,Eq,Ord)
+newtype Touching p = Touching p deriving (Show,Eq,Ord,Functor,F.Foldable,T.Traversable)
 
 -- | No intersection, one touching point, or two points
 type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection

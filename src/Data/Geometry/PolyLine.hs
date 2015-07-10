@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Data.Geometry.PolyLine where
 
 import           Control.Applicative
@@ -45,6 +46,9 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
 
 instance PointFunctor (PolyLine d p) where
   pmap f = over points (fmap (first f))
+
+instance Arity d => Bifunctor (PolyLine d) where
+  bimap f g (PolyLine pts) = PolyLine $ fmap (bimap (fmap g) f) pts
 
 
 -- | pre: The input list contains at least two points
