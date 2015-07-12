@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -24,6 +25,10 @@ import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 
+import           Data.Singletons
+
+import qualified Data.Geometry.Ipe.Attributes as IA
+
 import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
 
@@ -32,6 +37,7 @@ import qualified Data.ByteString.Char8 as C
 import           Data.List(nub)
 import qualified Data.Seq2     as S2
 import           Data.Text(Text)
+import qualified Data.Text as Text
 
 import           Text.XML.Expat.Tree
 import           Text.XML.Expat.Format(format')
@@ -44,16 +50,18 @@ import qualified Data.Text as T
 
 -- | Given a prism to convert something of type g into an ipe file, a file path,
 -- and a g. Convert the geometry and write it to file.
-writeIpe        :: ( RecAll (Page r) gs IpeWrite
-                   , IpeWriteText r
-                   ) => Prism' (IpeFile gs r) g -> FilePath -> g -> IO ()
-writeIpe p fp g = writeIpeFile (p # g) fp
+
+-- writeIpe        :: ( RecAll (Page r) gs IpeWrite
+--                    , IpeWriteText r
+--                    ) => Prism' (IpeFile gs r) g -> FilePath -> g -> IO ()
+-- writeIpe p fp g = writeIpeFile (p # g) fp
 
 -- | Write an IpeFiele to file.
-writeIpeFile :: ( RecAll (Page r) gs IpeWrite
-                , IpeWriteText r
-                ) => IpeFile gs r -> FilePath -> IO ()
-writeIpeFile = writeIpeFile'
+
+-- writeIpeFile :: ( RecAll (Page r) gs IpeWrite
+--                 , IpeWriteText r
+--                 ) => IpeFile gs r -> FilePath -> IO ()
+-- writeIpeFile = writeIpeFile'
 
 -- | Convert the input to ipeXml, and prints it to standard out in such a way
 -- that the copied text can be pasted into ipe as a geometry object.
@@ -91,40 +99,32 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: t -> Maybe (Node Text Text)
 
-
--- | Ipe write for Exts
-ipeWriteExt             :: ( IpeWrite t
-                           , RecAll a as IpeWriteText, AllSatisfy IpeAttrName as
-                           ) => t :+ Rec a as -> Maybe (Node Text Text)
-ipeWriteExt (x :+ arec) = ipeWrite x `mAddAtts` ipeWriteAttrs arec
-
-
 -- | For the types representing attribute values we can get the name/key to use
 -- when serializing to ipe.
 class IpeAttrName a where
   attrName :: Proxy a -> Text
 
-
-type Attr = (Text,Text)
+instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
+  ipeWriteText attr = unAttr attr >>= ipeWriteText
 
 -- | Functon to write all attributes in a Rec
-ipeWriteAttrs :: ( RecAll f rs IpeWriteText
-                 , AllSatisfy IpeAttrName rs
-                 ) => Rec f rs -> [Attr]
-ipeWriteAttrs rs = mapMaybe (\(x,my) -> (x,) <$> my) $ zip (writeAttrNames  rs)
-                                                           (writeAttrValues rs)
-
+ipeWriteAttrs           :: ( AllSatisfy IpeAttrName rs
+                           , RecAll (Attr f) rs IpeWriteText
+                           ) => IA.Attributes f rs -> [(Text,Text)]
+ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNames  r)
+                                                                   (writeAttrValues r)
+  where
+    f (Const n) (Const mv) = Const $ (n,) <$> mv
 
 -- | Writing the attribute values
-writeAttrValues :: RecAll f rs IpeWriteText => Rec f rs -> [Maybe Text]
-writeAttrValues = recordToList
-                . rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
+writeAttrValues :: RecAll f rs IpeWriteText => Rec f rs -> Rec (Const (Maybe Text)) rs
+writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
                 . reifyConstraint (Proxy :: Proxy IpeWriteText)
 
 -- | Writing Attribute names
-writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> [Text]
-writeAttrNames RNil      = []
-writeAttrNames (x :& xs) = write'' x : writeAttrNames xs
+writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
+writeAttrNames RNil      = RNil
+writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
   where
     write''   :: forall f s. IpeAttrName s => f s -> Text
     write'' _ = attrName (Proxy :: Proxy s)
@@ -178,9 +178,42 @@ instance IpeWriteText v => IpeWriteText (IpeValue v) where
   ipeWriteText (Named t)  = ipeWriteText t
   ipeWriteText (Valued v) = ipeWriteText v
 
+instance IpeWriteText TransformationTypes where
+  ipeWriteText Affine       = Just "affine"
+  ipeWriteText Rigid        = Just "rigid"
+  ipeWriteText Translations = Just "translations"
+
+instance IpeWriteText PinType where
+  ipeWriteText No         = Nothing
+  ipeWriteText Yes        = Just "yes"
+  ipeWriteText Horizontal = Just "h"
+  ipeWriteText Vertical   = Just "v"
+
 deriving instance IpeWriteText r => IpeWriteText (IpeSize  r)
 deriving instance IpeWriteText r => IpeWriteText (IpePen   r)
 deriving instance IpeWriteText IpeColor
+
+instance IpeWriteText r => IpeWriteText (IpeDash r) where
+  ipeWriteText (DashNamed t) = Just t
+  ipeWriteText (DashPattern xs x) = (\ts t -> mconcat [ "["
+                                                      , Text.intercalate " " ts
+                                                      , "] ", t ])
+                                    <$> Tr.mapM ipeWriteText xs
+                                    <*> ipeWriteText x
+
+instance IpeWriteText FillType where
+  ipeWriteText Wind   = Just "wind"
+  ipeWriteText EOFill = Just "eofill"
+
+instance IpeWriteText r => IpeWriteText (IpeArrow r) where
+  ipeWriteText (IpeArrow n s) = (\n s -> n <> "/" <> s) <$> ipeWriteText n
+                                                        <*> ipeWriteText s
+
+instance IpeWriteText r => IpeWriteText (Path r) where
+  ipeWriteText = fmap concat' . Tr.sequence . fmap ipeWriteText . _pathSegments
+    where
+      concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
+
 
 --------------------------------------------------------------------------------
 instance IpeWriteText r => IpeWrite (IpeSymbol r) where
@@ -190,27 +223,24 @@ instance IpeWriteText r => IpeWrite (IpeSymbol r) where
                            , ("name", n)
                            ] []
 
-instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttribute r rs) where
-  ipeWriteText (SymbolAttribute x) = ipeWriteText x
+-- instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttribute r rs) where
+--   ipeWriteText (SymbolAttribute x) = ipeWriteText x
 
 
 -- CommonAttributeUnivers
-instance IpeAttrName Layer           where attrName _ = "layer"
+instance IpeAttrName IA.Layer        where attrName _ = "layer"
 instance IpeAttrName Matrix          where attrName _ = "matrix"
 instance IpeAttrName Pin             where attrName _ = "pin"
 instance IpeAttrName Transformations where attrName _ = "transformations"
 
 -- IpeSymbolAttributeUniversre
-instance IpeAttrName SymbolStroke where attrName _ = "stroke"
-instance IpeAttrName SymbolFill   where attrName _ = "fill"
-instance IpeAttrName SymbolPen    where attrName _ = "pen"
+instance IpeAttrName Stroke       where attrName _ = "stroke"
+instance IpeAttrName Fill         where attrName _ = "fill"
+instance IpeAttrName Pen          where attrName _ = "pen"
 instance IpeAttrName Size         where attrName _ = "size"
 
 -- PathAttributeUniverse
-instance IpeAttrName Stroke     where attrName _ = "stroke"
-instance IpeAttrName Fill       where attrName _ = "fill"
 instance IpeAttrName Dash       where attrName _ = "dash"
-instance IpeAttrName Pen        where attrName _ = "pen"
 instance IpeAttrName LineCap    where attrName _ = "cap"
 instance IpeAttrName LineJoin   where attrName _ = "join"
 instance IpeAttrName FillRule   where attrName _ = "fillrule"
@@ -256,23 +286,45 @@ instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
   ipeWriteText (EllipseSegment  m) = ipeWriteText $ Ellipse m
 
-instance IpeWriteText (PathAttrElf rs r) => IpeWriteText (PathAttribute r rs) where
-  ipeWriteText (PathAttribute x) = ipeWriteText x
-
 instance IpeWriteText r => IpeWrite (Path r) where
-  ipeWrite (Path segs) = (\t -> Element "path" [] [Text t]) <$> mt
-    where
-      concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
-      mt      = fmap concat' . Tr.sequence . fmap ipeWriteText $ segs
+  ipeWrite p = (\t -> Element "path" [] [Text t]) <$> ipeWriteText p
 
 --------------------------------------------------------------------------------
 
 
-instance ( IpeObjectElF r fld  ~ (g :+ Rec f ats)
+instance (IpeWriteText r) => IpeWrite (Group r) where
+  ipeWrite (Group gs) = case mapMaybe ipeWrite gs of
+                          [] -> Nothing
+                          ns -> (Just $ Element "group" [] ns)
+
+
+instance ( AllSatisfy IpeAttrName rs
+         , RecAll (Attr f) rs IpeWriteText
          , IpeWrite g
-         , RecAll f ats IpeWriteText, AllSatisfy IpeAttrName ats
-         ) => IpeWrite (IpeObject r fld) where
-  ipeWrite (IpeObject (g :+ ats)) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
+         ) => IpeWrite (g :+ IA.Attributes f rs) where
+  ipeWrite (g :+ ats) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
+
+-- instance ( (IpeObjectAttrF g) ~ rs, (IpeObjectSymbolF g) ~ f
+--          , AllSatisfy IpeAttrName rs
+--          , RecAll (Attr f) rs IpeWriteText
+--          , IpeWrite g
+--          ) => IpeWrite (g :+ IA.Attributes f rs) where
+--   ipeWrite (g :+ ats) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
+
+-- type All'' g = ( AllSatisfy IpeAttrName (IpeObjectAttrF g)
+--                , RecAll (Attr (IpeObjectSymbolF g)) (IpeObjectAttrF g) IpeWriteText
+--                )
+
+
+instance (IpeWriteText r) => IpeWrite (IpeObject r) where
+    ipeWrite (IpeGroup x) = ipeWrite x
+
+    -- ipeWrite (IpeGroup     g a) = ipeWrite g `mAddAtts` ipeWriteAttrs a
+    -- -- ipeWrite (IpeImage     i a) = ipeWrite i `mAddAtts` ipeWriteAttrs a
+    -- -- ipeWrite (IpeTextLabel l a) = ipeWrite l `mAddAtts` ipeWriteAttrs a
+    -- -- ipeWrite (IpeMiniPage  m a) = ipeWrite m `mAddAtts` ipeWriteAttrs a
+    -- ipeWrite (IpeUse       s a) = ipeWrite s `mAddAtts` ipeWriteAttrs a
+    -- ipeWrite (IpePath      p a) = ipeWrite p `mAddAtts` ipeWriteAttrs a
 
 
 ipeWriteRec :: RecAll f rs IpeWrite => Rec f rs -> [Node Text Text]
@@ -280,17 +332,9 @@ ipeWriteRec = catMaybes . recordToList
             . rmap (\(Compose (Dict x)) -> Const $ ipeWrite x)
             . reifyConstraint (Proxy :: Proxy IpeWrite)
 
-instance RecAll (IpeObject r) gt IpeWrite => IpeWrite (Group gt r) where
-  -- basically the same implementation as ipeWriteAttrs: convert the rec to a Rec Const
-  -- then turn that into a list. If the list is non-empty we construct a new group element.
-  ipeWrite = fmap (Element "group" [])
-           . wrap . ipeWriteRec
-    where
-      wrap [] = Nothing
-      wrap xs = Just xs
 
-instance IpeWriteText (GroupAttrElf rs r) => IpeWriteText (GroupAttribute r rs) where
-  ipeWriteText (GroupAttribute x) = ipeWriteText x
+-- instance IpeWriteText (GroupAttrElf rs r) => IpeWriteText (GroupAttribute r rs) where
+--   ipeWriteText (GroupAttribute x) = ipeWriteText x
 
 
 --------------------------------------------------------------------------------
@@ -305,19 +349,19 @@ instance IpeWrite View where
     where
       ls = T.unwords .  map _layerName $ lrs
 
-instance IpeWrite (Group gs r) => IpeWrite (IpePage gs r) where
+instance (IpeWriteText r)  => IpeWrite (IpePage r) where
   ipeWrite (IpePage lrs vs pgs) = Just . Element "page" [] . catMaybes . concat $
                                   [ map ipeWrite lrs
                                   , map ipeWrite vs
                                   , [ipeWrite pgs]
                                   ]
 
-instance RecAll (Page r) gs IpeWrite => IpeWrite (IpeFile gs r) where
+instance (IpeWriteText r) => IpeWrite (IpeFile r) where
   ipeWrite (IpeFile p s pgs) = Just $ Element "ipe" ipeAtts chs
     where
     ipeAtts = [("version","70005"),("creator", "HGeometry")]
     -- TODO: Add preamble and styles
-    chs = ipeWriteRec pgs
+    chs = mapMaybe ipeWrite pgs
 
 
 --------------------------------------------------------------------------------
@@ -393,15 +437,11 @@ testPoly = fromPoints' [origin, point2 0 10, point2 10 10, point2 100 100]
 
 
 
-testWriteUse :: Maybe (Node Text Text)
-testWriteUse = ipeWriteExt sym
-  where
-    sym :: IpeSymbol Double :+ (Rec (SymbolAttribute Double) [Size, SymbolStroke])
-    sym = Symbol origin "mark" :+ (  SymbolAttribute (IpeSize  $ Named "normal")
-                                  :& SymbolAttribute (IpeColor $ Named "green")
-                                  :& RNil
-                                  )
-
-
-
-foo = ipeWrite grrr
+-- testWriteUse :: Maybe (Node Text Text)
+-- testWriteUse = ipeWriteExt sym
+--   where
+--     sym :: IpeSymbol Double :+ (Rec (SymbolAttribute Double) [Size, SymbolStroke])
+--     sym = Symbol origin "mark" :+ (  SymbolAttribute (IpeSize  $ Named "normal")
+--                                   :& SymbolAttribute (IpeColor $ Named "green")
+--                                   :& RNil
+--                                   )

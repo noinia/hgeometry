@@ -13,8 +13,10 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
+import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.List.NonEmpty as NE
+import           Data.Monoid
 import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Text(Text)
@@ -25,71 +27,52 @@ import           Data.Vinyl
 
 newtype IpeOut g i = IpeOut { asIpe :: g -> i }
 
+-- Given an geometry object, and a record with its attributes, construct an ipe
+-- Object representing it using the default conversion.
+asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
+            => g -> IpeAttributes i r -> IpeObject r
+asIpeObject = asIpeObject' defaultIpeOut
 
+-- -- | Given a IpeOut that specifies how to convert a geometry object into an
+-- ipe geometry object, the geometry object, and a record with its attributes,
+-- construct an ipe Object representing it.
+asIpeObject'          :: (ToObject i, NumType g ~ r)
+                      => IpeOut g (i r) -> g -> IpeAttributes i r -> IpeObject r
+asIpeObject' io g ats = asIpe (ipeObject io ats) g
 
+--------------------------------------------------------------------------------
 
+-- | Helper to construct an IpeOut g IpeObject , if we already know how to
+-- construct a specific Ipe type.
+ipeObject        :: (ToObject i, NumType g ~ r)
+                 => IpeOut g (i r) -> IpeAttributes i r -> IpeOut g (IpeObject r)
+ipeObject io ats = IpeOut $ flip ipeObject' ats . asIpe io
 
-
--- | Given a Prism to convert a geometry object into an ipe geometry object,
--- the geometry object, and a record with its attributes, construct its corresponding
--- ipe Object.
-asIpeObject         :: ( Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
-                       , RevIpeObjectValueElF i ~ it
-                       , i ~ IpeObjectValueElF r (it ats)
-                       )
-                    => IpeOut g i
-                    -> g -> Rec (f r) ats -> IpeObject r (it ats)
-asIpeObject f g ats = asObject (asIpe f g) ats
-
-
-asIpeObject' :: ( Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
-                , RevIpeObjectValueElF (DefaultIpeOut g) ~ it
-                , (DefaultIpeOut g) ~ IpeObjectValueElF r (it ats)
-                , HasDefaultIpeOut g
-                )
-             => g -> Rec (f r) ats -> IpeObject r (it ats)
-asIpeObject' = asIpeObject defaultIpeOut
-
-
--- | Given one of the ipe values, (i.e. a Path, IpeSymbol, etc.) and a Rec of
--- the appropriate corresponding type, construct an ipe Object from the two.
-asObject     :: ( Rec (f r) ats ~ IpeObjectAttrElF r (it ats)
-                , RevIpeObjectValueElF (IpeObjectValueElF r (it ats)) ~ it
-                )
-             => IpeObjectValueElF r (it ats)
-             -> IpeObjectAttrElF r (it ats)
-             -> IpeObject r (it ats)
-asObject x r = IpeObject $ x :+ r
-
-
-
-
-
-class HasDefaultIpeOut g where
-  type DefaultIpeOut g
-
-  defaultIpeOut :: IpeOut g (DefaultIpeOut g)
-
-  -- defaultAttributes :: Rec (f r) ats
-
-instance HasDefaultIpeOut (Point 2 r) where
-  type DefaultIpeOut (Point 2 r) = IpeSymbol r
-  defaultIpeOut = diskMark
-
-instance HasDefaultIpeOut (LineSegment 2 p r) where
-  type DefaultIpeOut (LineSegment 2 p r) = Path r
-  defaultIpeOut = lineSegment
-
-instance Floating r => HasDefaultIpeOut (Disk p r) where
-  type DefaultIpeOut (Disk p r) = Path r
-  defaultIpeOut = disk
-
-
+-- | Construct an ipe object from the core of an Ext
 coreOut    :: IpeOut g i -> IpeOut (g :+ a) i
 coreOut io = IpeOut $ asIpe io . (^.core)
 
 --------------------------------------------------------------------------------
+-- * Default Conversions
 
+class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
+  type DefaultIpeOut g :: * -> *
+  defaultIpeOut :: IpeOut g ((DefaultIpeOut g) (NumType g))
+
+instance HasDefaultIpeOut (Point 2 r) where
+  type DefaultIpeOut (Point 2 r) = IpeSymbol
+  defaultIpeOut = diskMark
+
+instance HasDefaultIpeOut (LineSegment 2 p r) where
+  type DefaultIpeOut (LineSegment 2 p r) = Path
+  defaultIpeOut = lineSegment
+
+instance Floating r => HasDefaultIpeOut (Disk p r) where
+  type DefaultIpeOut (Disk p r) = Path
+  defaultIpeOut = disk
+
+--------------------------------------------------------------------------------
+-- * Point Converters
 
 mark   :: Text -> IpeOut (Point 2 r) (IpeSymbol r)
 mark n = IpeOut $ flip Symbol n
@@ -141,15 +124,25 @@ fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 ls = (ClosedLineSegment (only origin) (only (point2 1 1)))
 
 
---test :: IpeObject Integer ('IpePath '[])
-test = asIpeObject lineSegment ls emptyPathAttributes
-
-
--- test' :: IpeObject Integer ('IpePath '[])
-test' = asIpeObject' ls emptyPathAttributes
+test :: IpeObject Integer
+test = asIpeObject' lineSegment ls $ mempty <> attr SStroke (IpeColor "red")
 
 
 
 
-emptyPathAttributes :: Rec (PathAttribute r) '[]
-emptyPathAttributes = RNil
+-- test' :: Attributes (PathAttrElfSym1 Integer) (IpeObjectAttrF (Path Integer) (PathAttrElfSym1 Integer))
+-- -- test' :: RecApplicative (IpeObjectAttrF (Path Integer) (IpeObjectSymbolF (Path Integer)))
+-- --       => IpeAttributes (Path Integer)
+-- test' = mempty
+
+
+
+
+-- -- test' :: IpeObject Integer ('IpePath '[])
+-- test' = asIpeObject' ls emptyPathAttributes
+
+
+
+
+-- emptyPathAttributes :: Rec (PathAttribute r) '[]
+-- emptyPathAttributes = RNil

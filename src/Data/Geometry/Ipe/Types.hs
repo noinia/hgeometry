@@ -8,19 +8,22 @@ module Data.Geometry.Ipe.Types where
 
 import           Control.Applicative
 import           Control.Lens
+import           Data.Monoid
 import           Data.Proxy
 import           Data.Vinyl
-
 import           Linear.Affine((.-.), qdA)
 
 import           Data.Ext
 import           Data.Geometry.Ball
-import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation(Matrix)
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
+import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
+import           Data.Geometry.Properties
+import           Data.Geometry.Transformation(Matrix)
+import           Data.Singletons.TH
+import           Data.Vinyl.TypeLevel
+import           Frames.CoRec
 
 import           Data.Geometry.Ipe.Attributes
 import           Data.Text(Text)
@@ -44,6 +47,8 @@ data Image r = Image { _imageData :: ()
                      } deriving (Show,Eq,Ord)
 makeLenses ''Image
 
+type instance NumType (Image r) = r
+
 --------------------------------------------------------------------------------
 -- | Text Objects
 
@@ -52,6 +57,9 @@ data TextLabel r = Label Text (Point 2 r)
 
 data MiniPage r = MiniPage Text (Point 2 r) r
                  deriving (Show,Eq,Ord)
+
+type instance NumType (TextLabel r) = r
+type instance NumType (MiniPage r)  = r
 
 width                  :: MiniPage t -> t
 width (MiniPage _ _ w) = w
@@ -70,8 +78,8 @@ type instance NumType (IpeSymbol r) = r
 
 
 -- | Example of an IpeSymbol. I.e. A symbol that expresses that the size is 'large'
-sizeSymbol :: SymbolAttribute Int Size
-sizeSymbol = SymbolAttribute . IpeSize $ Named "large"
+-- sizeSymbol :: Attributes (AttrMapSym1 r) (SymbolAttributes r)
+-- sizeSymbol = attr SSize (IpeSize $ Named "large")
 
 --------------------------------------------------------------------------------
 -- | Paths
@@ -111,156 +119,199 @@ data Operation r = MoveTo (Point 2 r)
                  deriving (Eq, Show)
 makePrisms ''Operation
 
+--------------------------------------------------------------------------------
+-- * Attribute Mapping
+
+
+-- | The mapping between the labels of the the attributes and the types of the
+-- attributes with these labels. For example, the 'Matrix' label/attribute should
+-- have a value of type 'Matrix 3 3 r'.
+type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
+  AttrMap r 'Layer          = Text
+  AttrMap r 'Matrix         = Matrix 3 3 r
+  AttrMap r Pin             = PinType
+  AttrMap r Transformations = TransformationTypes
+
+  AttrMap r Stroke = IpeColor
+  AttrMap r Pen    = IpePen r
+  AttrMap r Fill   = IpeColor
+  AttrMap r Size   = IpeSize r
+
+  AttrMap r Dash     = IpeDash r
+  AttrMap r LineCap  = Int
+  AttrMap r LineJoin = Int
+  AttrMap r FillRule = FillType
+  AttrMap r Arrow    = IpeArrow r
+  AttrMap r RArrow   = IpeArrow r
+  AttrMap r Opacity  = IpeOpacity
+  AttrMap r Tiling   = IpeTiling
+  AttrMap r Gradient = IpeGradient
+
+  AttrMap r Clip = Path r -- strictly we event want this to be a closed path I guess
+
+genDefunSymbols [''AttrMap]
+
+
+--------------------------------------------------------------------------------
+-- | Groups and Objects
 
 --------------------------------------------------------------------------------
 -- | Group Attributes
 
--- | Now that we know what a Path is we can define the Attributes of a Group.
-type family GroupAttrElf (s :: GroupAttributeUniverse) (r :: *) :: * where
-  GroupAttrElf Clip r = Path r -- strictly we event want this to be a closed path I guess
+-- -- | Now that we know what a Path is we can define the Attributes of a Group.
+-- type family GroupAttrElf (r :: *) (s :: GroupAttributeUniverse) :: * where
+--   GroupAttrElf r Clip = Path r -- strictly we event want this to be a closed path I guess
 
-newtype GroupAttribute r s = GroupAttribute (GroupAttrElf s r)
+-- genDefunSymbols [''GroupAttrElf]
 
---------------------------------------------------------------------------------
--- | Groups
-
--- | To define groups, we need some poly kinded, type-level only, 2-tuples.
-data (a :: ka) :.: (b :: kb)
-
--- | An IpeGroup can store IpeObjects. We distinguish the following different
--- ipeObjects. The parameter t will cary additional information about the
--- particular object. In particular, we will use it to keep track of the
--- attributes each item has.
---
--- Note: We will use this type on the type-level only! In particular, we will
--- use it as a Label in a Vinyl Rec.
-data IpeObjectType t = IpeGroup     t
-                     | IpeImage     t
-                     | IpeTextLabel t
-                     | IpeMiniPage  t
-                     | IpeUse       t
-                     | IpePath      t
-                     deriving (Show,Read,Eq)
-
--- | A group is essentially a hetrogenious list of IpeObjects. We represent a
--- group by means of a Vinyl Rec.
-type Group gt r = Rec (IpeObject r) gt
-
-type instance NumType (Group gt r) = r
-
--- | This type family links each 'IpeObjectType' to the type (in Haskell) that
--- we use to represent such an IpeObject. In principle we represent each object
--- by means of an Ext (:+), in which the 'core' is one of the previously seen types
--- (i.e. an Image, TextLabel, IpeSymbol, Path, etc), and the extra is a Vinyl record
--- storing the attributes.
---
--- The different ipe types use a different Universe to draw the labels form, to
--- make sure that i.e. a Path only has attributes applicable to a Path.
---
--- We also see the parameter of the IpeObjectType here: in all but the group case it is
--- a type level list that tells which attributes the object has. In case of a group it is a
--- poly-kinded pair (i.e. a `gt :.: gs`)  where the gt is a type level list that captures
--- *ALL* type information of the objects stored in this group, and the *gs* is a type level
--- list that specifies which attributes this group itself has.
-type IpeObjectElF r (f :: IpeObjectType k) = IpeObjectValueElF r f :+ IpeObjectAttrElF r f
-
-type family IpeObjectValueElF r (f :: IpeObjectType k) :: * where
-  IpeObjectValueElF r (IpeGroup (gt :.: gs)) = Group gt r
-  IpeObjectValueElF r (IpeImage is)          = Image r
-  IpeObjectValueElF r (IpeTextLabel ts)      = TextLabel r
-  IpeObjectValueElF r (IpeMiniPage mps)      = MiniPage r
-  IpeObjectValueElF r (IpeUse  ss)           = IpeSymbol r
-  IpeObjectValueElF r (IpePath ps)           = Path r
+-- type GroupAttributes r = Attributes (GroupAttrElfSym1 r) '[ 'Clip]
 
 
-type family RevIpeObjectValueElF (t :: *) :: (k -> IpeObjectType k) where
-  RevIpeObjectValueElF (Group gt r)   = IpeGroup
-  RevIpeObjectValueElF (Image r)      = IpeImage
-  RevIpeObjectValueElF (TextLabel r)  = IpeTextLabel
-  RevIpeObjectValueElF (MiniPage r)   = IpeMiniPage
-  RevIpeObjectValueElF (IpeSymbol r ) = IpeUse
-  RevIpeObjectValueElF (Path r)       = IpePath
+-- | A group is essentially a list of IpeObjects.
+newtype Group r = Group { _groupItems :: [IpeObject r] }
+                  deriving (Show,Eq)
+
+type instance NumType (Group r) = r
 
 
 
 
-type family IpeObjectAttrElF r (f :: IpeObjectType k) :: * where
-  IpeObjectAttrElF r (IpeGroup (gt :.: gs)) = Rec (GroupAttribute     r) gs
-  IpeObjectAttrElF r (IpeImage is)          = Rec (CommonAttribute    r) is
-  IpeObjectAttrElF r (IpeTextLabel ts)      = Rec (TextLabelAttribute r) ts
-  IpeObjectAttrElF r (IpeMiniPage mps)      = Rec (MiniPageAttribute  r) mps
-  IpeObjectAttrElF r (IpeUse  ss)           = Rec (SymbolAttribute    r) ss
-  IpeObjectAttrElF r (IpePath ps)           = Rec (PathAttribute      r) ps
-
-
-
-type family IpeObjectAttrFunctorElF (f :: IpeObjectType k) :: (* -> u -> *) where
-  IpeObjectAttrFunctorElF (IpeGroup (gt :.: gs)) = GroupAttribute
-  IpeObjectAttrFunctorElF (IpeImage is)          = CommonAttribute
-  IpeObjectAttrFunctorElF (IpeTextLabel ts)      = TextLabelAttribute
-  IpeObjectAttrFunctorElF (IpeMiniPage mps)      = MiniPageAttribute
-  IpeObjectAttrFunctorElF (IpeUse  ss)           = SymbolAttribute
-  IpeObjectAttrFunctorElF (IpePath ps)           = PathAttribute
-
-
-
--- TODO: Maybe split this TF into two TFS' one that determines the core type, the other
--- that gives the Attribute wrapper type
--- It would be nice if we could tell taht IpeObjecTELF was injective ...
-
--- | An ipe Object is then simply a thin wrapper around the IpeObjectELF type family.
-newtype IpeObject r (fld :: IpeObjectType k) =
-  IpeObject { _ipeObject :: IpeObjectElF r fld }
-
-makeLenses ''IpeObject
-
-type instance NumType (IpeObject r t) = r
-
-
--- data SomeIpeObject r where
---   SomeIpeObject :: IpeObject r fld -> SomeIpeObject r
-
---------------------------------------------------------------------------------
-
-
-symb'' :: IpeObjectElF Int (IpeUse '[Size])
-symb'' = Symbol origin "myLargesymbol"  :+ ( sizeSymbol :& RNil )
-
-symb :: IpeObjectElF Int (IpeUse ('[] :: [SymbolAttributeUniverse]))
-symb = Symbol origin "foo" :+ RNil
-
-symb' :: IpeObject Int (IpeUse '[Size])
-symb' = IpeObject symb''
-
-gr :: Group '[IpeUse '[Size]] Int
-gr = symb' :& RNil
-
-grr :: IpeObjectElF Int (IpeGroup ('[IpeUse '[Size]]
-                                   :.:
-                                   ('[] :: [GroupAttributeUniverse])
-                                  )
-                        )
-grr = gr :+ RNil
-
-
-grrr :: IpeObject Int (IpeGroup ('[IpeUse '[Size]] :.:
-                                      ('[] :: [GroupAttributeUniverse])
-                                )
-                      )
-grrr = IpeObject grr
-
-
-points' :: forall gt r. Group gt r -> [Point 2 r]
-points' = fmap (^.ipeObject.core.symbolPoint) . filterRec'
-
-filterRec' :: forall gt r fld. (fld ~ IpeUse '[Size]) =>
-              Rec (IpeObject r) gt -> [IpeObject r fld]
-filterRec' = undefined
--- filterRec' = filterRec (Proxy :: Proxy fld)
 
 
 
 
+
+
+
+
+
+
+-- type family F (t :: *) :: k where
+--   F Int = (->)
+--   F Bool = Int
+
+-- data Uni1 = A | B
+-- data Uni2 = C | D
+
+-- type family D (t :: *) where
+--   D Int  = Uni1
+--   D Bool = Uni2
+
+-- type family G (t :: *) :: (D t) where
+--   G Int  = A
+--   G Bool = C
+
+
+
+-- --
+-- type family IpeObjectSymbolF (t :: *) :: (TyFun u * -> *) where
+--   IpeObjectSymbolF (Group     r) = GroupAttrElfSym1 r
+--   IpeObjectSymbolF (Image     r) = CommonAttrElfSym1 r
+--   IpeObjectSymbolF (TextLabel r) = CommonAttrElfSym1 r
+--   IpeObjectSymbolF (MiniPage  r) = CommonAttrElfSym1 r
+--   IpeObjectSymbolF (IpeSymbol r) = SymbolAttrElfSym1 r
+--   IpeObjectSymbolF (Path      r) = PathAttrElfSym1 r
+
+type family IpeObjectAttrF (r :: *) (t :: * -> *) :: [u] where
+  IpeObjectAttrF r Group     = GroupAttributes  r
+  IpeObjectAttrF r Image     = CommonAttributes r
+  IpeObjectAttrF r TextLabel = CommonAttributes r
+  IpeObjectAttrF r MiniPage  = CommonAttributes r
+  IpeObjectAttrF r IpeSymbol = SymbolAttributes r
+  IpeObjectAttrF r Path      = PathAttributes   r
+
+
+-- type family IpeObjectAttrF1 (t :: *) (u :: *) :: [u] where
+--   IpeObjectAttrF (Group     r) GroupAttributeUniverse = GroupAttributes  r
+--   IpeObjectAttrF (Image     r) CommonAttributeUniverse = CommonAttributes r
+--   IpeObjectAttrF (TextLabel r) CommonAttributeUniverse = CommonAttributes r
+--   IpeObjectAttrF (MiniPage  r) CommonAttributeUniverse = CommonAttributes r
+--   IpeObjectAttrF (IpeSymbol r) SymbolAttributeUniverse = SymbolAttributes r
+--   IpeObjectAttrF (Path      r) PathAttributeUniverse   = PathAttributes   r
+
+
+
+-- type family IpeObjectAttrF (t :: *) (f :: TyFun u * -> *) :: [u] where
+--   IpeObjectAttrF (Group     r) (GroupAttrElfSym1 r)  = GroupAttributes  r
+--   IpeObjectAttrF (Image     r) (CommonAttrElfSym1 r) = CommonAttributes r
+--   IpeObjectAttrF (TextLabel r) (CommonAttrElfSym1 r) = CommonAttributes r
+--   IpeObjectAttrF (MiniPage  r) (CommonAttrElfSym1 r) = CommonAttributes r
+--   IpeObjectAttrF (IpeSymbol r) (SymbolAttrElfSym1 r) = SymbolAttributes r
+--   IpeObjectAttrF (Path      r) (PathAttrElfSym1 r)   = PathAttributes   r
+
+
+
+type IpeAttributes g r =
+  Attributes (AttrMapSym1 r) (IpeObjectAttrF r g)
+
+
+-- | An IpeObject' is essentially the oject ogether with its attributes
+type IpeObject' g r = g r :+ IpeAttributes g r
+
+data IpeObject r =
+    IpeGroup     (IpeObject' Group     r)
+  | IpeImage     (IpeObject' Image     r)
+  | IpeTextLabel (IpeObject' TextLabel r)
+  | IpeMiniPage  (IpeObject' MiniPage  r)
+  | IpeUse       (IpeObject' IpeSymbol r)
+  | IpePath      (IpeObject' Path      r)
+
+
+
+-- data IpeObject r =
+--     IpeGroup     (Group     r :+ Attributes (GroupAttrElfSym1 r)  (GroupAttributes     r))
+--   | IpeImage     (Image     r :+ Attributes (CommonAttrElfSym1 r) (ImageAttributes     r))
+--   | IpeTextLabel (TextLabel r :+ Attributes (CommonAttrElfSym1 r) (TextLabelAttributes r))
+--   | IpeMiniPage  (MiniPage  r :+ Attributes (CommonAttrElfSym1 r) (MiniPageAttributes  r))
+--   | IpeUse       (IpeSymbol r :+ Attributes (SymbolAttrElfSym1 r) (SymbolAttributes    r))
+--   | IpePath      (Path      r :+ Attributes (PathAttrElfSym1 r)   (PathAttributes      r))
+
+-- | To Express constraints
+-- type All' c i = RecAll (Attr (AttrMapSym1 (NumType i))) (IpeObjectAttrF i) c
+
+-- type All' c i r = RecAll (Attr (AttrMapSym1 r)) (IpeObjectAttrF r i) c
+
+-- type All'
+
+-- type AllIpeObject (c :: * -> Constraint) r =
+--   ( c (Group r),    c (Image r),     c (TextLabel r)
+--   , c (MiniPage r), c (IpeSymbol r), c (Path r)
+--   )
+
+deriving instance (Show r) => Show (IpeObject r)
+deriving instance (Eq r)   => Eq   (IpeObject r)
+
+type instance NumType (IpeObject r) = r
+
+makePrisms ''IpeObject
+
+class ToObject i where
+  ipeObject' :: i r -> IpeAttributes i r -> IpeObject r
+
+instance ToObject Group      where ipeObject' g a = IpeGroup     (g :+ a)
+instance ToObject Image      where ipeObject' p a = IpeImage     (p :+ a)
+instance ToObject TextLabel  where ipeObject' p a = IpeTextLabel (p :+ a)
+instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
+instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
+instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
+
+
+-- test' :: IpeAttributes Group Integer
+-- test' = mempty
+
+-- test'' :: Attributes ( Integer) (IpeObjectAttrF (Path Integer))
+-- test'' = mempty
+
+-- gr :: Group Integer
+-- gr = Group []
+
+-- toI = ipeObject' gr test'
+
+-- testz :: IpeAttributes (Group Integer)
+-- testz = Attrs $ (Attr path) :& RNil
+
+-- path :: Path Integer
+-- path = Path mempty
 
 --------------------------------------------------------------------------------
 
@@ -310,41 +361,19 @@ type IpeBitmap = XmlTree
 
 -- | An IpePage is essentially a Group, together with a list of layers and a
 -- list of views.
-data IpePage gs r = IpePage { _layers :: [Layer]
-                            , _views  :: [View]
-                            , _pages  :: Group gs r
-                            }
-              -- deriving (Eq, Show)
+data IpePage r = IpePage { _layers :: [Layer]
+                         , _views  :: [View]
+                         , _pages  :: Group r
+                         }
+              deriving (Eq,Show)
 makeLenses ''IpePage
 
-
-
-
-
--- pGr :: IpePage '[IpeUse '[Size]] Int
-pGr = IpePage [] [] gr
-
-
-
-
-newtype Page r gs = Page { _unP :: IpePage gs r }
-makeLenses ''Page
-
-
-ppGr = Page pGr
-
-type IpePages gss r = Rec (Page r) gss
-
-
-
 -- | A complete ipe file
-data IpeFile gs r = IpeFile { _preamble :: Maybe IpePreamble
-                            , _styles   :: [IpeStyle]
-                            , _ipePages :: IpePages gs r
-                            }
-                  -- deriving (Eq,Show)
+data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
+                         , _styles   :: [IpeStyle]
+                         , _ipePages :: [IpePage r]
+                         }
+               deriving (Eq,Show)
 
--- ifP :: IpeFile '[ '[IpeUse '[Size]]] Int
-ifP = IpeFile Nothing [] (ppGr :& RNil)
 
 makeLenses ''IpeFile
