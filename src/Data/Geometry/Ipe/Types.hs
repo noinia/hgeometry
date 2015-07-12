@@ -296,6 +296,7 @@ instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
 instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
 
 
+
 -- test' :: IpeAttributes Group Integer
 -- test' = mempty
 

@@ -8,7 +8,7 @@ import           Control.Applicative hiding (Const)
 import           Control.Lens hiding (rmap, Const)
 import qualified Data.Foldable as F
 import           Data.Geometry.Transformation(Matrix)
-import           Data.Monoid
+import           Data.Semigroup
 import           Data.Singletons
 import           Data.Singletons.TH
 import           Data.String(IsString(..))
@@ -91,8 +91,13 @@ instance (RecAll (Attr f) ats Eq)   => Eq   (Attributes f ats) where
                          . (reifyConstraint (Proxy :: Proxy Eq)) $ b
 
 instance RecApplicative ats => Monoid (Attributes f ats) where
-  mempty                          = Attrs $ rpure mempty
-  (Attrs as) `mappend` (Attrs bs) = Attrs $ zipRecsWith mappend as bs
+  mempty        = Attrs $ rpure mempty
+  a `mappend` b = a <> b
+
+instance Semigroup (Attributes f ats) where
+  (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith mappend as bs
+
+
 
 zipRecsWith                       :: (forall a. f a -> g a -> h a)
                                   -> Rec f as -> Rec g as -> Rec h as

@@ -16,7 +16,7 @@ import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.List.NonEmpty as NE
-import           Data.Monoid
+import           Data.Semigroup
 import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Text(Text)
@@ -29,6 +29,7 @@ newtype IpeOut g i = IpeOut { asIpe :: g -> i }
 
 -- Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
+
 asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
             => g -> IpeAttributes i r -> IpeObject r
 asIpeObject = asIpeObject' defaultIpeOut
@@ -37,7 +38,7 @@ asIpeObject = asIpeObject' defaultIpeOut
 -- ipe geometry object, the geometry object, and a record with its attributes,
 -- construct an ipe Object representing it.
 asIpeObject'          :: (ToObject i, NumType g ~ r)
-                      => IpeOut g (i r) -> g -> IpeAttributes i r -> IpeObject r
+                      => IpeOut g (IpeObject' i r) -> g -> IpeAttributes i r -> IpeObject r
 asIpeObject' io g ats = asIpe (ipeObject io ats) g
 
 --------------------------------------------------------------------------------
@@ -45,8 +46,9 @@ asIpeObject' io g ats = asIpe (ipeObject io ats) g
 -- | Helper to construct an IpeOut g IpeObject , if we already know how to
 -- construct a specific Ipe type.
 ipeObject        :: (ToObject i, NumType g ~ r)
-                 => IpeOut g (i r) -> IpeAttributes i r -> IpeOut g (IpeObject r)
-ipeObject io ats = IpeOut $ flip ipeObject' ats . asIpe io
+                   => IpeOut g (IpeObject' i r) -> IpeAttributes i r -> IpeOut g (IpeObject r)
+ipeObject io ats = IpeOut $ \g -> let (i :+ ats') = asIpe io g
+                                    in ipeObject' i (ats' <> ats)
 
 -- | Construct an ipe object from the core of an Ext
 coreOut    :: IpeOut g i -> IpeOut (g :+ a) i
@@ -57,7 +59,7 @@ coreOut io = IpeOut $ asIpe io . (^.core)
 
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   type DefaultIpeOut g :: * -> *
-  defaultIpeOut :: IpeOut g ((DefaultIpeOut g) (NumType g))
+  defaultIpeOut :: IpeOut g (IpeObject' (DefaultIpeOut g) (NumType g))
 
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
@@ -74,18 +76,25 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
 --------------------------------------------------------------------------------
 -- * Point Converters
 
-mark   :: Text -> IpeOut (Point 2 r) (IpeSymbol r)
-mark n = IpeOut $ flip Symbol n
+mark   :: Text -> IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
+mark n = noAttrs . IpeOut $ flip Symbol n
 
-diskMark :: IpeOut (Point 2 r) (IpeSymbol r)
+diskMark :: IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
 diskMark = mark "mark/disk(sx)"
 
 
 
 --------------------------------------------------------------------------------
 
-lineSegment :: IpeOut (LineSegment 2 p r) (Path r)
-lineSegment = fromPathSegment lineSegment'
+noAttrs :: Monoid extra => IpeOut g core -> IpeOut g (core :+ extra)
+noAttrs = addAttributes mempty
+
+addAttributes :: extra -> IpeOut g core -> IpeOut g (core :+ extra)
+addAttributes ats io = IpeOut $ \g -> asIpe io g :+ ats
+
+
+lineSegment :: IpeOut (LineSegment 2 p r) (IpeObject' Path r)
+lineSegment = noAttrs $ fromPathSegment lineSegment'
 
 lineSegment' :: IpeOut (LineSegment 2 p r) (PathSegment r)
 lineSegment' = IpeOut $ PolyLineSegment . fromLineSegment . first (const ())
@@ -97,9 +106,8 @@ polyLine = fromPathSegment polyLine'
 polyLine' :: IpeOut (PolyLine 2 a r) (PathSegment r)
 polyLine' = IpeOut $ PolyLineSegment . first (const ())
 
-
-disk :: Floating r => IpeOut (Disk p r) (Path r)
-disk = IpeOut $ asIpe circle . Boundary
+disk :: Floating r => IpeOut (Disk p r) (IpeObject' Path r)
+disk = addAttributes (attr SFill (IpeColor "red")) . IpeOut $ asIpe circle . Boundary
 
 circle :: Floating r => IpeOut (Circle p r) (Path r)
 circle = fromPathSegment circle'
