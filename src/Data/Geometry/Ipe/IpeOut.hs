@@ -27,19 +27,24 @@ import           Data.Vinyl
 
 newtype IpeOut g i = IpeOut { asIpe :: g -> i }
 
+
 -- Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
-
 asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
-            => g -> IpeAttributes i r -> IpeObject r
-asIpeObject = asIpeObject' defaultIpeOut
+             => g -> IpeAttributes i r -> IpeObject r
+asIpeObject = asIpeObjectWith defaultIpeOut
 
 -- -- | Given a IpeOut that specifies how to convert a geometry object into an
 -- ipe geometry object, the geometry object, and a record with its attributes,
 -- construct an ipe Object representing it.
-asIpeObject'          :: (ToObject i, NumType g ~ r)
+asIpeObjectWith          :: (ToObject i, NumType g ~ r)
                       => IpeOut g (IpeObject' i r) -> g -> IpeAttributes i r -> IpeObject r
-asIpeObject' io g ats = asIpe (ipeObject io ats) g
+asIpeObjectWith io g ats = asIpe (ipeObject io ats) g
+
+
+asIpeGroup        :: [IpeObject r] -> IpeAttributes Group r -> IpeObject r
+asIpeGroup gs ats = IpeGroup $ (Group gs) :+ ats
+
 
 --------------------------------------------------------------------------------
 
@@ -107,7 +112,7 @@ polyLine' :: IpeOut (PolyLine 2 a r) (PathSegment r)
 polyLine' = IpeOut $ PolyLineSegment . first (const ())
 
 disk :: Floating r => IpeOut (Disk p r) (IpeObject' Path r)
-disk = addAttributes (attr SFill (IpeColor "red")) . IpeOut $ asIpe circle . Boundary
+disk = noAttrs . IpeOut $ asIpe circle . Boundary
 
 circle :: Floating r => IpeOut (Circle p r) (Path r)
 circle = fromPathSegment circle'
@@ -132,8 +137,8 @@ fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 ls = (ClosedLineSegment (only origin) (only (point2 1 1)))
 
 
-test :: IpeObject Integer
-test = asIpeObject' lineSegment ls $ mempty <> attr SStroke (IpeColor "red")
+testzz :: IpeObject Integer
+testzz = asIpeObjectWith lineSegment ls $ mempty <> attr SStroke (IpeColor "red")
 
 
 

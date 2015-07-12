@@ -314,17 +314,33 @@ instance ( AllSatisfy IpeAttrName rs
 -- type All'' g = ( AllSatisfy IpeAttrName (IpeObjectAttrF g)
 --                , RecAll (Attr (IpeObjectSymbolF g)) (IpeObjectAttrF g) IpeWriteText
 --                )
+instance IpeWriteText r => IpeWrite (MiniPage r) where
+  ipeWrite (MiniPage t p w) = (\pt wt ->
+                              Element "text" [ ("pos", pt)
+                                             , ("type", "minipage")
+                                             , ("width", wt)
+                                             ] [Text t]
+                              ) <$> ipeWriteText p
+                                <*> ipeWriteText w
+
+instance IpeWriteText r => IpeWrite (Image r) where
+  ipeWrite (Image d r) = Nothing -- TODO
+
+instance IpeWriteText r => IpeWrite (TextLabel r) where
+  ipeWrite (Label t p) = (\pt ->
+                         Element "text" [("pos", pt)
+                                        ,("type", "label")
+                                        ] [Text t]
+                         ) <$> ipeWriteText p
 
 
 instance (IpeWriteText r) => IpeWrite (IpeObject r) where
-    ipeWrite (IpeGroup x) = ipeWrite x
-
-    -- ipeWrite (IpeGroup     g a) = ipeWrite g `mAddAtts` ipeWriteAttrs a
-    -- -- ipeWrite (IpeImage     i a) = ipeWrite i `mAddAtts` ipeWriteAttrs a
-    -- -- ipeWrite (IpeTextLabel l a) = ipeWrite l `mAddAtts` ipeWriteAttrs a
-    -- -- ipeWrite (IpeMiniPage  m a) = ipeWrite m `mAddAtts` ipeWriteAttrs a
-    -- ipeWrite (IpeUse       s a) = ipeWrite s `mAddAtts` ipeWriteAttrs a
-    -- ipeWrite (IpePath      p a) = ipeWrite p `mAddAtts` ipeWriteAttrs a
+    ipeWrite (IpeGroup     g) = ipeWrite g
+    ipeWrite (IpeImage     i) = ipeWrite i
+    ipeWrite (IpeTextLabel l) = ipeWrite l
+    ipeWrite (IpeMiniPage  m) = ipeWrite m
+    ipeWrite (IpeUse       s) = ipeWrite s
+    ipeWrite (IpePath      p) = ipeWrite p
 
 
 ipeWriteRec :: RecAll f rs IpeWrite => Rec f rs -> [Node Text Text]

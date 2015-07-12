@@ -4,12 +4,13 @@ import           Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncremental
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ball
 import           Data.Geometry
+import           Data.Geometry.Ball
 import           Data.Geometry.Line
 import           Data.Geometry.PolyLine
+import           Data.Monoid
 
-import           Data.Geometry.Ipe
+--import           Data.Geometry.Ipe
 
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.IpeOut
@@ -22,22 +23,13 @@ import           System.Environment(getArgs)
 import           System.Random
 
 
-
+diskResult :: Floating r => IpeOut (DiskResult p r) (IpeObject r)
 diskResult = IpeOut f
   where
-    f (DiskResult d pts) =    asIpeObject' d emptyPathAttributes
-                           -- :& obj pts
-                           :& RNil
+    f (DiskResult d pts) = asIpeGroup (asIpeObject d mempty : (F.toList . fmap g $ pts))
+                                      mempty
 
---     g p = asIpeObject (coreOut diskMark) p
---     obj (Two p q) = g p :& g q :& RNil
---     obj (Three p q r) = g p :& g q :& RNil -- TODO: r is missing here
-
--- obj :: Group _ r
-obj (Two p q) = g p :& g q :& RNil
-obj (Three p q r) = g p :& g q :& RNil -- TODO: r is missing here
-
-g p = asIpeObject (coreOut diskMark) p
+    g p = asIpeObject (p^.core) mempty
 
 main = do
   (fp:_) <- getArgs
