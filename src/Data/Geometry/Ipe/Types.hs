@@ -21,7 +21,8 @@ import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation(Matrix)
-import           Data.Singletons.TH
+import           Data.Maybe(mapMaybe)
+import           Data.Singletons.TH(genDefunSymbols)
 import           Data.Vinyl.TypeLevel
 import           Frames.CoRec
 
@@ -37,6 +38,8 @@ import qualified Data.Seq2     as S2
 
 --------------------------------------------------------------------------------
 
+
+newtype LayerName = LayerName {_layerName :: Text } deriving (Show,Read,Eq,Ord,IsString)
 
 --------------------------------------------------------------------------------
 -- | Image Objects
@@ -127,7 +130,7 @@ makePrisms ''Operation
 -- attributes with these labels. For example, the 'Matrix' label/attribute should
 -- have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
-  AttrMap r 'Layer          = Text
+  AttrMap r 'Layer          = LayerName
   AttrMap r 'Matrix         = Matrix 3 3 r
   AttrMap r Pin             = PinType
   AttrMap r Transformations = TransformationTypes
@@ -173,45 +176,6 @@ newtype Group r = Group { _groupItems :: [IpeObject r] }
 
 type instance NumType (Group r) = r
 
-
-
-
-
-
-
-
-
-
-
-
-
-
--- type family F (t :: *) :: k where
---   F Int = (->)
---   F Bool = Int
-
--- data Uni1 = A | B
--- data Uni2 = C | D
-
--- type family D (t :: *) where
---   D Int  = Uni1
---   D Bool = Uni2
-
--- type family G (t :: *) :: (D t) where
---   G Int  = A
---   G Bool = C
-
-
-
--- --
--- type family IpeObjectSymbolF (t :: *) :: (TyFun u * -> *) where
---   IpeObjectSymbolF (Group     r) = GroupAttrElfSym1 r
---   IpeObjectSymbolF (Image     r) = CommonAttrElfSym1 r
---   IpeObjectSymbolF (TextLabel r) = CommonAttrElfSym1 r
---   IpeObjectSymbolF (MiniPage  r) = CommonAttrElfSym1 r
---   IpeObjectSymbolF (IpeSymbol r) = SymbolAttrElfSym1 r
---   IpeObjectSymbolF (Path      r) = PathAttrElfSym1 r
-
 type family IpeObjectAttrF (r :: *) (t :: * -> *) :: [u] where
   IpeObjectAttrF r Group     = GroupAttributes  r
   IpeObjectAttrF r Image     = CommonAttributes r
@@ -221,32 +185,15 @@ type family IpeObjectAttrF (r :: *) (t :: * -> *) :: [u] where
   IpeObjectAttrF r Path      = PathAttributes   r
 
 
--- type family IpeObjectAttrF1 (t :: *) (u :: *) :: [u] where
---   IpeObjectAttrF (Group     r) GroupAttributeUniverse = GroupAttributes  r
---   IpeObjectAttrF (Image     r) CommonAttributeUniverse = CommonAttributes r
---   IpeObjectAttrF (TextLabel r) CommonAttributeUniverse = CommonAttributes r
---   IpeObjectAttrF (MiniPage  r) CommonAttributeUniverse = CommonAttributes r
---   IpeObjectAttrF (IpeSymbol r) SymbolAttributeUniverse = SymbolAttributes r
---   IpeObjectAttrF (Path      r) PathAttributeUniverse   = PathAttributes   r
-
-
-
--- type family IpeObjectAttrF (t :: *) (f :: TyFun u * -> *) :: [u] where
---   IpeObjectAttrF (Group     r) (GroupAttrElfSym1 r)  = GroupAttributes  r
---   IpeObjectAttrF (Image     r) (CommonAttrElfSym1 r) = CommonAttributes r
---   IpeObjectAttrF (TextLabel r) (CommonAttrElfSym1 r) = CommonAttributes r
---   IpeObjectAttrF (MiniPage  r) (CommonAttrElfSym1 r) = CommonAttributes r
---   IpeObjectAttrF (IpeSymbol r) (SymbolAttrElfSym1 r) = SymbolAttributes r
---   IpeObjectAttrF (Path      r) (PathAttrElfSym1 r)   = PathAttributes   r
-
-
-
 type IpeAttributes g r =
   Attributes (AttrMapSym1 r) (IpeObjectAttrF r g)
 
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
 type IpeObject' g r = g r :+ IpeAttributes g r
+
+attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
+attributes = extra
 
 data IpeObject r =
     IpeGroup     (IpeObject' Group     r)
@@ -256,27 +203,6 @@ data IpeObject r =
   | IpeUse       (IpeObject' IpeSymbol r)
   | IpePath      (IpeObject' Path      r)
 
-
-
--- data IpeObject r =
---     IpeGroup     (Group     r :+ Attributes (GroupAttrElfSym1 r)  (GroupAttributes     r))
---   | IpeImage     (Image     r :+ Attributes (CommonAttrElfSym1 r) (ImageAttributes     r))
---   | IpeTextLabel (TextLabel r :+ Attributes (CommonAttrElfSym1 r) (TextLabelAttributes r))
---   | IpeMiniPage  (MiniPage  r :+ Attributes (CommonAttrElfSym1 r) (MiniPageAttributes  r))
---   | IpeUse       (IpeSymbol r :+ Attributes (SymbolAttrElfSym1 r) (SymbolAttributes    r))
---   | IpePath      (Path      r :+ Attributes (PathAttrElfSym1 r)   (PathAttributes      r))
-
--- | To Express constraints
--- type All' c i = RecAll (Attr (AttrMapSym1 (NumType i))) (IpeObjectAttrF i) c
-
--- type All' c i r = RecAll (Attr (AttrMapSym1 r)) (IpeObjectAttrF r i) c
-
--- type All'
-
--- type AllIpeObject (c :: * -> Constraint) r =
---   ( c (Group r),    c (Image r),     c (TextLabel r)
---   , c (MiniPage r), c (IpeSymbol r), c (Path r)
---   )
 
 deriving instance (Show r) => Show (IpeObject r)
 deriving instance (Eq r)   => Eq   (IpeObject r)
@@ -295,24 +221,26 @@ instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
 instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
 instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
 
+commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) (CommonAttributes r))
+commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
+  where
+    select :: (CommonAttributes r ⊆ IpeObjectAttrF r g) =>
+              Lens' (IpeObject' g r) (Rec (Attr (AttrMapSym1 r)) (CommonAttributes r))
+    select = attributes.unAttrs.rsubset
 
+    g (IpeGroup i)     = i^.select
+    g (IpeImage i)     = i^.select
+    g (IpeTextLabel i) = i^.select
+    g (IpeMiniPage i)  = i^.select
+    g (IpeUse i)       = i^.select
+    g (IpePath i)      = i^.select
 
--- test' :: IpeAttributes Group Integer
--- test' = mempty
-
--- test'' :: Attributes ( Integer) (IpeObjectAttrF (Path Integer))
--- test'' = mempty
-
--- gr :: Group Integer
--- gr = Group []
-
--- toI = ipeObject' gr test'
-
--- testz :: IpeAttributes (Group Integer)
--- testz = Attrs $ (Attr path) :& RNil
-
--- path :: Path Integer
--- path = Path mempty
+    s (IpeGroup i)     a = IpeGroup     $ i&select .~ a
+    s (IpeImage i)     a = IpeImage     $ i&select .~ a
+    s (IpeTextLabel i) a = IpeTextLabel $ i&select .~ a
+    s (IpeMiniPage i)  a = IpeMiniPage  $ i&select .~ a
+    s (IpeUse i)       a = IpeUse       $ i&select .~ a
+    s (IpePath i)      a = IpePath      $ i&select .~ a
 
 --------------------------------------------------------------------------------
 
@@ -321,13 +249,12 @@ instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
 type XmlTree = Text
 
 
-newtype Layer = Layer {_layerName :: Text } deriving (Show,Read,Eq,Ord,IsString)
 
 
 -- | The definition of a view
 -- make active layer into an index ?
-data View = View { _layerNames      :: [Layer]
-                 , _activeLayer     :: Layer
+data View = View { _layerNames      :: [LayerName]
+                 , _activeLayer     :: LayerName
                  }
           deriving (Eq, Ord, Show)
 makeLenses ''View
@@ -355,26 +282,35 @@ type IpeBitmap = XmlTree
 -- Ipe Pages
 
 
-
-
-
+type PageContent r = [IpeObject r]
 
 
 -- | An IpePage is essentially a Group, together with a list of layers and a
 -- list of views.
-data IpePage r = IpePage { _layers :: [Layer]
-                         , _views  :: [View]
-                         , _pages  :: Group r
+data IpePage r = IpePage { _layers  :: [LayerName]
+                         , _views   :: [View]
+                         , _content :: PageContent r
                          }
               deriving (Eq,Show)
 makeLenses ''IpePage
 
+-- | Creates a simple page with no views.
+fromContent     :: [IpeObject r] -> IpePage r
+fromContent obs = IpePage layers [] obs
+  where
+    layers = mapMaybe (^.commonAttributes.attrLens SLayer) obs
+
 -- | A complete ipe file
 data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
                          , _styles   :: [IpeStyle]
-                         , _ipePages :: [IpePage r]
+                         , _pages    :: [IpePage r]
                          }
                deriving (Eq,Show)
 
+singlePageFile   :: IpePage r -> IpeFile r
+singlePageFile p = IpeFile Nothing [] [p]
+
+
+singlePageFromContent = singlePageFile . fromContent
 
 makeLenses ''IpeFile

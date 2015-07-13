@@ -7,7 +7,7 @@
 module Data.Geometry.Ipe.Writer where
 
 import           Control.Applicative hiding (Const(..))
-import           Control.Lens((^.),(^..),(.~),(&), Prism', (#))
+import           Control.Lens((^.),(^..),(.~),(&), Prism', (#), to)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
@@ -16,9 +16,10 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Maybe(catMaybes, mapMaybe, fromMaybe)
-import           Data.Monoid
+import           Data.Semigroup
 import           Data.Proxy
 import qualified Data.Traversable as Tr
 import           Data.Vinyl
@@ -105,7 +106,7 @@ class IpeAttrName a where
   attrName :: Proxy a -> Text
 
 instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
-  ipeWriteText attr = unAttr attr >>= ipeWriteText
+  ipeWriteText attr = _getAttr attr >>= ipeWriteText
 
 -- | Functon to write all attributes in a Rec
 ipeWriteAttrs           :: ( AllSatisfy IpeAttrName rs
@@ -304,16 +305,7 @@ instance ( AllSatisfy IpeAttrName rs
          ) => IpeWrite (g :+ IA.Attributes f rs) where
   ipeWrite (g :+ ats) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
 
--- instance ( (IpeObjectAttrF g) ~ rs, (IpeObjectSymbolF g) ~ f
---          , AllSatisfy IpeAttrName rs
---          , RecAll (Attr f) rs IpeWriteText
---          , IpeWrite g
---          ) => IpeWrite (g :+ IA.Attributes f rs) where
---   ipeWrite (g :+ ats) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
 
--- type All'' g = ( AllSatisfy IpeAttrName (IpeObjectAttrF g)
---                , RecAll (Attr (IpeObjectSymbolF g)) (IpeObjectAttrF g) IpeWriteText
---                )
 instance IpeWriteText r => IpeWrite (MiniPage r) where
   ipeWrite (MiniPage t p w) = (\pt wt ->
                               Element "text" [ ("pos", pt)
@@ -324,7 +316,17 @@ instance IpeWriteText r => IpeWrite (MiniPage r) where
                                 <*> ipeWriteText w
 
 instance IpeWriteText r => IpeWrite (Image r) where
-  ipeWrite (Image d r) = Nothing -- TODO
+  ipeWrite (Image _ Empty)     = Nothing
+  ipeWrite (Image d (Box a b)) = (\dt p q ->
+                                   Element "image" [("rect", p <> " " <> q)] [Text dt]
+                                 )
+                               <$> ipeWriteText d
+                               <*> ipeWriteText (a^.core.(to getMin))
+                               <*> ipeWriteText (b^.core.(to getMax))
+
+-- TODO: Replace this one with s.t. that writes the actual image payload
+instance IpeWriteText () where
+  ipeWriteText () = Nothing
 
 instance IpeWriteText r => IpeWrite (TextLabel r) where
   ipeWrite (Label t p) = (\pt ->
@@ -355,8 +357,10 @@ ipeWriteRec = catMaybes . recordToList
 
 --------------------------------------------------------------------------------
 
-instance IpeWrite IT.Layer where
-  ipeWrite (IT.Layer l) = Just $ Element "layer" [("name", l)] []
+deriving instance IpeWriteText LayerName
+
+instance IpeWrite LayerName where
+  ipeWrite (LayerName n) = Just $ Element "layer" [("name",n)] []
 
 instance IpeWrite View where
   ipeWrite (View lrs act) = Just $ Element "view" [ ("layers", ls)
@@ -366,11 +370,13 @@ instance IpeWrite View where
       ls = T.unwords .  map _layerName $ lrs
 
 instance (IpeWriteText r)  => IpeWrite (IpePage r) where
-  ipeWrite (IpePage lrs vs pgs) = Just . Element "page" [] . catMaybes . concat $
+  ipeWrite (IpePage lrs vs objs) = Just .
+                                  Element "page" [] . catMaybes . concat $
                                   [ map ipeWrite lrs
                                   , map ipeWrite vs
-                                  , [ipeWrite pgs]
+                                  , map ipeWrite objs
                                   ]
+
 
 instance (IpeWriteText r) => IpeWrite (IpeFile r) where
   ipeWrite (IpeFile p s pgs) = Just $ Element "ipe" ipeAtts chs
@@ -383,6 +389,15 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
 --------------------------------------------------------------------------------
 
 type Atts = [(Text,Text)]
+
+ipeWritePolyLines' :: IpeWriteText r
+                  => [(PolyLine 2 () r, Atts)] -> Maybe (Node Text Text)
+ipeWritePolyLines' = ipeWrite . singlePageFromContent . map f
+  where
+    f (pl,ats) = ipeObject' (mkPath pl) mempty -- TODO: We ignore the ats, as they are in the wrong format
+    mkPath     = Path . S2.l1Singleton . PolyLineSegment
+
+
 
 ipeWritePolyLines     :: IpeWriteText r
                       => [(PolyLine 2 () r, Atts)] -> Node Text Text

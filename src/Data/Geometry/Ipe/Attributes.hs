@@ -62,8 +62,10 @@ type GroupAttributes r = CommonAttributes r ++ '[ 'Clip]
 -- (symbol representing) the type family 'f'
 newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
-             (label :: k) = GAttr { unAttr :: Maybe (Apply f label) }
+             (label :: k) = GAttr { _getAttr :: Maybe (Apply f label) }
                           deriving (Show,Read,Eq,Ord)
+
+makeLenses ''Attr
 
 pattern Attr x = GAttr (Just x)
 pattern NoAttr = GAttr Nothing
@@ -76,7 +78,9 @@ instance Monoid (Attr f l) where
 
 
 newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) =
-  Attrs { unAttrs :: Rec (Attr f) ats }
+  Attrs { _unAttrs :: Rec (Attr f) ats }
+
+makeLenses ''Attributes
 
 
 -- type All' c i = RecAll (Attr (IpeObjectSymbolF i)) (IpeObjectAttrF i) c
@@ -104,8 +108,11 @@ zipRecsWith                       :: (forall a. f a -> g a -> h a)
 zipRecsWith f RNil      _         = RNil
 zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
 
-getAttr   :: (at ∈ ats) => proxy at -> Attributes f ats -> Maybe (Apply f at)
-getAttr p = unAttr . rget p . unAttrs
+attrLens   :: (at ∈ ats) => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
+attrLens p = unAttrs.rlens p.getAttr
+
+lookupAttr   :: (at ∈ ats) => proxy at -> Attributes f ats -> Maybe (Apply f at)
+lookupAttr p = view (attrLens p)
 
 setAttr               :: forall proxy at ats f. (at ∈ ats)
                       => proxy at -> Apply f at -> Attributes f ats -> Attributes f ats
