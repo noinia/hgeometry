@@ -5,6 +5,7 @@
 module Data.Geometry.Box(
                         -- * d-dimensional boxes
                           Box(..)
+                        , minP, maxP, _Box, _Empty
 
                         -- * Constructing bounding boxes
                         , IsBoxable(..)
@@ -22,7 +23,7 @@ module Data.Geometry.Box(
                         ) where
 
 import           Control.Applicative
-import           Control.Lens(Getter,to,(^.),view)
+import           Control.Lens hiding (_Empty, only)
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -47,6 +48,15 @@ data Box d p r = Empty
                | Box { _minP :: Min (Point d r) :+ p
                      , _maxP :: Max (Point d r) :+ p
                      }
+
+makePrisms ''Box
+
+minP :: Traversal' (Box d p r) (Min (Point d r) :+ p)
+minP = _Box._1
+
+maxP :: Traversal' (Box d p r) (Max (Point d r) :+ p)
+maxP = _Box._2
+
 
 deriving instance (Show r, Show p, Arity d) => Show (Box d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
