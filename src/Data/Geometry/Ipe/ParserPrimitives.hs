@@ -6,17 +6,13 @@ module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          , (<*><>) , (<*><)
                                          , (<***>) , (<***) , (***>)
                                          , pMaybe , pCount , pSepBy
-                                         , Parser(..) , ParseError
+                                         , Parser, ParseError
                                          , pNotFollowedBy
                                          ) where
 
-
--- import Data.Functor.Identity
-
 import           Control.Applicative hiding (many,(<|>))
-
 import           Text.Parsec(try)
-import           Text.Parsec(ParsecT(..),Parsec, Stream(..))
+import           Text.Parsec(ParsecT, Stream)
 import           Text.Parsec.Text
 import           Text.ParserCombinators.Parsec hiding (Parser,try)
 
@@ -74,11 +70,12 @@ pSepBy = sepBy
 
 
 -- | infix variant of notfollowed by
+pNotFollowedBy :: Parser a -> Parser b -> Parser a
 p `pNotFollowedBy` q = do { x <- p ; notFollowedBy' q ; return x }
     where
       -- | copy of the original notFollowedBy but replaced the error message
       -- to get rid of the Show dependency
-      notFollowedBy' p     = try (do{ c <- try p; unexpected "not followed by" }
+      notFollowedBy' z     = try (do{ _ <- try z; unexpected "not followed by" }
                                     <|> return ()
                                  )
 
@@ -98,7 +95,9 @@ p <*><> q = do
   return $ f x
 
 
-p <*>< q = (\a _ -> a) <$> p <*><> q
+(<*><)   :: (Stream s m t, Reversable s)
+          => ParsecT s u m b -> ParsecT s u m a -> ParsecT s u m b
+p <*>< q = const <$> p <*><> q
 
 
 rev :: (Reversable s, Stream s m t) => ParsecT s u m ()
