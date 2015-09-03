@@ -62,7 +62,7 @@ type GroupAttributes r = CommonAttributes r ++ '[ 'Clip]
 -- (symbol representing) the type family 'f'
 newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
-             (label :: k) = GAttr { _getAttr :: Maybe (Apply f label) }
+             (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
                           deriving (Show,Read,Eq,Ord)
 
 makeLenses ''Attr
