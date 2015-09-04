@@ -50,8 +50,14 @@ instance Coordinate (Ratio Integer) where
 -----------------------------------------------------------------------
 -- | Running the parsers
 
+readCoordinate :: Coordinate r => Text -> Either Text r
+readCoordinate = runParser pCoordinate
+
 readPoint :: Coordinate r => Text -> Either Text (Point 2 r)
-readPoint = bimap errorText fst . runP pPoint
+readPoint = runParser pPoint
+
+runParser   :: Parser a -> Text -> Either Text a
+runParser p = bimap errorText fst . runP p
 
 -- Collect errors
 data Either' l r = Left' l | Right' r deriving (Show,Eq)

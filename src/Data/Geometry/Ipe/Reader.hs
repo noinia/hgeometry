@@ -1,16 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.Ipe.Reader where
 
+import           Data.Proxy
 import           Data.Either(rights)
 import           Control.Applicative
 import           Control.Lens
 
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Maybe(fromMaybe)
 import           Data.Vinyl
 
 import           Data.Validation
+
+import qualified Data.Geometry.Transformation as Trans
+
 
 import           Data.Geometry.Point
 import           Data.Geometry.Line
@@ -18,16 +24,88 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Attributes
+import           Data.Geometry.Ipe.PathParser
 
 import qualified Data.ByteString as B
 import           Data.Monoid
+import           Data.Singletons
 import           Data.Text(Text)
 
-import           Data.Geometry.Ipe.PathParser
 
 import           Text.XML.Expat.Tree
 
 import qualified Data.Text as T
+-- import qualified Data.Map as M
+
+--------------------------------------------------------------------------------
+
+type ConversionError = Text
+
+--------------------------------------------------------------------------------
+
+class IpeReadText t where
+  ipeReadText :: Text -> Either ConversionError t
+
+-- instance IpeReadText Text where
+--   ipeReadText = Right
+
+-- instance Coordinate r => IpeReadText r where
+--   ipeReadText = readCoordinate
+
+instance Coordinate r => IpeReadText (Point 2 r) where
+  ipeReadText = readPoint
+
+instance Coordinate r => IpeReadText (Trans.Matrix 3 3 r) where
+  ipeReadText = readMatrix
+
+instance IpeReadText LayerName where
+  ipeReadText = Right . LayerName
+
+instance IpeReadText PinType where
+  ipeReadText "yes" = Right Yes
+  ipeReadText "h"   = Right Horizontal
+  ipeReadText "v"   = Right Vertical
+  ipeReadText ""    = Right No
+  ipeReadText _     = Left "invalid PinType"
+
+instance IpeReadText TransformationTypes where
+  ipeReadText "affine"       = Right Affine
+  ipeReadText "rigid"        = Right Rigid
+  ipeReadText "translations" = Right Translations
+  ipeReadText _              = Left "invalid TransformationType"
+
+instance IpeReadText FillType where
+  ipeReadText "wind"   = Right Wind
+  ipeReadText "eofill" = Right EOFill
+  ipeReadText _        = Left "invalid FillType"
+
+
+-- instance Coordinate r => IpeReadText (IpeDash r) where
+
+ipeReadTextWith     :: (Text -> Either t v) -> Text -> Either ConversionError (IpeValue v)
+ipeReadTextWith f t = case f t of
+                        Right v -> Right (Valued v)
+                        Left _  -> Right (Named t)
+
+
+instance IpeReadText IpeColor where
+  ipeReadText = fmap IpeColor . ipeReadTextWith Right
+
+instance Coordinate r => IpeReadText (IpePen r) where
+  ipeReadText = fmap IpePen . ipeReadTextWith readCoordinate
+
+instance Coordinate r => IpeReadText (IpeSize r) where
+  ipeReadText = fmap IpeSize . ipeReadTextWith readCoordinate
+
+
+-- instance Coordinate r => IpeReadText (Path r) where
+--   ipeReadText t =
+
+
+
+
+--------------------------------------------------------------------------------
+
 
 -- fromIpeFile :: (Coordinate r, IpeRead t) => FilePath -> IO [PolyLine 2 () r]
 -- fromIpeFile
@@ -36,27 +114,56 @@ import qualified Data.Text as T
 fromIpeXML   :: (Coordinate r, IpeRead t) => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead
 
-class IpeReadText t where
-  ipeReadText :: Coordinate r => Text -> Either ConversionError (t r)
-
-type ConversionError = Text
-
 -- TODO: We also want to do something with the attributes
 
+class IpeReadObject t where
+  ipeReadObject   :: forall r. Coordinate r
+                  => Node Text Text -> Either ConversionError (t r :+ IpeAttributes t r)
+  ipeReadObject x = (:+) <$> ipeReadCore x <*> ipeReadAttrs (Proxy :: Proxy t) x
+
+  ipeReadCore  :: Coordinate r => Node Text Text
+               -> Either ConversionError (t r)
+  ipeReadAttrs :: Coordinate r => Proxy t -> Node Text Text
+               -> Either ConversionError (IpeAttributes t r)
+
+
 class IpeRead t where
-  ipeRead :: Coordinate r => Node Text Text -> Either ConversionError (t r)
+  ipeRead  :: Coordinate r => Node Text Text -> Either ConversionError (t r)
 
--- instance IpeRead IpeSymbol where
---   ipeRead (Element "use" ats _) = case extract ["pos","name"] ats of
 
--- given a list of keys, and a list of attributes. Extracts the values matching
--- the keys. The result is a pair (vs,others), where others are the remaining
--- attributes, and vs are the values corresponding to the keys. Sorted on
--- increasing order of their keys.
-extract :: [Text] -> [(Text,Text)] -> ([Text],[(Text,Text)])
-extract = undefined
+class IpeReadAttr (u :: AttributeUniverse) where
+  ipeReadAttr :: Proxy u -> Node Text Text -> Either ConversionError (Attr f at)
 
-instance IpeReadText (PolyLine 2 ()) where
+-- ipeReadAttr'                        :: forall (t :: * -> *)
+--                                                r
+--                                                (f :: TyFun AttributeUniverse * -> *)
+--                                                (at :: AttributeUniverse)
+--                                      . (t r ~ Apply f at)
+--                                     => (Proxy t, Proxy r, Proxy f)
+--                                     -> Proxy at
+--                                     -> Node Text Text
+--                                     -> Either ConversionError (Attr f at)
+-- ipeReadAttr' _ pr (Element _ ats _) = attr <$> mapM ipeReadText' mv
+--   where
+--     mv = lookup (attrName pr) ats
+
+--     attr :: Maybe (t r) -> Attr f at
+--     attr = Attr
+
+--     ipeReadText' :: Text -> Either ConversionError (t r)
+--     ipeReadText' = ipeReadText
+
+instance IpeReadObject IpeSymbol where
+  ipeReadCore (Element "use" ats _) = case lookup "pos" ats of
+      Nothing -> Left "symbol without position"
+      Just ps -> flip Symbol name <$> ipeReadText ps
+    where
+      name = fromMaybe "mark/disk(sx)" $ lookup "name" ats
+  ipeReadCore _ = Left "symbol element expected, text found"
+
+  -- ipeReadAttrs (Element _ ats _) =
+
+instance Coordinate r => IpeReadText (PolyLine 2 () r) where
   ipeReadText t = readPathOperations t >>= fromOps
     where
       fromOps (MoveTo p:LineTo q:ops) = (\ps -> fromPoints' $ [p,q] ++ ps)
@@ -81,8 +188,9 @@ instance IpeRead (PolyLine 2 ()) where
                                     -- apparently hexpat already splits the text into lines
   ipeRead _                       = Left "iperead: no polyline."
 
+unText          :: Node t t1 -> t1
 unText (Text t) = t
-
+unText _        = error "unText: element found, text expected"
 
 instance IpeRead PathSegment where
   ipeRead = fmap PolyLineSegment . ipeRead
