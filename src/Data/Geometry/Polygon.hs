@@ -6,6 +6,7 @@ module Data.Geometry.Polygon where
 import           Control.Applicative
 import           Control.Lens hiding (Simple, only)
 import           Data.Ext
+import           Data.Semigroup
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.Boundary
@@ -49,6 +50,15 @@ type MultiPolygon  = Polygon Multi
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
+
+instance (Show p, Show r) => Show (Polygon t p r) where
+  show (SimplePolygon vs)   = "SimplePolygon " <> show vs
+  show (MultiPolygon vs hs) = "MultiPolygon " <> show vs <> " " <> show hs
+
+instance (Eq p, Eq r) => Eq (Polygon t p r) where
+  (SimplePolygon vs)   == (SimplePolygon vs')    = vs == vs'
+  (MultiPolygon vs hs) == (MultiPolygon vs' hs') = vs == vs' && hs == hs'
+  _                    == _                      = False
 
 -- * Functions on Polygons
 
