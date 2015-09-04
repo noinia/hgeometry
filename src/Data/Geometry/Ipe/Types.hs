@@ -19,6 +19,7 @@ import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
+import           Data.Geometry.Polygon(SimplePolygon)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation(Matrix)
 import           Data.Maybe(mapMaybe)
@@ -89,20 +90,20 @@ type instance NumType (IpeSymbol r) = r
 
 -- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
+                   | PolygonPath            (SimplePolygon () r)
                      -- TODO
-                   | PolygonPath
                    | CubicBezierSegment     -- (CubicBezier 2 r)
                    | QuadraticBezierSegment -- (QuadraticBezier 2 r)
                    | EllipseSegment (Matrix 3 3 r)
                    | ArcSegment
                    | SplineSegment          -- (Spline 2 r)
                    | ClosedSplineSegment    -- (ClosedSpline 2 r)
-                   deriving (Show,Eq,Ord)
+                   deriving (Show,Eq)
 makePrisms ''PathSegment
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: S2.ViewL1 (PathSegment r) }
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq)
 makeLenses ''Path
 
 
