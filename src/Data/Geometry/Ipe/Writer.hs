@@ -100,10 +100,6 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: t -> Maybe (Node Text Text)
 
--- | For the types representing attribute values we can get the name/key to use
--- when serializing to ipe.
-class IpeAttrName a where
-  attrName :: Proxy a -> Text
 
 instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
   ipeWriteText attr = _getAttr attr >>= ipeWriteText
@@ -228,31 +224,6 @@ instance IpeWriteText r => IpeWrite (IpeSymbol r) where
 --   ipeWriteText (SymbolAttribute x) = ipeWriteText x
 
 
--- CommonAttributeUnivers
-instance IpeAttrName IA.Layer        where attrName _ = "layer"
-instance IpeAttrName Matrix          where attrName _ = "matrix"
-instance IpeAttrName Pin             where attrName _ = "pin"
-instance IpeAttrName Transformations where attrName _ = "transformations"
-
--- IpeSymbolAttributeUniversre
-instance IpeAttrName Stroke       where attrName _ = "stroke"
-instance IpeAttrName Fill         where attrName _ = "fill"
-instance IpeAttrName Pen          where attrName _ = "pen"
-instance IpeAttrName Size         where attrName _ = "size"
-
--- PathAttributeUniverse
-instance IpeAttrName Dash       where attrName _ = "dash"
-instance IpeAttrName LineCap    where attrName _ = "cap"
-instance IpeAttrName LineJoin   where attrName _ = "join"
-instance IpeAttrName FillRule   where attrName _ = "fillrule"
-instance IpeAttrName Arrow      where attrName _ = "arrow"
-instance IpeAttrName RArrow     where attrName _ = "rarrow"
-instance IpeAttrName Opacity    where attrName _ = "opacity"
-instance IpeAttrName Tiling     where attrName _ = "tiling"
-instance IpeAttrName Gradient   where attrName _ = "gradient"
-
--- GroupAttributeUniverse
-instance IpeAttrName Clip     where attrName _ = "clip"
 
 --------------------------------------------------------------------------------
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -7,7 +8,7 @@ module Data.Geometry.Ipe.Attributes where
 import           Control.Applicative hiding (Const)
 import           Control.Lens hiding (rmap, Const)
 import qualified Data.Foldable as F
-import           Data.Geometry.Transformation(Matrix)
+import qualified Data.Geometry.Transformation as Transf
 import           Data.Semigroup
 import           Data.Singletons
 import           Data.Singletons.TH
@@ -38,7 +39,7 @@ data AttributeUniverse = -- common
 genSingletons [ ''AttributeUniverse ]
 
 
-type CommonAttributes r = [ 'Layer, 'Matrix, Pin, Transformations ]
+type CommonAttributes r = [ Layer, Matrix, Pin, Transformations ]
 
 
 type TextLabelAttributes r = CommonAttributes r
@@ -264,3 +265,36 @@ makeLenses ''IpeArrow
 
 
 --------------------------------------------------------------------------------
+-- * Attribute names in Ipe
+
+
+-- | For the types representing attribute values we can get the name/key to use
+-- when serializing to ipe.
+class IpeAttrName (a :: AttributeUniverse) where
+  attrName :: Proxy a -> Text
+
+-- CommonAttributeUnivers
+instance IpeAttrName Layer           where attrName _ = "layer"
+instance IpeAttrName Matrix          where attrName _ = "matrix"
+instance IpeAttrName Pin             where attrName _ = "pin"
+instance IpeAttrName Transformations where attrName _ = "transformations"
+
+-- IpeSymbolAttributeUniversre
+instance IpeAttrName Stroke       where attrName _ = "stroke"
+instance IpeAttrName Fill         where attrName _ = "fill"
+instance IpeAttrName Pen          where attrName _ = "pen"
+instance IpeAttrName Size         where attrName _ = "size"
+
+-- PathAttributeUniverse
+instance IpeAttrName Dash       where attrName _ = "dash"
+instance IpeAttrName LineCap    where attrName _ = "cap"
+instance IpeAttrName LineJoin   where attrName _ = "join"
+instance IpeAttrName FillRule   where attrName _ = "fillrule"
+instance IpeAttrName Arrow      where attrName _ = "arrow"
+instance IpeAttrName RArrow     where attrName _ = "rarrow"
+instance IpeAttrName Opacity    where attrName _ = "opacity"
+instance IpeAttrName Tiling     where attrName _ = "tiling"
+instance IpeAttrName Gradient   where attrName _ = "gradient"
+
+-- GroupAttributeUniverse
+instance IpeAttrName Clip     where attrName _ = "clip"
