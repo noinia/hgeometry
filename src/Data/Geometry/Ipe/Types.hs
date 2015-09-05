@@ -177,17 +177,17 @@ newtype Group r = Group { _groupItems :: [IpeObject r] }
 
 type instance NumType (Group r) = r
 
-type family IpeObjectAttrF (r :: *) (t :: * -> *) :: [u] where
-  IpeObjectAttrF r Group     = GroupAttributes  r
-  IpeObjectAttrF r Image     = CommonAttributes r
-  IpeObjectAttrF r TextLabel = CommonAttributes r
-  IpeObjectAttrF r MiniPage  = CommonAttributes r
-  IpeObjectAttrF r IpeSymbol = SymbolAttributes r
-  IpeObjectAttrF r Path      = PathAttributes   r
+type family IpeObjectAttrF (t :: * -> *) :: [u] where
+  IpeObjectAttrF Group     = GroupAttributes
+  IpeObjectAttrF Image     = CommonAttributes
+  IpeObjectAttrF TextLabel = CommonAttributes
+  IpeObjectAttrF MiniPage  = CommonAttributes
+  IpeObjectAttrF IpeSymbol = SymbolAttributes
+  IpeObjectAttrF Path      = PathAttributes
 
 
 type IpeAttributes g r =
-  Attributes (AttrMapSym1 r) (IpeObjectAttrF r g)
+  Attributes (AttrMapSym1 r) (IpeObjectAttrF g)
 
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
@@ -222,11 +222,11 @@ instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
 instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
 instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
 
-commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) (CommonAttributes r))
+commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
 commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
   where
-    select :: (CommonAttributes r ⊆ IpeObjectAttrF r g) =>
-              Lens' (IpeObject' g r) (Rec (Attr (AttrMapSym1 r)) (CommonAttributes r))
+    select :: (CommonAttributes ⊆ IpeObjectAttrF g) =>
+              Lens' (IpeObject' g r) (Rec (Attr (AttrMapSym1 r)) CommonAttributes)
     select = attributes.unAttrs.rsubset
 
     g (IpeGroup i)     = i^.select

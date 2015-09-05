@@ -39,24 +39,24 @@ data AttributeUniverse = -- common
 genSingletons [ ''AttributeUniverse ]
 
 
-type CommonAttributes r = [ Layer, Matrix, Pin, Transformations ]
+type CommonAttributes = [ Layer, Matrix, Pin, Transformations ]
 
 
-type TextLabelAttributes r = CommonAttributes r
-type MiniPageAttributes  r = CommonAttributes r
+type TextLabelAttributes = CommonAttributes
+type MiniPageAttributes  = CommonAttributes
 
-type ImageAttributes     r = CommonAttributes r
+type ImageAttributes     = CommonAttributes
 
 
-type SymbolAttributes r = CommonAttributes r ++
+type SymbolAttributes = CommonAttributes ++
                           [Stroke, Fill, Pen, Size]
 
-type PathAttributes r = CommonAttributes r ++
-                        [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
-                        , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
-                        ]
+type PathAttributes = CommonAttributes ++
+                      [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
+                      , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
+                      ]
 
-type GroupAttributes r = CommonAttributes r ++ '[ 'Clip]
+type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
 
 -- | Attr implements the mapping from labels to types as specified by the
