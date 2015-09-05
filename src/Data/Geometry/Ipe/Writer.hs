@@ -126,12 +126,6 @@ writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
     write''   :: forall f s. IpeAttrName s => f s -> Text
     write'' _ = attrName (Proxy :: Proxy s)
 
--- | Function that states that all elements in xs satisfy a given constraint c
-type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
-  AllSatisfy c '[] = ()
-  AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
-
-
 instance IpeWriteText Text where
   ipeWriteText = Just
 

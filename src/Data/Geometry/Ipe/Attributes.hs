@@ -18,6 +18,7 @@ import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
+import           GHC.Exts
 
 --------------------------------------------------------------------------------
 
@@ -298,3 +299,30 @@ instance IpeAttrName Gradient   where attrName _ = "gradient"
 
 -- GroupAttributeUniverse
 instance IpeAttrName Clip     where attrName _ = "clip"
+
+
+-- | Wrap up a value with a capability given by its type
+data GDict (c :: k -> Constraint) (a :: k) where
+  GDict :: c a => Proxy a -> GDict c a
+
+-- -- | Sometimes we may know something for /all/ fields of a record, but when
+-- -- you expect to be able to /each/ of the fields, you are then out of luck.
+-- -- Surely given @âˆ€x:u.Ï†(x)@ we should be able to recover @x:u âŠ¢ Ï†(x)@! Sadly,
+-- -- the constraint solver is not quite smart enough to realize this and we must
+-- -- make it patently obvious by reifying the constraint pointwise with proof.
+-- gReifyConstraint
+--   :: RecAll f rs c
+--   => proxy c
+--   -> Rec f rs
+--   -> Rec (GDict c :. f) rs
+-- gReifyConstraint prx RNil      = RNil
+-- gReifyConstraint prx (x :& xs) = Compose (mkDict x) :& reifyConstraint prx xs
+--   where
+--     mkDict   :: f l -> (GDict c l)
+--     mkDict _ = GDict (Proxy :: Proxy l)
+
+
+-- | Function that states that all elements in xs satisfy a given constraint c
+type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
+  AllSatisfy c '[] = ()
+  AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)

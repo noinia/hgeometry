@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PolyKinds #-}
 module Data.Geometry.Ipe.Reader where
 
 import           Data.Proxy
@@ -10,9 +11,13 @@ import           Control.Lens hiding (only)
 
 import           Data.Ext
 import qualified Data.Foldable as F
+import qualified Data.Traversable as Tr
 import           Data.Maybe(fromMaybe, isJust, mapMaybe)
 import qualified Data.List as L
 import           Data.Vinyl
+import           Data.Vinyl.Functor
+import           Data.Vinyl.TypeLevel
+
 import qualified Data.List.NonEmpty as NE
 -- import           Data.Validation
 import qualified Data.Seq2     as S2
@@ -23,6 +28,7 @@ import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Transformation as Trans
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Attributes
+import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.PathParser
 
 import qualified Data.ByteString as B
@@ -159,27 +165,31 @@ class IpeRead t where
 class IpeReadAttr (u :: AttributeUniverse) where
   ipeReadAttr :: Proxy u -> Node Text Text -> Either ConversionError (Attr f at)
 
-ipeReadAttr'                        :: forall t r f (at :: AttributeUniverse).
-                                      (t r ~ Apply f at, IpeAttrName at
-                                      , IpeReadText (t r))
-                                    => (Proxy t, Proxy r, Proxy f)
-                                    -> Proxy at
+ipeReadAttr'                        :: forall f (at :: AttributeUniverse).
+                                      ( IpeAttrName at, IpeReadText (Apply f at))
+                                    => Proxy f -> Proxy at
                                     -> Node Text Text
                                     -> Either ConversionError (Attr f at)
-ipeReadAttr' _ pr (Element _ ats _) = GAttr <$> mapM ipeReadText mv
+ipeReadAttr' _ pr (Element _ ats _) = GAttr <$> Tr.mapM ipeReadText mv
   where
     mv = lookup (attrName pr) ats
-
+ipeReadAttr' _ _ _                  = Left "ipeReadAttr': Text found, element expected."
 
 -- ipeReadA :: forall t r f (ats :: [AttributeUniverse]).
---             => Proxy f
---             -> Proxy ats
+--             ( RecApplicative ats, RecAll (Attr f) ats IpeReadText
+--             , AllSatisfy IpeAttrName ats)
+--             => Proxy f -> Proxy ats
 --             -> Node Text Text
---             -> Either ConversionError (Attributes f at)
--- ipeReadA xml = Attrs <$> rtraverse f  . _unAttrs $ mempty
+--             -> Either ConversionError (IA.Attributes f ats)
+-- ipeReadA prf _ xml = IA.Attrs <$> ( rtraverse f
+--                                   . reifyConstraint (Proxy :: Proxy IpeReadText)
+--                                   . reifyConstraint (Proxy :: Proxy IpeAttrName)
+--                                   . _unAttrs $ mempty
+--                                   )
 --   where
---     f   :: Attr f at -> Either ConversionError (Attr f at)
---     f _ = ipeReadAttr' (Proxy :: Proxy t, Proxy :: Proxy r, Proxy :: Proxy f) (Proxy :: Proxy at)
+--     f   :: forall at. (Dict IpeReadText :. (Dict IpeAttrName :. Attr f)) at
+--            -> Either ConversionError (Attr f at)
+--     f (Compose (Dict (Compose (Dict _)))) = ipeReadAttr' prf (Proxy :: Proxy at) xml
 
 
 
