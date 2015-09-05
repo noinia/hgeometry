@@ -6,22 +6,21 @@ module Data.Geometry.Ipe.Reader where
 import           Data.Proxy
 import           Data.Either(rights)
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens hiding (only)
 
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Maybe(fromMaybe)
+import           Data.Maybe(fromMaybe, isJust, mapMaybe)
+import qualified Data.List as L
 import           Data.Vinyl
-
-import           Data.Validation
-
-import qualified Data.Geometry.Transformation as Trans
-
+import qualified Data.List.NonEmpty as NE
+-- import           Data.Validation
+import qualified Data.Seq2     as S2
 
 import           Data.Geometry.Point
-import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
+import qualified Data.Geometry.Polygon as Polygon
 import           Data.Geometry.PolyLine
+import qualified Data.Geometry.Transformation as Trans
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.PathParser
@@ -98,11 +97,37 @@ instance Coordinate r => IpeReadText (IpeSize r) where
   ipeReadText = fmap IpeSize . ipeReadTextWith readCoordinate
 
 
--- instance Coordinate r => IpeReadText (Path r) where
---   ipeReadText t =
+instance Coordinate r => IpeReadText [Operation r] where
+  ipeReadText = readPathOperations
 
+instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
+  ipeReadText t = ipeReadText t >>= fromOpsN
+    where
+      fromOpsN xs = case fromOps xs of
+                      Left l       -> Left l
+                      Right []     -> Left "No path segments produced"
+                      Right (p:ps) -> Right $ p NE.:| ps
 
+      fromOps []            = Right []
+      fromOps (MoveTo p:xs) = fromOps' p xs
+      fromOps _             = Left "Path should start with a move to"
 
+      fromOps' _ []             = Left "Found only a MoveTo operation"
+      fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
+                                      pts  = map only $ s:q:mapMaybe (^?_LineTo) ls
+                                      poly = Polygon.fromPoints pts
+                                      pl   = fromPoints pts
+                                  in case xs of
+                                       (ClosePath : xs') -> PolygonPath poly   <<| xs'
+                                       _                 -> PolyLineSegment pl <<| xs
+      fromOps' _ _ = Left "fromOpts': rest not implemented yet."
+
+      span' pr = L.span (not . isn't pr)
+
+      x <<| xs = (x:) <$> fromOps xs
+
+instance Coordinate r => IpeReadText (Path r) where
+  ipeReadText = fmap (Path . S2.viewL1FromNonEmpty) . ipeReadText
 
 --------------------------------------------------------------------------------
 
@@ -134,24 +159,29 @@ class IpeRead t where
 class IpeReadAttr (u :: AttributeUniverse) where
   ipeReadAttr :: Proxy u -> Node Text Text -> Either ConversionError (Attr f at)
 
--- ipeReadAttr'                        :: forall (t :: * -> *)
---                                                r
---                                                (f :: TyFun AttributeUniverse * -> *)
---                                                (at :: AttributeUniverse)
---                                      . (t r ~ Apply f at)
---                                     => (Proxy t, Proxy r, Proxy f)
---                                     -> Proxy at
---                                     -> Node Text Text
---                                     -> Either ConversionError (Attr f at)
--- ipeReadAttr' _ pr (Element _ ats _) = attr <$> mapM ipeReadText' mv
+ipeReadAttr'                        :: forall t r f (at :: AttributeUniverse).
+                                      (t r ~ Apply f at, IpeAttrName at
+                                      , IpeReadText (t r))
+                                    => (Proxy t, Proxy r, Proxy f)
+                                    -> Proxy at
+                                    -> Node Text Text
+                                    -> Either ConversionError (Attr f at)
+ipeReadAttr' _ pr (Element _ ats _) = GAttr <$> mapM ipeReadText mv
+  where
+    mv = lookup (attrName pr) ats
+
+
+-- ipeReadA :: forall t r f (ats :: [AttributeUniverse]).
+--             => Proxy f
+--             -> Proxy ats
+--             -> Node Text Text
+--             -> Either ConversionError (Attributes f at)
+-- ipeReadA xml = Attrs <$> rtraverse f  . _unAttrs $ mempty
 --   where
---     mv = lookup (attrName pr) ats
+--     f   :: Attr f at -> Either ConversionError (Attr f at)
+--     f _ = ipeReadAttr' (Proxy :: Proxy t, Proxy :: Proxy r, Proxy :: Proxy f) (Proxy :: Proxy at)
 
---     attr :: Maybe (t r) -> Attr f at
---     attr = Attr
 
---     ipeReadText' :: Text -> Either ConversionError (t r)
---     ipeReadText' = ipeReadText
 
 instance IpeReadObject IpeSymbol where
   ipeReadCore (Element "use" ats _) = case lookup "pos" ats of

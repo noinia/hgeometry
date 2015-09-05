@@ -102,6 +102,9 @@ instance Semigroup (ViewL1 a) where
 toNonEmpty          :: ViewL1 a -> NonEmpty a
 toNonEmpty ~(a :< s) = (a :| F.toList s)
 
+viewL1FromNonEmpty            :: NonEmpty a -> ViewL1 a
+viewL1FromNonEmpty ~(x :| xs) = x :< S.fromList xs
+
 
 -- | O(1) get a left view
 viewl                 :: Seq2 a -> ViewL2 a
