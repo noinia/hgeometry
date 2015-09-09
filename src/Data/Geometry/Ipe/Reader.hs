@@ -43,8 +43,6 @@ import           Text.XML.Expat.Tree
 import qualified Data.Text as T
 -- import qualified Data.Map as M
 
-import GHC.Exts
-
 --------------------------------------------------------------------------------
 
 type ConversionError = Text
@@ -149,25 +147,11 @@ fromIpeXML   :: (Coordinate r, IpeRead (t r))
              => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead
 
--- TODO: We also want to do something with the attributes
-
--- class IpeReadObject t where
---   ipeReadObject   :: forall r. Coordinate r
---                   => Node Text Text -> Either ConversionError (t r :+ IpeAttributes t r)
---   ipeReadObject x = (:+) <$> ipeReadCore x <*> ipeReadAttrs (Proxy :: Proxy t) x
-
---   ipeReadCore  :: Coordinate r => Node Text Text
---                -> Either ConversionError (t r)
---   -- ipeReadAttrs :: Coordinate r => Proxy t -> Node Text Text
---   --              -> Either ConversionError (IpeAttributes t r)
-
-
 class IpeRead t where
   ipeRead  :: Node Text Text -> Either ConversionError t
 
 class IpeReadAttr t where
   ipeReadAttr  :: Text -> Node Text Text -> Either ConversionError t
-
 
 
 instance IpeReadText (Apply f at) => IpeReadAttr (Attr f at) where
@@ -208,7 +192,7 @@ ipeReadRec :: forall r f (ats :: [AttributeUniverse]).
                            => Proxy f -> Proxy ats
                            -> Node Text Text
                            -> Either ConversionError (Rec (Attr  f) ats)
-ipeReadRec prf _ x = zipTraverseWith f (writeAttrNames r) r'
+ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
   where
     r  = rpure (GAttr Nothing)
     r' = reifyConstraint (Proxy :: Proxy IpeReadAttr) r
@@ -237,188 +221,15 @@ readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
 readSymAttrs = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
 
-
-
--- class IpeReadAttr (u :: AttributeUniverse) where
---   ipeReadAttr :: Proxy u -> Node Text Text -> Either ConversionError (Attr f at)
-
--- ipeReadAttr'                        :: forall f (at :: AttributeUniverse).
---                                       ( IpeAttrName at, IpeReadText (Apply f at))
---                                     => Proxy f -> Proxy at
---                                     -> Node Text Text
---                                     -> Either ConversionError (Attr f at)
--- ipeReadAttr' _ pr (Element _ ats _) =
---   where
---     mv = lookup (attrName pr) ats
--- ipeReadAttr' _ _ _                  = Left "ipeReadAttr': Text found, element expected."
-
-
-
-
-
--- ipeReadAttr'                        :: forall f (at :: AttributeUniverse).
---                                       ( IpeReadText (Apply f at), IpeAttrName at)
---                                     => Proxy f -> Proxy at
---                                     -> Node Text Text
---                                     -> Either ConversionError (Attr f at)
--- ipeReadAttr' _ pr (Element _ ats _) = GAttr <$> Tr.mapM ipeReadText mv
---   where
---     mv = lookup (attrName pr) ats
--- ipeReadAttr' _ _  _                 = Left "ipeReadAttr': Text found, element expected."
-
-
--- newtype XAttr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
---                                    -- Labels in universe u to concrete types
---               (label :: u) = XAttr { _getAttr :: Apply f label }
-
-
-
--- ipeReadAttr''  :: forall f (at :: AttributeUniverse).
---                                       ( IpeReadText (Apply f at))
---                                     => Proxy f -> Proxy at
---                                     -> Apply f at
---                                     -> Text
---                                     -> Node Text Text
---                                     -> Either ConversionError (Maybe (Apply f at))
--- ipeReadAttr'' _ pr _ n (Element _ ats _ ) = Tr.mapM ipeReadText $ lookup n ats
-
-
-
-newtype EitherX f (at :: AttributeUniverse) = EX (Either ConversionError (Maybe (Apply f at)))
-
-
-
-
--- zipR          :: forall f ats. ( AllSatisfy IpeAttrName ats
---                                , RecApplicative ats
---                                , RecAll (XAttr f) ats IpeReadText
---                                ) =>
---                  Proxy f -> Proxy ats -> Node Text Text
---               -> Rec (EitherX f) ats
--- zipR prf _ xml = zipRecsWith f (writeAttrNames r) r'
---   where
---     r  :: Rec (XAttr f) ats
---     r  =  rpure undefined
-
---     r' = reifyConstraint (Proxy :: Proxy IpeReadText) r
-
---     f                              :: forall (at :: AttributeUniverse).
---                                       Const Text at
---                                    -> (Dict IpeReadText :. XAttr f) at
---                                    -> (EitherX f) at
---     f (Const n) (Compose (Dict (XAttr a))) =
---       EX $ ipeReadAttr'' prf (Proxy :: Proxy at) a n xml
-
-      -- Compose undefined -- $ ipeReadAttr' prf (Proxy :: Proxy at) n xml
-
-
--- type C (c :: * -> Constraint) (f :: TyFun u * -> *) (label :: u) = c (Apply f label)
-
--- type family AllSatisfy' (c :: * -> Constraint)
---                         (f :: TyFun u * -> *)
---                         (labels :: [u]) :: Constraint where
---   AllSatisfy' c f '[]       = ()
---   AllSatisfy' c f (x ': xs) = (c (Apply f x), AllSatisfy' c f xs)
-
-
-
--- ipeReadRec :: forall t r f (ats :: [AttributeUniverse]).
---                            ( RecApplicative ats
---                            , AllSatisfy' IpeReadText f ats
---                            )
---                            => Proxy f -> Proxy ats
---                            -> Text
---                            -> Either ConversionError (Rec (Attr  f) ats)
--- ipeReadRec prf _ t = rtraverse f
---                    -- . reifyConstraint (Proxy :: Proxy IpeReadText)
---                    $ rpure (GAttr Nothing)
---   where
---     f   :: forall at. IpeReadText (Apply f at) => Attr f at -> Either ConversionError (Attr f at)
---     f _ = ipeReadAttr prf (Proxy :: Proxy at) t
-
-
-
-
-    -- f                    :: forall at. -- IpeReadText (Apply f at) =>
-    --                         (Dict IpeReadText :. Attr f) at
-    --                      -> Either ConversionError (Attr f at)
-    -- f (Compose (Dict _)) = ipeReadAttr prf (Proxy :: Proxy at) t
-
--- ipeReadAttr :: forall f (at :: AttributeUniverse).
---                ( IpeReadText (Apply f at))
---             => Proxy f -> Proxy at
---             -> Text
---             -> Either ConversionError (Attr f at)
--- ipeReadAttr = undefined
-
-
-
-
--- ipeReadA :: forall t r f (ats :: [AttributeUniverse]).
---             ( RecApplicative ats, RecAll (Attr f) ats IpeReadText
---             , AllSatisfy IpeAttrName ats
---             )
---             => Proxy f -> Proxy ats
---             -> Node Text Text
---             -> Either ConversionError (IA.Attributes f ats)
--- ipeReadA prf _ xml = IA.Attrs <$> ( rsequence
---                                   $ zipRecsWith f (writeAttrNames r)
---                                                   r'
---                                   )
---   where
---     r  =  _unAttrs mempty
---     r' = reifyConstraint (Proxy :: Proxy IpeReadText) r
-
---     f                              :: forall (at :: AttributeUniverse).
---                                       Const Text at
---                                    -> (Dict IpeReadText :. Attr f) at
---                                    -> Either ConversionError (Attr f at)
---     f (Const n) (Compose (Dict _)) = ipeReadAttr' prf (Proxy :: Proxy at) n xml
-
-
--- rsequence           :: Applicative f => Rec (f :. g) rs -> f (Rec g rs)
--- rsequence RNil      = RNil
--- rsequence ((Compose r) :& rs) = (:&) <$> r <*> rsequence rs
-
-
--- readA         :: forall r f ats. ( RecAll (Attr f) ats IpeReadText
---                                  , RecAll (Const (Maybe Text))   ats IpeReadText
---                                  )
---               => Proxy f -> Proxy ats -> Rec (Const (Maybe Text)) ats
---               -> Rec (EitherX f) ats
--- readA prf _ = rmap f . reifyConstraint (Proxy :: Proxy IpeReadText)
---   where
---     f :: forall at. (Dict IpeReadText :. (Const (Maybe Text))) at -> EitherX f at
---     f (Compose (Dict (Const mv))) = case ipeReadText <$> mv of
---                                       Nothing -> EX $ Right Nothing
---                                       Just (x :: Either ConversionError (Apply f at)) -> EX (Just <$> x)
-
--- ipeReadA :: forall t r f (ats :: [AttributeUniverse]).
---             ( RecApplicative ats, RecAll (Attr f) ats IpeReadText
---             , AllSatisfy IpeAttrName ats
---             )
---             => Proxy f -> Proxy ats
---             -> Node Text Text
---             -> Either ConversionError (IA.Attributes f ats)
--- ipeReadA prf _ xml = IA.Attrs <$> ( rtraverse f
---                                   . reifyConstraint (Proxy :: Proxy IpeReadText)
---                                   . reifyConstraint (Proxy :: Proxy IpeAttrName)
---                                   . _unAttrs $ mempty
---                                   )
-
-
---   where
---     f   :: forall at. (Dict IpeReadText :. (Dict _ :. Attr f)) at
---            -> Either ConversionError (Attr f at)
---     f (Compose (Dict (Compose (Dict _)))) = ipeReadAttr' prf (Proxy :: Proxy at) xml
-
-
--- testz   :: forall f ats. Rec (Attr f) ats -> Rec (Dict IpeAttrName :. Attr f) ats
--- testz r = reifyConstraint (Proxy :: Proxy IpeAttrName) r
-
-
-instance (IpeRead a, IpeRead b) => IpeRead (a :+ b) where
-  ipeRead x = (:+) <$> ipeRead x <*> ipeRead x
+ipeReadObject           :: ( IpeRead (i r)
+                           , f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                           ,  RecApplicative ats
+                           , RecAll (Attr f) ats IpeReadAttr
+                           , AllSatisfy IpeAttrName ats
+                           )
+                        => Proxy i -> proxy r -> Node Text Text
+                        -> Either ConversionError (i r :+ IpeAttributes i r)
+ipeReadObject prI prR xml = (:+) <$> ipeRead xml <*> ipeReadAttrs prI prR xml
 
 
 instance Coordinate r => IpeRead (IpeSymbol r) where
@@ -428,6 +239,25 @@ instance Coordinate r => IpeRead (IpeSymbol r) where
     where
       name = fromMaybe "mark/disk(sx)" $ lookup "name" ats
   ipeRead _ = Left "symbol element expected, text found"
+
+-- instance Coordinate r => IpeRead (IpeAttributes IpeSymbol r) where
+--   ipeRead = ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy r)
+
+testz = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
+               >>= ipeReadObject (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
+
+
+-- instance Coordinate r => IpeRead (IpeObject r) where
+--   ipeRead xml = firstRight [ IpeGroup <$> ipeReadObject (Proxy :: Proxy Group) (Proxy :: Proxy r) xml
+--                            ]
+--     where
+--       firstRight =
+
+
+
+
+
+
 
   -- ipeReadAttrs (Element _ ats _) =
 
