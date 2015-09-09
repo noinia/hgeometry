@@ -186,9 +186,10 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
     r' = reifyConstraint (Proxy :: Proxy IpeReadAttr) r
 
 
-    f                    :: forall at.
-                            Const Text at -> (Dict IpeReadAttr :. Attr f) at
-                         -> Either ConversionError (Attr f at)
+    f                              :: forall at.
+                                      Const Text at
+                                   -> (Dict IpeReadAttr :. Attr f) at
+                                   -> Either ConversionError (Attr f at)
     f (Const n) (Compose (Dict _)) = ipeReadAttr n x
 
 
