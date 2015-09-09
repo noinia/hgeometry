@@ -172,14 +172,14 @@ zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs 
 
 -- | Reading the Attributes into a Rec (Attr f), all based on the types of f
 -- (the type family mapping labels to types), and a list of labels (ats).
-ipeReadRec :: forall r f (ats :: [AttributeUniverse]).
-                           ( RecApplicative ats
-                           , RecAll (Attr f) ats IpeReadAttr
-                           , AllSatisfy IpeAttrName ats
-                           )
-                           => Proxy f -> Proxy ats
-                           -> Node Text Text
-                           -> Either ConversionError (Rec (Attr  f) ats)
+ipeReadRec       :: forall f ats.
+                 ( RecApplicative ats
+                 , RecAll (Attr f) ats IpeReadAttr
+                 , AllSatisfy IpeAttrName ats
+                 )
+                 => Proxy f -> Proxy ats
+                 -> Node Text Text
+                 -> Either ConversionError (Rec (Attr  f) ats)
 ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
   where
     r  = rpure (GAttr Nothing)
@@ -194,9 +194,9 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
 
 -- | Reader for records. Given a proxy of some ipe type i, and a proxy of an
 -- coordinate type r, read the IpeAttributes for i from the xml node.
-ipeReadAttrs     :: forall proxy proxy' i r f (ats :: [AttributeUniverse]).
+ipeReadAttrs     :: forall proxy proxy' i r f ats.
                  ( f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
-                 ,  RecApplicative ats
+                 , RecApplicative ats
                  , RecAll (Attr f) ats IpeReadAttr
                  , AllSatisfy IpeAttrName ats
                  )
