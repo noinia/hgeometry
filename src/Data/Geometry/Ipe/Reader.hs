@@ -150,40 +150,28 @@ fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipe
 class IpeRead t where
   ipeRead  :: Node Text Text -> Either ConversionError t
 
+-- | Basically IpeReadText for attributes. This class is not really meant to be
+-- implemented directly. Just define an IpeReadText instance for the type
+-- (Apply f at), then the generic instance below takes care of looking up the
+-- name of the attribute, and calling the right ipeReadText value. This class
+-- is just so that reifyConstraint in `ipeReadRec` can select the right
+-- typeclass when building the rec.
 class IpeReadAttr t where
   ipeReadAttr  :: Text -> Node Text Text -> Either ConversionError t
-
 
 instance IpeReadText (Apply f at) => IpeReadAttr (Attr f at) where
   ipeReadAttr n (Element _ ats _) = GAttr <$> Tr.mapM ipeReadText (lookup n ats)
   ipeReadAttr _ _                 = Left "IpeReadAttr: Element expected, Text found"
 
-
-
-
-
--- ipeReadRec :: forall t r f (ats :: [AttributeUniverse]).
---                            ( RecApplicative ats
---                            , RecAll (Attr f) ats IpeReadAttr
---                            )
---                            => Proxy f -> Proxy ats
---                            -> Node Text Text
---                            -> Either ConversionError (Rec (Attr  f) ats)
--- ipeReadRec prf _ x = rtraverse f
---                    . reifyConstraint (Proxy :: Proxy IpeReadAttr)
---                    $ rpure (GAttr Nothing)
---   where
---     f                    :: forall at. (Dict IpeReadAttr :. Attr f) at
---                          -> Either ConversionError (Attr f at)
---     f (Compose (Dict _)) = ipeReadAttr "foo" x
-
-
+-- | Combination of zipRecWith and traverse
 zipTraverseWith                       :: forall f g h i (rs :: [u]). Applicative h
                                       => (forall (x :: u). f x -> g x -> h (i x))
                                       -> Rec f rs -> Rec g rs -> h (Rec i rs)
 zipTraverseWith _ RNil      RNil      = pure RNil
 zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs ys
 
+-- | Reading the Attributes into a Rec (Attr f), all based on the types of f
+-- (the type family mapping labels to types), and a list of labels (ats).
 ipeReadRec :: forall r f (ats :: [AttributeUniverse]).
                            ( RecApplicative ats
                            , RecAll (Attr f) ats IpeReadAttr
@@ -203,16 +191,20 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
                          -> Either ConversionError (Attr f at)
     f (Const n) (Compose (Dict _)) = ipeReadAttr n x
 
-ipeReadAttrs             :: forall proxy i r f (ats :: [AttributeUniverse]).
-                         ( f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
-                         ,  RecApplicative ats
-                         , RecAll (Attr f) ats IpeReadAttr
-                         , AllSatisfy IpeAttrName ats
-                         )
-                         => Proxy i -> proxy r
-                         -> Node Text Text
-                         -> Either ConversionError (IpeAttributes i r)
-ipeReadAttrs prI prR = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy ats)
+
+-- | Reader for records. Given a proxy of some ipe type i, and a proxy of an
+-- coordinate type r, read the IpeAttributes for i from the xml node.
+ipeReadAttrs     :: forall proxy proxy' i r f (ats :: [AttributeUniverse]).
+                 ( f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                 ,  RecApplicative ats
+                 , RecAll (Attr f) ats IpeReadAttr
+                 , AllSatisfy IpeAttrName ats
+                 )
+                 => proxy i -> proxy' r
+                 -> Node Text Text
+                 -> Either ConversionError (IpeAttributes i r)
+ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy ats)
+
 
 testSym :: B.ByteString
 testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
