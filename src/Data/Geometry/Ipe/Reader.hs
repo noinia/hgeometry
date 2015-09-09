@@ -31,6 +31,7 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.PathParser
+import           Data.Geometry.Ipe.ParserPrimitives(pInteger)
 
 import qualified Data.ByteString as B
 import           Data.Monoid
@@ -49,14 +50,22 @@ type ConversionError = Text
 
 --------------------------------------------------------------------------------
 
+-- | Reading an ipe elemtn from a Text value
 class IpeReadText t where
   ipeReadText :: Text -> Either ConversionError t
 
--- instance IpeReadText Text where
---   ipeReadText = Right
+-- | Reading an ipe lement from Xml
+class IpeRead t where
+  ipeRead  :: Node Text Text -> Either ConversionError t
 
--- instance Coordinate r => IpeReadText r where
---   ipeReadText = readCoordinate
+--------------------------------------------------------------------------------
+--  ReadText instances
+
+instance IpeReadText Text where
+  ipeReadText = Right
+
+instance IpeReadText Int where
+  ipeReadText = fmap fromInteger . runParser pInteger
 
 instance Coordinate r => IpeReadText (Point 2 r) where
   ipeReadText = readPoint
@@ -85,8 +94,15 @@ instance IpeReadText FillType where
   ipeReadText "eofill" = Right EOFill
   ipeReadText _        = Left "invalid FillType"
 
+instance Coordinate r => IpeReadText (IpeArrow r) where
+  ipeReadText t = case T.split (== '/') t of
+                    [n,s] -> IpeArrow <$> pure n <*> ipeReadText s
+                    _     -> Left "ipeArrow: name contains not exactly 1 / "
 
--- instance Coordinate r => IpeReadText (IpeDash r) where
+instance Coordinate r => IpeReadText (IpeDash r) where
+  ipeReadText t = Right . DashNamed $ t
+                  -- TODO: Implement proper parsing here
+
 
 ipeReadTextWith     :: (Text -> Either t v) -> Text -> Either ConversionError (IpeValue v)
 ipeReadTextWith f t = case f t of
@@ -137,18 +153,7 @@ instance Coordinate r => IpeReadText (Path r) where
   ipeReadText = fmap (Path . S2.viewL1FromNonEmpty) . ipeReadText
 
 --------------------------------------------------------------------------------
-
-
--- fromIpeFile :: (Coordinate r, IpeRead t) => FilePath -> IO [PolyLine 2 () r]
--- fromIpeFile
-
-
-fromIpeXML   :: (Coordinate r, IpeRead (t r))
-             => B.ByteString -> Either ConversionError (t r)
-fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead
-
-class IpeRead t where
-  ipeRead  :: Node Text Text -> Either ConversionError t
+-- Reading attributes
 
 -- | Basically IpeReadText for attributes. This class is not really meant to be
 -- implemented directly. Just define an IpeReadText instance for the type
@@ -214,6 +219,10 @@ readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
 readSymAttrs = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
 
+
+
+-- | If we can ipeRead an ipe element, and we can ipeReadAttrs its attributes
+-- we can properly read an ipe object using ipeReadObject
 ipeReadObject           :: ( IpeRead (i r)
                            , f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
                            ,  RecApplicative ats
@@ -225,6 +234,9 @@ ipeReadObject           :: ( IpeRead (i r)
 ipeReadObject prI prR xml = (:+) <$> ipeRead xml <*> ipeReadAttrs prI prR xml
 
 
+--------------------------------------------------------------------------------
+-- | Ipe read instances
+
 instance Coordinate r => IpeRead (IpeSymbol r) where
   ipeRead (Element "use" ats _) = case lookup "pos" ats of
       Nothing -> Left "symbol without position"
@@ -233,18 +245,51 @@ instance Coordinate r => IpeRead (IpeSymbol r) where
       name = fromMaybe "mark/disk(sx)" $ lookup "name" ats
   ipeRead _ = Left "symbol element expected, text found"
 
+-- | Given a list of Nodes, try to parse all of them as a big text. If we
+-- encounter anything else then text, the parsing fails.
+allText :: [Node Text Text] -> Either ConversionError Text
+allText = fmap T.unlines . mapM unT
+  where
+    unT (Text t) = Right t
+    unT _        = Left "allText: Expected Text, found an Element"
+
+instance Coordinate r => IpeRead (Path r) where
+  ipeRead (Element "path" _ chs) = allText chs >>= ipeReadText
+  ipeRead _                      = Left "path: expected element, found text"
+
+
+instance Coordinate r => IpeRead (IpeObject r) where
+  ipeRead x = firstRight [ IpeUse   <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
+                         , IpePath  <$> ipeReadObject (Proxy :: Proxy Path)      r x
+
+
+                         , IpeGroup <$> ipeReadObject (Proxy :: Proxy Group)     r x
+                         ]
+    where
+      r = Proxy :: Proxy r
+      firstRight = maybe (Left "No matching object") Right . firstOf (traverse._Right)
+
+
+instance Coordinate r => IpeRead (Group r) where
+  ipeRead (Element "group" _ chs) = Group <$> mapM ipeRead chs
+  ipeRead _                       = Left "ipeRead Group: expected Element, found Text"
+
+
+
 -- instance Coordinate r => IpeRead (IpeAttributes IpeSymbol r) where
 --   ipeRead = ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy r)
 
+
+testz :: Either ConversionError (IpeObject Double)
 testz = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
-               >>= ipeReadObject (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
+               >>= ipeRead -- Object (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
 
 
--- instance Coordinate r => IpeRead (IpeObject r) where
---   ipeRead xml = firstRight [ IpeGroup <$> ipeReadObject (Proxy :: Proxy Group) (Proxy :: Proxy r) xml
---                            ]
---     where
---       firstRight =
+
+
+
+
+
 
 
 
@@ -292,7 +337,7 @@ testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</
 testO :: Text
 testO = "\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n"
 
-testPoly :: Either Text (PolyLine 2 () Double)
+testPoly :: Either Text (Path Double)
 testPoly = fromIpeXML testP
 
 -- ipeRead' :: [Element Text Text]
@@ -316,3 +361,13 @@ polylinesFromIpeFile :: (Coordinate r) => FilePath -> IO [PolyLine 2 () r]
 polylinesFromIpeFile = fmap readPolies . B.readFile
   where
     readPolies = either (const []) readPolyLines . parse' defaultParseOptions
+
+--------------------------------------------------------------------------------
+
+-- fromIpeFile :: (Coordinate r, IpeRead t) => FilePath -> IO [PolyLine 2 () r]
+-- fromIpeFile
+
+
+fromIpeXML   :: (Coordinate r, IpeRead (t r))
+             => B.ByteString -> Either ConversionError (t r)
+fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead

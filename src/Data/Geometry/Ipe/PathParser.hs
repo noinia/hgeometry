@@ -154,3 +154,4 @@ mkMatrix [a,b,c,d,e,f] = Matrix $ v3 (v3 a c e)
                          -- But ipe uses the following order:
                          -- 024
                          -- 135
+mkMatrix _             = error "mkMatrix: need exactly 6 arguments"
