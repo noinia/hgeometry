@@ -186,8 +186,10 @@ type family IpeObjectAttrF (t :: * -> *) :: [u] where
   IpeObjectAttrF Path      = PathAttributes
 
 
-type IpeAttributes g r =
-  Attributes (AttrMapSym1 r) (IpeObjectAttrF g)
+-- | Attributes' :: * -> [AttributeUniverse] -> *
+type Attributes' r = Attributes (AttrMapSym1 r)
+
+type IpeAttributes g r = Attributes' r (IpeObjectAttrF g)
 
 
 -- | An IpeObject' is essentially the oject ogether with its attributes

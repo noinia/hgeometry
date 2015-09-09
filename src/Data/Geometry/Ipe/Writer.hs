@@ -118,13 +118,6 @@ writeAttrValues :: RecAll f rs IpeWriteText => Rec f rs -> Rec (Const (Maybe Tex
 writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
                 . reifyConstraint (Proxy :: Proxy IpeWriteText)
 
--- | Writing Attribute names
-writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
-writeAttrNames RNil      = RNil
-writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
-  where
-    write''   :: forall f s. IpeAttrName s => f s -> Text
-    write'' _ = attrName (Proxy :: Proxy s)
 
 instance IpeWriteText Text where
   ipeWriteText = Just

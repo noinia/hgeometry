@@ -321,8 +321,18 @@ data GDict (c :: k -> Constraint) (a :: k) where
 --     mkDict   :: f l -> (GDict c l)
 --     mkDict _ = GDict (Proxy :: Proxy l)
 
-
 -- | Function that states that all elements in xs satisfy a given constraint c
 type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
   AllSatisfy c '[] = ()
   AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
+
+
+-- | Writing Attribute names
+writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
+writeAttrNames RNil      = RNil
+writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
+  where
+    write''   :: forall f s. IpeAttrName s => f s -> Text
+    write'' _ = attrName (Proxy :: Proxy s)
+
+--
