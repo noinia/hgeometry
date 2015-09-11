@@ -49,6 +49,30 @@ import qualified Data.Text as T
 
 type ConversionError = Text
 
+
+-- | Given a file path, tries to read an ipe file
+readIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
+readIpeFile = fmap fromIpeXML . B.readFile
+
+-- | Since most Ipe file contain only one page, we provide a shortcut for that
+-- as well.
+readSinglePageFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpePage r))
+readSinglePageFile = fmap f . readIpeFile
+  where
+    f (Left e)  = Left e
+    f (Right i) = maybe (Left "No Ipe pages found") Right . firstOf (pages.traverse) $ i
+
+-- | Given a Bytestring, try to parse the bytestring into anything that is
+-- IpeReadable, i.e. any of the Ipe elements.
+fromIpeXML   :: (Coordinate r, IpeRead (t r))
+             => B.ByteString -> Either ConversionError (t r)
+fromIpeXML b = readXML b >>= ipeRead
+
+
+-- | Reads the data from a Bytestring into a proper Node
+readXML :: B.ByteString -> Either ConversionError (Node Text Text)
+readXML = bimap (T.pack . show) id . parse' defaultParseOptions
+
 --------------------------------------------------------------------------------
 
 -- | Reading an ipe elemtn from a Text value
@@ -219,9 +243,14 @@ ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy at
 testSym :: B.ByteString
 testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
 
+
+-- readAttrsFromXML :: B.ByteString -> Either
+
 readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
-readSymAttrs = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
+readSymAttrs = readXML testSym
                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
+
+
 
 
 
@@ -287,6 +316,7 @@ instance Coordinate r => IpeRead (MiniPage r) where
 
 instance Coordinate r => IpeRead (Image r) where
   ipeRead (Element "image" ats _) = Image () <$> (lookup' "rect" ats >>= ipeReadText)
+  ipeRead _                       = Left "Image: Element expected, text found"
 
 instance Coordinate r => IpeRead (IpeObject r) where
   ipeRead x = firstRight [ IpeUse       <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
@@ -396,11 +426,9 @@ instance Coordinate r => IpeRead (PathSegment r) where
 testP :: B.ByteString
 testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
 
-testO :: Text
-testO = "\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n"
 
-testPoly :: Either Text (Path Double)
-testPoly = fromIpeXML testP
+-- testPoly :: Either Text (Path Double)
+-- testPoly = fromIpeXML testP
 
 -- ipeRead' :: [Element Text Text]
 -- ipeRead' = map ipeRead
@@ -425,11 +453,3 @@ polylinesFromIpeFile = fmap readPolies . B.readFile
     readPolies = either (const []) readPolyLines . parse' defaultParseOptions
 
 --------------------------------------------------------------------------------
-
--- fromIpeFile :: (Coordinate r, IpeRead t) => FilePath -> IO [PolyLine 2 () r]
--- fromIpeFile
-
-
-fromIpeXML   :: (Coordinate r, IpeRead (t r))
-             => B.ByteString -> Either ConversionError (t r)
-fromIpeXML b = (bimap (T.pack . show) id $ parse' defaultParseOptions b) >>= ipeRead
