@@ -262,6 +262,8 @@ data View = View { _layerNames      :: [LayerName]
           deriving (Eq, Ord, Show)
 makeLenses ''View
 
+-- instance Default
+
 
 -- | for now we pretty much ignore these
 data IpeStyle = IpeStyle { _styleName :: Maybe Text

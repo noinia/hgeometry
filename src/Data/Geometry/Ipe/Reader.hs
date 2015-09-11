@@ -24,6 +24,7 @@ import qualified Data.List.NonEmpty as NE
 import qualified Data.Seq2     as S2
 
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import qualified Data.Geometry.Polygon as Polygon
 import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Transformation as Trans
@@ -109,6 +110,9 @@ ipeReadTextWith f t = case f t of
                         Right v -> Right (Valued v)
                         Left _  -> Right (Named t)
 
+
+instance Coordinate r => IpeReadText (Rectangle () r) where
+  ipeReadText = readRectangle
 
 instance IpeReadText IpeColor where
   ipeReadText = fmap IpeColor . ipeReadTextWith Right
@@ -258,16 +262,45 @@ instance Coordinate r => IpeRead (Path r) where
   ipeRead _                      = Left "path: expected element, found text"
 
 
+lookup'   :: Text -> [(Text,a)] -> Either ConversionError a
+lookup' k = maybe (Left $ "lookup' " <> k <> " not found") Right . lookup k
+
+instance Coordinate r => IpeRead (TextLabel r) where
+  ipeRead (Element "text" ats chs)
+    | lookup "type" ats == Just "label" = Label
+                                       <$> allText chs
+                                       <*> (lookup' "pos" ats >>= ipeReadText)
+    | otherwise                         = Left "Not a Text label"
+  ipeRead _                             = Left "textlabel: Expected element, found text"
+
+
+
+instance Coordinate r => IpeRead (MiniPage r) where
+  ipeRead (Element "text" ats chs)
+    | lookup "type" ats == Just "minipage" = MiniPage
+                                          <$> allText chs
+                                          <*> (lookup' "pos"   ats >>= ipeReadText)
+                                          <*> (lookup' "width" ats >>= readCoordinate)
+    | otherwise                            = Left "Not a MiniPage"
+  ipeRead _                                = Left "MiniPage: Expected element, found text"
+
+
+instance Coordinate r => IpeRead (Image r) where
+  ipeRead (Element "image" ats _) = Image () <$> (lookup' "rect" ats >>= ipeReadText)
+
 instance Coordinate r => IpeRead (IpeObject r) where
-  ipeRead x = firstRight [ IpeUse   <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
-                         , IpePath  <$> ipeReadObject (Proxy :: Proxy Path)      r x
-
-
-                         , IpeGroup <$> ipeReadObject (Proxy :: Proxy Group)     r x
+  ipeRead x = firstRight [ IpeUse       <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
+                         , IpePath      <$> ipeReadObject (Proxy :: Proxy Path)      r x
+                         , IpeGroup     <$> ipeReadObject (Proxy :: Proxy Group)     r x
+                         , IpeTextLabel <$> ipeReadObject (Proxy :: Proxy TextLabel) r x
+                         , IpeMiniPage  <$> ipeReadObject (Proxy :: Proxy MiniPage)  r x
+                         , IpeImage     <$> ipeReadObject (Proxy :: Proxy Image)     r x
                          ]
     where
       r = Proxy :: Proxy r
-      firstRight = maybe (Left "No matching object") Right . firstOf (traverse._Right)
+
+firstRight :: [Either ConversionError a] -> Either ConversionError a
+firstRight = maybe (Left "No matching object") Right . firstOf (traverse._Right)
 
 
 instance Coordinate r => IpeRead (Group r) where
@@ -275,9 +308,38 @@ instance Coordinate r => IpeRead (Group r) where
   ipeRead _                       = Left "ipeRead Group: expected Element, found Text"
 
 
+instance IpeRead LayerName where
+  ipeRead (Element "layer" ats _) = LayerName <$> lookup' "name" ats
+  ipeRead _                       = Left "layer: Expected element, found text"
 
--- instance Coordinate r => IpeRead (IpeAttributes IpeSymbol r) where
---   ipeRead = ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy r)
+instance IpeRead View where
+  ipeRead (Element "view" ats _) = (\lrs a -> View (map LayerName $ T.words lrs) a)
+                                <$> lookup' "layers" ats
+                                <*> (lookup' "active" ats >>= ipeReadText)
+  ipeRead _                      = Left "View Expected element, found text"
+
+
+-- TODO: this instance throws away all of our error collecting (and is pretty
+-- slow/stupid since it tries parsing all children with all parsers)
+instance Coordinate r => IpeRead (IpePage r) where
+  ipeRead (Element "page" _ chs) = Right $ IpePage (readAll chs) (readAll chs) (readAll chs)
+  ipeRead _                      = Left "page: Element expected, text found"
+      -- withDef   :: b -> Either a b -> Either c b
+      -- withDef d = either (const $ Right d) Right
+
+      -- readLayers  = withDef ["alpha"] . readAll
+      -- readViews   = withDef []        . readAll
+      -- readObjects = withDef []        . readAll
+
+-- | try reading everything as an a. Throw away whatever fails.
+readAll   :: IpeRead a => [Node Text Text] -> [a]
+readAll   = rights . map ipeRead
+
+
+instance Coordinate r => IpeRead (IpeFile r) where
+  ipeRead (Element "ipe" _ chs) = Right $ IpeFile Nothing [] (readAll chs)
+  ipeRead _                     = Left "Ipe: Element expected, text found"
+
 
 
 testz :: Either ConversionError (IpeObject Double)

@@ -4,6 +4,7 @@ module Data.Geometry.Ipe.PathParser where
 
 import           Numeric
 
+import           Data.Ext(only)
 import           Control.Applicative
 import           Control.Monad
 
@@ -17,6 +18,7 @@ import           Data.Ratio
 
 import           Text.Parsec.Error(messageString, errorMessages)
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Geometry.Transformation
 import           Data.Geometry.Ipe.ParserPrimitives
@@ -106,7 +108,11 @@ splitKeepDelims delims t = maybe mPref continue $ T.uncons rest
 
 
 readMatrix :: Coordinate r => Text -> Either Text (Matrix 3 3 r)
-readMatrix = bimap errorText fst . runP pMatrix
+readMatrix = runParser pMatrix
+
+
+readRectangle :: Coordinate r => Text -> Either Text (Rectangle () r)
+readRectangle = runParser pRectangle
 
 -----------------------------------------------------------------------
 -- | The parsers themselves
@@ -136,6 +142,11 @@ pCoordinate :: Coordinate r => Parser r
 pCoordinate = fromSeq <$> pInteger <*> pDecimal
               where
                 pDecimal = pMaybe (pChar '.' *> pInteger)
+
+pRectangle :: Coordinate r => Parser (Rectangle () r)
+pRectangle = (\p q -> fromCornerPoints (only p) (only q)) <$> pPoint
+                                                          <*  pWhiteSpace
+                                                          <*> pPoint
 
 pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate

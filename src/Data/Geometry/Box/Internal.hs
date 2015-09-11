@@ -41,6 +41,11 @@ minP = _Box._1
 maxP :: Traversal' (Box d p r) (Max (Point d r) :+ p)
 maxP = _Box._2
 
+-- | Given the point with the lowest coordinates and the point with highest
+-- coordinates, create a box.
+fromCornerPoints          :: Point d r :+ p -> Point d r :+ p -> Box d p r
+fromCornerPoints low high = Box (low&core %~ Min) (high&core %~ Max)
+
 
 deriving instance (Show r, Show p, Arity d) => Show (Box d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
