@@ -7,7 +7,6 @@ import           Control.Applicative
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -118,6 +117,8 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
 
       Point2 px py = p
       Point2 qx qy = q
+
+
 
 
 --------------------------------------------------------------------------------

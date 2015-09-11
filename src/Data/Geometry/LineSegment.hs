@@ -9,7 +9,7 @@ import           Control.Applicative
 import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.Box
+import           Data.Geometry.Box.Internal
 import           Data.Geometry.Interval
 import           Data.Geometry.Line.Internal
 import           Data.Geometry.Point
@@ -112,6 +112,7 @@ instance Arity d => Bifunctor (LineSegment d) where
 
 -- ** Converting between Lines and LineSegments
 
+-- | Directly convert a line into a line segment.
 toLineSegment            :: (Monoid p, Num r, Arity d) => Line d r -> LineSegment d p r
 toLineSegment (Line p v) = ClosedLineSegment (p       :+ mempty)
                                              (p .+^ v :+ mempty)
@@ -238,6 +239,14 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 segmentLength                    :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength (LineSegment' p q) = distanceA (p^.core) (q^.core)
 
+
+
+
+-- | flips the start and end point of the segment
+flipSegment   :: LineSegment d p r -> LineSegment d p r
+flipSegment s = let p = s^.start
+                    q = s^.end
+                in (s&start .~ q)&end .~ p
 
 testSeg :: LineSegment 2 () Rational
 testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
