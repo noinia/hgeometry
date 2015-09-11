@@ -12,6 +12,7 @@ import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -27,11 +28,10 @@ import           Data.Vinyl
 
 newtype IpeOut g i = IpeOut { asIpe :: g -> i }
 
-
--- Given an geometry object, and a record with its attributes, construct an ipe
+-- | Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
 asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
-             => g -> IpeAttributes i r -> IpeObject r
+            => g -> IpeAttributes i r -> IpeObject r
 asIpeObject = asIpeObjectWith defaultIpeOut
 
 -- -- | Given a IpeOut that specifies how to convert a geometry object into an
@@ -42,9 +42,13 @@ asIpeObjectWith          :: (ToObject i, NumType g ~ r)
 asIpeObjectWith io g ats = asIpe (ipeObject io ats) g
 
 
-asIpeGroup        :: [IpeObject r] -> IpeAttributes Group r -> IpeObject r
-asIpeGroup gs ats = IpeGroup $ (Group gs) :+ ats
+-- | Create an ipe group without group attributes
+asIpeGroup :: [IpeObject r] -> IpeObject r
+asIpeGroup = flip asIpeGroup' mempty
 
+-- | Creates a group out of ipe
+asIpeGroup'        :: [IpeObject r] -> IpeAttributes Group r -> IpeObject r
+asIpeGroup' gs ats = IpeGroup $ (Group gs) :+ ats
 
 --------------------------------------------------------------------------------
 
@@ -96,6 +100,21 @@ noAttrs = addAttributes mempty
 
 addAttributes :: extra -> IpeOut g core -> IpeOut g (core :+ extra)
 addAttributes ats io = IpeOut $ \g -> asIpe io g :+ ats
+
+
+-- | Default size of the cliping rectangle used to clip lines. This is
+-- Rectangle is large enough to cover the normal page size in ipe.
+defaultClipRectangle :: (Num r, Ord r) => Rectangle () r
+defaultClipRectangle = boundingBoxList [ point2 (-200) (-200), point2 1000 1000 ]
+
+-- -- | An ipe out to draw a line, by clipping it to stay within a rectangle of
+-- -- default size.
+-- line :: IpeOut (Line 2 r) (IpeObject' Path r)
+-- line = line' defaultClipRectangle
+
+-- -- | An ipe out to draw a line, by clipping it to stay within the rectangle
+-- line'   :: Rectangle p r -> IpeOut (Line 2 r) (IpeObject' Path r)
+-- line' r = IpeOut $ \l -> error "not implemented yet"
 
 
 lineSegment :: IpeOut (LineSegment 2 p r) (IpeObject' Path r)
