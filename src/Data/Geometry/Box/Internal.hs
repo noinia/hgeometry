@@ -4,26 +4,6 @@
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Box.Internal where
 
-       -- (
-       --                             -- * d-dimensional boxes
-       --                    Box(..)
-       --                  , minP, maxP, _Box, _Empty
-
-       --                  -- * Constructing bounding boxes
-       --                  , IsBoxable(..)
-       --                  , IsAlwaysTrueBoundingBox
-       --                  , boundingBoxList
-
-       --                  -- * Functions on d-dimensonal boxes
-       --                  , minPoint, maxPoint
-       --                  , extent, size, widthIn
-       --                  , inBox
-
-       --                  -- * Rectangles, aka 2-dimensional boxes
-       --                  , Rectangle
-       --                  , width , height
-       --                  ) where
-
 import           Control.Applicative
 import           Control.Lens hiding (_Empty, only)
 import           Data.Bifunctor
@@ -44,7 +24,9 @@ import           Linear.Affine((.-.))
 import qualified Data.Vector.Fixed                as FV
 
 import           GHC.TypeLits
+
 --------------------------------------------------------------------------------
+-- * d-dimensional boxes
 
 data Box d p r = Empty
                | Box { _minP :: Min (Point d r) :+ p
@@ -104,6 +86,9 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (Box d p r) where
 type instance Dimension (Box d p r) = d
 type instance NumType   (Box d p r) = r
 
+--------------------------------------------------------------------------------0
+-- * Functions on d-dimensonal boxes
+
 to'     :: (m -> Point d r) -> (Box d p r -> m :+ p) ->
            Getter (Box d p r) (Maybe (Point d r :+ p))
 to' f g = to $ \x -> case x of
@@ -158,6 +143,7 @@ widthIn   :: forall proxy p i d r. (Arity d, Num r, Index' (i-1) d) => proxy i -
 widthIn _ = view (V.element (C :: C (i - 1))) . size
 
 ----------------------------------------
+-- * Rectangles, aka 2-dimensional boxes
 
 type Rectangle = Box 2
 
@@ -197,6 +183,7 @@ corners r     = let w = width r
                           )
 
 --------------------------------------------------------------------------------
+-- * Constructing bounding boxes
 
 class IsBoxable g where
   boundingBox :: (Monoid p, Semigroup p, Ord (NumType g))

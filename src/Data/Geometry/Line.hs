@@ -1,7 +1,7 @@
-module Data.Geometry.Line(module I
+module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
-import Data.Geometry.Line.Internal as I
+import Data.Geometry.Line.Internal
 import Data.Geometry.LineSegment
 import Data.Geometry.Box
 import Data.Geometry.Properties

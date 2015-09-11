@@ -1,4 +1,4 @@
-module Data.Geometry.Vector( module GV
+module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , module FV
                            , module LV
                            , Affine(..)
@@ -7,6 +7,7 @@ module Data.Geometry.Vector( module GV
                            ) where
 
 import qualified Data.Foldable                    as F
+import           Data.Geometry.Vector.VectorFixed
 import           Data.Geometry.Vector.VectorFixed as GV
 import           Data.Maybe
 import           Data.Monoid

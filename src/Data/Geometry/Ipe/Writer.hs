@@ -420,8 +420,8 @@ combine ns  = Just $ Element "group" [] ns
 
 
 
-testPoly :: PolyLine 2 () Double
-testPoly = fromPoints' [origin, point2 0 10, point2 10 10, point2 100 100]
+-- testPoly :: PolyLine 2 () Double
+-- testPoly = fromPoints' [origin, point2 0 10, point2 10 10, point2 100 100]
 
 
 

@@ -9,12 +9,7 @@ import Data.Monoid
 import Data.Function(on)
 import Control.Lens hiding (only)
 import Data.Geometry
-import Data.Geometry.Box
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
-import Data.Geometry.Ipe.Types
-import Data.Geometry.Ipe.IpeOut
-import Data.Geometry.Ipe.Writer
+import Data.Geometry.Ipe
 import GHC.Exts
 import Data.List(sortBy)
 

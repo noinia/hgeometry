@@ -1,18 +1,28 @@
-module Data.Geometry( module Prop
-                    , module T
-                    , module P
-                    , module V
-                    , module L
+module Data.Geometry( module Data.Geometry.Properties
+                    , module Data.Geometry.Transformation
+                    , module Data.Geometry.Point
+                    , module Data.Geometry.Vector
+                    , module Data.Geometry.Line
+                    , module Data.Geometry.LineSegment
+                    , module Data.Geometry.PolyLine
+                    , module Data.Geometry.Polygon
+                    , module Data.Geometry.Box
+                    , module Linear.Affine
+                    , module Linear.Vector
                     , module Linear.Affine
                     ) where
 
 
-import Data.Geometry.Properties as Prop
-import Data.Geometry.Transformation as T
+import Data.Geometry.Properties
+import Data.Geometry.Transformation
 
-import Data.Geometry.Point as P
-import Data.Geometry.Vector as V
-import Data.Geometry.Line as L
+import Data.Geometry.Point
+import Data.Geometry.Vector
+import Data.Geometry.Line
+import Data.Geometry.LineSegment
+import Data.Geometry.PolyLine hiding (fromPoints)
+import Data.Geometry.Polygon hiding (fromPoints)
+import Data.Geometry.Box
 
 import Linear.Affine hiding (Point, origin)
-import Linear.Vector as V
+import Linear.Vector

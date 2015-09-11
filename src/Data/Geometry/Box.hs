@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE DeriveFunctor  #-}
-module Data.Geometry.Box( module I
+module Data.Geometry.Box( module Data.Geometry.Box.Internal
                         , topSide, leftSide, bottomSide, rightSide
                         , sides, sides'
                         ) where
@@ -13,7 +13,7 @@ import           Control.Lens hiding (_Empty, only)
 import           Data.Ext
 import qualified Data.Foldable as F
 import qualified Data.Traversable as Tr
-import           Data.Geometry.Box.Internal as I
+import           Data.Geometry.Box.Internal
 import           Data.Geometry.Point
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Properties

@@ -1,8 +1,12 @@
-module Data.Geometry.Ipe( module I
+module Data.Geometry.Ipe( module Data.Geometry.Ipe.Types
+                        , module Data.Geometry.Ipe.Writer
+                        , module Data.Geometry.Ipe.Reader
+                        , module Data.Geometry.Ipe.IpeOut
+                        , module Data.Geometry.Ipe.Attributes
                         ) where
 
-import qualified Data.Geometry.Ipe.Types as I
-import qualified Data.Geometry.Ipe.Writer as I
-import qualified Data.Geometry.Ipe.Reader as I
-import qualified Data.Geometry.Ipe.IpeOut as IO
-import qualified Data.Geometry.Ipe.Attributes as I
+import Data.Geometry.Ipe.Types
+import Data.Geometry.Ipe.Writer
+import Data.Geometry.Ipe.Reader
+import Data.Geometry.Ipe.IpeOut
+import Data.Geometry.Ipe.Attributes
