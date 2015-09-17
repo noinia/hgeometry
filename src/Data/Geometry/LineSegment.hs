@@ -8,6 +8,7 @@ import           Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens hiding (only)
 import           Data.Bifunctor
+import           Data.Semigroup
 import           Data.Ext
 import           Data.Geometry.Box.Internal
 import           Data.Geometry.Interval
