@@ -14,6 +14,7 @@ import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PolyLine
+import           Data.Geometry.Polygon(SimplePolygon, outerBoundary)
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
 import           Data.Geometry.Box
@@ -27,7 +28,7 @@ import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 
 import           Data.Singletons
-
+import qualified Data.CircularList as CL
 import qualified Data.Geometry.Ipe.Attributes as IA
 
 import           Data.Geometry.Ipe.Attributes
@@ -240,9 +241,16 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
     -- the polyline type guarantees that there is at least one point
 
+instance IpeWriteText r => IpeWriteText (SimplePolygon () r) where
+  ipeWriteText pg = case pg^..outerBoundary.to CL.toList.Tr.traverse.core of
+    (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
+    _          -> Nothing
+    -- TODO: We are not really guaranteed that there is at least one point, it would
+    -- be nice if the type could guarantee that.
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
+  ipeWriteText (PolygonPath     p) = ipeWriteText p
   ipeWriteText (EllipseSegment  m) = ipeWriteText $ Ellipse m
 
 instance IpeWriteText r => IpeWrite (Path r) where
@@ -341,7 +349,7 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
     where
     ipeAtts = [("version","70005"),("creator", "HGeometry")]
     -- TODO: Add preamble and styles
-    chs = mapMaybe ipeWrite pgs
+    chs = mapMaybe ipeWrite . F.toList $ pgs
 
 
 --------------------------------------------------------------------------------

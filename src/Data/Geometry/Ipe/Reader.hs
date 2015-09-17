@@ -367,7 +367,9 @@ readAll   = rights . map ipeRead
 
 
 instance Coordinate r => IpeRead (IpeFile r) where
-  ipeRead (Element "ipe" _ chs) = Right $ IpeFile Nothing [] (readAll chs)
+  ipeRead (Element "ipe" _ chs) = case readAll chs of
+                                    []  -> Left "Ipe: no pages found"
+                                    pgs -> Right $ IpeFile Nothing [] (NE.fromList pgs)
   ipeRead _                     = Left "Ipe: Element expected, text found"
 
 

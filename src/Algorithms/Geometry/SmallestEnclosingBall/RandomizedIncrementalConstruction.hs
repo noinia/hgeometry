@@ -2,11 +2,13 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction where
 
+import           Algorithms.Geometry.SmallestEnclosingBall.Types
+
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry
 import           Data.Geometry.Ball
-import           Data.Geometry.Point
 import qualified Data.List as L
 import           Data.List.NonEmpty
 import           Data.Maybe(fromMaybe)
@@ -16,20 +18,6 @@ import           System.Random
 import           System.Random.Shuffle(shuffle)
 
 
-
--- | List of two or three elements
-data TwoOrThree a = Two !a !a | Three !a !a !a deriving (Show,Read,Eq,Ord,Functor)
-
-instance F.Foldable TwoOrThree where
-  foldMap f (Two   a b)   = f a <> f b
-  foldMap f (Three a b c) = f a <> f b <> f c
-
--- | The result of a smallest enclosing disk computation: The smallest ball
---    and the points defining it
-data DiskResult p r = DiskResult { _enclosingDisk  :: Disk () r
-                                 , _definingPoints :: TwoOrThree (Point 2 r :+ p)
-                                 }
-makeLenses ''DiskResult
 
 -- | O(n) expected time algorithm to compute the smallest enclosing disk of a
 -- set of points. we need at least two points.

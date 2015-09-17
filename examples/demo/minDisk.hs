@@ -38,6 +38,9 @@ main = do
 
 main' fp = do
   pls    <- polylinesFromIpeFile fp
+  let ipeP = undefined -- read a single page
+      pts  = ipeP^..content._IpeUse.core.symbolPoint
+      polies = ipeP^..content._Path.core.asPolyLine
   gen <- getStdGen
   print pls
   mapM_ (print . (^.enclosingDisk) . minDisk' gen) pls
