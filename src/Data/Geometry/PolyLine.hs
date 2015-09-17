@@ -16,6 +16,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Seq2 as S2
+import qualified Data.Sequence as Seq
 import           Data.Semigroup
 
 --------------------------------------------------------------------------------
@@ -64,3 +65,17 @@ fromPoints' = fromPoints . map (\p -> p :+ mempty)
 -- | We consider the line-segment as closed.
 fromLineSegment                    :: LineSegment d p r -> PolyLine d p r
 fromLineSegment (LineSegment' p q) = fromPoints [p,q]
+
+-- | Convert to a closed line segment by taking the first two points.
+asLineSegment                              :: PolyLine d p r -> LineSegment d p r
+asLineSegment (PolyLine (S2.Seq2 p mid q)) = ClosedLineSegment p (f $ Seq.viewl mid)
+  where
+    f Seq.EmptyL    = q
+    f (q' Seq.:< _) = q'
+
+-- | Stricter version of asLineSegment that fails if the Polyline contains more
+-- than two points.
+asLineSegment'                            :: PolyLine d p r -> Maybe (LineSegment d p r)
+asLineSegment' (PolyLine (S2.Seq2 p m q))
+  | Seq.null m                            = Just $ ClosedLineSegment p q
+  | otherwise                             = Nothing
