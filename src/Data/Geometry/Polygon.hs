@@ -5,6 +5,7 @@ module Data.Geometry.Polygon where
 
 import           Control.Applicative
 import           Control.Lens hiding (Simple, only)
+import           Data.Bifunctor
 import           Data.Ext
 import           Data.Semigroup
 import qualified Data.Foldable as F
@@ -59,6 +60,14 @@ instance (Eq p, Eq r) => Eq (Polygon t p r) where
   (SimplePolygon vs)   == (SimplePolygon vs')    = vs == vs'
   (MultiPolygon vs hs) == (MultiPolygon vs' hs') = vs == vs' && hs == hs'
   _                    == _                      = False
+
+instance PointFunctor (Polygon t p) where
+  pmap f (SimplePolygon vs)   = SimplePolygon (fmap (first f) vs)
+  pmap f (MultiPolygon vs hs) = MultiPolygon  (fmap (first f) vs) (map (pmap f) hs)
+
+instance Num r => IsTransformable (Polygon t p r) where
+  transformBy = transformPointFunctor
+
 
 -- * Functions on Polygons
 

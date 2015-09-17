@@ -120,9 +120,25 @@ setAttr               :: forall proxy at ats f. (at ∈ ats)
                       => proxy at -> Apply f at -> Attributes f ats -> Attributes f ats
 setAttr p a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
 
+
+-- | gets and removes the attribute from Attributes
+takeAttr       :: forall proxy at ats f. (at ∈ ats)
+               => proxy at -> Attributes f ats -> ( Maybe (Apply f at)
+                                                  , Attributes f ats )
+takeAttr p ats = (lookupAttr p ats, ats&attrLens p .~ Nothing)
+
+
+-- | unsets/Removes an attribute
+unSetAttr   :: forall proxy at ats f. (at ∈ ats)
+            => proxy at -> Attributes f ats -> Attributes f ats
+unSetAttr p = snd . takeAttr p
+
+
 attr     :: (at ∈ ats, RecApplicative ats)
          => proxy at -> Apply f at -> Attributes f ats
 attr p x = setAttr p x mempty
+
+
 
 
 --------------------------------------------------------------------------------

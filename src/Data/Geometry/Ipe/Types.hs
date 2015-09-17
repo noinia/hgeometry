@@ -21,13 +21,14 @@ import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon(SimplePolygon)
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation(Matrix)
+import           Data.Geometry.Transformation
 import           Data.Maybe(mapMaybe)
 import           Data.Singletons.TH(genDefunSymbols)
 import           Data.Vinyl.TypeLevel
 import           Frames.CoRec
 
-import           Data.Geometry.Ipe.Attributes
+import qualified Data.Geometry.Ipe.Attributes as AT
+import           Data.Geometry.Ipe.Attributes hiding (Matrix)
 import           Data.Text(Text)
 
 import           GHC.Exts
@@ -51,7 +52,11 @@ data Image r = Image { _imageData :: ()
                      } deriving (Show,Eq,Ord)
 makeLenses ''Image
 
-type instance NumType (Image r) = r
+type instance NumType   (Image r) = r
+type instance Dimension (Image r) = 2
+
+instance Num r => IsTransformable (Image r) where
+  transformBy t = over rect (transformBy t)
 
 --------------------------------------------------------------------------------
 -- | Text Objects
@@ -62,8 +67,17 @@ data TextLabel r = Label Text (Point 2 r)
 data MiniPage r = MiniPage Text (Point 2 r) r
                  deriving (Show,Eq,Ord)
 
-type instance NumType (TextLabel r) = r
-type instance NumType (MiniPage r)  = r
+type instance NumType   (TextLabel r) = r
+type instance Dimension (TextLabel r) = 2
+
+type instance NumType   (MiniPage r) = r
+type instance Dimension (MiniPage r) = 2
+
+instance Num r => IsTransformable (TextLabel r) where
+  transformBy t (Label txt p) = Label txt (transformBy t p)
+
+instance Num r => IsTransformable (MiniPage r) where
+  transformBy t (MiniPage txt p w) = MiniPage txt (transformBy t p) w
 
 width                  :: MiniPage t -> t
 width (MiniPage _ _ w) = w
@@ -78,7 +92,12 @@ data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                  deriving (Show,Eq,Ord)
 makeLenses ''IpeSymbol
 
-type instance NumType (IpeSymbol r) = r
+type instance NumType   (IpeSymbol r) = r
+type instance Dimension (IpeSymbol r) = 2
+
+instance Num r => IsTransformable (IpeSymbol r) where
+  transformBy t = over symbolPoint (transformBy t)
+
 
 
 -- | Example of an IpeSymbol. I.e. A symbol that expresses that the size is 'large'
@@ -101,14 +120,26 @@ data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    deriving (Show,Eq)
 makePrisms ''PathSegment
 
+type instance NumType   (PathSegment r) = r
+type instance Dimension (PathSegment r) = 2
+
+instance Num r => IsTransformable (PathSegment r) where
+  transformBy t (PolyLineSegment p) = PolyLineSegment $ transformBy t p
+  transformBy t (PolygonPath p)     = PolygonPath $ transformBy t p
+  transformBy t _                   = error "transformBy: not implemented yet"
+
+
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: S2.ViewL1 (PathSegment r) }
                  deriving (Show,Eq)
 makeLenses ''Path
 
 
-type instance NumType (Path r) = r
+type instance NumType   (Path r) = r
+type instance Dimension (Path r) = 2
 
+instance Num r => IsTransformable (Path r) where
+  transformBy t (Path s) = Path $ fmap (transformBy t) s
 
 -- | type that represents a path in ipe.
 data Operation r = MoveTo (Point 2 r)
@@ -132,7 +163,7 @@ makePrisms ''Operation
 -- have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
   AttrMap r 'Layer          = LayerName
-  AttrMap r 'Matrix         = Matrix 3 3 r
+  AttrMap r AT.Matrix       = Matrix 3 3 r
   AttrMap r Pin             = PinType
   AttrMap r Transformations = TransformationTypes
 
@@ -175,7 +206,12 @@ genDefunSymbols [''AttrMap]
 newtype Group r = Group { _groupItems :: [IpeObject r] }
                   deriving (Show,Eq)
 
-type instance NumType (Group r) = r
+type instance NumType   (Group r) = r
+type instance Dimension (Group r) = 2
+
+instance Num r => IsTransformable (Group r) where
+  transformBy t (Group s) = Group $ fmap (transformBy t) s
+
 
 type family IpeObjectAttrF (t :: * -> *) :: [u] where
   IpeObjectAttrF Group     = GroupAttributes
@@ -210,9 +246,11 @@ data IpeObject r =
 deriving instance (Show r) => Show (IpeObject r)
 deriving instance (Eq r)   => Eq   (IpeObject r)
 
-type instance NumType (IpeObject r) = r
+type instance NumType   (IpeObject r) = r
+type instance Dimension (IpeObject r) = 2
 
 makePrisms ''IpeObject
+makeLenses ''Group
 
 class ToObject i where
   ipeObject' :: i r -> IpeAttributes i r -> IpeObject r
@@ -223,6 +261,17 @@ instance ToObject TextLabel  where ipeObject' p a = IpeTextLabel (p :+ a)
 instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
 instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
 instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
+
+instance Num r => IsTransformable (IpeObject r) where
+  transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
+  transformBy t (IpeImage i)     = IpeImage     $ i&core %~ transformBy t
+  transformBy t (IpeTextLabel i) = IpeTextLabel $ i&core %~ transformBy t
+  transformBy t (IpeMiniPage i)  = IpeMiniPage  $ i&core %~ transformBy t
+  transformBy t (IpeUse i)       = IpeUse       $ i&core %~ transformBy t
+  transformBy t (IpePath i)      = IpePath      $ i&core %~ transformBy t
+
+
+
 
 commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
 commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
@@ -319,3 +368,27 @@ singlePageFile p = IpeFile Nothing [] [p]
 singlePageFromContent = singlePageFile . fromContent
 
 makeLenses ''IpeFile
+
+--------------------------------------------------------------------------------
+
+-- | Takes and applies the ipe Matrix attribute of this item.
+applyMatrix'              :: ( IsTransformable (i r)
+                             , AT.Matrix ∈ IpeObjectAttrF i
+                             , Dimension (i r) ~ 2, r ~ NumType (i r))
+                          => IpeObject' i r -> IpeObject' i r
+applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ ats') mm
+  where
+    (mm,ats') = takeAttr (Proxy :: Proxy AT.Matrix) ats
+
+-- | Applies the matrix to an ipe object if it has one.
+applyMatrix                  :: Num r => IpeObject r -> IpeObject r
+applyMatrix (IpeGroup i)     = IpeGroup . applyMatrix'
+                             $ i&core.groupItems.traverse %~ applyMatrix
+                             -- note that for a group we first (recursively)
+                             -- apply the matrices, and then apply
+                             -- the matrix of the group to its members.
+applyMatrix (IpeImage i)     = IpeImage     $ applyMatrix' i
+applyMatrix (IpeTextLabel i) = IpeTextLabel $ applyMatrix' i
+applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
+applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
+applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
