@@ -9,19 +9,9 @@ module Data.Geometry.Box( module Data.Geometry.Box.Internal
 
 
 import           Control.Applicative
-import           Control.Lens hiding (_Empty, only)
-import           Data.Ext
-import qualified Data.Foldable as F
 import qualified Data.Traversable as Tr
 import           Data.Geometry.Box.Internal
-import           Data.Geometry.Point
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Properties
-import           Data.Maybe(catMaybes, maybe)
-import           Data.Semigroup
-import           Data.Vinyl
-import           Frames.CoRec
-import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 

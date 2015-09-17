@@ -13,8 +13,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Traversable as T
 import           Data.Vinyl
-import           Linear.Affine(Affine(..))
-import           Linear.Vector((*^))
 import           Frames.CoRec
 
 

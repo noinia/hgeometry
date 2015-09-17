@@ -3,7 +3,7 @@
 module Data.Geometry.LineSegment where
 
 
-import Data.Bifunctor
+import           Data.Bifunctor
 import           Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens hiding (only)
@@ -17,17 +17,11 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.List as L
-import           Data.Maybe(maybe)
-import           Data.Ord(comparing)
 import           Data.Range
-import           Data.Semigroup
 import           Data.Vinyl
 import           Data.UnBounded
 import           Frames.CoRec
-import           Linear.Affine(Affine(..),distanceA)
-import           Linear.Vector((*^))
-
+import           Linear.Affine(distanceA)
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -81,7 +75,7 @@ segment2SubLine ss = SubLine l (Interval s e)
     e = q&unEndPoint.core %~ f
 
 subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
-subLineToSegment sl = let r@(Interval s' e') = (fixEndPoints sl)^.subRange
+subLineToSegment sl = let (Interval s' e') = (fixEndPoints sl)^.subRange
                           s = s'&unEndPoint %~ (^.extra)
                           e = e'&unEndPoint %~ (^.extra)
                       in LineSegment s e
@@ -191,42 +185,6 @@ p `onSegment` l = let s         = l^.start.core
                   in maybe False inRange $ scalarMultiple (p .-. s) (t .-. s)
 
 
--- -- | Compute the overlap between the two segments (if they overlap/intersect)
--- overlap     :: (Ord r, Fractional r, Arity d)
---             => LineSegment d p r -> LineSegment d p r -> Maybe (LineSegment d p r)
--- overlap l m = mim >>= \im -> case il `intersect` im of
---     IntervalIntersection (Interval s e) -> Just $ LineSegment (s^.extra) (e^.extra)
---     NoOverlap                           -> Nothing
---   where
---     p = l^.start
---     q = l^.end
---     r = m^.start
---     s = m^.end
-
---     u = q^.core .-. p^.core
-
---     -- lineseg l corresp to an interval from 0 1
---     il = Interval (0 :+ p) (1 :+ q)
-
-
---     -- let lambda x denote the scalar s.t. x = p + (lambda x) *^ u
---     --
---     -- lambda' computes lambda' and pairs it with the associated point.
---     -- lambda  :: (Point d r :+ extra) -> Maybe (r :+ (Point d r :+ extra)
---     lambda' x = (:+ x) <$> scalarMultiple u (x^.core .-. p^.core)
-
---     -- lineseg m corresponds to an interval
---     -- [min (lambda r, lambda s), max (lambda r, lambda s)]
---     --
---     -- mim denotes this interval, assuming it exists (i.e. that is,
---     -- assuming r and s are indeed colinear with pq.
---     mim = mapM lambda' [r, s] >>= (f . L.sortBy (comparing (^.core)))
-
---     -- Make sure we have two elems, s.t. both r and s are colinear with pq
---     f [a,b] = Just $ Interval a b
---     f _     = Nothing
-
-
 -- | The left and right end point (or left below right if they have equal x-coords)
 orderedEndPoints   :: Ord r => LineSegment 2 p r -> (Point 2 r :+ p, Point 2 r :+ p)
 orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
@@ -248,19 +206,19 @@ flipSegment s = let p = s^.start
                     q = s^.end
                 in (s&start .~ q)&end .~ p
 
-testSeg :: LineSegment 2 () Rational
-testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
+-- testSeg :: LineSegment 2 () Rational
+-- testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
 
-horL' :: Line 2 Rational
-horL' = horizontalLine 0
+-- horL' :: Line 2 Rational
+-- horL' = horizontalLine 0
 
-testI = testSeg `intersect` horL'
+-- testI = testSeg `intersect` horL'
 
 
-ff = bimap (fmap Val) (const ())
+-- ff = bimap (fmap Val) (const ())
 
-ss' = let (LineSegment p q) = testSeg in
-      LineSegment (p&unEndPoint %~ ff)
-                  (q&unEndPoint %~ ff)
+-- ss' = let (LineSegment p q) = testSeg in
+--       LineSegment (p&unEndPoint %~ ff)
+--                   (q&unEndPoint %~ ff)
 
-ss'' = ss'^._SubLine
+-- ss'' = ss'^._SubLine
