@@ -349,7 +349,7 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
     where
     ipeAtts = [("version","70005"),("creator", "HGeometry")]
     -- TODO: Add preamble and styles
-    chs = mapMaybe ipeWrite pgs
+    chs = mapMaybe ipeWrite . F.toList $ pgs
 
 
 --------------------------------------------------------------------------------

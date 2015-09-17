@@ -35,6 +35,8 @@ import           GHC.Exts
 
 import           GHC.TypeLits
 
+
+import qualified Data.List.NonEmpty as NE
 import qualified Data.Sequence as S
 import qualified Data.Seq2     as S2
 
@@ -357,17 +359,19 @@ fromContent obs = IpePage layers [] obs
 -- | A complete ipe file
 data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
                          , _styles   :: [IpeStyle]
-                         , _pages    :: [IpePage r]
+                         , _pages    :: NE.NonEmpty (IpePage r)
                          }
                deriving (Eq,Show)
+makeLenses ''IpeFile
 
+-- | Convenience function to construct an ipe file consisting of a single page.
 singlePageFile   :: IpePage r -> IpeFile r
-singlePageFile p = IpeFile Nothing [] [p]
+singlePageFile p = IpeFile Nothing [] (p NE.:| [])
 
-
+-- | Create a single page ipe file from a list of IpeObjects
+singlePageFromContent :: [IpeObject r] -> IpeFile r
 singlePageFromContent = singlePageFile . fromContent
 
-makeLenses ''IpeFile
 
 --------------------------------------------------------------------------------
 
