@@ -34,7 +34,7 @@ spec = do
     -- it "parses a path" $
       --   (show $ fromIpeXML'
           -- "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
-)
+-- )
       --   `shouldBe`
 -- "Right (Path {_pathSegments = PolyLineSegment (PolyLine {_points = Seq2 (Point2 [128.0,656.0] :+ ()) (fromList [Point2 [224.0,768.0] :+ (),Point2 [304.0,624.0] :+ ()]) (Point2 [432.0,752.0] :+ ())}) :< fromList []})"
 
