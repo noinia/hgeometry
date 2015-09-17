@@ -1,5 +1,6 @@
 module Data.Geometry.Ipe.FromIpe where
 
+import Control.Applicative
 import qualified Data.Traversable as Tr
 import Data.Ext
 import Data.Geometry.Ipe.Types
@@ -37,3 +38,13 @@ asSimplePolygon = prism' poly2path path2poly
     path2poly = preview (pathSegments.Tr.traverse._PolygonPath)
     -- TODO: Check that the path actually is a simple polygon, rather
     -- than ignoring everything that does not fit
+
+-- | use the first prism to select the ipe object to depicle with, and the second
+-- how to select the geometry object from there on. Then we can select the geometry
+-- object, directly with its attributes here.
+withAttrs       :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g
+                -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
+withAttrs po pg = prism' g2o o2g
+  where
+    g2o    = review po . over core (review pg)
+    o2g o  = preview po o >>= \(i :+ ats) -> (:+ ats) <$> preview pg i

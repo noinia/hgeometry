@@ -337,15 +337,11 @@ type IpeBitmap = XmlTree
 --------------------------------------------------------------------------------
 -- Ipe Pages
 
-
-type PageContent r = [IpeObject r]
-
-
 -- | An IpePage is essentially a Group, together with a list of layers and a
 -- list of views.
 data IpePage r = IpePage { _layers  :: [LayerName]
                          , _views   :: [View]
-                         , _content :: PageContent r
+                         , _content :: [IpeObject r]
                          }
               deriving (Eq,Show)
 makeLenses ''IpePage
