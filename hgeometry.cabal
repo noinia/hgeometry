@@ -106,7 +106,7 @@ library
 
                , semigroups       >= 0.15
                , bifunctors       >= 4.1
-               , validation       >= 0.4
+               -- , validation       >= 0.4
 
                , containers       >= 0.5
                , parsec           >= 3
@@ -166,7 +166,10 @@ test-suite hspec
   ghc-options:          -Wall
   main-is:              Spec.hs
 
-  other-modules: RangeSpec
+  other-modules: Data.RangeSpec
+                 Data.Geometry.Ipe.ReaderSpec
+
+                 Algorithms.Geometry.SmallestEnclosingDisk.RISpec
 
   build-depends:        base
                       , hspec >= 2.1
@@ -175,6 +178,7 @@ test-suite hspec
                       , lens
                       , data-clist
                       , linear
+                      , bytestring
 
   default-extensions: TypeFamilies
                     , GADTs

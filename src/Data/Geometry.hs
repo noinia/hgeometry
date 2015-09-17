@@ -9,7 +9,6 @@ module Data.Geometry( module Data.Geometry.Properties
                     , module Data.Geometry.Box
                     , module Linear.Affine
                     , module Linear.Vector
-                    , module Linear.Affine
                     ) where
 
 

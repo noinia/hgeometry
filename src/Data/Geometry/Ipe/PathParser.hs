@@ -11,7 +11,7 @@ import           Control.Monad
 import           Data.Bifunctor
 import           Data.Monoid(mconcat)
 import           Data.Semigroup
-import           Data.Validation(AccValidation(..))
+-- import           Data.Validation(AccValidation(..))
 
 import           Data.Char(isSpace)
 import           Data.Ratio
