@@ -203,21 +203,21 @@ insidePolygon        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> B
 q `insidePolygon` pg = q `inPolygon` pg == Inside
 
 
-testQ = map (`inPolygon` testPoly) [ point2 1 1    -- Inside
-                                   , point2 0 0    -- OnBoundary
-                                   , point2 5 14   -- Inside
-                                   , point2 5 10   -- Inside
-                                   , point2 10 5   -- OnBoundary
-                                   , point2 20 5   -- Outside
-                                   ]
+-- testQ = map (`inPolygon` testPoly) [ point2 1 1    -- Inside
+--                                    , point2 0 0    -- OnBoundary
+--                                    , point2 5 14   -- Inside
+--                                    , point2 5 10   -- Inside
+--                                    , point2 10 5   -- OnBoundary
+--                                    , point2 20 5   -- Outside
+--                                    ]
 
-testPoly :: SimplePolygon () Rational
-testPoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
-                                                   , point2 10 0
-                                                   , point2 10 10
-                                                   , point2 5 15
-                                                   , point2 1 11
-                                                   ]
+-- testPoly :: SimplePolygon () Rational
+-- testPoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
+--                                                    , point2 10 0
+--                                                    , point2 10 10
+--                                                    , point2 5 15
+--                                                    , point2 1 11
+--                                                    ]
 
 -- | Compute the area of a polygon
 area                        :: Fractional r => Polygon t p r -> r
@@ -225,7 +225,9 @@ area poly@(SimplePolygon _) = abs $ signedArea poly
 area (MultiPolygon vs hs)   = area (SimplePolygon vs) - sum [area h | h <- hs]
 
 
--- | Compute the signed area of a simple polygon.
+-- | Compute the signed area of a simple polygon. The the vertices are in
+-- clockwise order, the signed area will be negative, if the verices are given
+-- in counter clockwise order, the area will be positive.
 signedArea      :: Fractional r => SimplePolygon p r -> r
 signedArea poly = x / 2
   where
@@ -241,3 +243,14 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
          | LineSegment' (p :+ _) (q :+ _) <- C.toList $ outerBoundaryEdges poly  ]
 
     sum' = F.foldl' (^+^) zero
+
+
+-- | Test if the outer boundary of the polygon is in clockwise or counter
+-- clockwise order.
+isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
+isCounterClockwise = (\x -> x == abs x) . signedArea . asSimplePolygon
+
+-- | Convert a Polygon to a simple polygon by forgetting about any holes.
+asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
+asSimplePolygon poly@(SimplePolygon _) = poly
+asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
