@@ -21,6 +21,7 @@ import           Data.Proxy
 import           Data.Range
 import           Frames.CoRec(asA)
 import qualified Data.CircularList as C
+import           Linear.Vector(Additive(..), (^*), (^/))
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -217,3 +218,26 @@ testPoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
                                                    , point2 5 15
                                                    , point2 1 11
                                                    ]
+
+-- | Compute the area of a polygon
+area                        :: Fractional r => Polygon t p r -> r
+area poly@(SimplePolygon _) = abs $ signedArea poly
+area (MultiPolygon vs hs)   = area (SimplePolygon vs) - sum [area h | h <- hs]
+
+
+-- | Compute the signed area of a simple polygon.
+signedArea      :: Fractional r => SimplePolygon p r -> r
+signedArea poly = x / 2
+  where
+    x = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
+            | LineSegment' p q <- C.toList $ outerBoundaryEdges poly  ]
+
+
+-- | Compute the centroid of a simple polygon.
+centroid      :: Fractional r => SimplePolygon p r -> Point 2 r
+centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
+  where
+    xs = [ (toVec p ^+^ toVec q) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
+         | LineSegment' (p :+ _) (q :+ _) <- C.toList $ outerBoundaryEdges poly  ]
+
+    sum' = F.foldl' (^+^) zero
