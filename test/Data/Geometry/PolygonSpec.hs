@@ -50,7 +50,7 @@ toSpec (TestCase poly is bs os) = do
                                     describe "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Double])
+readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly
@@ -71,7 +71,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
             lookupAttr colorP symAts == lookupAttr colorP polyAts
 
         -- A point i inside if it is a disk
-        isInsidePt   :: IpeSymbol Double -> Bool
+        isInsidePt   :: IpeSymbol r -> Bool
         isInsidePt s = s^.symbolName == "mark/disk(sx)"
 
         -- Boxes are on the boundary

@@ -164,13 +164,14 @@ q `onBoundary` pg = any (q `onSegment`) es
 -- Outside
 --
 -- TODO: Add some testcases with multiPolygons
+-- TODO: Add some more onBoundary testcases
 inPolygon                                :: forall t p r. (Fractional r, Ord r)
                                          => Point 2 r -> Polygon t p r
                                          -> PointLocationResult
 q `inPolygon` pg
-    | q `onBoundary` pg                  = OnBoundary
-    | odd k && not (any (q `inHole`) hs) = Inside
-    | otherwise                          = Outside
+    | q `onBoundary` pg                             = OnBoundary
+    | odd kl && odd kr && not (any (q `inHole`) hs) = Inside
+    | otherwise                                     = Outside
   where
     l = horizontalLine $ q^.yCoord
 
@@ -178,9 +179,9 @@ q `inPolygon` pg
     -- line l
     intersectionPoint = asA (Proxy :: Proxy (Point 2 r)) . (`intersect` l)
 
-    -- Count the number of intersections that the horizontal line through q maxes
-    -- with the polygon, that are strictly to the right of q. If this number is odd
-    -- the point lies within the polygon.
+    -- Count the number of intersections that the horizontal line through q
+    -- maxes with the polygon, that are strictly to the left and strictly to
+    -- the right of q. If these numbers are both odd the point lies within the polygon.
     --
     --
     -- note that: - by the asA (Point 2 r) we ignore horizontal segments (as desired)
@@ -188,15 +189,34 @@ q `inPolygon` pg
     --               at the (open) point q.
     --            - by using half-open segments as edges we avoid double counting
     --               intersections that coincide with vertices.
+    --            - If the point is outside, and on the same height as the
+    --              minimum or maximum coordinate of the polygon. The number of
+    --              intersections to the left or right may be one. Thus
+    --              incorrectly classifying the point as inside. To avoid this,
+    --              we count both the points to the left *and* to the right of
+    --              p. Only if both are odd the point is inside.  so that if
+    --              the point is outside, and on the same y-coordinate as one
+    --              of the extermal vertices (one ofth)
     --
     -- See http://geomalgorithms.com/a03-_inclusion.html for more information.
-    k = length
-      . filter (\p -> p^.xCoord > q^.xCoord)
-      . mapMaybe intersectionPoint . C.toList . outerBoundaryEdges $ pg
+    SP kl kr = count (\p -> (p^.xCoord) `compare` (q^.xCoord))
+             . mapMaybe intersectionPoint . C.toList . outerBoundaryEdges $ pg
 
     -- For multi polygons we have to test if we do not lie in a hole .
     inHole = insidePolygon
     hs     = holeList pg
+
+    count   :: (a -> Ordering) -> [a] -> SP Int Int
+    count f = foldr (\x (SP lts gts) -> case f x of
+                             LT -> SP (lts + 1) gts
+                             EQ -> SP lts       gts
+                             GT -> SP lts       (gts + 1)) (SP 0 0)
+
+
+
+
+data SP a b = SP !a !b
+
 
 -- | Test if a point lies strictly inside the polgyon.
 insidePolygon        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
