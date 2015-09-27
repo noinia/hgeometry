@@ -14,6 +14,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.Geometry.Vector as V
+import qualified Data.List.NonEmpty as NE
 import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
 import           Data.Maybe(catMaybes, maybe)
 import           Data.Semigroup
@@ -52,8 +53,8 @@ instance (Arity d, Ord r) => (Box d p r) `IsIntersectableWith` (Box d p r) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  (Box a b) `intersect` (Box c d) = coRec $ Box (mi :+ ()) (ma :+ ())
-    where
+  (Box a b) `intersect` (Box c d) =  coRec $ Box (mi :+ ()) (ma :+ ())
+    where                           -- TODO: Fixme: This may yield no intersection
       mi = (a^.core) `max` (c^.core)
       ma = (b^.core) `min` (d^.core)
 
@@ -83,9 +84,9 @@ maxPoint b = let (Max p :+ e) = b^.maxP in p :+ e
 
 -- | Check if a point lies a box
 --
--- >>> origin `inBox` (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- >>> origin `inBox` (boundingBoxList' [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
 -- False
--- >>> origin `inBox` (boundingBoxList [point3 (-1) (-2) (-3), point3 10 20 30] :: Box 3 () Int)
+-- >>> origin `inBox` (boundingBoxList' [point3 (-1) (-2) (-3), point3 10 20 30] :: Box 3 () Int)
 -- True
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
@@ -94,7 +95,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 -- resulting vector is 0 indexed whereas one would normally count dimensions
 -- starting at zero.
 --
--- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- >>> extent (boundingBoxList' [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
 -- Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
 extent                                 :: (Arity d)
                                        => Box d p r -> Vector d (R.Range r)
@@ -103,16 +104,16 @@ extent (Box (Min a :+ _) (Max b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toV
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
 --
--- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> size (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
 -- Vector3 [1,2,3]
 size :: (Arity d, Num r) => Box d p r -> Vector d r
 size = fmap R.width . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
--- >>> widthIn (C :: C 1) (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn (C :: C 1) (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
 -- 1
--- >>> widthIn (C :: C 3) (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn (C :: C 3) (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
 -- 3
 widthIn   :: forall proxy p i d r. (Arity d, Num r, Index' (i-1) d) => proxy i -> Box d p r -> r
 widthIn _ = view (V.element (C :: C (i - 1))) . size
@@ -122,16 +123,16 @@ widthIn _ = view (V.element (C :: C (i - 1))) . size
 
 type Rectangle = Box 2
 
--- >>> width (boundingBoxList [origin, point2 1 2] :: Rectangle () Int)
+-- >>> width (boundingBoxList' [origin, point2 1 2] :: Rectangle () Int)
 -- 1
--- >>> width (boundingBoxList [origin] :: Rectangle () Int)
+-- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0
 width :: Num r => Rectangle p r -> r
 width = widthIn (C :: C 1)
 
--- >>> height (boundingBoxList [origin, point2 1 2] :: Rectangle () Int)
+-- >>> height (boundingBoxList' [origin, point2 1 2] :: Rectangle () Int)
 -- 2
--- >>> height (boundingBoxList [origin] :: Rectangle () Int)
+-- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0
 height :: Num r => Rectangle p r -> r
 height = widthIn (C :: C 2)
@@ -166,10 +167,18 @@ class IsBoxable g where
 type IsAlwaysTrueBoundingBox g p = (Semigroup p, Arity (Dimension g))
 
 
+
 boundingBoxList :: (IsBoxable g, Monoid p, F.Foldable1 c, Ord (NumType g)
-                   , IsAlwaysTrueBoundingBox g p
-                   ) => c g -> Box (Dimension g) p (NumType g)
+                    , IsAlwaysTrueBoundingBox g p
+                    ) => c g -> Box (Dimension g) p (NumType g)
 boundingBoxList = F.foldMap1 boundingBox
+
+
+-- | Unsafe version of boundingBoxList, that does not check if the list is non-empty
+boundingBoxList' :: (IsBoxable g, Monoid p, Ord (NumType g)
+                    , IsAlwaysTrueBoundingBox g p
+                    ) => [g] -> Box (Dimension g) p (NumType g)
+boundingBoxList' = boundingBoxList . NE.fromList
 
 ----------------------------------------
 
