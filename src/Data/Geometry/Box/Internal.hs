@@ -5,10 +5,10 @@
 module Data.Geometry.Box.Internal where
 
 import           Control.Applicative
-import           Control.Lens hiding (_Empty, only, Empty)
+import           Control.Lens hiding (only)
 import           Data.Bifunctor
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Semigroup.Foldable as F
 import qualified Data.Range as R
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -28,18 +28,10 @@ import           GHC.TypeLits
 --------------------------------------------------------------------------------
 -- * d-dimensional boxes
 
-data Box d p r = Empty
-               | Box { _minP :: Min (Point d r) :+ p
+data Box d p r = Box { _minP :: Min (Point d r) :+ p
                      , _maxP :: Max (Point d r) :+ p
                      }
-
-makePrisms ''Box
-
-minP :: Traversal' (Box d p r) (Min (Point d r) :+ p)
-minP = _Box._1
-
-maxP :: Traversal' (Box d p r) (Max (Point d r) :+ p)
-maxP = _Box._2
+makeLenses ''Box
 
 -- | Given the point with the lowest coordinates and the point with highest
 -- coordinates, create a box.
@@ -52,26 +44,15 @@ deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
 deriving instance (Ord r, Ord p, Arity d)   => Ord  (Box d p r)
 
 instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
-  Empty       <> b             = b
-  b           <> Empty         = b
   (Box mi ma) <> (Box mi' ma') = Box (mi <> mi') (ma <> ma')
 
-
-instance (Arity d, Ord r, Semigroup p) => Monoid (Box d p r) where
-  mempty = Empty
-  b `mappend` b' = b <> b'
-
-type instance IntersectionOf (Box d p r) (Box d q r) = '[ Box d () r]
-
+type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
 instance (Arity d, Ord r) => (Box d p r) `IsIntersectableWith` (Box d p r) where
 
-  nonEmptyIntersection _ _ x = match x (H f :& RNil)
-    where
-      f Empty = True
-      f _     = False
+  nonEmptyIntersection = defaultNonEmptyIntersection
 
-  bx@(Box a b) `intersect` by@(Box c d) = coRec $ Box (mi :+ ()) (ma :+ ())
+  (Box a b) `intersect` (Box c d) = coRec $ Box (mi :+ ()) (ma :+ ())
     where
       mi = (a^.core) `max` (c^.core)
       ma = (b^.core) `min` (d^.core)
@@ -94,17 +75,11 @@ type instance NumType   (Box d p r) = r
 --------------------------------------------------------------------------------0
 -- * Functions on d-dimensonal boxes
 
-to'     :: (m -> Point d r) -> (Box d p r -> m :+ p) ->
-           Getter (Box d p r) (Maybe (Point d r :+ p))
-to' f g = to $ \x -> case x of
-                  Empty -> Nothing
-                  b     -> Just . first f . g $ b
+minPoint :: Box d p r -> Point d r :+ p
+minPoint b = let (Min p :+ e) = b^.minP in p :+ e
 
-minPoint :: Getter (Box d p r) (Maybe (Point d r :+ p))
-minPoint = to' getMin _minP
-
-maxPoint :: Getter (Box d p r) (Maybe (Point d r :+ p))
-maxPoint = to' getMax _maxP
+maxPoint :: Box d p r -> Point d r :+ p
+maxPoint b = let (Max p :+ e) = b^.maxP in p :+ e
 
 -- | Check if a point lies a box
 --
@@ -113,22 +88,17 @@ maxPoint = to' getMax _maxP
 -- >>> origin `inBox` (boundingBoxList [point3 (-1) (-2) (-3), point3 10 20 30] :: Box 3 () Int)
 -- True
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
-p `inBox` b = maybe False f $ extent b
-  where
-    f = FV.and . FV.zipWith R.inRange (toVec p)
-
-
+p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 
 -- | Get a vector with the extent of the box in each dimension. Note that the
 -- resulting vector is 0 indexed whereas one would normally count dimensions
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
--- Just Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
+-- Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
 extent                                 :: (Arity d)
-                                       => Box d p r -> Maybe (Vector d (R.Range r))
-extent Empty                           = Nothing
-extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith R.ClosedRange (toVec a) (toVec b)
+                                       => Box d p r -> Vector d (R.Range r)
+extent (Box (Min a :+ _) (Max b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
@@ -136,7 +106,7 @@ extent (Box (Min a :+ _) (Max b :+ _)) = Just $ FV.zipWith R.ClosedRange (toVec 
 -- >>> size (boundingBoxList [origin, point3 1 2 3] :: Box 3 () Int)
 -- Vector3 [1,2,3]
 size :: (Arity d, Num r) => Box d p r -> Vector d r
-size = maybe (pure 0) (fmap R.width) . extent
+size = fmap R.width . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
@@ -171,21 +141,20 @@ height = widthIn (C :: C 2)
 -- (TopLeft, TopRight, BottomRight, BottomLeft).
 -- The extra values in the Top points are taken from the Top point,
 -- the extra values in the Bottom points are taken from the Bottom point
-corners :: Num r => Rectangle p r -> Maybe ( Point 2 r :+ p
-                                           , Point 2 r :+ p
-                                           , Point 2 r :+ p
-                                           , Point 2 r :+ p
-                                           )
-corners Empty = Nothing
+corners :: Num r => Rectangle p r -> ( Point 2 r :+ p
+                                     , Point 2 r :+ p
+                                     , Point 2 r :+ p
+                                     , Point 2 r :+ p
+                                     )
 corners r     = let w = width r
                     h = height r
                     p = (_maxP r)&core %~ getMax
                     q = (_minP r)&core %~ getMin
-                in Just $ ( p&core.xCoord %~ (subtract w)
-                          , p
-                          , q&core.xCoord %~ (+ w)
-                          , q
-                          )
+                in ( p&core.xCoord %~ (subtract w)
+                   , p
+                   , q&core.xCoord %~ (+ w)
+                   , q
+                   )
 
 --------------------------------------------------------------------------------
 -- * Constructing bounding boxes
@@ -197,10 +166,10 @@ class IsBoxable g where
 type IsAlwaysTrueBoundingBox g p = (Semigroup p, Arity (Dimension g))
 
 
-boundingBoxList :: (IsBoxable g, Monoid p, F.Foldable c, Ord (NumType g)
+boundingBoxList :: (IsBoxable g, Monoid p, F.Foldable1 c, Ord (NumType g)
                    , IsAlwaysTrueBoundingBox g p
                    ) => c g -> Box (Dimension g) p (NumType g)
-boundingBoxList = F.foldMap boundingBox
+boundingBoxList = F.foldMap1 boundingBox
 
 ----------------------------------------
 

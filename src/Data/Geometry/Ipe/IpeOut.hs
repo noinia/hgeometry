@@ -105,7 +105,8 @@ addAttributes ats io = IpeOut $ \g -> asIpe io g :+ ats
 -- | Default size of the cliping rectangle used to clip lines. This is
 -- Rectangle is large enough to cover the normal page size in ipe.
 defaultClipRectangle :: (Num r, Ord r) => Rectangle () r
-defaultClipRectangle = boundingBoxList [ point2 (-200) (-200), point2 1000 1000 ]
+defaultClipRectangle = boundingBox (point2 (-200) (-200)) <>
+                       boundingBox (point2 1000 1000)
 
 -- -- | An ipe out to draw a line, by clipping it to stay within a rectangle of
 -- -- default size.

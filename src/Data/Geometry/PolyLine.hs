@@ -18,6 +18,7 @@ import           Data.Geometry.Vector
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as Seq
 import           Data.Semigroup
+import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)
@@ -40,7 +41,7 @@ instance Semigroup (PolyLine d p r) where
   (PolyLine pts) <> (PolyLine pts') = PolyLine $ pts <> pts'
 
 instance Arity d => IsBoxable (PolyLine d p r) where
-  boundingBox = boundingBoxList . toListOf (points.traverse.core)
+  boundingBox = boundingBoxList . NE.fromList . toListOf (points.traverse.core)
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor

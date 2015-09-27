@@ -282,7 +282,6 @@ instance IpeWriteText r => IpeWrite (MiniPage r) where
                                 <*> ipeWriteText w
 
 instance IpeWriteText r => IpeWrite (Image r) where
-  ipeWrite (Image _ Empty)     = Nothing
   ipeWrite (Image d (Box a b)) = (\dt p q ->
                                    Element "image" [("rect", p <> " " <> q)] [Text dt]
                                  )
