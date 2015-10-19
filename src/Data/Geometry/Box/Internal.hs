@@ -49,14 +49,23 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
-instance (Arity d, Ord r) => (Box d p r) `IsIntersectableWith` (Box d p r) where
+-- In principle this should also just work for Boxes in higher dimensions. It is just
+-- that we need a better way to compute their corners
+instance (Num r, Ord r) => (Rectangle p r) `IsIntersectableWith` (Rectangle p r) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  (Box a b) `intersect` (Box c d) =  coRec $ Box (mi :+ ()) (ma :+ ())
-    where                           -- TODO: Fixme: This may yield no intersection
+  box@(Box a b) `intersect` box'@(Box c d)
+      |    box  `containsACornerOf` box'
+        || box' `containsACornerOf` box = coRec $ Box (mi :+ ()) (ma :+ ())
+      | otherwise                       = coRec NoIntersection
+    where
+
       mi = (a^.core) `max` (c^.core)
       ma = (b^.core) `min` (d^.core)
+
+      bx `containsACornerOf` bx' = let (a',b',c',d') = corners bx'
+                                   in any (\(p :+ _) -> p `inBox` bx) [a',b',c',d']
 
 
 instance PointFunctor (Box d p) where

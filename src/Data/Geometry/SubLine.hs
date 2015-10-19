@@ -100,4 +100,4 @@ horL :: SubLine 2 () (UnBounded Rational)
 horL = fromLine $ horizontalLine 0
 
 
-test = (testL^.subRange) `intersect` (horL^.subRange)
+-- test = (testL^.subRange) `intersect` (horL^.subRange)
