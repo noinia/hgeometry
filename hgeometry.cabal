@@ -17,13 +17,21 @@ author:              Frank Staals
 maintainer:          f.staals@uu.nl
 -- copyright:
 
+tested-with:         GHC >= 7.8.4
+
 category:            Geometry
 build-type:          Simple
+
 extra-source-files:  README.md
+                     test/Data/Geometry/pointInPolygon.ipe
+
 cabal-version:       >=1.10
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
+
+
+
 
 library
   exposed-modules:  Data.Geometry
@@ -47,7 +55,7 @@ library
 
 
                     -- Data.Geometry.Plane
-
+                    Data.Geometry.Slab
                     Data.Geometry.Box
                     Data.Geometry.Box.Internal
                     Data.Geometry.Ball
@@ -96,7 +104,7 @@ library
                , vinyl            >= 0.5       &&     < 0.6
                , linear           >= 1.10
                , lens             >= 4.2
-               , singletons       >= 1.0
+               , singletons       >= 1.0       &&     < 2.0
                , bifunctors       >= 5
                , semigroupoids    >= 5
                , Frames           >= 0.1.0.0
@@ -168,8 +176,10 @@ test-suite hspec
 
   other-modules: Data.RangeSpec
                  Data.Geometry.Ipe.ReaderSpec
+                 Data.Geometry.PolygonSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
+
 
   build-depends:        base
                       , hspec >= 2.1

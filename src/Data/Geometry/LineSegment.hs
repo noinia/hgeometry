@@ -95,7 +95,7 @@ instance PointFunctor (LineSegment d p) where
   pmap f (LineSegment s e) = LineSegment (s&unEndPoint %~ first f) (e&unEndPoint %~ first f)
 
 instance Arity d => IsBoxable (LineSegment d p r) where
-  boundingBox l = boundingBoxList [l^.start.core, l^.end.core]
+  boundingBox l = boundingBox (l^.start.core) <> boundingBox (l^.end.core)
 
 instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor

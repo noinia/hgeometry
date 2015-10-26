@@ -56,7 +56,10 @@ fixEndPoints sl = sl&subRange %~ f
 -- | given point p on line (Line q v), Get the scalar lambda s.t.
 -- p = q + lambda v
 toOffset              :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
-toOffset p (Line q v) = fromJust $ scalarMultiple (p .-. q) v
+toOffset p (Line q v) = fromJust' $ scalarMultiple (p .-. q) v
+  where
+    fromJust' (Just x) = x
+    fromJust' _        = error "toOffset: Nothing"
 
 type instance IntersectionOf (SubLine 2 p r) (SubLine 2 q r) = [ NoIntersection
                                                                , Point 2 r
@@ -97,4 +100,4 @@ horL :: SubLine 2 () (UnBounded Rational)
 horL = fromLine $ horizontalLine 0
 
 
-test = (testL^.subRange) `intersect` (horL^.subRange)
+-- test = (testL^.subRange) `intersect` (horL^.subRange)
