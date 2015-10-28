@@ -270,6 +270,12 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
 isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
 isCounterClockwise = (\x -> x == abs x) . signedArea . asSimplePolygon
 
+-- | Orient the outer boundary to clockwise order
+toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder p
+  | isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
+  | otherwise            = p
+
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
 asSimplePolygon poly@(SimplePolygon _) = poly
