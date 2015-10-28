@@ -89,7 +89,9 @@ data Input = Input { _luke  :: Point 2 Int
                    , _daltons :: [Point 2 Int]
                    } deriving (Show,Eq)
 
-
+-- TODO: THis only works if there are no colinear points. I.e. if Luke or the
+-- hatch lie on the hull, but in the interior of some edge, they are not
+-- contained in the hull.
 escape                :: Input -> Answer
 escape (Input l h ds) = case convexHull $ (l :+ Luke) : (h :+ Hatch) : map (:+ Dalton) ds of
     -- all positions are distinct, so the hull has at least two elements
