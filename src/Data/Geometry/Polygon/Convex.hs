@@ -12,6 +12,13 @@ type ConvexPolygon = SimplePolygon
 
 -- | Rotating Right <-> rotate clockwise
 
+-- Implementation of the Divide & Conqueror algorithm as described in:
+--
+-- Two Algorithms for Constructing a Delaunay Triangulation
+-- Lee and Schachter
+-- International Journal of Computer and Information Sciences, Vol 9, No. 3, 1980
+
+
 -- : (combined hull, lower tangent that was added, upper tangent thtat was
 -- added)
 
