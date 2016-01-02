@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE LambdaCase #-}
-module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquereor where
+module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
 import Control.Monad.State
 import Control.Monad.Reader
@@ -51,6 +51,14 @@ edges' :: Triangulation p r -> [(VertexID,VertexID)]
 edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
+drawTriangulation = IpeOut $ \tr ->
+    let es = map (uncurry ClosedLineSegment) . edges $ tr
+    in asIpeGroup $ map (\e -> asIpeObjectWith lineSegment e mempty) es
+
+
+-- instance HasDefaultIpeOut (Triangulation p r) where
+--   type DefaultIpeOut (Triangulation p r) = Group
+--   defaultIpeOut =
 
 
 --------------------------------------------------------------------------------
