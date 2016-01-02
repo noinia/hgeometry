@@ -1,15 +1,17 @@
 module Data.Seq2 where
 
-import           Prelude hiding (foldr,foldl,head,tail,last)
+import           Prelude hiding (foldr,foldl,head,tail,last,length)
 
 import           Control.Applicative
-import           Data.List.NonEmpty
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
 
 
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import qualified Data.Sequence as S
+
+--------------------------------------------------------------------------------
 
 -- | Basically Data.Sequence but with the guarantee that the list contains at
 -- least two elements.
@@ -58,13 +60,44 @@ x <| ~(Seq2 l s r) = Seq2 x (l S.<| s) r
 
 
 -- | Concatenate two sequences. O(log(min(n1,n2)))
-~(Seq2 ll ls lr) >< ~(Seq2 rl rs rr) = Seq2 ll ((ls S.|> lr) S.>< (rl S.<| rs)) rr
+(><) :: Seq2 a -> Seq2 a -> Seq2 a
+s >< l = fromSeqUnsafe $ toSeq s S.>< toSeq l
 
 
 -- | pre: the list contains at least two elements
 fromList          :: [a] -> Seq2 a
 fromList (a:b:xs) = F.foldl' (\s x -> s |> x) (duo a b) xs
 fromList _        = error "Seq2.fromList: Not enough values"
+
+
+
+-- | fmap but with an index
+mapWithIndex                  :: (Int -> a -> b) -> Seq2 a -> Seq2 b
+mapWithIndex f s@(Seq2 a m b) = Seq2 (f 0 a) (S.mapWithIndex f' m) (f l b)
+  where
+    l    = length s - 1
+    f' i = f (i+1)
+
+
+take   :: Int -> Seq2 a -> S.Seq a
+take i = S.take i . toSeq
+
+
+drop   :: Int -> Seq2 a -> S.Seq a
+drop i = S.drop i . toSeq
+
+
+toSeq               :: Seq2 a -> S.Seq a
+toSeq ~(Seq2 a m b) = ((a S.<| m) S.|> b)
+
+
+-- | Convert a Seq into a Seq2. It is not checked that the length is at least two
+fromSeqUnsafe   :: S.Seq a -> Seq2 a
+fromSeqUnsafe s = Seq2 a m b
+  where
+    ~(a S.:< s') = S.viewl s
+    ~(m S.:> b)  = S.viewr s'
+
 
 --------------------------------------------------------------------------------
 -- | Left views
@@ -99,11 +132,11 @@ instance Semigroup (ViewL1 a) where
   ~(a :< s) <> ~(b :< t) = a :< (s <> S.singleton b <> t)
 
 
-toNonEmpty          :: ViewL1 a -> NonEmpty a
-toNonEmpty ~(a :< s) = (a :| F.toList s)
+toNonEmpty           :: ViewL1 a -> NonEmpty.NonEmpty a
+toNonEmpty ~(a :< s) = (a NonEmpty.:| F.toList s)
 
-viewL1FromNonEmpty            :: NonEmpty a -> ViewL1 a
-viewL1FromNonEmpty ~(x :| xs) = x :< S.fromList xs
+viewL1FromNonEmpty                     :: NonEmpty.NonEmpty a -> ViewL1 a
+viewL1FromNonEmpty ~(x NonEmpty.:| xs) = x :< S.fromList xs
 
 
 -- | O(1) get a left view
