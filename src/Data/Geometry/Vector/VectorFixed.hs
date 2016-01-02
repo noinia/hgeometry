@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Vector.VectorFixed where
 
+import           Data.Monoid
 import           Control.Applicative
 import           Control.Lens
 import           Data.Foldable
