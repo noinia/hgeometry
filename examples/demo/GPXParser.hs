@@ -13,7 +13,6 @@ import           Control.Monad
 import           Data.Maybe
 import           Data.Time.Clock
 import           Data.Time.Format
-import           System.Locale
 import           Text.XML.Expat.Tree
 
 import           Control.Lens
@@ -47,7 +46,7 @@ newtype Activity = Activity { _tracks :: [Track]} deriving (Show,Eq)
 makeLenses ''Activity
 
 
-combine (Activity ts) = Activity [Track $ concatMap _trackPoints ts]
+combineTracks (Activity ts) = Activity [Track $ concatMap _trackPoints ts]
 
 
 readGPXFile    :: FilePath -> IO Activity
