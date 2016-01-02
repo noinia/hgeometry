@@ -2,7 +2,7 @@ module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker where
 
 import Data.Semigroup
 import Data.Ord(comparing)
-import Control.Lens
+import Control.Lens hiding (only)
 import Data.Ext
 import Data.Geometry.PolyLine
 import Data.Geometry.Point
@@ -11,8 +11,6 @@ import Data.Geometry.LineSegment
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as S
 import qualified Data.Foldable as F
-
-
 
 douglasPeucker         :: (Ord r, Fractional r, Arity d)
                        => r -> PolyLine d p r -> PolyLine d p r
@@ -36,8 +34,8 @@ split                  :: Int -> PolyLine d p r
 split i (PolyLine pts) = bimap f f (as,bs)
   where
     f = PolyLine . S2.fromSeqUnsafe
-    as = S2.take i pts
-    bs = S2.drop (i-1) pts
+    as = S2.take (i+1) pts
+    bs = S2.drop i     pts
 
 
 maxDist       :: (Ord r, Fractional r, Arity d)

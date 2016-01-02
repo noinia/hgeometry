@@ -120,7 +120,7 @@ sqDistanceTo p = fst . sqDistanceToArg p
 -- realizing this distance.
 sqDistanceToArg           :: (Fractional r, Arity d) => Point d r -> Line d r -> (r, Point d r)
 sqDistanceToArg p (Line q v) = let u = q .-. p
-                                   t = (u `dot` v) / (v `dot` v)
+                                   t = (-1 * (u `dot` v)) / (v `dot` v)
                                    m = q .+^ (v ^* t)
                                in (qdA m p, m)
 
