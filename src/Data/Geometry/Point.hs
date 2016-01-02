@@ -2,34 +2,18 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where
 
-import           Control.Applicative
 import           Control.Lens
-import           Data.Monoid
 import           Data.Proxy
-
--- import Data.TypeLevel.Common
-import           Data.Typeable
-import           Data.Vinyl hiding (Nat)
-import qualified Data.Vinyl as V
-import           Data.Vinyl.Functor(Const(..))
-import qualified Data.Vinyl.TypeLevel as TV
-
-import           Data.Vinyl.TypeLevel hiding (Nat)
 
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
--- import qualified Data.Vector.Fixed.Cont as C
-
 
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           GHC.TypeLits
 
 import qualified Data.Geometry.Vector as Vec
-
-import           Linear.Vector(Additive(..))
-import           Linear.Affine hiding (Point(..), origin)
 
 --------------------------------------------------------------------------------
 

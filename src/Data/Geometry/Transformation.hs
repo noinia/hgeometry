@@ -17,12 +17,9 @@ import           Data.Proxy
 
 import           GHC.TypeLits
 import           Linear.Matrix((!*),(!*!))
-import           Linear.Vector(zero)
 
 import qualified Data.Vector.Fixed as FV
 import qualified Data.Geometry.Vector as V
-
-import           Data.Vinyl.TypeLevel hiding (Nat)
 
 --------------------------------------------------------------------------------
 -- * Matrices

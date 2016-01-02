@@ -11,7 +11,6 @@ import Data.Geometry.Line.Internal
 import Data.Geometry.Point
 import Data.Geometry.Properties
 import Data.Geometry.Vector
-import Data.Maybe
 import Data.Range
 import Data.UnBounded
 import           Frames.CoRec
@@ -47,10 +46,10 @@ pointAt a (Line p v) = p .+^ (a *^ v)
 fixEndPoints    :: (Num r, Arity d) => SubLine d p r -> SubLine d (Point d r :+ p) r
 fixEndPoints sl = sl&subRange %~ f
   where
-    ptAt             = flip pointAt (sl^.line)
-    label (c :+ e)   = (c :+ (ptAt c :+ e))
-    f (Interval l u) = Interval (l&unEndPoint %~ label)
-                                (u&unEndPoint %~ label)
+    ptAt              = flip pointAt (sl^.line)
+    label (c :+ e)    = (c :+ (ptAt c :+ e))
+    f ~(Interval l u) = Interval (l&unEndPoint %~ label)
+                                 (u&unEndPoint %~ label)
 
 
 -- | given point p on line (Line q v), Get the scalar lambda s.t.
@@ -79,7 +78,7 @@ instance (Ord r, Fractional r) =>
                                     (toOffset p m) `inInterval` s
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \l              -> match (r `intersect` s') $
+      :& (H $ \_             -> match (r `intersect` s') $
                                       (H $ \NoIntersection -> coRec NoIntersection)
                                    :& (H $ \i              -> coRec $ SubLine l i)
                                    :& RNil

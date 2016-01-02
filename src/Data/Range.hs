@@ -3,10 +3,13 @@ module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
                  , Range(..)
+                 , prettyShow
                  , lower, upper
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper
                  , isValid
+
+                 , shiftLeft, shiftRight
                  ) where
 
 import           Control.Applicative
@@ -102,8 +105,8 @@ instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
 
   -- The intersection is empty, if after clipping, the order of the end points is inverted
   -- or if the endpoints are the same, but both are open.
-  r@(Range l u) `intersect` s = let i@(Range l' u') = clipLower' l . clipUpper' u $ s
-                                in if isValid i then coRec i else coRec NoIntersection
+  (Range l u) `intersect` s = let i = clipLower' l . clipUpper' u $ s
+                              in if isValid i then coRec i else coRec NoIntersection
 
 -- | Get the width of the interval
 --
@@ -133,8 +136,8 @@ clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothi
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is
 -- indeed smaller than the right endpoint. Note that we treat empty open-ranges
 -- as invalid as well.
-isValid               :: Ord a => Range a -> Bool
-isValid r@(Range l u) = case (_unEndPoint l) `compare` (_unEndPoint u) of
+isValid             :: Ord a => Range a -> Bool
+isValid (Range l u) = case (_unEndPoint l) `compare` (_unEndPoint u) of
                           LT                            -> True
                           EQ | isClosed l || isClosed u -> True
                           _                             -> False
