@@ -3,8 +3,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
-module DrawGPX where
+module Main where
 
+import Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 import Data.Maybe
 import           Control.Applicative
 import           Control.Lens
@@ -103,7 +104,8 @@ main = do
              <$> mapM (\fp -> print fp >> readGPXFile fp) files
     let polies   = mapMaybe (asPolyLine . subsampleTrack ssFactor) tks
         -- !polies' = map (unPolyLine.traverse.extra .~ ()) polies
-    writePolyLineFile "/tmp/out.ipe" $  map (flip stroke "black") maps ++ map strokeByMonth polies
+    writePolyLineFile "/tmp/out.ipe" . map (bimap (douglasPeucker 0.01) id) $
+      map (flip stroke "black") maps ++ map strokeByMonth polies
 
     -- $ zipWith stroke polies' (cycle colors)
 
@@ -117,7 +119,7 @@ asPolyLine = fmap fromPoints . f . map toPt . _trackPoints
 toPt :: TrackPoint -> Point 2 Double :+ Time
 toPt (TP (pos :+ t)) = point2 (pos^.longitude) (pos^.latitude) :+ t
 
-ssFactor = 5
+ssFactor = 1
 
 worldWidth  = 1000
 worldHeight = 1000
