@@ -3,6 +3,7 @@
 module Data.Geometry.Point where
 
 import           Control.Applicative
+import           Data.Monoid(mconcat)
 import           Control.Lens
 import           Data.Proxy
 
