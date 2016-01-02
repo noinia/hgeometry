@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where
 
+import           Control.Applicative
 import           Control.Lens
 import           Data.Proxy
 
