@@ -2,8 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.LineSegment where
 
-
-import           Data.Bifunctor
+import           Data.Ord(comparing)
 import           Control.Arrow((&&&))
 import           Control.Applicative
 import           Control.Lens hiding (only)
@@ -22,7 +21,7 @@ import           Data.Range
 import           Data.Vinyl
 import           Data.UnBounded
 import           Frames.CoRec
-import           Linear.Affine(distanceA)
+import qualified Data.Foldable as F
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -85,14 +84,15 @@ instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
   supportingLine s = lineThrough (s^.start.core) (s^.end.core)
 
 instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
-  show (LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
+  show ~(LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
 
 deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
 -- deriving instance (Ord r, Ord p, Arity d)   => Ord (LineSegment d p r)
 deriving instance Arity d                   => Functor (LineSegment d p)
 
 instance PointFunctor (LineSegment d p) where
-  pmap f (LineSegment s e) = LineSegment (s&unEndPoint %~ first f) (e&unEndPoint %~ first f)
+  pmap f ~(LineSegment s e) = LineSegment (s&unEndPoint %~ first f)
+                                          (e&unEndPoint %~ first f)
 
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBox (l^.start.core) <> boundingBox (l^.end.core)
@@ -140,9 +140,9 @@ instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  s@(LineSegment p q) `intersect` l = let f = bimap (fmap Val) (const ())
-                                          s' = LineSegment (p&unEndPoint %~ f)
-                                                           (q&unEndPoint %~ f)
+  ~s@(LineSegment p q) `intersect` l = let f  = bimap (fmap Val) (const ())
+                                           s' = LineSegment (p&unEndPoint %~ f)
+                                                            (q&unEndPoint %~ f)
                                     in match ((s'^._SubLine) `intersect` (fromLine l)) $
          (H   coRec)
       :& (H $ coRec . fmap (_unUnBounded))
@@ -180,10 +180,10 @@ instance (Ord r, Fractional r) =>
 -- False
 onSegment       :: (Ord r, Fractional r, Arity d)
                 => Point d r -> LineSegment d p r -> Bool
-p `onSegment` l = let s         = l^.start.core
-                      t         = l^.end.core
-                      inRange x = 0 <= x && x <= 1
-                  in maybe False inRange $ scalarMultiple (p .-. s) (t .-. s)
+p `onSegment` l = let s          = l^.start.core
+                      t          = l^.end.core
+                      inRange' x = 0 <= x && x <= 1
+                  in maybe False inRange' $ scalarMultiple (p .-. s) (t .-. s)
 
 
 -- | The left and right end point (or left below right if they have equal x-coords)
@@ -195,11 +195,27 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 
 
 -- | Length of the line segment
-segmentLength                    :: (Arity d, Floating r) => LineSegment d p r -> r
-segmentLength (LineSegment' p q) = distanceA (p^.core) (q^.core)
+segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
+segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
 
 
+-- | Squared distance from the point to the Segment s. The same remark as for
+-- the 'sqDistanceToSegArg' applies here.
+sqDistanceToSeg   :: (Arity d, Fractional r, Ord r) => Point d r -> LineSegment d p r -> r
+sqDistanceToSeg p = fst . sqDistanceToSegArg p
 
+
+-- | Squared distance from the point to the Segment s, and the point on s
+-- realizing it.  Note that if the segment is *open*, the closest point
+-- returned may be one of the (open) end points, even though technically the
+-- end point does not lie on the segment. (The true closest point then lies
+-- arbitrarily close to the end point).
+sqDistanceToSegArg     :: (Arity d, Fractional r, Ord r)
+                       => Point d r -> LineSegment d p r -> (r, Point d r)
+sqDistanceToSegArg p s = let m  = sqDistanceToArg p (supportingLine s)
+                             xs = m : map (\(q :+ _) -> (qdA p q, q)) [s^.start, s^.end]
+                         in   F.minimumBy (comparing fst)
+                            . filter (flip onSegment s . snd) $ xs
 
 -- | flips the start and end point of the segment
 flipSegment   :: LineSegment d p r -> LineSegment d p r

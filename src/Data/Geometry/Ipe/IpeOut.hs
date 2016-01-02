@@ -26,7 +26,7 @@ import           Data.Vinyl
 
 --------------------------------------------------------------------------------
 
-newtype IpeOut g i = IpeOut { asIpe :: g -> i }
+newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
@@ -69,6 +69,10 @@ coreOut io = IpeOut $ asIpe io . (^.core)
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   type DefaultIpeOut g :: * -> *
   defaultIpeOut :: IpeOut g (IpeObject' (DefaultIpeOut g) (NumType g))
+
+  -- defaultIpeObject :: RecApplicative (IpeObjectAttrF (DefaultIpeOut g))
+  --                  => IpeOut g (IpeObject (NumType g))
+  -- defaultIpeObject = IpeOut $ flip asIpeObject mempty
 
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol

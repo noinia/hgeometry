@@ -3,18 +3,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Line.Internal where
 
-import           Control.Applicative
 import           Control.Lens
-import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
-
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -49,8 +45,8 @@ verticalLine x = Line (point2 x 0) (v2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (v2 1 0)
 
-perpendicularTo                          :: Num r => Line 2 r -> Line 2 r
-perpendicularTo (Line p (Vector2 vx vy)) = Line p (v2 (-vy) vx)
+perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
+perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (v2 (-vy) vx)
 
 
 
@@ -98,7 +94,7 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  l@(Line p (Vector2 ux uy)) `intersect` m@(Line q v@(Vector2 vx vy))
+  l@(Line p ~(Vector2 ux uy)) `intersect` (Line q ~v@(Vector2 vx vy))
       | areParallel = if q `onLine` l then coRec l
                                       else coRec NoIntersection
       | otherwise   = coRec r
@@ -115,8 +111,18 @@ instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) whe
       Point2 px py = p
       Point2 qx qy = q
 
+-- | Squared distance from point p to line l
+sqDistanceTo   :: (Fractional r, Arity d) => Point d r -> Line d r -> r
+sqDistanceTo p = fst . sqDistanceToArg p
 
 
+-- | The squared distance between the point p and the line l, and the point m
+-- realizing this distance.
+sqDistanceToArg           :: (Fractional r, Arity d) => Point d r -> Line d r -> (r, Point d r)
+sqDistanceToArg p (Line q v) = let u = q .-. p
+                                   t = (u `dot` v) / (v `dot` v)
+                                   m = q .+^ (v ^* t)
+                               in (qdA m p, m)
 
 --------------------------------------------------------------------------------
 -- * Supporting Lines
@@ -137,9 +143,9 @@ fromLinearFunction a b = Line (point2 0 b) (v2 1 a)
 
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical
-toLinearFunction                            :: forall r. (Fractional r, Eq r)
-                                            => Line 2 r -> Maybe (r,r)
-toLinearFunction l@(Line _ (Vector2 vx vy)) = match (l `intersect` verticalLine (0 :: r)) $
+toLinearFunction                             :: forall r. (Fractional r, Eq r)
+                                             => Line 2 r -> Maybe (r,r)
+toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine (0 :: r)) $
        (H $ \NoIntersection -> Nothing)    -- l is a vertical line
     :& (H $ \(Point2 _ b)   -> Just (vy / vx,b))
     :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
