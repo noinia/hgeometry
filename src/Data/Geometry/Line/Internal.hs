@@ -118,7 +118,8 @@ sqDistanceTo p = fst . sqDistanceToArg p
 
 -- | The squared distance between the point p and the line l, and the point m
 -- realizing this distance.
-sqDistanceToArg           :: (Fractional r, Arity d) => Point d r -> Line d r -> (r, Point d r)
+sqDistanceToArg              :: (Fractional r, Arity d)
+                             => Point d r -> Line d r -> (r, Point d r)
 sqDistanceToArg p (Line q v) = let u = q .-. p
                                    t = (-1 * (u `dot` v)) / (v `dot` v)
                                    m = q .+^ (v ^* t)
