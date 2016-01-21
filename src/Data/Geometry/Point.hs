@@ -12,7 +12,7 @@ import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import qualified Data.List as L
 
-
+import           Data.Ext
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           GHC.TypeLits
@@ -228,13 +228,14 @@ ccw p q r = case z `compare` 0 of
 -- | Sort the points arround the given point p in counter clockwise order with
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.
-sortArround       :: (Ord r, Num r) => Point 2 r -> [Point 2 r] -> [Point 2 r]
+sortArround       :: (Ord r, Num r)
+                  => (Point 2 r :+ p) -> [Point 2 r :+ p] -> [Point 2 r :+ p]
 sortArround p pts = sortArround' above' ++ sortArround' below'
   where
-    (below',above') = L.partition (\q -> q^.yCoord < p^.yCoord) pts
+    (below',above') = L.partition (\q -> q^.core.yCoord < p^.core.yCoord) pts
     sortArround'    = L.sortBy cmp
 
-    cmp q r = case ccw p q r of
+    cmp q r = case ccw (p^.core) (q^.core) (r^.core) of
                 CCW      -> LT
                 CW       -> GT
-                CoLinear -> qdA p q `compare` qdA p r
+                CoLinear -> qdA (p^.core) (q^.core) `compare` qdA (p^.core) (r^.core)
