@@ -10,6 +10,8 @@ import           Data.Proxy
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
+import qualified Data.List as L
+
 
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
@@ -190,6 +192,8 @@ yCoord = coord (C :: C 2)
 zCoord :: (3 <=. d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
 
+
+
 --------------------------------------------------------------------------------
 -- * Point Functors
 
@@ -220,3 +224,17 @@ ccw p q r = case z `compare` 0 of
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
        z             = ux * vy - uy * vx
+
+-- | Sort the points arround the given point p in counter clockwise order with
+-- respect to the rightward horizontal ray starting from p.  If two points q
+-- and r are colinear with p, the closest one to p is reported first.
+sortArround       :: (Ord r, Num r) => Point 2 r -> [Point 2 r] -> [Point 2 r]
+sortArround p pts = sortArround' above' ++ sortArround' below'
+  where
+    (below',above') = L.partition (\q -> q^.yCoord < p^.yCoord) pts
+    sortArround'    = L.sortBy cmp
+
+    cmp q r = case ccw p q r of
+                CCW      -> LT
+                CW       -> GT
+                CoLinear -> qdA p q `compare` qdA p r
