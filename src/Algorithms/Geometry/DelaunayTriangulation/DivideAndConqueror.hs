@@ -3,6 +3,8 @@
 {-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
+import Control.Applicative((<$>))
+import Algorithms.Geometry.DelaunayTriangulation.Types
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Lens hiding (only)
@@ -38,22 +40,6 @@ main = do
              dt  = delaunayTriangulation $ NonEmpty.fromList pts
          showDT dt
 
-showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
-showDT = mapM_ print . edges
-
-
-edges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
-edges t = let pts = _positions t
-          in map (\(u,v) -> (pts V.! u, pts V.! v)) . edges' $ t
-
-
-edges' :: Triangulation p r -> [(VertexID,VertexID)]
-edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
-       . zip [0..] . V.toList . _neighbours
-
-drawTriangulation = IpeOut $ \tr ->
-    let es = map (uncurry ClosedLineSegment) . edges $ tr
-    in asIpeGroup $ map (\e -> asIpeObjectWith lineSegment e mempty) es
 
 
 -- instance HasDefaultIpeOut (Triangulation p r) where
@@ -77,22 +63,9 @@ drawTriangulation = IpeOut $ \tr ->
 -- | Rotating Right <-> rotate clockwise
 
 
-type VertexID = Int
 
 
 
-
--- | Neighbours are stored in clockwise order: i.e. rotating right moves to the
--- next clockwise neighbour.
-data Triangulation p r = Triangulation { _vertexIds  :: M.Map (Point 2 r) VertexID
-                                       , _positions  :: V.Vector (Point 2 r :+ p)
-                                       , _neighbours :: V.Vector (C.CList VertexID)
-                                       }
-                         deriving (Show,Eq)
--- makeLenses ''Triangulation
-
-
-type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 
 
 data TriangRes p r = TriangRes { _triang     :: Triangulation p r
@@ -108,7 +81,7 @@ delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
     ptsV   = V.fromList . F.toList $ pts
     vtxMap = M.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
 
-    tr     = fmap _unElem $ asBalancedBinLeafTree pts
+    tr     = _unElem <$> asBalancedBinLeafTree pts
 
     (adj,_) = delaunayTriangulation' tr (vtxMap,ptsV)
     adjV    = V.fromList . IM.elems $ adj
@@ -170,7 +143,6 @@ merge ld rd bt ut mapping@(vtxMap,_)
                                           moveUp (tl,tr) l r
 
 
-type Vertex    = C.CList VertexID
 type Merge p r = StateT Adj (Reader (Mapping p r))
 
 
