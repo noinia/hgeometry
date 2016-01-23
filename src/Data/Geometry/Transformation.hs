@@ -84,7 +84,7 @@ instance ( Num r
          ) => IsTransformable (Point d r) where
   transformBy (Transformation m) (Point v) = Point . V.init $ m `mult` v'
     where
-      v'    = snoc v 0
+      v'    = snoc v 1
 
 
 --------------------------------------------------------------------------------
