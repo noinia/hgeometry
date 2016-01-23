@@ -24,6 +24,7 @@ build-type:          Simple
 
 extra-source-files:  README.md
                      test/Data/Geometry/pointInPolygon.ipe
+                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
 
 cabal-version:       >=1.10
 source-repository head
@@ -191,8 +192,10 @@ test-suite hspec
   other-modules: Data.RangeSpec
                  Data.Geometry.Ipe.ReaderSpec
                  Data.Geometry.PolygonSpec
+                 Data.Geometry.PointSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
+                 Algorithms.Geometry.DelaunayTriangulation.DTSpec
 
 
   build-depends:        base
@@ -203,6 +206,11 @@ test-suite hspec
                       , data-clist
                       , linear
                       , bytestring
+                      , vinyl
+                      , semigroups
+                      , vector
+                      , containers
+                      , random
 
   default-extensions: TypeFamilies
                     , GADTs

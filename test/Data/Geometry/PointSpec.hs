@@ -31,8 +31,8 @@ spec = do
                           , point2 (-5) 3
                           , point2 (-3) (-3)
                           , point2 (-1) (-5)
-                          , point2 6    (-4)
                           , point2 0    (-5)
                           , point2 0    (-6)
+                          , point2 6    (-4)
                           , point2 26   (-2)
                           ]

@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TupleSections #-}
 module Algorithms.Geometry.DelaunayTriangulation.Types where
 
@@ -37,8 +38,7 @@ data Triangulation p r = Triangulation { _vertexIds  :: M.Map (Point 2 r) Vertex
                                        , _neighbours :: V.Vector (C.CList VertexID)
                                        }
                          deriving (Show,Eq)
--- makeLenses ''Triangulation
-
+makeLenses ''Triangulation
 
 
 type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
