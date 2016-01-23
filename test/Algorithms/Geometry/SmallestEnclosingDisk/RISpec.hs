@@ -21,8 +21,6 @@ import qualified Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncremental
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
 
 
-import Debug.Trace
-
 spec :: Spec
 spec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
 
@@ -40,7 +38,6 @@ data TestCase r = TestCase { _pointSet :: [Point 2 r :+ ()]
 
 
 toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
-toSpec (TestCase pts sol)  | traceShow pts False = undefined
 toSpec (TestCase pts sol) =
     describe ("testing point set with solution " ++ show sol) $ do
       it "comparing with naive solution" $
@@ -60,7 +57,7 @@ diskOf (Two p q)     = fromDiameter p q
 diskOf (Three p q r) = fromMaybe (error "Wrong manual disk") $ disk p q r
 
 
--- | Point sets per color
+-- | Point sets per color, Crosses form the solution
 readInput    :: FilePath -> IO (Either ConversionError [TestCase Rational])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
