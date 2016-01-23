@@ -24,11 +24,12 @@ import           System.Random.Shuffle(shuffle)
 -- implemented using randomized incremental construction
 smallestEnclosingDisk           :: (Ord r, Fractional r, RandomGen g)
                                 => g
-                                -> Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p]
+                                -> [Point 2 r :+ p]
                                 -> DiskResult p r
-smallestEnclosingDisk g p q pts = let (p':q':pts') = shuffle g (p:q:pts)
-                                  in smallestEnclosingDisk' p' q' pts'
 
+smallestEnclosingDisk g pts@(_:_:_) = let (p:q:pts') = shuffle g pts
+                                      in smallestEnclosingDisk' p q pts'
+smallestEnclosingDisk g _           = error "smallestEnclosingDisk: Too few points"
 
 -- | Smallest enclosing disk.
 smallestEnclosingDisk'     :: (Ord r, Fractional r)
@@ -67,7 +68,7 @@ smallestEnclosingDiskWithPoints p q = foldr addPoint (initial p q)
       | otherwise                  = DiskResult (circle' r) (Three p q r)
 
     circle' r = fromMaybe degen $ disk (p^.core) (q^.core) (r^.core)
-    degen = error "smallestEnclosingDisk: Unhandled degeneracy"
+    degen = error "smallestEnclosingDisk: Unhandled degeneracy, three points on a line"
     -- TODO: handle degenerate case
 
 

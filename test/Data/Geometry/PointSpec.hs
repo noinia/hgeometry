@@ -1,4 +1,4 @@
-module Data.RangeSpec where
+module Data.Geometry.PointSpec where
 
 import Data.Ext
 import Data.Geometry.Point
