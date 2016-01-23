@@ -51,11 +51,18 @@ type ConversionError = Text
 
 
 -- | Given a file path, tries to read an ipe file
+readRawIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
+readRawIpeFile = fmap fromIpeXML . B.readFile
+
+
+-- | Given a file path, tries to read an ipe file. This function applies all
+-- matrices to objects.
 readIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
-readIpeFile = fmap fromIpeXML . B.readFile
+readIpeFile = fmap (bimap id applyMatrices) . readRawIpeFile
+
 
 -- | Since most Ipe file contain only one page, we provide a shortcut for that
--- as well.
+-- as well. This function applies all matrices.
 readSinglePageFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpePage r))
 readSinglePageFile = fmap f . readIpeFile
   where
@@ -67,7 +74,6 @@ readSinglePageFile = fmap f . readIpeFile
 fromIpeXML   :: (Coordinate r, IpeRead (t r))
              => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = readXML b >>= ipeRead
-
 
 -- | Reads the data from a Bytestring into a proper Node
 readXML :: B.ByteString -> Either ConversionError (Node Text Text)
@@ -242,6 +248,8 @@ ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy at
 
 testSym :: B.ByteString
 testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
+
+
 
 
 -- readAttrsFromXML :: B.ByteString -> Either

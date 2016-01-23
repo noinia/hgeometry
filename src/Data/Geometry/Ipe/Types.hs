@@ -392,3 +392,9 @@ applyMatrix (IpeTextLabel i) = IpeTextLabel $ applyMatrix' i
 applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
 applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
 applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
+
+applyMatrices   :: Num r => IpeFile r -> IpeFile r
+applyMatrices f = f&pages.traverse %~ applyMatricesPage
+
+applyMatricesPage   :: Num r => IpePage r -> IpePage r
+applyMatricesPage p = p&content.traverse %~ applyMatrix
