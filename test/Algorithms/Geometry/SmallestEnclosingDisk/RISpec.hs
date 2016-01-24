@@ -2,19 +2,18 @@
 {-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
 
+import Util
+
 import Control.Monad(when)
 import System.Random(mkStdGen)
-import Data.Vinyl
 import Control.Lens
 import Data.Ext
 import Data.Maybe
 import Data.Proxy
-import Data.Function(on)
 import Test.Hspec
-import qualified Data.List as L
 import Data.Geometry
 import Data.Geometry.Ball(fromDiameter, disk, Disk)
-import Data.Geometry.Ipe hiding (disk)
+import Data.Geometry.Ipe
 
 import Algorithms.Geometry.SmallestEnclosingBall.Types
 import qualified Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction as RIC
@@ -72,11 +71,3 @@ readInput fp = fmap f <$> readSinglePageFile fp
 
         right = either (const Nothing) Just
         solutionOf = right . fromList . map (^.core.symbolPoint) . filter isInSolution
-
-
-
-byStrokeColour :: (Stroke ∈ IpeObjectAttrF g) => [IpeObject' g r] -> [[IpeObject' g r]]
-byStrokeColour = map (map fst) . L.groupBy ((==) `on` snd) . L.sortOn snd
-               . map (\x -> (x,lookup' x))
-  where
-    lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats

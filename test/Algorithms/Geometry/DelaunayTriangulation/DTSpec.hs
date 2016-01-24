@@ -1,8 +1,11 @@
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 
+import Util
+
 import Test.Hspec
 import Control.Lens hiding (only)
 import Data.Geometry
+import Data.Maybe(mapMaybe)
 import Algorithms.Geometry.DelaunayTriangulation.Types
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror as DC
 import qualified Algorithms.Geometry.DelaunayTriangulation.Naive              as Naive
@@ -19,25 +22,19 @@ dtEdges = edges . DC.delaunayTriangulation
 
 take' i = NonEmpty.fromList . NonEmpty.take i
 
+--------------------------------------------------------------------------------
 
-isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
-xs `isShiftOf` ys = let rest = tail . C.leftElements
-                    in maybe False (\xs' -> rest xs' == rest ys) $
-                         C.focus ys >>= flip C.rotateTo xs
 
-sameAsNaive       :: (Fractional r, Ord r, Show p, Show r)
-                  => String -> NonEmpty.NonEmpty (Point 2 r :+ p) -> Spec
-sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
-                      (Naive.delaunayTriangulation pts
-                       `sameEdges`
-                       DC.delaunayTriangulation pts) `shouldBe` True
-
-sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
-triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `isShiftOf` (adjB V.! b))
-                      $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
+-- | Point sets per color, Crosses form the solution
+readInput    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readInput fp = fmap f <$> readSinglePageFile fp
   where
-    adjA = triA^.neighbours
-    adjB = triB^.neighbours
+    f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint :+ ()) pSet
+             | pSet <- byStrokeColour' syms
+             ]
+      where
+        syms = page^..content.traverse._IpeUse
+        byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
 
 spec :: Spec
 spec = do
@@ -46,13 +43,34 @@ spec = do
       dtEdges (take' 1 myPoints) `shouldBe` []
     sameAsNaive "myPoints" myPoints
 
--- main = do
---          page <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
---          let pts = page^..content.traverse._IpeUse
---              dt  = delaunayTriangulation $ NonEmpty.fromList pts
---          print dt
+
+data TestCase r = TestCase { _color    :: String
+                           , _pointSet :: NonEmpty.NonEmpty (Point 2 r :+ ())
+                           } deriving (Show,Eq)
 
 
+toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
+toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
+                            sameAsNaive c pts
+
+sameAsNaive       :: (Fractional r, Ord r, Show p, Show r)
+                  => String -> NonEmpty.NonEmpty (Point 2 r :+ p) -> Spec
+sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
+                      (Naive.delaunayTriangulation pts
+                       `sameEdges`
+                       DC.delaunayTriangulation pts) `shouldBe` True
+
+isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
+xs `isShiftOf` ys = let rest = tail . C.leftElements
+                    in maybe False (\xs' -> rest xs' == rest ys) $
+                         C.focus ys >>= flip C.rotateTo xs
+
+sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
+triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `isShiftOf` (adjB V.! b))
+                      $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
+  where
+    adjA = triA^.neighbours
+    adjB = triB^.neighbours
 
 
 
