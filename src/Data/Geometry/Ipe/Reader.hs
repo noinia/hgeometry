@@ -3,7 +3,28 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
-module Data.Geometry.Ipe.Reader where
+module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
+                                 readRawIpeFile
+                               , readIpeFile
+                               , readSinglePageFile
+                               , ConversionError
+
+                               -- * Reading XML directly
+                               , fromIpeXML
+                               , readXML
+
+                               -- * Read classes
+                               , IpeReadText(..)
+                               , IpeRead(..)
+                               , IpeReadAttr(..)
+
+
+                               -- * Some low level implementation functions
+                               , ipeReadTextWith
+                               , ipeReadObject
+                               , ipeReadAttrs
+                               , ipeReadRec
+                               ) where
 
 import           Data.Proxy
 import           Data.Either(rights)
@@ -235,7 +256,7 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
 -- | Reader for records. Given a proxy of some ipe type i, and a proxy of an
 -- coordinate type r, read the IpeAttributes for i from the xml node.
 ipeReadAttrs     :: forall proxy proxy' i r f ats.
-                 ( f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                 ( f ~ AttrMapSym1 r, ats ~ AttributesOf i
                  , RecApplicative ats
                  , RecAll (Attr f) ats IpeReadAttr
                  , AllSatisfy IpeAttrName ats
@@ -265,7 +286,7 @@ readSymAttrs = readXML testSym
 -- | If we can ipeRead an ipe element, and we can ipeReadAttrs its attributes
 -- we can properly read an ipe object using ipeReadObject
 ipeReadObject           :: ( IpeRead (i r)
-                           , f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                           , f ~ AttrMapSym1 r, ats ~ AttributesOf i
                            ,  RecApplicative ats
                            , RecAll (Attr f) ats IpeReadAttr
                            , AllSatisfy IpeAttrName ats

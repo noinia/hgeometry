@@ -15,8 +15,7 @@ import Data.Geometry
 import Data.Geometry.Interval
 import Data.Geometry.Polygon
 import Data.Geometry.Ball(disk, insideBall)
-import Data.Geometry.Ipe hiding (disk, lookup')
-
+import Data.Geometry.Ipe
 
 
 -- We store all adjacency lists in clockwise order
@@ -61,4 +60,4 @@ edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
 
 drawTriangulation = IpeOut $ \tr ->
     let es = map (uncurry ClosedLineSegment) . edges $ tr
-    in asIpeGroup $ map (\e -> asIpeObjectWith lineSegment e mempty) es
+    in asIpeGroup $ map (\e -> asIpeObjectWith ipeLineSegment e mempty) es
