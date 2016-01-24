@@ -1,7 +1,7 @@
 module Data.Geometry.Polygon.Convex where
 
 import Data.Function(on)
-import Control.Lens hiding (only)
+import Control.Lens
 import Data.Ext
 import Data.Geometry
 import Data.Geometry.Polygon(fromPoints)
@@ -151,6 +151,6 @@ rotateRWhile p lst
 --------------------------------------------------------------------------------
 
 
-leftp = fromPoints . map only $ [point2 0 10, point2 5 15, point2 10 10, point2 6 0]
+leftp = fromPoints . map ext $ [point2 0 10, point2 5 15, point2 10 10, point2 6 0]
 
-rightp = fromPoints . map only $ [point2 30 20, point2 25 4, point2 20 7, point2 24 30]
+rightp = fromPoints . map ext $ [point2 30 20, point2 25 4, point2 20 7, point2 24 30]

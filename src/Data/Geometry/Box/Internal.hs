@@ -5,7 +5,7 @@
 module Data.Geometry.Box.Internal where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Semigroup.Foldable as F

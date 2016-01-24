@@ -4,7 +4,7 @@ module Data.Geometry.SubLine where
 import           Control.Applicative
 import qualified Data.Foldable as F
 import qualified Data.Traversable as T
-import Control.Lens hiding (only)
+import Control.Lens
 import Data.Ext
 import Data.Geometry.Interval
 import Data.Geometry.Line.Internal
@@ -89,7 +89,7 @@ instance (Ord r, Fractional r) =>
 
 
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r)
-fromLine l = SubLine (fmap Val l) (OpenInterval (only MinInfinity) (only MaxInfinity))
+fromLine l = SubLine (fmap Val l) (OpenInterval (ext MinInfinity) (ext MaxInfinity))
 
 
 -- testL :: SubLine 2 () (UnBounded Rational)

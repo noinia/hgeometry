@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
 
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -46,7 +46,7 @@ instance Arity d => Bifunctor (Ball d) where
 
 -- | Given two points on the diameter of the ball, construct a ball.
 fromDiameter     :: (Arity d, Fractional r) => Point d r -> Point d r -> Ball d () r
-fromDiameter p q = let c = p .+^ ((q .-. p) ^/ 2) in Ball (only c) (qdA c p)
+fromDiameter p q = let c = p .+^ ((q .-. p) ^/ 2) in Ball (ext c) (qdA c p)
 
 -- | Construct a ball given the center point and a point p on the boundary.
 fromCenterAndPoint     :: (Arity d, Num r) => Point d r :+ p -> Point d r :+ p -> Ball d p r
@@ -54,7 +54,7 @@ fromCenterAndPoint c p = Ball c $ qdA (c^.core) (p^.core)
 
 -- | A d dimensional unit ball centered at the origin.
 unitBall :: (Arity d, Num r) => Ball d () r
-unitBall = Ball (only origin) 1
+unitBall = Ball (ext origin) 1
 
 -- * Querying if a point lies in a ball
 
@@ -127,7 +127,7 @@ disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 disk p q r = match ((f p) `intersect` (f q)) $
        (H $ \NoIntersection -> Nothing)
-    :& (H $ \c@(Point _)    -> Just $ Ball (only c) (qdA c p))
+    :& (H $ \c@(Point _)    -> Just $ Ball (ext c) (qdA c p))
     :& (H $ \_              -> Nothing)
     :& RNil
        -- If the intersection is not a point, The two lines f p and f q are

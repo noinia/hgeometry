@@ -3,7 +3,7 @@ module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 import Util
 
 import Test.Hspec
-import Control.Lens hiding (only)
+import Control.Lens
 import Data.Geometry
 import Data.Maybe(mapMaybe)
 import Algorithms.Geometry.DelaunayTriangulation.Types
@@ -76,7 +76,7 @@ triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `isShiftOf` (adjB V.! b))
 
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map only $
+myPoints = NonEmpty.fromList . map ext $
            [ point2 1  3
            , point2 4  26
            , point2 5  17

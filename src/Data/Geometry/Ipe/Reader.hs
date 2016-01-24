@@ -29,7 +29,7 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
 import           Data.Proxy
 import           Data.Either(rights)
 import           Control.Applicative hiding (Const)
-import           Control.Lens hiding (only, Const, rmap)
+import           Control.Lens hiding (Const, rmap)
 
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -192,7 +192,7 @@ instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
 
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
-                                      pts  = map only $ s:q:mapMaybe (^?_LineTo) ls
+                                      pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
                                       poly = Polygon.fromPoints pts
                                       pl   = fromPoints pts
                                   in case xs of

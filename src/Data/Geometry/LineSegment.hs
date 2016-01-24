@@ -5,7 +5,7 @@ module Data.Geometry.LineSegment where
 import           Data.Ord(comparing)
 import           Control.Arrow((&&&))
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Semigroup
 import           Data.Ext
@@ -224,7 +224,7 @@ flipSegment s = let p = s^.start
                 in (s&start .~ q)&end .~ p
 
 -- testSeg :: LineSegment 2 () Rational
--- testSeg = LineSegment (Open $ only origin)  (Closed $ only (point2 10 0))
+-- testSeg = LineSegment (Open $ ext origin)  (Closed $ ext (point2 10 0))
 
 -- horL' :: Line 2 Rational
 -- horL' = horizontalLine 0

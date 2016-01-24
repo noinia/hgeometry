@@ -3,7 +3,7 @@
 module Data.Geometry.HalfLine where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Interval
@@ -61,8 +61,8 @@ instance (Num r, AlwaysTruePFT d) => IsTransformable (HalfLine d r) where
 halfLineToSubLine                :: (Arity d, Num r)
                                  => HalfLine d r -> SubLine d () (UnBounded r)
 halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
-                                   in SubLine l (Interval (Closed $ only (Val 0))
-                                                          (Open   $ only MaxInfinity))
+                                   in SubLine l (Interval (Closed $ ext (Val 0))
+                                                          (Open   $ ext MaxInfinity))
 
 
 fromSubLine               :: (Num r, Arity d) => SubLine d p (UnBounded r) -> Maybe (HalfLine d r)

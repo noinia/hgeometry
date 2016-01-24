@@ -2,11 +2,11 @@
 module Data.Geometry.Ipe.IpeOut where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ball hiding (disk)
+import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Types
@@ -158,7 +158,7 @@ fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 
 
 
-ls = (ClosedLineSegment (only origin) (only (point2 1 1)))
+ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
 
 
 testzz :: IpeObject Integer

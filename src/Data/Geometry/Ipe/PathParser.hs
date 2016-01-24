@@ -4,7 +4,7 @@ module Data.Geometry.Ipe.PathParser where
 
 import           Numeric
 
-import           Data.Ext(only)
+import           Data.Ext(ext)
 import           Control.Applicative
 import           Control.Monad
 
@@ -144,9 +144,9 @@ pCoordinate = fromSeq <$> pInteger <*> pDecimal
                 pDecimal = pMaybe (pChar '.' *> pInteger)
 
 pRectangle :: Coordinate r => Parser (Rectangle () r)
-pRectangle = (\p q -> fromCornerPoints (only p) (only q)) <$> pPoint
-                                                          <*  pWhiteSpace
-                                                          <*> pPoint
+pRectangle = (\p q -> fromCornerPoints (ext p) (ext q)) <$> pPoint
+                                                        <*  pWhiteSpace
+                                                        <*> pPoint
 
 pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate

@@ -7,7 +7,7 @@ import Control.Applicative((<$>))
 import Algorithms.Geometry.DelaunayTriangulation.Types
 import Control.Monad.State
 import Control.Monad.Reader
-import Control.Lens hiding (only)
+import Control.Lens
 import Data.Function(on)
 import qualified Data.Foldable as F
 import Data.Maybe(fromJust)
@@ -293,7 +293,7 @@ size' (Node _ s _) = s
 --------------------------------------------------------------------------------
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map only $
+myPoints = NonEmpty.fromList . map ext $
            [ point2 1  3
            , point2 4  26
            , point2 5  17
