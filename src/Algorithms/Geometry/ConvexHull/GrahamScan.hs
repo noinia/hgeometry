@@ -1,56 +1,45 @@
-module Algorithms.Geometry.ConvexHull.GrahamScan( ConvexHull(..)
-                                                , DegenerateCH
-                                                , convexHull
+module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 , upperHull
                                                 , lowerHull
+                                                , module Types
                                                 ) where
 
+import           Algorithms.Geometry.ConvexHull.Types as Types
 import           Control.Lens((^.))
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.List as L
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid
+import           Data.List.NonEmpty(NonEmpty(..))
 
 
--- | Two dimensional convex hulls
-newtype ConvexHull p r = ConvexHull { _hull :: (SimplePolygon p r) }
---                       deriving (Show,Eq)
+-- | O(n log n) time ConvexHull using Graham-Scan. The resulting polygon is
+-- given in clockwise order.
+convexHull            :: (Ord r, Num r)
+                      => NonEmpty (Point 2 r :+ p) -> ConvexHull p r
+convexHull (p :| []) = ConvexHull . fromPoints $ [p]
+convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
+                           uh  = NonEmpty.tail . hull' $         ps'
+                           lh  = NonEmpty.tail . hull' $ reverse ps'
+                       in ConvexHull . fromPoints $ lh ++ uh
 
-type DegenerateCH p r = Maybe (Point 2 r :+ p)
-
-
--- | O(n log n) time ConvexHull using Graham-Scan
-convexHull     :: (Ord r, Num r)
-               => [Point 2 r :+ p] -> Either (DegenerateCH p r) (ConvexHull p r)
-convexHull []  = Left Nothing
-convexHull [p] = Left (Just p)
-convexHull ps  = let ps' = L.sortBy incXdecY ps
-                     uh  = tail . hull' $         ps'
-                     lh  = tail . hull' $ reverse ps'
-                 in Right . ConvexHull . fromPoints $ lh ++ uh
-
-upperHull  :: (Ord r, Num r)
-           => [Point 2 r :+ p] -> Either (DegenerateCH p r) [Point 2 r :+ p]
+upperHull  :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
 upperHull = hull id
 
 
-lowerHull  :: (Ord r, Num r)
-           => [Point 2 r :+ p] -> Either (DegenerateCH p r) [Point 2 r :+ p]
+lowerHull :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
 lowerHull = hull reverse
 
 
 -- | Helper function so that that can compute both the upper or the lower hull, depending
 -- on the function f
-hull       :: (Ord r, Num r)
-           => ([Point 2 r :+ p] -> [Point 2 r :+ p])
-           -> [Point 2 r :+ p]
-           -> Either (DegenerateCH p r) [Point 2 r :+ p]
-hull _ []  = Left Nothing
-hull _ [p] = Left (Just p)
-hull f ps  = Right . hull' . f . L.sortBy incXdecY $ ps
-
-
+hull               :: (Ord r, Num r)
+                   => ([Point 2 r :+ p] -> [Point 2 r :+ p])
+                   -> NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+hull f h@(_ :| []) = h
+hull f pts         = hull' .  f
+                   . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
 incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
@@ -58,8 +47,8 @@ incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
 
 
 -- | Precondition: The list of input points is sorted
-hull'          :: (Ord r, Num r) => [Point 2 r :+ p] -> [Point 2 r :+ p]
-hull' (a:b:ps) = hull'' [b,a] ps
+hull'          :: (Ord r, Num r) => [Point 2 r :+ p] -> NonEmpty (Point 2 r :+ p)
+hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
   where
     hull'' h  []    = h
     hull'' h (p:ps) = hull'' (cleanMiddle (p:h)) ps

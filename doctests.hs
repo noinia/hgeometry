@@ -36,6 +36,7 @@ prefixWith s = map (\s' -> "src/" <> s <> s')
 
 
 dataModules = prefixWith "Data/" [ "Range.hs"
+                                 , "CircularList/Util.hs"
                                  ]
 
 geomModules = prefixWith "Data/Geometry/" [ "Point.hs"

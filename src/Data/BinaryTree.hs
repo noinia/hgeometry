@@ -7,6 +7,7 @@ import Data.Foldable
 import Data.List.NonEmpty(NonEmpty)
 import Data.Semigroup
 import Data.Traversable
+import Data.Semigroup.Foldable
 
 data BinLeafTree v a = Leaf a
                      | Node (BinLeafTree v a) v (BinLeafTree v a)
@@ -29,6 +30,8 @@ instance Measured v a => Measured v (BinLeafTree v a) where
 instance Foldable (BinLeafTree v) where
   foldMap f (Leaf a)     = f a
   foldMap f (Node l _ r) = foldMap f l `mappend` foldMap f r
+
+instance Foldable1 (BinLeafTree v)
 
 instance Traversable (BinLeafTree v) where
   traverse f (Leaf a)     = Leaf <$> f a
