@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 
 import Util
@@ -14,6 +15,7 @@ import Data.Geometry.Ipe
 import Data.Ext
 import Data.Traversable(traverse)
 import qualified Data.CircularList as C
+import qualified Data.CircularList.Util as CU
 import qualified Data.Map as M
 import qualified Data.Vector as V
 
@@ -23,6 +25,23 @@ dtEdges = edges . DC.delaunayTriangulation
 take' i = NonEmpty.fromList . NonEmpty.take i
 
 --------------------------------------------------------------------------------
+
+spec :: Spec
+spec = do
+  describe "Testing Divide and Conqueror Algorithm for Delaunay Triangulation" $ do
+    it "singleton " $ do
+      dtEdges (take' 1 myPoints) `shouldBe` []
+    toSpec (TestCase "myPoints" myPoints)
+
+
+ipeSpec :: Spec
+ipeSpec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
+
+testCases    :: FilePath -> Spec
+testCases fp = (runIO $ readInput fp) >>= \case
+    Left e    -> it "reading Delaunay Triangulation disk file" $
+                   expectationFailure $ "Failed to read ipe file " ++ show e
+    Right tcs -> mapM_ toSpec tcs
 
 
 -- | Point sets per color, Crosses form the solution
@@ -36,12 +55,6 @@ readInput fp = fmap f <$> readSinglePageFile fp
         syms = page^..content.traverse._IpeUse
         byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
 
-spec :: Spec
-spec = do
-  describe "Testing Divide and Conqueror Algorithm for Delaunay Triangulation" $ do
-    it "singleton " $ do
-      dtEdges (take' 1 myPoints) `shouldBe` []
-    sameAsNaive "myPoints" myPoints
 
 
 data TestCase r = TestCase { _color    :: String
@@ -60,13 +73,9 @@ sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
                        `sameEdges`
                        DC.delaunayTriangulation pts) `shouldBe` True
 
-isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
-xs `isShiftOf` ys = let rest = tail . C.leftElements
-                    in maybe False (\xs' -> rest xs' == rest ys) $
-                         C.focus ys >>= flip C.rotateTo xs
 
 sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
-triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `isShiftOf` (adjB V.! b))
+triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `CU.isShiftOf` (adjB V.! b))
                       $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
   where
     adjA = triA^.neighbours
