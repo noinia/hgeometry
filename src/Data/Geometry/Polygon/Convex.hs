@@ -10,6 +10,8 @@ import Data.Maybe(fromJust)
 
 type ConvexPolygon = SimplePolygon
 
+
+
 -- | Rotating Right <-> rotate clockwise
 
 -- Implementation of the Divide & Conqueror algorithm as described in:
@@ -151,6 +153,14 @@ rotateRWhile p lst
 --------------------------------------------------------------------------------
 
 
-leftp = fromPoints . map ext $ [point2 0 10, point2 5 15, point2 10 10, point2 6 0]
+-- leftp = fromPoints . map ext $ [point2 0 10, point2 5 15, point2 10 10, point2 6 0]
 
-rightp = fromPoints . map ext $ [point2 30 20, point2 25 4, point2 20 7, point2 24 30]
+-- rightp = fromPoints . map ext $ [point2 30 20, point2 25 4, point2 20 7, point2 24 30]
+
+
+-- testLeft = fromPoints . map ext $ [point2 1 3]
+-- testRight = fromPoints . map ext $ reverse [point2 4 26]
+
+-- test3 = fromPoints . map ext $ [point2 6 7]
+
+-- testz = (\(ch,_,_) -> ch) $ merge testLeft testRight
