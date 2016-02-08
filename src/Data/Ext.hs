@@ -9,6 +9,7 @@ import Data.Bifoldable
 import Data.Bitraversable
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
+import Data.Functor.Apply(liftF2)
 
 --------------------------------------------------------------------------------
 
@@ -34,7 +35,9 @@ instance Bitraversable (:+) where
   bitraverse f g (c :+ e) = (:+) <$> f c <*> g e
 
 instance Bifoldable1 (:+)
--- instance Bitraversable1 (:+)
+
+instance Bitraversable1 (:+) where
+  bitraverse1 f g (c :+ e) = liftF2 (:+) (f c) (g e)
 
 instance (Semigroup core, Semigroup extra) => Semigroup (core :+ extra) where
   (c :+ e) <> (c' :+ e') = c <> c' :+ e <> e'
