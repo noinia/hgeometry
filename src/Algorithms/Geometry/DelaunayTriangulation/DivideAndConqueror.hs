@@ -5,6 +5,7 @@ module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
 import Control.Applicative((<$>))
 import Algorithms.Geometry.DelaunayTriangulation.Types
+import Algorithms.Geometry.ConvexHull.GrahamScan as GS
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Lens
@@ -16,6 +17,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import qualified Data.IntMap.Strict as IM
 import qualified Data.CircularList as C
+import qualified Data.CircularList.Util as CU
 import Data.Geometry.Polygon.Convex(ConvexPolygon)
 import qualified Data.Geometry.Polygon.Convex as Convex
 import Data.Geometry.Polygon.Convex(focus', pred', succ')
@@ -33,12 +35,12 @@ import Data.BinaryTree
 import Debug.Trace
 import Data.Geometry.Ipe hiding (disk, lookup')
 
-main = do
-         Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
-         let syms = page^..content.traverse._IpeUse
-             pts  = map (\s -> s&core %~ (^.symbolPoint)) syms
-             dt  = delaunayTriangulation $ NonEmpty.fromList pts
-         showDT dt
+-- main = do
+--          Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
+--          let syms = page^..content.traverse._IpeUse
+--              pts  = map (\s -> s&core %~ (^.symbolPoint)) syms
+--              dt  = delaunayTriangulation $ NonEmpty.fromList pts
+--          showDT dt
 
 
 
@@ -101,28 +103,37 @@ delaunayTriangulation' pts mapping@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          pi       = lookup' vtxMap (p^.core)
                      in (IM.singleton pi C.empty, fromPoints [p])
-  | size' pts == 2 = let pts'@[p,q] = F.toList pts
-                         [pi,qi]    = map ((lookup' vtxMap) . (^.core)) pts'
-                     in ( IM.fromList [ (pi, C.singleton qi)
-                                      , (qi, C.singleton pi) ]
-                        , fromPoints pts'
-                        )
-  | size' pts == 3 = let pts'@[p,q,r] = F.toList pts
-                         [pi,qi,ri]   = map ((lookup' vtxMap) . (^.core)) pts'
-                     in ( IM.fromList [ (pi, C.fromList [qi, ri])
-                                      , (qi, C.fromList [ri, pi])
-                                      , (ri, C.fromList [pi, qi])
-                                      ]      -- TODO: Check orientations..
-                        , fromPoints pts'
-                        )
+  | size' pts <= 3 = let pts'            = NonEmpty.fromList . F.toList $ pts
+                         (ConvexHull ch) = GS.convexHull pts'
+                     in (fromHull vtxMap ch, ch)
+  -- | size' pts == 2 = let pts'@[p,q] = F.toList pts
+  --                        [pi,qi]    = map ((lookup' vtxMap) . (^.core)) pts'
+  --                    in ( IM.fromList [ (pi, C.singleton qi)
+  --                                     , (qi, C.singleton pi) ]
+  --                       , fromPoints pts'
+  --                       )
+  -- | size' pts == 3 = let pts'@[p,q,r] = F.toList pts
+  --                        [pi,qi,ri]   = map ((lookup' vtxMap) . (^.core)) pts'
+  --                    in ( IM.fromList [ (pi, C.fromList [qi, ri])
+  --                                     , (qi, C.fromList [ri, pi])
+  --                                     , (ri, C.fromList [pi, qi])
+  --                                     ]      -- TODO: Check orientations..
+  --                       , fromPoints pts'
+  --                       )
   | otherwise      = let (Node lt _ rt) = pts
                          (ld,lch)       = delaunayTriangulation' lt mapping
                          (rd,rch)       = delaunayTriangulation' rt mapping
                          (ch, bt, ut)   = Convex.merge lch rch
                      in trace ("HULLS: " ++ show (lch,rch)) $
-
                        (merge ld rd bt ut mapping, ch)
 
+-- | Given a polygon; construct the adjacency list representation
+-- pre: at least two elements
+fromHull vtxMap p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
+                                     . C.rightElements $ p^.outerBoundary
+                        es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
+                        f prv c nxt  = (c,C.fromList [prv, nxt])
+                    in IM.fromList es
 
 
 merge           :: (Ord r, Fractional r,      Show r, Show p)
@@ -246,15 +257,21 @@ insert' u v _ ad | trace ("insert' on " ++ show (u,v,ad)) False = undefined
 insert' u v (_,ptMap) ad = (\adj' -> trace ("ADJ: After Inserting " ++ show (u,v,adj')) adj')
                            .  IM.adjustWithKey (insert'' v) u . IM.adjustWithKey (insert'' u) v $ ad
   where
-    -- inserts a into the adjacency list of b
-    insert'' bi ai adjA = case C.toList adjA of
-        []     -> C.singleton bi
-        [ci]   -> C.fromList [ci,bi]
-        (ci:_) -> let a = ptMap V.! ai
-                      b = ptMap V.! bi
-                  in fromJust . C.rotateTo ci . C.insertL bi .
-                     Convex.rotateRWhile (\_ di -> trace "foo" $
-                       ptMap V.! di `Convex.isRightOf` (a,b)) $ adjA
+    -- inserts b into the adjacency list of a
+    insert'' bi ai adjA | traceShow ("insert'', ",bi,ai,adjA) False = undefined
+    insert'' bi ai adjA = CU.insertOrdBy (cwCmpAround (ptMap V.! ai) `on` (ptMap V.!)) bi adjA
+
+
+      -- case C.toList adjA of
+      --   []     -> C.singleton bi
+      --   [ci]   -> C.fromList [ci,bi]
+      --   (ci:_) -> let a = ptMap V.! ai
+      --                 b = ptMap V.! bi
+      --             in fromJust . C.rotateTo ci . C.insertL bi .
+      --                Convex.rotateRWhile (\_ di -> trace "foo" $
+      --                  ptMap V.! di `Convex.isRightOf` (a,b)) $ adjA
+
+                     -- this is weird: todo: take the initial head f; rotate while the the head comes before new in the order before new
 
 -- | Deletes an edge
 delete     :: VertexID -> VertexID -> Adj -> Adj
