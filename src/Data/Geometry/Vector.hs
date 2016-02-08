@@ -1,18 +1,20 @@
 module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
-                           , module FV
                            , module LV
                            , Affine(..)
+                           , qdA, distanceA
+                           , dot, norm
                            , isScalarMultipleOf
                            , scalarMultiple
                            ) where
 
+import           Data.Monoid
 import qualified Data.Foldable                    as F
 import           Data.Geometry.Vector.VectorFixed
 import           Data.Geometry.Vector.VectorFixed as GV
 import           Data.Maybe
-import           Data.Monoid
 import qualified Data.Vector.Fixed                as FV
-import           Linear.Affine(Affine(..))
+import           Linear.Affine(Affine(..), qdA, distanceA)
+import           Linear.Metric(dot,norm)
 import           Linear.Vector as LV
 
 
@@ -80,7 +82,7 @@ scalarMultiple'      :: (Eq r, Fractional r, GV.Arity d)
 scalarMultiple' u v = g . F.foldr mappend mempty $ FV.zipWith f u v
   where
     f 0  0  = Maybe -- we don't know lambda yet, but it may still be a scalar mult.
-    f ui 0  = No      -- Not a scalar multiple
+    f _  0  = No      -- Not a scalar multiple
     f ui vi = Yes $ ui / vi -- can still be a scalar multiple
 
     g No      = Nothing

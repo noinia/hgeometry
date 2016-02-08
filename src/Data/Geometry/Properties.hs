@@ -5,7 +5,7 @@
 module Data.Geometry.Properties where
 
 import           Control.Applicative
-import           Data.Maybe(isJust, mapMaybe, listToMaybe, fromJust)
+import           Data.Maybe(isJust)
 import           Data.Proxy
 import           Data.Vinyl.Core
 import           Data.Vinyl.Functor
@@ -13,7 +13,7 @@ import           Data.Vinyl.Lens
 import           Frames.CoRec
 import           GHC.TypeLits
 
-import qualified Data.Vinyl.TypeLevel as VTL
+
 
 --------------------------------------------------------------------------------
 

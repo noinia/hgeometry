@@ -2,11 +2,11 @@
 module Data.Geometry.Ipe.IpeOut where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Ball hiding (disk)
+import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Types
@@ -26,7 +26,7 @@ import           Data.Vinyl
 
 --------------------------------------------------------------------------------
 
-newtype IpeOut g i = IpeOut { asIpe :: g -> i }
+newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
@@ -70,26 +70,30 @@ class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   type DefaultIpeOut g :: * -> *
   defaultIpeOut :: IpeOut g (IpeObject' (DefaultIpeOut g) (NumType g))
 
+  -- defaultIpeObject :: RecApplicative (AttributesOf (DefaultIpeOut g))
+  --                  => IpeOut g (IpeObject (NumType g))
+  -- defaultIpeObject = IpeOut $ flip asIpeObject mempty
+
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
-  defaultIpeOut = diskMark
+  defaultIpeOut = ipeDiskMark
 
 instance HasDefaultIpeOut (LineSegment 2 p r) where
   type DefaultIpeOut (LineSegment 2 p r) = Path
-  defaultIpeOut = lineSegment
+  defaultIpeOut = ipeLineSegment
 
 instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
-  defaultIpeOut = disk
+  defaultIpeOut = ipeDisk
 
 --------------------------------------------------------------------------------
 -- * Point Converters
 
-mark   :: Text -> IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
-mark n = noAttrs . IpeOut $ flip Symbol n
+ipeMark   :: Text -> IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
+ipeMark n = noAttrs . IpeOut $ flip Symbol n
 
-diskMark :: IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
-diskMark = mark "mark/disk(sx)"
+ipeDiskMark :: IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
+ipeDiskMark = ipeMark "mark/disk(sx)"
 
 
 
@@ -118,27 +122,27 @@ defaultClipRectangle = boundingBox (point2 (-200) (-200)) <>
 -- line' r = IpeOut $ \l -> error "not implemented yet"
 
 
-lineSegment :: IpeOut (LineSegment 2 p r) (IpeObject' Path r)
-lineSegment = noAttrs $ fromPathSegment lineSegment'
+ipeLineSegment :: IpeOut (LineSegment 2 p r) (IpeObject' Path r)
+ipeLineSegment = noAttrs $ fromPathSegment ipeLineSegment'
 
-lineSegment' :: IpeOut (LineSegment 2 p r) (PathSegment r)
-lineSegment' = IpeOut $ PolyLineSegment . fromLineSegment . first (const ())
+ipeLineSegment' :: IpeOut (LineSegment 2 p r) (PathSegment r)
+ipeLineSegment' = IpeOut $ PolyLineSegment . fromLineSegment . first (const ())
 
 
-polyLine :: IpeOut (PolyLine 2 p r) (Path r)
-polyLine = fromPathSegment polyLine'
+ipePolyLine :: IpeOut (PolyLine 2 p r) (Path r)
+ipePolyLine = fromPathSegment ipePolyLine'
 
-polyLine' :: IpeOut (PolyLine 2 a r) (PathSegment r)
-polyLine' = IpeOut $ PolyLineSegment . first (const ())
+ipePolyLine' :: IpeOut (PolyLine 2 a r) (PathSegment r)
+ipePolyLine' = IpeOut $ PolyLineSegment . first (const ())
 
-disk :: Floating r => IpeOut (Disk p r) (IpeObject' Path r)
-disk = noAttrs . IpeOut $ asIpe circle . Boundary
+ipeDisk :: Floating r => IpeOut (Disk p r) (IpeObject' Path r)
+ipeDisk = noAttrs . IpeOut $ asIpe ipeCircle . Boundary
 
-circle :: Floating r => IpeOut (Circle p r) (Path r)
-circle = fromPathSegment circle'
+ipeCircle :: Floating r => IpeOut (Circle p r) (Path r)
+ipeCircle = fromPathSegment ipeCircle'
 
-circle' :: Floating r => IpeOut (Circle p r) (PathSegment r)
-circle' = IpeOut circle''
+ipeCircle' :: Floating r => IpeOut (Circle p r) (PathSegment r)
+ipeCircle' = IpeOut circle''
   where
     circle'' (Circle (c :+ _) r) = EllipseSegment m
       where
@@ -154,17 +158,17 @@ fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 
 
 
-ls = (ClosedLineSegment (only origin) (only (point2 1 1)))
+ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
 
 
 testzz :: IpeObject Integer
-testzz = asIpeObjectWith lineSegment ls $ mempty <> attr SStroke (IpeColor "red")
+testzz = asIpeObjectWith ipeLineSegment ls $ mempty <> attr SStroke (IpeColor "red")
 
 
 
 
--- test' :: Attributes (PathAttrElfSym1 Integer) (IpeObjectAttrF (Path Integer) (PathAttrElfSym1 Integer))
--- -- test' :: RecApplicative (IpeObjectAttrF (Path Integer) (IpeObjectSymbolF (Path Integer)))
+-- test' :: Attributes (PathAttrElfSym1 Integer) (AttributesOf (Path Integer) (PathAttrElfSym1 Integer))
+-- -- test' :: RecApplicative (AttributesOf (Path Integer) (IpeObjectSymbolF (Path Integer)))
 -- --       => IpeAttributes (Path Integer)
 -- test' = mempty
 

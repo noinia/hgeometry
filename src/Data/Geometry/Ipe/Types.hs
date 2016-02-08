@@ -215,19 +215,19 @@ instance Num r => IsTransformable (Group r) where
   transformBy t (Group s) = Group $ fmap (transformBy t) s
 
 
-type family IpeObjectAttrF (t :: * -> *) :: [u] where
-  IpeObjectAttrF Group     = GroupAttributes
-  IpeObjectAttrF Image     = CommonAttributes
-  IpeObjectAttrF TextLabel = CommonAttributes
-  IpeObjectAttrF MiniPage  = CommonAttributes
-  IpeObjectAttrF IpeSymbol = SymbolAttributes
-  IpeObjectAttrF Path      = PathAttributes
+type family AttributesOf (t :: * -> *) :: [u] where
+  AttributesOf Group     = GroupAttributes
+  AttributesOf Image     = CommonAttributes
+  AttributesOf TextLabel = CommonAttributes
+  AttributesOf MiniPage  = CommonAttributes
+  AttributesOf IpeSymbol = SymbolAttributes
+  AttributesOf Path      = PathAttributes
 
 
 -- | Attributes' :: * -> [AttributeUniverse] -> *
 type Attributes' r = Attributes (AttrMapSym1 r)
 
-type IpeAttributes g r = Attributes' r (IpeObjectAttrF g)
+type IpeAttributes g r = Attributes' r (AttributesOf g)
 
 
 -- | An IpeObject' is essentially the oject ogether with its attributes
@@ -278,7 +278,7 @@ instance Num r => IsTransformable (IpeObject r) where
 commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
 commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
   where
-    select :: (CommonAttributes ⊆ IpeObjectAttrF g) =>
+    select :: (CommonAttributes ⊆ AttributesOf g) =>
               Lens' (IpeObject' g r) (Rec (Attr (AttrMapSym1 r)) CommonAttributes)
     select = attributes.unAttrs.rsubset
 
@@ -373,7 +373,7 @@ singlePageFromContent = singlePageFile . fromContent
 
 -- | Takes and applies the ipe Matrix attribute of this item.
 applyMatrix'              :: ( IsTransformable (i r)
-                             , AT.Matrix ∈ IpeObjectAttrF i
+                             , AT.Matrix ∈ AttributesOf i
                              , Dimension (i r) ~ 2, r ~ NumType (i r))
                           => IpeObject' i r -> IpeObject' i r
 applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ ats') mm
@@ -392,3 +392,9 @@ applyMatrix (IpeTextLabel i) = IpeTextLabel $ applyMatrix' i
 applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
 applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
 applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
+
+applyMatrices   :: Num r => IpeFile r -> IpeFile r
+applyMatrices f = f&pages.traverse %~ applyMatricesPage
+
+applyMatricesPage   :: Num r => IpePage r -> IpePage r
+applyMatricesPage p = p&content.traverse %~ applyMatrix

@@ -4,7 +4,7 @@ module Data.Geometry.Polygon where
 
 
 import           Control.Applicative
-import           Control.Lens hiding (Simple, only)
+import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Semigroup
@@ -29,12 +29,12 @@ import           Linear.Vector(Additive(..), (^*), (^/))
 {- $setup
 >>> :{
 let simplePoly :: SimplePolygon () Rational
-    simplePoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
-                                                         , point2 10 0
-                                                         , point2 10 10
-                                                         , point2 5 15
-                                                         , point2 1 11
-                                                         ]
+    simplePoly = SimplePolygon . C.fromList . map ext $ [ point2 0 0
+                                                        , point2 10 0
+                                                        , point2 10 10
+                                                        , point2 5 15
+                                                        , point2 1 11
+                                                        ]
 :} -}
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
@@ -232,12 +232,12 @@ q `insidePolygon` pg = q `inPolygon` pg == Inside
 --                                    ]
 
 -- testPoly :: SimplePolygon () Rational
--- testPoly = SimplePolygon . C.fromList . map only $ [ point2 0 0
---                                                    , point2 10 0
---                                                    , point2 10 10
---                                                    , point2 5 15
---                                                    , point2 1 11
---                                                    ]
+-- testPoly = SimplePolygon . C.fromList . map ext $ [ point2 0 0
+--                                                   , point2 10 0
+--                                                   , point2 10 10
+--                                                   , point2 5 15
+--                                                   , point2 1 11
+--                                                   ]
 
 -- | Compute the area of a polygon
 area                        :: Fractional r => Polygon t p r -> r
@@ -269,6 +269,12 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
 -- clockwise order.
 isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
 isCounterClockwise = (\x -> x == abs x) . signedArea . asSimplePolygon
+
+-- | Orient the outer boundary to clockwise order
+toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder p
+  | isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
+  | otherwise            = p
 
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r

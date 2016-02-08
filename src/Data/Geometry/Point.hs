@@ -3,33 +3,23 @@
 module Data.Geometry.Point where
 
 import           Control.Applicative
+import           Data.Monoid(mconcat)
 import           Control.Lens
-import           Data.Monoid
 import           Data.Proxy
-
--- import Data.TypeLevel.Common
-import           Data.Typeable
-import           Data.Vinyl hiding (Nat)
-import qualified Data.Vinyl as V
-import           Data.Vinyl.Functor(Const(..))
-import qualified Data.Vinyl.TypeLevel as TV
-
-import           Data.Vinyl.TypeLevel hiding (Nat)
 
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
--- import qualified Data.Vector.Fixed.Cont as C
+import qualified Data.List as L
 
-
+import           Data.Ext
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           GHC.TypeLits
 
 import qualified Data.Geometry.Vector as Vec
-
-import           Linear.Vector(Additive(..))
-import           Linear.Affine hiding (Point(..), origin)
+import qualified Data.CircularList as C
+import qualified Data.CircularList.Util as CU
 
 --------------------------------------------------------------------------------
 
@@ -204,6 +194,8 @@ yCoord = coord (C :: C 2)
 zCoord :: (3 <=. d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
 
+
+
 --------------------------------------------------------------------------------
 -- * Point Functors
 
@@ -234,3 +226,138 @@ ccw p q r = case z `compare` 0 of
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
        z             = ux * vy - uy * vx
+
+sortArround'   :: (Ord r, Num r)
+               => Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+sortArround' c = L.sortBy (ccwCmpAround c)
+
+
+-- | Sort the points arround the given point p in counter clockwise order with
+-- respect to the rightward horizontal ray starting from p.  If two points q
+-- and r are colinear with p, the closest one to p is reported first.
+-- running time: O(n log n)
+sortArround       :: (Ord r, Num r)
+                  => Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+sortArround p pts = concatMap sortArround' [ topR, topL, bottomL, bottomR ]
+  where
+    (topL, topR, bottomL, bottomR) = partitionIntoQuadrants p pts
+    sortArround' = L.sortBy cmp
+
+    cmp q r = case ccw (p^.core) (q^.core) (r^.core) of
+                CCW      -> LT
+                CW       -> GT
+                CoLinear -> qdA (p^.core) (q^.core) `compare` qdA (p^.core) (r^.core)
+
+-- | Quadrants of two dimensional points. in CCW order
+data Quadrant = TopRight | TopLeft | BottomLeft | BottomRight
+              deriving (Show,Read,Eq,Ord,Enum,Bounded)
+
+
+-- | Quadrants around point c; quadrants are closed on their "previous"
+-- boundary (i..e the boundary with the previous quadrant in the CCW order),
+-- open on next boundary. The origin itself is assigned the topRight quadrant
+quadrantWith                   :: (Arity d, Ord r, 1 <=. d, 2 <=. d)
+                               => Point d r :+ q -> Point d r :+ p -> Quadrant
+quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
+                                      , (c^.yCoord) `compare` (p^.yCoord) ) of
+                                   (EQ, EQ) -> TopRight
+                                   (LT, EQ) -> TopRight
+                                   (LT, LT) -> TopRight
+                                   (EQ, LT) -> TopLeft
+                                   (GT, LT) -> TopLeft
+                                   (GT, EQ) -> BottomLeft
+                                   (GT, GT) -> BottomLeft
+                                   (EQ, GT) -> BottomRight
+                                   (LT, GT) -> BottomRight
+
+-- | Quadrants with respect to the origin
+quadrant :: (Arity d, Ord r, Num r, 1 <=. d, 2 <=. d) => Point d r :+ p -> Quadrant
+quadrant = quadrantWith (ext origin)
+
+
+-- | Given a center point c, and a set of points, partition the points into
+-- quadrants around c (based on their x and y coordinates). The quadrants are
+-- reported in the order topLeft, topRight, bottomLeft, bottomRight. The points
+-- are in the same order as they were in the original input lists.
+-- Points with the same x-or y coordinate as p, are "rounded" to above.
+partitionIntoQuadrants       :: (Ord r, Arity d, 1 <=. d, 2 <=. d)
+                             => Point d r :+ q
+                             -> [Point d r :+ p]
+                             -> ( [Point d r :+ p], [Point d r :+ p]
+                                , [Point d r :+ p], [Point d r :+ p]
+                                )
+partitionIntoQuadrants c pts = (topL, topR, bottomL, bottomR)
+  where
+    (below',above')   = L.partition (on yCoord) pts
+    (bottomL,bottomR) = L.partition (on xCoord) below'
+    (topL,topR)       = L.partition (on xCoord) above'
+
+    on l q       = q^.core.l < c^.core.l
+
+-- | Counter clockwise ordering of the points around c. Points are ordered with
+-- respect to the positive x-axis.
+-- Points nearer to the center come before
+-- points further away.
+ccwCmpAround       :: (Num r, Ord r)
+                   => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+ccwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
+                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
+                         CCW      -> LT
+                         CW       -> GT
+                         CoLinear -> qdA (c^.core) (q^.core)
+                                     `compare`
+                                     qdA (c^.core) (r^.core)
+                       x -> x -- if the quadrant differs, use the order
+                              -- specified by the quadrant.
+
+-- | Clockwise ordering of the points around c. Points are ordered with
+-- respect to the positive x-axis. Points nearer to the center come before
+-- points further away.
+cwCmpAround       :: (Num r, Ord r)
+                  => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+cwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
+                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
+                         CCW      -> GT
+                         CW       -> LT
+                         CoLinear -> qdA (c^.core) (q^.core)
+                                     `compare`
+                                     qdA (c^.core) (r^.core)
+                       LT -> GT
+                       GT -> LT -- if the quadrant differs, use the order
+                                -- specified by the quadrant.
+
+
+
+-- | Given a center c, a new point p, and a list of points ps, sorted in
+-- counter clockwise order around c. Insert p into the cyclic order. The focus
+-- of the returned cyclic list is the new point p.
+--
+-- running time: O(n)
+insertIntoCyclicOrder   :: (Ord r, Num r)
+                        => Point 2 r :+ q -> Point 2 r :+ p
+                        -> C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
+insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c)
+
+
+  -- C.fromList $ case (on xCoord p, on yCoord p) of
+  --   (False, True)  -> (insert' topL) ++ bottomL ++ bottomR ++ topR
+  --   (True, True)   -> (insert' topR) ++ topL ++ bottomL ++ bottomR
+  --   (False, False) -> (insert' bottomL) ++ bottomR ++ topR ++ topL
+  --   (True, False)  -> (insert' bottomR) ++ topR ++ topL ++ bottomL
+  -- where
+  --   (topL, topR, bottomL, bottomR) = partitionIntoQuadrants p $ C.leftElements pts
+  --   on l q = q^.core.l < c^.core.l
+  --   insert' = L.insertBy (ccwCmpAround c) p
+
+
+-- -- | given c, p, and a list of points pts in counter-clockwise order around
+-- -- c. Split the list into points before p in the order, and points after the
+-- -- order.
+-- splitCCW c p []         = ([],[])
+-- splitCCW c p (s:q:rest) = case ccwCmpAround c s q of
+--                             LT -> -- there
+
+--                               -- q occurs before p
+
+
+-- -- insertCCW c p (s:pts =

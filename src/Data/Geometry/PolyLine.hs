@@ -9,7 +9,6 @@ import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
-import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -64,8 +63,8 @@ fromPoints' = fromPoints . map (\p -> p :+ mempty)
 
 
 -- | We consider the line-segment as closed.
-fromLineSegment                    :: LineSegment d p r -> PolyLine d p r
-fromLineSegment (LineSegment' p q) = fromPoints [p,q]
+fromLineSegment                     :: LineSegment d p r -> PolyLine d p r
+fromLineSegment ~(LineSegment' p q) = fromPoints [p,q]
 
 -- | Convert to a closed line segment by taking the first two points.
 asLineSegment                              :: PolyLine d p r -> LineSegment d p r

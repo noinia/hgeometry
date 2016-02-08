@@ -88,7 +88,7 @@ Main Algorithm
 ---------------
 
 > maxBaseArea   :: PointSet -> Area
-> maxBaseArea p = case convexHull $ map only p of
+> maxBaseArea p = case convexHull $ map ext p of
 >     Left _                  -> 0
 >     Right ch@(ConvexHull h) -> case C.toList $ h ^. outerBoundary of
 >                                  [_,_]   -> 0
@@ -197,7 +197,7 @@ ternary search.
 >                          -> Unimodal (Array Int) (Point 2 Int) -> Triangle () Int
 > findLargestTriang p q us = triang . ternarySearchArray area' $ us
 >   where
->     triang v = Triangle (only p) (only q) (only v)
+>     triang v = Triangle (ext p) (ext q) (ext v)
 >     area' = triangArea . triang
 
 

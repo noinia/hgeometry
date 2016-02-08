@@ -15,7 +15,7 @@ module Data.Geometry.TrapezoidalMap( Trapezoid(..)
                                    ) where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Control.Monad.State.Class
 import           Control.Monad.State.Persistent
 import           Data.Ext
@@ -139,7 +139,7 @@ top t = trim <$> leftX t <*> rightX t <*> topSupport t
 
 trim              :: (Ord r, Fractional r)
                   => r -> r -> LineSegment 2 p r :+ e -> LineSegment 2 () r :+ e
-trim l r (s :+ e) = let closed = Closed . only in
+trim l r (s :+ e) = let closed = Closed . ext in
                     LineSegment (closed $ atXCoord l s) (closed $ atXCoord r s) :+ e
 
 --------------------------------------------------------------------------------

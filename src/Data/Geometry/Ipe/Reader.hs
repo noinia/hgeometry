@@ -3,12 +3,33 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
-module Data.Geometry.Ipe.Reader where
+module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
+                                 readRawIpeFile
+                               , readIpeFile
+                               , readSinglePageFile
+                               , ConversionError
+
+                               -- * Reading XML directly
+                               , fromIpeXML
+                               , readXML
+
+                               -- * Read classes
+                               , IpeReadText(..)
+                               , IpeRead(..)
+                               , IpeReadAttr(..)
+
+
+                               -- * Some low level implementation functions
+                               , ipeReadTextWith
+                               , ipeReadObject
+                               , ipeReadAttrs
+                               , ipeReadRec
+                               ) where
 
 import           Data.Proxy
 import           Data.Either(rights)
 import           Control.Applicative hiding (Const)
-import           Control.Lens hiding (only, Const, rmap)
+import           Control.Lens hiding (Const, rmap)
 
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -51,11 +72,18 @@ type ConversionError = Text
 
 
 -- | Given a file path, tries to read an ipe file
+readRawIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
+readRawIpeFile = fmap fromIpeXML . B.readFile
+
+
+-- | Given a file path, tries to read an ipe file. This function applies all
+-- matrices to objects.
 readIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
-readIpeFile = fmap fromIpeXML . B.readFile
+readIpeFile = fmap (bimap id applyMatrices) . readRawIpeFile
+
 
 -- | Since most Ipe file contain only one page, we provide a shortcut for that
--- as well.
+-- as well. This function applies all matrices.
 readSinglePageFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpePage r))
 readSinglePageFile = fmap f . readIpeFile
   where
@@ -67,7 +95,6 @@ readSinglePageFile = fmap f . readIpeFile
 fromIpeXML   :: (Coordinate r, IpeRead (t r))
              => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = readXML b >>= ipeRead
-
 
 -- | Reads the data from a Bytestring into a proper Node
 readXML :: B.ByteString -> Either ConversionError (Node Text Text)
@@ -165,7 +192,7 @@ instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
 
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
-                                      pts  = map only $ s:q:mapMaybe (^?_LineTo) ls
+                                      pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
                                       poly = Polygon.fromPoints pts
                                       pl   = fromPoints pts
                                   in case xs of
@@ -229,7 +256,7 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
 -- | Reader for records. Given a proxy of some ipe type i, and a proxy of an
 -- coordinate type r, read the IpeAttributes for i from the xml node.
 ipeReadAttrs     :: forall proxy proxy' i r f ats.
-                 ( f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                 ( f ~ AttrMapSym1 r, ats ~ AttributesOf i
                  , RecApplicative ats
                  , RecAll (Attr f) ats IpeReadAttr
                  , AllSatisfy IpeAttrName ats
@@ -242,6 +269,8 @@ ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy at
 
 testSym :: B.ByteString
 testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
+
+
 
 
 -- readAttrsFromXML :: B.ByteString -> Either
@@ -257,7 +286,7 @@ readSymAttrs = readXML testSym
 -- | If we can ipeRead an ipe element, and we can ipeReadAttrs its attributes
 -- we can properly read an ipe object using ipeReadObject
 ipeReadObject           :: ( IpeRead (i r)
-                           , f ~ AttrMapSym1 r, ats ~ IpeObjectAttrF i
+                           , f ~ AttrMapSym1 r, ats ~ AttributesOf i
                            ,  RecApplicative ats
                            , RecAll (Attr f) ats IpeReadAttr
                            , AllSatisfy IpeAttrName ats

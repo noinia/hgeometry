@@ -15,7 +15,7 @@ module Data.Geometry.Interval-- (
        where
 
 import           Control.Applicative
-import           Control.Lens(makeLenses, (^.),(%~),(.~),(&), Lens')
+import           Control.Lens(makeLenses, (^.),(%~),(&), Lens')
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -35,7 +35,7 @@ newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
 makeLenses ''Interval
 
 instance (Show a, Show r) => Show (Interval a r) where
-  show (Interval l u) = concat [ "Interval (", show l, ") (", show u,")"]
+  show ~(Interval l u) = concat [ "Interval (", show l, ") (", show u,")"]
 
 instance Functor (Interval a) where
   fmap = T.fmapDefault
@@ -108,7 +108,7 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
     where
       f x = Arg (x^.core) x
       r' = fmap f r
-      s' = fmap f r
+      s' = fmap f s
 
       g (Arg _ x) = x
 

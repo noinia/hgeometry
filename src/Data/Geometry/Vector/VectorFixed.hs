@@ -3,17 +3,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Vector.VectorFixed where
 
+import           Data.Monoid
 import           Control.Applicative
 import           Control.Lens
-import           Data.Monoid
-
-import           Data.Proxy
-
 import           Data.Foldable
 import           Data.Traversable
 
 import           Data.Vector.Fixed.Boxed
-import           Data.Vector.Fixed.Cont(Z(..),S(..),ToPeano(..),ToNat(..))
+import           Data.Vector.Fixed.Cont(Z, S, ToPeano)
 
 import           GHC.TypeLits
 
@@ -106,8 +103,8 @@ u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
 --------------------------------------------------------------------------------
 
 -- | Conversion to a Linear.V3
-toV3   :: Vector 3 a -> L3.V3 a
-toV3 (Vector3 a b c) = L3.V3 a b c
+toV3                  :: Vector 3 a -> L3.V3 a
+toV3 ~(Vector3 a b c) = L3.V3 a b c
 
 -- | Conversion from a Linear.V3
 fromV3               :: L3.V3 a -> Vector 3 a

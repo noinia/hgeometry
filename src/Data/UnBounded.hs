@@ -30,14 +30,14 @@ pattern ValT x = GTop (Just x)
 pattern Top    = GTop Nothing
 
 instance Ord a => Ord (Top a) where
-  Top      `compare` Top      = EQ
-  _        `compare` Top      = LT
-  Top      `compare` _        = GT
-  (ValT x) `compare` (ValT y) = x `compare` y
+  Top       `compare` Top      = EQ
+  _         `compare` Top      = LT
+  Top       `compare` _        = GT
+  ~(ValT x) `compare` ~(ValT y) = x `compare` y
 
 instance Show a => Show (Top a) where
-  show (ValT x) = "ValT " ++ show x
-  show Top      = "Top"
+  show Top       = "Top"
+  show ~(ValT x) = "ValT " ++ show x
 
 --------------------------------------------------------------------------------
 
@@ -47,14 +47,14 @@ instance Show a => Show (Top a) where
 --
 -- >>> data Bottom a = ValB
 newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
-                 deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad)
+                 deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
 pattern Bottom = GBottom Nothing
 pattern ValB x = GBottom (Just x)
 
 instance Show a => Show (Bottom a) where
-  show Bottom   = "Bottom"
-  show (ValB x) = "ValB " ++ show x
+  show Bottom    = "Bottom"
+  show ~(ValB x) = "ValB " ++ show x
 
 --------------------------------------------------------------------------------
 
@@ -73,12 +73,18 @@ instance Show a => Show (UnBounded a) where
 
 instance Num a => Num (UnBounded a) where
   MinInfinity + _           = MinInfinity
+  _           + MinInfinity = MinInfinity
   (Val x)     + (Val y)     = Val $ x + y
   _           + MaxInfinity = MaxInfinity
+  MaxInfinity + _           = MaxInfinity
+
 
   MinInfinity * _           = MinInfinity
+  _           * MinInfinity = MinInfinity
+
   (Val x)     * (Val y)     = Val $ x * y
   _           * MaxInfinity = MaxInfinity
+  MaxInfinity * _           = MaxInfinity
 
   abs MinInfinity = MinInfinity
   abs (Val x)     = Val $ abs x

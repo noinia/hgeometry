@@ -5,7 +5,7 @@
 module Data.Geometry.Box.Internal where
 
 import           Control.Applicative
-import           Control.Lens hiding (only)
+import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Semigroup.Foldable as F
@@ -16,11 +16,7 @@ import           Data.Geometry.Transformation
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
-import           Data.Maybe(catMaybes, maybe)
 import           Data.Semigroup
-import           Data.Vinyl
-import           Frames.CoRec
-import           Linear.Affine((.-.))
 
 import qualified Data.Vector.Fixed                as FV
 
@@ -157,7 +153,6 @@ corners :: Num r => Rectangle p r -> ( Point 2 r :+ p
                                      , Point 2 r :+ p
                                      )
 corners r     = let w = width r
-                    h = height r
                     p = (_maxP r)&core %~ getMax
                     q = (_minP r)&core %~ getMin
                 in ( p&core.xCoord %~ (subtract w)
