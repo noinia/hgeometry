@@ -11,6 +11,7 @@ import           Data.Geometry.Interval
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
+import           Data.Ord(comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
@@ -144,3 +145,33 @@ toLinearFunction l@(Line _ (Vector2 vx vy)) = match (l `intersect` verticalLine 
     :& (H $ \(Point2 _ b)   -> Just (vy / vx,b))
     :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
     :& RNil
+
+-- | Result of a side test
+data SideTest = Below | On | Above deriving (Show,Read,Eq,Ord)
+
+-- | Given a point q and a line l, compute to which side of l q lies. For
+-- vertical lines the left side of the line is interpeted as below.
+--
+-- >>> point2 10 10 `onSide` (lineThrough origin $ point2 10 5)
+-- Above
+-- >>> point2 10 10 `onSide` (lineThrough origin $ point2 (-10) 5)
+-- Above
+-- >>> point2 5 5 `onSide` (verticalLine 10)
+-- Below
+-- >>> point2 5 5 `onSide` (lineThrough origin $ point2 (-3) (-3))
+-- On
+onSide                :: (Ord r, Num r) => Point 2 r -> Line 2 r -> SideTest
+q `onSide` (Line p v) = let r    =  p .+^ v
+                            f z         = (z^.xCoord, -z^.yCoord)
+                            minBy g a b = F.minimumBy (comparing g) [a,b]
+                            maxBy g a b = F.maximumBy (comparing g) [a,b]
+                        in case ccw (minBy f p r) (maxBy f p r) q of
+                          CCW      -> Above
+                          CW       -> Below
+                          CoLinear -> On
+
+
+
+-- | Test if the query point q lies (strictly) above line l
+liesAbove       :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
+q `liesAbove` l = q `onSide` l == Above
