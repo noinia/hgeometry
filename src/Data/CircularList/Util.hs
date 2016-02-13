@@ -1,9 +1,11 @@
 module Data.CircularList.Util where
 
 import           Control.Lens
-
+import           Data.Tuple
 import qualified Data.CircularList as C
 import qualified Data.List as L
+
+import Debug.Trace
 
 -- $setup
 -- >>> let ordList = C.fromList [5,6,10,20,30,1,2,3]
@@ -15,6 +17,9 @@ import qualified Data.List as L
 --
 -- >>> insertOrd 1 C.empty
 -- fromList [1]
+-- >>> insertOrd 1 $ C.fromList [2]
+-- fromList [1,2]
+-- >> insertOrd 2 $ C.fromList [1,3]
 -- >>> insertOrd 31 ordList
 -- fromList [5,6,10,20,30,31,1,2,3]
 -- >>> insertOrd 1 ordList
@@ -25,7 +30,6 @@ import qualified Data.List as L
 -- fromList [5,6,10,11,20,30,1,2,3]
 insertOrd :: Ord a => a -> C.CList a -> C.CList a
 insertOrd = insertOrdBy compare
-
 
 -- | Insert an element into an increasingly ordered circular list, with
 -- specified compare operator.
@@ -42,11 +46,25 @@ insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     (_:_,  LT) -> rest ++ L.insertBy cmp x pref
   where
     -- split the list at its maximum.
-    (rest,pref) = bimap f (map snd)
-                . L.break (\(a,b) -> (a `cmp` b == GT)) $ zip xs (tail xs)
+    (pref,rest) = splitIncr cmp xs
 
-    f []         = []
-    f ((a,b):bs) = a:b:map snd bs
+-- given a list of elements that is supposedly a a cyclic-shift of a list of
+-- increasing items, find the splitting point. I.e. returns a pair of lists
+-- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted
+-- order.
+splitIncr              :: (a -> a -> Ordering) -> [a] -> ([a],[a])
+splitIncr _   []       = ([],[])
+splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
+                      . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
+
+
+  -- go [] xs
+  -- where
+  --   go acc []           = (reverse acc,[])
+  --   go acc [x]          = (reverse acc, [x])
+  --   go acc (x:y:xs)
+  --     | x `cmp` y == GT = (reverse (x:acc), y:xs)
+  --     | otherwise       = go (x:acc) (y:xs)
 
 -- | Test if the circular list is a cyclic shift of the second list.
 -- Running time: O(n), where n is the size of the smallest list
