@@ -22,7 +22,7 @@ convexHull (p :| []) = ConvexHull . fromPoints $ [p]
 convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in ConvexHull . fromPoints $ lh ++ uh
+                       in ConvexHull . fromPoints . reverse $ lh ++ uh
 
 upperHull  :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
 upperHull = hull id

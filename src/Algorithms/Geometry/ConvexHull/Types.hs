@@ -10,5 +10,5 @@ import           Data.Geometry.Polygon
 
 -- | Two dimensional convex hulls
 newtype ConvexHull p r = ConvexHull { _extractHull :: (SimplePolygon p r) }
---                       deriving (Show,Eq)
+                       deriving (Show,Eq)
 makeLenses ''ConvexHull
