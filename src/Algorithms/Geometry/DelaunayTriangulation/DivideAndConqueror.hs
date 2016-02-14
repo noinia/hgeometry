@@ -11,7 +11,9 @@ import Control.Monad.Reader
 import Control.Lens
 import Data.Function(on)
 import qualified Data.Foldable as F
-import Data.Maybe(fromJust)
+import Data.Maybe(fromJust, fromMaybe)
+
+import qualified Data.List as L
 import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
@@ -20,7 +22,7 @@ import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import Data.Geometry.Polygon.Convex(ConvexPolygon)
 import qualified Data.Geometry.Polygon.Convex as Convex
-import Data.Geometry.Polygon.Convex(focus', pred', succ')
+import Data.Geometry.Polygon.Convex(focus')
 import Data.Ext
 import Data.Geometry
 import Data.Geometry.Interval
@@ -47,6 +49,7 @@ import Data.Geometry.Ipe hiding (disk, lookup')
 -- instance HasDefaultIpeOut (Triangulation p r) where
 --   type DefaultIpeOut (Triangulation p r) = Group
 --   defaultIpeOut =
+
 
 
 --------------------------------------------------------------------------------
@@ -93,19 +96,23 @@ type Adj = IM.IntMap (C.CList VertexID)
 
 -- : pre: - Input points are sorted lexicographically
 
+withID      :: c :+ e -> e' -> c :+ (e :+ e')
+withID p pi = p&extra %~ (:+pi)
 
 delaunayTriangulation'   :: (Ord r, Fractional r,      Show r, Show p)
                          => BinLeafTree Size (Point 2 r :+ p)
                          -> Mapping p r
-                         -> (Adj, ConvexPolygon p r)
+                         -> (Adj, ConvexPolygon (p :+ VertexID) r)
 delaunayTriangulation' pts mapping@(vtxMap,_)
   | trace ("DT " ++ show (size' pts)) False = undefined
   | size' pts == 1 = let (Leaf p) = pts
                          pi       = lookup' vtxMap (p^.core)
-                     in (IM.singleton pi C.empty, fromPoints [p])
-  | size' pts <= 3 = let pts'            = NonEmpty.fromList . F.toList $ pts
+                     in (IM.singleton pi C.empty, fromPoints [withID p pi])
+  | size' pts <= 3 = let pts'            = NonEmpty.fromList
+                                         . map (\p -> withID p (lookup' vtxMap (p^.core)))
+                                         . F.toList $ pts
                          (ConvexHull ch) = GS.convexHull pts'
-                     in (fromHull vtxMap ch, ch)
+                     in (fromHull mapping ch, ch)
   -- | size' pts == 2 = let pts'@[p,q] = F.toList pts
   --                        [pi,qi]    = map ((lookup' vtxMap) . (^.core)) pts'
   --                    in ( IM.fromList [ (pi, C.singleton qi)
@@ -124,43 +131,55 @@ delaunayTriangulation' pts mapping@(vtxMap,_)
                          (ld,lch)       = delaunayTriangulation' lt mapping
                          (rd,rch)       = delaunayTriangulation' rt mapping
                          (ch, bt, ut)   = Convex.merge lch rch
-                     in trace ("HULLS: " ++ show (lch,rch)) $
-                       (merge ld rd bt ut mapping, ch)
+                     in trace ("HULLS: " ++ show (lch,rch, bt)) $
+                       (merge ld rd bt ut mapping (firsts ch), ch)
+
+
+-- | Mapping that says for each vtx in the convex hull what the first entry in
+-- the adj. list should be. The input polygon is given in Clockwise order
+firsts    :: SimplePolygon (p :+ VertexID) r -> IM.IntMap VertexID
+firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
+       . C.toList . outerBoundaryEdges
+
+
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
-fromHull vtxMap p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                     . C.rightElements $ p^.outerBoundary
-                        es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
-                        f prv c nxt  = (c,C.fromList [prv, nxt])
-                    in IM.fromList es
+
+fromHull              :: Ord r => Mapping p r -> SimplePolygon (p :+ q) r -> Adj
+fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
+                                         . C.rightElements $ p^.outerBoundary
+                            es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
+                            f prv c nxt  = (c,C.fromList . L.nub $ [prv, nxt])
+                        in IM.fromList es
 
 
 merge           :: (Ord r, Fractional r,      Show r, Show p)
                    => Adj
                 -> Adj
-                -> LineSegment 2 p r
-                -> LineSegment 2 p r
+                -> LineSegment 2 (p :+ VertexID) r
+                -> LineSegment 2 (p :+ VertexID) r
                 -> Mapping p r
+                -> Firsts
                 -> Adj
-merge ld rd bt ut mapping@(vtxMap,_)
+merge ld rd bt ut mapping@(vtxMap,_) fsts
   | trace ("Merge " ++ show (ld,rd,bt,ut)) False = undefined
   | otherwise                        = let l   = lookup' vtxMap (bt^.start.core)
                                            r   = lookup' vtxMap (bt^.end.core)
                                            tl  = lookup' vtxMap (ut^.start.core)
                                            tr  = lookup' vtxMap (ut^.end.core)
                                            adj = ld `IM.union` rd
-                                       in flip runReader mapping . flip execStateT adj $
-                                          moveUp (tl,tr) l r
+                                       in   flip runReader (mapping, fsts)
+                                          . flip execStateT adj $ moveUp (tl,tr) l r
+
+type Firsts = IM.IntMap VertexID
+
+type Merge p r = StateT Adj (Reader (Mapping p r, Firsts))
 
 
-type Merge p r = StateT Adj (Reader (Mapping p r))
-
-
-lookup'' :: Show a => Int -> IM.IntMap a -> a
-lookup'' k m | traceShow (m,k) False = undefined
+lookup'' :: Int -> IM.IntMap a -> a
+-- lookup'' k m | traceShow (m,k) False = undefined
 lookup'' k m = fromJust . IM.lookup k $ m
-
 
 moveUp :: (Ord r, Fractional r,      Show r, Show p)
                      => (VertexID,VertexID) -> VertexID -> VertexID -> Merge p r ()
@@ -169,13 +188,19 @@ moveUp ut l r
   | (l,r) == ut = insert l r
   | otherwise   = do
                      trace ("============ STARTING ITERATION WITH " ++ show (l,r)) (pure ())
-                     -- Get the neighbours of r and l along the convex hull
-                     r1 <- lookup'' r <$> get
-                     l1 <- lookup'' l <$> get
-                     trace ("NEIGHBORS OF " ++ show l ++ ": " ++ show l1) (pure ())
                      trace ("INSERTING " ++ show (l,r)) insert l r
+
+                     adj <- get
+                     trace ("Current adj:" ++ show adj) (pure ())
+                     -- Get the neighbours of r and l along the convex hull
+                     r1 <- pred' . rotateTo l . lookup'' r <$> get
+                     l1 <- succ' . rotateTo r . lookup'' l <$> get
+
+                     trace ("R1, L1:" ++ show (r1,l1)) (pure ())
                      (r1',a) <- rotateR l r r1
+                     trace ("RotateR result: " ++ show (r1',a)) (pure ())
                      (l1',b) <- rotateL l r l1
+                     trace ("RotateL result: " ++ show (l1',b)) (pure ())
                      c       <- qTest l r r1' l1'
                      let (l',r') = case (a,b,c) of
                                      (True,_,_)          -> (focus' l1', r)
@@ -183,6 +208,9 @@ moveUp ut l r
                                      (False,False,True)  -> (l,          focus' r1')
                                      (False,False,False) -> (focus' l1', r)
                      moveUp ut l' r'
+
+
+
 
 -- | ''rotates'' around r and removes all neighbours of r that violate the
 -- delaunay condition. Returns the first vertex (as a Neighbour of r) that
@@ -236,7 +264,7 @@ rotateL' l r l1' l2' = go l1' l2'
 -- by the first three points.
 qTest         :: (Ord r, Fractional r)
               => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Bool
-qTest h i j k = withPtMap . snd <$> ask
+qTest h i j k = withPtMap . snd . fst <$> ask
   where
     withPtMap ptMap = let h' = ptMap V.! h
                           i' = ptMap V.! i
@@ -247,14 +275,31 @@ qTest h i j k = withPtMap . snd <$> ask
 
 -- | Inserts an edge into the right position.
 insert     :: (Num r, Ord r) => VertexID -> VertexID -> Merge p r ()
-insert u v = ask >>= modify . insert' u v
+insert u v = do
+               (mapping,fsts) <- ask
+               modify $ insert' u v mapping
+               rotateToFirst u fsts
+               rotateToFirst v fsts
+               adj <- get
+               trace ("ADJ: After Insert " ++ show (u,v,adj)) (pure ())
+
+
+-- | make sure that the first vtx in the adj list of v is its predecessor on the CH
+rotateToFirst        :: VertexID -> Firsts -> Merge p r ()
+rotateToFirst v fsts = modify $ IM.adjust f v
+  where
+    mfst   = IM.lookup v fsts
+    f  cl  = fromMaybe cl $ mfst >>= flip C.rotateTo cl
+
+
+
 
 -- | Inserts an edge (and makes sure that the vertex is inserted in the
 -- correct. pos in the adjacency lists)
 insert'               :: (Num r, Ord r)
                       => VertexID -> VertexID -> Mapping p r -> Adj -> Adj
 insert' u v _ ad | trace ("insert' on " ++ show (u,v,ad)) False = undefined
-insert' u v (_,ptMap) ad = (\adj' -> trace ("ADJ: After Inserting " ++ show (u,v,adj')) adj')
+insert' u v (_,ptMap) ad = (\adj' -> trace ("ADJ: After Insert' " ++ show (u,v,adj')) adj')
                            .  IM.adjustWithKey (insert'' v) u . IM.adjustWithKey (insert'' u) v $ ad
   where
     -- inserts b into the adjacency list of a
@@ -285,13 +330,13 @@ delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
 -- | Lifted version of Convex.IsLeftOf
 isLeftOf           :: (Ord r, Num r)
                    => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isLeftOf` (l,r) = withPtMap . snd <$> ask
+p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
   where
     withPtMap ptMap = (ptMap V.! p) `Convex.isLeftOf` (ptMap V.! l, ptMap V.! r)
 
 -- | Lifted version of Convex.IsRightOf
 isRightOf :: (Ord r, Num r) => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isRightOf` (l,r) = withPtMap . snd <$> ask
+p `isRightOf` (l,r) = withPtMap . snd . fst <$> ask
   where
     withPtMap ptMap = (ptMap V.! p) `Convex.isRightOf` (ptMap V.! l, ptMap V.! r)
 
@@ -299,7 +344,7 @@ p `isRightOf` (l,r) = withPtMap . snd <$> ask
 -- * Some Helper functions
 
 
-lookup'     :: (Ord k, Show a, Show k) => M.Map k a -> k -> a
+lookup'     :: Ord k => M.Map k a -> k -> a
 -- lookup' m x | traceShow (m,x) False = undefined
 lookup' m x = fromJust $ M.lookup x m
 
@@ -307,19 +352,46 @@ size'              :: BinLeafTree Size a -> Size
 size' (Leaf _)     = 1
 size' (Node _ s _) = s
 
+-- | an 'unsafe' version of rotateTo that assumes the element to rotate to
+-- occurs in the list.
+rotateTo   :: Eq a => a -> C.CList a -> C.CList a
+rotateTo x = fromJust . C.rotateTo x
+
+-- | Adjacency lists are stored in clockwise order, so pred means rotate right
+pred' :: C.CList a -> C.CList a
+pred' = C.rotR
+
+-- | Adjacency lists are stored in clockwise order, so pred and succ rotate left
+succ' :: C.CList a -> C.CList a
+succ' = C.rotL
+
+
 --------------------------------------------------------------------------------
 
-myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map ext $
-           [ point2 1  3
-           , point2 4  26
-           , point2 5  17
-           , point2 6  7
-           -- , point2 12 16
-           -- , point2 19 4
-           -- , point2 20 0
-           -- , point2 20 11
-           -- , point2 23 23
-           -- , point2 31 14
-           -- , point2 33 5
-           ]
+-- myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
+-- myPoints = NonEmpty.fromList . map ext $
+--            [ point2 1  3
+--            , point2 4  26
+--            , point2 5  17
+--            , point2 6  7
+--            -- , point2 12 16
+--            , point2 19 4
+--            -- , point2 20 0
+--            -- , point2 20 11
+--            -- , point2 23 23
+--            -- , point2 31 14
+--            -- , point2 33 5
+--            ]
+
+-- test = mapM_ print . edges . delaunayTriangulation $ myPoints
+
+
+-- res = Convex.merge (fromPoints $ map ext
+--                     [point2 1 3, point2 4 26]) (fromPoints $ map ext [point2 5 17, point2 6 7])
+
+-- chs = (GS.convexHull . NonEmpty.fromList $ map ext [point2 5 17, point2 6 7, point2 19 4])
+
+
+
+-- cl = C.fromList $ map ext [ point2 5 17, point2 6 7]
+-- xs = CU.insertOrdBy (cwCmpAround (ext $ point2 19 4)) (ext $ point2 1 3) cl

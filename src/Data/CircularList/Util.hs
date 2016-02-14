@@ -57,15 +57,6 @@ splitIncr _   []       = ([],[])
 splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
                       . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
 
-
-  -- go [] xs
-  -- where
-  --   go acc []           = (reverse acc,[])
-  --   go acc [x]          = (reverse acc, [x])
-  --   go acc (x:y:xs)
-  --     | x `cmp` y == GT = (reverse (x:acc), y:xs)
-  --     | otherwise       = go (x:acc) (y:xs)
-
 -- | Test if the circular list is a cyclic shift of the second list.
 -- Running time: O(n), where n is the size of the smallest list
 isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
