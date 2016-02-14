@@ -18,8 +18,9 @@ import Debug.Trace
 -- >>> insertOrd 1 C.empty
 -- fromList [1]
 -- >>> insertOrd 1 $ C.fromList [2]
--- fromList [1,2]
--- >> insertOrd 2 $ C.fromList [1,3]
+-- fromList [2,1]
+-- >>> insertOrd 2 $ C.fromList [1,3]
+-- fromList [1,2,3]
 -- >>> insertOrd 31 ordList
 -- fromList [5,6,10,20,30,31,1,2,3]
 -- >>> insertOrd 1 ordList

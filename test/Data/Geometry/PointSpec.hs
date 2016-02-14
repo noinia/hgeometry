@@ -10,7 +10,7 @@ spec :: Spec
 spec = do
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
-      sortArround' (ext origin) (map ext [ point2 (-3) (-3)
+      sortArround (ext origin) (map ext [ point2 (-3) (-3)
                                         , point2 (-1) (-5)
                                         , point2 5    5
                                         , point2 6    (-4)
@@ -39,13 +39,13 @@ spec = do
                          , point2 26   (-2)
                          ]
     it "degenerate points on horizontal line" $
-      sortArround' (ext origin) (map ext [ point2 2    0
+      sortArround (ext origin) (map ext [ point2 2    0
                                         , point2 (-1) 0
                                         , point2 10   0
                                         ])
       `shouldBe` map ext [ point2 2 0, point2 10 0, point2 (-1) 0 ]
     it "degenerate points on vertical line" $
-      sortArround' (ext origin) (map ext [ point2 0 2
+      sortArround (ext origin) (map ext [ point2 0 2
                                         , point2 0 (-1)
                                         , point2 0 10
                                         ])
