@@ -13,10 +13,9 @@ import Data.Functor.Apply(liftF2)
 
 --------------------------------------------------------------------------------
 
-data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord)
+data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded)
 infixr 1 :+
 
--- data Ext extra core = core :+ extra deriving (Show,Read,Eq,Ord)
 
 instance Bifunctor (:+) where
   bimap f g (c :+ e) = f c :+ g e

@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Polygon where
 
