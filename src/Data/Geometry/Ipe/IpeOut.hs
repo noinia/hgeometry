@@ -88,7 +88,7 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
 
 instance HasDefaultIpeOut (PolyLine 2 p r) where
   type DefaultIpeOut (PolyLine 2 p r) = Path
-  defaultIpeOut = ipePolyLine
+  defaultIpeOut = noAttrs ipePolyLine
 
 
 --------------------------------------------------------------------------------
