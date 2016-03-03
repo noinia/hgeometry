@@ -9,6 +9,7 @@ module Data.Geometry.Ipe.Writer where
 import           Control.Applicative hiding (Const(..))
 import           Control.Lens((^.),(^..),(.~),(&), Prism', (#), to)
 import           Data.Ext
+import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
@@ -142,11 +143,11 @@ instance IpeWriteText Double where
 instance IpeWriteText Int where
   ipeWriteText = writeByShow
 
+instance HasResolution p => IpeWriteText (Fixed p) where
+  ipeWriteText = writeByShow
 
 writeByShow :: Show t => t -> Maybe Text
 writeByShow = ipeWriteText . T.pack . show
-
-
 
 unwords' :: [Maybe Text] -> Maybe Text
 unwords' = fmap T.unwords . sequence
