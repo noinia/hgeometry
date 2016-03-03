@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
-import Control.Applicative((<$>))
+import Control.Applicative
 import Algorithms.Geometry.DelaunayTriangulation.Types
 import Control.Monad.State
 import Control.Monad.Reader
