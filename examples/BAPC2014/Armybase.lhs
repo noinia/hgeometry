@@ -27,7 +27,7 @@ $O(n^2 \log n)$ solution.
 > import qualified Data.Array   as A
 > import qualified Data.List     as L
 > import qualified Data.CircularList as C
-
+> import qualified Data.List.NonEmpty as NonEmpty
 
 Preliminaries
 -------------
@@ -87,13 +87,13 @@ TODO
 Main Algorithm
 ---------------
 
-> maxBaseArea   :: PointSet -> Area
-> maxBaseArea p = case convexHull $ map ext p of
->     Left _                  -> 0
->     Right ch@(ConvexHull h) -> case C.toList $ h ^. outerBoundary of
->                                  [_,_]   -> 0
->                                  [a,b,c] -> triangArea $ Triangle a b c
->                                  _       -> maxAreaQuadrangle ch
+> maxBaseArea    :: PointSet -> Area
+> maxBaseArea [] = 0
+> maxBaseArea p  = case convexHull . NonEmpty.fromList $ map ext p of
+>     ch@(ConvexHull h) -> case C.toList $ h ^. outerBoundary of
+>                            [_,_]   -> 0
+>                            [a,b,c] -> triangArea $ Triangle a b c
+>                            _       -> maxAreaQuadrangle ch
 
 
 <div class="observation">

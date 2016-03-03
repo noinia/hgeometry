@@ -3,6 +3,7 @@ module BAPC2012.Gunslinger where
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens
 import qualified Data.CircularList as C
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ext
 import           Data.Fixed
 import           Data.Geometry.Point
@@ -93,10 +94,11 @@ data Input = Input { _luke  :: Point 2 Int
 -- hatch lie on the hull, but in the interior of some edge, they are not
 -- contained in the hull.
 escape                :: Input -> Answer
-escape (Input l h ds) = case convexHull $ (l :+ Luke) : (h :+ Hatch) : map (:+ Dalton) ds of
+escape (Input l h ds) = case convexHull . NonEmpty.fromList $
+                               (l :+ Luke) : (h :+ Hatch) : map (:+ Dalton) ds of
     -- all positions are distinct, so the hull has at least two elements
-    Right (ConvexHull poly) -> case C.findRotateTo (\p -> p^.extra == Luke) $
-                                       poly^.outerBoundary of
+    ConvexHull poly -> case C.findRotateTo (\p -> p^.extra == Luke) $
+                              poly^.outerBoundary of
       Nothing -> Impossible
       Just h  -> (distanceToHatch $ C.leftElements h)
                  `min`

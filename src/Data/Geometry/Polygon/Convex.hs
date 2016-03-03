@@ -116,7 +116,6 @@ upperTangent (SimplePolygon l) (SimplePolygon r) = rotate xx yy zz zz'
       | otherwise                                 = ClosedLineSegment (focus' x)
                                                                       (focus' y)
 
-
 isRightOf           :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
 a `isRightOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CW
@@ -148,19 +147,3 @@ rotateRWhile p lst
                   xs' = C.rotR xs
                   nxt = focus' xs'
               in if p cur nxt then go xs' else xs
-
-
---------------------------------------------------------------------------------
-
-
--- leftp = fromPoints . map ext $ [point2 0 10, point2 5 15, point2 10 10, point2 6 0]
-
--- rightp = fromPoints . map ext $ [point2 30 20, point2 25 4, point2 20 7, point2 24 30]
-
-
--- testLeft = fromPoints . map ext $ [point2 1 3]
--- testRight = fromPoints . map ext $ reverse [point2 4 26]
-
--- test3 = fromPoints . map ext $ [point2 6 7]
-
--- testz = (\(ch,_,_) -> ch) $ merge testLeft testRight

@@ -90,11 +90,11 @@ myPoints = NonEmpty.fromList . map ext $
            , point2 4  26
            , point2 5  17
            , point2 6  7
-           -- , point2 12 16
-           -- , point2 19 4
-           -- , point2 20 0
-           -- , point2 20 11
-           -- , point2 23 23
-           -- , point2 31 14
-           -- , point2 33 5
+           , point2 12 16
+           , point2 19 4
+           , point2 20 0
+           , point2 20 11
+           , point2 23 23
+           , point2 31 14
+           , point2 33 5
            ]
