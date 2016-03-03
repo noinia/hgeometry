@@ -59,11 +59,13 @@ import qualified Data.Text as T
 -- writeIpe p fp g = writeIpeFile (p # g) fp
 
 -- | Write an IpeFiele to file.
+writeIpeFile :: IpeWriteText r => FilePath -> IpeFile r -> IO ()
+writeIpeFile = flip writeIpeFile'
 
--- writeIpeFile :: ( RecAll (Page r) gs IpeWrite
---                 , IpeWriteText r
---                 ) => IpeFile gs r -> FilePath -> IO ()
--- writeIpeFile = writeIpeFile'
+-- | Creates a single page ipe file with the given page
+writeIpePage    :: IpeWriteText r => FilePath -> IpePage r -> IO ()
+writeIpePage fp = writeIpeFile fp . singlePageFile
+
 
 -- | Convert the input to ipeXml, and prints it to standard out in such a way
 -- that the copied text can be pasted into ipe as a geometry object.

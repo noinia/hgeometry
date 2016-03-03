@@ -86,6 +86,11 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
   defaultIpeOut = ipeDisk
 
+instance HasDefaultIpeOut (PolyLine 2 p r) where
+  type DefaultIpeOut (PolyLine 2 p r) = Path
+  defaultIpeOut = ipePolyLine
+
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
