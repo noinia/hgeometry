@@ -32,7 +32,10 @@ source-repository head
   location: https://github.com/noinia/hgeometry
 
 
-
+flag demos
+  description: Build demonstration programs
+  default:     False
+  manual:      True
 
 library
   exposed-modules:  Data.Geometry
@@ -129,9 +132,8 @@ library
                , bifunctors       >= 4.1
                -- , validation       >= 0.4
 
-               , containers       >= 0.5
                , parsec           >= 3
-               -- , tranformers      >= 0.3
+               -- , tranformers      > 0.3
 
                , vector           >= 0.10
                , fixed-vector     >= 0.6.4.0
@@ -142,14 +144,59 @@ library
                , random
 
 
-               -- , time
-               -- , directory
+               , time
+               , directory
 
 
   hs-source-dirs: src
                   -- examples/demo
 
   default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+
+                    , PatternSynonyms
+                    , ViewPatterns
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , AutoDeriveTypeable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
+executable demo
+  if !flag(demos)
+    buildable: False
+  main-is: demo/WriteEnsemble.hs
+
+  if flag(demos)
+    build-depends: base
+                 , hgeometry
+                 , lens
+                 , containers
+                 , vinyl
+                 , Frames
+                 , text
+                 , directory
+                 , time
+
+
+  hs-source-dirs: examples
+
+  default-language: Haskell2010
 
   default-extensions: TypeFamilies
                     , GADTs
