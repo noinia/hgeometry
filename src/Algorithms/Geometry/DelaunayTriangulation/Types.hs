@@ -2,6 +2,7 @@
 {-# LANGUAGE TupleSections #-}
 module Algorithms.Geometry.DelaunayTriangulation.Types where
 
+import Data.Monoid(mempty)
 import Control.Lens hiding (only)
 import qualified Data.Foldable as F
 import Data.Maybe(fromJust)

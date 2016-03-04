@@ -2,6 +2,7 @@ module Algorithms.Geometry.DelaunayTriangulation.Naive where
 
 import Algorithms.Geometry.DelaunayTriangulation.Types
 
+import Control.Applicative
 import Control.Monad(forM_)
 import Control.Lens hiding (only)
 import qualified Data.Foldable as F

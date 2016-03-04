@@ -9,6 +9,7 @@ module Data.Geometry.Ipe.Writer where
 import           Control.Applicative hiding (Const(..))
 import           Control.Lens((^.),(^..),(.~),(&), Prism', (#), to)
 import           Data.Ext
+import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
@@ -59,11 +60,13 @@ import qualified Data.Text as T
 -- writeIpe p fp g = writeIpeFile (p # g) fp
 
 -- | Write an IpeFiele to file.
+writeIpeFile :: IpeWriteText r => FilePath -> IpeFile r -> IO ()
+writeIpeFile = flip writeIpeFile'
 
--- writeIpeFile :: ( RecAll (Page r) gs IpeWrite
---                 , IpeWriteText r
---                 ) => IpeFile gs r -> FilePath -> IO ()
--- writeIpeFile = writeIpeFile'
+-- | Creates a single page ipe file with the given page
+writeIpePage    :: IpeWriteText r => FilePath -> IpePage r -> IO ()
+writeIpePage fp = writeIpeFile fp . singlePageFile
+
 
 -- | Convert the input to ipeXml, and prints it to standard out in such a way
 -- that the copied text can be pasted into ipe as a geometry object.
@@ -140,11 +143,11 @@ instance IpeWriteText Double where
 instance IpeWriteText Int where
   ipeWriteText = writeByShow
 
+instance HasResolution p => IpeWriteText (Fixed p) where
+  ipeWriteText = writeByShow
 
 writeByShow :: Show t => t -> Maybe Text
 writeByShow = ipeWriteText . T.pack . show
-
-
 
 unwords' :: [Maybe Text] -> Maybe Text
 unwords' = fmap T.unwords . sequence
