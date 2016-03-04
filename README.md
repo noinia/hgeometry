@@ -22,15 +22,17 @@ that a polyline is a proper polyline, and thus has at least two vertices.
 
 Please note that aspect (2), implementing good algorithms, is much work in
 progress. HGeometry currently has only very basic types, and implements only
-two algorithms: an (optimal) $O(n \log n)$ time algorithm for convex hull, and
-an $O(n)$ expected time algorithm for smallest enclosing disk (both in $R^2$).
+a few algorithms:
 
-Current work is on implementing $O(n \log n + k)$ time red-blue line segment
-intersection. This would also allow for efficient polygon intersection and map
-overlay.
+* two (optimal) $O(n \log n)$ time algorithms for convex hull in
+  $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
+* an $O(n)$ expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
+* the well-known Douglas Peucker polyline line simplification algorithm,
+* an $O(n \log n)$ time Delanay triangulation algorithm (using divide and conqueror).
 
-A Note on the Ext (:+) data type
----------------------------------
+
+
+A Note on the Ext (:+) data type ---------------------------------
 
 In many applications we do not just have geometric data, e.g. `Point d r`s or
 `Polygon r`s, but instead, these types have some additional properties, like a
