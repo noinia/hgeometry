@@ -35,7 +35,6 @@ import Data.BinaryTree
 
 
 import Debug.Trace
-import Data.Geometry.Ipe hiding (disk, lookup')
 
 -- main = do
 --          Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
@@ -368,20 +367,20 @@ succ' = C.rotL
 
 --------------------------------------------------------------------------------
 
--- myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
--- myPoints = NonEmpty.fromList . map ext $
---            [ point2 1  3
---            , point2 4  26
---            , point2 5  17
---            , point2 6  7
---            -- , point2 12 16
---            , point2 19 4
---            -- , point2 20 0
---            -- , point2 20 11
---            -- , point2 23 23
---            -- , point2 31 14
---            -- , point2 33 5
---            ]
+myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
+myPoints = NonEmpty.fromList . map ext $
+           [ point2 1  3
+           , point2 4  26
+           , point2 5  17
+           , point2 6  7
+           -- , point2 12 16
+           , point2 19 4
+           -- , point2 20 0
+           -- , point2 20 11
+           -- , point2 23 23
+           -- , point2 31 14
+           -- , point2 33 5
+           ]
 
 -- test = mapM_ print . edges . delaunayTriangulation $ myPoints
 
