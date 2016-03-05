@@ -21,6 +21,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Maybe(catMaybes, mapMaybe, fromMaybe)
+import           Data.Ratio
 import           Data.Semigroup
 import           Data.Proxy
 import qualified Data.Traversable as Tr
@@ -145,6 +146,13 @@ instance IpeWriteText Int where
 
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow
+
+-- | This instance converts the ratio to a Pico, and then displays that.
+instance Integral a => IpeWriteText (Ratio a) where
+  ipeWriteText = ipeWriteText . f . fromRational . toRational
+    where
+      f :: Pico -> Pico
+      f = id
 
 writeByShow :: Show t => t -> Maybe Text
 writeByShow = ipeWriteText . T.pack . show

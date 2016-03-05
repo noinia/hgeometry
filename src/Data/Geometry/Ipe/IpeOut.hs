@@ -13,6 +13,7 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Box
+import           Data.Geometry.Polygon
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -90,6 +91,10 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
   type DefaultIpeOut (PolyLine 2 p r) = Path
   defaultIpeOut = noAttrs ipePolyLine
 
+instance HasDefaultIpeOut (SimplePolygon p r) where
+  type DefaultIpeOut (SimplePolygon p r) = Path
+  defaultIpeOut = flip addAttributes ipeSimplePolygon $
+                    mempty <> attr SFill (IpeColor "red")
 
 --------------------------------------------------------------------------------
 -- * Point Converters
@@ -159,6 +164,13 @@ ipeCircle' = IpeOut circle''
 -- | Helper to construct a IpeOut g Path, for when we already have an IpeOut g PathSegment
 fromPathSegment    :: IpeOut g (PathSegment r) -> IpeOut g (Path r)
 fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
+
+ipeSimplePolygon :: IpeOut (SimplePolygon p r) (Path r)
+ipeSimplePolygon = fromPathSegment . IpeOut $ PolygonPath . dropExt
+  where
+    dropExt                    :: SimplePolygon p r -> SimplePolygon () r
+    dropExt (SimplePolygon vs) = SimplePolygon $ fmap (&extra .~ ()) vs
+
 
 
 
