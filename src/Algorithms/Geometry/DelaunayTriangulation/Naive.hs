@@ -4,7 +4,8 @@ import Algorithms.Geometry.DelaunayTriangulation.Types
 
 import Control.Applicative
 import Control.Monad(forM_)
-import Control.Lens hiding (only)
+import Control.Lens
+import Data.Function(on)
 import qualified Data.Foldable as F
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -20,11 +21,14 @@ import qualified Data.List as L
 -- | Naive O(n^4) time implementation of the delaunay triangulation. Simply
 -- tries each triple (p,q,r) and tests if it is delaunay, i.e. if there are no
 -- other points in the circle defined by p, q, and r.
+--
+-- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
+-- input does contain duplicate points, the implementation throws them away)
 delaunayTriangulation     :: (Ord r, Fractional r,       Show r, Show p)
                           => NonEmpty.NonEmpty (Point 2 r :+ p) -> Triangulation p r
 delaunayTriangulation pts = Triangulation ptIds ptsV adjV
   where
-    ptsV   = V.fromList . F.toList $ pts
+    ptsV   = V.fromList . F.toList . NonEmpty.nubBy ((==) `on` (^.core)) $ pts
     ptIds  = M.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
     adjV   = toAdjLists (ptIds,ptsV) . extractEdges $ fs
     n      = V.length ptsV - 1
