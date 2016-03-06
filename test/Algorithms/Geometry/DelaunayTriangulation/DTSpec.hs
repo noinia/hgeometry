@@ -33,7 +33,7 @@ spec = do
       dtEdges (take' 1 myPoints) `shouldBe` []
     toSpec (TestCase "myPoints" myPoints)
     toSpec (TestCase "myPoints'" myPoints')
-    -- ipeSpec
+    ipeSpec
 
 ipeSpec :: Spec
 ipeSpec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"

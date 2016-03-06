@@ -250,7 +250,7 @@ rotateR' l r r1' r2' = go r1' r2'
     go r1 r2 = qTest l r r1 r2 >>= \case
                  True  -> pure r1
                  False -> do modify $ delete r (focus' r1)
-                             go r2 (pred' r1)
+                             go r2 (pred' r2)
 
 
 
@@ -275,7 +275,7 @@ rotateL' l r l1' l2' = go l1' l2'
     go l1 l2 = qTest l r l1 l2 >>= \case
                  True  -> pure l1
                  False -> do modify $ delete l (focus' l1)
-                             go l2 (succ' l1)
+                             go l2 (succ' l2)
 
 
 
