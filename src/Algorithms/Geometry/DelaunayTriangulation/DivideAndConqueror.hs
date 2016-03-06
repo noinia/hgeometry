@@ -53,13 +53,14 @@ input = [ point2 64  736
 testz = delaunayTriangulation . NonEmpty.fromList . map ext $ input
 
 main = do
-         Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
+         Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt1.ipe"
          let syms = page^..content.traverse._IpeUse
              pts  = map (&extra .~ ()) $ map (\s -> s&core %~ (^.symbolPoint)) syms
              dt  = delaunayTriangulation $ NonEmpty.fromList pts
-         -- mapM_ (\(p :+ _) -> print p) pts
+         pure dt
+         -- -- mapM_ (\(p :+ _) -> print p) pts
          -- print dt
-         printAsIpeSelection $ asIpe drawTriangulation dt
+         -- printAsIpeSelection $ asIpe drawTriangulation dt
 
 
 
@@ -208,11 +209,14 @@ moveUp ut l r
                      (l1',b) <- rotateL l r l1
                      trace ("RotateL result: " ++ show (l1',b)) (pure ())
                      c       <- qTest l r r1' l1'
+                     trace ("adj after rotating:" ++ show adj) (pure ())
+                     trace ("QTest result:" ++ show c) (pure ())
                      let (l',r') = case (a,b,c) of
                                      (True,_,_)          -> (focus' l1', r)
                                      (False,True,_)      -> (l,          focus' r1')
                                      (False,False,True)  -> (l,          focus' r1')
                                      (False,False,False) -> (focus' l1', r)
+                     trace ("Before going up: " ++ show (l',r')) (pure ())
                      moveUp ut l' r'
 
 
@@ -237,10 +241,18 @@ rotateR' l r r1' r2' | trace ("RR'" ++ show (l,r,r1',r2')) False = undefined
 rotateR' l r r1' r2' = go r1' r2'
   where
     go r1 r2 | trace ("GR" ++ show (r1,r2)) False = undefined
+
+    -- go r1 r2 = do modify $ delete r (focus' r1)
+    --               qTest l r r1 r2 >>= \case
+    --                 True  -> pure r2
+    --                 False -> go r2 (pred' r1)
+
     go r1 r2 = qTest l r r1 r2 >>= \case
                  True  -> pure r1
                  False -> do modify $ delete r (focus' r1)
                              go r2 (pred' r1)
+
+
 
 -- | Symmetric to rotateR
 rotateL     :: (Ord r, Fractional r)
@@ -248,7 +260,7 @@ rotateL     :: (Ord r, Fractional r)
 rotateL l r l1 | trace ("ROTL: " ++ show (l,r,l1))               False = undefined
 rotateL l r l1 = focus' l1 `isRightOf` (r, l) >>= \case
                    True  -> (,False) <$> rotateL' l r l1 (succ' l1)
-                   False -> trace "WRONG?" $ pure (l1,True)
+                   False -> pure (l1,True)
 
 -- | The code that does the actual rotating. Symmetric to rotateR'
 rotateL'             :: (Ord r, Fractional r)
@@ -256,6 +268,10 @@ rotateL'             :: (Ord r, Fractional r)
 rotateL' l r l1' l2' = go l1' l2'
   where
     go l1 l2 | trace ("GL " ++ show (l,r,l1,l2)) False = undefined
+    -- go l1 l2 = do modify $ delete l (focus' l1)
+    --               qTest l r l1 l2 >>= \case
+    --                 True  -> pure l2
+    --                 False -> go l2 (succ' l1)
     go l1 l2 = qTest l r l1 l2 >>= \case
                  True  -> pure l1
                  False -> do modify $ delete l (focus' l1)
@@ -286,8 +302,8 @@ insert u v = do
                modify $ insert' u v mapping
                rotateToFirst u fsts
                rotateToFirst v fsts
-               adj <- get
-               trace ("ADJ: After Insert " ++ show (u,v,adj)) (pure ())
+               -- adj <- get
+               -- trace ("ADJ: After Insert " ++ show (u,v,adj)) (pure ())
 
 
 -- | make sure that the first vtx in the adj list of v is its predecessor on the CH

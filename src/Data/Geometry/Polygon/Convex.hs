@@ -157,21 +157,3 @@ rotateRWhile p lst
                   xs' = C.rotR xs
                   nxt = focus' xs'
               in if p cur nxt then go xs' else xs
-
-
-left = fromPoints . map (input !! ) $ [3, 0, 1]
-right = fromPoints . map (input !!) $ [7,8,6,5,4]
-
-test = merge left right
-
-input :: [Point 2 Rational :+ ()]
-input = map ext [ point2 64 656
-                , point2 64  736
-                , point2 96 688
-                , point2 128 672
-                , point2 128 752
-                , point2 160 704
-                , point2 192 672
-                , point2 192 736
-                , point2 208 704
-                ]
