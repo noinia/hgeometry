@@ -33,26 +33,38 @@ import Data.BinaryTree
 
 --------------------------------------------------------------------------------
 
-
+import Data.Geometry.Ipe
 import Debug.Trace
+import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
 
--- main = do
---          Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
---          let syms = page^..content.traverse._IpeUse
---              pts  = map (\s -> s&core %~ (^.symbolPoint)) syms
---              dt  = delaunayTriangulation $ NonEmpty.fromList pts
---          showDT dt
+input :: [Point 2 Rational]
+input = [ point2 64  736
+        , point2 96 688
+        , point2 128 752
+        , point2 160 704
+        , point2 128 672
+        , point2 64 656
+        , point2 192 736
+        , point2 208 704
+        , point2 192 672
+        ]
+
+
+testz = delaunayTriangulation . NonEmpty.fromList . map ext $ input
+
+main = do
+         Right (page :: IpePage Rational) <- readSinglePageFile "/Users/frank/tmp/dt.ipe"
+         let syms = page^..content.traverse._IpeUse
+             pts  = map (&extra .~ ()) $ map (\s -> s&core %~ (^.symbolPoint)) syms
+             dt  = delaunayTriangulation $ NonEmpty.fromList pts
+         -- mapM_ (\(p :+ _) -> print p) pts
+         -- print dt
+         printAsIpeSelection $ asIpe drawTriangulation dt
 
 
 
--- instance HasDefaultIpeOut (Triangulation p r) where
---   type DefaultIpeOut (Triangulation p r) = Group
---   defaultIpeOut =
 
-
-
---------------------------------------------------------------------------------
-
+-------------------------------------------------------------------------------
 -- Implementation of the Divide & Conqueror algorithm as described in:
 --
 -- Two Algorithms for Constructing a Delaunay Triangulation
@@ -77,11 +89,17 @@ data TriangRes p r = TriangRes { _triang     :: Triangulation p r
                                }
 
 
+-- | Computes the delaunay triangulation of a set of points.
+--
+-- Running time: O(n log n)
+--
+-- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
+-- input does contain duplicate points, the implementation throws them away)
 delaunayTriangulation      :: (Ord r, Fractional r,       Show r, Show p)
                            => NonEmpty.NonEmpty (Point 2 r :+ p) -> Triangulation p r
 delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
   where
-    pts    = NonEmpty.sortBy (compare `on` (^.core)) pts'
+    pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
     ptsV   = V.fromList . F.toList $ pts
     vtxMap = M.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
 
@@ -90,14 +108,17 @@ delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
     (adj,_) = delaunayTriangulation' tr (vtxMap,ptsV)
     adjV    = V.fromList . IM.elems $ adj
 
+-- | Removes duplicates from a sorted list
+nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)
+nub' = fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` (^.core))
 
 type Adj = IM.IntMap (C.CList VertexID)
 
--- : pre: - Input points are sorted lexicographically
 
 withID      :: c :+ e -> e' -> c :+ (e :+ e')
 withID p pi = p&extra %~ (:+pi)
 
+-- : pre: - Input points are sorted lexicographically
 delaunayTriangulation'   :: (Ord r, Fractional r,      Show r, Show p)
                          => BinLeafTree Size (Point 2 r :+ p)
                          -> Mapping p r
@@ -112,20 +133,6 @@ delaunayTriangulation' pts mapping@(vtxMap,_)
                                          . F.toList $ pts
                          (ConvexHull ch) = GS.convexHull pts'
                      in (fromHull mapping ch, ch)
-  -- | size' pts == 2 = let pts'@[p,q] = F.toList pts
-  --                        [pi,qi]    = map ((lookup' vtxMap) . (^.core)) pts'
-  --                    in ( IM.fromList [ (pi, C.singleton qi)
-  --                                     , (qi, C.singleton pi) ]
-  --                       , fromPoints pts'
-  --                       )
-  -- | size' pts == 3 = let pts'@[p,q,r] = F.toList pts
-  --                        [pi,qi,ri]   = map ((lookup' vtxMap) . (^.core)) pts'
-  --                    in ( IM.fromList [ (pi, C.fromList [qi, ri])
-  --                                     , (qi, C.fromList [ri, pi])
-  --                                     , (ri, C.fromList [pi, qi])
-  --                                     ]      -- TODO: Check orientations..
-  --                       , fromPoints pts'
-  --                       )
   | otherwise      = let (Node lt _ rt) = pts
                          (ld,lch)       = delaunayTriangulation' lt mapping
                          (rd,rch)       = delaunayTriangulation' rt mapping
@@ -363,34 +370,3 @@ pred' = C.rotR
 -- | Adjacency lists are stored in clockwise order, so pred and succ rotate left
 succ' :: C.CList a -> C.CList a
 succ' = C.rotL
-
-
---------------------------------------------------------------------------------
-
-myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map ext $
-           [ point2 1  3
-           , point2 4  26
-           , point2 5  17
-           , point2 6  7
-           -- , point2 12 16
-           , point2 19 4
-           -- , point2 20 0
-           -- , point2 20 11
-           -- , point2 23 23
-           -- , point2 31 14
-           -- , point2 33 5
-           ]
-
--- test = mapM_ print . edges . delaunayTriangulation $ myPoints
-
-
--- res = Convex.merge (fromPoints $ map ext
---                     [point2 1 3, point2 4 26]) (fromPoints $ map ext [point2 5 17, point2 6 7])
-
--- chs = (GS.convexHull . NonEmpty.fromList $ map ext [point2 5 17, point2 6 7, point2 19 4])
-
-
-
--- cl = C.fromList $ map ext [ point2 5 17, point2 6 7]
--- xs = CU.insertOrdBy (cwCmpAround (ext $ point2 19 4)) (ext $ point2 1 3) cl

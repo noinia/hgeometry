@@ -59,6 +59,7 @@ edges' :: Triangulation p r -> [(VertexID,VertexID)]
 edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
+drawTriangulation :: IpeOut (Triangulation p r) (IpeObject r)
 drawTriangulation = IpeOut $ \tr ->
     let es = map (uncurry ClosedLineSegment) . edges $ tr
     in asIpeGroup $ map (\e -> asIpeObjectWith ipeLineSegment e mempty) es
