@@ -1,12 +1,20 @@
 module Data.Geometry.Polygon.Convex where
 
-import Data.Function(on)
 import Control.Lens
 import Data.Ext
+import Data.Function(on, )
 import Data.Geometry
 import Data.Geometry.Polygon(fromPoints)
 import qualified Data.CircularList as C
+import qualified Data.Foldable as F
 import Data.Maybe(fromJust)
+import Data.Ord(comparing)
+
+
+import Data.Geometry.Ipe
+import Debug.Trace
+
+--------------------------------------------------------------------------------
 
 type ConvexPolygon = SimplePolygon
 
@@ -50,6 +58,9 @@ rotateTo' x = fromJust . C.findRotateTo (coreEq x)
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
 
+
+trace'    :: Show a => String -> a -> a
+trace' s a = trace ("|||" ++ s ++ " " ++ show a ++ "|||\n") a
 
 -- | Compute the lower tangent of the two polgyons
 --
@@ -128,13 +139,12 @@ a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
 --------------------------------------------------------------------------------
 
 -- | Rotate to the rightmost point
-rightMost :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
-rightMost = rotateRWhile (\cur nxt -> (cur^.core.xCoord) < (nxt^.core.xCoord))
-
+rightMost    :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
+rightMost xs = let m = F.maximumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
 -- | Rotate to the leftmost point
-leftMost :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
-leftMost = rotateRWhile (\cur nxt -> (cur^.core.xCoord) > (nxt^.core.xCoord))
+leftMost    :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
+leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
 
 -- | rotate right while p 'current' 'rightNeibhour' is true
@@ -147,3 +157,21 @@ rotateRWhile p lst
                   xs' = C.rotR xs
                   nxt = focus' xs'
               in if p cur nxt then go xs' else xs
+
+
+left = fromPoints . map (input !! ) $ [3, 0, 1]
+right = fromPoints . map (input !!) $ [7,8,6,5,4]
+
+test = merge left right
+
+input :: [Point 2 Rational :+ ()]
+input = map ext [ point2 64 656
+                , point2 64  736
+                , point2 96 688
+                , point2 128 672
+                , point2 128 752
+                , point2 160 704
+                , point2 192 672
+                , point2 192 736
+                , point2 208 704
+                ]

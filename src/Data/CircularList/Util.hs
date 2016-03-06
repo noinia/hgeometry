@@ -4,6 +4,7 @@ import           Control.Lens
 import           Data.Tuple
 import qualified Data.CircularList as C
 import qualified Data.List as L
+import qualified Data.Traversable as T
 
 import Debug.Trace
 
@@ -64,3 +65,13 @@ isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
 xs `isShiftOf` ys = let rest = tail . C.leftElements
                     in maybe False (\xs' -> rest xs' == rest ys) $
                          C.focus ys >>= flip C.rotateTo xs
+
+
+-- minimumBy     :: (a -> a -> Ordering) -> C.CList a -> a
+-- minimumBy cmp = L.minimumBy cmp . C.rightElements
+
+instance Foldable C.CList where
+  foldMap = T.foldMapDefault
+
+instance T.Traversable C.CList where
+  traverse f = fmap C.fromList . T.traverse f . C.rightElements
