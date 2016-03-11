@@ -76,32 +76,16 @@ sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
 
 
 sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
-triA `sameEdges` triB = all sameAdj . M.assocs $ mapping
+triA `sameEdges` triB = all sameAdj . M.assocs $ mapping'
   where
     sameAdj (a, b) = (f $ adjA V.! a) `CU.isShiftOf` (adjB V.! b)
 
     adjA = triA^.neighbours
     adjB = triB^.neighbours
 
-    mapping = M.fromList $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
+    mapping' = M.fromList $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
 
-    f = fmap (fromJust . flip M.lookup mapping)
-
-
-
-dc' = DC.delaunayTriangulation myPoints'
-naive' = Naive.delaunayTriangulation myPoints'
-
-
-fff = mapM print . map (\(a,b) -> let a' = adjA V.! a
-                                      b' = adjB V.! b
-                                  in (a,b,a',b',a' `CU.isShiftOf` b'))
-    $ zip (M.elems $ naive'^.vertexIds) (M.elems $ dc'^.vertexIds)
-  where
-    adjA = naive'^.neighbours
-    adjB = dc'^.neighbours
-
-
+    f = fmap (fromJust . flip M.lookup mapping')
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
 myPoints = NonEmpty.fromList . map ext $

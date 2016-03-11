@@ -125,7 +125,6 @@ delaunayTriangulation'   :: (Ord r, Fractional r,      Show r, Show p)
                          -> Mapping p r
                          -> (Adj, ConvexPolygon (p :+ VertexID) r)
 delaunayTriangulation' pts mapping@(vtxMap,_)
-  | trace ("DT " ++ show (size' pts)) False = undefined
   | size' pts == 1 = let (Leaf p) = pts
                          pi       = lookup' vtxMap (p^.core)
                      in (IM.singleton pi C.empty, fromPoints [withID p pi])
@@ -138,8 +137,8 @@ delaunayTriangulation' pts mapping@(vtxMap,_)
                          (ld,lch)       = delaunayTriangulation' lt mapping
                          (rd,rch)       = delaunayTriangulation' rt mapping
                          (ch, bt, ut)   = Convex.merge lch rch
-                     in trace ("HULLS: " ++ show (lch,rch, bt)) $
-                       (merge ld rd bt ut mapping (firsts ch), ch)
+                     in --trace ("HULLS: " ++ show (lch,rch, bt)) $
+                        (merge ld rd bt ut mapping (firsts ch), ch)
 
 
 -- | Mapping that says for each vtx in the convex hull what the first entry in
@@ -170,7 +169,7 @@ merge           :: (Ord r, Fractional r,      Show r, Show p)
                 -> Firsts
                 -> Adj
 merge ld rd bt ut mapping@(vtxMap,_) fsts
-  | trace ("Merge " ++ show (ld,rd,bt,ut)) False = undefined
+  -- | trace ("Merge " ++ show (ld,rd,bt,ut)) False = undefined
   | otherwise                        = let l   = lookup' vtxMap (bt^.start.core)
                                            r   = lookup' vtxMap (bt^.end.core)
                                            tl  = lookup' vtxMap (ut^.start.core)
@@ -191,32 +190,30 @@ lookup'' k m = fromJust . IM.lookup k $ m
 moveUp :: (Ord r, Fractional r,      Show r, Show p)
                      => (VertexID,VertexID) -> VertexID -> VertexID -> Merge p r ()
 moveUp ut l r
-  | trace ("MERGE: UT: " ++ show ut) False = undefined
   | (l,r) == ut = insert l r
   | otherwise   = do
-                     trace ("============ STARTING ITERATION WITH " ++ show (l,r)) (pure ())
-                     trace ("INSERTING " ++ show (l,r)) insert l r
-
+                     -- trace ("============ STARTING ITERATION WITH " ++ show (l,r)) (pure ())
+                     -- trace ("INSERTING " ++ show (l,r)) (pure ())
+                     insert l r
                      adj <- get
-                     trace ("Current adj:" ++ show adj) (pure ())
+                     -- trace ("Current adj:" ++ show adj) (pure ())
                      -- Get the neighbours of r and l along the convex hull
                      r1 <- pred' . rotateTo l . lookup'' r <$> get
                      l1 <- succ' . rotateTo r . lookup'' l <$> get
 
-                     trace ("R1, L1:" ++ show (r1,l1)) (pure ())
+                     -- trace ("R1, L1:" ++ show (r1,l1)) (pure ())
                      (r1',a) <- rotateR l r r1
-                     trace ("RotateR result: " ++ show (r1',a)) (pure ())
+                     -- trace ("RotateR result: " ++ show (r1',a)) (pure ())
                      (l1',b) <- rotateL l r l1
-                     trace ("RotateL result: " ++ show (l1',b)) (pure ())
+                     -- trace ("RotateL result: " ++ show (l1',b)) (pure ())
                      c       <- qTest l r r1' l1'
-                     trace ("adj after rotating:" ++ show adj) (pure ())
-                     trace ("QTest result:" ++ show c) (pure ())
+                     -- trace ("adj after rotating:" ++ show adj) (pure ())
+                     -- trace ("QTest result:" ++ show c) (pure ())
                      let (l',r') = case (a,b,c) of
                                      (True,_,_)          -> (focus' l1', r)
                                      (False,True,_)      -> (l,          focus' r1')
                                      (False,False,True)  -> (l,          focus' r1')
                                      (False,False,False) -> (focus' l1', r)
-                     trace ("Before going up: " ++ show (l',r')) (pure ())
                      moveUp ut l' r'
 
 
@@ -229,7 +226,7 @@ moveUp ut l r
 -- description in the paper for more info)
 rotateR     :: (Ord r, Fractional r)
                      => VertexID -> VertexID -> Vertex -> Merge p r (Vertex, Bool)
-rotateR l r r1 | trace ("rotR " ++ show (l,r,r1))               False = undefined
+-- rotateR l r r1 | trace ("rotR " ++ show (l,r,r1))               False = undefined
 rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
                    True  -> (,False) <$> rotateR' l r r1 (pred' r1)
                    False -> pure (r1,True)
@@ -237,16 +234,10 @@ rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
 -- | The code that does the actual rotating
 rotateR'             :: (Ord r, Fractional r)
                      => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
-rotateR' l r r1' r2' | trace ("RR'" ++ show (l,r,r1',r2')) False = undefined
+-- rotateR' l r r1' r2' | trace ("RR'" ++ show (l,r,r1',r2')) False = undefined
 rotateR' l r r1' r2' = go r1' r2'
   where
-    go r1 r2 | trace ("GR" ++ show (r1,r2)) False = undefined
-
-    -- go r1 r2 = do modify $ delete r (focus' r1)
-    --               qTest l r r1 r2 >>= \case
-    --                 True  -> pure r2
-    --                 False -> go r2 (pred' r1)
-
+    -- go r1 r2 | trace ("GR" ++ show (r1,r2)) False = undefined
     go r1 r2 = qTest l r r1 r2 >>= \case
                  True  -> pure r1
                  False -> do modify $ delete r (focus' r1)
@@ -257,7 +248,7 @@ rotateR' l r r1' r2' = go r1' r2'
 -- | Symmetric to rotateR
 rotateL     :: (Ord r, Fractional r)
                      => VertexID -> VertexID -> Vertex -> Merge p r (Vertex, Bool)
-rotateL l r l1 | trace ("ROTL: " ++ show (l,r,l1))               False = undefined
+-- rotateL l r l1 | trace ("ROTL: " ++ show (l,r,l1))               False = undefined
 rotateL l r l1 = focus' l1 `isRightOf` (r, l) >>= \case
                    True  -> (,False) <$> rotateL' l r l1 (succ' l1)
                    False -> pure (l1,True)
@@ -267,11 +258,7 @@ rotateL'             :: (Ord r, Fractional r)
                      => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
 rotateL' l r l1' l2' = go l1' l2'
   where
-    go l1 l2 | trace ("GL " ++ show (l,r,l1,l2)) False = undefined
-    -- go l1 l2 = do modify $ delete l (focus' l1)
-    --               qTest l r l1 l2 >>= \case
-    --                 True  -> pure l2
-    --                 False -> go l2 (succ' l1)
+    -- go l1 l2 | trace ("GL " ++ show (l,r,l1,l2)) False = undefined
     go l1 l2 = qTest l r l1 l2 >>= \case
                  True  -> pure l1
                  False -> do modify $ delete l (focus' l1)
@@ -298,8 +285,8 @@ qTest h i j k = withPtMap . snd . fst <$> ask
 -- | Inserts an edge into the right position.
 insert     :: (Num r, Ord r) => VertexID -> VertexID -> Merge p r ()
 insert u v = do
-               (mapping,fsts) <- ask
-               modify $ insert' u v mapping
+               (mapping',fsts) <- ask
+               modify $ insert' u v mapping'
                rotateToFirst u fsts
                rotateToFirst v fsts
                -- adj <- get
@@ -320,25 +307,12 @@ rotateToFirst v fsts = modify $ IM.adjust f v
 -- correct. pos in the adjacency lists)
 insert'               :: (Num r, Ord r)
                       => VertexID -> VertexID -> Mapping p r -> Adj -> Adj
-insert' u v _ ad | trace ("insert' on " ++ show (u,v,ad)) False = undefined
-insert' u v (_,ptMap) ad = (\adj' -> trace ("ADJ: After Insert' " ++ show (u,v,adj')) adj')
-                           .  IM.adjustWithKey (insert'' v) u . IM.adjustWithKey (insert'' u) v $ ad
+insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
+                      . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
-    insert'' bi ai adjA | traceShow ("insert'', ",bi,ai,adjA) False = undefined
-    insert'' bi ai adjA = CU.insertOrdBy (cwCmpAround (ptMap V.! ai) `on` (ptMap V.!)) bi adjA
+    insert'' bi ai = CU.insertOrdBy (cwCmpAround (ptMap V.! ai) `on` (ptMap V.!)) bi
 
-
-      -- case C.toList adjA of
-      --   []     -> C.singleton bi
-      --   [ci]   -> C.fromList [ci,bi]
-      --   (ci:_) -> let a = ptMap V.! ai
-      --                 b = ptMap V.! bi
-      --             in fromJust . C.rotateTo ci . C.insertL bi .
-      --                Convex.rotateRWhile (\_ di -> trace "foo" $
-      --                  ptMap V.! di `Convex.isRightOf` (a,b)) $ adjA
-
-                     -- this is weird: todo: take the initial head f; rotate while the the head comes before new in the order before new
 
 -- | Deletes an edge
 delete     :: VertexID -> VertexID -> Adj -> Adj
@@ -367,7 +341,6 @@ p `isRightOf` (l,r) = withPtMap . snd . fst <$> ask
 
 
 lookup'     :: Ord k => M.Map k a -> k -> a
--- lookup' m x | traceShow (m,x) False = undefined
 lookup' m x = fromJust $ M.lookup x m
 
 size'              :: BinLeafTree Size a -> Size
