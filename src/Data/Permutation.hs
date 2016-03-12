@@ -10,6 +10,7 @@ import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
+
 --------------------------------------------------------------------------------
 
 -- | Orbits (Cycles) are represented by vectors
@@ -21,6 +22,9 @@ data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
                                  }
                    deriving (Show,Eq)
 makeLenses ''Permutation
+
+elems :: Permutation a -> V.Vector a
+elems = GV.concat . GV.toList . _orbits
 
 size      :: Permutation a -> Int
 size perm = GV.length (perm^.indexes)
@@ -50,6 +54,7 @@ orbitFrom s p = s : (takeWhile (/= s) . tail $ iterate p s)
 -- Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the
 -- permutation.
+
 cycleRep        :: (GV.Vector v a, Enum a, Eq a) => v a -> (a -> a) -> Permutation a
 cycleRep v perm = toCycleRep n $ runST $ do
     bv    <- UMV.replicate n False -- bit vector of marks
