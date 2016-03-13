@@ -16,6 +16,7 @@ ghcExts = map ("-X" ++)
 
           , "PatternSynonyms"
           , "ViewPatterns"
+          , "TupleSections"
           , "MultiParamTypeClasses"
 
           , "StandaloneDeriving"
@@ -37,6 +38,8 @@ prefixWith s = map (\s' -> "src/" <> s <> s')
 
 dataModules = prefixWith "Data/" [ "Range.hs"
                                  , "CircularList/Util.hs"
+                                 , "Permutation.hs"
+                                 , "PlanarGraph.hs"
                                  ]
 
 geomModules = prefixWith "Data/Geometry/" [ "Point.hs"

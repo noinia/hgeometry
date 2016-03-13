@@ -38,6 +38,8 @@ flag demos
   manual:      True
 
 library
+  ghc-options: -Wall -fno-warn-unticked-promoted-constructors
+
   exposed-modules:  Data.Geometry
                     Data.Geometry.Properties
                     Data.Geometry.Vector
@@ -163,6 +165,7 @@ library
                     , RankNTypes
 
                     , PatternSynonyms
+                    , TupleSections
                     , ViewPatterns
 
                     , StandaloneDeriving

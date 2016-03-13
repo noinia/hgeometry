@@ -10,7 +10,6 @@ import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
-
 --------------------------------------------------------------------------------
 
 -- | Orbits (Cycles) are represented by vectors
@@ -38,10 +37,12 @@ cycleOf perm x = perm^.orbits.ix' (perm^.indexes.ix' (fromEnum x)._1)
 next     :: GV.Vector v a => v a -> Int -> a
 next v i = let n = GV.length v in v GV.! ((i+1) `mod` n)
 
-
+-- | Lookup the indices of an element, i.e. in which orbit the item is, and the
+-- index within the orbit.
 lookupIdx        :: Enum a => Permutation a -> a -> (Int,Int)
 lookupIdx perm x = perm^.indexes.ix' (fromEnum x)
 
+-- | Apply the permutation, i.e. consider the permutation as a function.
 apply        :: Enum a => Permutation a -> a -> a
 apply perm x = let (c,i) = lookupIdx perm x
                in next (perm^.orbits.ix' c) i
@@ -54,12 +55,11 @@ orbitFrom s p = s : (takeWhile (/= s) . tail $ iterate p s)
 -- Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the
 -- permutation.
-
 cycleRep        :: (GV.Vector v a, Enum a, Eq a) => v a -> (a -> a) -> Permutation a
 cycleRep v perm = toCycleRep n $ runST $ do
     bv    <- UMV.replicate n False -- bit vector of marks
     morbs <- forM [0..(n - 1)] $ \i -> do
-               m <- UMV.read bv i
+               m <- UMV.read bv (fromEnum $ v GV.! i)
                if m then pure Nothing -- already visited
                     else do
                       let xs = orbitFrom (v GV.! i) perm
