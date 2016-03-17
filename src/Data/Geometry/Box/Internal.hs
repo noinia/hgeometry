@@ -123,6 +123,19 @@ size = fmap R.width . extent
 widthIn   :: forall proxy p i d r. (Arity d, Num r, Index' (i-1) d) => proxy i -> Box d p r -> r
 widthIn _ = view (V.element (C :: C (i - 1))) . size
 
+
+-- | Same as 'widthIn' but with a runtime int instead of a static dimension.
+--
+-- >>> widthIn' 1 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- Just 1
+-- >>> widthIn' 3 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- Just 3
+-- >>> widthIn' 10 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- Nothing
+widthIn'   :: (Arity d, KnownNat d, Num r) => Int -> Box d p r -> Maybe r
+widthIn' i = preview (V.element' (i-1)) . size
+
+
 ----------------------------------------
 -- * Rectangles, aka 2-dimensional boxes
 
