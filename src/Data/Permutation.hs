@@ -9,6 +9,8 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
 
 --------------------------------------------------------------------------------
 
@@ -21,6 +23,16 @@ data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
                                  }
                    deriving (Show,Eq)
 makeLenses ''Permutation
+
+instance Functor Permutation where
+  fmap = T.fmapDefault
+
+instance F.Foldable Permutation where
+  foldMap = T.foldMapDefault
+
+instance T.Traversable Permutation where
+  traverse f (Permutation os is) = flip Permutation is <$> T.traverse (T.traverse f) os
+
 
 elems :: Permutation a -> V.Vector a
 elems = GV.concat . GV.toList . _orbits
