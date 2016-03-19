@@ -19,6 +19,9 @@ import Data.Maybe
 import GHC.TypeLits
 import qualified Data.Geometry.Vector as GV
 
+
+
+import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
 import Data.Range
@@ -97,32 +100,53 @@ dropIdx                 :: core :+ (t :+ extra) -> core :+ extra
 dropIdx (p :+ (_ :+ e)) = p :+ e
 
 
--- | given the points, sorted in every dimension, build a split tree
+-- | Given the points, sorted in every dimension, recursively build a split tree
+--
+-- The algorithm works in rounds. Each round takes O(n) time, and halves the
+-- number of points. Thus, the total running time is O(n log n).
+--
+-- The algorithm essentially builds a path in the split tree; at every node on
+-- the path that we construct, we split the point set into two sets (L,R)
+-- according to the longest side of the bounding box.
+--
+-- The smaller set is "assigned" to the current node and set asside. We
+-- continue to build the path with the larger set until the total number of
+-- items remaining is less than n/2.
+--
+-- To start the next round, each node on the path needs to have the points
+-- assigned to that node, sorted in each dimension (i.e. the Vector
+-- (PointSeq))'s. Since we have the level assignment, we can compute these
+-- lists by traversing each original input list (i.e. one for every dimension)
+-- once, and partition the points based on their level assignment.
 fairSplitTree'       :: (Fractional r, Ord r, Arity d, Index' 0 d, KnownNat d)
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
                      -> SplitTree d p r ()
 fairSplitTree' n pts
     | n <= 1    = let (p S2.:< _) = pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
-    | otherwise = runST $ do
-        levels <- MV.replicate n Nothing
-        rest   <- flip runReaderT levels $ assignLevels (n `div` 2) 0 pts (Level 0)
-        pure undefined
-
+    | otherwise = undefined
   where
-    h = n `div` 2
+    -- note that points may also be assigned level 'Nothing'.
+    (levels, maxLvl) = runST $ do
+        lvls  <- MV.replicate n Nothing
+        l     <- runReaderT (assignLevels (n `div` 2) 0 pts (Level 0)) lvls
+        lvls' <- V.unsafeFreeze lvls
+        pure (lvls',l)
 
 
+-- | ST monad with access to the vector storign the level of the points.
 type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
 
-
+-- | Assigns the points a level. Returns the number l of levels used. (note
+-- that this means the maximum assigned level is l-1; the level of the
+-- remaining points is Nothing).
 assignLevels                  :: (Fractional r, Ord r, Arity d, KnownNat d)
                               => Int -- ^ Number of items we need to collect
                               -> Int -- ^ Number of items we collected so far
                               -> GV.Vector d (PointSeq d (Idx :+ p) r)
                               -> Level -- ^ current level
-                              -> RST s (GV.Vector d (PointSeq d (Idx :+ p) r))
+                              -> RST s Level
 assignLevels h m pts l
-  | m > h     = pure pts
+  | m > h     = pure l
   | otherwise = do
     pts' <- compactEnds pts
     -- find the widest dimension j = i+1
