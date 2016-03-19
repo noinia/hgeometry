@@ -132,6 +132,45 @@ fairSplitTree' n pts
         lvls' <- V.unsafeFreeze lvls
         pure (lvls',l)
 
+    -- FIXME: We cannot really afford to run reIndexPoints on all nodes!!!!!
+
+
+-- | Reindex the points so that they again have an index in the range
+-- [0,..,n'], where n' is the new number of points.
+--
+-- running time: O(oldN * d)
+reIndexPoints           :: (Arity d, Index' 0 d)
+                        => Int -- ^ oldN
+                        -> GV.Vector d (PointSeq d (Idx :+ p) r)
+                        -> GV.Vector d (PointSeq d (Idx :+ p) r)
+reIndexPoints oldN ptsV = fmap reIndex ptsV
+  where
+    pts = ptsV^.GV.element (C :: C 0)
+
+    reIndex = fmap (\p -> p&extra.core %~ (mapping' V.!))
+
+    mapping' = V.create $ do
+        v <- MV.new oldN
+        forM_ (zip [0..] (F.toList pts)) $ \(i,p) ->
+          MV.write v (p^.extra.core) i
+        pure v
+
+
+-- | Assign the points to their the correct class. The 'Nothing' class is
+-- considered the last class
+distributePoints              :: Int                      -- ^ number of classes
+                              -> V.Vector (Maybe Level)   -- ^ level assignment
+                              -> PointSeq d (Idx :+ p) r  -- ^ input points
+                              -> V.Vector (PointSeq d (Idx :+ p) r)
+distributePoints k levels pts = fmap fromSeqUnsafe $ V.create $ do
+    v <- MV.replicate k mempty
+    forM_ pts $ \p ->
+      append v (level p) p
+    pure v
+  where
+    level p = maybe (k-1) unLevel $ levels V.! (p^.extra.core)
+    append v i p = MV.read v i >>= MV.write v i . (S.|> p)
+
 
 -- | ST monad with access to the vector storign the level of the points.
 type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
