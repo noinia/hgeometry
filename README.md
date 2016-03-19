@@ -32,7 +32,8 @@ a few algorithms:
 
 
 
-A Note on the Ext (:+) data type ---------------------------------
+A Note on the Ext (:+) data type
+---------------------------------
 
 In many applications we do not just have geometric data, e.g. `Point d r`s or
 `Polygon r`s, but instead, these types have some additional properties, like a
