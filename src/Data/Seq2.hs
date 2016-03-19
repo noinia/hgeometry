@@ -147,6 +147,10 @@ viewl ~(Seq2 l s r) = l :<< (s :> r)
 l1Singleton :: a -> ViewL1 a
 l1Singleton = (:< S.empty)
 
+viewL1toR1           :: ViewL1 a -> ViewR1 a
+viewL1toR1 ~(l :< s) = let (s' S.:> r) = S.viewr (l S.<| s) in s' :> r
+
+
 --------------------------------------------------------------------------------
 -- | Right views
 

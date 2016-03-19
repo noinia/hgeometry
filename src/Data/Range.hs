@@ -6,7 +6,7 @@ module Data.Range( EndPoint(..)
                  , prettyShow
                  , lower, upper
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
-                 , inRange, width, clipLower, clipUpper
+                 , inRange, width, clipLower, clipUpper, midPoint
                  , isValid
 
                  , shiftLeft, shiftRight
@@ -117,6 +117,8 @@ instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
 width   :: Num r => Range r -> r
 width i = i^.upper.unEndPoint - i^.lower.unEndPoint
 
+midPoint   :: Fractional r => Range r -> r
+midPoint r = let w = width r in r^.lower.unEndPoint + (w / 2)
 
 
 --------------------------------------------------------------------------------
