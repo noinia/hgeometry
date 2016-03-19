@@ -28,6 +28,7 @@ instance Functor Seq2 where
 
 instance F.Foldable Seq2 where
   foldMap = T.foldMapDefault
+  length ~(Seq2 _ s _) = 2 + S.length s
 
 instance Semigroup (Seq2 a) where
   l <> r = l >< r
@@ -35,8 +36,8 @@ instance Semigroup (Seq2 a) where
 duo     :: a -> a -> Seq2 a
 duo a b = Seq2 a S.empty b
 
-length               :: Seq2 a -> Int
-length ~(Seq2 _ s _) = 2 + S.length s
+length :: Seq2 a -> Int
+length = F.length
 
 
 -- | get the element with index i, counting from the left and starting at 0.
@@ -113,6 +114,8 @@ instance Functor ViewL2 where
 
 instance F.Foldable ViewL2 where
   foldMap = T.foldMapDefault
+  length ~(_ :<< s) = 1 + F.length s
+
 
 
 -- | At least one element
@@ -126,6 +129,7 @@ instance Functor ViewL1 where
 
 instance F.Foldable ViewL1 where
   foldMap = T.foldMapDefault
+  length ~(_ :< s) = 1 + S.length s
 
 -- | We throw away information here; namely that the combined list contains two elements.
 instance Semigroup (ViewL1 a) where
@@ -166,7 +170,7 @@ instance Functor ViewR2 where
 
 instance F.Foldable ViewR2 where
   foldMap = T.foldMapDefault
-
+  length (s :>> _) = 1 + F.length s
 
 -- | A view of the right end of the sequence, with the guarantee that it has at
 -- least one element.
@@ -180,6 +184,7 @@ instance Functor ViewR1 where
 
 instance F.Foldable ViewR1 where
   foldMap = T.foldMapDefault
+  length (s :> _) = 1 + S.length s
 
 
 -- | O(1) get a right view
