@@ -32,7 +32,7 @@ source-repository head
   location: https://github.com/noinia/hgeometry
 
 
-flag demos
+flag examples
   description: Build demonstration programs
   default:     False
   manual:      True
@@ -148,6 +148,7 @@ library
 
                , time
                , directory
+               , optparse-applicative
 
 
   hs-source-dirs: src
@@ -180,24 +181,34 @@ library
                     , FlexibleContexts
                     , MultiParamTypeClasses
 
-executable demo
-  if !flag(demos)
+executable hgeometry-examples
+  if !flag(examples)
     buildable: False
-  main-is: demo/WriteEnsemble.hs
+  main-is: Main.hs
 
-  if flag(demos)
+  if flag(examples)
     build-depends: base
                  , hgeometry
                  , lens
                  , containers
                  , vinyl
                  , Frames
+                 , optparse-applicative
                  , text
+                 , hexpat
+                 , bytestring
                  , directory
                  , time
+                 , random
 
 
   hs-source-dirs: examples
+
+  other-modules: Demo.DrawGPX
+                 Demo.WriteEnsemble
+                 Demo.MinDisk
+
+                 Demo.GPXParser
 
   default-language: Haskell2010
 
@@ -219,6 +230,7 @@ executable demo
                     , DeriveFoldable
                     , DeriveTraversable
 
+                    , DeriveDataTypeable
                     , AutoDeriveTypeable
 
                     , FlexibleInstances

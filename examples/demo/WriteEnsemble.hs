@@ -1,6 +1,7 @@
-module Main where
+module Demo.WriteEnsemble where
 
 import Control.Lens
+import Data.Data
 import Data.Ext
 import Control.Applicative
 import Data.Fixed
@@ -14,13 +15,39 @@ import System.Directory
 import Data.List(isSuffixOf)
 import Data.Monoid
 import Data.Time.Calendar
+import Options.Applicative
+
+
+--------------------------------------------------------------------------------
+
+data Options = Options { kind    :: String
+                       , inPath  :: FilePath
+                       , outPath :: FilePath
+                       }
+               deriving Data
+
+
+options :: ParserInfo Options
+options = info (helper <*> parser)
+               (  progDesc "Converts ensembles to ipe files"
+               <> header   "ensemblewriter - writes a weather ensembles to a ipe files"
+               )
+  where
+    parser = Options
+          <$> strOption (help "Kind of input data in the input files" )
+          <*> strOption (help "Input Directory")
+          <*> strOption (help "Output Directory")
+
+--------------------------------------------------------------------------------
 
 -- read a bunch of text files, each defining a time-series (ensemble), produce
 -- an ipe file wheyre each time-series is represented by a polyline.
 
 main :: IO ()
-main = do
-    (kind:inPath:outPath:_) <- getArgs
+main = execParser options >>= mainWith
+
+mainWith                               :: Options -> IO ()
+mainWith (Options kind inPath outPath) = do
     inFiles <- filter (".dat" `isSuffixOf`) <$> getDirectoryContents inPath
     let f = case kind of
           "precip" -> asPrecipPt

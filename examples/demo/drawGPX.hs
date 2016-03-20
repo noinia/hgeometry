@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
-module Main where
+module Demo.DrawGPX where
 
 import Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 import Data.Maybe
@@ -12,9 +12,9 @@ import           Control.Lens
 import           Data.List(isSuffixOf)
 import qualified Data.Sequence as S
 import           Data.Time.Clock
-import           GPXParser
+import           Demo.GPXParser
 import           System.Directory
-
+import           Data.Data
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
@@ -27,6 +27,33 @@ import Text.Printf(printf)
 import Data.Time.Calendar
 import qualified Data.Foldable as F
 import qualified Data.Text as T
+import Options.Applicative
+
+
+--------------------------------------------------------------------------------
+
+-- data Options = Options { kind    :: String
+--                        , inPath  :: FilePath
+--                        , outPath :: FilePath
+--                        }
+--                deriving Data
+
+
+-- options :: ParserInfo Options
+-- options = info (helper <*> parser)
+--                (  progDesc "Converts ensembles to ipe files"
+--                <> header   "ensemblewriter - writes a weather ensembles to a ipe files"
+--                )
+--   where
+--     parser = Options
+--           <$> strOption (help "Kind of input data in the input files" )
+--           <*> strOption (help "Input Directory")
+--           <*> strOption (help "Output Directory")
+
+--------------------------------------------------------------------------------
+
+
+
 
 scaleF = 1
 
