@@ -7,7 +7,7 @@ import Control.Monad.Reader
 import Data.Semigroup
 import Data.Ord(comparing)
 import Control.Applicative
-import Control.Monad(forM, forM_)
+import Control.Monad(forM_)
 import Control.Monad.ST(ST,runST)
 import Data.Ext
 import Control.Lens hiding (Level, levels)
@@ -40,33 +40,6 @@ import Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 
 --------------------------------------------------------------------------------
 
-
--- | Data that we store in the split tree
-data NodeData d p r a = NodeData { _splitDim :: !Int
-                                 , _bBox     :: Box d p r
-                                 , _nodeData :: a
-                                 }
-makeLenses ''NodeData
-
-instance Functor (NodeData d p r) where
-  fmap = Tr.fmapDefault
-
-instance F.Foldable (NodeData d p r) where
-  foldMap = Tr.foldMapDefault
-
-instance Tr.Traversable (NodeData d p r) where
-  traverse f (NodeData d b x) = NodeData d b <$> f x
-
-
-type SplitTree d p r a = BinLeafTree (NodeData d p r a) (Point d r :+ p)
-
-
-type PointSet d p r a = SplitTree d p r a
-
-type WSP d p r a = (PointSet d p r a, PointSet d p r a)
-
---------------------------------------------------------------------------------
-
 -- | Construct a split tree
 --
 --
@@ -89,16 +62,6 @@ wellSeparatedPairs s = f
 
 --------------------------------------------------------------------------------
 -- * Building the split tree
-
-type PointSeq d p r = S2.ViewL1 (Point d r :+ p)
-
-
-newtype Level = Level { unLevel :: Int } deriving (Show,Eq,Ord,Enum)
-
-
-dropIdx                 :: core :+ (t :+ extra) -> core :+ extra
-dropIdx (p :+ (_ :+ e)) = p :+ e
-
 
 -- | Given the points, sorted in every dimension, recursively build a split tree
 --
@@ -132,13 +95,50 @@ fairSplitTree' n pts
         lvls' <- V.unsafeFreeze lvls
         pure (lvls',l)
 
+
+    pts' = distributePoints (unLevel maxLvl) levels pts
+
     -- FIXME: We cannot really afford to run reIndexPoints on all nodes!!!!!
+
+
+-- TODO, check if this works as I expect.
+distributePoints          :: Arity d
+                          => Int -> V.Vector (Maybe Level)
+                          -> GV.Vector d (PointSeq d (Idx :+ p) r)
+                          -> V.Vector (GV.Vector d (PointSeq d (Idx :+ p) r))
+distributePoints k levels = Tr.traverse (distributePoints' k levels)
+
+-- | Assign the points to their the correct class. The 'Nothing' class is
+-- considered the last class
+distributePoints'              :: Int                      -- ^ number of classes
+                               -> V.Vector (Maybe Level)   -- ^ level assignment
+                               -> PointSeq d (Idx :+ p) r  -- ^ input points
+                               -> V.Vector (PointSeq d (Idx :+ p) r)
+distributePoints' k levels pts = fmap fromSeqUnsafe $ V.create $ do
+    v <- MV.replicate k mempty
+    forM_ pts $ \p ->
+      append v (level p) p
+    pure v
+  where
+    level p = maybe (k-1) unLevel $ levels V.! (p^.extra.core)
+    append v i p = MV.read v i >>= MV.write v i . (S.|> p)
 
 
 -- | Reindex the points so that they again have an index in the range
 -- [0,..,n'], where n' is the new number of points.
 --
 -- running time: O(oldN * d)
+--
+-- FIXME: We should get this down to newN * d, then we are fine.
+--
+-- one copout would be to use an IntMap to implement mapping'.
+--
+-- alternatively: I can unsafe freeze and thaw an existing vector to pass it
+-- along to use as mapping. Except then I would have to force the evaluation
+-- order, i.e. we cannot be in 'reIndexPoints' for two of the nodes at the same
+-- time.
+--
+-- so, basically, run reIndex points in ST as well.
 reIndexPoints           :: (Arity d, Index' 0 d)
                         => Int -- ^ oldN
                         -> GV.Vector d (PointSeq d (Idx :+ p) r)
@@ -155,21 +155,6 @@ reIndexPoints oldN ptsV = fmap reIndex ptsV
           MV.write v (p^.extra.core) i
         pure v
 
-
--- | Assign the points to their the correct class. The 'Nothing' class is
--- considered the last class
-distributePoints              :: Int                      -- ^ number of classes
-                              -> V.Vector (Maybe Level)   -- ^ level assignment
-                              -> PointSeq d (Idx :+ p) r  -- ^ input points
-                              -> V.Vector (PointSeq d (Idx :+ p) r)
-distributePoints k levels pts = fmap fromSeqUnsafe $ V.create $ do
-    v <- MV.replicate k mempty
-    forM_ pts $ \p ->
-      append v (level p) p
-    pure v
-  where
-    level p = maybe (k-1) unLevel $ levels V.! (p^.extra.core)
-    append v i p = MV.read v i >>= MV.write v i . (S.|> p)
 
 
 -- | ST monad with access to the vector storign the level of the points.
@@ -207,16 +192,17 @@ compactEnds        :: Arity d
                    -> RST s (GV.Vector d (PointSeq d (Idx :+ p) r))
 compactEnds = Tr.traverse compactEnds'
 
+-- | Assign level l to point p
 assignLevel     :: (c :+ (Idx :+ p)) -> Level -> RST s ()
 assignLevel p l = ask >>= \levels -> lift $ MV.write levels (p^.extra.core) (Just l)
 
+-- | Get the level of a point
 levelOf   :: (c :+ (Idx :+ p)) -> RST s (Maybe Level)
 levelOf p = ask >>= \levels -> lift $ MV.read levels (p^.extra.core)
 
+-- | Test if the point already has a level assigned to it.
 hasLevel :: c :+ (Idx :+ p) -> RST s Bool
 hasLevel = fmap isJust . levelOf
-
-
 
 -- | Remove allready assigned points from the sequence
 --
@@ -248,15 +234,16 @@ compactEnds' (l0 S2.:< s0) = fmap fromSeqUnsafe . goL $ l0 S.<| s0
 --
 -- running time: O(|Smallest set|) + R, where R is the number of *old* points
 -- (i.e. points that should have been removed) in the list.
-findAndCompact                :: (Ord r, Arity d)
-                              => Int -- ^ the dimension we are in, i.e. so that we know
-                                     -- which coordinate of the point to compare
-                              -> PointSeq d (Idx :+ p) r
-                              -> r -- ^ the mid point
-                              -> RST s ( PointSeq d (Idx :+ p) r
-                                       , PointSeq d (Idx :+ p) r
-                                       )
-findAndCompact j pts m = fmap select . stepL $ l0 S.<| s0
+findAndCompact                   :: (Ord r, Arity d)
+                                 => Int
+                                    -- ^ the dimension we are in, i.e. so that we know
+                                    -- which coordinate of the point to compare
+                                 -> PointSeq d (Idx :+ p) r
+                                 -> r -- ^ the mid point
+                                 -> RST s ( PointSeq d (Idx :+ p) r
+                                          , PointSeq d (Idx :+ p) r
+                                          )
+findAndCompact j (l0 S2.:< s0) m = fmap select . stepL $ l0 S.<| s0
   where
     -- stepL and stepR together build a data structure (FAC l r S) that
     -- contains the left part of the list, i.e. the points before midpoint, and
@@ -284,8 +271,6 @@ findAndCompact j pts m = fmap select . stepL $ l0 S.<| s0
 
     addL l x = x&leftPart  %~ (l S.<|)
     addR r x = x&rightPart %~ (S.|> r)
-
-    l0 S2.:< s0 = pts
 
     select = over both fromSeqUnsafe . select'
 
@@ -353,5 +338,8 @@ fromSeqUnsafe _                       = error "fromSeqUnsafe: Empty seq"
 ix'   :: (Arity d, KnownNat d) => Int -> Lens' (GV.Vector d a) a
 ix' i = singular (GV.element' i)
 
+
+dropIdx                 :: core :+ (t :+ extra) -> core :+ extra
+dropIdx (p :+ (_ :+ e)) = p :+ e
 
 --------------------------------------------------------------------------------
