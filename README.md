@@ -63,5 +63,5 @@ Reading and Writing Ipe files
 -----------------------------
 
 Apart from geometric types, HGeometry provides some interface for reading and
-writing Ipe (http://ipe7.sourceforge.net). However, this is all very work in
+writing Ipe (http://ipe.otfried.org). However, this is all very work in
 progress. Hence, the API is experimental and may change at any time!

@@ -35,6 +35,13 @@ asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
             => g -> IpeAttributes i r -> IpeObject r
 asIpeObject = asIpeObjectWith defaultIpeOut
 
+-- | asIpeObject with its arguments flipped. Convenient if you don't want to
+-- map asIpeObject over a list or so.
+asIpeObject' :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
+             => IpeAttributes i r -> g -> IpeObject r
+asIpeObject' = flip asIpeObject
+
+
 -- -- | Given a IpeOut that specifies how to convert a geometry object into an
 -- ipe geometry object, the geometry object, and a record with its attributes,
 -- construct an ipe Object representing it.
