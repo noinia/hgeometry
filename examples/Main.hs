@@ -10,6 +10,7 @@ import Data.Data
 import qualified Demo.DrawGPX as DrawGPX
 import qualified Demo.WriteEnsemble as EnsembleWriter
 import qualified Demo.MinDisk as MinDisk
+import qualified Demo.Delaunay as Delaunay
 
 
 
@@ -20,21 +21,25 @@ data Options = BAPC           BAPCOptions
              | DrawGPX        ()
              | EnsembleWriter EnsembleWriter.Options
              | MinDisk        MinDisk.Options
+             | Delaunay       Delaunay.Options
              deriving Data
 
-
+parser :: Parser Options
 parser = subparser (
        command' DrawGPX        (noOpts $ header "Draw GPX")
     <> command' EnsembleWriter EnsembleWriter.options
     <> command' MinDisk        MinDisk.options
+    <> command' Delaunay       Delaunay.options
     )
 
 
+mainWith       :: Options -> IO ()
 mainWith opts' = case opts' of
   BAPC _              -> putStrLn "not yet"
   DrawGPX _           -> DrawGPX.main
   EnsembleWriter opts -> EnsembleWriter.mainWith opts
   MinDisk opts        -> MinDisk.mainWith opts
+  Delaunay opts       -> Delaunay.mainWith opts
 
 
 --------------------------------------------------------------------------------
