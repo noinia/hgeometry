@@ -21,8 +21,8 @@ data Options = Options { _inPath    :: FilePath
 
 options :: ParserInfo Options
 options = info (helper <*> parser)
-               (  progDesc "generate an ipe file with random points."
-               <> header   "GenPoints"
+               (  progDesc "Compute the Delaunay Triangulation of the points in the input file."
+               <> header   "Delaunay"
                )
   where
     parser = Options
