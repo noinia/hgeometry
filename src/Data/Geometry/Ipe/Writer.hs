@@ -354,12 +354,24 @@ instance (IpeWriteText r)  => IpeWrite (IpePage r) where
                                   ]
 
 
+instance IpeWrite IpeStyle where
+  ipeWrite (IpeStyle _ xml) = Just xml
+
+
+instance IpeWrite IpePreamble where
+  ipeWrite (IpePreamble _ latex) = Just $ Element "preamble" [] [Text latex]
+  -- TODO: I probably want to do something with the encoding ....
+
 instance (IpeWriteText r) => IpeWrite (IpeFile r) where
-  ipeWrite (IpeFile p s pgs) = Just $ Element "ipe" ipeAtts chs
+  ipeWrite (IpeFile mp ss pgs) = Just $ Element "ipe" ipeAtts chs
     where
-    ipeAtts = [("version","70005"),("creator", "HGeometry")]
-    -- TODO: Add preamble and styles
-    chs = mapMaybe ipeWrite . F.toList $ pgs
+      ipeAtts = [("version","70005"),("creator", "HGeometry")]
+      chs = mconcat [ catMaybes [mp >>= ipeWrite]
+                    , mapMaybe ipeWrite ss
+                    , mapMaybe ipeWrite . F.toList $ pgs
+                    ]
+
+
 
 
 --------------------------------------------------------------------------------
