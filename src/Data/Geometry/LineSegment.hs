@@ -1,6 +1,20 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.LineSegment where
+module Data.Geometry.LineSegment( LineSegment
+                                , pattern LineSegment
+                                , pattern LineSegment'
+                                , pattern ClosedLineSegment
+
+                                , _SubLine
+
+
+                                , toLineSegment
+                                , onSegment
+                                , orderedEndPoints
+                                , segmentLength
+                                , sqDistanceToSeg, sqDistanceToSegArg
+                                , flipSegment
+                                ) where
 
 import           Data.Ord(comparing)
 import           Control.Arrow((&&&))
