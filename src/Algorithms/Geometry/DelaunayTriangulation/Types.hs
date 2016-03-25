@@ -1,23 +1,17 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TupleSections #-}
 module Algorithms.Geometry.DelaunayTriangulation.Types where
 
 import Data.Monoid(mempty)
-import Control.Lens hiding (only)
-import qualified Data.Foldable as F
-import Data.Maybe(fromJust)
+import Control.Lens
+import qualified Data.IntMap.Strict as IM
 import qualified Data.Vector as V
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import qualified Data.CircularList as C
-import Data.Geometry.Polygon.Convex(focus', pred', succ')
 import Data.Ext
 import Data.Geometry
-import Data.Geometry.Interval
-import Data.Geometry.Polygon
-import Data.Geometry.Ball(disk, insideBall)
 import Data.Geometry.Ipe
 
+--------------------------------------------------------------------------------
 
 -- We store all adjacency lists in clockwise order
 
@@ -30,6 +24,7 @@ type VertexID = Int
 
 type Vertex    = C.CList VertexID
 
+type Adj = IM.IntMap (C.CList VertexID)
 
 -- | Neighbours are stored in clockwise order: i.e. rotating right moves to the
 -- next clockwise neighbour.
