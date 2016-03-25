@@ -1,4 +1,8 @@
-module Data.Geometry.Polygon.Convex where
+module Data.Geometry.Polygon.Convex( ConvexPolygon
+                                   , merge
+                                   , lowerTangent, upperTangent
+                                   , isLeftOf, isRightOf
+                                   ) where
 
 import Control.Lens
 import Data.Ext
@@ -10,25 +14,24 @@ import qualified Data.Foldable as F
 import Data.Maybe(fromJust)
 import Data.Ord(comparing)
 
-
-import Data.Geometry.Ipe
-import Debug.Trace
-
 --------------------------------------------------------------------------------
 
 type ConvexPolygon = SimplePolygon
 
 
 
--- | Rotating Right <-> rotate clockwise
 
--- Implementation of the Divide & Conqueror algorithm as described in:
+-- * Merging Two convex Hulls
+
+
+-- | Rotating Right <-> rotate clockwise
+--
+-- Merging two convex hulls, based on the paper:
 --
 -- Two Algorithms for Constructing a Delaunay Triangulation
 -- Lee and Schachter
 -- International Journal of Computer and Information Sciences, Vol 9, No. 3, 1980
-
-
+--
 -- : (combined hull, lower tangent that was added, upper tangent thtat was
 -- added)
 
@@ -57,10 +60,6 @@ rotateTo' x = fromJust . C.findRotateTo (coreEq x)
 
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
-
-
-trace'    :: Show a => String -> a -> a
-trace' s a = trace ("|||" ++ s ++ " " ++ show a ++ "|||\n") a
 
 -- | Compute the lower tangent of the two polgyons
 --
@@ -147,13 +146,13 @@ leftMost    :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
 leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
 
--- | rotate right while p 'current' 'rightNeibhour' is true
-rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a
-rotateRWhile p lst
-  | C.isEmpty lst = lst
-  | otherwise     = go lst
-    where
-      go xs = let cur = focus' xs
-                  xs' = C.rotR xs
-                  nxt = focus' xs'
-              in if p cur nxt then go xs' else xs
+-- -- | rotate right while p 'current' 'rightNeibhour' is true
+-- rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a
+-- rotateRWhile p lst
+--   | C.isEmpty lst = lst
+--   | otherwise     = go lst
+--     where
+--       go xs = let cur = focus' xs
+--                   xs' = C.rotR xs
+--                   nxt = focus' xs'
+--               in if p cur nxt then go xs' else xs

@@ -20,7 +20,6 @@ import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import Data.Geometry.Polygon.Convex(ConvexPolygon)
 import qualified Data.Geometry.Polygon.Convex as Convex
-import Data.Geometry.Polygon.Convex(focus')
 import Data.Ext
 import Data.Geometry
 import Data.Geometry.Interval
@@ -30,22 +29,26 @@ import Data.Geometry.Ball(disk, insideBall)
 import Data.BinaryTree
 
 -------------------------------------------------------------------------------
+-- * Divide & Conqueror Delaunay Triangulation
+--
 -- Implementation of the Divide & Conqueror algorithm as described in:
 --
 -- Two Algorithms for Constructing a Delaunay Triangulation
 -- Lee and Schachter
 -- International Journal of Computer and Information Sciences, Vol 9, No. 3, 1980
-
+--
 -- We store all adjacency lists in clockwise order
-
+--
 -- : If v on the convex hull, then its first entry in the adj. lists is its CCW
 -- successor (i.e. its predecessor) on the convex hull
+--
+-- Rotating Right <-> rotate clockwise
 
--- | Rotating Right <-> rotate clockwise
 
-data TriangRes p r = TriangRes { _triang     :: Triangulation p r
-                               , _convexHull :: ConvexPolygon p r
-                               }
+
+-- data TriangRes p r = TriangRes { _triang     :: Triangulation p r
+--                                , _convexHull :: ConvexPolygon p r
+--                                }
 
 
 -- | Computes the delaunay triangulation of a set of points.
@@ -74,23 +77,23 @@ delaunayTriangulation' :: (Ord r, Fractional r)
                        => BinLeafTree Size (Point 2 r :+ p)
                        -> Mapping p r
                        -> (Adj, ConvexPolygon (p :+ VertexID) r)
-delaunayTriangulation' pts mapping@(vtxMap,_)
+delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
-                         pi       = lookup' vtxMap (p^.core)
-                     in (IM.singleton pi C.empty, fromPoints [withID p pi])
+                         i        = lookup' vtxMap (p^.core)
+                     in (IM.singleton i C.empty, fromPoints [withID p i])
   | size' pts <= 3 = let pts'            = NonEmpty.fromList
                                          . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                          . F.toList $ pts
                          (ConvexHull ch) = GS.convexHull pts'
-                     in (fromHull mapping ch, ch)
+                     in (fromHull mapping' ch, ch)
   | otherwise      = let (Node lt _ rt) = pts
-                         (ld,lch)       = delaunayTriangulation' lt mapping
-                         (rd,rch)       = delaunayTriangulation' rt mapping
+                         (ld,lch)       = delaunayTriangulation' lt mapping'
+                         (rd,rch)       = delaunayTriangulation' rt mapping'
                          (ch, bt, ut)   = Convex.merge lch rch
-                     in (merge ld rd bt ut mapping (firsts ch), ch)
+                     in (merge ld rd bt ut mapping' (firsts ch), ch)
 
 --------------------------------------------------------------------------------
-
+-- * Implementation
 
 -- | Mapping that says for each vtx in the convex hull what the first entry in
 -- the adj. list should be. The input polygon is given in Clockwise order
@@ -110,24 +113,22 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
 
 
 -- | Merge the two delaunay triangulations
-merge           :: (Ord r, Fractional r)
-                => Adj
-                -> Adj
-                -> LineSegment 2 (p :+ VertexID) r -- ^ lower tangent
-                -> LineSegment 2 (p :+ VertexID) r -- ^ upper tangent
-                -> Mapping p r
-                -> Firsts
-                -> Adj
-merge ld rd bt ut mapping'@(vtxMap,_) fsts
-  -- | trace ("Merge " ++ show (ld,rd,bt,ut)) False = undefined
-  | otherwise                        = let l   = lookup' vtxMap (bt^.start.core)
-                                           r   = lookup' vtxMap (bt^.end.core)
-                                           tl  = lookup' vtxMap (ut^.start.core)
-                                           tr  = lookup' vtxMap (ut^.end.core)
-                                           adj = ld `IM.union` rd
-                                       in   flip runReader (mapping', fsts)
-                                          . flip execStateT adj $ moveUp (tl,tr) l r
-
+merge                            :: (Ord r, Fractional r)
+                                 => Adj
+                                 -> Adj
+                                 -> LineSegment 2 (p :+ VertexID) r -- ^ lower tangent
+                                 -> LineSegment 2 (p :+ VertexID) r -- ^ upper tangent
+                                 -> Mapping p r
+                                 -> Firsts
+                                 -> Adj
+merge ld rd bt ut mapping'@(vtxMap,_) fsts =
+    flip runReader (mapping', fsts) . flip execStateT adj $ moveUp (tl,tr) l r
+  where
+    l   = lookup' vtxMap (bt^.start.core)
+    r   = lookup' vtxMap (bt^.end.core)
+    tl  = lookup' vtxMap (ut^.start.core)
+    tr  = lookup' vtxMap (ut^.end.core)
+    adj = ld `IM.union` rd
 
 type Merge p r = StateT Adj (Reader (Mapping p r, Firsts))
 
@@ -140,19 +141,13 @@ moveUp ut l r
   | (l,r) == ut = insert l r
   | otherwise   = do
                      insert l r
-                     adj <- get
                      -- Get the neighbours of r and l along the convex hull
                      r1 <- pred' . rotateTo l . lookup'' r <$> get
                      l1 <- succ' . rotateTo r . lookup'' l <$> get
 
-                     -- trace ("R1, L1:" ++ show (r1,l1)) (pure ())
                      (r1',a) <- rotateR l r r1
-                     -- trace ("RotateR result: " ++ show (r1',a)) (pure ())
                      (l1',b) <- rotateL l r l1
-                     -- trace ("RotateL result: " ++ show (l1',b)) (pure ())
                      c       <- qTest l r r1' l1'
-                     -- trace ("adj after rotating:" ++ show adj) (pure ())
-                     -- trace ("QTest result:" ++ show c) (pure ())
                      let (l',r') = case (a,b,c) of
                                      (True,_,_)          -> (focus' l1', r)
                                      (False,True,_)      -> (l,          focus' r1')
@@ -177,18 +172,15 @@ rotateR'     :: (Ord r, Fractional r)
              => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
 rotateR' l r = go
   where
-    -- go r1 r2 | trace ("GR" ++ show (r1,r2)) False = undefined
     go r1 r2 = qTest l r r1 r2 >>= \case
                  True  -> pure r1
                  False -> do modify $ delete r (focus' r1)
                              go r2 (pred' r2)
 
 
-
 -- | Symmetric to rotateR
 rotateL     :: (Ord r, Fractional r)
                      => VertexID -> VertexID -> Vertex -> Merge p r (Vertex, Bool)
--- rotateL l r l1 | trace ("ROTL: " ++ show (l,r,l1))               False = undefined
 rotateL l r l1 = focus' l1 `isRightOf` (r, l) >>= \case
                    True  -> (,False) <$> rotateL' l r l1 (succ' l1)
                    False -> pure (l1,True)
@@ -198,7 +190,6 @@ rotateL'     :: (Ord r, Fractional r)
              => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
 rotateL' l r = go
   where
-    -- go l1 l2 | trace ("GL " ++ show (l,r,l1,l2)) False = undefined
     go l1 l2 = qTest l r l1 l2 >>= \case
                  True  -> pure l1
                  False -> do modify $ delete l (focus' l1)
@@ -295,15 +286,16 @@ pred' = C.rotR
 succ' :: C.CList a -> C.CList a
 succ' = C.rotL
 
+focus' :: C.CList a -> a
+focus' = fromJust . C.focus
 
 -- | Removes duplicates from a sorted list
 nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)
 nub' = fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` (^.core))
 
 
-withID      :: c :+ e -> e' -> c :+ (e :+ e')
-withID p pi = p&extra %~ (:+pi)
+withID     :: c :+ e -> e' -> c :+ (e :+ e')
+withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
--- lookup'' k m | traceShow (m,k) False = undefined
 lookup'' k m = fromJust . IM.lookup k $ m

@@ -83,21 +83,3 @@ isDelaunay (_,ptsV) p q r = case disk (pt p) (pt q) (pt r) of
       [pt i | i <- [0..(V.length ptsV - 1)], i /= p, i /= q, i /= r]
    where
      pt i = (ptsV V.! i)^.core
-
-
-myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
-myPoints = NonEmpty.fromList . map ext $
-           [ point2 1  3
-           , point2 4  26
-           , point2 5  17
-           , point2 6  7
-           -- , point2 12 16
-           -- , point2 19 4
-           -- , point2 20 0
-           -- , point2 20 11
-           -- , point2 23 23
-           -- , point2 31 14
-           -- , point2 33 5
-           ]
-
-test = mapM_ print . edges . delaunayTriangulation $ myPoints

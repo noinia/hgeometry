@@ -27,6 +27,8 @@ import           Data.Vinyl
 
 --------------------------------------------------------------------------------
 
+-- | An IpeOut is essentially a funciton to convert a geometry object of type
+-- 'g' into an ipe object of type 'i'.
 newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
@@ -56,7 +58,7 @@ asIpeGroup = flip asIpeGroup' mempty
 
 -- | Creates a group out of ipe
 asIpeGroup'        :: [IpeObject r] -> IpeAttributes Group r -> IpeObject r
-asIpeGroup' gs ats = IpeGroup $ (Group gs) :+ ats
+asIpeGroup' gs ats = IpeGroup $ Group gs :+ ats
 
 --------------------------------------------------------------------------------
 
@@ -74,8 +76,11 @@ coreOut io = IpeOut $ asIpe io . (^.core)
 --------------------------------------------------------------------------------
 -- * Default Conversions
 
+-- | Class that specifies a default conversion from a geometry type g into an
+-- ipe object.
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   type DefaultIpeOut g :: * -> *
+
   defaultIpeOut :: IpeOut g (IpeObject' (DefaultIpeOut g) (NumType g))
 
   -- defaultIpeObject :: RecApplicative (AttributesOf (DefaultIpeOut g))
@@ -111,8 +116,6 @@ ipeMark n = noAttrs . IpeOut $ flip Symbol n
 
 ipeDiskMark :: IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
 ipeDiskMark = ipeMark "mark/disk(sx)"
-
-
 
 --------------------------------------------------------------------------------
 
@@ -182,11 +185,11 @@ ipeSimplePolygon = fromPathSegment . IpeOut $ PolygonPath . dropExt
 
 
 
-ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
+-- ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
 
 
-testzz :: IpeObject Integer
-testzz = asIpeObjectWith ipeLineSegment ls $ mempty <> attr SStroke (IpeColor "red")
+-- testzz :: IpeObject Integer
+-- testzz = asIpeObjectWith ipeLineSegment ls $ mempty <> attr SStroke (IpeColor "red")
 
 
 
