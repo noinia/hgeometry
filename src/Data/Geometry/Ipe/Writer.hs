@@ -400,10 +400,6 @@ ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
     mkLayer n  = Element "layer" [("name",n)] []
 
 
-writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
-writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
-
-
 instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
   ipeWrite p = ipeWrite path
     where

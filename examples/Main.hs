@@ -18,7 +18,7 @@ import qualified Demo.Delaunay as Delaunay
 --------------------------------------------------------------------------------
 
 data Options = BAPC           BAPCOptions
-             | DrawGPX        ()
+             | DrawGPX        DrawGPX.Options
              | EnsembleWriter EnsembleWriter.Options
              | MinDisk        MinDisk.Options
              | Delaunay       Delaunay.Options
@@ -26,7 +26,7 @@ data Options = BAPC           BAPCOptions
 
 parser :: Parser Options
 parser = subparser (
-       command' DrawGPX        (noOpts $ header "Draw GPX")
+       command' DrawGPX        DrawGPX.options
     <> command' EnsembleWriter EnsembleWriter.options
     <> command' MinDisk        MinDisk.options
     <> command' Delaunay       Delaunay.options
@@ -36,7 +36,7 @@ parser = subparser (
 mainWith       :: Options -> IO ()
 mainWith opts' = case opts' of
   BAPC _              -> putStrLn "not yet"
-  DrawGPX _           -> DrawGPX.main
+  DrawGPX opts        -> DrawGPX.mainWith opts
   EnsembleWriter opts -> EnsembleWriter.mainWith opts
   MinDisk opts        -> MinDisk.mainWith opts
   Delaunay opts       -> Delaunay.mainWith opts
