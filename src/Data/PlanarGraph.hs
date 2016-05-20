@@ -1,15 +1,17 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.PlanarGraph where
 
-import Data.Ext
-import Data.Permutation
-import Data.Maybe
-import Control.Monad(join, forM)
-import Control.Lens
+import           Control.Lens
+import           Control.Monad (join, forM)
+import           Control.Monad.ST (ST,runST)
+import           Data.Ext
+import           Data.Maybe
+import           Data.Permutation
+import           Data.Tree
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-import qualified Data.CircularList as C
 
 --------------------------------------------------------------------------------
 
@@ -148,6 +150,18 @@ planarGraph perm = PlanarGraph perm vData eData fData
     eData  = V.replicate d ()
     fData  = V.replicate f ()
 
+-- | Get the number of vertices
+numVertices :: PlanarGraph s w v e f -> Int
+numVertices g = V.length (g^.embedding.orbits)
+
+-- | Get the number of Edges
+numEdges :: PlanarGraph s w v e f -> Int
+numEdges g = size (g^.embedding) `div` 2
+
+-- | Get the number of faces
+numFaces   :: PlanarGraph s w v e f -> Int
+numFaces g = numEdges g - numVertices g + 2
+
 
 -- | Enumerate all vertices
 vertices   :: PlanarGraph s w v e f -> V.Vector (VertexId s w)
@@ -185,6 +199,20 @@ incomingEdges v g = V.filter (not . isPositive) $ incidentEdges v g
 -- | All outgoing edges incident to vertex v, in counterclockwise order around v.
 outgoingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
 outgoingEdges v g = V.filter isPositive $ incidentEdges v g
+
+
+
+neighbours     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
+neighbours v g = otherVtx <$> incidentEdges v g
+  where
+    otherVtx d = let u = tailOf d g in if u == v then headOf d g else u
+
+-- outgoingNeighbours :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
+-- outgoingNeighbours = undefined
+
+-- incomingNeighbours :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
+-- incomingNeighbours = undefined
+
 
 --------------------------------------------------------------------------------
 -- * Access data
@@ -277,6 +305,10 @@ boundary (FaceId v) g = incidentEdges v $ dual g
 
 
 
+
+
+
+testPerm :: Permutation (Dart s)
 testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
            in toCycleRep 12 [ [ Dart a Negative
                               , Dart c Positive
@@ -324,3 +356,30 @@ testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
 --                      , fromList [dart 1 "+1",dart 3 "-1",dart 2 "-1"]
 --                      , fromList [dart 4 "-1",dart 3 "+1",dart 5 "+1",dart 5 "-1"]
 --                      ]
+
+-- dff   :: PlanarGraph s w v e f -> Forest (VertexId s w)
+-- dff g = dfs g (F.toList $ vertices g)
+
+
+-- | DFS on a planar graph.
+--
+-- Note that since our planar graphs are always connected there is no need need
+-- for dfs to take a list of start vertices.
+dfs         :: forall s w v e f.
+               PlanarGraph s w v e f -> VertexId s w -> Tree (VertexId s w)
+dfs g start = runST $ do
+                 bv     <- UMV.replicate n False -- bit vector of marks
+                 -- start will be unvisited, thus the fromJust is safe
+                 fromJust <$> dfs' bv start
+  where
+    n = numVertices g
+    visit   bv (VertexId i) = UMV.write bv i True
+    visited bv (VertexId i) = UMV.read  bv i
+    dfs'      :: UMV.MVector s' Bool -> VertexId s w
+              -> ST s' (Maybe (Tree (VertexId s w)))
+    dfs' bv u = visited bv u >>= \case
+                  True  -> pure Nothing
+                  False -> do
+                             visit bv u
+                             let vs = V.toList $ neighbours u g
+                             Just . Node u . catMaybes <$> mapM (dfs' bv) vs

@@ -2,24 +2,27 @@
 module Data.Permutation where
 
 import           Control.Lens
-import           Control.Monad.ST(runST)
-import           Control.Monad(forM)
-import           Data.Maybe(catMaybes)
+import           Control.Monad (forM)
+import           Control.Monad.ST (runST)
+import qualified Data.Foldable as F
+import           Data.Maybe (catMaybes)
+import qualified Data.Traversable as T
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
 
 --------------------------------------------------------------------------------
 
 -- | Orbits (Cycles) are represented by vectors
 type Orbit a = V.Vector a
 
--- | Cyclic representation of a permutation
+-- | Cyclic representation of a permutation.
 data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
                                  , _indexes :: UV.Vector (Int,Int)
+                                               -- ^ idxes (fromEnum a) = (i,j)
+                                               -- implies that a is the j^th
+                                               -- item in the i^th orbit
                                  }
                    deriving (Show,Eq)
 makeLenses ''Permutation
@@ -88,15 +91,19 @@ cycleRep v perm = toCycleRep n $ runST $ do
 -- | Given the size n, and a list of Cycles, turns the cycles into a
 -- cyclic representation of the Permutation.
 toCycleRep      :: Enum a => Int -> [[a]] -> Permutation a
-toCycleRep n os = Permutation (V.fromList . map V.fromList $ os) ixes
+toCycleRep n os = Permutation (V.fromList . map V.fromList $ os) (genIndexes n os)
+
+
+genIndexes      :: Enum a => Int -> [[a]] -> UV.Vector (Int,Int)
+genIndexes n os = UV.create $ do
+                                v <- UMV.new n
+                                mapM_ (uncurry $ UMV.write v) ixes'
+                                pure v
   where
     f i c = zipWith (\x j -> (fromEnum x,(i,j))) c [0..]
-
     ixes' = concat $ zipWith f [0..] os
-    ixes = UV.create $ do
-             v <- UMV.new n
-             mapM_ (uncurry $ UMV.write v) ixes'
-             pure v
+
+
 
 --------------------------------------------------------------------------------
 -- * Helper stuff
