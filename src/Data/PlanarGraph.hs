@@ -3,14 +3,16 @@
 module Data.PlanarGraph where
 
 import           Control.Lens
-import           Control.Monad (join, forM)
+import           Control.Monad (join, forM, forM_, when, filterM)
 import           Control.Monad.ST (ST,runST)
 import           Data.Ext
 import           Data.Maybe
 import           Data.Permutation
 import           Data.Tree
+import qualified Data.List as L
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
 --------------------------------------------------------------------------------
@@ -51,6 +53,8 @@ makeLenses ''Arc
 
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
+
+
 
 data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum)
 
@@ -114,11 +118,11 @@ type family Dual (sp :: World) where
   Dual Dual_   = Primal_
 
 
-newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int } deriving (Eq,Ord)
+newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int } deriving (Eq,Ord,Enum)
+-- VertexId's are in the range 0...|orbits|-1
 
 instance Show (VertexId s w) where
   show (VertexId i) = "VertexId " ++ show i
-
 
 
 
@@ -165,7 +169,7 @@ numFaces g = numEdges g - numVertices g + 2
 
 -- | Enumerate all vertices
 vertices   :: PlanarGraph s w v e f -> V.Vector (VertexId s w)
-vertices g = fmap VertexId $ V.enumFromN 0 (V.length (g^.embedding.orbits)-1)
+vertices g = fmap VertexId $ V.enumFromN 0 (V.length (g^.embedding.orbits))
 
 -- | Enumerate all darts
 darts :: PlanarGraph s w v e f -> V.Vector (Dart s)
@@ -357,29 +361,146 @@ testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
 --                      , fromList [dart 4 "-1",dart 3 "+1",dart 5 "+1",dart 5 "-1"]
 --                      ]
 
--- dff   :: PlanarGraph s w v e f -> Forest (VertexId s w)
--- dff g = dfs g (F.toList $ vertices g)
 
+--------------------------------------------------------------------------------
+-- * Algorithms
 
 -- | DFS on a planar graph.
 --
+-- Running time: O(n)
+--
 -- Note that since our planar graphs are always connected there is no need need
 -- for dfs to take a list of start vertices.
-dfs         :: forall s w v e f.
-               PlanarGraph s w v e f -> VertexId s w -> Tree (VertexId s w)
-dfs g start = runST $ do
+dfs  :: forall s w v e f.
+      PlanarGraph s w v e f -> VertexId s w -> Tree (VertexId s w)
+dfs g = dfs' (adjacencyLists g)
+
+
+-- | Transform into adjacencylist representation
+adjacencyLists   :: PlanarGraph s w v e f -> AdjacencyLists s w
+adjacencyLists g = V.toList . flip neighbours g <$> vertices g
+
+
+type AdjacencyLists s w = V.Vector [VertexId s w]
+
+dfs'          :: forall s w. AdjacencyLists s w -> VertexId s w -> Tree (VertexId s w)
+dfs' g start = runST $ do
                  bv     <- UMV.replicate n False -- bit vector of marks
                  -- start will be unvisited, thus the fromJust is safe
-                 fromJust <$> dfs' bv start
+                 fromJust <$> dfs'' bv start
   where
-    n = numVertices g
+    n = GV.length g
+
+    neighs              :: VertexId s w -> [VertexId s w]
+    neighs (VertexId u) = g GV.! u
+
     visit   bv (VertexId i) = UMV.write bv i True
     visited bv (VertexId i) = UMV.read  bv i
-    dfs'      :: UMV.MVector s' Bool -> VertexId s w
-              -> ST s' (Maybe (Tree (VertexId s w)))
-    dfs' bv u = visited bv u >>= \case
-                  True  -> pure Nothing
-                  False -> do
-                             visit bv u
-                             let vs = V.toList $ neighbours u g
-                             Just . Node u . catMaybes <$> mapM (dfs' bv) vs
+    dfs''      :: UMV.MVector s' Bool -> VertexId s w
+               -> ST s' (Maybe (Tree (VertexId s w)))
+    dfs'' bv u = visited bv u >>= \case
+                   True  -> pure Nothing
+                   False -> do
+                              visit bv u
+                              Just . Node u . catMaybes <$> mapM (dfs'' bv) (neighs u)
+
+
+
+-- Minimum spanning tree of the edges. The result is a rooted tree, in which
+-- the nodes are the vertices in the planar graph together with the edge weight
+-- of the edge to their parent. The root's weight is zero.
+--
+-- running time: $O(n log n)$
+mst   :: Ord e => PlanarGraph s w v e f -> Tree (VertexId s w)
+mst g = runST $ do
+          uf <- new (numVertices g)
+          makeTree g <$> filterM (\e -> union uf (headOf e g) (tailOf e g)) edges'
+  where
+    edges' = map fst . L.sortOn snd . V.toList $ V.zip (edges g) (g^.edgeData)
+
+-- Given the underlying planar graph, and a set of edges that form a tree,
+-- create the actual tree.
+--
+-- pre: the planar graph has at least one vertex.
+makeTree   :: forall s w v e f.
+              PlanarGraph s w v e f -> [Dart s] -> Tree (VertexId s w)
+makeTree g = flip dfs' start . mkAdjacencyLists
+  where
+    n = numVertices g
+    start = V.head $ vertices g
+
+    append                  :: MV.MVector s' [a] -> VertexId s w -> a -> ST s' ()
+    append v (VertexId i) x = MV.read v i >>= MV.write v i . (x:)
+
+    mkAdjacencyLists        :: [Dart s] -> AdjacencyLists s w
+    mkAdjacencyLists edges' = V.create $ do
+                                vs <- MV.replicate n []
+                                forM_ edges' $ \e -> do
+                                  let u = headOf e g
+                                      v = tailOf e g
+                                  append vs u v
+                                  append vs v u
+                                pure vs
+
+-- | Union find DS
+newtype UF s a = UF { _unUF :: UMV.MVector s (Int,Int) }
+
+new   :: Enum a => Int -> ST s (UF s a)
+new n = do
+          v <- UMV.new n
+          forM_ [0..n-1] $ \i ->
+            UMV.write v i (i,0)
+          pure $ UF v
+
+-- | Union the components containing x and y. Returns weather or not the two
+-- components were already in the same component or not.
+union               :: (Enum a, Eq a) => UF s a -> a -> a -> ST s Bool
+union uf@(UF v) x y = do
+                        (rx,rrx) <- find' uf x
+                        (ry,rry) <- find' uf y
+                        let b = rx /= ry
+                            rx' = fromEnum rx
+                            ry' = fromEnum ry
+                        when b $ case rrx `compare` rry of
+                            LT -> UMV.write v rx'  (ry',rrx)
+                            GT -> UMV.write v ry' (rx',rry)
+                            EQ -> do UMV.write v ry' (rx',rry)
+                                     UMV.write v rx' (rx',rrx+1)
+                        pure b
+
+
+-- | Get the representative of the component containing x
+find    :: (Enum a, Eq a) => UF s a -> a -> ST s a
+find uf = fmap fst . find' uf
+
+-- | Get the representative (and its rank) of the component containing x
+find'             :: (Enum a, Eq a) => UF s a -> a -> ST s (a,Int)
+find' uf@(UF v) x = do
+                      (p,r) <- UMV.read v (fromEnum x) -- get my parent
+                      if toEnum p == x then
+                        pure (x,r) -- I am a root
+                      else do
+                        rt@(j,_) <- find' uf (toEnum p)  -- get the root of my parent
+                        UMV.write v (fromEnum x) (fromEnum j,r)   -- path compression
+                        pure rt
+
+
+
+
+-- mst g = undefined
+
+-- -- | runs MST with a given root
+-- mstFrom     :: (Ord e, Monoid e)
+--             => VertexId s w -> PlanarGraph s w v e f -> Tree (VertexId s w, e)
+-- mstFrom r g = prims initialQ (Node (r,mempty) [])
+--   where
+--     update' k p q = Q.adjust (const p) k q
+
+--     -- initial Q has the value of the root set to the zero element, and has no
+--     -- parent. The others are all set to Top (and have no parent yet)
+--     initialQ = update' r (ValT (mempty,Nothing))
+--              . GV.foldr (\v q -> Q.insert v (Top,Nothing) q) Q.empty $ vertices g
+
+--     prims qq t = case Q.minView qq of
+--       Nothing -> t
+--       Just (v Q.:-> (w,p), q) -> prims $
