@@ -206,8 +206,8 @@ outgoingEdges v g = V.filter isPositive $ incidentEdges v g
 
 
 
-neighbours     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
-neighbours v g = otherVtx <$> incidentEdges v g
+neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
+neighboursOf v g = otherVtx <$> incidentEdges v g
   where
     otherVtx d = let u = tailOf d g in if u == v then headOf d g else u
 
@@ -378,7 +378,7 @@ dfs g = dfs' (adjacencyLists g)
 
 -- | Transform into adjacencylist representation
 adjacencyLists   :: PlanarGraph s w v e f -> AdjacencyLists s w
-adjacencyLists g = V.toList . flip neighbours g <$> vertices g
+adjacencyLists g = V.toList . flip neighboursOf g <$> vertices g
 
 
 type AdjacencyLists s w = V.Vector [VertexId s w]
