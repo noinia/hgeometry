@@ -13,6 +13,7 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Box
+import           Data.Geometry.Polygon
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -26,6 +27,8 @@ import           Data.Vinyl
 
 --------------------------------------------------------------------------------
 
+-- | An IpeOut is essentially a funciton to convert a geometry object of type
+-- 'g' into an ipe object of type 'i'.
 newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
@@ -33,6 +36,13 @@ newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
 asIpeObject :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
             => g -> IpeAttributes i r -> IpeObject r
 asIpeObject = asIpeObjectWith defaultIpeOut
+
+-- | asIpeObject with its arguments flipped. Convenient if you don't want to
+-- map asIpeObject over a list or so.
+asIpeObject' :: (HasDefaultIpeOut g, DefaultIpeOut g ~ i, NumType g ~ r)
+             => IpeAttributes i r -> g -> IpeObject r
+asIpeObject' = flip asIpeObject
+
 
 -- -- | Given a IpeOut that specifies how to convert a geometry object into an
 -- ipe geometry object, the geometry object, and a record with its attributes,
@@ -48,7 +58,7 @@ asIpeGroup = flip asIpeGroup' mempty
 
 -- | Creates a group out of ipe
 asIpeGroup'        :: [IpeObject r] -> IpeAttributes Group r -> IpeObject r
-asIpeGroup' gs ats = IpeGroup $ (Group gs) :+ ats
+asIpeGroup' gs ats = IpeGroup $ Group gs :+ ats
 
 --------------------------------------------------------------------------------
 
@@ -66,8 +76,11 @@ coreOut io = IpeOut $ asIpe io . (^.core)
 --------------------------------------------------------------------------------
 -- * Default Conversions
 
+-- | Class that specifies a default conversion from a geometry type g into an
+-- ipe object.
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   type DefaultIpeOut g :: * -> *
+
   defaultIpeOut :: IpeOut g (IpeObject' (DefaultIpeOut g) (NumType g))
 
   -- defaultIpeObject :: RecApplicative (AttributesOf (DefaultIpeOut g))
@@ -90,6 +103,10 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
   type DefaultIpeOut (PolyLine 2 p r) = Path
   defaultIpeOut = noAttrs ipePolyLine
 
+instance HasDefaultIpeOut (SimplePolygon p r) where
+  type DefaultIpeOut (SimplePolygon p r) = Path
+  defaultIpeOut = flip addAttributes ipeSimplePolygon $
+                    mempty <> attr SFill (IpeColor "red")
 
 --------------------------------------------------------------------------------
 -- * Point Converters
@@ -99,8 +116,6 @@ ipeMark n = noAttrs . IpeOut $ flip Symbol n
 
 ipeDiskMark :: IpeOut (Point 2 r) (IpeObject' IpeSymbol r)
 ipeDiskMark = ipeMark "mark/disk(sx)"
-
-
 
 --------------------------------------------------------------------------------
 
@@ -160,14 +175,21 @@ ipeCircle' = IpeOut circle''
 fromPathSegment    :: IpeOut g (PathSegment r) -> IpeOut g (Path r)
 fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 
+ipeSimplePolygon :: IpeOut (SimplePolygon p r) (Path r)
+ipeSimplePolygon = fromPathSegment . IpeOut $ PolygonPath . dropExt
+  where
+    dropExt                    :: SimplePolygon p r -> SimplePolygon () r
+    dropExt (SimplePolygon vs) = SimplePolygon $ fmap (&extra .~ ()) vs
 
 
 
-ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
 
 
-testzz :: IpeObject Integer
-testzz = asIpeObjectWith ipeLineSegment ls $ mempty <> attr SStroke (IpeColor "red")
+-- ls = (ClosedLineSegment (ext origin) (ext (point2 1 1)))
+
+
+-- testzz :: IpeObject Integer
+-- testzz = asIpeObjectWith ipeLineSegment ls $ mempty <> attr SStroke (IpeColor "red")
 
 
 

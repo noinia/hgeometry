@@ -66,7 +66,7 @@ instance Ord r => (Slab o a r) `IsIntersectableWith` (Slab o a r) where
 
   (Slab i) `intersect` (Slab i') = match (i `intersect` i') $
         (H $ \NoIntersection -> coRec NoIntersection)
-     :& (H $ \i              -> coRec (Slab i :: Slab o a r))
+     :& (H $ \i''            -> coRec (Slab i'' :: Slab o a r))
      :& RNil
 
 instance (Slab Horizontal a r) `IsIntersectableWith` (Slab Vertical a r) where

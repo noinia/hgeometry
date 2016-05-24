@@ -1,8 +1,7 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
-
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.Types where
 
@@ -11,33 +10,28 @@ import           Control.Lens
 import           Data.Monoid
 import           Data.Proxy
 import           Data.Vinyl
-import           Linear.Affine((.-.), qdA)
 
 import           Data.Ext
-import           Data.Geometry.Ball
 import           Data.Geometry.Box(Rectangle)
-import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon(SimplePolygon)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+
 import           Data.Maybe(mapMaybe)
 import           Data.Singletons.TH(genDefunSymbols)
-import           Data.Vinyl.TypeLevel
-import           Frames.CoRec
 
+import           Data.Geometry.Ipe.Literal
 import qualified Data.Geometry.Ipe.Attributes as AT
 import           Data.Geometry.Ipe.Attributes hiding (Matrix)
 import           Data.Text(Text)
+import           Text.XML.Expat.Tree(Node)
 
 import           GHC.Exts
 
-import           GHC.TypeLits
-
 
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Sequence as S
 import qualified Data.Seq2     as S2
 
 --------------------------------------------------------------------------------
@@ -128,7 +122,7 @@ type instance Dimension (PathSegment r) = 2
 instance Num r => IsTransformable (PathSegment r) where
   transformBy t (PolyLineSegment p) = PolyLineSegment $ transformBy t p
   transformBy t (PolygonPath p)     = PolygonPath $ transformBy t p
-  transformBy t _                   = error "transformBy: not implemented yet"
+  transformBy _ _                   = error "transformBy: not implemented yet"
 
 
 -- | A path is a non-empty sequence of PathSegments.
@@ -299,12 +293,6 @@ commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
 --------------------------------------------------------------------------------
 
 
-
-type XmlTree = Text
-
-
-
-
 -- | The definition of a view
 -- make active layer into an index ?
 data View = View { _layerNames      :: [LayerName]
@@ -318,19 +306,24 @@ makeLenses ''View
 
 -- | for now we pretty much ignore these
 data IpeStyle = IpeStyle { _styleName :: Maybe Text
-                         , _styleData :: XmlTree
+                         , _styleData :: Node Text Text
                          }
-              deriving (Eq,Show,Read,Ord)
+              deriving (Eq,Show)
 makeLenses ''IpeStyle
+
+
+basicIpeStyle :: IpeStyle
+basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|resources/basic.isy|])
+
 
 -- | The maybe string is the encoding
 data IpePreamble  = IpePreamble { _encoding     :: Maybe Text
-                                , _preambleData :: XmlTree
+                                , _preambleData :: Text
                                 }
                   deriving (Eq,Read,Show,Ord)
 makeLenses ''IpePreamble
 
-type IpeBitmap = XmlTree
+type IpeBitmap = Text
 
 
 
@@ -348,9 +341,9 @@ makeLenses ''IpePage
 
 -- | Creates a simple page with no views.
 fromContent     :: [IpeObject r] -> IpePage r
-fromContent obs = IpePage layers [] obs
+fromContent obs = IpePage layers' [] obs
   where
-    layers = mapMaybe (^.commonAttributes.attrLens SLayer) obs
+    layers' = mapMaybe (^.commonAttributes.attrLens SLayer) obs
 
 -- | A complete ipe file
 data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
@@ -362,7 +355,7 @@ makeLenses ''IpeFile
 
 -- | Convenience function to construct an ipe file consisting of a single page.
 singlePageFile   :: IpePage r -> IpeFile r
-singlePageFile p = IpeFile Nothing [] (p NE.:| [])
+singlePageFile p = IpeFile Nothing [basicIpeStyle] (p NE.:| [])
 
 -- | Create a single page ipe file from a list of IpeObjects
 singlePageFromContent :: [IpeObject r] -> IpeFile r

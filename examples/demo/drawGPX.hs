@@ -3,35 +3,70 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
-module Main where
+module Demo.DrawGPX where
 
-import Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
-import Data.Maybe
+import           Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 import           Control.Applicative
 import           Control.Lens
-import           Data.List(isSuffixOf)
-import qualified Data.Sequence as S
-import           Data.Time.Clock
-import           GPXParser
-import           System.Directory
-
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
-import           Data.Geometry.Ipe.Writer
-
-import qualified Data.Geometry.Polygon as Polygon
-
+import           Data.Data
 import           Data.Ext
-import Text.Printf(printf)
-import Data.Time.Calendar
 import qualified Data.Foldable as F
+import           Data.Geometry
+import           Data.Geometry.PolyLine
+import           Data.Geometry.Ipe
+import           Data.Geometry.Vector
+import           Data.List (isSuffixOf)
+import           Data.Maybe
+import qualified Data.Sequence as S
 import qualified Data.Text as T
+import           Data.Time.Calendar
+import           Data.Time.Clock
+import           Demo.GPXParser
+import           Options.Applicative
+import           System.Directory
+import           Text.Printf (printf)
 
-scaleF = 1
+
+--------------------------------------------------------------------------------
+
+data Options = Options { _inPath  :: FilePath
+                       , _outPath :: FilePath
+                       }
+               deriving Data
+
+options :: ParserInfo Options
+options = info (helper <*> parser)
+               (  progDesc "Draws gpx trajectories in ipe"
+               <> header   "DrawGPX"
+               )
+  where
+    parser = Options
+          <$> strOption (help "Input Directory"
+                         <> short 'i'
+                         <> metavar "INDIR"
+                        )
+          <*> strOption (help "Output File"
+                         <> short 'o'
+                         <> metavar "TARGET"
+                        )
+
+--------------------------------------------------------------------------------
+
+mainWith                          :: Options -> IO ()
+mainWith (Options inPath outPath) = do
+    let inPath' = inPath ++ "/"
+    files <- map (inPath' ++) . filter (isSuffixOf ".gpx")
+         <$> getDirectoryContents inPath'
+    tks   <- concatMap (_tracks . combineTracks) <$> mapM readGPXFile files
+    let polies  = mapMaybe asPolyLine tks
+        polies' = map (douglasPeucker 0.01 . scaleUniformlyBy 100) polies
+        pg = singlePageFromContent $ map (asIpeObject' mempty) polies'
+    -- print pg
+    writeIpeFile outPath pg
+
 
 colors :: [T.Text]
-colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) $ colors'
+colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) colors'
   where
     colors' :: [[Double]]
     -- colors' = [ [84,48,5]
@@ -61,53 +96,40 @@ colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) $ colors'
               , [177,89,40]
               ]
 
-readCoords    :: FilePath -> IO (PolyLine 2 () Double)
-readCoords fp = fromPoints .
-                map ((\[x,y] -> point2 x y :+ ()) . map read . words) . lines
-             <$> readFile fp
+-- readCoords    :: FilePath -> IO (PolyLine 2 () Double)
+-- readCoords fp = fromPoints .
+--                 map ((\[x,y] -> point2 x y :+ ()) . map read . words) . lines
+--              <$> readFile fp
 
-readCoords'    :: FilePath -> IO [PolyLine 2 () Double]
-readCoords' fp = mapMaybe (fmap fromPoints . g . f)  .  group' . lines <$> readFile fp
-  where
-    f = map ((\[x,y] -> point2 x y :+ ()) . map read . words)
-    g xs@(_:_:_) = Just xs
-    g _          = Nothing
+-- readCoords'    :: FilePath -> IO [PolyLine 2 () Double]
+-- readCoords' fp = mapMaybe (fmap fromPoints . g . f)  .  group' . lines <$> readFile fp
+--   where
+--     f = map ((\[x,y] -> point2 x y :+ ()) . map read . words)
+--     g xs@(_:_:_) = Just xs
+--     g _          = Nothing
 
-group' lst = case break (== "NL") lst of
-               ([],[]) -> []
-               ([],"NL":r) -> group' r
-               (pr,"NL":r) -> pr:group' r
-               (pr,[])     -> [pr]
-
-
-
-maps = mapM (\f -> readCoords $ "/Users/frank/tmp/bikerides/maps/" ++ f)
-       [ "nld_coords.txt"
-       , "bel_coords.txt"
-       , "dnk_coords.txt"
-       , "fra_coords.txt"
-       ]
-
---   do
---     nld <- readCoords
---     writePolyLineFile "/tmp/nld.ipe" $  map (flip stroke "black") [nld]
+-- group' lst = case break (== "NL") lst of
+--                ([],[]) -> []
+--                ([],"NL":r) -> group' r
+--                (pr,"NL":r) -> pr:group' r
+--                (pr,[])     -> [pr]
 
 
 
+-- maps = mapM (\f -> readCoords $ "/Users/frank/tmp/bikerides/maps/" ++ f)
+--        [ "nld_coords.txt"
+--        , "bel_coords.txt"
+--        , "dnk_coords.txt"
+--        , "fra_coords.txt"
+--        ]
 
-main = do
-    let path = "/Users/frank/tmp/bikerides/gpx/"
-    files <- map (path ++ ) . filter (isSuffixOf ".gpx") <$> getDirectoryContents path
-    maps <- maps
-    -- nld <- readCoords' "/Users/frank/tmp/bikerides/maps/nld.txt"
-    tks   <- concatMap (_tracks . combineTracks)
-             <$> mapM (\fp -> print fp >> readGPXFile fp) files
-    let polies   = mapMaybe (asPolyLine . subsampleTrack ssFactor) tks
-        -- !polies' = map (unPolyLine.traverse.extra .~ ()) polies
-    writePolyLineFile "/tmp/out.ipe" . map (bimap (douglasPeucker 0.01) id) $
-      map (flip stroke "black") maps ++ map strokeByMonth polies
+-- --   do
+-- --     nld <- readCoords
+-- --     writePolyLineFile "/tmp/nld.ipe" $  map (flip stroke "black") [nld]
 
-    -- $ zipWith stroke polies' (cycle colors)
+
+
+
 
 
 asPolyLine :: Track -> Maybe (PolyLine 2 UTCTime Double)

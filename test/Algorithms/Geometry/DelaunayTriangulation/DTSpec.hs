@@ -6,7 +6,7 @@ import Util
 import Test.Hspec
 import Control.Lens
 import Data.Geometry
-import Data.Maybe(mapMaybe)
+import Data.Maybe(mapMaybe, fromJust)
 import Algorithms.Geometry.DelaunayTriangulation.Types
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror as DC
 import qualified Algorithms.Geometry.DelaunayTriangulation.Naive              as Naive
@@ -32,7 +32,8 @@ spec = do
     it "singleton " $ do
       dtEdges (take' 1 myPoints) `shouldBe` []
     toSpec (TestCase "myPoints" myPoints)
-
+    toSpec (TestCase "myPoints'" myPoints')
+    ipeSpec
 
 ipeSpec :: Spec
 ipeSpec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
@@ -75,14 +76,16 @@ sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
 
 
 sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
-triA `sameEdges` triB = all (\(a,b) -> (adjA V.! a) `CU.isShiftOf` (adjB V.! b))
-                      $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
+triA `sameEdges` triB = all sameAdj . M.assocs $ mapping'
   where
+    sameAdj (a, b) = (f $ adjA V.! a) `CU.isShiftOf` (adjB V.! b)
+
     adjA = triA^.neighbours
     adjB = triB^.neighbours
 
+    mapping' = M.fromList $ zip (M.elems $ triA^.vertexIds) (M.elems $ triB^.vertexIds)
 
-
+    f = fmap (fromJust . flip M.lookup mapping')
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
 myPoints = NonEmpty.fromList . map ext $
@@ -98,3 +101,16 @@ myPoints = NonEmpty.fromList . map ext $
            , point2 31 14
            , point2 33 5
            ]
+
+myPoints' :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
+myPoints' = NonEmpty.fromList . map ext $
+            [ point2 64  736
+            , point2 96 688
+            , point2 128 752
+            , point2 160 704
+            , point2 128 672
+            , point2 64 656
+            , point2 192 736
+            , point2 208 704
+            , point2 192 672
+            ]

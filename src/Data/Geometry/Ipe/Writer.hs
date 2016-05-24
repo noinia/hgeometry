@@ -21,6 +21,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Maybe(catMaybes, mapMaybe, fromMaybe)
+import           Data.Ratio
 import           Data.Semigroup
 import           Data.Proxy
 import qualified Data.Traversable as Tr
@@ -145,6 +146,13 @@ instance IpeWriteText Int where
 
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow
+
+-- | This instance converts the ratio to a Pico, and then displays that.
+instance Integral a => IpeWriteText (Ratio a) where
+  ipeWriteText = ipeWriteText . f . fromRational . toRational
+    where
+      f :: Pico -> Pico
+      f = id
 
 writeByShow :: Show t => t -> Maybe Text
 writeByShow = ipeWriteText . T.pack . show
@@ -346,12 +354,24 @@ instance (IpeWriteText r)  => IpeWrite (IpePage r) where
                                   ]
 
 
+instance IpeWrite IpeStyle where
+  ipeWrite (IpeStyle _ xml) = Just xml
+
+
+instance IpeWrite IpePreamble where
+  ipeWrite (IpePreamble _ latex) = Just $ Element "preamble" [] [Text latex]
+  -- TODO: I probably want to do something with the encoding ....
+
 instance (IpeWriteText r) => IpeWrite (IpeFile r) where
-  ipeWrite (IpeFile p s pgs) = Just $ Element "ipe" ipeAtts chs
+  ipeWrite (IpeFile mp ss pgs) = Just $ Element "ipe" ipeAtts chs
     where
-    ipeAtts = [("version","70005"),("creator", "HGeometry")]
-    -- TODO: Add preamble and styles
-    chs = mapMaybe ipeWrite . F.toList $ pgs
+      ipeAtts = [("version","70005"),("creator", "HGeometry")]
+      chs = mconcat [ catMaybes [mp >>= ipeWrite]
+                    , mapMaybe ipeWrite ss
+                    , mapMaybe ipeWrite . F.toList $ pgs
+                    ]
+
+
 
 
 --------------------------------------------------------------------------------
@@ -378,10 +398,6 @@ ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
     mkPath     = Path . S2.l1Singleton . PolyLineSegment
     layers     = map mkLayer . nub . mapMaybe (lookup "layer" . snd)
     mkLayer n  = Element "layer" [("name",n)] []
-
-
-writePolyLineFile :: IpeWriteText r => FilePath -> [(PolyLine 2 () r, Atts)] -> IO ()
-writePolyLineFile fp = B.writeFile fp . format' . ipeWritePolyLines
 
 
 instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where

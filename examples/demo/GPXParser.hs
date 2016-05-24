@@ -3,7 +3,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators #-}
-module GPXParser where
+module Demo.GPXParser where
 
 
 import qualified Data.ByteString.Lazy as B

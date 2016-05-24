@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry
-version:             0.4.0.0
+version:             0.5.0.0
 synopsis:            Data types for geometric objects, geometric algorithms, and data  structures.
 description:
   HGeometry provides some basic geometry types, and geometric algorithms and
@@ -23,6 +23,7 @@ category:            Geometry
 build-type:          Simple
 
 extra-source-files:  README.md
+                     resources/basic.isy
                      test/Data/Geometry/pointInPolygon.ipe
                      test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
 
@@ -32,12 +33,14 @@ source-repository head
   location: https://github.com/noinia/hgeometry
 
 
-flag demos
+flag examples
   description: Build demonstration programs
   default:     False
   manual:      True
 
 library
+  ghc-options: -Wall -fno-warn-unticked-promoted-constructors
+
   exposed-modules:  Data.Geometry
                     Data.Geometry.Properties
                     Data.Geometry.Vector
@@ -89,6 +92,7 @@ library
                     Data.Range
 
                     Data.Geometry.Ipe
+                    Data.Geometry.Ipe.Literal
                     Data.Geometry.Ipe.Attributes
                     Data.Geometry.Ipe.Types
                     Data.Geometry.Ipe.Writer
@@ -142,10 +146,12 @@ library
                , hexpat           >= 0.20.9
                , mtl
                , random
+               , template-haskell
 
 
                , time
                , directory
+               , optparse-applicative
 
 
   hs-source-dirs: src
@@ -163,6 +169,8 @@ library
                     , RankNTypes
 
                     , PatternSynonyms
+                    , TupleSections
+                    , LambdaCase
                     , ViewPatterns
 
                     , StandaloneDeriving
@@ -177,24 +185,36 @@ library
                     , FlexibleContexts
                     , MultiParamTypeClasses
 
-executable demo
-  if !flag(demos)
+executable hgeometry-examples
+  if !flag(examples)
     buildable: False
-  main-is: demo/WriteEnsemble.hs
+  main-is: Main.hs
 
-  if flag(demos)
+  if flag(examples)
     build-depends: base
                  , hgeometry
                  , lens
                  , containers
                  , vinyl
                  , Frames
+                 , semigroups
+                 , optparse-applicative
                  , text
+                 , hexpat
+                 , bytestring
                  , directory
                  , time
+                 , random
 
 
   hs-source-dirs: examples
+
+  other-modules: Demo.DrawGPX
+                 Demo.WriteEnsemble
+                 Demo.MinDisk
+                 Demo.Delaunay
+
+                 Demo.GPXParser
 
   default-language: Haskell2010
 
@@ -216,6 +236,7 @@ executable demo
                     , DeriveFoldable
                     , DeriveTraversable
 
+                    , DeriveDataTypeable
                     , AutoDeriveTypeable
 
                     , FlexibleInstances
@@ -236,7 +257,6 @@ test-suite hspec
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
   hs-source-dirs:       test
-  ghc-options:          -Wall
   main-is:              Spec.hs
 
   other-modules: Data.RangeSpec

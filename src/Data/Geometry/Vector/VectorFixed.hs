@@ -44,8 +44,19 @@ type Arity  (n :: Nat)  = V.Arity (ToPeano n)
 
 type Index' i d = V.Index (ToPeano i) (ToPeano d)
 
+
+-- | Lens into the i th element
 element   :: forall proxy i d r. (Arity d, Index' i d) => proxy i -> Lens' (Vector d r) r
 element _ = V.elementTy (undefined :: (ToPeano i))
+
+-- | Similar to 'element' above. Except that we don't have a static guarantee
+-- that the index is in bounds. Hence, we can only return a Traversal
+element'   :: forall d r. (KnownNat d, Arity d) => Int -> Traversal' (Vector d r) r
+element' i f v
+  | 0 <= i && i < fromInteger (natVal (C :: C d)) = f (v V.! i)
+                                                 <&> \a -> (v&V.element i .~ a)
+       -- Implementation based on that of Ixed Vector in Control.Lens.At
+  | otherwise                                     = pure v
 
 
 instance (Show r, Arity d) => Show (Vector d r) where

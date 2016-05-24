@@ -1,23 +1,23 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.DelaunayTriangulation.Types where
 
-import Data.Monoid(mempty)
-import Control.Lens hiding (only)
-import qualified Data.Foldable as F
-import Data.Maybe(fromJust)
-import qualified Data.Vector as V
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
+import           Control.Lens
 import qualified Data.CircularList as C
-import Data.Geometry.Polygon.Convex(focus', pred', succ')
-import Data.Ext
-import Data.Geometry
-import Data.Geometry.Interval
-import Data.Geometry.Polygon
-import Data.Geometry.Ball(disk, insideBall)
-import Data.Geometry.Ipe
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Ipe
+import qualified Data.IntMap.Strict as IM
+import qualified Data.Map as M
+import qualified Data.Map.Strict as SM
+import           Data.Monoid (mempty)
+import qualified Data.Permutation as P
+import           Data.PlanarGraph
+import qualified Data.Vector as V
 
+import           Debug.Trace
+
+--------------------------------------------------------------------------------
 
 -- We store all adjacency lists in clockwise order
 
@@ -30,6 +30,7 @@ type VertexID = Int
 
 type Vertex    = C.CList VertexID
 
+type Adj = IM.IntMap (C.CList VertexID)
 
 -- | Neighbours are stored in clockwise order: i.e. rotating right moves to the
 -- next clockwise neighbour.
@@ -47,18 +48,64 @@ type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 
 
 showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
-showDT = mapM_ print . edges
+showDT = mapM_ print . triangulationEdges
 
 
-edges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
-edges t = let pts = _positions t
-          in map (\(u,v) -> (pts V.! u, pts V.! v)) . edges' $ t
+triangulationEdges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
+triangulationEdges t = let pts = _positions t
+                       in map (\(u,v) -> (pts V.! u, pts V.! v)) . edges' $ t
 
 
 edges' :: Triangulation p r -> [(VertexID,VertexID)]
 edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
+drawTriangulation :: IpeOut (Triangulation p r) (IpeObject r)
 drawTriangulation = IpeOut $ \tr ->
-    let es = map (uncurry ClosedLineSegment) . edges $ tr
+    let es = map (uncurry ClosedLineSegment) . triangulationEdges $ tr
     in asIpeGroup $ map (\e -> asIpeObjectWith ipeLineSegment e mempty) es
+
+
+--------------------------------------------------------------------------------
+
+type PlaneGraph s w v e f r = PlanarGraph s w (Point 2 r :+ v) e f
+
+data ST a b c = ST { fst' :: !a, snd' :: !b , trd' :: !c}
+
+type ArcID = Int
+
+-- | ST' is a strict triple (m,a,x) containing:
+--
+-- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
+--            u < v, to arcId's.
+-- - a: the next available unused arcID
+-- - x: the data value we are interested in computing
+type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
+
+toPlaneGraph    :: forall proxy s p r.
+                   proxy s -> Triangulation p r -> PlaneGraph s Primal_ p () () r
+toPlaneGraph _ tr = (planarGraph . P.toCycleRep n $ perm)&vertexData .~ tr^.positions
+  where
+    neighs    = C.rightElements <$> tr^.neighbours
+    n         = sum . fmap length $ neighs
+
+    vtxIDs = [0..]
+    perm = trd' . foldr toOrbit (ST mempty 0 mempty) $ zip vtxIDs (V.toList neighs)
+
+    -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
+    -- vertex with its adjacent vertices into an Orbit
+    toOrbit                     :: (VertexID,[VertexID]) -> ST' [[Dart s]]
+                                -> ST' [[Dart s]]
+    toOrbit (u,vs) (ST m a dss) =
+      let (ST m' a' ds') = foldr (toDart . (u,)) (ST m a mempty) vs
+      in ST m' a' (ds':dss)
+
+
+    -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
+    -- representing this edge.
+    toDart                   :: (VertexID,VertexID) -> ST' [Dart s] -> ST' [Dart s]
+    toDart (u,v) (ST m a ds) = let dir = if u < v then Positive else Negative
+                                   t'  = (min u v, max u v)
+                               in case M.lookup t' m of
+      Just a' -> ST m                  a     (Dart (Arc a') dir : ds)
+      Nothing -> ST (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
