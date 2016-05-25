@@ -18,6 +18,7 @@ ghcExts = map ("-X" ++)
           , "ViewPatterns"
           , "TupleSections"
           , "MultiParamTypeClasses"
+          , "LambdaCase"
 
           , "StandaloneDeriving"
           , "GeneralizedNewtypeDeriving"
