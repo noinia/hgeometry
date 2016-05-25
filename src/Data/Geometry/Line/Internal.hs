@@ -46,6 +46,7 @@ verticalLine x = Line (point2 x 0) (v2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (v2 1 0)
 
+-- | Given a line l with anchor point p, get the line perpendicular to l that also goes through p.
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (v2 (-vy) vx)
 
@@ -182,3 +183,10 @@ q `onSide` (Line p v) = let r    =  p .+^ v
 -- | Test if the query point q lies (strictly) above line l
 liesAbove       :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 q `liesAbove` l = q `onSide` l == Above
+
+
+-- | Get the bisector between two points
+bisector     :: Fractional r => Point 2 r -> Point 2 r -> Line 2 r
+bisector p q = let v = q .-. p
+                   h = p .+^ (v ^/ 2)
+               in perpendicularTo (Line h v)

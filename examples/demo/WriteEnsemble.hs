@@ -41,7 +41,7 @@ options = info (helper <*> parser)
 --------------------------------------------------------------------------------
 
 -- read a bunch of text files, each defining a time-series (ensemble), produce
--- an ipe file wheyre each time-series is represented by a polyline.
+-- an ipe file where each time-series is represented by a polyline.
 
 main :: IO ()
 main = execParser options >>= mainWith
