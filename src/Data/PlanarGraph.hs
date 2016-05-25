@@ -3,13 +3,12 @@
 module Data.PlanarGraph where
 
 import           Control.Lens
-import           Control.Monad (join, forM, forM_, when, filterM)
+import           Control.Monad (forM_, when, filterM)
 import           Control.Monad.ST (ST,runST)
-import           Data.Ext
+import qualified Data.List as L
 import           Data.Maybe
 import           Data.Permutation
 import           Data.Tree
-import qualified Data.List as L
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Mutable as MV

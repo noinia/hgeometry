@@ -20,8 +20,11 @@ import qualified Data.Map as M
 import qualified Data.Vector as V
 
 
-dtEdges = edges . DC.delaunayTriangulation
+dtEdges :: (Fractional r, Ord r)
+        => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
+dtEdges = edges' . DC.delaunayTriangulation
 
+take'   :: Int -> NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
 take' i = NonEmpty.fromList . NonEmpty.take i
 
 --------------------------------------------------------------------------------
