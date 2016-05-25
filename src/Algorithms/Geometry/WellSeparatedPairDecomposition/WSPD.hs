@@ -2,41 +2,32 @@
 {-# LANGUAGE LambdaCase  #-}
 module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD where
 
-import Control.Monad.Reader
-
-import Data.Semigroup
-import Data.Ord(comparing)
-import Control.Applicative
-import Control.Monad(forM_)
-import Control.Monad.ST(ST,runST)
-import Data.Ext
-import Control.Lens hiding (Level, levels)
-import Data.Geometry.Point
-import Data.Geometry.Vector
-import Data.Geometry.Box
-import Data.BinaryTree
-import Data.Maybe
-import GHC.TypeLits
+import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
+import           Control.Applicative
+import           Control.Lens hiding (Level, levels)
+import           Control.Monad (forM_)
+import           Control.Monad.Reader
+import           Control.Monad.ST (ST,runST)
+import           Data.BinaryTree
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.Box
+import           Data.Geometry.Point
+import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
-
-
-
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-
-import Data.Range
-import qualified Data.Range as Range
-
-import qualified Data.Seq2 as S2
-import qualified Data.Sequence as S
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-
-
-import qualified Data.Foldable as F
+import           Data.Maybe
+import           Data.Ord (comparing)
+import           Data.Range
+import qualified Data.Range as Range
+import           Data.Semigroup
+import qualified Data.Seq2 as S2
+import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
-
-import Algorithms.Geometry.WellSeparatedPairDecomposition.Types
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
