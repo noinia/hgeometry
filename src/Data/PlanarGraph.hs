@@ -191,6 +191,11 @@ tailOf d g = VertexId . fst $ lookupIdx (g^.embedding) d
 headOf   :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 headOf d = tailOf (twin d)
 
+-- | endPoints d g = (tailOf d g, headOf d g)
+endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
+endPoints d g = (tailOf d g, headOf d g)
+
+
 -- | All edges incident to vertex v, in counterclockwise order around v.
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
@@ -233,6 +238,20 @@ eDataOf d = edgeData.ix' (fromEnum d)
 -- | Data of a face of a given face
 fDataOf                       :: FaceId s w -> Lens' (PlanarGraph s w v e f) f
 fDataOf (FaceId (VertexId i)) = faceData.ix' i
+
+
+-- | Data corresponding to the endpoints of the dart
+endPointDataOf   :: Dart s -> Getter (PlanarGraph s w v e f) (v,v)
+endPointDataOf d = to $ endPointData d
+
+
+-- | Data corresponding to the endpoints of the dart
+endPointData     :: Dart s -> PlanarGraph s w v e f -> (v,v)
+endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
+
+-- | Get the edge data associated with each dart
+withEdgeData :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
+withEdgeData g = V.zip (elems $ g^.embedding) (g^.edgeData)
 
 
 --------------------------------------------------------------------------------
@@ -406,17 +425,26 @@ dfs' g start = runST $ do
 
 
 
--- Minimum spanning tree of the edges. The result is a rooted tree, in which
+-- " "Minimum spanning tree of the edges. The result is a rooted tree, in which
 -- the nodes are the vertices in the planar graph together with the edge weight
 -- of the edge to their parent. The root's weight is zero.
 --
--- running time: $O(n log n)$
+-- running time: $O(n \log n)$
 mst   :: Ord e => PlanarGraph s w v e f -> Tree (VertexId s w)
-mst g = runST $ do
+mst g = makeTree g $ mstEdges g
+  -- TODO: Add edges/darts to the output somehow.
+
+
+-- | Computes the set of edges in the Minimum spanning tree
+--
+-- running time: $O(n \log n)$
+mstEdges   :: Ord e => PlanarGraph s w v e f -> [Dart s]
+mstEdges g = runST $ do
           uf <- new (numVertices g)
-          makeTree g <$> filterM (\e -> union uf (headOf e g) (tailOf e g)) edges'
+          filterM (\e -> union uf (headOf e g) (tailOf e g)) edges'
   where
     edges' = map fst . L.sortOn snd . V.toList $ V.zip (edges g) (g^.edgeData)
+
 
 -- Given the underlying planar graph, and a set of edges that form a tree,
 -- create the actual tree.
