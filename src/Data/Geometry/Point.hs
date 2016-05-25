@@ -334,3 +334,12 @@ insertIntoCyclicOrder   :: (Ord r, Num r)
                         => Point 2 r :+ q -> Point 2 r :+ p
                         -> C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
 insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c)
+
+
+-- | Squared Euclidean distance between two points
+squaredEuclideanDist :: (Num r, Arity d) => Point d r -> Point d r -> r
+squaredEuclideanDist = qdA
+
+-- | Euclidean distance between two points
+euclideanDist :: (Floating r, Arity d) => Point d r -> Point d r -> r
+euclideanDist = distanceA
