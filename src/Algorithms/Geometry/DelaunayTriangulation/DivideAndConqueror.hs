@@ -1,32 +1,30 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
-import Control.Applicative
-import Algorithms.Geometry.DelaunayTriangulation.Types
-import Algorithms.Geometry.ConvexHull.GrahamScan as GS
-import Control.Monad.State
-import Control.Monad.Reader
-import Control.Lens
-import Data.Function(on)
-import qualified Data.Foldable as F
-import Data.Maybe(fromJust, fromMaybe)
-
-import qualified Data.List as L
-import qualified Data.Vector as V
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import qualified Data.IntMap.Strict as IM
+import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
+import           Algorithms.Geometry.DelaunayTriangulation.Types
+import           Control.Applicative
+import           Control.Lens
+import           Control.Monad.Reader
+import           Control.Monad.State
+import           Data.BinaryTree
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
-import Data.Geometry.Polygon.Convex(ConvexPolygon)
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Function (on)
+import           Data.Geometry
+import           Data.Geometry.Ball (disk, insideBall)
+import           Data.Geometry.Interval
+import           Data.Geometry.Polygon
 import qualified Data.Geometry.Polygon.Convex as Convex
-import Data.Ext
-import Data.Geometry
-import Data.Geometry.Interval
-import Data.Geometry.Polygon
-import Data.Geometry.Ball(disk, insideBall)
-
-import Data.BinaryTree
+import           Data.Geometry.Polygon.Convex (ConvexPolygon)
+import qualified Data.IntMap.Strict as IM
+import qualified Data.List as L
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as M
+import           Data.Maybe (fromJust, fromMaybe)
+import qualified Data.Vector as V
 
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
@@ -45,15 +43,10 @@ import Data.BinaryTree
 -- Rotating Right <-> rotate clockwise
 
 
-
--- data TriangRes p r = TriangRes { _triang     :: Triangulation p r
---                                , _convexHull :: ConvexPolygon p r
---                                }
-
-
 -- | Computes the delaunay triangulation of a set of points.
 --
--- Running time: O(n log n)
+-- Running time: $O(n \log n)$
+-- (note: We use an IntMap in the implementation. So maybe actually $O(n \log^2 n)$)
 --
 -- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
 -- input does contain duplicate points, the implementation throws them away)
@@ -112,7 +105,9 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
                         in IM.fromList es
 
 
--- | Merge the two delaunay triangulations
+-- | Merge the two delaunay triangulations.
+--
+-- running time: $O(n)$ (although we cheat a bit by using a IntMap)
 merge                            :: (Ord r, Fractional r)
                                  => Adj
                                  -> Adj
@@ -134,7 +129,7 @@ type Merge p r = StateT Adj (Reader (Mapping p r, Firsts))
 
 type Firsts = IM.IntMap VertexID
 
-
+-- | Merges the two delaunay traingulations.
 moveUp          :: (Ord r, Fractional r)
                 => (VertexID,VertexID) -> VertexID -> VertexID -> Merge p r ()
 moveUp ut l r
