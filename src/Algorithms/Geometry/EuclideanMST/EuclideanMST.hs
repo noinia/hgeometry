@@ -21,24 +21,28 @@ import           Data.Tree
 -- does contain duplicate points, the implementation throws them away)
 --
 -- running time: $O(n \log n)$
-euclideanMST     :: (Ord r, Floating r)
+euclideanMST     :: (Ord r, Fractional r)
                  => NonEmpty.NonEmpty (Point 2 r :+ p) -> Tree (Point 2 r :+ p)
 euclideanMST pts = (\v -> g^.vDataOf v) <$> t
   where
-    g = withEdgeDistances . toPlaneGraph (Proxy :: Proxy MSTW)
+    -- since we care only about the relative order of the edges we can use the
+    -- squared Euclidean distance rather than the Euclidean distance, thus
+    -- avoiding the Floating constraint
+    g = withEdgeDistances squaredEuclideanDist . toPlaneGraph (Proxy :: Proxy MSTW)
       . delaunayTriangulation $ pts
     t = mst g
 
--- extractEMST =
 
-
--- | Labels the edges of a plane graph with their distances
-withEdgeDistances   :: Floating r
-                    => PlaneGraph s w p e f r -> PlaneGraph s w p (r :+ e) f r
-withEdgeDistances g = g&edgeData .~ xs
+-- | Labels the edges of a plane graph with their distances, as specified by
+-- the distance function.
+withEdgeDistances     :: (Point 2 r ->  Point 2 r -> r)
+                      -> PlaneGraph s w p e f r -> PlaneGraph s w p (r :+ e) f r
+withEdgeDistances f g = g&edgeData .~ xs
   where
     xs = fmap (\(d,x) -> len d :+ x) $ withEdgeData g
-    len d = uncurry euclideanDist . over both (^.core) $ endPointData d g
+    len d = uncurry f . over both (^.core) $ endPointData d g
+
+
 
 data MSTW
 
