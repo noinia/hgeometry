@@ -122,6 +122,7 @@ coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 -- 1
 --
 -- if we want.
+pattern Point2       :: r -> r -> Point 2 r
 pattern Point2 x y   <- (_point2 -> (x,y))
 
 -- | Similarly, we can write:
@@ -133,6 +134,7 @@ pattern Point2 x y   <- (_point2 -> (x,y))
 --   in g myPoint
 -- :}
 -- 3
+pattern Point3       :: r -> r -> r -> Point 3 r
 pattern Point3 x y z <- (_point3 -> (x,y,z))
 
 -- | Construct a 2 dimensional point

@@ -173,5 +173,8 @@ _unV3 v = let [x,y,z] = V.toList v in (x,y,z)
 
 
 -- | Pattern synonym for two and three dim vectors
+pattern Vector2       :: r -> r -> Vector 2 r
 pattern Vector2 x y   <- (_unV2 -> (x,y))
+
+pattern Vector3       :: r -> r -> r -> Vector 3 r
 pattern Vector3 x y z <- (_unV3 -> (x,y,z))

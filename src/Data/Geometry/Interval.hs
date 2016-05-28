@@ -60,11 +60,14 @@ inInterval       :: Ord r => r -> Interval a r -> Bool
 x `inInterval` r = x `inRange` (fmap (^.core) $ r^.unInterval )
 
 
--- :: (r :+ a) -> (r :+ a) -> OpenInterval a r
+pattern OpenInterval       :: (r :+ a) -> (r :+ a) -> Interval a r
 pattern OpenInterval   l u = GInterval (OpenRange   l u)
+
+pattern ClosedInterval     :: (r :+ a) -> (r :+ a) -> Interval a r
 pattern ClosedInterval l u = GInterval (ClosedRange l u)
 
--- | :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
+
+pattern Interval     :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
 pattern Interval l u = GInterval (Range l u)
 
 
