@@ -1,45 +1,69 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-module Data.PlanarGraph where
+module Data.PlanarGraph( Arc(..)
+                       , Direction(..), rev
+
+                       , Dart(..), arc, direction
+                       , twin, isPositive
+
+                       , World(..)
+
+                       , Dual
+
+                       , VertexId(..)
+
+                       , PlanarGraph
+                       , embedding, vertexData, dartData, faceData
+                       , edgeData
+
+                       , planarGraph, planarGraph'
+
+                       , numVertices, numDarts, numEdges, numFaces
+                       , darts', darts, edges', edges, vertices', vertices, faces', faces
+
+                       , tailOf, headOf, endPoints
+                       , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
+
+                       , vDataOf, eDataOf, fDataOf, endPointDataOf, endPointData
+
+
+                       , dual
+
+                       , FaceId(..)
+                       , leftFace, rightFace, boundary
+                       ) where
 
 import           Control.Lens
-import           Control.Monad (forM_, when, filterM)
-import           Control.Monad.ST (ST,runST)
-import qualified Data.List as L
-import           Data.Maybe
+import           Control.Monad (forM_)
 import           Data.Permutation
-import           Data.Tree
 import qualified Data.Vector as V
-import qualified Data.Vector.Generic as GV
+import qualified Data.Foldable as F
 import qualified Data.Vector.Mutable as MV
-import qualified Data.Vector.Unboxed.Mutable as UMV
 
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> :{
---  let
---    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---    myEmbedding = toCycleRep 12 [ [ Dart aA Negative
---                                  , Dart aC Positive
---                                  , Dart aB Positive
---                                  , Dart aA Positive
---                                  ]
---                                , [ Dart aE Negative
---                                  , Dart aB Negative
---                                  , Dart aD Negative
---                                  , Dart aG Positive
---                                  ]
---                                , [ Dart aE Positive
---                                  , Dart aD Positive
---                                  , Dart aC Negative
---                                  ]
---                                , [ Dart aG Negative
---                                  ]
---                                ]
---    myGraph = planarGraph myEmbedding
---    dart i s = Dart (Arc i) (read s)
+-- let dart i s = Dart (Arc i) (read s)
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+--     myGraph :: PlanarGraph Test Primal_ () String ()
+--     myGraph = planarGraph' [ [ (Dart aA Negative, "a-")
+--                              , (Dart aC Positive, "c+")
+--                              , (Dart aB Positive, "b+")
+--                              , (Dart aA Positive, "a+")
+--                              ]
+--                            , [ (Dart aE Negative, "e-")
+--                              , (Dart aB Negative, "b-")
+--                              , (Dart aD Negative, "d-")
+--                              , (Dart aG Positive, "g+")
+--                              ]
+--                            , [ (Dart aE Positive, "e+")
+--                              , (Dart aD Positive, "d+")
+--                              , (Dart aC Negative, "c-")
+--                              ]
+--                            , [ (Dart aG Negative, "g-")
+--                              ]
+--                            ]
 -- :}
 
 -- TODO: Add a fig. of the Graph
@@ -47,12 +71,13 @@ import qualified Data.Vector.Unboxed.Mutable as UMV
 
 --------------------------------------------------------------------------------
 
+-- | An Arc is a directed edge in a planar graph. The type s is used to tie
+-- this arc to a particular graph.
 newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded)
 makeLenses ''Arc
 
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
-
 
 
 data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum)
@@ -109,7 +134,7 @@ instance Enum (Dart s) where
                                 Negative -> 2*i + 1
 
 
--- | The space in which the graph lives
+-- | The world in which the graph lives
 data World = Primal_ | Dual_ deriving (Show,Eq)
 
 type family Dual (sp :: World) where
@@ -117,6 +142,8 @@ type family Dual (sp :: World) where
   Dual Dual_   = Primal_
 
 
+-- | A vertex in a planar graph. A vertex is tied to a particular planar graph
+-- by the phantom type s, and to a particular world w.
 newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int } deriving (Eq,Ord,Enum)
 -- VertexId's are in the range 0...|orbits|-1
 
@@ -124,21 +151,45 @@ instance Show (VertexId s w) where
   show (VertexId i) = "VertexId " ++ show i
 
 
-
-
+--------------------------------------------------------------------------------
+-- * The graph type itself
 
 -- | A *connected* Planar graph with bidirected edges. I.e. the edges (darts) are
 -- directed, however, for every directed edge, the edge in the oposite
 -- direction is also in the graph.
 --
+-- The types v, e, and f are the are the types of the data associated with the
+-- vertices, edges, and faces, respectively.
+--
 -- The orbits in the embedding are assumed to be in counterclockwise order.
 data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding  :: Permutation (Dart s)
                                                     , _vertexData :: V.Vector v
-                                                    , _edgeData   :: V.Vector e
-                                                    , _faceData   :: V.Vector f
+                                                    , _rawDartData :: V.Vector e
+                                                    , _faceData    :: V.Vector f
                                                     }
                                       deriving (Show,Eq)
 makeLenses ''PlanarGraph
+
+
+-- | lens to access the Dart Data
+dartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
+                 (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
+dartData = lens darts (\g xs -> g&rawDartData .~ reorderEdgeData xs)
+
+-- | edgeData is just an alias for 'dartData'
+edgeData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
+                 (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
+edgeData = dartData
+
+
+-- | Reorders the edge data to be in the right order to set edgeData
+reorderEdgeData    :: Foldable f => f (Dart s, e) -> V.Vector e
+reorderEdgeData ds = V.create $ do
+                                  v <- MV.new (F.length ds)
+                                  forM_ (F.toList ds) $ \(d,x) ->
+                                    MV.write v (fromEnum d) x
+                                  pure v
+
 
 -- | Construct a planar graph
 planarGraph      :: Permutation (Dart s) -> PlanarGraph s Primal_ () () ()
@@ -153,30 +204,128 @@ planarGraph perm = PlanarGraph perm vData eData fData
     eData  = V.replicate d ()
     fData  = V.replicate f ()
 
+
+
+-- | Construct a planar graph.
+--
+planarGraph'    :: [[(Dart s,e)]] -> PlanarGraph s Primal_ () e ()
+planarGraph' ds = (planarGraph perm)&dartData .~ (V.fromList . concat $ ds)
+  where
+    n     = sum . map length $ ds
+    perm  = toCycleRep n $ map (map fst) ds
+
+data Test
+
+testG :: PlanarGraph Test Primal_ () String ()
+testG = planarGraph' [ [ (Dart aA Negative, "a-")
+                       , (Dart aC Positive, "c+")
+                       , (Dart aB Positive, "b+")
+                       , (Dart aA Positive, "a+")
+                       ]
+                     , [ (Dart aE Negative, "e-")
+                       , (Dart aB Negative, "b-")
+                       , (Dart aD Negative, "d-")
+                       , (Dart aG Positive, "g+")
+                       ]
+                     , [ (Dart aE Positive, "e+")
+                       , (Dart aD Positive, "d+")
+                       , (Dart aC Negative, "c-")
+                       ]
+                     , [ (Dart aG Negative, "g-")
+                       ]
+                     ]
+  where
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+
+
+
+
+
+
 -- | Get the number of vertices
+--
+-- >>> numVertices myGraph
+-- 4
 numVertices :: PlanarGraph s w v e f -> Int
 numVertices g = V.length (g^.embedding.orbits)
 
+-- | Get the number of Darts
+--
+-- >>> numDarts myGraph
+-- 12
+numDarts :: PlanarGraph s w v e f -> Int
+numDarts g = size (g^.embedding)
+
 -- | Get the number of Edges
+--
+-- >>> numEdges myGraph
+-- 6
 numEdges :: PlanarGraph s w v e f -> Int
-numEdges g = size (g^.embedding) `div` 2
+numEdges g = numDarts g `div` 2
 
 -- | Get the number of faces
+--
+-- >>> numFaces myGraph
+-- 4
 numFaces   :: PlanarGraph s w v e f -> Int
 numFaces g = numEdges g - numVertices g + 2
 
 
 -- | Enumerate all vertices
-vertices   :: PlanarGraph s w v e f -> V.Vector (VertexId s w)
-vertices g = fmap VertexId $ V.enumFromN 0 (V.length (g^.embedding.orbits))
+--
+-- >>> vertices' myGraph
+-- fromList [VertexId 0,VertexId 1,VertexId 2,VertexId 3]
+vertices'   :: PlanarGraph s w v e f -> V.Vector (VertexId s w)
+vertices' g = VertexId <$> V.enumFromN 0 (V.length (g^.embedding.orbits))
+
+-- | Enumerate all vertices, together with their vertex data
+
+-- >>> vertices myGraph
+-- fromList [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+vertices   :: PlanarGraph s w v e f -> V.Vector (VertexId s w, v)
+vertices g = V.zip (vertices' g) (g^.vertexData)
+
 
 -- | Enumerate all darts
-darts :: PlanarGraph s w v e f -> V.Vector (Dart s)
-darts = elems . _embedding
+darts' :: PlanarGraph s w v e f -> V.Vector (Dart s)
+darts' = elems . _embedding
+
+-- | Get all darts together with their data
+--
+-- >>> mapM_ print $ darts myGraph
+-- (Dart (Arc 0) -1,"a-")
+-- (Dart (Arc 2) +1,"c+")
+-- (Dart (Arc 1) +1,"b+")
+-- (Dart (Arc 0) +1,"a+")
+-- (Dart (Arc 4) -1,"e-")
+-- (Dart (Arc 1) -1,"b-")
+-- (Dart (Arc 3) -1,"d-")
+-- (Dart (Arc 5) +1,"g+")
+-- (Dart (Arc 4) +1,"e+")
+-- (Dart (Arc 3) +1,"d+")
+-- (Dart (Arc 2) -1,"c-")
+-- (Dart (Arc 5) -1,"g-")
+darts   :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
+darts g = (\d -> (d,g^.eDataOf d)) <$> darts' g
 
 -- | Enumerate all edges. We report only the Positive darts
-edges :: PlanarGraph s w v e f -> V.Vector (Dart s)
-edges = V.filter isPositive . darts
+edges' :: PlanarGraph s w v e f -> V.Vector (Dart s)
+edges' = V.filter isPositive . darts'
+
+-- | Enumerate all edges with their edge data. We report only the Positive
+-- darts.
+--
+-- >>> mapM_ print $ edges myGraph
+-- (Dart (Arc 2) +1,"c+")
+-- (Dart (Arc 1) +1,"b+")
+-- (Dart (Arc 0) +1,"a+")
+-- (Dart (Arc 5) +1,"g+")
+-- (Dart (Arc 4) +1,"e+")
+-- (Dart (Arc 3) +1,"d+")
+edges :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
+edges = V.filter (isPositive . fst) . darts
+
+
 
 
 
@@ -209,7 +358,8 @@ outgoingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
 outgoingEdges v g = V.filter isPositive $ incidentEdges v g
 
 
-
+-- | Gets the neighbours of a particular vertex, in counterclockwise order
+-- around the vertex.
 neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 neighboursOf v g = otherVtx <$> incidentEdges v g
   where
@@ -232,7 +382,7 @@ vDataOf (VertexId i) = vertexData.ix' i
 
 -- | Edge data of a given dart
 eDataOf   :: Dart s -> Lens' (PlanarGraph s w v e f) e
-eDataOf d = edgeData.ix' (fromEnum d)
+eDataOf d = rawDartData.ix' (fromEnum d)
 
 -- | Data of a face of a given face
 fDataOf                       :: FaceId s w -> Lens' (PlanarGraph s w v e f) f
@@ -247,11 +397,6 @@ endPointDataOf d = to $ endPointData d
 -- | Data corresponding to the endpoints of the dart
 endPointData     :: Dart s -> PlanarGraph s w v e f -> (v,v)
 endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
-
--- | Get the edge data associated with each dart
-withEdgeData :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
-withEdgeData g = V.zip (elems $ g^.embedding) (g^.edgeData)
-
 
 --------------------------------------------------------------------------------
 -- * The Dual graph
@@ -272,18 +417,22 @@ dual   :: PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
 dual g = let perm = g^.embedding
          in PlanarGraph (cycleRep (elems perm) (apply perm . twin))
                         (g^.faceData)
-                        (g^.edgeData)
+                        (g^.rawDartData)
                         (g^.vertexData)
 
---
+-- | A face
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (Dual w) } deriving (Eq,Ord)
 
 instance Show (FaceId s w) where
   show (FaceId (VertexId i)) = "FaceId " ++ show i
 
 -- | Enumerate all faces in the planar graph
-faces :: PlanarGraph s w v e f -> V.Vector (FaceId s w)
-faces = fmap FaceId . vertices . dual
+faces' :: PlanarGraph s w v e f -> V.Vector (FaceId s w)
+faces' = fmap FaceId . vertices' . dual
+
+-- | All faces with their face data.
+faces   :: PlanarGraph s w v e f -> V.Vector (FaceId s w, f)
+faces g = V.zip (faces' g) (g^.faceData)
 
 -- | The face to the left of the dart
 --
@@ -378,156 +527,3 @@ testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
 --                      , fromList [dart 1 "+1",dart 3 "-1",dart 2 "-1"]
 --                      , fromList [dart 4 "-1",dart 3 "+1",dart 5 "+1",dart 5 "-1"]
 --                      ]
-
-
---------------------------------------------------------------------------------
--- * Algorithms
-
--- | DFS on a planar graph.
---
--- Running time: O(n)
---
--- Note that since our planar graphs are always connected there is no need need
--- for dfs to take a list of start vertices.
-dfs  :: forall s w v e f.
-      PlanarGraph s w v e f -> VertexId s w -> Tree (VertexId s w)
-dfs g = dfs' (adjacencyLists g)
-
-
--- | Transform into adjacencylist representation
-adjacencyLists   :: PlanarGraph s w v e f -> AdjacencyLists s w
-adjacencyLists g = V.toList . flip neighboursOf g <$> vertices g
-
-
-type AdjacencyLists s w = V.Vector [VertexId s w]
-
-dfs'          :: forall s w. AdjacencyLists s w -> VertexId s w -> Tree (VertexId s w)
-dfs' g start = runST $ do
-                 bv     <- UMV.replicate n False -- bit vector of marks
-                 -- start will be unvisited, thus the fromJust is safe
-                 fromJust <$> dfs'' bv start
-  where
-    n = GV.length g
-
-    neighs              :: VertexId s w -> [VertexId s w]
-    neighs (VertexId u) = g GV.! u
-
-    visit   bv (VertexId i) = UMV.write bv i True
-    visited bv (VertexId i) = UMV.read  bv i
-    dfs''      :: UMV.MVector s' Bool -> VertexId s w
-               -> ST s' (Maybe (Tree (VertexId s w)))
-    dfs'' bv u = visited bv u >>= \case
-                   True  -> pure Nothing
-                   False -> do
-                              visit bv u
-                              Just . Node u . catMaybes <$> mapM (dfs'' bv) (neighs u)
-
-
-
--- " "Minimum spanning tree of the edges. The result is a rooted tree, in which
--- the nodes are the vertices in the planar graph together with the edge weight
--- of the edge to their parent. The root's weight is zero.
---
--- running time: $O(n \log n)$
-mst   :: Ord e => PlanarGraph s w v e f -> Tree (VertexId s w)
-mst g = makeTree g $ mstEdges g
-  -- TODO: Add edges/darts to the output somehow.
-
-
--- | Computes the set of edges in the Minimum spanning tree
---
--- running time: $O(n \log n)$
-mstEdges   :: Ord e => PlanarGraph s w v e f -> [Dart s]
-mstEdges g = runST $ do
-          uf <- new (numVertices g)
-          filterM (\e -> union uf (headOf e g) (tailOf e g)) edges'
-  where
-    edges' = map fst . L.sortOn snd . V.toList $ V.zip (edges g) (g^.edgeData)
-
-
--- Given the underlying planar graph, and a set of edges that form a tree,
--- create the actual tree.
---
--- pre: the planar graph has at least one vertex.
-makeTree   :: forall s w v e f.
-              PlanarGraph s w v e f -> [Dart s] -> Tree (VertexId s w)
-makeTree g = flip dfs' start . mkAdjacencyLists
-  where
-    n = numVertices g
-    start = V.head $ vertices g
-
-    append                  :: MV.MVector s' [a] -> VertexId s w -> a -> ST s' ()
-    append v (VertexId i) x = MV.read v i >>= MV.write v i . (x:)
-
-    mkAdjacencyLists        :: [Dart s] -> AdjacencyLists s w
-    mkAdjacencyLists edges' = V.create $ do
-                                vs <- MV.replicate n []
-                                forM_ edges' $ \e -> do
-                                  let u = headOf e g
-                                      v = tailOf e g
-                                  append vs u v
-                                  append vs v u
-                                pure vs
-
--- | Union find DS
-newtype UF s a = UF { _unUF :: UMV.MVector s (Int,Int) }
-
-new   :: Enum a => Int -> ST s (UF s a)
-new n = do
-          v <- UMV.new n
-          forM_ [0..n-1] $ \i ->
-            UMV.write v i (i,0)
-          pure $ UF v
-
--- | Union the components containing x and y. Returns weather or not the two
--- components were already in the same component or not.
-union               :: (Enum a, Eq a) => UF s a -> a -> a -> ST s Bool
-union uf@(UF v) x y = do
-                        (rx,rrx) <- find' uf x
-                        (ry,rry) <- find' uf y
-                        let b = rx /= ry
-                            rx' = fromEnum rx
-                            ry' = fromEnum ry
-                        when b $ case rrx `compare` rry of
-                            LT -> UMV.write v rx'  (ry',rrx)
-                            GT -> UMV.write v ry' (rx',rry)
-                            EQ -> do UMV.write v ry' (rx',rry)
-                                     UMV.write v rx' (rx',rrx+1)
-                        pure b
-
-
--- | Get the representative of the component containing x
-find    :: (Enum a, Eq a) => UF s a -> a -> ST s a
-find uf = fmap fst . find' uf
-
--- | Get the representative (and its rank) of the component containing x
-find'             :: (Enum a, Eq a) => UF s a -> a -> ST s (a,Int)
-find' uf@(UF v) x = do
-                      (p,r) <- UMV.read v (fromEnum x) -- get my parent
-                      if toEnum p == x then
-                        pure (x,r) -- I am a root
-                      else do
-                        rt@(j,_) <- find' uf (toEnum p)  -- get the root of my parent
-                        UMV.write v (fromEnum x) (fromEnum j,r)   -- path compression
-                        pure rt
-
-
-
-
--- mst g = undefined
-
--- -- | runs MST with a given root
--- mstFrom     :: (Ord e, Monoid e)
---             => VertexId s w -> PlanarGraph s w v e f -> Tree (VertexId s w, e)
--- mstFrom r g = prims initialQ (Node (r,mempty) [])
---   where
---     update' k p q = Q.adjust (const p) k q
-
---     -- initial Q has the value of the root set to the zero element, and has no
---     -- parent. The others are all set to Top (and have no parent yet)
---     initialQ = update' r (ValT (mempty,Nothing))
---              . GV.foldr (\v q -> Q.insert v (Top,Nothing) q) Q.empty $ vertices g
-
---     prims qq t = case Q.minView qq of
---       Nothing -> t
---       Just (v Q.:-> (w,p), q) -> prims $

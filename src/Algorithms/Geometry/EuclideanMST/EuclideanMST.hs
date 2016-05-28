@@ -2,14 +2,16 @@ module Algorithms.Geometry.EuclideanMST.EuclideanMST where
 
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror
 import           Algorithms.Geometry.DelaunayTriangulation.Types
+import           Algorithms.Graph.MST
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.PlanarGraph
+import           Data.PlaneGraph
 import           Data.Proxy
 import           Data.Tree
+
 
 --------------------------------------------------------------------------------
 
@@ -21,7 +23,7 @@ import           Data.Tree
 -- does contain duplicate points, the implementation throws them away)
 --
 -- running time: $O(n \log n)$
-euclideanMST     :: (Ord r, Fractional r)
+euclideanMST     :: (Ord r, Fractional r, Show r, Show p)
                  => NonEmpty.NonEmpty (Point 2 r :+ p) -> Tree (Point 2 r :+ p)
 euclideanMST pts = (\v -> g^.vDataOf v) <$> t
   where
@@ -31,17 +33,6 @@ euclideanMST pts = (\v -> g^.vDataOf v) <$> t
     g = withEdgeDistances squaredEuclideanDist . toPlaneGraph (Proxy :: Proxy MSTW)
       . delaunayTriangulation $ pts
     t = mst g
-
-
--- | Labels the edges of a plane graph with their distances, as specified by
--- the distance function.
-withEdgeDistances     :: (Point 2 r ->  Point 2 r -> r)
-                      -> PlaneGraph s w p e f r -> PlaneGraph s w p (r :+ e) f r
-withEdgeDistances f g = g&edgeData .~ xs
-  where
-    xs = fmap (\(d,x) -> len d :+ x) $ withEdgeData g
-    len d = uncurry f . over both (^.core) $ endPointData d g
-
 
 
 data MSTW

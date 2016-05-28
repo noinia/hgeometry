@@ -14,7 +14,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Geometry.Ipe
 import Data.Ext
 import Data.Traversable(traverse)
-import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import qualified Data.Map as M
 import qualified Data.Vector as V
@@ -22,7 +21,7 @@ import qualified Data.Vector as V
 
 dtEdges :: (Fractional r, Ord r)
         => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
-dtEdges = edges' . DC.delaunayTriangulation
+dtEdges = tEdges . DC.delaunayTriangulation
 
 take'   :: Int -> NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
 take' i = NonEmpty.fromList . NonEmpty.take i

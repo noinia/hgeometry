@@ -12,7 +12,7 @@ import qualified Data.Map as M
 import qualified Data.Map.Strict as SM
 import           Data.Monoid (mempty)
 import qualified Data.Permutation as P
-import           Data.PlanarGraph
+import           Data.PlaneGraph
 import qualified Data.Vector as V
 
 import           Debug.Trace
@@ -53,11 +53,11 @@ showDT = mapM_ print . triangulationEdges
 
 triangulationEdges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
 triangulationEdges t = let pts = _positions t
-                       in map (\(u,v) -> (pts V.! u, pts V.! v)) . edges' $ t
+                       in map (\(u,v) -> (pts V.! u, pts V.! v)) . tEdges $ t
 
 
-edges' :: Triangulation p r -> [(VertexID,VertexID)]
-edges' = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
+tEdges :: Triangulation p r -> [(VertexID,VertexID)]
+tEdges = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
 drawTriangulation :: IpeOut (Triangulation p r) (IpeObject r)
@@ -67,8 +67,6 @@ drawTriangulation = IpeOut $ \tr ->
 
 
 --------------------------------------------------------------------------------
-
-type PlaneGraph s w v e f r = PlanarGraph s w (Point 2 r :+ v) e f
 
 data ST a b c = ST { fst' :: !a, snd' :: !b , trd' :: !c}
 

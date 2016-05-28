@@ -8,13 +8,12 @@ import           Control.Applicative
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
-import           Data.Fixed
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Traversable
 import           Options.Applicative
-import           Data.Proxy
+
 
 data Options = Options { _inPath    :: FilePath
                        , _outFile   :: FilePath
@@ -46,8 +45,8 @@ mainWith (Options inFile outFile) = do
            let pts  = syms&traverse.core %~ (^.symbolPoint)
                pts' = NonEmpty.fromList pts
                dt   = delaunayTriangulation $ pts'
-               -- emst = euclideanMST pts'
-               out  = [asIpe drawTriangulation dt] --, asIpe drawTree' emst]
+               emst = euclideanMST pts'
+               out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
            -- print $ length $ edges' dt
            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
            writeIpeFile outFile . singlePageFromContent $ out
