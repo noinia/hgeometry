@@ -44,21 +44,31 @@ import qualified Data.Foldable as F
 -- | Line segments. LineSegments have a start and end point, both of which may
 -- contain additional data of type p. We can think of a Line-Segment being defined as
 --
---  data LineSegment d p r = LineSegment (EndPoint ((Point d r) :+ p))
---                                       (EndPoint ((Point d r) :+ p))
+--  data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p))
+--                                       (EndPoint (Point d r :+ p))
 newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
 makeLenses ''LineSegment
 
 -- | Pattern that essentially models the line segment as a:
 --
--- data LineSegment d p r = LineSegment (EndPoint ((Point d r) :+ p))
---                                      (EndPoint ((Point d r) :+ p))
+-- data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p))
+--                                      (EndPoint (Point d r :+ p))
+pattern LineSegment           :: EndPoint (Point d r :+ p)
+                              -> EndPoint (Point d r :+ p)
+                              -> LineSegment d p r
 pattern LineSegment       s t = GLineSegment (Interval s t)
 
 -- | Gets the start and end point, but forgetting if they are open or closed.
+pattern LineSegment'          :: Point d r :+ p
+                              -> Point d r :+ p
+                              -> LineSegment d p r
 pattern LineSegment'      s t <- ((^.start) &&& (^.end) -> (s,t))
 
+
+pattern ClosedLineSegment     :: Point d r :+ p
+                              -> Point d r :+ p
+                              -> LineSegment d p r
 pattern ClosedLineSegment s t = GLineSegment (ClosedInterval s t)
 
 type instance Dimension (LineSegment d p r) = d
