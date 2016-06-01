@@ -25,8 +25,8 @@ $O(n^2 \log n)$ solution.
 > import Data.Geometry.Polygon
 > import Algorithms.Geometry.ConvexHull.GrahamScan
 > import qualified Data.Array   as A
+> import qualified Data.Foldable as F
 > import qualified Data.List     as L
-> import qualified Data.CircularList as C
 > import qualified Data.List.NonEmpty as NonEmpty
 
 Preliminaries
@@ -40,7 +40,7 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 
 > newtype Half = Half Int
 >                        deriving (Show,Eq,Ord)
->
+
 > instance Num Half where
 >   (Half a) + (Half b) = Half $ a + b
 >   (Half a) - (Half b) = Half $ a - b
@@ -90,7 +90,7 @@ Main Algorithm
 > maxBaseArea    :: PointSet -> Area
 > maxBaseArea [] = 0
 > maxBaseArea p  = case convexHull . NonEmpty.fromList $ map ext p of
->     ch@(ConvexHull h) -> case C.toList $ h ^. outerBoundary of
+>     ch@(ConvexHull h) -> case F.toList $ h ^. outerBoundary of
 >                            [_,_]   -> 0
 >                            [a,b,c] -> triangArea $ Triangle a b c
 >                            _       -> maxAreaQuadrangle ch
@@ -115,14 +115,14 @@ the function `allChains` finds all alowed pairs $p$ and $q$, and the chains of
 vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 
 > type Chain = Array Int (Point 2 Int)
->
+
 > allChains                 :: ConvexHull () Int
 >                           -> [(Point 2 Int, Point 2 Int, (Chain,Chain))]
 > allChains (ConvexHull ch) =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
 >   where
->     n   = C.size $ ch^.outerBoundary
->     chA = listArray (1,n) . map (^.core) . C.toList $ ch^.outerBoundary
+>     n   = F.length $ ch^.outerBoundary
+>     chA = listArray (1,n) . map (^.core) . F.toList $ ch^.outerBoundary
 >     rest i = [i+2.. if i == 1 then n - 1 else n ]
 
 we make sure that we only select non-neighbouring pairs. Hence the i+2 in rest

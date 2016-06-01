@@ -2,7 +2,8 @@ module BAPC2012.Gunslinger where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens
-import qualified Data.CircularList as C
+import qualified Data.CircularSeq as C
+import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ext
 import           Data.Fixed
@@ -120,8 +121,8 @@ distanceAlong xs' = sum $ zipWith distanceA xs (tail xs)
 
 -- Distance from luke, at the head of the list, to the hatch while walking
 -- along the points in the list.
-distanceToHatch :: [Point 2 Int :+ Kind] -> Answer
-distanceToHatch = maybe Impossible (Possible . distanceAlong) . toHatch
+distanceToHatch :: Foldable f => f (Point 2 Int :+ Kind) -> Answer
+distanceToHatch = maybe Impossible (Possible . distanceAlong) . toHatch . F.toList
 
 
 readPoint   :: String -> Point 2 Int

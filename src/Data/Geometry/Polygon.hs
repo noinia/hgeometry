@@ -19,7 +19,8 @@ import           Data.Maybe(mapMaybe)
 import           Data.Proxy
 import           Data.Range
 import           Frames.CoRec(asA)
-import qualified Data.CircularList as C
+import qualified Data.CircularSeq as C
+-- import qualified Data.CircularList as C
 import           Linear.Vector(Additive(..), (^*), (^/))
 
 --------------------------------------------------------------------------------
@@ -41,8 +42,8 @@ data PolygonType = Simple | Multi
 
 
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CList (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CList (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 
 type SimplePolygon = Polygon Simple
 
@@ -71,24 +72,26 @@ instance Num r => IsTransformable (Polygon t p r) where
 
 -- * Functions on Polygons
 
-outerBoundary :: forall t p r. Lens' (Polygon t p r) (C.CList (Point 2 r :+ p))
-outerBoundary = lens get set
+outerBoundary :: forall t p r. Lens' (Polygon t p r) (C.CSeq (Point 2 r :+ p))
+outerBoundary = lens g s
   where
-    get                     :: Polygon t p r -> C.CList (Point 2 r :+ p)
-    get (SimplePolygon vs)  = vs
-    get (MultiPolygon vs _) = vs
+    g                     :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
+    g (SimplePolygon vs)  = vs
+    g (MultiPolygon vs _) = vs
 
-    set                           :: Polygon t p r -> C.CList (Point 2 r :+ p) -> Polygon t p r
-    set (SimplePolygon _)      vs = SimplePolygon vs
-    set (MultiPolygon  _   hs) vs = MultiPolygon vs hs
+    s                           :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
+                                -> Polygon t p r
+    s (SimplePolygon _)      vs = SimplePolygon vs
+    s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
 
 holes :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
-holes = lens get set
+holes = lens g s
   where
-    get :: Polygon Multi p r -> [Polygon Simple p r]
-    get (MultiPolygon _ hs) = hs
-    set :: Polygon Multi p r -> [Polygon Simple p r] -> Polygon Multi p r
-    set (MultiPolygon vs _) hs = MultiPolygon vs hs
+    g                     :: Polygon Multi p r -> [Polygon Simple p r]
+    g (MultiPolygon _ hs) = hs
+    s                     :: Polygon Multi p r -> [Polygon Simple p r]
+                          -> Polygon Multi p r
+    s (MultiPolygon vs _) = MultiPolygon vs
 
 
 -- | Get all holes in a polygon
@@ -100,8 +103,8 @@ holeList (MultiPolygon _ hs) = hs
 -- | The vertices in the polygon. No guarantees are given on the order in which
 -- they appear!
 vertices :: Polygon t p r -> [Point 2 r :+ p]
-vertices (SimplePolygon vs)   = C.toList vs
-vertices (MultiPolygon vs hs) = C.toList vs ++ concatMap vertices hs
+vertices (SimplePolygon vs)   = F.toList vs
+vertices (MultiPolygon vs hs) = F.toList vs ++ concatMap vertices hs
 
 
 
@@ -109,14 +112,14 @@ fromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 fromPoints = SimplePolygon . C.fromList
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
-outerBoundaryEdges :: Polygon t p r -> C.CList (LineSegment 2 p r)
+outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
 
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.
-toEdges    :: C.CList (Point 2 r :+ p) -> C.CList (LineSegment 2 p r)
-toEdges vs = let vs' = C.toList vs in
+toEdges    :: C.CSeq (Point 2 r :+ p) -> C.CSeq (LineSegment 2 p r)
+toEdges vs = let vs' = F.toList vs in
   C.fromList $ zipWith (\p q -> LineSegment (Closed p) (Open q)) vs' (tail vs' ++ vs')
 
 
@@ -142,7 +145,7 @@ onBoundary        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
 q `onBoundary` pg = any (q `onSegment`) es
   where
     out = SimplePolygon $ pg^.outerBoundary
-    es = concatMap (C.toList . outerBoundaryEdges) $ out : holeList pg
+    es = concatMap (F.toList . outerBoundaryEdges) $ out : holeList pg
 
 -- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.
 -- Running time: O(n).
@@ -199,7 +202,7 @@ q `inPolygon` pg
     --
     -- See http://geomalgorithms.com/a03-_inclusion.html for more information.
     SP kl kr = count (\p -> (p^.xCoord) `compare` (q^.xCoord))
-             . mapMaybe intersectionPoint . C.toList . outerBoundaryEdges $ pg
+             . mapMaybe intersectionPoint . F.toList . outerBoundaryEdges $ pg
 
     -- For multi polygons we have to test if we do not lie in a hole .
     inHole = insidePolygon
@@ -251,7 +254,7 @@ signedArea      :: Fractional r => SimplePolygon p r -> r
 signedArea poly = x / 2
   where
     x = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
-            | LineSegment' p q <- C.toList $ outerBoundaryEdges poly  ]
+            | LineSegment' p q <- F.toList $ outerBoundaryEdges poly  ]
 
 
 -- | Compute the centroid of a simple polygon.
@@ -259,7 +262,7 @@ centroid      :: Fractional r => SimplePolygon p r -> Point 2 r
 centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
   where
     xs = [ (toVec p ^+^ toVec q) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
-         | LineSegment' (p :+ _) (q :+ _) <- C.toList $ outerBoundaryEdges poly  ]
+         | LineSegment' (p :+ _) (q :+ _) <- F.toList $ outerBoundaryEdges poly  ]
 
     sum' = F.foldl' (^+^) zero
 

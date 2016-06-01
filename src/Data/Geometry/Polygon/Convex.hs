@@ -9,7 +9,8 @@ import Data.Ext
 import Data.Function(on, )
 import Data.Geometry
 import Data.Geometry.Polygon(fromPoints)
-import qualified Data.CircularList as C
+import qualified Data.CircularSeq as C
+import Data.CircularSeq(focus,CSeq)
 import qualified Data.Foldable as F
 import Data.Maybe(fromJust)
 import Data.Ord(comparing)
@@ -49,12 +50,13 @@ merge lp rp = (fromPoints $ r' ++ l', lt, ut)
 
 
     takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
+    rightElems  = F.toList . C.rightElements
 
-    r' = takeUntil (coreEq b) . C.rightElements . rotateTo' d $ rp^.outerBoundary
-    l' = takeUntil (coreEq c) . C.rightElements . rotateTo' a $ lp^.outerBoundary
+    r' = takeUntil (coreEq b) . rightElems . rotateTo' d $ rp^.outerBoundary
+    l' = takeUntil (coreEq c) . rightElems . rotateTo' a $ lp^.outerBoundary
 
 
-rotateTo'   :: Eq a => (a :+ b) -> C.CList (a :+ b) -> C.CList (a :+ b)
+rotateTo'   :: Eq a => (a :+ b) -> CSeq (a :+ b) -> CSeq (a :+ b)
 rotateTo' x = fromJust . C.findRotateTo (coreEq x)
 
 
@@ -82,21 +84,18 @@ lowerTangent (SimplePolygon l) (SimplePolygon r) = rotate xx yy zz zz''
     zz'' = succ' xx
 
     rotate x y z z''
-      | focus' z   `isRightOf` (focus' x, focus' y) = rotate x   z (pred' z) z''
+      | focus z   `isRightOf` (focus x, focus y) = rotate x   z (pred' z) z''
                                                       -- rotate the right polygon CCW
-      | focus' z'' `isRightOf` (focus' x, focus' y) = rotate z'' y z         (succ' z'')
+      | focus z'' `isRightOf` (focus x, focus y) = rotate z'' y z         (succ' z'')
                                                       -- rotate the left polygon CW
-      | otherwise                                   = ClosedLineSegment (focus' x)
-                                                                        (focus' y)
+      | otherwise                                = ClosedLineSegment (focus x)
+                                                                     (focus y)
 
-focus' :: C.CList c -> c
-focus' = fromJust . C.focus
+succ' :: CSeq a -> CSeq a
+succ' = C.rotateR
 
-succ' :: C.CList a -> C.CList a
-succ' = C.rotR
-
-pred' :: C.CList a -> C.CList a
-pred' = C.rotL
+pred' :: CSeq a -> CSeq a
+pred' = C.rotateL
 
 -- | Compute the upper tangent of the two polgyons
 --
@@ -119,12 +118,12 @@ upperTangent (SimplePolygon l) (SimplePolygon r) = rotate xx yy zz zz'
     zz' = pred' xx
 
     rotate x y z z'
-      | focus' z  `isLeftOf` (focus' x, focus' y) = rotate x  z (succ' z) z'
+      | focus z  `isLeftOf` (focus x, focus y) = rotate x  z (succ' z) z'
                                                     -- rotate the right polygon CW
-      | focus' z' `isLeftOf` (focus' x, focus' y) = rotate z' y z        (pred' z')
+      | focus z' `isLeftOf` (focus x, focus y) = rotate z' y z        (pred' z')
                                                     -- rotate the left polygon CCW
-      | otherwise                                 = ClosedLineSegment (focus' x)
-                                                                      (focus' y)
+      | otherwise                              = ClosedLineSegment (focus x)
+                                                                   (focus y)
 
 isRightOf           :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
@@ -138,11 +137,11 @@ a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
 --------------------------------------------------------------------------------
 
 -- | Rotate to the rightmost point
-rightMost    :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
+rightMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
 rightMost xs = let m = F.maximumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
 -- | Rotate to the leftmost point
-leftMost    :: Ord r => C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
+leftMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
 leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
 
@@ -152,7 +151,7 @@ leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m 
 --   | C.isEmpty lst = lst
 --   | otherwise     = go lst
 --     where
---       go xs = let cur = focus' xs
+--       go xs = let cur = focus xs
 --                   xs' = C.rotR xs
 --                   nxt = focus' xs'
 --               in if p cur nxt then go xs' else xs

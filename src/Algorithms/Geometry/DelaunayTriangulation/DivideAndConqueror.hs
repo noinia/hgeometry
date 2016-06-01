@@ -8,7 +8,8 @@ import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.BinaryTree
-import qualified Data.CircularList as C
+import qualified Data.CircularList as CL
+import qualified Data.CircularSeq as CS
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -73,7 +74,7 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i C.empty, fromPoints [withID p i])
+                     in (IM.singleton i CL.empty, fromPoints [withID p i])
   | size' pts <= 3 = let pts'            = NonEmpty.fromList
                                          . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                          . F.toList $ pts
@@ -92,16 +93,16 @@ delaunayTriangulation' pts mapping'@(vtxMap,_)
 -- the adj. list should be. The input polygon is given in Clockwise order
 firsts :: SimplePolygon (p :+ VertexID) r -> IM.IntMap VertexID
 firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
-       . C.toList . outerBoundaryEdges
+       . F.toList . outerBoundaryEdges
 
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
 fromHull              :: Ord r => Mapping p r -> SimplePolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . C.rightElements $ p^.outerBoundary
+                                         . F.toList . CS.rightElements $ p^.outerBoundary
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
-                            f prv c nxt  = (c,C.fromList . L.nub $ [prv, nxt])
+                            f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
                         in IM.fromList es
 
 
@@ -220,7 +221,7 @@ rotateToFirst        :: VertexID -> Firsts -> Merge p r ()
 rotateToFirst v fsts = modify $ IM.adjust f v
   where
     mfst   = IM.lookup v fsts
-    f  cl  = fromMaybe cl $ mfst >>= flip C.rotateTo cl
+    f  cl  = fromMaybe cl $ mfst >>= flip CL.rotateTo cl
 
 
 -- | Inserts an edge (and makes sure that the vertex is inserted in the
@@ -238,7 +239,7 @@ insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
 delete     :: VertexID -> VertexID -> Adj -> Adj
 delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
   where
-    delete' x = C.filterL (/= x) -- should we rotate left or right if it is the focus?
+    delete' x = CL.filterL (/= x) -- should we rotate left or right if it is the focus?
 
 
 
@@ -270,19 +271,19 @@ size' (Node _ s _) = s
 
 -- | an 'unsafe' version of rotateTo that assumes the element to rotate to
 -- occurs in the list.
-rotateTo   :: Eq a => a -> C.CList a -> C.CList a
-rotateTo x = fromJust . C.rotateTo x
+rotateTo   :: Eq a => a -> CL.CList a -> CL.CList a
+rotateTo x = fromJust . CL.rotateTo x
 
 -- | Adjacency lists are stored in clockwise order, so pred means rotate right
-pred' :: C.CList a -> C.CList a
-pred' = C.rotR
+pred' :: CL.CList a -> CL.CList a
+pred' = CL.rotR
 
 -- | Adjacency lists are stored in clockwise order, so pred and succ rotate left
-succ' :: C.CList a -> C.CList a
-succ' = C.rotL
+succ' :: CL.CList a -> CL.CList a
+succ' = CL.rotL
 
-focus' :: C.CList a -> a
-focus' = fromJust . C.focus
+focus' :: CL.CList a -> a
+focus' = fromJust . CL.focus
 
 -- | Removes duplicates from a sorted list
 nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)

@@ -28,11 +28,8 @@ import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-
 import           Data.Singletons
-import qualified Data.CircularList as CL
 import qualified Data.Geometry.Ipe.Attributes as IA
-
 import           Data.Geometry.Ipe.Attributes
 import           GHC.Exts
 
@@ -253,7 +250,7 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
     -- the polyline type guarantees that there is at least one point
 
 instance IpeWriteText r => IpeWriteText (SimplePolygon () r) where
-  ipeWriteText pg = case pg^..outerBoundary.to CL.toList.Tr.traverse.core of
+  ipeWriteText pg = case pg^..outerBoundary.to F.toList.Tr.traverse.core of
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
     _          -> Nothing
     -- TODO: We are not really guaranteed that there is at least one point, it would
