@@ -40,6 +40,7 @@ prefixWith s = map (\s' -> "src/" <> s <> s')
 dataModules = prefixWith "Data/" [ "Range.hs"
                                  , "CircularList/Util.hs"
                                  , "Permutation.hs"
+                                 , "CircularSeq.hs"
                                  , "PlanarGraph.hs"
                                  ]
 
