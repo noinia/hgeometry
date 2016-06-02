@@ -5,7 +5,6 @@ module Algorithms.Graph.MST( mst
                            ) where
 
 import           Algorithms.Graph.DFS (AdjacencyLists, dfs')
-import           Control.Lens
 import           Control.Monad (forM_, when, filterM)
 import           Control.Monad.ST (ST,runST)
 import qualified Data.List as L
@@ -132,22 +131,22 @@ find' uf@(UF v) x = do
 --------------------------------------------------------------------------------
 -- Testing Stuff
 
-testG = planarGraph' [ [ (Dart aA Negative, "a-")
-                       , (Dart aC Positive, "c+")
-                       , (Dart aB Positive, "b+")
-                       , (Dart aA Positive, "a+")
-                       ]
-                     , [ (Dart aE Negative, "e-")
-                       , (Dart aB Negative, "b-")
-                       , (Dart aD Negative, "d-")
-                       , (Dart aG Positive, "g+")
-                       ]
-                     , [ (Dart aE Positive, "e+")
-                       , (Dart aD Positive, "d+")
-                       , (Dart aC Negative, "c-")
-                       ]
-                     , [ (Dart aG Negative, "g-")
-                       ]
-                     ]
-  where
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+-- testG = planarGraph' [ [ (Dart aA Negative, "a-")
+--                        , (Dart aC Positive, "c+")
+--                        , (Dart aB Positive, "b+")
+--                        , (Dart aA Positive, "a+")
+--                        ]
+--                      , [ (Dart aE Negative, "e-")
+--                        , (Dart aB Negative, "b-")
+--                        , (Dart aD Negative, "d-")
+--                        , (Dart aG Positive, "g+")
+--                        ]
+--                      , [ (Dart aE Positive, "e+")
+--                        , (Dart aD Positive, "d+")
+--                        , (Dart aC Negative, "c-")
+--                        ]
+--                      , [ (Dart aG Negative, "g-")
+--                        ]
+--                      ]
+--   where
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

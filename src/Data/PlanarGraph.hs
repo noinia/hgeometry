@@ -74,7 +74,6 @@ import qualified Data.Vector.Mutable as MV
 -- | An Arc is a directed edge in a planar graph. The type s is used to tie
 -- this arc to a particular graph.
 newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded)
-makeLenses ''Arc
 
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
@@ -213,32 +212,6 @@ planarGraph' ds = (planarGraph perm)&dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
     perm  = toCycleRep n $ map (map fst) ds
-
-data Test
-
-testG :: PlanarGraph Test Primal_ () String ()
-testG = planarGraph' [ [ (Dart aA Negative, "a-")
-                       , (Dart aC Positive, "c+")
-                       , (Dart aB Positive, "b+")
-                       , (Dart aA Positive, "a+")
-                       ]
-                     , [ (Dart aE Negative, "e-")
-                       , (Dart aB Negative, "b-")
-                       , (Dart aD Negative, "d-")
-                       , (Dart aG Positive, "g+")
-                       ]
-                     , [ (Dart aE Positive, "e+")
-                       , (Dart aD Positive, "d+")
-                       , (Dart aC Negative, "c-")
-                       ]
-                     , [ (Dart aG Negative, "g-")
-                       ]
-                     ]
-  where
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
-
-
-
 
 
 
@@ -471,13 +444,9 @@ boundary (FaceId v) g = incidentEdges v $ dual g
 
 
 
--- testG = planarGraph testPerm
--- testG' = dual testG
 
-
-
-
-
+--------------------------------------------------------------------------------
+-- Testing stuff
 
 testPerm :: Permutation (Dart s)
 testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
@@ -498,32 +467,26 @@ testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
                             , [ Dart g Negative
                               ]
                             ]
--- testx = (myAns, myAns == answer)
---   where
---    myAns = (dual $ planarGraph myEmbedding)^.embedding.orbits
 
---    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---    myEmbedding = toCycleRep 12 [ [ Dart aA Negative
---                                  , Dart aC Positive
---                                  , Dart aB Positive
---                                  , Dart aA Positive
---                                  ]
---                                , [ Dart aE Negative
---                                  , Dart aB Negative
---                                  , Dart aD Negative
---                                  , Dart aG Positive
---                                  ]
---                                , [ Dart aE Positive
---                                  , Dart aD Positive
---                                  , Dart aC Negative
---                                  ]
---                                , [ Dart aG Negative
---                                  ]
---                                ]
---    dart i s = Dart (Arc i) (read s)
---    fromList = V.fromList
---    answer = fromList [ fromList [dart 0 "-1"]
---                      , fromList [dart 2 "+1",dart 4 "+1",dart 1 "-1",dart 0 "+1"]
---                      , fromList [dart 1 "+1",dart 3 "-1",dart 2 "-1"]
---                      , fromList [dart 4 "-1",dart 3 "+1",dart 5 "+1",dart 5 "-1"]
---                      ]
+data Test
+
+testG :: PlanarGraph Test Primal_ () String ()
+testG = planarGraph' [ [ (Dart aA Negative, "a-")
+                       , (Dart aC Positive, "c+")
+                       , (Dart aB Positive, "b+")
+                       , (Dart aA Positive, "a+")
+                       ]
+                     , [ (Dart aE Negative, "e-")
+                       , (Dart aB Negative, "b-")
+                       , (Dart aD Negative, "d-")
+                       , (Dart aG Positive, "g+")
+                       ]
+                     , [ (Dart aE Positive, "e+")
+                       , (Dart aD Positive, "d+")
+                       , (Dart aC Negative, "c-")
+                       ]
+                     , [ (Dart aG Negative, "g-")
+                       ]
+                     ]
+  where
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

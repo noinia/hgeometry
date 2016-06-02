@@ -23,7 +23,7 @@ import           Data.Tree
 -- does contain duplicate points, the implementation throws them away)
 --
 -- running time: $O(n \log n)$
-euclideanMST     :: (Ord r, Fractional r, Show r, Show p)
+euclideanMST     :: (Ord r, Fractional r)
                  => NonEmpty.NonEmpty (Point 2 r :+ p) -> Tree (Point 2 r :+ p)
 euclideanMST pts = (\v -> g^.vDataOf v) <$> t
   where
