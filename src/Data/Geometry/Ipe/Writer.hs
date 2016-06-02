@@ -7,7 +7,7 @@
 module Data.Geometry.Ipe.Writer where
 
 import           Control.Applicative hiding (Const(..))
-import           Control.Lens((^.),(^..),(.~),(&), Prism', (#), to)
+import           Control.Lens((^.),(^..),(.~),(&), to)
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
@@ -31,7 +31,6 @@ import           Data.Vinyl.TypeLevel
 import           Data.Singletons
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Attributes
-import           GHC.Exts
 
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
@@ -104,7 +103,7 @@ class IpeWrite t where
 
 
 instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
-  ipeWriteText attr = _getAttr attr >>= ipeWriteText
+  ipeWriteText att = _getAttr att >>= ipeWriteText
 
 -- | Functon to write all attributes in a Rec
 ipeWriteAttrs           :: ( AllSatisfy IpeAttrName rs
@@ -199,8 +198,8 @@ instance IpeWriteText FillType where
   ipeWriteText EOFill = Just "eofill"
 
 instance IpeWriteText r => IpeWriteText (IpeArrow r) where
-  ipeWriteText (IpeArrow n s) = (\n s -> n <> "/" <> s) <$> ipeWriteText n
-                                                        <*> ipeWriteText s
+  ipeWriteText (IpeArrow n s) = (\n' s' -> n' <> "/" <> s') <$> ipeWriteText n
+                                                            <*> ipeWriteText s
 
 instance IpeWriteText r => IpeWriteText (Path r) where
   ipeWriteText = fmap concat' . Tr.sequence . fmap ipeWriteText . _pathSegments
@@ -373,36 +372,13 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
 
 --------------------------------------------------------------------------------
 
-type Atts = [(Text,Text)]
-
-ipeWritePolyLines' :: IpeWriteText r
-                  => [(PolyLine 2 () r, Atts)] -> Maybe (Node Text Text)
-ipeWritePolyLines' = ipeWrite . singlePageFromContent . map f
-  where
-    f (pl,ats) = ipeObject' (mkPath pl) mempty -- TODO: We ignore the ats, as they are in the wrong format
-    mkPath     = Path . S2.l1Singleton . PolyLineSegment
-
-
-
-ipeWritePolyLines     :: IpeWriteText r
-                      => [(PolyLine 2 () r, Atts)] -> Node Text Text
-ipeWritePolyLines pls = Element "ipe" ipeAtts [Element "page" [] chs]
-  where
-    chs     = layers pls ++ mapMaybe f pls
-    ipeAtts = [("version","70005"),("creator", "HGeometry 0.4.0.0")]
-
-    f (pl,ats) = ipeWrite (mkPath pl) `mAddAtts` ats
-    mkPath     = Path . S2.l1Singleton . PolyLineSegment
-    layers     = map mkLayer . nub . mapMaybe (lookup "layer" . snd)
-    mkLayer n  = Element "layer" [("name",n)] []
-
-
 instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
   ipeWrite p = ipeWrite path
     where
       path = fromPolyLine $ p & points.Tr.traverse.extra .~ ()
       -- TODO: Do something with the p's
 
+fromPolyLine :: PolyLine 2 () r -> Path r
 fromPolyLine = Path . S2.l1Singleton . PolyLineSegment
 
 

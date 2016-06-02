@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 

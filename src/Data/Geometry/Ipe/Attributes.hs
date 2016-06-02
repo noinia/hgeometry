@@ -12,7 +12,6 @@ import qualified Data.Geometry.Transformation as Transf
 import           Data.Semigroup
 import           Data.Singletons
 import           Data.Singletons.TH
-import           Data.String(IsString(..))
 import           Data.Text(Text)
 import qualified Data.Traversable as T
 import           Data.Vinyl
