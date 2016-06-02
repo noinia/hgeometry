@@ -94,6 +94,17 @@ holes = lens g s
     s (MultiPolygon vs _) = MultiPolygon vs
 
 
+-- | Access the i^th vertex on the outer boundary
+outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
+outerVertex i = outerBoundary.C.item i
+
+-- running time: $O(\log i)$
+outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
+outerBoundaryEdge i p = let u = p^.outerVertex i
+                            v = p^.outerVertex (i+1)
+                        in LineSegment (Closed u) (Open v)
+
+
 -- | Get all holes in a polygon
 holeList                     :: Polygon t p r -> [Polygon Simple p r]
 holeList (SimplePolygon _)   = []
@@ -115,6 +126,10 @@ fromPoints = SimplePolygon . C.fromList
 outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
+-- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
+-- with vertices i and i+1 with respect to the current focus. All indices
+-- modulo n.
+--
 
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.

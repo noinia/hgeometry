@@ -5,6 +5,8 @@ module Data.CircularSeq( CSeq
                        , fromList
 
                        , focus
+                       , index, adjust
+                       , item
 
                        , rotateL
                        , rotateR
@@ -22,14 +24,15 @@ module Data.CircularSeq( CSeq
                        ) where
 
 import           Control.Applicative
+import           Control.Lens(lens, Lens')
+import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (listToMaybe)
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence as S
 import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
+import qualified Data.Sequence as S
 import qualified Data.Traversable as T
-import qualified Data.Foldable as F
 import           Data.Tuple (swap)
 
 --------------------------------------------------------------------------------
@@ -73,6 +76,50 @@ singleton x = CSeq S.empty x S.empty
 -- running time: O(1)
 focus              :: CSeq a -> a
 focus (CSeq _ x _) = x
+
+-- | Access the i^th item  (w.r.t the focus) in the CSeq (indices modulo n).
+--
+-- running time: $O(\log (i \mod n))$
+--
+-- >>> index (fromList [0..5]) 1
+-- 1
+-- >>> index (fromList [0..5]) 2
+-- 2
+-- >>> index (fromList [0..5]) 5
+-- 5
+-- >>> index (fromList [0..5]) 10
+-- 4
+-- >>> index (fromList [0..5]) 6
+-- 0
+-- >>> index (fromList [0..5]) (-1)
+-- 5
+-- >>> index (fromList [0..5]) (-6)
+-- 0
+index                   :: CSeq a -> Int -> a
+index s@(CSeq l x r) i' = let i  = i' `mod` length s
+                              rn = length r
+                          in if i == 0 then x
+                               else if i - 1 < rn then S.index r (i - 1)
+                                                  else S.index l (i - rn - 1)
+
+-- | Adjusts the i^th element w.r.t the focus in the CSeq
+--
+-- running time: $O(\log (i \mod n))$
+--
+-- >>> adjust (const 1000) 2 (fromList [0..5])
+-- CSeq [0,1,1000,3,4,5]
+adjust                     :: (a -> a) -> Int -> CSeq a -> CSeq a
+adjust f i' s@(CSeq l x r) = let i  = i' `mod` length s
+                                 rn = length r
+                             in if i == 0 then CSeq l (f x) r
+                                else if i - 1 < rn
+                                     then CSeq l                           x (S.adjust f (i - 1) r)
+                                     else CSeq (S.adjust f (i - rn - 1) l) x r
+
+
+-- | Access te ith item in the CSeq (w.r.t the focus) as a lens
+item   :: Int -> Lens' (CSeq a) a
+item i = lens (flip index i) (\s x -> adjust (const x) i s)
 
 
 resplit   :: Seq a -> (Seq a, Seq a)
