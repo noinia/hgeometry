@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Data.CircularList.Util where
 
 import           Control.Lens
@@ -70,8 +71,12 @@ xs `isShiftOf` ys = let rest = tail . C.leftElements
 -- minimumBy     :: (a -> a -> Ordering) -> C.CList a -> a
 -- minimumBy cmp = L.minimumBy cmp . C.rightElements
 
+#if !MIN_VERSION_data_clist(0,1,0)
+
 instance Foldable C.CList where
   foldMap = T.foldMapDefault
 
 instance T.Traversable C.CList where
   traverse f = fmap C.fromList . T.traverse f . C.rightElements
+
+#endif
