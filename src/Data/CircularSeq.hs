@@ -15,11 +15,10 @@ module Data.CircularSeq( CSeq
                        , asSeq
 
                        , reverseDirection
-                       , allRotations'
+                       , allRotations
 
                        , findRotateTo
                        , rotateTo
-
                        ) where
 
 import           Control.Applicative
@@ -49,10 +48,18 @@ instance Show a => Show (CSeq a) where
 instance T.Traversable CSeq where
   traverse f (CSeq l x r) = (\x' r' l' -> CSeq l' x' r')
                          <$> f x <*> traverse f r <*> traverse f l
+-- instance Traversable1 CSeq where
+--   traverse1 f (CSeq l x r) = liftF3 (\x' r' l' -> CSeq l' x' r')
+--                                     (f x) (traverse f r) (traverse f l)
+
+instance Foldable1 CSeq
+
 
 instance F.Foldable CSeq where
   foldMap = T.foldMapDefault
   length (CSeq l _ r) = 1 + S.length l + S.length r
+
+
 
 
 instance Functor CSeq where
@@ -208,6 +215,7 @@ findRotateTo   :: (a -> Bool) -> CSeq a -> Maybe (CSeq a)
 findRotateTo p = listToMaybe . filter (p . focus) . allRotations'
 
 
+rotateTo   :: Eq a => a -> CSeq a -> Maybe (CSeq a)
 rotateTo x = findRotateTo (== x)
 
 
