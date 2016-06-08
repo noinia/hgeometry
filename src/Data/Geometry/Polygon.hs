@@ -284,8 +284,13 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
 
 -- | Test if the outer boundary of the polygon is in clockwise or counter
 -- clockwise order.
+--
+-- running time: $O(1)$
+--
 isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
-isCounterClockwise = (\x -> x == abs x) . signedArea . asSimplePolygon
+isCounterClockwise = (\x -> x == abs x) . signedArea
+                   . fromPoints . take 3 . F.toList . (^.outerBoundary)
+
 
 -- | Orient the outer boundary to clockwise order
 toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
