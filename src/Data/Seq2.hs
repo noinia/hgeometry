@@ -1,10 +1,12 @@
 module Data.Seq2 where
 
-import           Prelude hiding (foldr,foldl,head,tail,last,length)
-
 import           Control.Applicative
+import           Control.Lens ((^.), (%~), (&), (<&>), (^?), Lens', lens)
+import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.Semigroup
+import           Prelude hiding (foldr,foldl,head,tail,last,length)
 
 
 import qualified Data.Traversable as T
@@ -33,23 +35,29 @@ instance F.Foldable Seq2 where
 instance Semigroup (Seq2 a) where
   l <> r = l >< r
 
+type instance Index (Seq2 a)   = Int
+type instance IxValue (Seq2 a) = a
+instance Ixed (Seq2 a) where
+  ix i f s@(Seq2 l m r)
+    | i == 0      = f l                 <&> \a -> Seq2 a m r
+    | i < 1 + mz  = f (S.index m (i-1)) <&> \a -> Seq2 l (S.update (i-1) a m) r
+    | i == mz + 1 = f r                 <&> \a -> Seq2 l m a
+    | otherwise   = pure s
+      where
+        mz = S.length m
+
 duo     :: a -> a -> Seq2 a
 duo a b = Seq2 a S.empty b
 
-length :: Seq2 a -> Int
-length = F.length
-
-
 -- | get the element with index i, counting from the left and starting at 0.
 -- O(log(min(i,n-i)))
-index                 :: Seq2 a -> Int -> a
-index ~(Seq2 l s r) i
-  | i == 0      = l
-  | i < 1 + sz  = S.index s (i+1)
-  | i == sz + 1 = r
-  | otherwise   = error "index: index out of bounds."
-    where
-      sz = S.length s
+index     :: Seq2 a -> Int -> a
+index s i = fromJust $ s^?ix i
+
+adjust       :: (a -> a) -> Int -> Seq2 a -> Seq2 a
+adjust f i s = s&ix i %~ f
+
+
 
 
 (<|) :: a -> Seq2 a -> Seq2 a
@@ -76,7 +84,7 @@ fromList _        = error "Seq2.fromList: Not enough values"
 mapWithIndex                  :: (Int -> a -> b) -> Seq2 a -> Seq2 b
 mapWithIndex f s@(Seq2 a m b) = Seq2 (f 0 a) (S.mapWithIndex f' m) (f l b)
   where
-    l    = length s - 1
+    l    = F.length s - 1
     f' i = f (i+1)
 
 
@@ -118,6 +126,8 @@ instance F.Foldable ViewL2 where
 
 
 
+
+
 -- | At least one element
 data ViewL1 a = a :< S.Seq a deriving (Show,Read,Eq,Ord)
 
@@ -134,6 +144,11 @@ instance F.Foldable ViewL1 where
 -- | We throw away information here; namely that the combined list contains two elements.
 instance Semigroup (ViewL1 a) where
   ~(a :< s) <> ~(b :< t) = a :< (s <> S.singleton b <> t)
+
+
+headL1 :: Lens' (ViewL1 a) a
+headL1 = lens (\(l :< _) -> l) (\(_ :< s) l -> l :< s)
+
 
 
 toNonEmpty           :: ViewL1 a -> NonEmpty.NonEmpty a
