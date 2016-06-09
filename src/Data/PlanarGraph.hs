@@ -247,14 +247,14 @@ numFaces g = numEdges g - numVertices g + 2
 -- | Enumerate all vertices
 --
 -- >>> vertices' myGraph
--- fromList [VertexId 0,VertexId 1,VertexId 2,VertexId 3]
+-- [VertexId 0,VertexId 1,VertexId 2,VertexId 3]
 vertices'   :: PlanarGraph s w v e f -> V.Vector (VertexId s w)
 vertices' g = VertexId <$> V.enumFromN 0 (V.length (g^.embedding.orbits))
 
 -- | Enumerate all vertices, together with their vertex data
 
 -- >>> vertices myGraph
--- fromList [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+-- [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
 vertices   :: PlanarGraph s w v e f -> V.Vector (VertexId s w, v)
 vertices g = V.zip (vertices' g) (g^.vertexData)
 
