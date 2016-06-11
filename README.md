@@ -28,8 +28,10 @@ a few algorithms:
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
 * an $O(n)$ expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an $O(n \log n)$ time algorithm for computing the Delaunay triangulation (using divide and conqueror).
-
+* an $O(n \log n)$ time algorithm for computing the Delaunay triangulation
+(using divide and conqueror).
+* an $O(n \log n)$ time algorithm for computing the Euclidean Minimum Spanning
+Tree (EMST), based on computing the Delaunay Triangulation.
 
 
 A Note on the Ext (:+) data type
