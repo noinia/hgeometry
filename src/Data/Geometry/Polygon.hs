@@ -9,6 +9,7 @@ import           Data.Ext
 import           Data.Semigroup
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
+import           Data.Geometry.Vector
 import           Data.Geometry.Boundary
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -302,3 +303,20 @@ toClockwiseOrder p
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
 asSimplePolygon poly@(SimplePolygon _) = poly
 asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
+
+
+-- | Comparison that compares which point is 'larger' in the direction given by
+-- the vector u.
+cmpExtreme       :: (Num r, Ord r)
+                 => Vector 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
+
+
+-- | Finds the extreme points, minimum and maximum, in a given direction
+--
+-- running time: $O(n)$
+extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
+                   -> (Point 2 r :+ p, Point 2 r :+ p)
+extremesLinear u p = let vs = p^.outerBoundary
+                         f  = cmpExtreme u
+                     in (F.minimumBy f vs, F.maximumBy f vs)

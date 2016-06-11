@@ -4,9 +4,8 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon
                                    , lowerTangent, upperTangent
                                    , isLeftOf, isRightOf
 
-                                   , cmpExtreme
-                                   , extremesNaive
                                    , extremes
+                                   , maxInDirection
                                    ) where
 
 import           Control.Lens
@@ -16,7 +15,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on, )
 import           Data.Geometry
-import           Data.Geometry.Polygon (fromPoints)
+import           Data.Geometry.Polygon (fromPoints, cmpExtreme)
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import qualified Data.Sequence as S
@@ -32,33 +31,18 @@ type ConvexPolygon = SimplePolygon
 mainWith inFile outFile = do
     ePage <- readSinglePageFile inFile
     case ePage of
-      Left err                         -> print err
-      Right (page :: IpePage Rational) -> case page^..content.traverse._IpePath._SimplePolygon.core of
-        []         -> putStrLn "No points found"
+      Left err                         -> error "" -- err
+      Right (page :: IpePage Rational) -> case page^..content.traverse._withAttrs _IpePath _asSimplePolygon.core of
+        []         -> error "No points found"
         polies@(_:_) -> do
            -- let out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
            -- print $ length $ edges' dt
            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
            -- writeIpeFile outFile . singlePageFromContent $ out
-           mapM_ (print . extremesNaive (v2 0 1)) polies
-           mapM_ (print . extremes      (v2 0 1)) polies
+           -- mapM_ (print . extremesNaive (v2 1 0)) polies
+           pure $ map (maxInDirection (v2 (-1) 0)) polies
 
 
--- | Comparison that compares which point is 'larger' in the direction given by
--- the vector u.
-cmpExtreme       :: (Num r, Ord r)
-                 => Vector 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
-
-
--- | Finds the extreme points, minimum and maximum, in a given direction
---
--- running time: $O(n)$
-extremesNaive     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
-                  -> (Point 2 r :+ p, Point 2 r :+ p)
-extremesNaive u p = let vs = p^.outerBoundary
-                        f  = cmpExtreme u
-                    in (F.minimumBy f vs, F.maximumBy f vs)
 
 
 -- | Finds the extreme points, minimum and maximum, in a given direction
@@ -66,26 +50,33 @@ extremesNaive u p = let vs = p^.outerBoundary
 -- pre: The input polygon is strictly convex.
 --
 -- running time: $O(\log n)$
+--
+--
 extremes     :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r
-                -> (Point 2 r :+ p, Point 2 r :+ p)
+             -> (Point 2 r :+ p, Point 2 r :+ p)
 extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 
--- | Finds the extreme maximum point in the given direction.
+-- | Finds the extreme maximum point in the given direction. Based on
+-- http://geomalgorithms.com/a14-_extreme_pts.html
 --
 --
 -- pre: The input polygon is strictly convex.
 --
--- running time: $O(\log n)$
+-- running time: $O(\log^2 n)$
 maxInDirection     :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u p = findMax . C.rightElements $ p^.outerBoundary
+maxInDirection u p = findMaxStart . C.rightElements $ p^.outerBoundary
   where
+    findMaxStart s@(viewl -> (a:<r))
+      | isLocalMax r a r = a
+      | otherwise        = findMax s
+    findMaxStart _       = error "absurd"
+
     findMax s = let i         = F.length s `div` 2
                     (ac,cb')  = S.splitAt i s
                     (c :< cb) = viewl cb'
                 in findMax' ac c cb
 
     findMax' ac c cb
-      -- | traceShow ("extremes'",ac,c,cb) False = undefined
       | isLocalMax ac c cb = c
       | otherwise          = binSearch ac c cb
 
@@ -98,6 +89,7 @@ maxInDirection u p = findMax . C.rightElements $ p^.outerBoundary
         (False,True,_)      -> findMax (c <| cb)
         (False,False,False) -> findMax (ac |> c)
         (False,False,True)  -> findMax (c <| cb)
+    binSearch _                  _ _ = error "maxInDirection, binSearch: empty chain"
 
     isLocalMax (viewr -> _ :> l) c (viewl -> r :< _) = c >=. l && c >=. r
     isLocalMax (viewr -> _ :> l) c _                 = c >=. l
@@ -106,13 +98,19 @@ maxInDirection u p = findMax . C.rightElements $ p^.outerBoundary
 
     -- the Edge from a to b is upwards w.r.t b if a is not larger than b
     isUpwards a (viewl -> b :< _) = cmpExtreme u a b /= GT
+    isUpwards _ _                 = error "isUpwards: no edge endpoint"
 
-    p >=. q = cmpExtreme u p q /= LT
-
-
-
+    p' >=. q = cmpExtreme u p' q /= LT
 
 
+--  | Given a convex polygon poly, and a point outside the polygon, find the
+--  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
+--  s.t. the polygon lies completely to the right of the line from q to v.
+--
+-- running time: $O(\log^2 n)$.
+-- rightTangent        :: ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+-- rightTangent poly q = undefined
+-- TODO: same as maxInDirection, but with a slightly different ordering
 
 
 

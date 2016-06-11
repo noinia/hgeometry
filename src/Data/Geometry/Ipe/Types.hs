@@ -395,18 +395,18 @@ applyMatricesPage p = p&content.traverse %~ applyMatrix
 --------------------------------------------------------------------------------
 
 
--- | Access a path as if it was a PolyLine
-_PolyLine :: Prism' (IpeObject' Path r)
-                    (PolyLine 2 () r :+ IpeAttributes Path r)
-_PolyLine = prism' build' access
-  where
-    build'  p         = p&core %~ Path . S2.l1Singleton . PolyLineSegment
-    access ~(p :+ a) = (:+ a) <$> p^?pathSegments.S2.headL1._PolyLineSegment
+-- -- | Access a path as if it was a PolyLine
+-- _PolyLine :: Prism' (IpeObject' Path r)
+--                     (PolyLine 2 () r :+ IpeAttributes Path r)
+-- _PolyLine = prism' build' access
+--   where
+--     build'  p         = p&core %~ Path . S2.l1Singleton . PolyLineSegment
+--     access ~(p :+ a) = (:+ a) <$> p^?pathSegments.S2.headL1._PolyLineSegment
 
--- | Access a path as if it was a SimplePolygon
-_SimplePolygon :: Prism' (IpeObject' Path r)
-                         (SimplePolygon () r :+ IpeAttributes Path r)
-_SimplePolygon = prism' build' access
-  where
-    build'  p         = p&core %~ Path . S2.l1Singleton . PolygonPath
-    access ~(p :+ a) = (:+ a) <$> p^?pathSegments.S2.headL1._PolygonPath
+-- -- | Access a path as if it was a SimplePolygon
+-- _SimplePolygon :: Prism' (IpeObject' Path r)
+--                          (SimplePolygon () r :+ IpeAttributes Path r)
+-- _SimplePolygon = prism' build' access
+--   where
+--     build'  p         = p&core %~ Path . S2.l1Singleton . PolygonPath
+--     access ~(p :+ a) = (:+ a) <$> p^?pathSegments.S2.headL1._PolygonPath
