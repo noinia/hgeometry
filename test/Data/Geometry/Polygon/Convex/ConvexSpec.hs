@@ -1,4 +1,4 @@
-module Data.Geometry.Polygon.ConvexSpec where
+module Data.Geometry.Polygon.Convex.ConvexSpec where
 
 import           Control.Applicative
 import           Control.Arrow ((&&&))
