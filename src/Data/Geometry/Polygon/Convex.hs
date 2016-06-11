@@ -1,4 +1,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-|
+Module    : Data.Geometry.Polygon.Convex
+Description: Convex Polygons
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Geometry.Polygon.Convex( ConvexPolygon
                                    , merge
                                    , lowerTangent, upperTangent
