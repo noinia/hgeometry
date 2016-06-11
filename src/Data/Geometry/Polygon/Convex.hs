@@ -8,7 +8,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon
                                    , maxInDirection
                                    ) where
 
-import           Control.Lens
+import           Control.Lens hiding ((:<), (:>))
 import qualified Data.CircularSeq as C
 import           Data.CircularSeq (focus,CSeq)
 import           Data.Ext

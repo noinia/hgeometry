@@ -1,7 +1,7 @@
 module Data.Seq2 where
 
 import           Control.Applicative
-import           Control.Lens ((^.), (%~), (&), (<&>), (^?), Lens', lens)
+import           Control.Lens ((%~), (&), (<&>), (^?), Lens', lens)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
