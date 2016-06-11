@@ -3,7 +3,7 @@
 # Usage: sh hackagedocs.sh 0.7.1 UserName Password
 PKG_NAME=hgeometry
 
-stack configure && stack build && stack haddock --hyperlink-source --html-location='http://hackage.haskell.org/package/$pkg/docs' \
+stack haddock --hyperlink-source --html-location='http://hackage.haskell.org/package/$pkg/docs' \
                                     --contents-location='http://hackage.haskell.org/package/$pkg'
 S=$?
 if [ "${S}" -eq "0" ]; then

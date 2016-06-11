@@ -1,8 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Polygon where
 
-
-import           Control.Applicative
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext

@@ -28,11 +28,9 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
 
 import           Data.Proxy
 import           Data.Either(rights)
-import           Control.Applicative hiding (Const)
 import           Control.Lens hiding (Const, rmap)
 
 import           Data.Ext
-import qualified Data.Foldable as F
 import qualified Data.Traversable as Tr
 import           Data.Maybe(fromMaybe, isJust, mapMaybe)
 import qualified Data.List as L
@@ -457,30 +455,5 @@ instance Coordinate r => IpeRead (PathSegment r) where
 testP :: B.ByteString
 testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
 
-
--- testPoly :: Either Text (Path Double)
--- testPoly = fromIpeXML testP
-
--- ipeRead' :: [Element Text Text]
--- ipeRead' = map ipeRead
-
--- instance IpeRead (IpePage gs) where
---   ipeRead (Element "page" ats chs) = Right . IpePage [] [] . fromList' . rights $ map ipeRead chs
---     where
---       fromList' = Group' . foldr (\x r -> (IpeObject x :& RNil) :& r) RNil
---   ipeRead _                        = Left "ipeRead: Not a page"
-
-readPolyLines :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
-readPolyLines (Element "ipe" _ chs) = concatMap readPolyLines' chs
-
-
-readPolyLines' :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
-readPolyLines' (Element "page" _ chs) = rights $ map ipeRead chs
-readPolyLines' _                      = []
-
-polylinesFromIpeFile :: (Coordinate r) => FilePath -> IO [PolyLine 2 () r]
-polylinesFromIpeFile = fmap readPolies . B.readFile
-  where
-    readPolies = either (const []) readPolyLines . parse' defaultParseOptions
 
 --------------------------------------------------------------------------------

@@ -5,9 +5,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.Types where
 
-import           Control.Applicative
+
 import           Control.Lens
-import           Data.Monoid
 import           Data.Proxy
 import           Data.Vinyl
 

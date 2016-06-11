@@ -23,7 +23,6 @@ module Data.CircularSeq( CSeq
                        , rotateTo
                        ) where
 
-import           Control.Applicative
 import           Control.Lens(lens, Lens')
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
