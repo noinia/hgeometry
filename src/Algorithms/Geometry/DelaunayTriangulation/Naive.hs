@@ -1,22 +1,21 @@
 module Algorithms.Geometry.DelaunayTriangulation.Naive where
 
-import Algorithms.Geometry.DelaunayTriangulation.Types
-
-import Control.Applicative
-import Control.Monad(forM_)
-import Control.Lens
-import Data.Function(on)
+import           Algorithms.Geometry.DelaunayTriangulation.Types
+import           Control.Lens
+import           Control.Monad (forM_)
+import qualified Data.CircularList as C
+import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
+import           Data.Function (on)
+import           Data.Geometry
+import           Data.Geometry.Ball (disk, insideBall)
+import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
-import qualified Data.CircularList as C
-import Data.Ext
-import Data.Geometry
-import Data.Geometry.Ball(disk, insideBall)
-import qualified Data.List as L
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 
+--------------------------------------------------------------------------------
 
 -- | Naive O(n^4) time implementation of the delaunay triangulation. Simply
 -- tries each triple (p,q,r) and tests if it is delaunay, i.e. if there are no
@@ -24,7 +23,7 @@ import qualified Data.List as L
 --
 -- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
 -- input does contain duplicate points, the implementation throws them away)
-delaunayTriangulation     :: (Ord r, Fractional r,       Show r, Show p)
+delaunayTriangulation     :: (Ord r, Fractional r)
                           => NonEmpty.NonEmpty (Point 2 r :+ p) -> Triangulation p r
 delaunayTriangulation pts = Triangulation ptIds ptsV adjV
   where

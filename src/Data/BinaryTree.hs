@@ -2,12 +2,13 @@
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
-import Control.Applicative
-import Data.Foldable
-import Data.List.NonEmpty(NonEmpty)
-import Data.Semigroup
-import Data.Traversable
-import Data.Semigroup.Foldable
+
+import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty)
+import           Data.Semigroup
+import           Data.Semigroup.Foldable
+
+--------------------------------------------------------------------------------
 
 data BinLeafTree v a = Leaf a
                      | Node (BinLeafTree v a) v (BinLeafTree v a)
@@ -44,7 +45,7 @@ instance Measured v a => Semigroup (BinLeafTree v a) where
 asBalancedBinLeafTree    :: NonEmpty a -> BinLeafTree Size (Elem a)
 asBalancedBinLeafTree ys = asBLT (length ys') ys'
   where
-    ys' = toList ys
+    ys' = F.toList ys
 
     asBLT _ [x] = Leaf (Elem x)
     asBLT n xs  = let h       = n `div` 2
