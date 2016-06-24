@@ -46,10 +46,10 @@ smallestEnclosingDiskWithPoint              :: (Ord r, Fractional r)
                                             -> DiskResult p r
 smallestEnclosingDiskWithPoint p (a :| pts) = foldr addPoint (initial p a) $ L.tails pts
   where
-    addPoint []      br   = br
-    addPoint (q:pts) br@(DiskResult d _)
+    addPoint []       br   = br
+    addPoint (q:pts') br@(DiskResult d _)
       | (q^.core) `inClosedBall` d = br
-      | otherwise                  = smallestEnclosingDiskWithPoints p q (a:pts)
+      | otherwise                  = smallestEnclosingDiskWithPoints p q (a:pts')
 
 
 

@@ -6,7 +6,6 @@ module Data.Geometry.PolyLine where
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point

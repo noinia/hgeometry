@@ -1,8 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE PolyKinds #-}
 module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                  readRawIpeFile
                                , readIpeFile
@@ -26,43 +24,34 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                , ipeReadRec
                                ) where
 
-import           Data.Proxy
-import           Data.Either(rights)
 import           Control.Lens hiding (Const, rmap)
-
+import qualified Data.ByteString as B
+import           Data.Either (rights)
 import           Data.Ext
-import qualified Data.Traversable as Tr
-import           Data.Maybe(fromMaybe, isJust, mapMaybe)
+import           Data.Geometry.Box
+import           Data.Geometry.Ipe.Attributes
+import           Data.Geometry.Ipe.ParserPrimitives (pInteger)
+import           Data.Geometry.Ipe.PathParser
+import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Point
+import           Data.Geometry.PolyLine
+import qualified Data.Geometry.Polygon as Polygon
+import qualified Data.Geometry.Transformation as Trans
 import qualified Data.List as L
+import qualified Data.List.NonEmpty as NE
+import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Monoid
+import           Data.Proxy
+import qualified Data.Seq2 as S2
+import           Data.Singletons
+import qualified Data.Text as T
+import           Data.Text (Text)
+import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-
-import qualified Data.List.NonEmpty as NE
--- import           Data.Validation
-import qualified Data.Seq2     as S2
-
-import           Data.Geometry.Point
-import           Data.Geometry.Box
-import qualified Data.Geometry.Polygon as Polygon
-import           Data.Geometry.PolyLine
-import qualified Data.Geometry.Transformation as Trans
-import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Ipe.Attributes
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.PathParser
-import           Data.Geometry.Ipe.ParserPrimitives(pInteger)
-
-import qualified Data.ByteString as B
-import           Data.Monoid
-import           Data.Singletons
-import           Data.Text(Text)
-
-
 import           Text.XML.Expat.Tree
 
-import qualified Data.Text as T
--- import qualified Data.Map as M
 
 --------------------------------------------------------------------------------
 

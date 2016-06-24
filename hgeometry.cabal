@@ -40,7 +40,7 @@ flag examples
   manual:      True
 
 library
-  ghc-options: -Wall -fno-warn-unticked-promoted-constructors
+  ghc-options: -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
   exposed-modules:  Data.Geometry
                     Data.Geometry.Properties
@@ -147,7 +147,7 @@ library
                , text             >= 1.1.1.0
                , bytestring       >= 0.10
 
-               , semigroups       >= 0.15
+               , semigroups       >= 0.18
                , bifunctors       >= 4.1
                -- , validation       >= 0.4
 

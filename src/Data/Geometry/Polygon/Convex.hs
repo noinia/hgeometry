@@ -15,8 +15,8 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon
                                    ) where
 
 import           Control.Lens hiding ((:<), (:>))
-import qualified Data.CircularSeq as C
 import           Data.CircularSeq (focus,CSeq)
+import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on, )
@@ -24,11 +24,11 @@ import           Data.Geometry
 import           Data.Geometry.Polygon (fromPoints, cmpExtreme)
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
-import qualified Data.Sequence as S
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))
+import qualified Data.Sequence as S
 
 import           Data.Geometry.Ipe
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type ConvexPolygon = SimplePolygon

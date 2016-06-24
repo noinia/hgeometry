@@ -122,7 +122,7 @@ pattern Circle c r = Sphere c r
 -- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
-disk p q r = match ((f p) `intersect` (f q)) $
+disk p q r = match (f p `intersect` f q) $
        (H $ \NoIntersection -> Nothing)
     :& (H $ \c@(Point _)    -> Just $ Ball (ext c) (qdA c p))
     :& (H $ \_              -> Nothing)

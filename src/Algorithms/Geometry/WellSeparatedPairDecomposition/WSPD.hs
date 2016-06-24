@@ -38,7 +38,7 @@ fairSplitTree     :: (Fractional r, Ord r, Arity d, Index' 0 d, KnownNat d)
                   => NonEmpty.NonEmpty (Point d r :+ p) -> SplitTree d p r ()
 fairSplitTree pts = fairSplitTree' (NonEmpty.length pts) . GV.imap f $ pure (g pts)
   where
-    f i  = S2.viewL1FromNonEmpty . NonEmpty.sortOn (^.core.unsafeCoord i)
+    f i  = S2.viewL1FromNonEmpty . NonEmpty.sortWith (^.core.unsafeCoord i)
     g = NonEmpty.zipWith (\i (p :+ e) -> p :+ (i :+ e)) (NonEmpty.fromList [0..])
 
 -- | Given a split tree, generate the Well separated pairs
