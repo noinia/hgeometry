@@ -10,12 +10,11 @@ module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          , pNotFollowedBy
                                          ) where
 
-import           Control.Applicative hiding (many,(<|>))
+
 import           Text.Parsec(try)
 import           Text.Parsec(ParsecT, Stream)
 import           Text.Parsec.Text
 import           Text.ParserCombinators.Parsec hiding (Parser,try)
-
 import qualified Data.Text as T
 
 

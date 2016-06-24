@@ -3,7 +3,6 @@
 {-# LANGUAGE UndecidableInstances  #-}
 module Data.Geometry.PolyLine where
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
@@ -14,10 +13,10 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import qualified Data.List.NonEmpty as NE
+import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as Seq
-import           Data.Semigroup
-import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)

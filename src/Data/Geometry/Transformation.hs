@@ -7,19 +7,15 @@
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Transformation where
 
-
-import           Control.Applicative
-import           Control.Lens(lens,Lens',set)
+import           Control.Lens (lens,Lens',set)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import           Data.Proxy
-
-import           GHC.TypeLits
-import           Linear.Matrix((!*),(!*!))
-
-import qualified Data.Vector.Fixed as FV
 import qualified Data.Geometry.Vector as V
+import           Data.Proxy
+import qualified Data.Vector.Fixed as FV
+import           GHC.TypeLits
+import           Linear.Matrix ((!*),(!*!))
 
 --------------------------------------------------------------------------------
 -- * Matrices

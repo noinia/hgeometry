@@ -16,9 +16,6 @@ import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
-import           GHC.TypeLits
-import           Linear.Affine(qdA, (.-.), (.+^))
-import           Linear.Vector((^/),(*^),(^+^))
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball

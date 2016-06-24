@@ -1,9 +1,6 @@
 module Data.Geometry.Boundary where
 
-
-import Data.Geometry.Properties
-import qualified Data.Foldable as F
-import qualified Data.Traversable as T
+import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 
 --------------------------------------------------------------------------------

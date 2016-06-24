@@ -12,7 +12,6 @@ module Data.Range( EndPoint(..)
                  , shiftLeft, shiftRight
                  ) where
 
-import           Control.Applicative
 import           Control.Arrow((&&&))
 import           Control.Lens
 import qualified Data.Foldable as F

@@ -4,9 +4,9 @@ import           Control.Lens
 import           Data.Tuple
 import qualified Data.CircularList as C
 import qualified Data.List as L
-import qualified Data.Traversable as T
 
-import Debug.Trace
+
+--------------------------------------------------------------------------------
 
 -- $setup
 -- >>> let ordList = C.fromList [5,6,10,20,30,1,2,3]

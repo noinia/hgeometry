@@ -20,7 +20,7 @@ import           Data.Range
 import           Frames.CoRec(asA)
 import qualified Data.CircularSeq as C
 -- import qualified Data.CircularList as C
-import           Linear.Vector(Additive(..), (^*), (^/))
+
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -68,6 +68,8 @@ instance PointFunctor (Polygon t p) where
 instance Num r => IsTransformable (Polygon t p r) where
   transformBy = transformPointFunctor
 
+instance IsBoxable (Polygon t p r) where
+  boundingBox = boundingBoxList' . toListOf (outerBoundary.traverse.core)
 
 -- * Functions on Polygons
 

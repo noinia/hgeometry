@@ -14,8 +14,8 @@ module Data.Geometry.Interval-- (
                              -- )
        where
 
-import           Control.Applicative
-import           Control.Lens(makeLenses, (^.),(%~),(&), Lens')
+import           Control.Lens (makeLenses, (^.),(%~),(&), Lens')
+import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -25,7 +25,6 @@ import           Data.Semigroup
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
-import           Data.Bifunctor
 
 --------------------------------------------------------------------------------
 

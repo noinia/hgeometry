@@ -10,7 +10,6 @@ module Data.UnBounded( Top, topToMaybe
                      , unBoundedToMaybe
                      ) where
 
-import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.Traversable as T

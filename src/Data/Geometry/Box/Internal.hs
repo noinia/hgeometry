@@ -4,22 +4,19 @@
 {-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Box.Internal where
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import qualified Data.Semigroup.Foldable as F
-import qualified Data.Range as R
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Geometry.Vector (Vector, Arity, Index',C(..))
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
-import           Data.Geometry.Vector(Vector, Arity, Index',C(..))
+import qualified Data.Range as R
 import           Data.Semigroup
-
-import qualified Data.Vector.Fixed                as FV
-
+import qualified Data.Semigroup.Foldable as F
+import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------

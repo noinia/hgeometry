@@ -1,15 +1,14 @@
 module Data.Ext where
 
-import Control.Applicative
 import Control.Lens
-import Data.Semigroup
 import Data.Biapplicative
-import Data.Bifunctor.Apply
 import Data.Bifoldable
+import Data.Bifunctor.Apply
 import Data.Bitraversable
+import Data.Functor.Apply (liftF2)
+import Data.Semigroup
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
-import Data.Functor.Apply(liftF2)
 
 --------------------------------------------------------------------------------
 

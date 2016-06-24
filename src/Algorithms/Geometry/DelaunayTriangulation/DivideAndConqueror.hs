@@ -3,7 +3,6 @@ module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types
-import           Control.Applicative
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State

@@ -2,7 +2,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.HalfLine where
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -17,10 +16,6 @@ import           Data.Geometry.Vector
 import           Data.Range
 import qualified Data.Traversable as T
 import           Data.UnBounded
-import           Frames.CoRec
-import           Linear.Affine(Affine(..),distanceA)
-import           Linear.Vector((*^))
-
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Half-Lines

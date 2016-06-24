@@ -2,24 +2,19 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where
 
-import           Control.Applicative
-import           Data.Monoid(mconcat)
 import           Control.Lens
-import           Data.Proxy
-
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
-import qualified Data.Vector.Fixed as FV
-import qualified Data.List as L
-
-import           Data.Ext
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
-import           GHC.TypeLits
-
-import qualified Data.Geometry.Vector as Vec
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.Properties
+import           Data.Geometry.Vector
+import qualified Data.Geometry.Vector as Vec
+import qualified Data.List as L
+import           Data.Proxy
+import qualified Data.Traversable as T
+import qualified Data.Vector.Fixed as FV
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 

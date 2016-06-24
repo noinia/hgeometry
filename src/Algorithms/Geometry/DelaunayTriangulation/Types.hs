@@ -10,12 +10,9 @@ import           Data.Geometry.Ipe
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
 import qualified Data.Map.Strict as SM
-import           Data.Monoid (mempty)
 import qualified Data.Permutation as P
 import           Data.PlaneGraph
 import qualified Data.Vector as V
-
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 

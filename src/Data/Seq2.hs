@@ -1,17 +1,14 @@
 module Data.Seq2 where
 
-import           Control.Applicative
 import           Control.Lens ((%~), (&), (<&>), (^?), Lens', lens)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
+import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Semigroup
-import           Prelude hiding (foldr,foldl,head,tail,last,length)
-
-
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
 import qualified Data.Sequence as S
+import qualified Data.Traversable as T
+import           Prelude hiding (foldr,foldl,head,tail,last,length)
 
 --------------------------------------------------------------------------------
 

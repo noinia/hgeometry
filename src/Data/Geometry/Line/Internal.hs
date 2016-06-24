@@ -8,7 +8,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import           Data.Ord(comparing)
+import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
