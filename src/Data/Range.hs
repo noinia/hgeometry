@@ -14,16 +14,14 @@ module Data.Range( EndPoint(..)
 
 import           Control.Arrow((&&&))
 import           Control.Lens
-import qualified Data.Foldable as F
 import           Data.Geometry.Properties
-import qualified Data.Traversable as T
 
 --------------------------------------------------------------------------------
 
 
 data EndPoint a = Open   a
                 | Closed a
-                deriving (Show,Read,Eq,Functor,F.Foldable,T.Traversable)
+                deriving (Show,Read,Eq,Functor,Foldable,Traversable)
 
 _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
@@ -49,11 +47,14 @@ isClosed = not . isOpen
 data Range a = Range { _lower :: EndPoint a
                      , _upper :: EndPoint a
                      }
-               deriving (Show,Read,Eq,Functor,F.Foldable,T.Traversable)
+               deriving (Show,Read,Eq,Functor,Foldable,Traversable)
 
 makeLenses ''Range
 
+pattern OpenRange       :: a -> a -> Range a
 pattern OpenRange   l u = Range (Open l)   (Open u)
+
+pattern ClosedRange     :: a -> a -> Range a
 pattern ClosedRange l u = Range (Closed l) (Closed u)
 
 -- | A range from l to u, ignoring/forgetting the type of the enpoints

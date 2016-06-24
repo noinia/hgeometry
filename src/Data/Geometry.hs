@@ -25,5 +25,5 @@ import Data.Geometry.Polygon hiding (fromPoints)
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 import Data.Geometry.Vector
-import Linear.Affine hiding (Point, origin)
+import Linear.Affine hiding (Point, Vector, origin)
 import Linear.Vector

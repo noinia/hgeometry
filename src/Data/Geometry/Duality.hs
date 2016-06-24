@@ -1,6 +1,5 @@
 module Data.Geometry.Duality where
 
-import Control.Applicative
 import Data.Geometry.Line
 import Data.Geometry.Point
 import Data.Maybe(fromJust)
