@@ -13,7 +13,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon
                                    , extremes
                                    , maxInDirection
 
-                                   , rightTangent
+                                   , leftTangent, rightTangent
 
                                    ) where
 
@@ -125,13 +125,20 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 
 
 --  | Given a convex polygon poly, and a point outside the polygon, find the
---  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
+--  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
 -- running time: $O(\log^2 n)$.
-rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
-rightTangent poly q = findMaxWith (tangentCmp q) poly
+leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+leftTangent poly q = findMaxWith (tangentCmp q) poly
 
+--  | Given a convex polygon poly, and a point outside the polygon, find the
+--  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
+--  s.t. the polygon lies completely to the left of the line from q to v.
+--
+-- running time: $O(\log^2 n)$.
+rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 
 
 
