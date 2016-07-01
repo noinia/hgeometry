@@ -12,6 +12,9 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon
 
                                    , extremes
                                    , maxInDirection
+
+                                   , rightTangent
+
                                    ) where
 
 import           Control.Lens hiding ((:<), (:>))
@@ -46,7 +49,7 @@ mainWith inFile outFile = do
            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
            -- writeIpeFile outFile . singlePageFromContent $ out
            -- mapM_ (print . extremesNaive (v2 1 0)) polies
-           pure $ map (maxInDirection (v2 (-1) 0)) polies
+           pure $ map (flip rightTangent (point2 80 528)) polies
 
 
 
@@ -69,9 +72,15 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 -- pre: The input polygon is strictly convex.
 --
 -- running time: $O(\log^2 n)$
-maxInDirection     :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u p = findMaxStart . C.rightElements $ p^.outerBoundary
+maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
+maxInDirection u = findMaxWith (cmpExtreme u)
+
+findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
+                  -> ConvexPolygon p r -> Point 2 r :+ p
+findMaxWith cmp p = findMaxStart . C.rightElements $ p^.outerBoundary
   where
+    p' >=. q = (p' `cmp` q) /= LT
+
     findMaxStart s@(viewl -> (a:<r))
       | isLocalMax r a r = a
       | otherwise        = findMax s
@@ -103,10 +112,16 @@ maxInDirection u p = findMaxStart . C.rightElements $ p^.outerBoundary
     isLocalMax _                 _ _                 = True
 
     -- the Edge from a to b is upwards w.r.t b if a is not larger than b
-    isUpwards a (viewl -> b :< _) = cmpExtreme u a b /= GT
+    isUpwards a (viewl -> b :< _) = (a `cmp` b) /= GT
     isUpwards _ _                 = error "isUpwards: no edge endpoint"
 
-    p' >=. q = cmpExtreme u p' q /= LT
+
+tangentCmp       :: (Num r, Ord r)
+                 => Point 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+tangentCmp o p q = case ccw o (p^.core) (q^.core) of
+                     CCW      -> LT -- q is left of the line from o to p
+                     CoLinear -> EQ -- q is *on* the line from o to p
+                     CW       -> GT -- q is right of the line from o to p
 
 
 --  | Given a convex polygon poly, and a point outside the polygon, find the
@@ -114,10 +129,8 @@ maxInDirection u p = findMaxStart . C.rightElements $ p^.outerBoundary
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
 -- running time: $O(\log^2 n)$.
--- rightTangent        :: ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
--- rightTangent poly q = undefined
--- TODO: same as maxInDirection, but with a slightly different ordering
-
+rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
+rightTangent poly q = findMaxWith (tangentCmp q) poly
 
 
 
