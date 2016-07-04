@@ -29,7 +29,7 @@ module Data.PlanarGraph( Arc(..)
                        , dual
 
                        , FaceId(..)
-                       , leftFace, rightFace, boundary
+                       , leftFace, rightFace, boundary, boundaryVertices
                        ) where
 
 import           Control.Lens
@@ -305,19 +305,26 @@ edges = V.filter (isPositive . fst) . darts
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
+-- running time: $O(1)$
 tailOf     :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 tailOf d g = VertexId . fst $ lookupIdx (g^.embedding) d
 
 -- | The vertex this dart is heading in to
+--
+-- running time: $O(1)$
 headOf   :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 headOf d = tailOf (twin d)
 
 -- | endPoints d g = (tailOf d g, headOf d g)
+--
+-- running time: $O(1)$
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 endPoints d g = (tailOf d g, headOf d g)
 
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
+--
+-- running time: $O(k)$, where $k$ is the output size
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
 incidentEdges (VertexId v) g = g^.embedding.orbits.ix' v
@@ -333,6 +340,8 @@ outgoingEdges v g = V.filter isPositive $ incidentEdges v g
 
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 -- around the vertex.
+--
+-- running time: $O(k)$, where $k$ is the output size
 neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 neighboursOf v g = otherVtx <$> incidentEdges v g
   where
@@ -350,14 +359,20 @@ neighboursOf v g = otherVtx <$> incidentEdges v g
 
 -- | Get the vertex data associated with a node. Note that updating this data may be
 -- expensive!!
+--
+-- running time: $O(1)$
 vDataOf              :: VertexId s w -> Lens' (PlanarGraph s w v e f) v
 vDataOf (VertexId i) = vertexData.ix' i
 
 -- | Edge data of a given dart
+--
+-- running time: $O(1)$
 eDataOf   :: Dart s -> Lens' (PlanarGraph s w v e f) e
 eDataOf d = rawDartData.ix' (fromEnum d)
 
 -- | Data of a face of a given face
+--
+-- running time: $O(1)$
 fDataOf                       :: FaceId s w -> Lens' (PlanarGraph s w v e f) f
 fDataOf (FaceId (VertexId i)) = faceData.ix' i
 
@@ -368,6 +383,8 @@ endPointDataOf d = to $ endPointData d
 
 
 -- | Data corresponding to the endpoints of the dart
+--
+-- running time: $O(1)$
 endPointData     :: Dart s -> PlanarGraph s w v e f -> (v,v)
 endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 
@@ -386,6 +403,8 @@ endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 --  in (dual myGraph)^.embedding.orbits == answer
 -- :}
 -- True
+--
+-- running time: $O(n)$.
 dual   :: PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
 dual g = let perm = g^.embedding
          in PlanarGraph (cycleRep (elems perm) (apply perm . twin))
@@ -417,6 +436,8 @@ faces g = V.zip (faces' g) (g^.faceData)
 -- FaceId 2
 -- >>> leftFace (dart 0 "+1") myGraph
 -- FaceId 0
+--
+-- running time: $O(1)$.
 leftFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 leftFace d g = FaceId . headOf d $ dual g
 
@@ -431,6 +452,8 @@ leftFace d g = FaceId . headOf d $ dual g
 -- FaceId 1
 -- >>> rightFace (dart 0 "+1") myGraph
 -- FaceId 1
+--
+-- running time: $O(1)$.
 rightFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 rightFace d g = FaceId . tailOf d $ dual g
 
@@ -439,11 +462,18 @@ rightFace d g = FaceId . tailOf d $ dual g
 -- the outer face in counter clockwise order.
 --
 --
-boundary     :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
+-- running time: $O(k)$, where $k$ is the output size.
+boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
 boundary (FaceId v) g = incidentEdges v $ dual g
 
 
-
+-- | The vertices bounding this face, for internal faces in clockwise order, for
+-- the outer face in counter clockwise order.
+--
+--
+-- running time: $O(k)$, where $k$ is the output size.
+boundaryVertices     :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
+boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 
 --------------------------------------------------------------------------------
 -- Testing stuff
