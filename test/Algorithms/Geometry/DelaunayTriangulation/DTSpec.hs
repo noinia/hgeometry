@@ -1,22 +1,20 @@
 {-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 
-import Util
-
-import Test.Hspec
-import Control.Lens
-import Data.Geometry
-import Data.Maybe(mapMaybe, fromJust)
-import Algorithms.Geometry.DelaunayTriangulation.Types
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror as DC
-import qualified Algorithms.Geometry.DelaunayTriangulation.Naive              as Naive
-import qualified Data.List.NonEmpty as NonEmpty
-import Data.Geometry.Ipe
-import Data.Ext
-import Data.Traversable(traverse)
+import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
+import           Algorithms.Geometry.DelaunayTriangulation.Types
+import           Control.Lens
 import qualified Data.CircularList.Util as CU
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Ipe
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
+import           Data.Maybe (mapMaybe, fromJust)
 import qualified Data.Vector as V
+import           Test.Hspec
+import           Util
 
 
 dtEdges :: (Fractional r, Ord r)
