@@ -52,6 +52,10 @@ element' i f v
   | otherwise                                     = pure v
 
 
+fromListUnsafe :: Arity d => [a] -> Vector d a
+fromListUnsafe = Vector . V.fromList
+
+
 instance (Show r, Arity d) => Show (Vector d r) where
   show (Vector v) = mconcat [ "Vector", show $ V.length v , " "
                             , show $ F.toList v

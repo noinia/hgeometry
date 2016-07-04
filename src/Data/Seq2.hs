@@ -15,7 +15,7 @@ import           Prelude hiding (foldr,foldl,head,tail,last,length)
 -- | Basically Data.Sequence but with the guarantee that the list contains at
 -- least two elements.
 data Seq2 a = Seq2 a (S.Seq a) a
-                deriving (Eq,Ord,Show,Read)
+                deriving (Eq,Ord,Show)
 
 
 instance T.Traversable Seq2 where
@@ -108,7 +108,7 @@ fromSeqUnsafe s = Seq2 a m b
 --------------------------------------------------------------------------------
 -- | Left views
 
-data ViewL2 a = a :<< ViewR1 a deriving (Show,Read,Eq,Ord)
+data ViewL2 a = a :<< ViewR1 a deriving (Show,Eq,Ord)
 
 -- | At least two elements
 instance T.Traversable ViewL2 where
@@ -126,7 +126,10 @@ instance F.Foldable ViewL2 where
 
 
 -- | At least one element
-data ViewL1 a = a :< S.Seq a deriving (Show,Read,Eq,Ord)
+data ViewL1 a = a :< S.Seq a deriving (Eq,Ord)
+
+instance Show a => Show (ViewL1 a) where
+  show (x :< xs) = concat [ show x, " :< ", show $ F.toList xs]
 
 instance T.Traversable ViewL1 where
   traverse f ~(a :< s) = (:<) <$> f a <*> T.traverse f s
@@ -172,7 +175,7 @@ viewL1toR1 ~(l :< s) = let (s' S.:> r) = S.viewr (l S.<| s) in s' :> r
 
 -- | A view of the right end of the seq, with the guarantee that it
 -- has at least two elements
-data ViewR2 a = ViewL1 a :>> a deriving (Show,Read,Eq,Ord)
+data ViewR2 a = ViewL1 a :>> a deriving (Show,Eq,Ord)
 
 instance T.Traversable ViewR2 where
   traverse f ~(s :>> a) = (:>>) <$> T.traverse f s <*> f a
