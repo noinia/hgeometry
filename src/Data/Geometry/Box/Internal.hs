@@ -7,12 +7,14 @@ module Data.Geometry.Box.Internal where
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
+import           Frames.CoRec (asA)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector (Vector, Arity, Index',C(..))
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
+import           Data.Proxy
 import qualified Data.Range as R
 import           Data.Semigroup
 import qualified Data.Semigroup.Foldable as F
@@ -32,6 +34,18 @@ makeLenses ''Box
 fromCornerPoints          :: Point d r :+ p -> Point d r :+ p -> Box d p r
 fromCornerPoints low high = Box (low&core %~ Min) (high&core %~ Max)
 
+-- | Build a d dimensional Box given d ranges.
+fromExtent    :: Arity d => Vector d (R.Range r) -> Box d () r
+fromExtent rs = Box (Min (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
+                    (Max (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
+
+
+-- | Center of the box
+centerPoint   :: (Arity d, Fractional r) => Box d p r -> Point d r
+centerPoint b = Point $ w V.^/ 2
+  where w = b^.minP.core.to getMin.vector V.^+^ b^.maxP.core.to getMax.vector
+
+
 
 deriving instance (Show r, Show p, Arity d) => Show (Box d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq   (Box d p r)
@@ -40,25 +54,44 @@ deriving instance (Ord r, Ord p, Arity d)   => Ord  (Box d p r)
 instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
   (Box mi ma) <> (Box mi' ma') = Box (mi <> mi') (ma <> ma')
 
-type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
+type instance IntersectionOf (Box d p r) (Box d p r) = '[ NoIntersection, Box d () r]
 
--- In principle this should also just work for Boxes in higher dimensions. It is just
--- that we need a better way to compute their corners
-instance (Num r, Ord r) => (Rectangle p r) `IsIntersectableWith` (Rectangle p r) where
-
+instance (Num r, Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d p r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  box@(Box a b) `intersect` box'@(Box c d)
-      |    box  `containsACornerOf` box'
-        || box' `containsACornerOf` box = coRec $ Box (mi :+ ()) (ma :+ ())
-      | otherwise                       = coRec NoIntersection
+  box `intersect` box' = f . sequence $ FV.zipWith intersect' (extent box) (extent box')
     where
+      f = maybe (coRec NoIntersection) (coRec . fromExtent)
+      r `intersect'` s = asA (Proxy :: Proxy (R.Range r)) $ r `intersect` s
 
-      mi = (a^.core) `max` (c^.core)
-      ma = (b^.core) `min` (d^.core)
 
-      bx `containsACornerOf` bx' = let (a',b',c',d') = corners bx'
-                                   in any (\(p :+ _) -> p `inBox` bx) [a',b',c',d']
+
+-- -- In principle this should also just work for Boxes in higher dimensions. It is just
+-- -- that we need a better way to compute their corners
+-- instance (Num r, Ord r) => (Rectangle p r) `IsIntersectableWith` (Rectangle p r) where
+
+--   nonEmptyIntersection = defaultNonEmptyIntersection
+
+--   box@(Box a b) `intersect` box'@(Box c d)
+--       |    box  `containsACornerOf` box'
+--         || box' `containsACornerOf` box = coRec $ Box (mi :+ ()) (ma :+ ())
+--       | otherwise                       = coRec NoIntersection
+--     where
+
+--       mi = (a^.core) `max` (c^.core)
+--       ma = (b^.core) `min` (d^.core)
+
+--       bx `containsACornerOf` bx' = let (a',b',c',d') = corners bx'
+--                                    in any (\(p :+ _) -> p `inBox` bx) [a',b',c',d']
+
+
+type instance IntersectionOf (Point d r) (Box d p r) = '[ NoIntersection, Point d r]
+
+instance (Arity d, Ord r) => (Point d r) `IsIntersectableWith` (Box d p r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  p `intersect` b
+    | not $ p `inBox` b = coRec NoIntersection
+    | otherwise         = coRec p
 
 
 instance PointFunctor (Box d p) where
@@ -99,7 +132,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 --
 -- >>> extent (boundingBoxList' [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
 -- Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
-extent                                 :: (Arity d)
+extent                                 :: Arity d
                                        => Box d p r -> Vector d (R.Range r)
 extent (Box (Min a :+ _) (Max b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
 
@@ -175,26 +208,20 @@ corners r     = let w = width r
 -- * Constructing bounding boxes
 
 class IsBoxable g where
-  boundingBox :: (Monoid p, Semigroup p, Ord (NumType g))
-              => g -> Box (Dimension g) p (NumType g)
-
-type IsAlwaysTrueBoundingBox g p = (Semigroup p, Arity (Dimension g))
+  boundingBox :: Ord (NumType g) => g -> Box (Dimension g) () (NumType g)
 
 
-
-boundingBoxList :: (IsBoxable g, Monoid p, F.Foldable1 c, Ord (NumType g)
-                    , IsAlwaysTrueBoundingBox g p
-                    ) => c g -> Box (Dimension g) p (NumType g)
+boundingBoxList :: (IsBoxable g, F.Foldable1 c, Ord (NumType g), Arity (Dimension g))
+                => c g -> Box (Dimension g) () (NumType g)
 boundingBoxList = F.foldMap1 boundingBox
 
 
 -- | Unsafe version of boundingBoxList, that does not check if the list is non-empty
-boundingBoxList' :: (IsBoxable g, Monoid p, Ord (NumType g)
-                    , IsAlwaysTrueBoundingBox g p
-                    ) => [g] -> Box (Dimension g) p (NumType g)
+boundingBoxList' :: (IsBoxable g, Ord (NumType g), Arity (Dimension g))
+                 => [g] -> Box (Dimension g) () (NumType g)
 boundingBoxList' = boundingBoxList . NE.fromList
 
 ----------------------------------------
 
 instance IsBoxable (Point d r) where
-  boundingBox p = Box (Min p :+ mempty) (Max p :+ mempty)
+  boundingBox p = Box (ext $ Min p) (ext $ Max p)
