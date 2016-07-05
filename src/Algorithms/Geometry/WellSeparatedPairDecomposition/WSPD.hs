@@ -10,6 +10,8 @@ import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
+import           Data.Geometry.Transformation
+import           Data.Geometry.Properties
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
@@ -43,7 +45,6 @@ fairSplitTree     :: (Fractional r, Ord r, Arity d, Index' 0 d,
 fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
   where
     pts' = GV.imap sortOn . pure . g $ pts
-    -- n = traceShow ("N: ", n', pts') n'
     n    = length $ pts'^.GV.element (C :: C 0)
 
     sortOn' i = NonEmpty.sortWith (^.core.unsafeCoord i)
@@ -58,19 +59,10 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
     node' l j r = Node l (NodeData j (bbOf l <> bbOf r) ()) r
 
 
-foldUp                  :: (b -> v -> b -> b) -> (a -> b) -> BinLeafTree v a -> b
-foldUp _ g (Leaf x)     = g x
-foldUp f g (Node l x r) = f (foldUp f g l) x (foldUp f g r)
-
-bbOf                             :: Ord r => SplitTree d p r a -> Box d () r
-bbOf (Leaf p)                    = boundingBox $ p^.core
-bbOf (Node _ (NodeData _ b _) _) = b
-
-
 -- | Given a split tree, generate the Well separated pairs
 --
 --
-wellSeparatedPairs   :: (Num r, Ord r, Arity d, KnownNat d)
+wellSeparatedPairs   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
   where
@@ -104,7 +96,7 @@ fairSplitTree'       :: (Fractional r, Ord r, Arity d, Index' 0 d, KnownNat d
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
                      -> BinLeafTree Int (Point d r :+ p)
 fairSplitTree' n pts
-    | traceShow (n,pts) False = undefined
+    -- | traceShow (n,pts) False = undefined
     | n <= 1    = let (p S2.:< _) = pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
     -- | n == 2    = let j     = widestDimension pts
     --                   [p,q] = F.toList $ pts^.ix' (j -1)
@@ -112,7 +104,7 @@ fairSplitTree' n pts
     | otherwise = foldr node' (V.last path) $ V.zip nodeLevels (V.init path)
   where
     -- note that points may also be assigned level 'Nothing'.
-    (levels', nodeLevels'@(maxLvl NonEmpty.:| _)) = runST $ do
+    (levels, nodeLevels'@(maxLvl NonEmpty.:| _)) = runST $ do
         lvls  <- MV.replicate n Nothing
         ls    <- runReaderT (assignLevels (n `div` 2) 0 pts (Level 0 Nothing) []) lvls
         lvls' <- V.unsafeFreeze lvls
@@ -123,14 +115,14 @@ fairSplitTree' n pts
 
     nodeLevels = V.fromList . L.reverse . NonEmpty.toList $ nodeLevels'
 
-    levels = traceShow ("Levels",levels',maxLvl) levels'
+    -- levels = traceShow ("Levels",levels',maxLvl) levels'
 
-    path = traceShow ("path", path',nodeLevels) path'
+    -- path = traceShow ("path", path',nodeLevels) path'
     distrPts = distributePoints (1 + maxLvl^.unLevel) levels pts
 
-    path' = recurse <$> (traceShow ("distributed pts",distrPts) distrPts)
+    path = recurse <$> distrPts -- (traceShow ("distributed pts",distrPts) distrPts)
 
-    node' (lvl,lc) rc | traceShow ("node' ",lvl,lc,rc) False = undefined
+    -- node' (lvl,lc) rc | traceShow ("node' ",lvl,lc,rc) False = undefined
     node' (lvl,lc) rc = case lvl^?widestDim._Just of
                           Nothing -> error "Unknown widest dimension"
                           Just j  -> Node lc j rc
@@ -156,9 +148,9 @@ distributePoints'              :: (Show r, Show p, Arity d) =>
                                -> PointSeq d (Idx :+ p) r  -- ^ input points
                                -> V.Vector (PointSeq d (Idx :+ p) r)
 distributePoints' k levels pts
-  | traceShow ("distributePoints ",k,levels) False = undefined
+  -- | traceShow ("distributePoints ",k,levels) False = undefined
   | otherwise
-  = traceShowId .   fmap fromSeqUnsafe $ V.create $ do
+  = fmap fromSeqUnsafe $ V.create $ do
     v <- MV.replicate k mempty
     forM_ pts $ \p ->
       append v (level p) p
@@ -193,13 +185,6 @@ reIndexPoints ptsV = fmap reIndex ptsV
     reIndex = fmap (\p -> p&extra.core %~ fromJust . flip IntMap.lookup mapping')
     mapping' = IntMap.fromAscList $ zip (map (^.extra.core) . F.toList $ pts) [0..]
 
-    -- mapping' = V.create $ do
-    --     v <- MV.new oldN
-    --     forM_ (zip [0..] (F.toList pts)) $ \(i,p) ->
-    --       MV.write v (p^.extra.core) i
-    --     pure v
-
-
 -- | ST monad with access to the vector storign the level of the points.
 type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
 
@@ -216,15 +201,15 @@ assignLevels                  :: (Fractional r, Ord r, Arity d, KnownNat d
                               -> [Level] -- ^ Levels used so far
                               -> RST s (NonEmpty.NonEmpty Level)
 assignLevels h m pts l prevLvls
-  | traceShow ("assignLevels ", h, m, l) False = undefined
+  -- | traceShow ("assignLevels ", h, m, l) False = undefined
   | m >= h    = pure (l NonEmpty.:| prevLvls)
   | otherwise = do
     pts' <- compactEnds pts
     -- find the widest dimension j = i+1
     let j    = widestDimension pts'
-        i    = traceShow  ("i",j,pts') j - 1
+        i    = j - 1 -- traceShow  ("i",j,pts') j - 1
         extJ = (extends pts')^.ix' i
-        mid  = traceShowId $ midPoint extJ
+        mid  = midPoint extJ
 
     -- find the set of points that we have to delete, by looking at the sorted
     -- list L_j. As a side effect, this will remove previously assigned points
@@ -296,7 +281,7 @@ findAndCompact                   :: (Ord r, Arity d
                                           , PointSeq d (Idx :+ p) r
                                           )
 findAndCompact j (l0 S2.:< s0) m
-  | traceShow ("findAndCompact ", j, (l0 S2.:< s0), m) False = undefined
+  -- | traceShow ("findAndCompact ", j, (l0 S2.:< s0), m) False = undefined
   | otherwise
   = fmap select . stepL $ l0 S.<| s0
   where
@@ -311,20 +296,22 @@ findAndCompact j (l0 S2.:< s0) m
     -- take a step from the right, and add l onto the left part. If it is
     -- larger than the mid point, we have found our split.
     -- stepL :: S.Seq (Point d r :+ (Idx :+ p)) -> ST s (FindAndCompact d r (Idx :+ p))
-    stepL s@(S.viewl -> l S.:< s') = hasLevel l >>= \case
-                                       False -> if l^.core.unsafeCoord j <= m
-                                                     then addL l <$> stepR s'
-                                                     else pure $ FAC mempty s L
-                                       True  -> stepL s' -- delete, continue left
-    stepL (S.viewl -> S.EmptyL)    = pure $ FAC mempty mempty L
+    stepL s = case S.viewl s of
+      S.EmptyL  -> pure $ FAC mempty mempty L
+      l S.:< s' -> hasLevel l >>= \case
+                     False -> if l^.core.unsafeCoord j <= m
+                                 then addL l <$> stepR s'
+                                 else pure $ FAC mempty s L
+                     True  -> stepL s' -- delete, continue left
 
     -- stepR :: S.Seq (Point d r :+ (Idx :+ p)) -> ST s (FindAndCompact d r (Idx :+ p))
-    stepR s@(S.viewr -> s' S.:> r) = hasLevel r >>= \case
-                                       False -> if (r^.core.unsafeCoord j) >= m
-                                                     then addR r <$> stepL s'
-                                                     else pure $ FAC s mempty R
-                                       True  -> stepR s'
-    stepR (S.viewr -> S.EmptyR)    = pure $ FAC mempty mempty R
+    stepR s = case S.viewr s of
+      S.EmptyR  -> pure $ FAC mempty mempty R
+      s' S.:> r -> hasLevel r >>= \case
+                     False -> if r^.core.unsafeCoord j >= m
+                                 then addR r <$> stepL s'
+                                 else pure $ FAC s mempty R
+                     True  -> stepR s'
 
 
     addL l x = x&leftPart  %~ (l S.<|)
@@ -332,7 +319,7 @@ findAndCompact j (l0 S2.:< s0) m
 
     select = over both fromSeqUnsafe . select'
 
-    select' f | traceShow ("select'", f) False = undefined
+    -- select' f | traceShow ("select'", f) False = undefined
     select' (FAC l r L) = (r, l)
     select' (FAC l r R) = (l, r)
 
@@ -362,7 +349,10 @@ extends = GV.imap (\i pts@(l S2.:< _) ->
 --------------------------------------------------------------------------------
 -- * Finding Well Separated Pairs
 
-findPairs                     :: (Num r, Ord r,Arity d, KnownNat d)
+type AlwaysTrueWSPD d = ( Arity d, KnownNat d
+                        , AlwaysTruePFT d, AlwaysTrueTransformation d)
+
+findPairs                     :: (Fractional r, Ord r, AlwaysTrueWSPD d)
                               => r -> SplitTree d p r a -> SplitTree d p r a
                               -> [WSP d p r a]
 findPairs s l r
@@ -372,17 +362,49 @@ findPairs s l r
 
 
 -- | Test if the two sets are well separated with param s
-areWellSeparated       :: r -> SplitTree d p r a -> SplitTree d p r a -> Bool
-areWellSeparated s l r = undefined -- TODO!!!
+areWellSeparated                               :: ( AlwaysTrueWSPD d
+                                                  , Fractional r, Ord r)
+                                               => r -- ^ separation factor
+                                               -> SplitTree d p r a
+                                               -> SplitTree d p r a -> Bool
+areWellSeparated _ (Leaf _)      (Leaf _)      = True
+areWellSeparated s (Leaf p)      (Node _ nd _) = pointBox s (p^.core) (nd^.bBox)
+areWellSeparated s (Node _ nd _) (Leaf p)      = pointBox s (p^.core) (nd^.bBox)
+areWellSeparated s (Node _ ld _) (Node _ rd _) = boxBox   s (ld^.bBox) (rd^.bBox)
+
+-- | Test if the point and the box are far enough appart
+pointBox       :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
+               => r -> Point d r -> Box d p r -> Bool
+pointBox s p b = not $ p `inBox` b'
+  where
+    v  = (centerPoint b)^.vector
+    b' = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
+
+-- | Test if the two boxes are sufficiently far appart
+boxBox         :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
+               => r -> Box d p r -> Box d p r -> Bool
+boxBox s lb rb = boxBox' s lb rb && boxBox' s rb lb
+  where
+    boxBox' s b' b = not $ b' `intersects` bOut
+      where
+        v    = (centerPoint b)^.vector
+        bOut = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
+
+--------------------------------------------------------------------------------
+-- * Helper stuff
 
 
+-- | Computes the maximum width of a splitTree
 maxWidth                             :: (Arity d, KnownNat d, Num r)
                                      => SplitTree d p r a -> r
 maxWidth (Leaf _)                    = 0
 maxWidth (Node _ (NodeData i b _) _) = fromJust $ widthIn' i b
 
---------------------------------------------------------------------------------
--- * Helper stuff
+-- | 'Computes' the bounding box of a split tree
+bbOf                             :: Ord r => SplitTree d p r a -> Box d () r
+bbOf (Leaf p)                    = boundingBox $ p^.core
+bbOf (Node _ (NodeData _ b _) _) = b
+
 
 children'              :: BinLeafTree v a -> [BinLeafTree v a]
 children' (Leaf _)     = []

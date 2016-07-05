@@ -7,6 +7,7 @@ import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty)
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
+import qualified Data.Tree as Tree
 
 --------------------------------------------------------------------------------
 
@@ -41,6 +42,11 @@ instance Traversable (BinLeafTree v) where
 instance Measured v a => Semigroup (BinLeafTree v a) where
   l <> r = node l r
 
+-- | Given a function to combine internal nodes into b's and leafs into b's,
+-- traverse the tree bottom up, and combine everything into one b.
+foldUp                  :: (b -> v -> b -> b) -> (a -> b) -> BinLeafTree v a -> b
+foldUp _ g (Leaf x)     = g x
+foldUp f g (Node l x r) = f (foldUp f g l) x (foldUp f g r)
 
 asBalancedBinLeafTree    :: NonEmpty a -> BinLeafTree Size (Elem a)
 asBalancedBinLeafTree ys = asBLT (length ys') ys'
@@ -62,3 +68,17 @@ newtype Elem a = Elem { _unElem :: a }
 
 instance Measured Size (Elem a) where
   measure _ = 1
+
+
+--------------------------------------------------------------------------------
+-- * Converting into a Data.Tree
+
+data RoseElem v a = InternalNode v | LeafNode a deriving (Show,Eq,Functor)
+
+toRoseTree              :: BinLeafTree v a -> Tree.Tree (RoseElem v a)
+toRoseTree (Leaf x)     = Tree.Node (LeafNode x) []
+toRoseTree (Node l v r) = Tree.Node (InternalNode v) (map toRoseTree [l,r])
+
+
+drawTree :: (Show v, Show a) => BinLeafTree v a -> String
+drawTree = Tree.drawTree . fmap show . toRoseTree
