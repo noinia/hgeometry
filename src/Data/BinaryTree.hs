@@ -63,11 +63,29 @@ newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord)
 instance Semigroup Size where
   x <> y = x + y
 
+instance Monoid Size where
+  mempty = Size 0
+  mappend = (<>)
+
 newtype Elem a = Elem { _unElem :: a }
                deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
 instance Measured Size (Elem a) where
   measure _ = 1
+
+
+data Sized a = Sized !Size a
+             deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+instance Semigroup a => Semigroup (Sized a) where
+  (Sized i a) <> (Sized j b) = Sized (i <> j) (a <> b)
+
+instance Monoid a => Monoid (Sized a) where
+  mempty = Sized mempty mempty
+  (Sized i a) `mappend` (Sized j b) = Sized (i <> j) (a `mappend` b)
+
+instance Semigroup a => Measured Size (Sized a) where
+  measure (Sized i _) = i
 
 
 --------------------------------------------------------------------------------

@@ -69,6 +69,21 @@ wellSeparatedPairs s = f
     f (Leaf _)     = []
     f (Node l _ r) = findPairs s l r ++ f l ++ f r
 
+
+
+
+-- -- | Given a split tree, generate the well separated pairs such that one set is
+-- -- a singleton.
+-- wellSeparatedPairSingletons   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
+--                               => r -> SplitTree d p r a -> [(Point d r :+ p, PointSet d p r (Sized a))]
+-- wellSeparatedPairSingletons s t = concatMap split $ wellSeparatedPairs s t'
+--   where
+--     split (l,r) = undefined
+--       -- | measure l <= measure r = map (,r) $ F.toList l
+--       -- | otherwise              = map (,l) $ F.toList r
+--     t' = undefined
+
+
 --------------------------------------------------------------------------------
 -- * Building the split tree
 
@@ -383,9 +398,9 @@ pointBox s p b = not $ p `inBox` b'
 -- | Test if the two boxes are sufficiently far appart
 boxBox         :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
                => r -> Box d p r -> Box d p r -> Bool
-boxBox s lb rb = boxBox' s lb rb && boxBox' s rb lb
+boxBox s lb rb = boxBox' lb rb && boxBox' rb lb
   where
-    boxBox' s b' b = not $ b' `intersects` bOut
+    boxBox' b' b = not $ b' `intersects` bOut
       where
         v    = (centerPoint b)^.vector
         bOut = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
