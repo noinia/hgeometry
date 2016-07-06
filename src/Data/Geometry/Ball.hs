@@ -108,11 +108,13 @@ pattern Sphere c r = Boundary (Ball c r)
 
 type Disk p r = Ball 2 p r
 
+pattern Disk     :: Point 2 r :+ p -> r -> Disk p r
 pattern Disk c r = Ball c r
 
 
 type Circle p r = Sphere 2 p r
 
+pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r
 pattern Circle c r = Sphere c r
 
 -- | Given three points, get the disk through the three points. If the three
@@ -151,10 +153,10 @@ instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) wh
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Line p' v) `intersect` (Circle (c :+ _) r) = case discr `compare` 0 of
-                                                LT -> coRec $ NoIntersection
+                                                LT -> coRec NoIntersection
                                                 EQ -> coRec . Touching $ q' (lambda (+))
                                                 GT -> let [l1,l2] = L.sort [lambda (-), lambda (+)]
-                                                      in coRec $ (q' l1, q' l2)
+                                                      in coRec (q' l1, q' l2)
     where
       (Vector2 vx vy)   = v
       -- (px, py) is the vector/point after translating the circle s.t. it is centered at the

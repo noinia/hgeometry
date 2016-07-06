@@ -59,7 +59,6 @@ instance (Show p, Show r) => Show (Polygon t p r) where
 instance (Eq p, Eq r) => Eq (Polygon t p r) where
   (SimplePolygon vs)   == (SimplePolygon vs')    = vs == vs'
   (MultiPolygon vs hs) == (MultiPolygon vs' hs') = vs == vs' && hs == hs'
-  _                    == _                      = False
 
 instance PointFunctor (Polygon t p) where
   pmap f (SimplePolygon vs)   = SimplePolygon (fmap (first f) vs)

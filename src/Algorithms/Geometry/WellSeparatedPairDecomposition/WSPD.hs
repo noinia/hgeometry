@@ -157,8 +157,7 @@ transpose = V.fromList . map GV.fromListUnsafe . L.transpose . map V.toList . F.
 
 -- | Assign the points to their the correct class. The 'Nothing' class is
 -- considered the last class
-distributePoints'              :: (Show r, Show p, Arity d) =>
-                                  Int                      -- ^ number of classes
+distributePoints'              :: Int                      -- ^ number of classes
                                -> V.Vector (Maybe Level)   -- ^ level assignment
                                -> PointSeq d (Idx :+ p) r  -- ^ input points
                                -> V.Vector (PointSeq d (Idx :+ p) r)
