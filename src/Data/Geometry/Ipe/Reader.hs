@@ -79,8 +79,7 @@ readSinglePageFile = fmap f . readIpeFile
 
 -- | Given a Bytestring, try to parse the bytestring into anything that is
 -- IpeReadable, i.e. any of the Ipe elements.
-fromIpeXML   :: (Coordinate r, IpeRead (t r))
-             => B.ByteString -> Either ConversionError (t r)
+fromIpeXML   :: IpeRead (t r) => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = readXML b >>= ipeRead
 
 -- | Reads the data from a Bytestring into a proper Node
