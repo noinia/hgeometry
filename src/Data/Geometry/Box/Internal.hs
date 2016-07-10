@@ -56,7 +56,7 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d p r) = '[ NoIntersection, Box d () r]
 
-instance (Num r, Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d p r) where
+instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d p r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   box `intersect` box' = f . sequence $ FV.zipWith intersect' (extent box) (extent box')

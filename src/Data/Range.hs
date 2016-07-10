@@ -58,6 +58,7 @@ pattern ClosedRange     :: a -> a -> Range a
 pattern ClosedRange l u = Range (Closed l) (Closed u)
 
 -- | A range from l to u, ignoring/forgetting the type of the enpoints
+pattern Range'     :: EndPoint a -> EndPoint a -> Range a
 pattern Range' l u <- (_lower &&& _upper -> (l,u))
 
 

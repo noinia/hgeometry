@@ -98,6 +98,8 @@ p `onBall` b = p `inBall` b == OnBoundary
 
 type Sphere d p r = Boundary (Ball d p r)
 
+
+pattern Sphere     :: Point d r :+ p -> r -> Sphere d p r
 pattern Sphere c r = Boundary (Ball c r)
 
 

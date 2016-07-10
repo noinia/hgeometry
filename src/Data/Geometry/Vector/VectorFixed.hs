@@ -141,7 +141,7 @@ class Prefix i d where
 instance Prefix Z d where
   prefix' _ = V.vector V.empty
 
-instance (V.Arity i, V.Arity d, V.Index i d, Prefix i d) => Prefix (S i) (S d) where
+instance (V.Arity i, V.Arity d, Prefix i d) => Prefix (S i) (S d) where
   prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)
 
 

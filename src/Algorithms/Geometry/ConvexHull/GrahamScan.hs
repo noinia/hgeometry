@@ -37,7 +37,7 @@ lowerHull = hull reverse
 hull               :: (Ord r, Num r)
                    => ([Point 2 r :+ p] -> [Point 2 r :+ p])
                    -> NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
-hull f h@(_ :| []) = h
+hull _ h@(_ :| []) = h
 hull f pts         = hull' .  f
                    . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
@@ -53,11 +53,11 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
     hull'' h  []    = h
     hull'' h (p:ps) = hull'' (cleanMiddle (p:h)) ps
 
-    cleanMiddle [b,a]                           = [b,a]
-    cleanMiddle h@(c:b:a:rest)
-      | rightTurn (a^.core) (b^.core) (c^.core) = h
-      | otherwise                               = cleanMiddle (c:a:rest)
-
+    cleanMiddle h@[_,_]                         = h
+    cleanMiddle h@(z:y:x:rest)
+      | rightTurn (x^.core) (y^.core) (z^.core) = h
+      | otherwise                               = cleanMiddle (z:x:rest)
+    cleanMiddle _                               = error "cleanMiddle: too few points"
 
 rightTurn       :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
 rightTurn a b c = ccw a b c == CW

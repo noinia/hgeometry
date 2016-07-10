@@ -71,7 +71,6 @@ wellSeparatedPairs s = f
 
 
 
-
 -- -- | Given a split tree, generate the well separated pairs such that one set is
 -- -- a singleton.
 -- wellSeparatedPairSingletons   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
@@ -81,7 +80,9 @@ wellSeparatedPairs s = f
 --     split (l,r) = undefined
 --       -- | measure l <= measure r = map (,r) $ F.toList l
 --       -- | otherwise              = map (,l) $ F.toList r
---     t' = undefined
+--     t' = foldUpData (\l nd r -> )
+
+--     t
 
 
 --------------------------------------------------------------------------------

@@ -67,7 +67,7 @@ makeTree g = flip dfs' start . mkAdjacencyLists
 -- | Union find DS
 newtype UF s a = UF { _unUF :: UMV.MVector s (Int,Int) }
 
-new   :: Enum a => Int -> ST s (UF s a)
+new   :: Int -> ST s (UF s a)
 new n = do
           v <- UMV.new n
           forM_ [0..n-1] $ \i ->

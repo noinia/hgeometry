@@ -48,6 +48,17 @@ foldUp                  :: (b -> v -> b -> b) -> (a -> b) -> BinLeafTree v a -> 
 foldUp _ g (Leaf x)     = g x
 foldUp f g (Node l x r) = f (foldUp f g l) x (foldUp f g r)
 
+
+-- | Traverses the tree bottom up, recomputing the assocated values.
+foldUpData     :: (w -> v -> w -> w) -> (a -> w) -> BinLeafTree v a -> BinLeafTree w a
+foldUpData f g = foldUp f' Leaf
+  where
+    f' l v r = Node l (f (access l) v (access r)) r
+
+    access (Leaf x)     = g x
+    access (Node _ v _) = v
+
+
 asBalancedBinLeafTree    :: NonEmpty a -> BinLeafTree Size (Elem a)
 asBalancedBinLeafTree ys = asBLT (length ys') ys'
   where
@@ -84,8 +95,8 @@ instance Monoid a => Monoid (Sized a) where
   mempty = Sized mempty mempty
   (Sized i a) `mappend` (Sized j b) = Sized (i <> j) (a `mappend` b)
 
-instance Semigroup a => Measured Size (Sized a) where
-  measure (Sized i _) = i
+-- instance Semigroup a => Measured Size (Sized a) where
+--   measure (Sized i _) = i
 
 
 --------------------------------------------------------------------------------
