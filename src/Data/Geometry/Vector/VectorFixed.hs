@@ -52,6 +52,9 @@ element' i f v
   | otherwise                                     = pure v
 
 
+fromList :: Arity d => [a] -> Maybe (Vector d a)
+fromList = fmap Vector . V.fromListM
+
 fromListUnsafe :: Arity d => [a] -> Vector d a
 fromListUnsafe = Vector . V.fromList
 

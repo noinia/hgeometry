@@ -225,3 +225,6 @@ boundingBoxList' = boundingBoxList . NE.fromList
 
 instance IsBoxable (Point d r) where
   boundingBox p = Box (ext $ Min p) (ext $ Max p)
+
+instance IsBoxable (Box d p r) where
+  boundingBox (Box m m') = Box (m&extra .~ ()) (m'&extra .~ ())
