@@ -422,16 +422,16 @@ validateAll err fld = bimap T.unlines id . validateAll' err fld
 
 validateAll' :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
                -> Either [err] [Point 2 r]
-validateAll' err field = toEither . foldr (\op res -> f op <> res) (Right' [])
+validateAll' err field = toEither . foldr (\op' res -> f op' <> res) (Right' [])
   where
-    f op = maybe (Left' [err]) (\p -> Right' [p]) $ op ^? field
+    f op' = maybe (Left' [err]) (\p -> Right' [p]) $ op' ^? field
     toEither = either' Left Right
 
 -- This is a bit of a hack
 instance Coordinate r => IpeRead (PolyLine 2 () r) where
-  ipeRead (Element "path" ats ts) = ipeReadText . T.unlines . map unText $ ts
+  ipeRead (Element "path" _ ts) = ipeReadText . T.unlines . map unText $ ts
                                     -- apparently hexpat already splits the text into lines
-  ipeRead _                       = Left "iperead: no polyline."
+  ipeRead _                     = Left "iperead: no polyline."
 
 unText          :: Node t t1 -> t1
 unText (Text t) = t
