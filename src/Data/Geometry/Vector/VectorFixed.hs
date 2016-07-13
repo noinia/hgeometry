@@ -52,11 +52,11 @@ element' i f v
   | otherwise                                     = pure v
 
 
-fromList :: Arity d => [a] -> Maybe (Vector d a)
-fromList = fmap Vector . V.fromListM
+vectorFromList :: Arity d => [a] -> Maybe (Vector d a)
+vectorFromList = fmap Vector . V.fromListM
 
-fromListUnsafe :: Arity d => [a] -> Vector d a
-fromListUnsafe = Vector . V.fromList
+vectorFromListUnsafe :: Arity d => [a] -> Vector d a
+vectorFromListUnsafe = Vector . V.fromList
 
 
 instance (Show r, Arity d) => Show (Vector d r) where

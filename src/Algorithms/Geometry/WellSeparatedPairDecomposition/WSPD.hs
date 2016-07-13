@@ -35,7 +35,7 @@ import Debug.Trace
 
 -- | Construct a split tree
 --
---
+-- running time: $O(n \log n)$
 fairSplitTree     :: (Fractional r, Ord r, Arity d, Index' 0 d,
                       KnownNat d
                         , Show r, Show p
@@ -61,7 +61,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
 
 -- | Given a split tree, generate the Well separated pairs
 --
---
+-- running time: $O(s^d n)$
 wellSeparatedPairs   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
@@ -73,6 +73,7 @@ wellSeparatedPairs s = f
 
 -- -- | Given a split tree, generate the well separated pairs such that one set is
 -- -- a singleton.
+-- -- running time: $O(s^d n\log n)$
 -- wellSeparatedPairSingletons   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
 --                               => r -> SplitTree d p r a -> [(Point d r :+ p, PointSet d p r (Sized a))]
 -- wellSeparatedPairSingletons s t = concatMap split $ wellSeparatedPairs s t'
@@ -154,7 +155,8 @@ distributePoints          :: (Arity d , Show r, Show p)
 distributePoints k levels = transpose . fmap (distributePoints' k levels)
 
 transpose :: Arity d => GV.Vector d (V.Vector a) -> V.Vector (GV.Vector d a)
-transpose = V.fromList . map GV.fromListUnsafe . L.transpose . map V.toList . F.toList
+transpose = V.fromList . map GV.vectorFromListUnsafe . L.transpose
+          . map V.toList . F.toList
 
 -- | Assign the points to their the correct class. The 'Nothing' class is
 -- considered the last class

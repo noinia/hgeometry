@@ -31,7 +31,7 @@ expectedPairwiseDistance k pts = makeExpected k pts pairwiseDist
 
 -- | A $(1+\varepsilon)$-approximation of expectedPairwiseDistance
 --
--- running time: $O((1/eps)^d * n\log n)$, where $n$ is the number of points
+-- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
 approxExpectedPairwiseDistance          :: (Floating r, Ord r
                                            , AlwaysTrueWSPD d, Index' 0 d
                                          , Show r, Show p)
@@ -49,7 +49,7 @@ pairwiseDist pts = sum [ euclideanDist (p^.core) (q^.core) | p <- pts, q <- pts]
 
 -- | $(1+\eps)$-approximation of the sum of the pairwise distances.
 --
--- running time: $O((1/eps)^d * n\log n)$, where $n$ is the number of points
+-- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
 approxPairwiseDistance         :: (Floating r, Ord r, AlwaysTrueWSPD d, Index' 0 d
                                   , Show r, Show p)
                                => r -> [Point d r :+ p] -> r
