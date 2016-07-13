@@ -117,7 +117,7 @@ parseInput :: forall d r. (Arity d, KnownNat d, Read r)
 parseInput = mapMaybe toPoint . drop 1 . C.lines
   where
     trim      = fst . C.spanEnd isSpace . C.dropWhile isSpace
-    fromList' = fromList . take (fromInteger . natVal $ (Proxy :: Proxy d))
+    fromList' = vectorFromList . take (fromInteger . natVal $ (Proxy :: Proxy d))
 
     toPoint bs = let (n:rs) = map trim . C.split ',' $ bs
                      p      = fmap Point . fromList' . map (read . C.unpack) $ rs
