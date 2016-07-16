@@ -17,7 +17,11 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup
 
+import Control.Monad((<=<))
 import Debug.Trace
+import           Algorithms.Geometry.Diameter
+import qualified Data.Foldable as F
+import qualified Data.Set as Set
 
 --------------------------------------------------------------------------------
 
@@ -44,7 +48,7 @@ approxExpectedPairwiseDistance eps k pts =
 
 -- | Sum of the pairwise distances
 pairwiseDist     :: (Floating r, Arity d) => [Point d r :+ p] -> r
-pairwiseDist pts = sum [ euclideanDist (p^.core) (q^.core) | p <- pts, q <- pts]
+pairwiseDist pts = sum [ euclideanDist (p^.core) (q^.core) | p <- pts, q <- pts] / 2
 
 
 -- | $(1+\eps)$-approximation of the sum of the pairwise distances.
@@ -59,11 +63,12 @@ approxPairwiseDistance eps pts =
   where
     t     = withSizes . fairSplitTree . NonEmpty.fromList $ pts
     pairs = wellSeparatedPairs (4 / eps) t
-      -- TODO: Check the 4!!!
 
     size (access -> (Sized (Size i) _))  = fromIntegral i
     repr (access -> (Sized _ (First p))) = p^.core
 
+
+-- wspPairs = fairSplitTree . NonEmpty.fromList
 
 --------------------------------------------------------------------------------
 -- * Helper stuff
@@ -127,5 +132,52 @@ parseInput = mapMaybe toPoint . drop 1 . C.lines
 readInput :: (Arity d, KnownNat d, Read r) => FilePath -> IO [Point d r :+ C.ByteString]
 readInput = fmap parseInput . B.readFile
 
-test :: FilePath -> IO [Point 3 Double :+ C.ByteString]
+test :: FilePath -> IO [Point 2 Double :+ C.ByteString]
 test = readInput
+
+testTree = fmap f .test
+  where
+    f pts = uncovered pts (4 / 0.05) (fairSplitTree $ NonEmpty.fromList pts)
+
+-- compareBoth     :: r -> FilePath -> IO (r, r, Bool)
+compareBoth eps = fmap f . test
+  where
+    f pts = let exact  = pairwiseDist pts
+                approx = approxPairwiseDistance eps pts
+            in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+-- testing stuff
+
+
+-- | Computes all pairs of points that are uncovered by the WSPD with separation s
+uncovered         :: (Fractional r, Ord r, AlwaysTrueWSPD d, Ord p)
+                  => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
+uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
+  where
+    allPairs = Set.fromList [ (p,q) | p <- pts, q <- pts, p < q ]
+    covered  = Set.unions [ mkSet as bs | (as,bs) <- wellSeparatedPairs s t]
+
+mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList bs]
+
+-- | Naively check if a WSP pair is actually well separated with respect to
+-- separation s. i.e. computes the maximum diameter of as and bs, and then
+-- tests by brute force if all pairs (a,b) from different sets are at distance
+-- at least s times the maximum diameter.
+isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
+isWellSeparated s (as,bs) =
+    and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
+  where
+    d = maximum . map (diameterNaive . F.toList) $ [as,bs]
+
+
+nonWellSeparated s = map (\(a,b,c) -> (a,b))
+                   . filter (\(a,b,c) -> not c)
+                   . map (\p@(a,b) -> (a,b,isWellSeparated s p))
+                   . wellSeparatedPairs s . fairSplitTree . NonEmpty.fromList
