@@ -1,12 +1,15 @@
 module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec where
 
+import           Algorithms.Geometry.Diameter
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
 import           Control.Lens
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Seq2 as S2
+import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           Test.Hspec
 import           Util
@@ -27,6 +30,9 @@ reIndexTest = describe "ReIndex tests" $ do
                (ptSeq [ point2 1 1 :+ 100, point2 5 5 :+ 101, origin :+ 1 ])
     output = v2 (ptSeq [ origin :+ 0, point2 1 1 :+ 1, point2 5 5 :+ 2 ])
                 (ptSeq [ point2 1 1 :+ 1, point2 5 5 :+ 2, origin :+ 0 ])
+
+
+
 
 
 
@@ -54,3 +60,28 @@ distributePointsTest = describe "DistributePoints tests" $ do
 --     f = S2.viewL1FromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
 ptSeq = S2.viewL1FromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
+
+
+
+-- coversAll
+
+
+-- | Computes all pairs of points that are uncovered by the WSPD with separation s
+uncovered         :: (Fractional r, Ord r, AlwaysTrueWSPD d, Ord p)
+                  => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
+uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
+  where
+    allPairs = Set.fromList [ (p,q) | p <- pts, q <- pts, p < q ]
+    covered  = Set.unions [ mkSet as bs | (as,bs) <- wellSeparatedPairs s t]
+
+    mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList bs]
+
+-- | Naively check if a WSP pair is actually well separated with respect to
+-- separation s. i.e. computes the maximum diameter of as and bs, and then
+-- tests by brute force if all pairs (a,b) from different sets are at distance
+-- at least s times the maximum diameter.
+isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
+isWellSeparated s (as,bs) =
+    and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
+  where
+    d = maximum . map (diameterNaive . F.toList) $ [as,bs]
