@@ -82,7 +82,6 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 -- False
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
-  -- TODO: Maybe use a specialize pragma for 2D with an implementation using ccw
 
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
