@@ -166,17 +166,19 @@ sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
 
+l = SS.toList
 
 
 handle                           :: (Ord r, Fractional r, Show r, Show p)
                                  => Event p r -> EventQueue p r -> StatusStructure p r
                                  -> [IntersectionPoint p r]
 handle e@(eventPoint -> p) eq ss
-  | traceShow ("Handling, ", e, SS.toList . SS.toTree $ ss) False = undefined
+  | traceShow ("=====================\nHandling, ", e, SS.toList $ ss) False = undefined
 handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
   where
     starts                   = traceShowId $ startSegs e
-    (before,contains',after) = extractContains p ss
+    ttt = extractContains p ss
+    (before,contains',after) = traceShow ("PARTS::::: ",ttt) ttt
     (ends,contains)          = L.partition (endsAt p) contains'
 
 
@@ -185,14 +187,15 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
                  _       -> []
 
     -- new status structure
-    ss' = traceShow ("new status (after): ", SS.toList . SS.toTree $ after) ss''
+    ss' = traceShow ("new status: ", l ss'', "====", l before ++ l newSegs ++ l after) ss''
     ss'' = before `SS.join` newSegs `SS.join` after
 
-    newSegs = traceShow ("new segs: ", SS.toList . SS.toTree $ newSegs') newSegs'
+    newSegs = traceShow ("new segs: ", SS.toList $ newSegs') newSegs'
     newSegs' = toStatusStruct p $ starts ++ contains
 
     -- the new eeventqueue
-    eq' = foldr EQ.insert eq es
+    eq' = foldr EQ.insert eq es'
+    es'  = traceShow ("New events found: ", es) es
 
     -- the new events:
     es | SS.null newSegs = maybeToList $ app (findNewEvent p) sl sr
@@ -252,24 +255,15 @@ findNewEvent p l r = match (l `intersect` r) $
 extractContains      :: (Fractional r, Ord r, Show r, Show p)
                      => Point 2 r -> StatusStructure p r
                      -> (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
-extractContains p ss = (SS.BalBST n before, contains1 ++ contains2, SS.BalBST n after)
+extractContains p ss = (before, mid1 ++ mid2, after)
   where
     n = ordAtNav (p^.yCoord)
+    SS.Split before (mid1,mid2) after = SS.splitExtract pred' sel $ ss { SS.nav = n}
 
-    (before',after') = SS.splitMonotone pred' $ ss { SS.nav = n }
-    pred' s          = SS.goLeft n s (p^.xCoord)
+    pred' s = not $ SS.goLeft n s (p^.xCoord)
+    sel   s = p `onSegment` s
 
-    -- before'' = traceShow ("before' ",SS.toList $ SS.toTree before') before'
+testSs :: StatusStructure () Rational
+testSs = SS.fromList (ordAtNav 5) [ ClosedLineSegment (point2 10 0 :+ ()) (point2 10 10 :+ ()) ]
 
-    (contains1,before) = bimap (map fst') (fromMaybe SS.Empty . listToMaybe . map snd')
-                       . L.span onLine' $ SS.extractSuffix before'
-
-    (contains2,after) = bimap (map fst') (fromMaybe SS.Empty . listToMaybe . map snd')
-                      . L.span onLine' $ SS.extractPrefix after'
-
-
-
-    onLine' (SS.Pair s _) = p `onSegment` s
-
-    fst' (SS.Pair a _) = a
-    snd' (SS.Pair _ b) = b
+test = extractContains (point2 5 5) testSs

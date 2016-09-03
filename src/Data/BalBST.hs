@@ -1,12 +1,13 @@
 {-# LANGUAGE RecordWildCards #-}
 module Data.BalBST where
 
-import Data.Bifunctor
-import Data.Function(on)
-import Prelude hiding (lookup,null)
-import Data.Maybe(isJust,fromJust,mapMaybe)
-
+import           Data.Bifunctor
+import           Data.Function (on)
+import qualified Data.List as L
+import           Data.Maybe
 import qualified Data.Tree as T
+import qualified Data.List.NonEmpty as NonEmpty
+import           Prelude hiding (lookup,null)
 
 data TreeNavigator k a = Nav { goLeft     :: a -> k -> Bool
                              , extractKey :: a -> a -> k
@@ -186,7 +187,9 @@ joinWith Nav{..} tl tr
 
 
 
-data Pair a b = Pair !a b deriving (Show,Eq,Functor,Foldable,Traversable)
+data Pair a b = Pair { fst' :: !a
+                     , snd' :: b
+                     } deriving (Show,Eq,Functor,Foldable,Traversable)
 
 
 extractPrefix                      :: BalBST k a -> [Pair a (Tree k a)]
@@ -208,7 +211,7 @@ extractSuffix (BalBST n@Nav{..} t) = extract t
         rs = map (fmap $ joinWith n l) $ extract r
 
 
-data Split a b = Split a !b a
+data Split a b = Split a !b a deriving (Show,Eq)
 
 -- | Splits the tree at x. Note that if x occurs more often, no guarantees are
 -- given which one is found.
@@ -239,7 +242,24 @@ splitMonotone p (BalBST n@Nav{..} t) = bimap (BalBST n) (BalBST n) $ split' t
       | p (unsafeMin r) = let (l',m) = split' l in (l',joinWith n m r)
       | otherwise       = let (m,r') = split' r in (joinWith n l m, r')
 
+-- |
+collect        :: b -> [Pair a b] -> Pair [a] b
+collect def [] = Pair [] def
+collect _   xs = Pair (map fst' xs) (snd' $ last xs)
 
+-- | Splits at a given monotone predicate p, and then selects everything that
+-- satisfies the predicate sel.
+splitExtract           :: (a -> Bool) -> (a -> Bool) -> BalBST k a
+                       -> Split (BalBST k a) ([a],[a])
+splitExtract p sel bst = Split (BalBST n before) (reverse mid1,mid2) (BalBST n after)
+  where
+    n                = nav bst
+    (before',after') = splitMonotone p bst
+
+    extract def = collect def . L.takeWhile (sel . fst')
+
+    Pair mid1 before = extract (toTree before') $ extractSuffix before'
+    Pair mid2 after  = extract (toTree after')  $ extractPrefix after'
 
 empty   :: TreeNavigator k a -> BalBST k a
 empty n = BalBST n Empty
