@@ -1,18 +1,16 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
-import Data.Geometry.LineSegment
-import Data.Ext
-import Data.Geometry.Point
-import Control.Lens
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
-
-
+import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
+import qualified Algorithms.Geometry.LineSegmentIntersection.Types
+import           Control.Lens
+import           Data.Ext
+import           Data.Geometry.Ipe
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import qualified Data.List.NonEmpty as NonEmpty
 import           Test.Hspec
 import           Util
-import           Data.Geometry.Ipe
-import qualified Data.List.NonEmpty as NonEmpty
-
-
 
 spec :: Spec
 spec = do

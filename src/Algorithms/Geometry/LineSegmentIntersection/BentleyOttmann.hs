@@ -1,30 +1,31 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
 
-import Data.Ord(Down(..), comparing)
-import Data.Function(on)
-import Control.Lens hiding (contains)
-import Data.Semigroup
-import Data.Ext
-import Data.Maybe
-import Data.Geometry.Interval
-import Data.Geometry.LineSegment hiding (Start,End)
-import Data.Geometry.Point
-import Data.Geometry.Line
-import Data.Geometry.Properties
-import Frames.CoRec
-import Data.Vinyl
-import Data.Proxy
-import Data.List.NonEmpty(NonEmpty(..))
-
-import qualified Data.List.NonEmpty as NonEmpty
+import           Algorithms.Geometry.LineSegmentIntersection.Types
+import           Control.Lens hiding (contains)
+import qualified Data.BalBST as SS -- status struct
+import           Data.Ext
+import           Data.Function (on)
+import           Data.Geometry.Interval
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment hiding (Start,End)
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
 import qualified Data.List as L
-import qualified Data.Set as EQ  -- event queue
-import qualified Data.BalBST as SS  -- status struct
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe
+import           Data.Ord (Down(..), comparing)
+import           Data.Proxy
+import           Data.Semigroup
+import qualified Data.Set as EQ -- event queue
+import           Data.Vinyl
+import           Frames.CoRec
 
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
+-- | Type of segment
 data EventType s = Start !(NonEmpty s)| Intersection | End !s deriving (Show)
 
 instance Eq (EventType s) where
@@ -49,12 +50,6 @@ instance Ord r => Ord (Event p r) where
                                         EQ -> s `compare` t
                                         x  -> x
 
-  -- (Event (Point2 a b) s) `compare` (Event (Point2 x y) t) = case b `compare` y of
-  --                                                             GT -> LT
-  --                                                             LT -> GT
-  --                                                             EQ -> (a,s) `compare` (x,t)
-
-
 -- | Decreasing on y, increasing on x
 ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
 ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
@@ -65,38 +60,6 @@ startSegs e = case eventType e of
                 Start ss -> NonEmpty.toList ss
                 _        -> []
 
-
--- -- TODO: we have to group the p's for the start points
--- data GEvent q s = Start        !q !(NonEmpty.NonEmpty s)
---                 | Intersection !q  -- for intersections we find the actual intersecting
---                                    -- segments again anyway
---                 | End          !q !s
---                 deriving Show
-
--- constr (Start _ _)      = 1
--- constr (Intersection _) = 2
--- constr (End _ _)        = 3
-
--- instance Eq q => Eq (GEvent q s) where
---   e == e' = (eventPoint e, constr e) == (eventPoint e', constr e')
-
-
---   -- (Start p _)      == (Start q _)      = p == q
---   -- (Intersection p) == (Intersection q) = p == q
---   -- (End p _)        == (End q _)        = p == q
---   -- _                == _                = False
---   -- -- e == e' = eventPoint e == eventPoint e'
-
--- instance Ord q => Ord (GEvent q s) where
---   e `compare` e' = (eventPoint e, constr e) `compare` (eventPoint e', constr e')
-
-
-
-
---     -- if e == e' then EQ else  eventPoint e `compare` eventPoint e'
-
-
--- type Event p r = GEvent (Point 2 r) (LineSegment 2 p r)
 
 -- | Order at a horizontal line
 ordAtNav   :: (Ord r, Fractional r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
@@ -126,12 +89,6 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
 -- isEnd _         = False
 
 
-
-data IntersectionPoint p r =
-  IntersectionPoint { _intersectionPoint :: Point 2 r
-                    , _endPointOf        :: [LineSegment 2 p r]
-                    , _interiorTo        :: [LineSegment 2 p r]
-                    } deriving (Show,Eq)
 
 
 
