@@ -2,8 +2,7 @@
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
-import qualified Data.Foldable as F
-import           Data.List.NonEmpty (NonEmpty,(..),(<|))
+import           Data.List.NonEmpty (NonEmpty(..),(<|),fromList)
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
@@ -41,9 +40,10 @@ instance Traversable (BinLeafTree v) where
 instance Measured v a => Semigroup (BinLeafTree v a) where
   l <> r = node l r
 
--- | Create a balanced tree with the elements in the leaves
+-- | Create a balanced tree, i.e. a tree of height $O(\log n)$ with the
+-- elements in the leaves.
 --
--- O(n) time.
+-- $O(n)$ time.
 asBalancedBinLeafTree :: NonEmpty a -> BinLeafTree Size (Elem a)
 asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
   where
@@ -53,10 +53,9 @@ asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
     merge ts@(_ :| [])  = ts
     merge (l :| r : []) = node l r :| []
     merge (l :| r : ts) = node l r <| (merge $ fromList ts)
--- -- the implementation below runs in O(n log n) time, as on every level it
--- -- traverses the list passed down.
--- asBalancedBinLeafTree ys = asBLT (length
--- ys') ys' where ys' = toList ys
+-- -- the implementation below produces slightly less high trees, but runs in
+-- -- O(n log n) time, as on every level it traverses the list passed down.
+-- asBalancedBinLeafTree ys = asBLT (length ys') ys' where ys' = toList ys
 
 --     asBLT _ [x] = Leaf (Elem x)
 --     asBLT n xs  = let h       = n `div` 2
