@@ -28,8 +28,10 @@ a few algorithms:
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
 * an $O(n)$ expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an $O(n \log n)$ time algorithm for computing the Delaunay triangulation (using divide and conqueror).
-
+* an $O(n \log n)$ time algorithm for computing the Delaunay triangulation
+(using divide and conqueror).
+* an $O(n \log n)$ time algorithm for computing the Euclidean Minimum Spanning
+Tree (EMST), based on computing the Delaunay Triangulation.
 
 
 A Note on the Ext (:+) data type
@@ -52,9 +54,9 @@ example a color, a size, or whatever).
 
 ```haskell
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CList (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CList (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
-  ```
+  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+```
 
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.
@@ -64,4 +66,24 @@ Reading and Writing Ipe files
 
 Apart from geometric types, HGeometry provides some interface for reading and
 writing Ipe (http://ipe.otfried.org). However, this is all very work in
-progress. Hence, the API is experimental and may change at any time!
+progress. Hence, the API is experimental and may change at any time! Here is an
+example showing reading a set of points from an Ipe file, computing the
+DelaunayTriangulation, and writing the result again to an output file
+
+```haskell
+mainWith                          :: Options -> IO ()
+mainWith (Options inFile outFile) = do
+    ePage <- readSinglePageFile inFile
+    case ePage of
+      Left err                         -> print err
+      Right (page :: IpePage Rational) -> case page^..content.traverse._IpeUse of
+        []         -> putStrLn "No points found"
+        syms@(_:_) -> do
+           let pts  = syms&traverse.core %~ (^.symbolPoint)
+               pts' = NonEmpty.fromList pts
+               dt   = delaunayTriangulation $ pts'
+               out  = [asIpe drawTriangulation dt]
+           writeIpeFile outFile . singlePageFromContent $ out
+```
+
+See the examples directory for more examples.

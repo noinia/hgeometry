@@ -16,9 +16,6 @@ import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
-import           GHC.TypeLits
-import           Linear.Affine(qdA, (.-.), (.+^))
-import           Linear.Vector((^/),(*^),(^+^))
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
@@ -101,6 +98,8 @@ p `onBall` b = p `inBall` b == OnBoundary
 
 type Sphere d p r = Boundary (Ball d p r)
 
+
+pattern Sphere     :: Point d r :+ p -> r -> Sphere d p r
 pattern Sphere c r = Boundary (Ball c r)
 
 
@@ -111,11 +110,13 @@ pattern Sphere c r = Boundary (Ball c r)
 
 type Disk p r = Ball 2 p r
 
+pattern Disk     :: Point 2 r :+ p -> r -> Disk p r
 pattern Disk c r = Ball c r
 
 
 type Circle p r = Sphere 2 p r
 
+pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r
 pattern Circle c r = Sphere c r
 
 -- | Given three points, get the disk through the three points. If the three
@@ -125,7 +126,7 @@ pattern Circle c r = Sphere c r
 -- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
-disk p q r = match ((f p) `intersect` (f q)) $
+disk p q r = match (f p `intersect` f q) $
        (H $ \NoIntersection -> Nothing)
     :& (H $ \c@(Point _)    -> Just $ Ball (ext c) (qdA c p))
     :& (H $ \_              -> Nothing)
@@ -154,10 +155,10 @@ instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) wh
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Line p' v) `intersect` (Circle (c :+ _) r) = case discr `compare` 0 of
-                                                LT -> coRec $ NoIntersection
+                                                LT -> coRec NoIntersection
                                                 EQ -> coRec . Touching $ q' (lambda (+))
                                                 GT -> let [l1,l2] = L.sort [lambda (-), lambda (+)]
-                                                      in coRec $ (q' l1, q' l2)
+                                                      in coRec (q' l1, q' l2)
     where
       (Vector2 vx vy)   = v
       -- (px, py) is the vector/point after translating the circle s.t. it is centered at the

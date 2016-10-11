@@ -7,9 +7,6 @@ module Data.Geometry.Box( module Data.Geometry.Box.Internal
                         , sides, sides'
                         ) where
 
-
-import           Control.Applicative
-import qualified Data.Traversable as Tr
 import           Data.Geometry.Box.Internal
 import           Data.Geometry.LineSegment
 

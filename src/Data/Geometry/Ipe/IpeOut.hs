@@ -1,11 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.IpeOut where
 
-import           Control.Applicative
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe.Attributes
@@ -17,13 +15,9 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import qualified Data.List.NonEmpty as NE
 import           Data.Semigroup
-import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Text(Text)
-import qualified Data.Traversable as Tr
-import           Data.Vinyl
 
 --------------------------------------------------------------------------------
 

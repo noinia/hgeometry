@@ -10,7 +10,6 @@ module Data.UnBounded( Top, topToMaybe
                      , unBoundedToMaybe
                      ) where
 
-import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.Traversable as T
@@ -26,7 +25,10 @@ import qualified Data.Traversable as T
 newtype Top a = GTop { topToMaybe :: Maybe a }
                 deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
+pattern ValT  :: a -> Top a
 pattern ValT x = GTop (Just x)
+
+pattern Top    :: Top a
 pattern Top    = GTop Nothing
 
 instance Ord a => Ord (Top a) where
@@ -49,7 +51,10 @@ instance Show a => Show (Top a) where
 newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
+pattern Bottom :: Bottom a
 pattern Bottom = GBottom Nothing
+
+pattern ValB   :: a -> Bottom a
 pattern ValB x = GBottom (Just x)
 
 instance Show a => Show (Bottom a) where

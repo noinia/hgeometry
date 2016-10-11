@@ -3,24 +3,17 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Vector.VectorFixed where
 
-import           Data.Monoid
-import           Control.Applicative
+
 import           Control.Lens
-import           Data.Foldable
-import           Data.Traversable
-
-import           Data.Vector.Fixed.Boxed
-import           Data.Vector.Fixed.Cont(Z, S, ToPeano)
-
-import           GHC.TypeLits
-
-import           Linear.Affine
-import           Linear.Metric
-import           Linear.Vector
-
+import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as V
-
+import           Data.Vector.Fixed.Boxed
+import           Data.Vector.Fixed.Cont (Z, S, ToPeano)
+import           GHC.TypeLits
+import           Linear.Affine (Affine(..))
+import           Linear.Metric
 import qualified Linear.V3 as L3
+import           Linear.Vector
 
 
 --------------------------------------------------------------------------------
@@ -59,9 +52,16 @@ element' i f v
   | otherwise                                     = pure v
 
 
+vectorFromList :: Arity d => [a] -> Maybe (Vector d a)
+vectorFromList = fmap Vector . V.fromListM
+
+vectorFromListUnsafe :: Arity d => [a] -> Vector d a
+vectorFromListUnsafe = Vector . V.fromList
+
+
 instance (Show r, Arity d) => Show (Vector d r) where
   show (Vector v) = mconcat [ "Vector", show $ V.length v , " "
-                            , show $ toList v
+                            , show $ F.toList v
                             ]
 
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
@@ -144,7 +144,7 @@ class Prefix i d where
 instance Prefix Z d where
   prefix' _ = V.vector V.empty
 
-instance (V.Arity i, V.Arity d, V.Index i d, Prefix i d) => Prefix (S i) (S d) where
+instance (V.Arity i, V.Arity d, Prefix i d) => Prefix (S i) (S d) where
   prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)
 
 

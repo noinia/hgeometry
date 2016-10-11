@@ -7,7 +7,6 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , scalarMultiple
                            ) where
 
-import           Data.Monoid
 import qualified Data.Foldable                    as F
 import           Data.Geometry.Vector.VectorFixed
 import           Data.Geometry.Vector.VectorFixed as GV

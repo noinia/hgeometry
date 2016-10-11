@@ -2,25 +2,21 @@
 {-# Language TemplateHaskell #-}
 module Data.Geometry.Slab where
 
-
-import           Control.Applicative
-import           Control.Lens(makeLenses, (^.),(%~),(.~),(&), Lens', both)
-import           Data.Bitraversable
+import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both)
+import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.Properties
-import           Data.Geometry.Interval
-import           Data.Geometry.Point
 import           Data.Geometry.Box.Internal
-import           Data.Geometry.LineSegment
+import           Data.Geometry.Interval
 import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Range
-import           Data.Semigroup
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
-import           Data.Bifunctor
 
 --------------------------------------------------------------------------------
 

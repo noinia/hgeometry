@@ -1,15 +1,14 @@
 module Data.Geometry.Ipe.FromIpe where
 
-import Control.Applicative
-import qualified Data.Traversable as Tr
-import Data.Ext
-import Data.Geometry.Ipe.Types
-import Data.Geometry.Line
-import Data.Geometry.LineSegment
+import           Control.Lens
+import           Data.Ext
+import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
 import qualified Data.Geometry.PolyLine as PolyLine
-import Data.Geometry.Polygon
-import Control.Lens
+import           Data.Geometry.Polygon
 import qualified Data.Seq2 as S2
+import qualified Data.Traversable as Tr
 
 
 -- | Try to convert a path into a line segment, fails if the path is not a line

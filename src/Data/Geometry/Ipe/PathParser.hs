@@ -1,32 +1,21 @@
-{-# Language FlexibleInstances #-}
 {-# Language OverloadedStrings #-}
 module Data.Geometry.Ipe.PathParser where
 
-import           Numeric
-
-import           Data.Ext(ext)
-import           Control.Applicative
-import           Control.Monad
-
 import           Data.Bifunctor
-import           Data.Monoid(mconcat)
-import           Data.Semigroup
--- import           Data.Validation(AccValidation(..))
-
-import           Data.Char(isSpace)
-import           Data.Ratio
-
-import           Text.Parsec.Error(messageString, errorMessages)
-import           Data.Geometry.Point
+import           Data.Char (isSpace)
+import           Data.Ext (ext)
 import           Data.Geometry.Box
-import           Data.Geometry.Vector
-import           Data.Geometry.Transformation
 import           Data.Geometry.Ipe.ParserPrimitives
-import           Data.Geometry.Ipe.Types(Operation(..))
-import           Data.Text(Text)
+import           Data.Geometry.Ipe.Types (Operation(..))
+import           Data.Geometry.Point
+import           Data.Geometry.Transformation
+import           Data.Geometry.Vector
+import           Data.Ratio
+import           Data.Semigroup
+import           Data.Text (Text)
 import qualified Data.Text as T
-
--- type Matrix d m r = ()
+import           Numeric
+import           Text.Parsec.Error (messageString, errorMessages)
 
 
 -----------------------------------------------------------------------

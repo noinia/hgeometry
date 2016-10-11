@@ -1,8 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE PolyKinds #-}
 module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                  readRawIpeFile
                                , readIpeFile
@@ -26,45 +24,34 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                , ipeReadRec
                                ) where
 
-import           Data.Proxy
-import           Data.Either(rights)
-import           Control.Applicative hiding (Const)
 import           Control.Lens hiding (Const, rmap)
-
+import qualified Data.ByteString as B
+import           Data.Either (rights)
 import           Data.Ext
-import qualified Data.Foldable as F
-import qualified Data.Traversable as Tr
-import           Data.Maybe(fromMaybe, isJust, mapMaybe)
+import           Data.Geometry.Box
+import           Data.Geometry.Ipe.Attributes
+import           Data.Geometry.Ipe.ParserPrimitives (pInteger)
+import           Data.Geometry.Ipe.PathParser
+import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Point
+import           Data.Geometry.PolyLine
+import qualified Data.Geometry.Polygon as Polygon
+import qualified Data.Geometry.Transformation as Trans
 import qualified Data.List as L
+import qualified Data.List.NonEmpty as NE
+import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Monoid
+import           Data.Proxy
+import qualified Data.Seq2 as S2
+import           Data.Singletons
+import qualified Data.Text as T
+import           Data.Text (Text)
+import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-
-import qualified Data.List.NonEmpty as NE
--- import           Data.Validation
-import qualified Data.Seq2     as S2
-
-import           Data.Geometry.Point
-import           Data.Geometry.Box
-import qualified Data.Geometry.Polygon as Polygon
-import           Data.Geometry.PolyLine
-import qualified Data.Geometry.Transformation as Trans
-import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Ipe.Attributes
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.PathParser
-import           Data.Geometry.Ipe.ParserPrimitives(pInteger)
-
-import qualified Data.ByteString as B
-import           Data.Monoid
-import           Data.Singletons
-import           Data.Text(Text)
-
-
 import           Text.XML.Expat.Tree
 
-import qualified Data.Text as T
--- import qualified Data.Map as M
 
 --------------------------------------------------------------------------------
 
@@ -92,8 +79,7 @@ readSinglePageFile = fmap f . readIpeFile
 
 -- | Given a Bytestring, try to parse the bytestring into anything that is
 -- IpeReadable, i.e. any of the Ipe elements.
-fromIpeXML   :: (Coordinate r, IpeRead (t r))
-             => B.ByteString -> Either ConversionError (t r)
+fromIpeXML   :: IpeRead (t r) => B.ByteString -> Either ConversionError (t r)
 fromIpeXML b = readXML b >>= ipeRead
 
 -- | Reads the data from a Bytestring into a proper Node
@@ -436,16 +422,16 @@ validateAll err fld = bimap T.unlines id . validateAll' err fld
 
 validateAll' :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
                -> Either [err] [Point 2 r]
-validateAll' err field = toEither . foldr (\op res -> f op <> res) (Right' [])
+validateAll' err field = toEither . foldr (\op' res -> f op' <> res) (Right' [])
   where
-    f op = maybe (Left' [err]) (\p -> Right' [p]) $ op ^? field
+    f op' = maybe (Left' [err]) (\p -> Right' [p]) $ op' ^? field
     toEither = either' Left Right
 
 -- This is a bit of a hack
 instance Coordinate r => IpeRead (PolyLine 2 () r) where
-  ipeRead (Element "path" ats ts) = ipeReadText . T.unlines . map unText $ ts
+  ipeRead (Element "path" _ ts) = ipeReadText . T.unlines . map unText $ ts
                                     -- apparently hexpat already splits the text into lines
-  ipeRead _                       = Left "iperead: no polyline."
+  ipeRead _                     = Left "iperead: no polyline."
 
 unText          :: Node t t1 -> t1
 unText (Text t) = t
@@ -457,30 +443,5 @@ instance Coordinate r => IpeRead (PathSegment r) where
 testP :: B.ByteString
 testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
 
-
--- testPoly :: Either Text (Path Double)
--- testPoly = fromIpeXML testP
-
--- ipeRead' :: [Element Text Text]
--- ipeRead' = map ipeRead
-
--- instance IpeRead (IpePage gs) where
---   ipeRead (Element "page" ats chs) = Right . IpePage [] [] . fromList' . rights $ map ipeRead chs
---     where
---       fromList' = Group' . foldr (\x r -> (IpeObject x :& RNil) :& r) RNil
---   ipeRead _                        = Left "ipeRead: Not a page"
-
-readPolyLines :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
-readPolyLines (Element "ipe" _ chs) = concatMap readPolyLines' chs
-
-
-readPolyLines' :: Coordinate r => Node Text Text -> [PolyLine 2 () r]
-readPolyLines' (Element "page" _ chs) = rights $ map ipeRead chs
-readPolyLines' _                      = []
-
-polylinesFromIpeFile :: (Coordinate r) => FilePath -> IO [PolyLine 2 () r]
-polylinesFromIpeFile = fmap readPolies . B.readFile
-  where
-    readPolies = either (const []) readPolyLines . parse' defaultParseOptions
 
 --------------------------------------------------------------------------------

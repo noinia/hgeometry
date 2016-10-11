@@ -8,7 +8,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import           Data.Ord(comparing)
+import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
@@ -82,7 +82,6 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 -- False
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
-  -- TODO: Maybe use a specialize pragma for 2D with an implementation using ccw
 
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.

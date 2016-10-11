@@ -5,13 +5,9 @@ module Control.Monad.State.Persistent( PersistentStateT
                                      , runPersistentState
                                      ) where
 
-
-import Control.Applicative
 import Control.Monad.State
 import Control.Monad.Identity(Identity(..))
-
 import Data.List.NonEmpty(NonEmpty(..),(<|),toList)
-
 
 --------------------------------------------------------------------------------
 

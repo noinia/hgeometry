@@ -5,15 +5,11 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Attributes where
 
-import           Control.Applicative hiding (Const)
 import           Control.Lens hiding (rmap, Const)
-import qualified Data.Foldable as F
-import qualified Data.Geometry.Transformation as Transf
 import           Data.Semigroup
 import           Data.Singletons
 import           Data.Singletons.TH
 import           Data.Text(Text)
-import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
@@ -64,7 +60,11 @@ type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
-                          deriving (Show,Read,Eq,Ord)
+
+deriving instance Show (Apply f label) => Show (Attr f label)
+deriving instance Read (Apply f label) => Read (Attr f label)
+deriving instance Eq   (Apply f label) => Eq   (Attr f label)
+deriving instance Ord  (Apply f label) => Ord  (Attr f label)
 
 makeLenses ''Attr
 
@@ -74,7 +74,7 @@ pattern NoAttr = GAttr Nothing
 -- | Give pref. to the *RIGHT*
 instance Monoid (Attr f l) where
   mempty                 = NoAttr
-  _ `mappend` b@(Attr x) = b
+  _ `mappend` b@(Attr _) = b
   a `mappend` _          = a
 
 
@@ -106,7 +106,7 @@ instance Semigroup (Attributes f ats) where
 
 zipRecsWith                       :: (forall a. f a -> g a -> h a)
                                   -> Rec f as -> Rec g as -> Rec h as
-zipRecsWith f RNil      _         = RNil
+zipRecsWith _ RNil      _         = RNil
 zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
 
 attrLens   :: (at ∈ ats) => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
@@ -117,7 +117,7 @@ lookupAttr p = view (attrLens p)
 
 setAttr               :: forall proxy at ats f. (at ∈ ats)
                       => proxy at -> Apply f at -> Attributes f ats -> Attributes f ats
-setAttr p a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
+setAttr _ a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
 
 
 -- | gets and removes the attribute from Attributes

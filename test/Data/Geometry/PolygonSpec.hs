@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 module Data.Geometry.PolygonSpec where
 
 import Data.Traversable(traverse)

@@ -2,12 +2,13 @@
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
-import Control.Applicative
-import Data.Foldable
-import Data.List.NonEmpty(NonEmpty(..),(<|),fromList)
-import Data.Semigroup
-import Data.Traversable
-import Data.Semigroup.Foldable
+import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty,(..),(<|))
+import           Data.Semigroup
+import           Data.Semigroup.Foldable
+import qualified Data.Tree as Tree
+
+--------------------------------------------------------------------------------
 
 data BinLeafTree v a = Leaf a
                      | Node (BinLeafTree v a) v (BinLeafTree v a)
@@ -62,6 +63,21 @@ asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
 --                       (ls,rs) = splitAt h xs
 --                   in node (asBLT h ls) (asBLT (n-h) rs)
 
+-- | Given a function to combine internal nodes into b's and leafs into b's,
+-- traverse the tree bottom up, and combine everything into one b.
+foldUp                  :: (b -> v -> b -> b) -> (a -> b) -> BinLeafTree v a -> b
+foldUp _ g (Leaf x)     = g x
+foldUp f g (Node l x r) = f (foldUp f g l) x (foldUp f g r)
+
+
+-- | Traverses the tree bottom up, recomputing the assocated values.
+foldUpData     :: (w -> v -> w -> w) -> (a -> w) -> BinLeafTree v a -> BinLeafTree w a
+foldUpData f g = foldUp f' Leaf
+  where
+    f' l v r = Node l (f (access l) v (access r)) r
+
+    access (Leaf x)     = g x
+    access (Node _ v _) = v
 
 
 newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord)
@@ -69,8 +85,40 @@ newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord)
 instance Semigroup Size where
   x <> y = x + y
 
+instance Monoid Size where
+  mempty = Size 0
+  mappend = (<>)
+
 newtype Elem a = Elem { _unElem :: a }
                deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
 instance Measured Size (Elem a) where
   measure _ = 1
+
+
+data Sized a = Sized !Size a
+             deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+instance Semigroup a => Semigroup (Sized a) where
+  (Sized i a) <> (Sized j b) = Sized (i <> j) (a <> b)
+
+instance Monoid a => Monoid (Sized a) where
+  mempty = Sized mempty mempty
+  (Sized i a) `mappend` (Sized j b) = Sized (i <> j) (a `mappend` b)
+
+-- instance Semigroup a => Measured Size (Sized a) where
+--   measure (Sized i _) = i
+
+
+--------------------------------------------------------------------------------
+-- * Converting into a Data.Tree
+
+data RoseElem v a = InternalNode v | LeafNode a deriving (Show,Eq,Functor)
+
+toRoseTree              :: BinLeafTree v a -> Tree.Tree (RoseElem v a)
+toRoseTree (Leaf x)     = Tree.Node (LeafNode x) []
+toRoseTree (Node l v r) = Tree.Node (InternalNode v) (map toRoseTree [l,r])
+
+
+drawTree :: (Show v, Show a) => BinLeafTree v a -> String
+drawTree = Tree.drawTree . fmap show . toRoseTree

@@ -10,12 +10,11 @@ module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          , pNotFollowedBy
                                          ) where
 
-import           Control.Applicative hiding (many,(<|>))
+
 import           Text.Parsec(try)
 import           Text.Parsec(ParsecT, Stream)
 import           Text.Parsec.Text
 import           Text.ParserCombinators.Parsec hiding (Parser,try)
-
 import qualified Data.Text as T
 
 
@@ -127,10 +126,10 @@ p <***> q = do
   return $ f x
 
 -- | the variants with missing brackets
-(***>) :: (Functor m, Monad m) => m a -> m b -> m b
+(***>) :: Monad m => m a -> m b -> m b
 p ***> q = (\_ s -> s) <$> p <***> q
 
-(<***) :: (Functor m, Monad m) => m b -> m t -> m b
+(<***) :: Monad m => m b -> m t -> m b
 p <*** q = (\s _ -> s) <$> p <***> q
 
 class Reversable s where

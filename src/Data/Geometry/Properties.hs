@@ -4,7 +4,6 @@
 {-# LANGUAGE DefaultSignatures #-}
 module Data.Geometry.Properties where
 
-import           Control.Applicative
 import           Data.Maybe(isJust)
 import           Data.Proxy
 import           Data.Vinyl.Core

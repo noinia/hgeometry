@@ -1,20 +1,19 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.SubLine where
 
-import           Control.Applicative
+import           Control.Lens
+import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry.Interval
+import           Data.Geometry.Line.Internal
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.Vector
+import           Data.Range
 import qualified Data.Traversable as T
-import Control.Lens
-import Data.Ext
-import Data.Geometry.Interval
-import Data.Geometry.Line.Internal
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Vector
-import Data.Range
-import Data.UnBounded
+import           Data.UnBounded
+import           Data.Vinyl
 import           Frames.CoRec
-import Data.Vinyl
 
 --------------------------------------------------------------------------------
 

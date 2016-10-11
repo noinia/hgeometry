@@ -1,50 +1,41 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Writer where
 
-import           Control.Applicative hiding (Const(..))
-import           Control.Lens((^.),(^..),(.~),(&), to)
+import           Control.Lens ((^.),(^..),(.~),(&), to)
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as C
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
+import           Data.Geometry.Box
+import           Data.Geometry.Ipe.Attributes
+import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Types
 import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.LineSegment
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon(SimplePolygon, outerBoundary)
-import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Point
-import           Data.Geometry.Box
+import           Data.Geometry.PolyLine
+import           Data.Geometry.Polygon (SimplePolygon, outerBoundary)
+import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Vector
-import           Data.Maybe(catMaybes, mapMaybe, fromMaybe)
+import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
+import           Data.Proxy
 import           Data.Ratio
 import           Data.Semigroup
-import           Data.Proxy
+import qualified Data.Seq2 as S2
+import           Data.Singletons
+import qualified Data.Text as T
+import qualified Data.Text as Text
+import           Data.Text (Text)
 import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           Data.Singletons
-import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Attributes
-
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as C
-import           Data.List(nub)
-import qualified Data.Seq2     as S2
-import           Data.Text(Text)
-import qualified Data.Text as Text
-
+import           System.IO (hPutStrLn,stderr)
+import           Text.XML.Expat.Format (format')
 import           Text.XML.Expat.Tree
-import           Text.XML.Expat.Format(format')
-
-import           System.IO(hPutStrLn,stderr)
-
-import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
 

@@ -1,3 +1,9 @@
+{-|
+Module    : Data.Geometry
+Description: Basic Geometry types
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Geometry( module Data.Geometry.Properties
                     , module Data.Geometry.Transformation
                     , module Data.Geometry.Point
@@ -19,5 +25,5 @@ import Data.Geometry.Polygon hiding (fromPoints)
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 import Data.Geometry.Vector
-import Linear.Affine hiding (Point, origin)
+import Linear.Affine hiding (Point, Vector, origin)
 import Linear.Vector

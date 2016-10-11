@@ -18,7 +18,6 @@ module Data.Geometry.LineSegment( LineSegment
 
 import           Data.Ord(comparing)
 import           Control.Arrow((&&&))
-import           Control.Applicative
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Semigroup

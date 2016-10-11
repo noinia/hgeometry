@@ -1,14 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Polygon where
 
-
-import           Control.Applicative
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Semigroup
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
+import           Data.Geometry.Vector
 import           Data.Geometry.Boundary
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -21,7 +20,7 @@ import           Data.Range
 import           Frames.CoRec(asA)
 import qualified Data.CircularSeq as C
 -- import qualified Data.CircularList as C
-import           Linear.Vector(Additive(..), (^*), (^/))
+
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -60,7 +59,6 @@ instance (Show p, Show r) => Show (Polygon t p r) where
 instance (Eq p, Eq r) => Eq (Polygon t p r) where
   (SimplePolygon vs)   == (SimplePolygon vs')    = vs == vs'
   (MultiPolygon vs hs) == (MultiPolygon vs' hs') = vs == vs' && hs == hs'
-  _                    == _                      = False
 
 instance PointFunctor (Polygon t p) where
   pmap f (SimplePolygon vs)   = SimplePolygon (fmap (first f) vs)
@@ -69,6 +67,8 @@ instance PointFunctor (Polygon t p) where
 instance Num r => IsTransformable (Polygon t p r) where
   transformBy = transformPointFunctor
 
+instance IsBoxable (Polygon t p r) where
+  boundingBox = boundingBoxList' . toListOf (outerBoundary.traverse.core)
 
 -- * Functions on Polygons
 
@@ -302,3 +302,20 @@ toClockwiseOrder p
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
 asSimplePolygon poly@(SimplePolygon _) = poly
 asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
+
+
+-- | Comparison that compares which point is 'larger' in the direction given by
+-- the vector u.
+cmpExtreme       :: (Num r, Ord r)
+                 => Vector 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
+
+
+-- | Finds the extreme points, minimum and maximum, in a given direction
+--
+-- running time: $O(n)$
+extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
+                   -> (Point 2 r :+ p, Point 2 r :+ p)
+extremesLinear u p = let vs = p^.outerBoundary
+                         f  = cmpExtreme u
+                     in (F.minimumBy f vs, F.maximumBy f vs)

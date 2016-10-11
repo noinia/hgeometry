@@ -3,19 +3,15 @@
 module Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction where
 
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
-
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ball
 import qualified Data.List as L
 import           Data.List.NonEmpty
-import           Data.Maybe(fromMaybe)
-import           Data.Monoid
-
+import           Data.Maybe (fromMaybe)
 import           System.Random
-import           System.Random.Shuffle(shuffle)
+import           System.Random.Shuffle (shuffle)
 
 
 
@@ -29,7 +25,7 @@ smallestEnclosingDisk           :: (Ord r, Fractional r, RandomGen g)
 
 smallestEnclosingDisk g pts@(_:_:_) = let (p:q:pts') = shuffle g pts
                                       in smallestEnclosingDisk' p q pts'
-smallestEnclosingDisk g _           = error "smallestEnclosingDisk: Too few points"
+smallestEnclosingDisk _ _           = error "smallestEnclosingDisk: Too few points"
 
 -- | Smallest enclosing disk.
 smallestEnclosingDisk'     :: (Ord r, Fractional r)
@@ -50,10 +46,10 @@ smallestEnclosingDiskWithPoint              :: (Ord r, Fractional r)
                                             -> DiskResult p r
 smallestEnclosingDiskWithPoint p (a :| pts) = foldr addPoint (initial p a) $ L.tails pts
   where
-    addPoint []      br   = br
-    addPoint (q:pts) br@(DiskResult d _)
+    addPoint []       br   = br
+    addPoint (q:pts') br@(DiskResult d _)
       | (q^.core) `inClosedBall` d = br
-      | otherwise                  = smallestEnclosingDiskWithPoints p q (a:pts)
+      | otherwise                  = smallestEnclosingDiskWithPoints p q (a:pts')
 
 
 
