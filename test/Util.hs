@@ -12,3 +12,13 @@ byStrokeColour = map (map fst) . L.groupBy ((==) `on` snd) . L.sortOn snd
                . map (\x -> (x,lookup' x))
   where
     lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats
+
+-- | Computes all elements on which the two lists differ
+difference :: Eq a => [a] -> [a] -> [a]
+difference xs ys = (xs L.\\ ys) ++ (ys L.\\ xs)
+
+-- differenceBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+
+
+diffBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+diffBy p xs ys = foldr (L.deleteBy p) ys xs

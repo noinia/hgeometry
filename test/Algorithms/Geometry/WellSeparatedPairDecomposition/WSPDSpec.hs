@@ -61,13 +61,14 @@ distributePointsTest = describe "DistributePoints tests" $ do
 
 ptSeq = S2.viewL1FromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
-
-
 -- coversAll
+
+points1 :: NonEmpty.NonEmpty (Point 2 Double :+ ())
+points1 = ext <$> NonEmpty.fromList [point2 0 0, point2 1 1, point2 2 100, point2 3 101]
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Fractional r, Ord r, AlwaysTrueWSPD d, Ord p)
+uncovered         :: (Floating r, Ord r, AlwaysTrueWSPD d, Ord p)
                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
 uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
   where
@@ -82,6 +83,10 @@ uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
 -- at least s times the maximum diameter.
 isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
 isWellSeparated s (as,bs) =
-    and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
+    and [ euclideanDist (a^.core) (b^.core) >= s*r | a <- F.toList as, b <- F.toList bs ]
   where
-    d = maximum . map (diameterNaive . F.toList) $ [as,bs]
+    r = (/2) . maximum . map (diameterNaive . F.toList) $ [as,bs]
+
+
+
+allCoveredTest = describe

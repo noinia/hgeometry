@@ -95,6 +95,11 @@ library
 
                     Algorithms.Geometry.Diameter
 
+
+                    Algorithms.Geometry.LineSegmentIntersection.Naive
+                    Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+                    Algorithms.Geometry.LineSegmentIntersection.Types
+
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
 
@@ -125,6 +130,7 @@ library
                     Data.Permutation
                     Data.PlanarGraph
                     Data.PlaneGraph
+                    Data.BalBST
 
 
                     System.Random.Shuffle
@@ -288,12 +294,14 @@ test-suite hspec
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
                  Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec
+                 Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
 
                  Util
 
 
   build-depends:        base
                       , hspec >= 2.1
+                      , QuickCheck >= 2.8
                       , hgeometry
                       , Frames
                       , lens

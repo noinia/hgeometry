@@ -2,15 +2,21 @@ module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
-import qualified Algorithms.Geometry.LineSegmentIntersection.Types
+import Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
+import           Data.Geometry.Interval
 import           Data.Geometry.Point
+import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Test.Hspec
 import           Util
+import qualified Data.Set as Set
+import qualified Data.Map as Map
+
+
 
 spec :: Spec
 spec = do
@@ -45,8 +51,47 @@ data TestCase r = TestCase { _segments :: [LineSegment 2 () r]
 
 toSpec                 :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
 toSpec (TestCase segs) = describe ("testing segments ") $ do
+                            samePointsAsNaive segs
                             sameAsNaive segs
 
 
-sameAsNaive segs = it "fails " $ do
-  Sweep.intersections segs `shouldBe` []
+-- newtype S p r = S (IntersectionPoint p r)
+
+-- instance (Eq p, Eq r) => Eq (S p r) where
+--   (S p) == (S q) = diffBy samePoint (p^.) ys
+
+samePoint ::  (Eq p, Eq r) => IntersectionPoint p r -> IntersectionPoint p r -> Bool
+samePoint (IntersectionPoint p es is) (IntersectionPoint q xs ys) =
+  p == q && (L.null $ xs L.\\ ys) && (L.null $ ys L.\\ xs)
+
+
+
+-- sameAsNaive      :: (Fractional r, Ord r, Eq p
+--                     , Show p, Show r
+--                     ) => [LineSegment 2 p r] -> Spec
+-- sameAsNaive segs = it "Same as Naive " $ do
+--   -- sameIntersections
+--   (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)
+--   -- `shouldBe` True
+
+instance (Ord p, Ord r) => Ord (LineSegment 2 p r) where
+  s `compare` t = (s^.start,s^.end) `compare` (s^.start,s^.end)
+
+
+sameAsNaive      :: (Fractional r, Ord r, Ord p
+                    , Show p, Show r
+                    ) => [LineSegment 2 p r] -> Spec
+sameAsNaive segs = it "Same as Naive " $ do
+    (f $ Sweep.intersections segs) `shouldBe` (f $ Naive.intersections segs)
+  where
+    f = Map.fromList . map (\p -> (p^.intersectionPoint, ( Set.fromList $ p^.endPointOf
+                                                         , Set.fromList $ p^.interiorTo
+                                                         )))
+
+samePointsAsNaive segs = it "Same points as Naive" $ do
+  (f $ Sweep.intersections segs) `shouldBe` (f $ Naive.intersections segs)
+   where
+     f = Set.fromList . map (^.intersectionPoint)
+
+
+  -- `shouldBe` True
