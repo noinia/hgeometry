@@ -147,6 +147,9 @@ compareBoth eps = fmap f . test
             in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
 
 
+compareBoth1 eps pts = let exact  = pairwiseDist pts
+                           approx = approxPairwiseDistance eps pts
+                       in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
 
 
 
@@ -157,7 +160,7 @@ compareBoth eps = fmap f . test
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Fractional r, Ord r, AlwaysTrueWSPD d, Ord p)
+uncovered         :: (Floating r, Ord r, AlwaysTrueWSPD d, Ord p)
                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
 uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
   where
@@ -174,10 +177,14 @@ isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a ->
 isWellSeparated s (as,bs) =
     and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
   where
-    d = maximum . map (diameterNaive . F.toList) $ [as,bs]
+    d = (/2) . maximum . map (diameterNaive . F.toList) $ [as,bs]
 
 
 nonWellSeparated s = map (\(a,b,c) -> (a,b))
                    . filter (\(a,b,c) -> not c)
                    . map (\p@(a,b) -> (a,b,isWellSeparated s p))
                    . wellSeparatedPairs s . fairSplitTree . NonEmpty.fromList
+
+
+points1 :: [Point 2 Double :+ ()]
+points1 = ext <$> [point2 0 0, point2 1 1, point2 2 10, point2 3 11, point2 5 5, point2 10 0]

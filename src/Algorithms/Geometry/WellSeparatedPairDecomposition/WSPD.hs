@@ -62,7 +62,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
 -- | Given a split tree, generate the Well separated pairs
 --
 -- running time: $O(s^d n)$
-wellSeparatedPairs   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
+wellSeparatedPairs   :: (Floating r, Ord r, AlwaysTrueWSPD d)
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
   where
@@ -369,33 +369,36 @@ extends = GV.imap (\i pts@(l S2.:< _) ->
 type AlwaysTrueWSPD d = ( Arity d, KnownNat d
                         , AlwaysTruePFT d, AlwaysTrueTransformation d)
 
-findPairs                     :: (Fractional r, Ord r, AlwaysTrueWSPD d)
+findPairs                     :: (Floating r, Ord r, AlwaysTrueWSPD d)
                               => r -> SplitTree d p r a -> SplitTree d p r a
                               -> [WSP d p r a]
 findPairs s l r
-  | areWellSeparated s l r    = [(l,r)]
+  | areWellSeparated' s l r   = [(l,r)]
   | maxWidth l <=  maxWidth r = concatMap (findPairs s l) $ children' r
   | otherwise                 = concatMap (findPairs s r) $ children' l
 
 
 -- | Test if the two sets are well separated with param s
-areWellSeparated                               :: ( AlwaysTrueWSPD d
-                                                  , Fractional r, Ord r)
-                                               => r -- ^ separation factor
-                                               -> SplitTree d p r a
-                                               -> SplitTree d p r a -> Bool
-areWellSeparated _ (Leaf _)      (Leaf _)      = True
-areWellSeparated s (Leaf p)      (Node _ nd _) = pointBox s (p^.core) (nd^.bBox)
-areWellSeparated s (Node _ nd _) (Leaf p)      = pointBox s (p^.core) (nd^.bBox)
-areWellSeparated s (Node _ ld _) (Node _ rd _) = boxBox   s (ld^.bBox) (rd^.bBox)
+areWellSeparated                     :: ( AlwaysTrueWSPD d, Fractional r, Ord r)
+                                     => r -- ^ separation factor
+                                     -> SplitTree d p r a
+                                     -> SplitTree d p r a -> Bool
+areWellSeparated _ (Leaf _) (Leaf _) = True
+areWellSeparated s l        r        = boxBox s (bbOf l)   (bbOf r)
 
--- | Test if the point and the box are far enough appart
-pointBox       :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
-               => r -> Point d r -> Box d p r -> Bool
-pointBox s p b = not $ p `inBox` b'
-  where
-    v  = (centerPoint b)^.vector
-    b' = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
+
+-- areWellSeparated s (Leaf p)      (Node _ nd _) = pointBox s (p^.core) (nd^.bBox)
+-- areWellSeparated s (Node _ nd _) (Leaf p)      = pointBox s (p^.core) (nd^.bBox)
+-- areWellSeparated s (Node _ ld _) (Node _ rd _) = boxBox   s (ld^.bBox) (rd^.bBox)
+
+
+-- -- | Test if the point and the box are far enough appart
+-- pointBox       :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
+--                => r -> Point d r -> Box d p r -> Bool
+-- pointBox s p b = not $ p `inBox` b'
+--   where
+--     v  = (centerPoint b)^.vector
+--     b' = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
 
 -- | Test if the two boxes are sufficiently far appart
 boxBox         :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
@@ -406,6 +409,31 @@ boxBox s lb rb = boxBox' lb rb && boxBox' rb lb
       where
         v    = (centerPoint b)^.vector
         bOut = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
+
+--------------------------------------------------------------------------------
+-- * Alternative def if wellSeparated that uses fractional
+
+
+areWellSeparated'                     :: (Floating r, Ord r, Arity d)
+                                      => r
+                                      -> SplitTree d p r a
+                                      -> SplitTree d p r a
+                                      -> Bool
+areWellSeparated' _ (Leaf _) (Leaf _) = True
+areWellSeparated' s l        r        = boxBox1 s (bbOf l) (bbOf r)
+
+-- (Leaf p)      (Node _ nd _) = pointBox' s (p^.core) (nd^.bBox)
+-- areWellSeparated' s (Node _ nd _) (Leaf p)      = pointBox' s (p^.core) (nd^.bBox)
+-- areWellSeparated' s (Node _ ld _) (Node _ rd _) = boxBox'   s (ld^.bBox) (rd^.bBox)
+
+boxBox1         :: (Floating r, Ord r, Arity d) => r -> Box d p r -> Box d p r -> Bool
+boxBox1 s lb rb = euclideanDist (centerPoint lb) (centerPoint rb) >= (s+1)*d
+  where
+    diam b = euclideanDist (b^.minP.core.to getMin) (b^.maxP.core.to getMax)
+    d      = max (diam lb) (diam rb)
+
+
+
 
 --------------------------------------------------------------------------------
 -- * Helper stuff

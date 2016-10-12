@@ -7,7 +7,7 @@ module Data.Range( EndPoint(..)
                  , lower, upper
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper, midPoint
-                 , isValid
+                 , isValid, covers
 
                  , shiftLeft, shiftRight
                  ) where
@@ -15,6 +15,7 @@ module Data.Range( EndPoint(..)
 import           Control.Arrow((&&&))
 import           Control.Lens
 import           Data.Geometry.Properties
+import           Frames.CoRec
 
 --------------------------------------------------------------------------------
 
@@ -58,9 +59,8 @@ pattern ClosedRange     :: a -> a -> Range a
 pattern ClosedRange l u = Range (Closed l) (Closed u)
 
 -- | A range from l to u, ignoring/forgetting the type of the enpoints
-pattern Range'     :: EndPoint a -> EndPoint a -> Range a
-pattern Range' l u <- (_lower &&& _upper -> (l,u))
-
+pattern Range'     :: a -> a -> Range a
+pattern Range' l u <- ((\r -> (r^.lower.unEndPoint,r^.upper.unEndPoint) -> (l,u)))
 
 
 prettyShow             :: Show a => Range a -> String
@@ -134,6 +134,10 @@ clipLower l r = let r' = clipLower' l r in if isValid r' then Just r' else Nothi
 -- either open, ), or closed, ],
 clipUpper     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
 clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothing
+
+-- | Wether or not the first range completely covers the second one
+covers       :: (Ord a) => Range a -> Range a -> Bool
+a `covers` b = maybe False (== b) . asA (Identity a) $ a `intersect` b
 
 
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is

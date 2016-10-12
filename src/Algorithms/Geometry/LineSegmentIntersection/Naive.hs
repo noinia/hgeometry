@@ -1,5 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
+module Algorithms.Geometry.LineSegmentIntersection.Naive where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens

@@ -55,11 +55,11 @@ ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
 ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 
 
+-- | Get the segments that start here
 startSegs   :: Event p r -> [LineSegment 2 p r]
 startSegs e = case eventType e of
                 Start ss -> NonEmpty.toList ss
                 _        -> []
-
 
 -- | Order at a horizontal line
 ordAtNav   :: (Ord r, Fractional r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
@@ -70,26 +70,6 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
       :& (H $ \p              -> p^.xCoord)
       :& (H $ \s              -> rightEndpoint s)
       :& RNil
-
-    --   let Just p = asA (Proxy :: Proxy (Point 2 r)) $
-    --       in p^.xCoord
-    -- -- FIXME: this fails for horizontal segments
-
--- eventPoint             :: GEvent q s -> q
--- eventPoint (Start p _) = p
--- eventPoint (Intersection p) = p
--- eventPoint (End p _) = p
-
-
--- startSegs              :: Event p r -> [LineSegment 2 p r]
--- startSegs (Start _ ss) = NonEmpty.toList ss
--- startSegs _            = []
-
--- isEnd (End _ _) = True
--- isEnd _         = False
-
-
-
 
 
 intersections    :: (Ord r, Fractional r, Show r, Show p)

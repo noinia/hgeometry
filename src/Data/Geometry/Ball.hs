@@ -64,7 +64,7 @@ p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
 
 -- | Test if a point lies strictly inside a ball
 --
--- >>> (point2 0.5 0) `insideBall` unitBall
+-- >>> (point2 0.5 0.0) `insideBall` unitBall
 -- True
 -- >>> (point2 1 0) `insideBall` unitBall
 -- False
