@@ -42,15 +42,19 @@ flag examples
 library
   ghc-options: -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
-  exposed-modules:  Data.Geometry
+  exposed-modules:
+                    -- * Generic Geometry
+                    Data.Geometry
                     Data.Geometry.Properties
-                    Data.Geometry.Vector
-                    -- Data.Geometry.Vector.Vinyl
                     Data.Geometry.Transformation
-                    Data.Geometry.Vector.VectorFixed
-                    Data.Geometry.Interval
                     Data.Geometry.Boundary
+                    Data.Geometry.Duality
 
+                    -- * Basic Geometry Types
+                    Data.Geometry.Vector
+                    Data.Geometry.Vector.VectorFixed
+                    -- Data.Geometry.Vector.Vinyl
+                    Data.Geometry.Interval
                     Data.Geometry.Point
                     Data.Geometry.Line
                     Data.Geometry.Line.Internal
@@ -58,10 +62,7 @@ library
                     Data.Geometry.SubLine
                     Data.Geometry.HalfLine
                     Data.Geometry.PolyLine
-
                     Data.Geometry.Triangle
-
-
                     -- Data.Geometry.Plane
                     Data.Geometry.Slab
                     Data.Geometry.Box
@@ -70,10 +71,14 @@ library
                     Data.Geometry.Polygon
                     Data.Geometry.Polygon.Convex
 
-                    Data.Geometry.Duality
+                    -- * Geometric Data Structures
+                    Data.Geometry.IntervalTree
+                    Data.Geometry.SegmentTree
 
+                    -- * Algorithms
                     Algorithms.Util
 
+                    -- * Geometric Algorithms
                     Algorithms.Geometry.ConvexHull.GrahamScan
                     Algorithms.Geometry.ConvexHull.Types
                     Algorithms.Geometry.ConvexHull.DivideAndConqueror
@@ -95,19 +100,15 @@ library
 
                     Algorithms.Geometry.Diameter
 
-
                     Algorithms.Geometry.LineSegmentIntersection.Naive
                     Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
                     Algorithms.Geometry.LineSegmentIntersection.Types
 
+                    -- * Graph Algorithms
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
 
-
-                    Data.UnBounded
-                    Data.Range
-
-
+                    -- * Ipe Types
                     Data.Geometry.Ipe
                     Data.Geometry.Ipe.Literal
                     Data.Geometry.Ipe.Attributes
@@ -118,21 +119,23 @@ library
                     Data.Geometry.Ipe.IpeOut
                     Data.Geometry.Ipe.FromIpe
 
-
-
+                    -- * General Data Types
+                    Data.UnBounded
+                    Data.Range
                     Data.Ext
                     Data.Seq2
                     Data.CircularSeq
                     Data.Sequence.Util
                     Data.BinaryTree
                     Data.CircularList.Util
+                    Data.BalBST
 
+                    -- * Planar Graphs
                     Data.Permutation
                     Data.PlanarGraph
                     Data.PlaneGraph
-                    Data.BalBST
 
-
+                    -- * Other
                     System.Random.Shuffle
                     Control.Monad.State.Persistent
 

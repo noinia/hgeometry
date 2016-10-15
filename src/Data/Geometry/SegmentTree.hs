@@ -11,6 +11,7 @@ import Data.BinaryTree
 import Data.Range
 import Data.Geometry.Interval
 import Data.Geometry.Properties
+import Data.Geometry.IntervalTree(IntervalLike(..))
 
 import Debug.Trace
 
@@ -38,6 +39,8 @@ makeLenses ''SegmentTree
 
 
 -- | Given a sorted list of endpoints
+--
+-- $O(n)$
 createTree       :: NonEmpty r -> v -> SegmentTree v r
 createTree pts v = SegmentTree . foldUpData f g . fmap _unElem
                  . asBalancedBinLeafTree $ ranges
@@ -53,11 +56,13 @@ createTree pts v = SegmentTree . foldUpData f g . fmap _unElem
 
 
 
-
+--
 search   :: (Ord r, Monoid v) => r -> SegmentTree v r -> v
 search x = mconcat . stab x
 
 -- | Returns the associated values of the nodes on the search path to x
+--
+-- $O(\log n)$
 stab                   :: Ord r => r -> SegmentTree v r -> [v]
 stab x (SegmentTree t) = stabRoot t
   where
@@ -80,11 +85,6 @@ class Measured v i => Assoc v i where
   insertAssoc :: i -> v -> v
   deleteAssoc :: i -> v -> v
 
-class IntervalLike i where
-  toRange :: i -> Range (NumType i)
-
-instance IntervalLike (Interval p r) where
-  toRange = fmap (^.core) . _unInterval
 
 
 
@@ -191,7 +191,7 @@ fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType
                    -> NonEmpty (Interval p r) -> SegmentTree v r
 fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
   where
-    endPoints i = [i^.start.core,i^.end.core]
+    endPoints i@(toRange -> Range' a b) = [a,b]
     pts = NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
 
 

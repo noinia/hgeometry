@@ -49,8 +49,9 @@ data Range a = Range { _lower :: EndPoint a
                      , _upper :: EndPoint a
                      }
                deriving (Show,Read,Eq,Functor,Foldable,Traversable)
-
 makeLenses ''Range
+
+type instance NumType (Range a) = a
 
 pattern OpenRange       :: a -> a -> Range a
 pattern OpenRange   l u = Range (Open l)   (Open u)

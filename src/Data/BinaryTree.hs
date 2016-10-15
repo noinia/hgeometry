@@ -2,10 +2,12 @@
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
-import           Data.List.NonEmpty (NonEmpty(..),(<|),fromList)
+import           Data.List.NonEmpty (NonEmpty(..),(<|))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
+import qualified Data.Vector as V
 
 --------------------------------------------------------------------------------
 
@@ -52,7 +54,7 @@ asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
 
     merge ts@(_ :| [])  = ts
     merge (l :| r : []) = node l r :| []
-    merge (l :| r : ts) = node l r <| (merge $ fromList ts)
+    merge (l :| r : ts) = node l r <| (merge $ NonEmpty.fromList ts)
 -- -- the implementation below produces slightly less high trees, but runs in
 -- -- O(n log n) time, as on every level it traverses the list passed down.
 -- asBalancedBinLeafTree ys = asBLT (length ys') ys' where ys' = toList ys
@@ -121,3 +123,26 @@ toRoseTree (Node l v r) = Tree.Node (InternalNode v) (map toRoseTree [l,r])
 
 drawTree :: (Show v, Show a) => BinLeafTree v a -> String
 drawTree = Tree.drawTree . fmap show . toRoseTree
+
+
+--------------------------------------------------------------------------------
+-- * Internal Node Tree
+
+
+data BinaryTree a = Nil
+                  | Internal (BinaryTree a) a (BinaryTree a)
+                  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+
+-- | Create a balanced binary tree
+--
+-- $O(n)$
+asBalancedBinTree :: [a] -> BinaryTree a
+asBalancedBinTree = mkTree . V.fromList
+  where
+    mkTree v = let n = V.length v
+                   h = n `div` 2
+                   x = v V.! h
+               in if n == 0 then Nil
+                            else Internal (mkTree $ V.slice 0 h v) x
+                                          (mkTree $ V.slice (h+1) (n - h -1) v)
