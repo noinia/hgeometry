@@ -4,7 +4,7 @@ module Data.Geometry.IntervalTree( NodeData(..)
                                  , IntervalTree(..), unIntervalTree
                                  , IntervalLike(..)
                                  , createTree, fromIntervals
-                                 , insert
+                                 , insert, delete
                                  , stab
                                  ) where
 
@@ -76,6 +76,25 @@ insert i (IntervalTree t) = IntervalTree $ insert' t
 
     insert'' (NodeData m l r) = NodeData m (M.insertWith (++) a [i] l)
                                            (M.insertWith (++) b [i] r)
+
+
+-- | Delete an interval from the Tree
+--
+-- $O(\log n)$ (under some general position assumption)
+delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i)
+          => i -> IntervalTree i r -> IntervalTree i r
+delete i (IntervalTree t) = IntervalTree $ delete' t
+  where
+    ri@(Range' a b) = toRange i
+
+    delete' Nil = Nil
+    delete' (Internal l nd@(_splitPoint -> m) r)
+      | m `inRange` ri = Internal l (delete'' nd) r
+      | b <= m         = Internal (delete' l) nd r
+      | otherwise      = Internal l nd (delete' r)
+
+    delete'' (NodeData m l r) = NodeData m (M.update f a l) (M.update f b r)
+    f is = let is' = List.delete i is in if null is' then Nothing else Just is'
 
 
 

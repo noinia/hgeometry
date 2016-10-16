@@ -1,5 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.Geometry.SegmentTree where
+module Data.Geometry.SegmentTree( NodeData(..), splitPoint, range, assoc
+                                , LeafData(..), atomicRange, leafAssoc
+
+                                , SegmentTree(..), unSegmentTree
+                                , Assoc(..)
+
+                                , createTree, fromIntervals
+                                , insert, delete
+
+                                , search, stab
+
+                                , I(..), fromIntervals'
+
+                                , Count(..)
+                                )
+
+       where
 
 import Data.Semigroup
 import Control.Lens
@@ -17,13 +33,14 @@ import Debug.Trace
 
 --------------------------------------------------------------------------------
 
-
+-- | Internal nodes store a split point, the range, and an associated data structure
 data NodeData v r = NodeData { _splitPoint :: r
                              , _range      :: Range r
                              , _assoc      :: v
                              } deriving (Show,Eq,Functor)
 makeLenses ''NodeData
 
+-- | Leaf nodes store an atomic range, and an associated data structure
 data LeafData v r = LeafData  { _atomicRange :: Range r
                               , _leafAssoc   :: v
                               } deriving (Show,Eq,Functor)
@@ -33,14 +50,14 @@ makeLenses ''LeafData
 
 -- | Segemnet tree on a Fixed set of endpoints
 newtype SegmentTree v r =
-  SegmentTree { _unTee :: BinLeafTree (NodeData v r) (LeafData v r) }
-                          deriving (Show,Eq)
+  SegmentTree { _unSegmentTree :: BinLeafTree (NodeData v r) (LeafData v r) }
+    deriving (Show,Eq)
 makeLenses ''SegmentTree
 
 
--- | Given a sorted list of endpoints
+-- | Given a sorted list of endpoints, construct a segment tree
 --
--- $O(n)$
+-- $O(n)$ time
 createTree       :: NonEmpty r -> v -> SegmentTree v r
 createTree pts v = SegmentTree . foldUpData f g . fmap _unElem
                  . asBalancedBinLeafTree $ ranges
@@ -54,9 +71,24 @@ createTree pts v = SegmentTree . foldUpData f g . fmap _unElem
     ranges = NonEmpty.fromList $ zipWith (\a b -> LeafData (ClosedRange a b) v)
                 (NonEmpty.toList pts) (NonEmpty.tail pts)
 
-
-
+-- | Build a SegmentTree
 --
+-- $O(n \log n)$
+fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType i ~ r)
+                   => (Interval p r -> i)
+                   -> NonEmpty (Interval p r) -> SegmentTree v r
+fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
+  where
+    endPoints i@(toRange -> Range' a b) = [a,b]
+    pts = NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
+
+
+--------------------------------------------------------------------------------
+-- * Searching
+
+-- | Search for all intervals intersecting x
+--
+-- $O(\log n + k)$ where k is the output size
 search   :: (Ord r, Monoid v) => r -> SegmentTree v r -> v
 search x = mconcat . stab x
 
@@ -81,11 +113,13 @@ stab x (SegmentTree t) = stabRoot t
                                       | otherwise      = v : stab' r
 
 
+--------------------------------------------------------------------------------
+-- * Inserting intervals
+
+-- | Class for associcated data structures
 class Measured v i => Assoc v i where
   insertAssoc :: i -> v -> v
   deleteAssoc :: i -> v -> v
-
-
 
 
 -- | Pre: the interval should have one of the endpoints on which the tree is built.
@@ -110,8 +144,8 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
       -- | traceShow ("L:" :: String,coversParent,nd) False = undefined
       | a <= m    = let cp  = ri `covers` rr
                     in Node (insertL cp l) (newND coversParent cp nd) (insert'' cp r)
-      | otherwise = let cp  = ri `covers` rr
-                    in Node l (newND coversParent cp nd) (insertL cp r)
+      | otherwise = Node l nd (insertL False r)
+                    -- in this case the interval does not cover me
 
     -- insert in the current node
     insert'' coversParent (Leaf r) = Leaf $ newLD coversParent r
@@ -124,8 +158,7 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
       -- | traceShow ("R:" :: String,nd) False = undefined
       | m <= b    = let cp  = ri `covers` rr
                     in Node (insert'' cp l) (newND coversParent cp nd) (insertR cp r)
-      | otherwise = let cp  = ri `covers` rr
-                    in Node (insertR cp l) (newND coversParent cp nd) r
+      | otherwise = Node (insertR False l) nd r
 
 
     insert' coversParent (Leaf r) = Leaf $ newLD coversParent r
@@ -138,6 +171,37 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
                         r'  = if m <= b then insertR cp r else r
                     in Node l' (newND coversParent cp nd) r'
 
+-- | Delete an interval from the tree
+--
+-- pre: The segment is in the tree!
+delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
+          => i -> SegmentTree v r -> SegmentTree v r
+delete i (SegmentTree t) = SegmentTree $ delete' t
+  where
+    ri@(Range' a b) = toRange i
+
+    delete' (Leaf ld)     = Leaf $ ld&leafAssoc %~ deleteAssoc i
+    delete' (Node l nd@(NodeData m rr _) r)
+      | b < m = Node (delete' l) nd r
+      | m < a = Node l nd (delete' r)
+      | otherwise = Node (deleteL l) (nd&assoc %~ deleteAssoc i) (deleteR r)
+
+    delete'' (Leaf ld)     = Leaf $ ld&leafAssoc %~ deleteAssoc i
+    delete'' (Node l nd r) = Node l (nd&assoc %~ deleteAssoc i) r
+
+    deleteL (Leaf ld)     = Leaf $ ld&leafAssoc %~ deleteAssoc i
+    deleteL (Node l nd@(_splitPoint -> m) r)
+      | a <= m    = Node (deleteL l) (nd&assoc %~ deleteAssoc i) (delete'' r)
+      | otherwise = Node l nd (deleteL r)
+
+    deleteR (Leaf ld)     = Leaf $ ld&leafAssoc %~ deleteAssoc i
+    deleteR (Node l nd@(_splitPoint -> m) r)
+      | m <= b    = Node (delete'' l) (nd&assoc %~ deleteAssoc i) (deleteR r)
+      | otherwise = Node (deleteR l) nd r
+
+
+--------------------------------------------------------------------------------
+-- * Listing the intervals stabbed
 
 -- | Interval
 newtype I a = I { _unI :: a} deriving (Show,Read,Eq,Ord)
@@ -150,21 +214,6 @@ instance Measured [I a] (I a) where
 instance Eq a => Assoc [I a] (I a) where
   insertAssoc = (:)
   deleteAssoc = List.delete
-
-
-newtype Count = Count { getCount :: Int} deriving (Show,Eq,Ord,Num,Integral,Enum,Real)
-
-newtype C a = C { _unC :: a} deriving (Show,Read,Eq,Ord)
-
-instance Semigroup Count where
-  a <> b = Count $ getCount a + getCount b
-
-instance Measured Count (C i) where
-  measure _ = 1
-
-instance Assoc Count (C i) where
-  insertAssoc _ v = v + 1
-  deleteAssoc _ v = v - 1
 
 -- instance Measured [Interval p r] (Interval p r) where
 --   measure = (:[])
@@ -183,19 +232,26 @@ fromIntervals' :: (Eq p, Ord r)
 fromIntervals' = fromIntervals I
 
 
--- | Build a SegmentTree
---
--- $O(n \log n)$
-fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType i ~ r)
-                   => (Interval p r -> i)
-                   -> NonEmpty (Interval p r) -> SegmentTree v r
-fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
-  where
-    endPoints i@(toRange -> Range' a b) = [a,b]
-    pts = NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
+--------------------------------------------------------------------------------
+-- * Counting the number of segments intersected
+
+newtype Count = Count { getCount :: Int} deriving (Show,Eq,Ord,Num,Integral,Enum,Real)
+
+newtype C a = C { _unC :: a} deriving (Show,Read,Eq,Ord)
+
+instance Semigroup Count where
+  a <> b = Count $ getCount a + getCount b
+
+instance Measured Count (C i) where
+  measure _ = 1
+
+instance Assoc Count (C i) where
+  insertAssoc _ v = v + 1
+  deleteAssoc _ v = v - 1
 
 
-
+--------------------------------------------------------------------------------
+-- * Testing stuff
 
 test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
                                             , closedInterval 5 15
@@ -206,7 +262,7 @@ test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
 closedInterval a b = ClosedInterval (ext a) (ext b)
 
 showT :: (Show r, Show v) => SegmentTree v r -> String
-showT = drawTree . _unTee
+showT = drawTree . _unSegmentTree
 
 
 test' :: (Show r, Num r, Ord r, Enum r) => SegmentTree [I (Interval () r)] r
