@@ -34,15 +34,15 @@ import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Internal nodes store a split point, the range, and an associated data structure
-data NodeData v r = NodeData { _splitPoint :: r
-                             , _range      :: Range r
-                             , _assoc      :: v
+data NodeData v r = NodeData { _splitPoint :: !r
+                             , _range      :: !(Range r)
+                             , _assoc      :: !v
                              } deriving (Show,Eq,Functor)
 makeLenses ''NodeData
 
 -- | Leaf nodes store an atomic range, and an associated data structure
-data LeafData v r = LeafData  { _atomicRange :: Range r
-                              , _leafAssoc   :: v
+data LeafData v r = LeafData  { _atomicRange :: !(Range r)
+                              , _leafAssoc   :: !v
                               } deriving (Show,Eq,Functor)
 makeLenses ''LeafData
 

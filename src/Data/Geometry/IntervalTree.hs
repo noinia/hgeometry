@@ -22,9 +22,9 @@ import qualified Data.Map as M
 --------------------------------------------------------------------------------
 
 -- | Information stored in a node of the Interval Tree
-data NodeData i r = NodeData { _splitPoint     :: r
-                             , _intervalsLeft  :: M.Map r [i]
-                             , _intervalsRight :: M.Map r [i]
+data NodeData i r = NodeData { _splitPoint     :: !r
+                             , _intervalsLeft  :: !(M.Map r [i])
+                             , _intervalsRight :: !(M.Map r [i])
                              } deriving (Show,Eq,Ord)
 makeLenses ''NodeData
 

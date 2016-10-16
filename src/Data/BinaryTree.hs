@@ -11,8 +11,8 @@ import qualified Data.Vector as V
 
 --------------------------------------------------------------------------------
 
-data BinLeafTree v a = Leaf a
-                     | Node (BinLeafTree v a) v (BinLeafTree v a)
+data BinLeafTree v a = Leaf !a
+                     | Node (BinLeafTree v a) !v (BinLeafTree v a)
                      deriving (Show,Read,Eq,Ord,Functor)
 
 
@@ -130,7 +130,7 @@ drawTree = Tree.drawTree . fmap show . toRoseTree
 
 
 data BinaryTree a = Nil
-                  | Internal (BinaryTree a) a (BinaryTree a)
+                  | Internal (BinaryTree a) !a (BinaryTree a)
                   deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 
