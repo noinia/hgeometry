@@ -8,16 +8,14 @@ module Data.Geometry.IntervalTree( NodeData(..)
                                  , stab
                                  ) where
 
-import Control.Lens
-import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
+import           Control.Lens
+import           Data.BinaryTree
+import           Data.Ext
+import           Data.Geometry.Interval
+import           Data.Geometry.Properties
 import qualified Data.List as List
-import Data.Ext
-import Data.BinaryTree
-import Data.Range
-import Data.Geometry.Interval
-import Data.Geometry.Properties
 import qualified Data.Map as M
+import           Data.Range
 
 --------------------------------------------------------------------------------
 
@@ -43,6 +41,19 @@ createTree pts = IntervalTree . asBalancedBinTree
                . map (\m -> NodeData m mempty mempty) $ pts
 
 
+-- | Build an interval tree
+--
+-- $O(n \log n)$
+fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
+                 => [i] -> IntervalTree i r
+fromIntervals is = foldr insert (createTree pts) is
+  where
+    endPoints (toRange -> Range' a b) = [a,b]
+    pts = List.sort . concatMap endPoints $ is
+
+--------------------------------------------------------------------------------
+
+
 -- | Find all intervals that stab x
 --
 -- $O(\log n + k)$, where k is the output size
@@ -57,6 +68,8 @@ stab x (IntervalTree t) = stab' t
                     in is ++ stab' r
     f p = concatMap snd . List.takeWhile (p . fst)
 
+
+--------------------------------------------------------------------------------
 
 -- | Insert :
 -- pre: the interval intersects some midpoint in the tree
@@ -98,6 +111,9 @@ delete i (IntervalTree t) = IntervalTree $ delete' t
 
 
 
+--------------------------------------------------------------------------------
+
+
 -- | Anything that looks like an interval
 class IntervalLike i where
   toRange :: i -> Range (NumType i)
@@ -109,21 +125,13 @@ instance IntervalLike (Interval p r) where
   toRange = fmap (^.core) . _unInterval
 
 
--- | Build an interval tree
---
--- $O(n \log n)$
-fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
-                 => [i] -> IntervalTree i r
-fromIntervals is = foldr insert (createTree pts) is
-  where
-    endPoints i@(toRange -> Range' a b) = [a,b]
-    pts = List.sort . concatMap endPoints $ is
 
+--------------------------------------------------------------------------------
 
-test = fromIntervals [ closedInterval 0 10
-                     , closedInterval 5 15
-                     , closedInterval 1 4
-                     , closedInterval 3 9
-                     ]
+-- test = fromIntervals [ closedInterval 0 10
+--                      , closedInterval 5 15
+--                      , closedInterval 1 4
+--                      , closedInterval 3 9
+--                      ]
 
-closedInterval a b = ClosedInterval (ext a) (ext b)
+-- closedInterval a b = ClosedInterval (ext a) (ext b)

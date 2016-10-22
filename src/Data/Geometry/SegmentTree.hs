@@ -22,14 +22,11 @@ import Control.Lens
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.List as List
-import Data.Ext
 import Data.BinaryTree
 import Data.Range
 import Data.Geometry.Interval
 import Data.Geometry.Properties
 import Data.Geometry.IntervalTree(IntervalLike(..))
-
-import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -79,7 +76,7 @@ fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType
                    -> NonEmpty (Interval p r) -> SegmentTree v r
 fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
   where
-    endPoints i@(toRange -> Range' a b) = [a,b]
+    endPoints (toRange -> Range' a b) = [a,b]
     pts = NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
 
 
@@ -141,7 +138,6 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
     -- pre: b > rr^.upper
     insertL coversParent (Leaf r) = Leaf $ newLD coversParent r
     insertL coversParent (Node l nd@(NodeData m rr _) r)
-      -- | traceShow ("L:" :: String,coversParent,nd) False = undefined
       | a <= m    = let cp  = ri `covers` rr
                     in Node (insertL cp l) (newND coversParent cp nd) (insert'' cp r)
       | otherwise = Node l nd (insertL False r)
@@ -155,7 +151,6 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
     -- pre: a < rr^.lower
     insertR coversParent (Leaf r) = Leaf $ newLD coversParent r
     insertR coversParent (Node l nd@(NodeData m rr _) r)
-      -- | traceShow ("R:" :: String,nd) False = undefined
       | m <= b    = let cp  = ri `covers` rr
                     in Node (insert'' cp l) (newND coversParent cp nd) (insertR cp r)
       | otherwise = Node (insertR False l) nd r
@@ -163,7 +158,6 @@ insert i (SegmentTree t) = SegmentTree $ insert' False t
 
     insert' coversParent (Leaf r) = Leaf $ newLD coversParent r
     insert' coversParent (Node l nd@(NodeData m rr _) r)
-      -- | traceShow ("ND:" :: String,nd) False = undefined
       | b < m     = Node (insert' False l) nd r
       | m < a     = Node l nd (insertR False r)
       | otherwise = let cp  = ri `covers` rr
@@ -178,10 +172,10 @@ delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
           => i -> SegmentTree v r -> SegmentTree v r
 delete i (SegmentTree t) = SegmentTree $ delete' t
   where
-    ri@(Range' a b) = toRange i
+    (Range' a b) = toRange i
 
     delete' (Leaf ld)     = Leaf $ ld&leafAssoc %~ deleteAssoc i
-    delete' (Node l nd@(NodeData m rr _) r)
+    delete' (Node l nd@(_splitPoint -> m) r)
       | b < m = Node (delete' l) nd r
       | m < a = Node l nd (delete' r)
       | otherwise = Node (deleteL l) (nd&assoc %~ deleteAssoc i) (deleteR r)
@@ -253,17 +247,17 @@ instance Assoc Count (C i) where
 --------------------------------------------------------------------------------
 -- * Testing stuff
 
-test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
-                                            , closedInterval 5 15
-                                            , closedInterval 1 4
-                                            , closedInterval 3 9
-                                            ]
+-- test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
+--                                             , closedInterval 5 15
+--                                             , closedInterval 1 4
+--                                             , closedInterval 3 9
+--                                             ]
 
-closedInterval a b = ClosedInterval (ext a) (ext b)
+-- closedInterval a b = ClosedInterval (ext a) (ext b)
 
-showT :: (Show r, Show v) => SegmentTree v r -> String
-showT = drawTree . _unSegmentTree
+-- showT :: (Show r, Show v) => SegmentTree v r -> String
+-- showT = drawTree . _unSegmentTree
 
 
-test' :: (Show r, Num r, Ord r, Enum r) => SegmentTree [I (Interval () r)] r
-test' = insert (I $ closedInterval 6 14) $ createTree (NonEmpty.fromList [2,4..20]) []
+-- test' :: (Show r, Num r, Ord r, Enum r) => SegmentTree [I (Interval () r)] r
+-- test' = insert (I $ closedInterval 6 14) $ createTree (NonEmpty.fromList [2,4..20]) []
