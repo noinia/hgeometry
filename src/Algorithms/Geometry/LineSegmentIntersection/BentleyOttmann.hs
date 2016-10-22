@@ -11,8 +11,9 @@ import           Data.Geometry.LineSegment hiding (Start,End)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
 import           Data.Semigroup
@@ -70,18 +71,19 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
       :& (H $ \s              -> rightEndpoint s)
       :& RNil
 
-groupStarts'' xs = let ys = groupStarts xs in traceShow ("GROUPED ",xs,ys) ys
-
 -- | Compute all intersections
 --
 -- $O((n+k)\log n)$, where $k$ is the number of intersections.
 intersections    :: (Ord r, Fractional r, Show r, Show p)
-                 => [LineSegment 2 p r] -> [IntersectionPoint p r]
-intersections ss = sweep pts (SS.empty $ ordAtNav undefined)
+                 => [LineSegment 2 p r] -> Intersections p r
+intersections ss = merge $ sweep pts (SS.empty $ ordAtNav undefined)
   where
-    pts = EQ.fromAscList . groupStarts'' . L.sort . concatMap f $ ss
+    pts = EQ.fromAscList . groupStarts . L.sort . concatMap f $ ss
     f s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
           in [Event p (Start $ s :| []), Event q (End s)]
+
+merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
+merge = foldr (\(IntersectionPoint p a) -> M.insertWith (<>) p a) M.empty
 
 groupStarts                          :: Eq r => [Event p r] -> [Event p r]
 groupStarts []                       = []
@@ -123,8 +125,8 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 
 
     toReport = case starts ++ contains' of
-                 (_:_:_) ->
-                   [IntersectionPoint p (starts <> ends) contains]
+                 (_:_:_) -> traceShowId
+                   [IntersectionPoint p $ associated (starts <> ends) contains]
                  _       -> []
 
     -- new status structure

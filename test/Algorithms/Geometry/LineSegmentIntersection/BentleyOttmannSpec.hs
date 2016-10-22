@@ -53,44 +53,13 @@ toSpec (TestCase segs) = describe ("testing segments ") $ do
                             samePointsAsNaive segs
                             sameAsNaive segs
 
+-- | Test if we have the same intersection points
+samePointsAsNaive segs = it "Same points as Naive" $ do
+  (Map.keys $ Sweep.intersections segs) `shouldBe` (Map.keys $ Naive.intersections segs)
 
--- newtype S p r = S (IntersectionPoint p r)
-
--- instance (Eq p, Eq r) => Eq (S p r) where
---   (S p) == (S q) = diffBy samePoint (p^.) ys
-
-samePoint ::  (Eq p, Eq r) => IntersectionPoint p r -> IntersectionPoint p r -> Bool
-samePoint (IntersectionPoint p es is) (IntersectionPoint q xs ys) =
-  p == q && (L.null $ xs L.\\ ys) && (L.null $ ys L.\\ xs)
-
-
-
--- sameAsNaive      :: (Fractional r, Ord r, Eq p
---                     , Show p, Show r
---                     ) => [LineSegment 2 p r] -> Spec
--- sameAsNaive segs = it "Same as Naive " $ do
---   -- sameIntersections
---   (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)
---   -- `shouldBe` True
-
-instance (Ord p, Ord r) => Ord (LineSegment 2 p r) where
-  s `compare` t = (s^.start,s^.end) `compare` (t^.start,t^.end)
-
-
-sameAsNaive      :: (Fractional r, Ord r, Ord p
+-- | Test if they every intersection point has the right segments
+sameAsNaive      :: (Fractional r, Ord r, Eq p
                     , Show p, Show r
                     ) => [LineSegment 2 p r] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do
-    (f $ Sweep.intersections segs) `shouldBe` (f $ Naive.intersections segs)
-  where
-    f = Map.fromList . map (\p -> (p^.intersectionPoint, ( Set.fromList $ p^.endPointOf
-                                                         , Set.fromList $ p^.interiorTo
-                                                         )))
-
-samePointsAsNaive segs = it "Same points as Naive" $ do
-  (f $ Sweep.intersections segs) `shouldBe` (f $ Naive.intersections segs)
-   where
-     f = Set.fromList . map (^.intersectionPoint)
-
-
-  -- `shouldBe` True
+    (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)
