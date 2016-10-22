@@ -478,45 +478,45 @@ boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 --------------------------------------------------------------------------------
 -- Testing stuff
 
-testPerm :: Permutation (Dart s)
-testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
-           in toCycleRep 12 [ [ Dart a Negative
-                              , Dart c Positive
-                              , Dart b Positive
-                              , Dart a Positive
-                              ]
-                            , [ Dart e Negative
-                              , Dart b Negative
-                              , Dart d Negative
-                              , Dart g Positive
-                              ]
-                            , [ Dart e Positive
-                              , Dart d Positive
-                              , Dart c Negative
-                              ]
-                            , [ Dart g Negative
-                              ]
-                            ]
+-- testPerm :: Permutation (Dart s)
+-- testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]
+--            in toCycleRep 12 [ [ Dart a Negative
+--                               , Dart c Positive
+--                               , Dart b Positive
+--                               , Dart a Positive
+--                               ]
+--                             , [ Dart e Negative
+--                               , Dart b Negative
+--                               , Dart d Negative
+--                               , Dart g Positive
+--                               ]
+--                             , [ Dart e Positive
+--                               , Dart d Positive
+--                               , Dart c Negative
+--                               ]
+--                             , [ Dart g Negative
+--                               ]
+--                             ]
 
 data Test
 
-testG :: PlanarGraph Test Primal_ () String ()
-testG = planarGraph' [ [ (Dart aA Negative, "a-")
-                       , (Dart aC Positive, "c+")
-                       , (Dart aB Positive, "b+")
-                       , (Dart aA Positive, "a+")
-                       ]
-                     , [ (Dart aE Negative, "e-")
-                       , (Dart aB Negative, "b-")
-                       , (Dart aD Negative, "d-")
-                       , (Dart aG Positive, "g+")
-                       ]
-                     , [ (Dart aE Positive, "e+")
-                       , (Dart aD Positive, "d+")
-                       , (Dart aC Negative, "c-")
-                       ]
-                     , [ (Dart aG Negative, "g-")
-                       ]
-                     ]
-  where
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+-- testG :: PlanarGraph Test Primal_ () String ()
+-- testG = planarGraph' [ [ (Dart aA Negative, "a-")
+--                        , (Dart aC Positive, "c+")
+--                        , (Dart aB Positive, "b+")
+--                        , (Dart aA Positive, "a+")
+--                        ]
+--                      , [ (Dart aE Negative, "e-")
+--                        , (Dart aB Negative, "b-")
+--                        , (Dart aD Negative, "d-")
+--                        , (Dart aG Positive, "g+")
+--                        ]
+--                      , [ (Dart aE Positive, "e+")
+--                        , (Dart aD Positive, "d+")
+--                        , (Dart aC Negative, "c-")
+--                        ]
+--                      , [ (Dart aG Negative, "g-")
+--                        ]
+--                      ]
+--   where
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

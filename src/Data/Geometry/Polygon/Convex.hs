@@ -1,11 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-|
 Module    : Data.Geometry.Polygon.Convex
 Description: Convex Polygons
 Copyright : (c) Frank Staals
 License : See LICENCE file
 -}
-module Data.Geometry.Polygon.Convex( ConvexPolygon
+module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , merge
                                    , lowerTangent, upperTangent
                                    , isLeftOf, isRightOf
@@ -24,7 +25,9 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on, )
 import           Data.Geometry
+import           Data.Geometry.Box (IsBoxable(..))
 import           Data.Geometry.Polygon (fromPoints, cmpExtreme)
+import           Data.Geometry.Properties
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))
@@ -34,22 +37,33 @@ import           Data.Geometry.Ipe
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
-type ConvexPolygon = SimplePolygon
+newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
+                          deriving (Show,Eq,PointFunctor)
+makeLenses ''ConvexPolygon
 
+-- | Polygons are per definition 2 dimensional
+type instance Dimension (ConvexPolygon p r) = 2
+type instance NumType   (ConvexPolygon p r) = r
 
-mainWith inFile outFile = do
-    ePage <- readSinglePageFile inFile
-    case ePage of
-      Left err                         -> error "" -- err
-      Right (page :: IpePage Rational) -> case page^..content.traverse._withAttrs _IpePath _asSimplePolygon.core of
-        []         -> error "No points found"
-        polies@(_:_) -> do
-           -- let out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
-           -- print $ length $ edges' dt
-           -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
-           -- writeIpeFile outFile . singlePageFromContent $ out
-           -- mapM_ (print . extremesNaive (v2 1 0)) polies
-           pure $ map (flip rightTangent (point2 80 528)) polies
+instance Num r => IsTransformable (ConvexPolygon p r) where
+  transformBy = transformPointFunctor
+
+instance IsBoxable (ConvexPolygon p r) where
+  boundingBox = boundingBox . _simplePolygon
+
+-- mainWith inFile outFile = do
+--     ePage <- readSinglePageFile inFile
+--     case ePage of
+--       Left err                         -> error "" -- err
+--       Right (page :: IpePage Rational) -> case page^..content.traverse._withAttrs _IpePath _asSimplePolygon.core of
+--         []         -> error "No points found"
+--         polies@(_:_) -> do
+--            -- let out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
+--            -- print $ length $ edges' dt
+--            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
+--            -- writeIpeFile outFile . singlePageFromContent $ out
+--            -- mapM_ (print . extremesNaive (v2 1 0)) polies
+--            pure $ map (flip rightTangent (point2 80 528)) polies
 
 
 
@@ -77,7 +91,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp p = findMaxStart . C.rightElements $ p^.outerBoundary
+findMaxWith cmp p = findMaxStart . C.rightElements . getVertices $ p
   where
     p' >=. q = (p' `cmp` q) /= LT
 
@@ -166,17 +180,17 @@ rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 merge       :: (Num r, Ord r) => ConvexPolygon p r  -> ConvexPolygon p r
             -> (ConvexPolygon p r, LineSegment 2 p r, LineSegment 2 p r)
-merge lp rp = (fromPoints $ r' ++ l', lt, ut)
+merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
 
-
     takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
     rightElems  = F.toList . C.rightElements
+    takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
 
-    r' = takeUntil (coreEq b) . rightElems . rotateTo' d $ rp^.outerBoundary
-    l' = takeUntil (coreEq c) . rightElems . rotateTo' a $ lp^.outerBoundary
+    r' = takeAndRotate b d rp
+    l' = takeAndRotate c a lp
 
 
 rotateTo'   :: Eq a => (a :+ b) -> CSeq (a :+ b) -> CSeq (a :+ b)
@@ -186,6 +200,8 @@ rotateTo' x = fromJust . C.findRotateTo (coreEq x)
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
 
+
+
 -- | Compute the lower tangent of the two polgyons
 --
 --   pre: - polygons lp and rp have at least 1 vertex
@@ -194,17 +210,18 @@ coreEq = (==) `on` (^.core)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent                                     :: (Num r, Ord r)
-                                                 => ConvexPolygon p r
-                                                 -> ConvexPolygon p r
-                                                 -> LineSegment 2 p r
-lowerTangent (SimplePolygon l) (SimplePolygon r) = rotate xx yy zz zz''
+lowerTangent                                       :: (Num r, Ord r)
+                                                   => ConvexPolygon p r
+                                                   -> ConvexPolygon p r
+                                                   -> LineSegment 2 p r
+lowerTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz''
   where
     xx = rightMost l
     yy = leftMost r
 
     zz   = pred' yy
     zz'' = succ' xx
+
 
     rotate x y z z''
       | focus z   `isRightOf` (focus x, focus y) = rotate x   z (pred' z) z''
@@ -228,11 +245,11 @@ pred' = C.rotateL
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-upperTangent                                     :: (Num r, Ord r)
-                                                 => ConvexPolygon p r
-                                                 -> ConvexPolygon p r
-                                                 -> LineSegment 2 p r
-upperTangent (SimplePolygon l) (SimplePolygon r) = rotate xx yy zz zz'
+upperTangent                                       :: (Num r, Ord r)
+                                                   => ConvexPolygon p r
+                                                   -> ConvexPolygon p r
+                                                   -> LineSegment 2 p r
+upperTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz'
   where
     xx = rightMost l
     yy = leftMost r
@@ -267,6 +284,9 @@ rightMost xs = let m = F.maximumBy (comparing (^.core.xCoord)) xs in rotateTo' m
 leftMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
 leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
 
+-- | Helper to get the vertices of a convex polygon
+getVertices :: ConvexPolygon p r -> CSeq (Point 2 r :+ p)
+getVertices = view (simplePolygon.outerBoundary)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true
 -- rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a

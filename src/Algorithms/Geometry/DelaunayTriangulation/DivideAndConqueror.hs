@@ -18,7 +18,7 @@ import           Data.Geometry.Ball (disk, insideBall)
 import           Data.Geometry.Interval
 import           Data.Geometry.Polygon
 import qualified Data.Geometry.Polygon.Convex as Convex
-import           Data.Geometry.Polygon.Convex (ConvexPolygon)
+import           Data.Geometry.Polygon.Convex (ConvexPolygon(..), simplePolygon)
 import qualified Data.IntMap.Strict as IM
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
@@ -73,11 +73,11 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, fromPoints [withID p i])
-  | size' pts <= 3 = let pts'            = NonEmpty.fromList
-                                         . map (\p -> withID p (lookup' vtxMap (p^.core)))
-                                         . F.toList $ pts
-                         (ConvexHull ch) = GS.convexHull pts'
+                     in (IM.singleton i CL.empty, ConvexPolygon $ fromPoints [withID p i])
+  | size' pts <= 3 = let pts'  = NonEmpty.fromList
+                               . map (\p -> withID p (lookup' vtxMap (p^.core)))
+                               . F.toList $ pts
+                         ch    = GS.convexHull pts'
                      in (fromHull mapping' ch, ch)
   | otherwise      = let (Node lt _ rt) = pts
                          (ld,lch)       = delaunayTriangulation' lt mapping'
@@ -90,16 +90,17 @@ delaunayTriangulation' pts mapping'@(vtxMap,_)
 
 -- | Mapping that says for each vtx in the convex hull what the first entry in
 -- the adj. list should be. The input polygon is given in Clockwise order
-firsts :: SimplePolygon (p :+ VertexID) r -> IM.IntMap VertexID
+firsts :: ConvexPolygon (p :+ VertexID) r -> IM.IntMap VertexID
 firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
-       . F.toList . outerBoundaryEdges
+       . F.toList . outerBoundaryEdges . _simplePolygon
 
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
-fromHull              :: Ord r => Mapping p r -> SimplePolygon (p :+ q) r -> Adj
+fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . F.toList . CS.rightElements $ p^.outerBoundary
+                                         . F.toList . CS.rightElements
+                                         $ p^.simplePolygon.outerBoundary
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
                         in IM.fromList es

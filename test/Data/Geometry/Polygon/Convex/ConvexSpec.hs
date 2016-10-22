@@ -33,7 +33,8 @@ toSingleSpec        :: (Num r, Ord r, Show r)
                     => ConvexPolygon q r -> Vector 2 r -> SpecWith ()
 toSingleSpec poly u = it msg $
   -- test that the reported extremes are equally far in direction u
-    F.all allEq (unzip [extremes u poly, extremesLinear u poly]) `shouldBe` True
+    F.all allEq (unzip [extremes u poly, extremesLinear u (poly^.simplePolygon)])
+    `shouldBe` True
   where
     allEq (p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
     msg = "Extremes test with direction " ++ show u
@@ -54,6 +55,6 @@ toSpec (TestCase poly) = do
 readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
-    f page = [ TestCase poly | (poly :+ _) <- polies ]
+    f page = [ TestCase (ConvexPolygon poly) | (poly :+ _) <- polies ]
       where
         polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon

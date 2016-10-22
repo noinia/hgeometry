@@ -14,15 +14,14 @@ $O(n^2 \log n)$ solution.
 > {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 > module BAPC2014.Armybase where
 
-> import Control.Applicative
+
 > import Control.Lens((^.))
-> import Data.Monoid
 > import Data.Ix
 > import Data.Ext
-
 > import Data.Geometry.Triangle
 > import Data.Geometry.Point
 > import Data.Geometry.Polygon
+> import Data.Geometry.Polygon.Convex
 > import Algorithms.Geometry.ConvexHull.GrahamScan
 > import qualified Data.Array   as A
 > import qualified Data.Foldable as F
@@ -90,10 +89,10 @@ Main Algorithm
 > maxBaseArea    :: PointSet -> Area
 > maxBaseArea [] = 0
 > maxBaseArea p  = case convexHull . NonEmpty.fromList $ map ext p of
->     ch@(ConvexHull h) -> case F.toList $ h ^. outerBoundary of
->                            [_,_]   -> 0
->                            [a,b,c] -> triangArea $ Triangle a b c
->                            _       -> maxAreaQuadrangle ch
+>     ch@(ConvexPolygon h) -> case F.toList $ h ^. outerBoundary of
+>                               [_,_]   -> 0
+>                               [a,b,c] -> triangArea $ Triangle a b c
+>                               _       -> maxAreaQuadrangle ch
 
 
 <div class="observation">
@@ -105,7 +104,7 @@ diagonals of our quadrangle. This splits the problem into two independent
 subproblems, in both of which we have to find the largest triangle that has $p$
 and $q$ as vertices.
 
-> maxAreaQuadrangle :: ConvexHull () Int -> Area
+> maxAreaQuadrangle :: ConvexPolygon () Int -> Area
 > maxAreaQuadrangle = maximum' . map (uncurry3 maxAreaQuadrangleWith) . allChains
 >   where
 >     uncurry3 f (a,b,c) = f a b c
@@ -116,9 +115,9 @@ vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 
 > type Chain = Array Int (Point 2 Int)
 
-> allChains                 :: ConvexHull () Int
+> allChains                 :: ConvexPolygon () Int
 >                           -> [(Point 2 Int, Point 2 Int, (Chain,Chain))]
-> allChains (ConvexHull ch) =
+> allChains (ConvexPolygon ch) =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
 >   where
 >     n   = F.length $ ch^.outerBoundary

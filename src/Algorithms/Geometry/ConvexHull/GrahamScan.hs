@@ -1,28 +1,27 @@
 module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 , upperHull
                                                 , lowerHull
-                                                , module Types
                                                 ) where
 
-import           Algorithms.Geometry.ConvexHull.Types as Types
-import           Control.Lens((^.))
+import           Control.Lens ((^.))
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Monoid
-import           Data.List.NonEmpty(NonEmpty(..))
 
 
 -- | O(n log n) time ConvexHull using Graham-Scan. The resulting polygon is
 -- given in clockwise order.
 convexHull            :: (Ord r, Num r)
-                      => NonEmpty (Point 2 r :+ p) -> ConvexHull p r
-convexHull (p :| []) = ConvexHull . fromPoints $ [p]
+                      => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
+convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
 convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in ConvexHull . fromPoints . reverse $ lh ++ uh
+                       in ConvexPolygon . fromPoints . reverse $ lh ++ uh
 
 upperHull  :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
 upperHull = hull id
