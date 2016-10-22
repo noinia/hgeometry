@@ -12,7 +12,6 @@ module Data.Range( EndPoint(..)
                  , shiftLeft, shiftRight
                  ) where
 
-import           Control.Arrow((&&&))
 import           Control.Lens
 import           Data.Geometry.Properties
 import           Frames.CoRec

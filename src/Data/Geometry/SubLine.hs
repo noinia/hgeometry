@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell  #-}
+-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.SubLine where
 
 import           Control.Lens
