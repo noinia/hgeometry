@@ -17,7 +17,6 @@ import qualified Data.Set as Set
 import qualified Data.Map as Map
 
 
-
 spec :: Spec
 spec = do
   describe "Testing Bentley Ottmann LineSegment Intersection" $ do
@@ -75,7 +74,7 @@ samePoint (IntersectionPoint p es is) (IntersectionPoint q xs ys) =
 --   -- `shouldBe` True
 
 instance (Ord p, Ord r) => Ord (LineSegment 2 p r) where
-  s `compare` t = (s^.start,s^.end) `compare` (s^.start,s^.end)
+  s `compare` t = (s^.start,s^.end) `compare` (t^.start,t^.end)
 
 
 sameAsNaive      :: (Fractional r, Ord r, Ord p

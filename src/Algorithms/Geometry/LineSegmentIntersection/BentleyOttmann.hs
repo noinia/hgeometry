@@ -15,7 +15,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
-import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
@@ -40,8 +39,8 @@ instance Ord (EventType s) where
   (End _)      `compare` (End _)      = EQ
   (End _)      `compare` _            = GT
 
-data Event p r = Event { eventPoint :: Point 2 r
-                       , eventType  :: EventType (LineSegment 2 p r)
+data Event p r = Event { eventPoint :: !(Point 2 r)
+                       , eventType  :: !(EventType (LineSegment 2 p r))
                        } deriving (Show,Eq)
 
 instance Ord r => Ord (Event p r) where
@@ -71,12 +70,16 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
       :& (H $ \s              -> rightEndpoint s)
       :& RNil
 
+groupStarts'' xs = let ys = groupStarts xs in traceShow ("GROUPED ",xs,ys) ys
 
+-- | Compute all intersections
+--
+-- $O((n+k)\log n)$, where $k$ is the number of intersections.
 intersections    :: (Ord r, Fractional r, Show r, Show p)
                  => [LineSegment 2 p r] -> [IntersectionPoint p r]
 intersections ss = sweep pts (SS.empty $ ordAtNav undefined)
   where
-    pts = EQ.fromList . groupStarts . concatMap f $ ss
+    pts = EQ.fromAscList . groupStarts'' . L.sort . concatMap f $ ss
     f s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
           in [Event p (Start $ s :| []), Event q (End s)]
 
@@ -120,7 +123,8 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 
 
     toReport = case starts ++ contains' of
-                 (_:_:_) -> [IntersectionPoint p (starts <> ends) contains]
+                 (_:_:_) ->
+                   [IntersectionPoint p (starts <> ends) contains]
                  _       -> []
 
     -- new status structure
