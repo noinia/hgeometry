@@ -21,6 +21,8 @@ module Data.CircularSeq( CSeq
 
                        , findRotateTo
                        , rotateTo
+
+                       , zipLWith, zipL
                        ) where
 
 import           Control.Lens(lens, Lens')
@@ -278,3 +280,13 @@ allRotations = fromList . allRotations'
 
 allRotations'   :: CSeq a -> [CSeq a]
 allRotations' s = take (length s) . iterate rotateR $ s
+
+-- | "Left zip": zip the two CLists, pairing up every element in the *left*
+-- list with its corresponding element in the right list. If there are more
+-- items in the right clist they are discarded.
+zipLWith         :: (a -> b -> c) -> CSeq a -> CSeq b -> CSeq c
+zipLWith f as bs = fromList $ zipWith f (F.toList as) (F.toList bs)
+
+-- | see 'zipLWith
+zipL :: CSeq a -> CSeq b -> CSeq (a, b)
+zipL = zipLWith (,)
