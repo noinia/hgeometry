@@ -6,24 +6,26 @@ import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
+import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Box
-import           Data.Geometry.Polygon
 import           Data.Geometry.PolyLine
+import           Data.Geometry.Polygon
+import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Semigroup
 import qualified Data.Seq2 as S2
-import           Data.Text(Text)
+import           Data.Text (Text)
 
 --------------------------------------------------------------------------------
 
 -- | An IpeOut is essentially a funciton to convert a geometry object of type
 -- 'g' into an ipe object of type 'i'.
 newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
+
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
 -- Object representing it using the default conversion.
@@ -101,6 +103,10 @@ instance HasDefaultIpeOut (SimplePolygon p r) where
   type DefaultIpeOut (SimplePolygon p r) = Path
   defaultIpeOut = flip addAttributes ipeSimplePolygon $
                     mempty <> attr SFill (IpeColor "red")
+
+instance HasDefaultIpeOut (ConvexPolygon p r) where
+  type DefaultIpeOut (ConvexPolygon p r) = Path
+  defaultIpeOut = IpeOut $ asIpe defaultIpeOut . view simplePolygon
 
 --------------------------------------------------------------------------------
 -- * Point Converters

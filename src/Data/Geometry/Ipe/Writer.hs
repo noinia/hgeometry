@@ -131,6 +131,9 @@ instance IpeWriteText Double where
 instance IpeWriteText Int where
   ipeWriteText = writeByShow
 
+instance IpeWriteText Integer where
+  ipeWriteText = writeByShow
+
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow
 

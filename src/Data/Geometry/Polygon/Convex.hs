@@ -16,6 +16,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
 
                                    , leftTangent, rightTangent
 
+                                   , minkowskiSum
                                    ) where
 
 import           Control.Lens hiding ((:<), (:>))
@@ -33,7 +34,7 @@ import           Data.Ord (comparing)
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))
 import qualified Data.Sequence as S
 
-import           Data.Geometry.Ipe
+-- import           Data.Geometry.Ipe
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -45,11 +46,21 @@ makeLenses ''ConvexPolygon
 type instance Dimension (ConvexPolygon p r) = 2
 type instance NumType   (ConvexPolygon p r) = r
 
+
 instance Num r => IsTransformable (ConvexPolygon p r) where
   transformBy = transformPointFunctor
 
 instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
+
+
+-- convexPolygon   :: SimplePolygon p r -> Maybe (ConvexPolygon p r)
+-- convexPolygon p = if isConvex p then Just p else Nothing
+
+-- isConvex   :: SimplePolygon p r -> Bool
+-- isConvex p = let ch = convexHull $ p^.vertices
+--              in p^.vertices.size == ch^.simplePolygon.vertices.size
+
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
@@ -114,7 +125,6 @@ findMaxWith cmp p = findMaxStart . C.rightElements . getVertices $ p
         (True,False,_)      -> findMax (ac |> c)
         (True,True,True)    -> findMax (ac |> c)
         (True,True,False)   -> findMax (c <| cb)
-
         (False,True,_)      -> findMax (c <| cb)
         (False,False,False) -> findMax (ac |> c)
         (False,False,True)  -> findMax (c <| cb)
@@ -273,16 +283,55 @@ isLeftOf            :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
 a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
 
+--------------------------------------------------------------------------------
+
+-- | Computes the Minkowski sum of the two input polygons with $n$ and $m$
+-- vertices respectively.
+--
+-- pre: input polygons are in CCW order.
+--
+-- running time: $O(n+m)$.
+minkowskiSum     :: (Ord r, Num r)
+                 => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
+minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
+  where
+    f p' = let xs@(S.viewl -> (v :< _)) = C.asSeq . bottomMost . getVertices $ p'
+           in F.toList $ xs |> v
+    (v :+ ve) .+. (w :+ we) = v .+^ (toVec w) :+ (ve,we)
+
+    cmpAngle v v' w w' =
+      ccwCmpAround (ext $ origin) (ext . Point $ v' .-. v) (ext . Point $ w' .-. w)
+
+    merge' [_]       [_]       = []
+    merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
+    merge' (v:vs)    ws@[w]    = v .+. w : merge' vs ws
+    merge' (v:v':vs) (w:w':ws) = v .+. w :
+      case cmpAngle (v^.core) (v'^.core) (w^.core) (w'^.core) of
+        LT -> merge' (v':vs)   (w:w':ws)
+        GT -> merge' (v:v':vs) (w':ws)
+        EQ -> merge' (v':vs)   (w':ws)
+    merge' _         _         = error $ "minkowskiSum: Should not happen"
+
+
+
 
 --------------------------------------------------------------------------------
 
--- | Rotate to the rightmost point
+-- | Rotate to the rightmost point (rightmost and topmost in case of ties)
 rightMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
-rightMost xs = let m = F.maximumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
+rightMost xs = let m = F.maximumBy (comparing (^.core)) xs in rotateTo' m xs
 
--- | Rotate to the leftmost point
+-- | Rotate to the leftmost point (and bottommost in case of ties)
 leftMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
-leftMost xs = let m = F.minimumBy (comparing (^.core.xCoord)) xs in rotateTo' m xs
+leftMost xs = let m = F.minimumBy (comparing (^.core)) xs in rotateTo' m xs
+
+-- | Rotate to the bottommost point (and leftmost in case of ties)
+bottomMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
+bottomMost xs = let f p = (p^.core.yCoord,p^.core.xCoord)
+                    m   = F.minimumBy (comparing f) xs
+                in rotateTo' m xs
+
+
 
 -- | Helper to get the vertices of a convex polygon
 getVertices :: ConvexPolygon p r -> CSeq (Point 2 r :+ p)
@@ -298,3 +347,10 @@ getVertices = view (simplePolygon.outerBoundary)
 --                   xs' = C.rotR xs
 --                   nxt = focus' xs'
 --               in if p cur nxt then go xs' else xs
+
+test1 = ConvexPolygon . fromPoints . map ext . reverse $ [origin, point2 1 4, point2 5 6, point2 10 3]
+
+test2 = ConvexPolygon . fromPoints . map ext . reverse $ [point2 11 6, point2 10 10, point2 15 18, point2 12 5]
+
+testA = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 1, point2 2 2]
+testB = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 3, point2 (-2) 2, point2 (-2) 1]
