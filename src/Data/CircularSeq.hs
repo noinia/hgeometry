@@ -40,8 +40,10 @@ import           Data.Tuple (swap)
 
 -- | Nonempty circular sequence
 data CSeq a = CSeq !(Seq a) !a !(Seq a)
-            deriving (Eq)
                      -- we keep the seq balanced, i.e. size left >= size right
+
+instance Eq a => Eq (CSeq a) where
+  a == b = asSeq a == asSeq b
 
 instance Show a => Show (CSeq a) where
   showsPrec d s = showParen (d > app_prec) $

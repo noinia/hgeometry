@@ -134,8 +134,9 @@ outerBoundaryEdges = toEdges . (^.outerBoundary)
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.
 toEdges    :: C.CSeq (Point 2 r :+ p) -> C.CSeq (LineSegment 2 p r)
-toEdges vs = let vs' = F.toList vs in
-  C.fromList $ zipWith (\p q -> LineSegment (Closed p) (Open q)) vs' (tail vs' ++ vs')
+toEdges vs = C.zipLWith (\p q -> LineSegment (Closed p) (Open q)) vs (C.rotateR vs)
+  -- let vs' = F.toList vs in
+  -- C.fromList $ zipWith (\p q -> LineSegment (Closed p) (Open q)) vs' (tail vs' ++ vs')
 
 
 -- | Test if q lies on the boundary of the polygon. Running time: O(n)
@@ -293,10 +294,16 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
 
 
 -- | Orient the outer boundary to clockwise order
-toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder         :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder p
   | isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
   | otherwise            = p
+
+-- | Orient the outer boundary to counter clockwise order
+toCounterClockWiseOrder    :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder p
+  | not $ isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
+  | otherwise                  = p
 
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r

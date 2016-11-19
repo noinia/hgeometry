@@ -21,7 +21,7 @@ import           Frames.CoRec
 
 data EndPoint a = Open   a
                 | Closed a
-                deriving (Show,Read,Eq,Functor,Foldable,Traversable)
+                deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
 _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a

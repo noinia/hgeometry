@@ -17,6 +17,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , leftTangent, rightTangent
 
                                    , minkowskiSum
+                                   , bottomMost
                                    ) where
 
 import           Control.Lens hiding ((:<), (:>))
@@ -348,9 +349,14 @@ getVertices = view (simplePolygon.outerBoundary)
 --                   nxt = focus' xs'
 --               in if p cur nxt then go xs' else xs
 
+test1 :: Num r => ConvexPolygon () r
 test1 = ConvexPolygon . fromPoints . map ext . reverse $ [origin, point2 1 4, point2 5 6, point2 10 3]
 
+test2 :: Num r => ConvexPolygon () r
 test2 = ConvexPolygon . fromPoints . map ext . reverse $ [point2 11 6, point2 10 10, point2 15 18, point2 12 5]
 
+testA :: Num r => ConvexPolygon () r
 testA = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 1, point2 2 2]
+
+testB :: Num r => ConvexPolygon () r
 testB = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 3, point2 (-2) 2, point2 (-2) 1]
