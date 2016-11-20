@@ -3,22 +3,23 @@ module Data.Geometry.Polygon where
 
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
+import qualified Data.CircularSeq as C
 import           Data.Ext
-import           Data.Semigroup
 import qualified Data.Foldable as F
-import           Data.Geometry.Box
-import           Data.Geometry.Vector
 import           Data.Geometry.Boundary
+import           Data.Geometry.Box
+import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Line
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Maybe(mapMaybe)
+import           Data.Geometry.Vector
+import           Data.Maybe (mapMaybe)
 import           Data.Proxy
 import           Data.Range
-import           Frames.CoRec(asA)
-import qualified Data.CircularSeq as C
+import           Data.Semigroup
+import           Data.Util
+import           Frames.CoRec (asA)
 -- import qualified Data.CircularList as C
 
 
@@ -229,11 +230,6 @@ q `inPolygon` pg
                              LT -> SP (lts + 1) gts
                              EQ -> SP lts       gts
                              GT -> SP lts       (gts + 1)) (SP 0 0)
-
-
-
-
-data SP a b = SP !a !b
 
 
 -- | Test if a point lies strictly inside the polgyon.

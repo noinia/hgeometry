@@ -128,6 +128,7 @@ library
                     Data.BinaryTree
                     Data.CircularList.Util
                     Data.BalBST
+                    Data.Util
 
                     -- * Planar Graphs
                     Data.Permutation
@@ -139,6 +140,7 @@ library
                     Control.Monad.State.Persistent
 
 
+
   other-modules:
                    Data.Geometry.Ipe.ParserPrimitives
 
@@ -146,21 +148,21 @@ library
 
 
   -- other-extensions:
-  build-depends: base             >= 4.8       &&     < 5
-               , containers       >= 0.5.5
-               , vinyl            >= 0.5       &&     < 0.6
-               , linear           >= 1.10
-               , lens             >= 4.2
-               , singletons       >= 2.0
-               , bifunctors       >= 5
-               , semigroupoids    >= 5
-               , Frames           >= 0.1.3.0
+  build-depends:
 
-               , text             >= 1.1.1.0
-               , bytestring       >= 0.10
-
-               , semigroups       >= 0.18
-               , bifunctors       >= 4.1
+                   Frames           >= 0.1.3.0
+                 , base             >= 4.8       &&     < 5
+                 , bifunctors       >= 4.1
+                 , bifunctors       >= 5
+                 , bytestring       >= 0.10
+                 , containers       >= 0.5.5
+                 , lens             >= 4.2
+                 , linear           >= 1.10
+                 , semigroupoids    >= 5
+                 , semigroups       >= 0.18
+                 , singletons       >= 2.0
+                 , text             >= 1.1.1.0
+                 , vinyl            >= 0.5       &&     < 0.6
                -- , validation       >= 0.4
 
                , parsec           >= 3
@@ -298,12 +300,13 @@ test-suite hspec
                  Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec
                  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
 
+                 QuickCheck.Instances
                  Util
 
 
   build-depends:        base
-                      , hspec >= 2.1
-                      , QuickCheck >= 2.8
+                      , hspec        >= 2.1
+                      , QuickCheck   >= 2.5
                       , hgeometry
                       , Frames
                       , lens

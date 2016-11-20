@@ -23,7 +23,7 @@ that a polyline is a proper polyline, and thus has at least two vertices.
 Please note that aspect (2), implementing good algorithms, is much work in
 progress. Only a few algorithms are currently available. Some examples are:
 
-* two (optimal) $O(n \log n)$ time algorithms for convex hull in
+* two $O(n \log n)$ time algorithms for convex hull in
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
 * an $O(n)$ expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
@@ -33,6 +33,8 @@ progress. Only a few algorithms are currently available. Some examples are:
 Tree (EMST), based on computing the Delaunay Triangulation.
 * an $O(\log^2 n)$ time algorithm to find extremal points and tangents on/to a
   convex polgon.
+* An optimal $O(n+m)$ time algorithm to compute the Minkowski sum of two convex
+  polygons.
 
 It also has some geometric data structures. In particular, HGeometry contans an
 implementation of
