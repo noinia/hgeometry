@@ -16,6 +16,8 @@ import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
+import           Linear.Matrix
+import           Linear.V3 (V3(..))
 
 --------------------------------------------------------------------------------
 -- * A d-dimensional ball
@@ -25,6 +27,11 @@ data Ball d p r = Ball { _center        :: Point d r :+ p
                        , _squaredRadius :: r
                        }
 makeLenses ''Ball
+
+-- | A lens to get/set the radius of a Ball
+radius :: Floating r => Lens' (Ball d p r) r
+radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
+
 
 deriving instance (Show r, Show p, Arity d) => Show (Ball d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq (Ball d p r)
@@ -139,6 +146,23 @@ disk p q r = match (f p `intersect` f q) $
     f p' = let v        = r .-. p'
                midPoint = p' .+^ (v ^/ 2)
            in perpendicularTo (Line midPoint v)
+
+-- | Creates a circle from three points on the boundary
+from3Points :: Fractional r
+            => Point 2 r :+ p -> Point 2 r :+ q -> Point 2 r :+ s -> Circle () r
+from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
+    Circle (ext c) (squaredEuclideanDist c p)
+  where
+    f  x y = x^2 + y^2
+    fx x y = V3 (f x y) y       1
+    fy x y = V3 x       (f x y) 1
+
+    xnom   = det33 $ V3 (fx px py) (fx qx qy) (fx sx sy)
+    ynom   = det33 $ V3 (fy px py) (fy qx qy) (fy sx sy)
+
+    denom  = (2 *) . det33 $ V3 (V3 px py 1) (V3 qx qy 1) (V3 sx sy 1)
+    c      = point2 (xnom / denom) (ynom / denom)
+
 
 
 newtype Touching p = Touching p deriving (Show,Eq,Ord,Functor,F.Foldable,T.Traversable)
