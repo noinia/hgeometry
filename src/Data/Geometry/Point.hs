@@ -229,20 +229,9 @@ ccw p q r = case z `compare` 0 of
 -- and r are colinear with p, the closest one to p is reported first.
 -- running time: O(n log n)
 sortArround   :: (Ord r, Num r)
-               => Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+               => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
 sortArround c = L.sortBy (ccwCmpAround c)
 
--- sortArround       :: (Ord r, Num r)
---                   => Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
--- sortArround p pts = concatMap sortArround' [ topR, topL, bottomL, bottomR ]
---   where
---     (topL, topR, bottomL, bottomR) = partitionIntoQuadrants p pts
---     sortArround' = L.sortBy cmp
-
---     cmp q r = case ccw (p^.core) (q^.core) (r^.core) of
---                 CCW      -> LT
---                 CW       -> GT
---                 CoLinear -> qdA (p^.core) (q^.core) `compare` qdA (p^.core) (r^.core)
 
 -- | Quadrants of two dimensional points. in CCW order
 data Quadrant = TopRight | TopLeft | BottomLeft | BottomRight
