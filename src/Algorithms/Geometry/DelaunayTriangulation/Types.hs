@@ -77,9 +77,10 @@ type ArcID = Int
 -- - x: the data value we are interested in computing
 type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 
+-- TODO: Convert to using fromAdjacencyLists in PlanarGraph
 toPlaneGraph    :: forall proxy s p r.
                    proxy s -> Triangulation p r -> PlaneGraph s Primal_ p () () r
-toPlaneGraph _ tr = (planarGraph . P.toCycleRep n $ perm)&vertexData .~ tr^.positions
+toPlaneGraph _ tr = (planarGraph' . P.toCycleRep n $ perm)&vertexData .~ tr^.positions
   where
     neighs    = C.rightElements <$> tr^.neighbours
     n         = sum . fmap length $ neighs
