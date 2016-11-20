@@ -242,6 +242,8 @@ data IpeArrow r = IpeArrow { _arrowName :: Text
                            } deriving (Show,Eq)
 makeLenses ''IpeArrow
 
+normalArrow :: IpeArrow r
+normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
 
 -- -- | and their types
 -- type family PathAttrElf (r :: *) (s :: PathAttributeUniverse) :: * where

@@ -15,7 +15,7 @@ module Data.PlanarGraph( Arc(..)
                        , embedding, vertexData, dartData, faceData
                        , edgeData
 
-                       , planarGraph, planarGraph'
+                       , planarGraph, planarGraph', fromAdjacencyLists
 
                        , numVertices, numDarts, numEdges, numFaces
                        , darts', darts, edges', edges, vertices', vertices, faces', faces
@@ -34,9 +34,12 @@ module Data.PlanarGraph( Arc(..)
 
 import           Control.Lens
 import           Control.Monad (forM_)
-import           Data.Permutation
-import qualified Data.Vector as V
+import qualified Data.CircularList as C
 import qualified Data.Foldable as F
+import qualified Data.Map.Strict as SM
+import           Data.Permutation
+import           Data.Util
+import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
@@ -47,23 +50,23 @@ import qualified Data.Vector.Mutable as MV
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
 --     myGraph :: PlanarGraph Test Primal_ () String ()
---     myGraph = planarGraph' [ [ (Dart aA Negative, "a-")
---                              , (Dart aC Positive, "c+")
---                              , (Dart aB Positive, "b+")
---                              , (Dart aA Positive, "a+")
---                              ]
---                            , [ (Dart aE Negative, "e-")
---                              , (Dart aB Negative, "b-")
---                              , (Dart aD Negative, "d-")
---                              , (Dart aG Positive, "g+")
---                              ]
---                            , [ (Dart aE Positive, "e+")
---                              , (Dart aD Positive, "d+")
---                              , (Dart aC Negative, "c-")
---                              ]
---                            , [ (Dart aG Negative, "g-")
---                              ]
---                            ]
+--     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+--                             , (Dart aC Positive, "c+")
+--                             , (Dart aB Positive, "b+")
+--                             , (Dart aA Positive, "a+")
+--                             ]
+--                           , [ (Dart aE Negative, "e-")
+--                             , (Dart aB Negative, "b-")
+--                             , (Dart aD Negative, "d-")
+--                             , (Dart aG Positive, "g+")
+--                             ]
+--                           , [ (Dart aE Positive, "e+")
+--                             , (Dart aD Positive, "d+")
+--                             , (Dart aC Negative, "c-")
+--                             ]
+--                           , [ (Dart aG Negative, "g-")
+--                             ]
+--                           ]
 -- :}
 
 -- TODO: Add a fig. of the Graph
@@ -191,8 +194,8 @@ reorderEdgeData ds = V.create $ do
 
 
 -- | Construct a planar graph
-planarGraph      :: Permutation (Dart s) -> PlanarGraph s Primal_ () () ()
-planarGraph perm = PlanarGraph perm vData eData fData
+planarGraph'      :: Permutation (Dart s) -> PlanarGraph s Primal_ () () ()
+planarGraph' perm = PlanarGraph perm vData eData fData
   where
     d = size perm
     e = d `div` 2
@@ -205,15 +208,60 @@ planarGraph perm = PlanarGraph perm vData eData fData
 
 
 
--- | Construct a planar graph.
+-- | Construct a planar graph, given the darts in cyclic order around each
+-- vertex.
 --
-planarGraph'    :: [[(Dart s,e)]] -> PlanarGraph s Primal_ () e ()
-planarGraph' ds = (planarGraph perm)&dartData .~ (V.fromList . concat $ ds)
+-- running time: $O(n)$.
+planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal_ () e ()
+planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
     perm  = toCycleRep n $ map (map fst) ds
 
 
+-- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
+--            u < v, to arcId's.
+-- - a: the next available unused arcID
+-- - x: the data value we are interested in computing
+type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
+
+
+-- | Construct a planar graph from a adjacency matrix. For every vertex, all
+-- vertices should be given in counter clockwise order.
+--
+-- running time: $O(n \log n)$.
+fromAdjacencyLists      :: forall s.
+                           [(VertexId s Primal_, C.CList (VertexId s Primal_))]
+                        -> PlanarGraph s Primal_ () () ()
+fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
+  where
+    n    = sum . fmap length $ adjM
+    perm = trd' . foldr toOrbit (STR mempty 0 mempty) $ adjM
+
+
+    -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
+    -- vertex with its adjacent vertices into an Orbit
+    toOrbit                     :: (VertexId s Primal_, C.CList (VertexId s Primal_))
+                                -> STR' s [[Dart s]]
+                                -> STR' s [[Dart s]]
+    toOrbit (u,vs) (STR m a dss) =
+      let (STR m' a' ds') = foldr (toDart . (u,)) (STR m a mempty) . C.toList $ vs
+      in STR m' a' (ds':dss)
+
+
+    -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
+    -- representing this edge.
+    toDart                    :: (VertexId s Primal_,VertexId s Primal_)
+                              -> STR' s [Dart s]
+                              -> STR' s [Dart s]
+    toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
+                                    t'  = (min u v, max u v)
+                               in case SM.lookup t' m of
+      Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
+      Nothing -> STR (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
+
+
+--------------------------------------------------------------------------------
 
 -- | Get the number of vertices
 --
@@ -520,3 +568,18 @@ data Test
 --                      ]
 --   where
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+
+
+--------------------------------------------------------------------------------
+
+
+
+-- type ArcID = Int
+
+-- -- | ST' is a strict triple (m,a,x) containing:
+-- --
+-- -- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
+-- --            u < v, to arcId's.
+-- -- - a: the next available unused arcID
+-- -- - x: the data value we are interested in computing
+-- type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
