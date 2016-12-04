@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module QuickCheck.Instances where
 
@@ -6,6 +7,8 @@ import Control.Lens
 import Data.Ext
 import Data.Range
 import Data.Geometry
+import Data.Geometry.Box
+import Data.Semigroup
 import Data.Geometry.SubLine
 import Data.Geometry.Interval
 import Data.Geometry.Vector
@@ -23,6 +26,9 @@ instance (Arbitrary r, Arity d) => Arbitrary (Point d r) where
 
 instance (Arbitrary r, Arity d, Num r) => Arbitrary (Line d r) where
   arbitrary = lineThrough <$> arbitrary <*> arbitrary
+
+instance (Arbitrary r, Arity d, Ord r) => Arbitrary (Box d () r) where
+  arbitrary = (\p (q :: Point d r) -> boundingBoxList' [p,q]) <$> arbitrary <*> arbitrary
 
 
 instance Arbitrary r => Arbitrary (EndPoint r) where

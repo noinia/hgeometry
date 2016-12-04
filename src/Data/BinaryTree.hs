@@ -80,6 +80,19 @@ foldUpData f g = foldUp f' Leaf
     access (Leaf x)     = g x
     access (Node _ v _) = v
 
+-- | Takes two trees, that have the same structure, and uses the provided
+-- functions to "zip" them together
+zipExactWith                                  :: (u -> v -> w)
+                                              -> (a -> b -> c)
+                                              -> BinLeafTree u a
+                                              -> BinLeafTree v b
+                                              -> BinLeafTree w c
+zipExactWith _ g (Leaf x)     (Leaf y)        = Leaf (x `g` y)
+zipExactWith f g (Node l m r) (Node l' m' r') = Node (zipExactWith f g l l')
+                                                     (m `f` m')
+                                                     (zipExactWith f g r r')
+zipExactWith _ _ _            _               =
+    error "zipExactWith: tree structures not the same "
 
 newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord)
 

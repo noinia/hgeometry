@@ -31,8 +31,8 @@ makeLenses ''Box
 
 -- | Given the point with the lowest coordinates and the point with highest
 -- coordinates, create a box.
-fromCornerPoints          :: Point d r :+ p -> Point d r :+ p -> Box d p r
-fromCornerPoints low high = Box (low&core %~ Min) (high&core %~ Max)
+box          :: Point d r :+ p -> Point d r :+ p -> Box d p r
+box low high = Box (low&core %~ Min) (high&core %~ Max)
 
 -- | Build a d dimensional Box given d ranges.
 fromExtent    :: Arity d => Vector d (R.Range r) -> Box d () r
