@@ -4,7 +4,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 module Data.Geometry.Properties where
 
-import           Data.Maybe(isJust)
+import           Data.Maybe(isNothing)
 import           Data.Proxy
 import           Data.Vinyl.Core
 import           Data.Vinyl.Functor
@@ -65,13 +65,13 @@ class IsIntersectableWith g h where
 type AlwaysTrueIntersection g h = RecApplicative (IntersectionOf g h)
 
 
--- | Returns True iff the resultt is a NoIntersection
+-- | Returns True iff the result is *not* a NoIntersection
 defaultNonEmptyIntersection :: forall g h proxy.
                             ( NoIntersection ∈ IntersectionOf g h
                             , RecApplicative (IntersectionOf g h)
                             )
                             => proxy g -> proxy h -> Intersection g h -> Bool
-defaultNonEmptyIntersection _ _ = isJust . asA (Proxy :: Proxy NoIntersection)
+defaultNonEmptyIntersection _ _ = isNothing . asA (Proxy :: Proxy NoIntersection)
 
 
 -- type IsAlwaysTrueFromEither a b = (VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z)))
