@@ -133,9 +133,9 @@ pCoordinate = fromSeq <$> pInteger <*> pDecimal
                 pDecimal = pMaybe (pChar '.' *> pInteger)
 
 pRectangle :: Coordinate r => Parser (Rectangle () r)
-pRectangle = (\p q -> fromCornerPoints (ext p) (ext q)) <$> pPoint
-                                                        <*  pWhiteSpace
-                                                        <*> pPoint
+pRectangle = (\p q -> box (ext p) (ext q)) <$> pPoint
+                                           <*  pWhiteSpace
+                                           <*> pPoint
 
 pMatrix :: Coordinate r => Parser (Matrix 3 3 r)
 pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate

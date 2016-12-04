@@ -68,7 +68,7 @@ instance Ord r => (Slab o a r) `IsIntersectableWith` (Slab o a r) where
 instance (Slab Horizontal a r) `IsIntersectableWith` (Slab Vertical a r) where
   nonEmptyIntersection _ _ _ = True
 
-  (Slab h) `intersect` (Slab v) = coRec $ fromCornerPoints low high
+  (Slab h) `intersect` (Slab v) = coRec $ box low high
     where
       low  = point2 (v^.start.core) (h^.start.core) :+ (v^.start.extra, h^.start.extra)
       high = point2 (v^.end.core)   (h^.end.core)   :+ (v^.end.extra,   h^.end.extra)
