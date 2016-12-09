@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.KDTree where
 
-import           Control.Lens hiding (imap, element, Empty)
+import           Control.Lens hiding (imap, element, Empty, (:<))
 import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -10,17 +10,21 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
+import qualified Data.Seq2 as S2
+import qualified Data.Seq as Seq
+import           Data.Seq (LSeq(..), ViewL(..))
 import qualified Data.Sequence as S
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Prelude hiding (replicate)
-
-import Debug.Trace
+import           Data.Coerce
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -75,24 +79,40 @@ buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
 
 buildKDTree' :: (Arity d, KnownNat d, Index' 0 d, Ord r)
              => NonEmpty.NonEmpty (Point d r :+ p) -> KDTree' d p r
-buildKDTree' = KDT . addBoxes
-             . build (Coord 1) . FV.imap sort . FV.replicate . S.fromList . F.toList
-  where
-    sort     i = S.unstableSortBy (comparing (^.core.unsafeCoord (1 + i)))
-                -- compute one tree with bounding boxes, then merge them together
+buildKDTree' = KDT . addBoxes . build (Coord 1) . toPointSet . Seq.fromNonEmpty
+  where     -- compute one tree with bounding boxes, then merge them together
     addBoxes t = let bbt = foldUpData (\l _ r -> boundingBoxList' [l,r])
                                       (boundingBox . (^.core)) t
                  in zipExactWith (\(SP c m) b -> Split c m b) const t bbt
 
 
+toPointSet :: (Arity d, Ord r)
+           => LSeq n (Point d r :+ p) -> PointSet (LSeq n) d p r
+toPointSet = FV.imap sort . FV.replicate
+  where
+    sort i = Seq.unstableSortBy (compareOn $ 1 + i)
+
+
+
+
+compareOn       :: (Ord r, Arity d)
+                => Int -> Point d r :+ e -> Point d r :+ e -> Ordering
+compareOn i p q = let f = (^.core.unsafeCoord i)
+                  in (f p, p^.core) `compare` (f q, q^.core)
+
+
 
 build      :: (Index' 0 d, Arity d, KnownNat d, Ord r)
-           => Coord d -> PointSet d p r -> BinLeafTree (Split' d r) (Point d r :+ p)
+           => Coord d
+           -> PointSet (LSeq 1) d p r
+           -> BinLeafTree (Split' d r) (Point d r :+ p)
 build i ps = case asSingleton ps of
-    Just p  -> Leaf p
-    Nothing -> let (l,m,r) = splitOn i ps
-                   j       = succ i
-               in Node (build j l) m (build j r)
+    Left p    -> Leaf p
+    Right ps' -> let (l,m,r) = splitOn i ps'
+                     j       = succ i
+                   -- the pattern match proves tha tthe seq has >= 2 elements
+                 in Node (build j l) m (build j r)
+
 
 --------------------------------------------------------------------------------
 
@@ -127,33 +147,50 @@ containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
 --------------------------------------------------------------------------------
 
 
-type PointSet d p r = Vector d (S.Seq (Point d r :+ p))
+type PointSet seq d p r = Vector d (seq (Point d r :+ p))
 
-splitOn                 :: (Arity d, KnownNat d, Ord r) => Coord d -> PointSet d p r
-                        -> (PointSet d p r, Split' d r, PointSet d p r)
-splitOn c@(Coord i) pts = (l, SP c m, r)
+splitOn                 :: (Arity d, KnownNat d, Ord r)
+                        => Coord d
+                        -> PointSet (LSeq 2) d p r
+                        -> ( PointSet (LSeq 1) d p r
+                           , Split' d r
+                           , PointSet (LSeq 1) d p r)
+splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
   where
     -- i = traceShow (c,j) j
 
-    mp = let xs = pts^.element' (i-1)
-         in traceShow (S.length xs) $   xs `S.index` (S.length xs `div` 2)
-    m  = mp^.core.unsafeCoord i
+    m = let xs = fromJust $ pts^?element' (i-1)
+        in xs `Seq.index` (F.length xs `div` 2)
+    -- m  = mp^.core.unsafeCoord i
     -- (S.viewR -> (l:>m), r) = let xs = pts^.element' (i-1)
     --                          in S.splitAt (1 + S.length xs `div` 2) xs
-    f = S.partition (\p -> p^.core.unsafeCoord i < m)
+
+    -- Since the input seq has >= 2 elems, F.length xs / 2 >= 1. It follows
+    -- that the both sets thus have at least one elemnt.
+    -- f :: LSeq 2 _ -> (LSeq 1 _, LSeq 1 _)
+    f = bimap Seq.promise Seq.promise
+      . Seq.partition (\p -> compareOn i p m == LT)
 
     (l,r) = unzip' . fmap f $ pts
 
     -- unzip' :: Vector d (a,b) -> (Vector d a, Vector d b)
     unzip' = bimap vectorFromListUnsafe vectorFromListUnsafe . unzip . F.toList
 
+
+
+
+
+
 -- TODO: Make sure that the partitioning is the same in all lists, in
 -- particular in case of points that have the same i-coordinates
+
+-- TODO: Write a test that verifies this: i.e. after calling splitOn something, all indices in the left PointSet have the same set of points
 
 
 -- pattern (Singleton p) <-
 
-asSingleton   :: (Index' 0 d, Arity d) => PointSet d p r -> Maybe (Point d r :+ p)
-asSingleton v = case F.toList $ v^.element (C :: C 0) of
-                [p] -> Just p
-                _   -> Nothing
+asSingleton   :: (Index' 0 d, Arity d) => PointSet (LSeq 1) d p r
+              -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
+asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
+                  _ :< _ Seq.:<< _ -> Right $ coerce v
+                  p :< _           -> Left p -- only one element

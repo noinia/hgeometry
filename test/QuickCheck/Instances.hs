@@ -2,21 +2,34 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module QuickCheck.Instances where
 
+import           Control.Lens
+import           Data.Ext
+import           Data.Geometry hiding (vector)
+import           Data.Geometry.Box
+import           Data.Geometry.Interval
+import           Data.Geometry.SubLine
+import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
-import Control.Lens
-import Data.Ext
-import Data.Range
-import Data.Geometry
-import Data.Geometry.Box
-import Data.Semigroup
-import Data.Geometry.SubLine
-import Data.Geometry.Interval
-import Data.Geometry.Vector
-import Test.QuickCheck
+import           Data.Proxy
+import           Data.Range
+import           Data.Semigroup
+import qualified Data.Seq as Seq
+import qualified Data.Seq2 as S2
+import           GHC.TypeLits
+import           Test.QuickCheck
+
+--------------------------------------------------------------------------------
 
 instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where
   arbitrary = NonEmpty.fromList <$> listOf1 arbitrary
 
+instance Arbitrary a => Arbitrary (S2.Seq2 a) where
+  arbitrary = S2.Seq2 <$> arbitrary <*> arbitrary <*> arbitrary
+
+instance (KnownNat n, Arbitrary a) => Arbitrary (Seq.LSeq n a) where
+  arbitrary = (\s s' -> Seq.promise . Seq.fromList $ s <> s')
+            <$> vector (fromInteger . natVal $ (Proxy :: Proxy n))
+            <*> arbitrary
 
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList

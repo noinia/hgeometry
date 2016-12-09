@@ -54,7 +54,12 @@ index s i = fromJust $ s^?ix i
 adjust       :: (a -> a) -> Int -> Seq2 a -> Seq2 a
 adjust f i s = s&ix i %~ f
 
-
+partition                :: (a -> Bool) -> Seq2 a -> (S.Seq a, S.Seq a)
+partition p (Seq2 x s y) = let (l,r) = S.partition p s in case (p x, p y) of
+    (False,False) -> ((x S.<| l) S.|> y, r)
+    (False,_)     -> (x S.<| l,          r S.|> y)
+    (True, False) -> (l S.|> y,          x S.<| r)
+    _             -> (l,                 (x S.<| r) S.|> y)
 
 
 (<|) :: a -> Seq2 a -> Seq2 a
@@ -156,6 +161,12 @@ toNonEmpty ~(a :< s) = (a NonEmpty.:| F.toList s)
 
 viewL1FromNonEmpty                     :: NonEmpty.NonEmpty a -> ViewL1 a
 viewL1FromNonEmpty ~(x NonEmpty.:| xs) = x :< S.fromList xs
+
+viewL1FromSeq   :: S.Seq a -> ViewL1 a
+viewL1FromSeq s = case S.viewl s of
+  S.EmptyL    -> error "viewL1FromSeq: Empty seq"
+  (x S.:< xs) -> x :< xs
+
 
 
 -- | O(1) get a left view
