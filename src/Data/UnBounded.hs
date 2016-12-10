@@ -47,7 +47,7 @@ instance Show a => Show (Top a) where
 -- i.e. an element that is smaller than any other element. We can think of
 -- `Bottom a` being defined as:
 --
--- >>> data Bottom a = ValB
+-- >>> data Bottom a = Bottom | ValB a
 newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad)
 
