@@ -429,7 +429,7 @@ areWellSeparated' s l        r        = boxBox1 s (bbOf l) (bbOf r)
 boxBox1         :: (Floating r, Ord r, Arity d) => r -> Box d p r -> Box d p r -> Bool
 boxBox1 s lb rb = euclideanDist (centerPoint lb) (centerPoint rb) >= (s+1)*d
   where
-    diam b = euclideanDist (b^.minP.core.to getMin) (b^.maxP.core.to getMax)
+    diam b = euclideanDist (b^.minP.core.cwMin) (b^.maxP.core.cwMax)
     d      = max (diam lb) (diam rb)
 
 

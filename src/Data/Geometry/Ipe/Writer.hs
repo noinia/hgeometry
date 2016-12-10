@@ -287,8 +287,8 @@ instance IpeWriteText r => IpeWrite (Image r) where
                                    Element "image" [("rect", p <> " " <> q)] [Text dt]
                                  )
                                <$> ipeWriteText d
-                               <*> ipeWriteText (a^.core.(to getMin))
-                               <*> ipeWriteText (b^.core.(to getMax))
+                               <*> ipeWriteText (a^.core.cwMin)
+                               <*> ipeWriteText (b^.core.cwMax)
 
 -- TODO: Replace this one with s.t. that writes the actual image payload
 instance IpeWriteText () where

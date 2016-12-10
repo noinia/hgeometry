@@ -7,7 +7,7 @@ import           Data.Ext
 import           Data.Function (on)
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
-import           Data.Geometry.LineSegment hiding (Start,End)
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import qualified Data.List as L
@@ -106,7 +106,7 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
     h s = match (s `intersect` horizontalLine y) $
          (H $ \NoIntersection -> error "ordAtNav: No intersection")
       :& (H $ \p              -> p^.xCoord)
-      :& (H $ \s              -> rightEndpoint s)
+      :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
       :& RNil
 
 

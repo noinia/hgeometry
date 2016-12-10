@@ -21,29 +21,50 @@ import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 
+
+--------------------------------------------------------------------------------
+
+-- | Coordinate wize minimum
+newtype CWMin a = CWMin { _cwMin :: a }
+                deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+makeLenses ''CWMin
+
+instance (Arity d, Ord r) => Semigroup (CWMin (Point d r)) where
+  (CWMin p) <> (CWMin q) = CWMin . Point $ FV.zipWith min (p^.vector) (q^.vector)
+
+-- | Coordinate wize maximum
+newtype CWMax a = CWMax { _cwMax :: a }
+                deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+makeLenses ''CWMax
+
+instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
+  (CWMax p) <> (CWMax q) = CWMax . Point $ FV.zipWith max (p^.vector) (q^.vector)
+
+
 --------------------------------------------------------------------------------
 -- * d-dimensional boxes
 
-data Box d p r = Box { _minP :: Min (Point d r) :+ p
-                     , _maxP :: Max (Point d r) :+ p
+
+data Box d p r = Box { _minP :: CWMin (Point d r) :+ p
+                     , _maxP :: CWMax (Point d r) :+ p
                      }
 makeLenses ''Box
 
 -- | Given the point with the lowest coordinates and the point with highest
 -- coordinates, create a box.
 box          :: Point d r :+ p -> Point d r :+ p -> Box d p r
-box low high = Box (low&core %~ Min) (high&core %~ Max)
+box low high = Box (low&core %~ CWMin) (high&core %~ CWMax)
 
 -- | Build a d dimensional Box given d ranges.
 fromExtent    :: Arity d => Vector d (R.Range r) -> Box d () r
-fromExtent rs = Box (Min (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
-                    (Max (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
+fromExtent rs = Box (CWMin (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
+                    (CWMax (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
 
 
 -- | Center of the box
 centerPoint   :: (Arity d, Fractional r) => Box d p r -> Point d r
 centerPoint b = Point $ w V.^/ 2
-  where w = b^.minP.core.to getMin.vector V.^+^ b^.maxP.core.to getMax.vector
+  where w = b^.minP.core.cwMin.vector V.^+^ b^.maxP.core.cwMax.vector
 
 
 
@@ -54,12 +75,12 @@ deriving instance (Ord r, Ord p, Arity d)   => Ord  (Box d p r)
 instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
   (Box mi ma) <> (Box mi' ma') = Box (mi <> mi') (ma <> ma')
 
-type instance IntersectionOf (Box d p r) (Box d p r) = '[ NoIntersection, Box d () r]
+type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
-instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d p r) where
+instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  box `intersect` box' = f . sequence $ FV.zipWith intersect' (extent box) (extent box')
+  bx `intersect` bx' = f . sequence $ FV.zipWith intersect' (extent bx) (extent bx')
     where
       f = maybe (coRec NoIntersection) (coRec . fromExtent)
       r `intersect'` s = asA (Proxy :: Proxy (R.Range r)) $ r `intersect` s
@@ -112,10 +133,10 @@ type instance NumType   (Box d p r) = r
 -- * Functions on d-dimensonal boxes
 
 minPoint :: Box d p r -> Point d r :+ p
-minPoint b = let (Min p :+ e) = b^.minP in p :+ e
+minPoint b = let (CWMin p :+ e) = b^.minP in p :+ e
 
 maxPoint :: Box d p r -> Point d r :+ p
-maxPoint b = let (Max p :+ e) = b^.maxP in p :+ e
+maxPoint b = let (CWMax p :+ e) = b^.maxP in p :+ e
 
 -- | Check if a point lies a box
 --
@@ -134,7 +155,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 -- Vector3 [Range {_lower = Closed 1, _upper = Closed 10},Range {_lower = Closed 2, _upper = Closed 20},Range {_lower = Closed 3, _upper = Closed 30}]
 extent                                 :: Arity d
                                        => Box d p r -> Vector d (R.Range r)
-extent (Box (Min a :+ _) (Max b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
+extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
@@ -196,8 +217,8 @@ corners :: Num r => Rectangle p r -> ( Point 2 r :+ p
                                      , Point 2 r :+ p
                                      )
 corners r     = let w = width r
-                    p = (_maxP r)&core %~ getMax
-                    q = (_minP r)&core %~ getMin
+                    p = (_maxP r)&core %~ _cwMax
+                    q = (_minP r)&core %~ _cwMin
                 in ( p&core.xCoord %~ (subtract w)
                    , p
                    , q&core.xCoord %~ (+ w)
@@ -224,7 +245,7 @@ boundingBoxList' = boundingBoxList . NE.fromList
 ----------------------------------------
 
 instance IsBoxable (Point d r) where
-  boundingBox p = Box (ext $ Min p) (ext $ Max p)
+  boundingBox p = Box (ext $ CWMin p) (ext $ CWMax p)
 
 instance IsBoxable (Box d p r) where
   boundingBox (Box m m') = Box (m&extra .~ ()) (m'&extra .~ ())

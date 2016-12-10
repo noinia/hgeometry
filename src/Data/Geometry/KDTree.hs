@@ -3,6 +3,7 @@ module Data.Geometry.KDTree where
 
 import           Control.Lens hiding (imap, element, Empty, (:<))
 import           Data.BinaryTree
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
@@ -11,20 +12,13 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
-import           Data.Ord (comparing)
 import           Data.Proxy
-import           Data.Semigroup
-import qualified Data.Seq2 as S2
-import qualified Data.Seq as Seq
 import           Data.Seq (LSeq(..), ViewL(..))
-import qualified Data.Sequence as S
+import qualified Data.Seq as Seq
 import           Data.Util
-import qualified Data.Vector as V
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Prelude hiding (replicate)
-import           Data.Coerce
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -73,6 +67,7 @@ toMaybe Empty    = Nothing
 toMaybe (Tree t) = Just t
 
 
+-- | Expects the input to be a set, i.e. no duplicates
 buildKDTree :: (Arity d, KnownNat d, Index' 0 d, Ord r)
             => [Point d r :+ p] -> KDTree d p r
 buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
@@ -84,6 +79,12 @@ buildKDTree' = KDT . addBoxes . build (Coord 1) . toPointSet . Seq.fromNonEmpty
     addBoxes t = let bbt = foldUpData (\l _ r -> boundingBoxList' [l,r])
                                       (boundingBox . (^.core)) t
                  in zipExactWith (\(SP c m) b -> Split c m b) const t bbt
+
+
+-- | Nub by sorting first
+ordNub :: Ord a => NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
+ordNub = fmap NonEmpty.head . NonEmpty.group1 . NonEmpty.sort
+
 
 
 toPointSet :: (Arity d, Ord r)
@@ -135,14 +136,16 @@ searchKDTree' qr = search . unKDT
       | b `containedIn` qr        = F.toList t
       | otherwise                 = l' ++ r'
       where
-        l' = if b `intersects` boxOf l then search l else []
-        r' = if b `intersects` boxOf r then search r else []
+        l' = if qr `intersects` boxOf l then search l else []
+        r' = if qr `intersects` boxOf r then search r else []
 
-    boxOf (Leaf p)                 = boundingBox (p^.core)
-    boxOf (Node _ (Split _ _ b) _) = b
+
+boxOf :: (Arity d, Ord r) => BinLeafTree (Split d r) (Point d r :+ p) -> Box d () r
+boxOf (Leaf p)                 = boundingBox (p^.core)
+boxOf (Node _ (Split _ _ b) _) = b
 
 containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
-(Box (Min p :+ _) (Max q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
+(Box (CWMin p :+ _) (CWMax q :+ _)) `containedIn` b = all (`intersects` b) [p,q]
 
 --------------------------------------------------------------------------------
 
@@ -194,3 +197,27 @@ asSingleton   :: (Index' 0 d, Arity d) => PointSet (LSeq 1) d p r
 asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
                   _ :< _ Seq.:<< _ -> Right $ coerce v
                   p :< _           -> Left p -- only one element
+
+
+----
+
+inp :: NonEmpty.NonEmpty (Point 2 Int :+ ())
+inp = NonEmpty.fromList [Point2 (-5) 1 :+ ()
+                        ,Point2 (-4) 0 :+ ()
+                        ,Point2 (-3) 7 :+ ()
+                        ,Point2 (-2) 3 :+ ()]
+
+
+-- . map (ext . fromJust. pointFromList) $ [ [-1]
+--                                                                 , [-1]
+--                                                                 ]
+
+inpps = toPointSet . Seq.fromNonEmpty $ inp
+
+
+qrect :: Box 2 () Int
+qrect = boundingBoxList' $ [point2 (-4) (-3), point2 (-4) (10)]
+
+  -- Box {_minP = Min {getMin = Point2 [-6,-4]} :+ (), _maxP = Max {getMax = Point2 [0,-3]} :+ ()}
+
+  -- boundingBoxList' . map (fromJust . pointFromList) $ [[-4],[1]]

@@ -98,7 +98,12 @@ unsafeCoord i = vector . FV.element (i-1)
 coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 
-
+-- | Constructs a point from a list of coordinates
+--
+-- >>> pointFromList [1,2,3] :: Maybe (Point 3 Int)
+-- Just Point3 [1,2,3]
+pointFromList :: Arity d => [r] -> Maybe (Point d r)
+pointFromList = fmap Point . Vec.vectorFromList
 
 
 --------------------------------------------------------------------------------
