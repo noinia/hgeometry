@@ -68,6 +68,8 @@ toMaybe (Tree t) = Just t
 
 
 -- | Expects the input to be a set, i.e. no duplicates
+--
+-- running time: $O(n \log n)$
 buildKDTree :: (Arity d, KnownNat d, Index' 0 d, Ord r)
             => [Point d r :+ p] -> KDTree d p r
 buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
@@ -94,13 +96,10 @@ toPointSet = FV.imap sort . FV.replicate
     sort i = Seq.unstableSortBy (compareOn $ 1 + i)
 
 
-
-
 compareOn       :: (Ord r, Arity d)
                 => Int -> Point d r :+ e -> Point d r :+ e -> Ordering
 compareOn i p q = let f = (^.core.unsafeCoord i)
                   in (f p, p^.core) `compare` (f q, q^.core)
-
 
 
 build      :: (Index' 0 d, Arity d, KnownNat d, Ord r)
@@ -120,9 +119,11 @@ build i ps = case asSingleton ps of
 reportSubTree :: KDTree' d p r -> NonEmpty.NonEmpty (Point d r :+ p)
 reportSubTree = NonEmpty.fromList . F.toList . unKDT
 
-searchKDTree
-  :: (Arity d, Ord r) =>
-     Box d q r -> KDTree d p r -> [Point d r :+ p]
+-- | Searches in a KDTree
+--
+-- running time: $O(n^{(d-1)/d} + k)$
+searchKDTree    :: (Arity d, Ord r)
+                => Box d q r -> KDTree d p r -> [Point d r :+ p]
 searchKDTree qr = maybe [] (searchKDTree' qr) . toMaybe
 
 searchKDTree'                  :: (Arity d, Ord r)
@@ -152,6 +153,7 @@ containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
 
 type PointSet seq d p r = Vector d (seq (Point d r :+ p))
 
+-- | running time: O(n)
 splitOn                 :: (Arity d, KnownNat d, Ord r)
                         => Coord d
                         -> PointSet (LSeq 2) d p r
@@ -164,9 +166,6 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
 
     m = let xs = fromJust $ pts^?element' (i-1)
         in xs `Seq.index` (F.length xs `div` 2)
-    -- m  = mp^.core.unsafeCoord i
-    -- (S.viewR -> (l:>m), r) = let xs = pts^.element' (i-1)
-    --                          in S.splitAt (1 + S.length xs `div` 2) xs
 
     -- Since the input seq has >= 2 elems, F.length xs / 2 >= 1. It follows
     -- that the both sets thus have at least one elemnt.
@@ -180,44 +179,8 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
     unzip' = bimap vectorFromListUnsafe vectorFromListUnsafe . unzip . F.toList
 
 
-
-
-
-
--- TODO: Make sure that the partitioning is the same in all lists, in
--- particular in case of points that have the same i-coordinates
-
--- TODO: Write a test that verifies this: i.e. after calling splitOn something, all indices in the left PointSet have the same set of points
-
-
--- pattern (Singleton p) <-
-
 asSingleton   :: (Index' 0 d, Arity d) => PointSet (LSeq 1) d p r
               -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
 asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
                   _ :< _ Seq.:<< _ -> Right $ coerce v
                   p :< _           -> Left p -- only one element
-
-
-----
-
-inp :: NonEmpty.NonEmpty (Point 2 Int :+ ())
-inp = NonEmpty.fromList [Point2 (-5) 1 :+ ()
-                        ,Point2 (-4) 0 :+ ()
-                        ,Point2 (-3) 7 :+ ()
-                        ,Point2 (-2) 3 :+ ()]
-
-
--- . map (ext . fromJust. pointFromList) $ [ [-1]
---                                                                 , [-1]
---                                                                 ]
-
-inpps = toPointSet . Seq.fromNonEmpty $ inp
-
-
-qrect :: Box 2 () Int
-qrect = boundingBoxList' $ [point2 (-4) (-3), point2 (-4) (10)]
-
-  -- Box {_minP = Min {getMin = Point2 [-6,-4]} :+ (), _maxP = Max {getMax = Point2 [0,-3]} :+ ()}
-
-  -- boundingBoxList' . map (fromJust . pointFromList) $ [[-4],[1]]
