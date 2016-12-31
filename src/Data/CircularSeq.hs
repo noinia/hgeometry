@@ -23,6 +23,7 @@ module Data.CircularSeq( CSeq
                        , rotateTo
 
                        , zipLWith, zipL
+                       , zip3LWith
                        ) where
 
 import           Control.Lens(lens, Lens')
@@ -292,3 +293,8 @@ zipLWith f as bs = fromList $ zipWith f (F.toList as) (F.toList bs)
 -- | see 'zipLWith
 zipL :: CSeq a -> CSeq b -> CSeq (a, b)
 zipL = zipLWith (,)
+
+
+-- | same as zipLWith but with three items
+zip3LWith            :: (a -> b -> c -> d) -> CSeq a -> CSeq b -> CSeq c -> CSeq d
+zip3LWith f as bs cs = fromList $ zipWith3 f (F.toList as) (F.toList bs) (F.toList cs)

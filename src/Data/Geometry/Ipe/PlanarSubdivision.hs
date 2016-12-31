@@ -44,4 +44,4 @@ drawEdge gr (d,e) = asIpeObject seg $ mempty <> attr SArrow normalArrow
     seg     = ClosedLineSegment u v
 
 
-draw = printAsIpeSelection $ asIpeObjectWith drawPlaneGraph test mempty
+draw g = printAsIpeSelection $ asIpeObjectWith drawPlaneGraph g mempty
