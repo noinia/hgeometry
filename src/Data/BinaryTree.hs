@@ -2,8 +2,12 @@
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
+import           Control.Lens (bimap)
+import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Ord (comparing)
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
@@ -144,8 +148,12 @@ drawTree = Tree.drawTree . fmap show . toRoseTree
 
 data BinaryTree a = Nil
                   | Internal (BinaryTree a) !a (BinaryTree a)
-                  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                  deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
+-- | Get the element stored at the root, if it exists
+access                  :: BinaryTree a -> Maybe a
+access Nil              = Nothing
+access (Internal _ x _) = Just x
 
 -- | Create a balanced binary tree
 --
@@ -159,3 +167,95 @@ asBalancedBinTree = mkTree . V.fromList
                in if n == 0 then Nil
                             else Internal (mkTree $ V.slice 0 h v) x
                                           (mkTree $ V.slice (h+1) (n - h -1) v)
+
+
+foldBinaryUp                      :: b -> (a -> b -> b -> b)
+                                  -> BinaryTree a -> BinaryTree (a,b)
+foldBinaryUp _ _ Nil              = Nil
+foldBinaryUp e f (Internal l x r) = let l' = foldBinaryUp e f l
+                                        r' = foldBinaryUp e f r
+                                        g  = maybe e snd . access
+                                        b  = f x (g l') (g r')
+                                    in Internal l' (x,b) r'
+
+
+
+data Ctx a = Top | L (Ctx a) a (BinaryTree a) | R (BinaryTree a) a (Ctx a)
+           deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
+
+data BinaryTreeZipper a = Loc (BinaryTree a) (Ctx a)
+           deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
+
+-- goLeft :: BinaryTreeZipper a -
+
+top   :: BinaryTree a -> BinaryTreeZipper a
+top t = Loc t Top
+
+left                            :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
+left (Loc (Internal l x r) ctx) = Just $ Loc l (L ctx x r)
+left (Loc Nil _)                = Nothing
+
+right                            :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
+right (Loc (Internal l x r) ctx) = Just $ Loc r (R l x ctx)
+right (Loc Nil _)                = Nothing
+
+up                     :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
+up (Loc _ Top)         = Nothing
+up (Loc l (L ctx x r)) = Just $ Loc (Internal l x r) ctx
+up (Loc r (R l x ctx)) = Just $ Loc (Internal l x r) ctx
+
+
+toRoot   :: BinaryTreeZipper a -> BinaryTreeZipper a
+toRoot z = toRoot' z (Just z)
+  where
+    toRoot' z' Nothing   = z'
+    toRoot' _  (Just z') = toRoot' z' (up z')
+
+
+visitAll   :: BinaryTree a -> [BinaryTreeZipper a]
+visitAll t = visitAll' (top t)
+  where
+    f           = maybe [] visitAll'
+    visitAll' z = z : f (left z) <> f (right z)
+
+accessZ (Loc t _) = access t
+
+
+
+-- | Returns all subtrees; i.e. every node with all its decendents
+subTrees :: BinaryTree a -> [BinaryTree a]
+subTrees t = Nil : subTrees' t
+  where
+    subTrees' Nil                 = []
+    subTrees' tt@(Internal l _ r) = tt : subTrees' l <> subTrees' r
+
+
+splitTree             :: BinaryTreeZipper a -> (BinaryTree a, BinaryTree a)
+splitTree (Loc t ctx) = let (Loc r _) = toRoot $ Loc Nil ctx
+                        in (t, r)
+
+
+-- | Given a binary tree with n nodes, splits it into two trees (s,l) of size
+-- $n/3 <= s <= l <= 2n/3$.
+--
+-- running time: $O(n)$
+balancedSplit   :: BinaryTree a -> (BinaryTree a, BinaryTree a)
+balancedSplit t = bimap drop' drop' . f
+                . splitTree . F.minimumBy (comparing diff') . visitAll $ t''
+  where
+    -- annotate the tree with subtree sizes
+    t'  = foldBinaryUp (Sum 0) (\_ l r -> Sum 1 <> l <> r) t
+    -- total size
+    n   = maybe 0 (getSum . snd) $ access t'
+    -- label with both k and n-k
+    t'' = (\(x,Sum k) -> (x,k,n - k)) <$> t'
+    -- difference in size between k and n-k
+    diff' (Loc tr _) = maybe n (\(_,k,nk) -> abs (k - nk)) . access $ tr
+
+    drop' = fmap (\(x,_,_) -> x) -- unannotate
+
+    -- order the tuple s.t. the largest tree occurs first
+    f tt@(a,b) = let g = maybe n (\(_,k,_) -> k) . access
+                  in case g a `compare` g b of
+                    LT -> tt
+                    _  -> (b,a)
