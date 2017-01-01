@@ -1,17 +1,22 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor #-}
-module Data.Geometry.Interval-- (
-                             -- -- * 1 dimensional Intervals
-                             --   Interval(..)
-                             -- , Intersection(..)
+module Data.Geometry.Interval(
+                             -- * 1 dimensional Intervals
+                               Interval(..)
+                             , pattern OpenInterval
+                             , pattern ClosedInterval
+                             , pattern Interval
 
-                             -- -- * querying the start and end of intervals
-                             -- , HasStart(..), HasEnd(..)
-                             -- -- * Working with intervals
-                             -- , width
-                             -- , inInterval
-                             -- )
+                             -- * querying the start and end of intervals
+                             , HasStart(..), HasEnd(..)
+                             -- * Working with intervals
+                             , width
+                             , inInterval
+                             , shiftLeft'
+
+                             , module Data.Range
+                             )
        where
 
 import           Control.Lens (makeLenses, (^.),(%~),(&), Lens')

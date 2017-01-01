@@ -4,6 +4,8 @@ module Data.CircularSeq( CSeq
                        , fromNonEmpty
                        , fromList
 
+                       , toNonEmpty
+
                        , focus
                        , index, adjust
                        , item
@@ -204,6 +206,9 @@ fromNonEmpty (x NonEmpty.:| xs) = withFocus x $ S.fromList xs
 fromList        :: [a] -> CSeq a
 fromList (x:xs) = withFocus x $ S.fromList xs
 fromList []     = error "fromList: Empty list"
+
+toNonEmpty :: CSeq a -> NonEmpty.NonEmpty a
+toNonEmpty = NonEmpty.fromList . F.toList
 
 -- | Rotates i elements to the right.
 --

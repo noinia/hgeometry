@@ -32,3 +32,6 @@ instance Field1 (SP a b) (SP c b) a c where
 
 instance Field2 (SP a b) (SP a c) b c where
   _2 = lens (\(SP _ b) -> b) (\(SP a _) c -> SP a c)
+
+-- | Strict pair with both items the same
+type Two a = SP a a

@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.PlanarGraph( Arc(..)
                        , Direction(..), rev
 
@@ -30,17 +31,31 @@ module Data.PlanarGraph( Arc(..)
 
                        , FaceId(..)
                        , leftFace, rightFace, boundary, boundaryVertices
+
+
+
+                       , HasEdgeOracle
+                       , buildEdgeOracle
+                       , findEdge
+                       , hasEdge
                        ) where
 
+import           Control.Applicative (Alternative(..))
 import           Control.Lens
 import           Control.Monad (forM_)
+import           Control.Monad.ST (ST)
 import qualified Data.CircularList as C
+import           Data.Ext
 import qualified Data.Foldable as F
+import qualified Data.List as L
 import qualified Data.Map.Strict as SM
+import           Data.Maybe (catMaybes, isJust)
 import           Data.Permutation
+import           Data.Semigroup (Semigroup(..))
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+
 
 --------------------------------------------------------------------------------
 
@@ -583,3 +598,66 @@ data Test
 -- -- - a: the next available unused arcID
 -- -- - x: the data value we are interested in computing
 -- type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
+
+
+--------------------------------------------------------------------------------
+-- * Testing Connectivity
+
+newtype HasEdgeOracle s w a =
+  HasEdgeOracle { _unEdgeOracle :: V.Vector [VertexId s w :+ a] }
+                         deriving (Show,Eq)
+
+instance Functor (HasEdgeOracle s w) where
+  fmap f (HasEdgeOracle v) = HasEdgeOracle $ fmap (fmap (&extra %~ f)) v
+
+
+data BuildAdj a = Adj { remaining :: !Int
+                      , adj       :: [a] -- note that adj is lazy!
+                      } deriving (Show,Eq)
+
+
+buildEdgeOracle        :: forall f s w. (Foldable f, Functor f)
+                       => [(VertexId s w, f (VertexId s w))] -> HasEdgeOracle s w ()
+buildEdgeOracle inAdj' = HasEdgeOracle $ V.create $ do
+                          inV <- initialize
+                          mv  <- MV.new (MV.length inV)
+                          build inV mv initQ
+                          pure mv
+  where
+    f xs  = Adj (length xs) (F.toList . fmap _unVertexId $ xs)
+    inAdj = V.fromList . map (\(i,xs) -> (i,f xs)) $ inAdj'
+
+    initialize :: ST s' (MV.MVector s' (BuildAdj Int))
+    initialize = do
+      mv <- MV.new (V.length inAdj)
+      forM_ inAdj $ \(VertexId i, xs) ->
+        MV.write mv i xs
+      pure mv
+
+    -- initial vertices available for processing
+    initQ = foldr (\(VertexId i,x) q -> if remaining x <= 6 then i : q
+                                                            else q) [] inAdj
+
+    -- remove x from v[i]
+    decrease v x i = do Adj k xs <- MV.read v i
+                        let k'  = k - 1
+                        MV.write v i (Adj k' $ L.delete x xs) -- lazily delete x
+                        pure $ if k' <= 6 then Just i else Nothing
+
+
+    -- The actual algorithm that builds the items
+    build _   _    []    = pure ()
+    build inV outV (i:q) = do
+                             x <- MV.read inV i
+                             MV.write outV i ((\j -> VertexId j :+ ()) <$> adj x)
+                             nq <- mapM (decrease inV i) $ adj x
+                             build inV outV (catMaybes nq <> q)
+
+
+hasEdge     :: VertexId s w -> VertexId s w -> HasEdgeOracle s w a -> Bool
+hasEdge u v = isJust . findEdge u v
+
+findEdge :: VertexId s w -> VertexId s w -> HasEdgeOracle s w a -> Maybe a
+findEdge  (VertexId u) (VertexId v) (HasEdgeOracle os) = find' u v <|> find' v u
+  where
+    find' j i = fmap (^.extra) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i

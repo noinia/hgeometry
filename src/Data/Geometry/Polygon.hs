@@ -5,6 +5,7 @@ import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import qualified Data.CircularSeq as C
 import           Data.Ext
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -114,9 +115,11 @@ holeList (MultiPolygon _ hs) = hs
 
 -- | The vertices in the polygon. No guarantees are given on the order in which
 -- they appear!
-vertices :: Polygon t p r -> [Point 2 r :+ p]
-vertices (SimplePolygon vs)   = F.toList vs
-vertices (MultiPolygon vs hs) = F.toList vs ++ concatMap vertices hs
+polygonVertices                      :: Polygon t p r
+                                     -> NonEmpty.NonEmpty (Point 2 r :+ p)
+polygonVertices (SimplePolygon vs)   = C.toNonEmpty vs
+polygonVertices (MultiPolygon vs hs) =
+  sconcat $ C.toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
 
@@ -127,10 +130,11 @@ fromPoints = SimplePolygon . C.fromList
 outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
--- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
--- with vertices i and i+1 with respect to the current focus. All indices
--- modulo n.
---
+
+-- -- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
+---- with vertices i and i+1 with respect to the current focus. All indices
+-- -- modulo n.
+-- --
 
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.

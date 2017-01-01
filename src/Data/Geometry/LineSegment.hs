@@ -6,6 +6,7 @@ module Data.Geometry.LineSegment( LineSegment
                                 , pattern ClosedLineSegment
 
                                 , _SubLine
+                                , module Data.Geometry.Interval
 
 
                                 , toLineSegment
@@ -82,6 +83,7 @@ instance HasEnd (LineSegment d p r) where
   type EndCore  (LineSegment d p r) = Point d r
   type EndExtra (LineSegment d p r) = p
   end = unLineSeg.end
+
 
 _SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
 _SubLine = iso segment2SubLine subLineToSegment
