@@ -3,6 +3,7 @@ module Data.BalBST where
 
 import           Data.Bifunctor
 import           Data.Function (on)
+import           Data.Functor.Contravariant
 import qualified Data.List as L
 import           Data.Maybe
 import qualified Data.Tree as T
@@ -14,6 +15,10 @@ import           Prelude hiding (lookup,null)
 data TreeNavigator k a = Nav { goLeft     :: a -> k -> Bool
                              , extractKey :: a -> a -> k
                              }
+
+instance Contravariant (TreeNavigator k) where
+  contramap f (Nav gL eK) = Nav (\a k -> gL (f a) k) (\x y -> eK (f x) (f y))
+
 
 ordNav :: Ord a => TreeNavigator a a
 ordNav = Nav (<=) min
@@ -108,7 +113,7 @@ insert x (BalBST n@Nav{..} t) = BalBST n (blacken $ insert' t)
 
 
 
-
+delete = undefined
 
 -- delete                        :: Eq a => a -> BalBST k a -> BalBST k a
 -- delete x (BalBST n@Nav{..} t) = delete' t
