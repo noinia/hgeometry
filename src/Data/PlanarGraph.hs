@@ -34,8 +34,8 @@ module Data.PlanarGraph( Arc(..)
 
 
 
-                       , HasEdgeOracle
-                       , buildEdgeOracle
+                       , EdgeOracle
+                       , edgeOracle, buildEdgeOracle
                        , findEdge
                        , hasEdge
                        ) where
@@ -55,6 +55,9 @@ import           Data.Semigroup (Semigroup(..))
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Unboxed as UV
+import qualified Data.Vector.Unboxed.Mutable as UMV
 
 
 --------------------------------------------------------------------------------
@@ -163,6 +166,7 @@ type family Dual (sp :: World) where
 -- by the phantom type s, and to a particular world w.
 newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int } deriving (Eq,Ord,Enum)
 -- VertexId's are in the range 0...|orbits|-1
+makeLenses ''VertexId
 
 instance Show (VertexId s w) where
   show (VertexId i) = "VertexId " ++ show i
@@ -240,6 +244,8 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
 -- - x: the data value we are interested in computing
 type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
 
+
+-- TODO: The idea is that with EdgeOracle this might be possible in O(n) time :)
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- vertices should be given in counter clockwise order.
@@ -603,61 +609,94 @@ data Test
 --------------------------------------------------------------------------------
 -- * Testing Connectivity
 
-newtype HasEdgeOracle s w a =
-  HasEdgeOracle { _unEdgeOracle :: V.Vector [VertexId s w :+ a] }
+
+-- | Edge Oracle:
+--
+-- main idea: store adjacency lists in such a way that we store an edge (u,v)
+-- either in u's adjacency list or in v's. This can be done s.t. all adjacency
+-- lists have length at most 6.
+newtype EdgeOracle s w a =
+  EdgeOracle { _unEdgeOracle :: V.Vector (V.Vector (VertexId s w :+ a)) }
                          deriving (Show,Eq)
 
-instance Functor (HasEdgeOracle s w) where
-  fmap f (HasEdgeOracle v) = HasEdgeOracle $ fmap (fmap (&extra %~ f)) v
+instance Functor (EdgeOracle s w) where
+  fmap f (EdgeOracle v) = EdgeOracle $ fmap (fmap (&extra %~ f)) v
 
 
-data BuildAdj a = Adj { remaining :: !Int
-                      , adj       :: [a] -- note that adj is lazy!
-                      } deriving (Show,Eq)
+edgeOracle   :: PlanarGraph s w v e f -> EdgeOracle s w ()
+edgeOracle g = buildEdgeOracle [ (v, ext <$> neighboursOf v g)
+                               | v <- F.toList $ vertices' g
+                               ]
 
 
-buildEdgeOracle        :: forall f s w. (Foldable f, Functor f)
-                       => [(VertexId s w, f (VertexId s w))] -> HasEdgeOracle s w ()
-buildEdgeOracle inAdj' = HasEdgeOracle $ V.create $ do
-                          inV <- initialize
-                          mv  <- MV.new (MV.length inV)
-                          build inV mv initQ
-                          pure mv
+-- | Builds an edge oracle that can be used to efficiently test if two vertices
+-- are connected by an edge.
+--
+-- running time: $O(n)$
+buildEdgeOracle        :: forall f s w e. (Foldable f)
+                       => [(VertexId s w, f (VertexId s w :+ e))] -> EdgeOracle s w e
+buildEdgeOracle inAdj' = EdgeOracle $ V.create $ do
+                          counts <- UV.thaw initCounts
+                          marks  <- UMV.replicate (UMV.length counts) False
+                          outV   <- MV.new (UMV.length counts)
+                          build counts marks outV initQ
+                          pure outV
+    -- main idea: maintain a vector with counts; i.e. how many unprocessed
+    -- vertices are adjacent to u, and a bit vector with marks to keep track if
+    -- a vertex has been processed yet. When we process a vertex, we keep only
+    -- the adjacencies of unprocessed verticese.
   where
-    f xs  = Adj (length xs) (F.toList . fmap _unVertexId $ xs)
-    inAdj = V.fromList . map (\(i,xs) -> (i,f xs)) $ inAdj'
+    -- Convert to a vector representation
+    inAdj = V.create $ do
+              mv <- MV.new (length inAdj')
+              forM_ inAdj' $ \(VertexId i,adjI) ->
+                MV.write mv i (V.fromList . F.toList $ adjI)
+              pure mv
 
-    initialize :: ST s' (MV.MVector s' (BuildAdj Int))
-    initialize = do
-      mv <- MV.new (V.length inAdj)
-      forM_ inAdj $ \(VertexId i, xs) ->
-        MV.write mv i xs
-      pure mv
-
+    initCounts = V.convert . fmap GV.length $ inAdj
     -- initial vertices available for processing
-    initQ = foldr (\(VertexId i,x) q -> if remaining x <= 6 then i : q
-                                                            else q) [] inAdj
+    initQ = GV.ifoldr (\i k q -> if k <= 6 then i : q else q) [] initCounts
 
-    -- remove x from v[i]
-    decrease v x i = do Adj k xs <- MV.read v i
-                        let k'  = k - 1
-                        MV.write v i (Adj k' $ L.delete x xs) -- lazily delete x
-                        pure $ if k' <= 6 then Just i else Nothing
+    -- | Construct the adjacencylist for vertex i. I.e. by retaining only adjacent
+    -- vertices that have not been processed yet.
+    extractAdj         :: UMV.MVector s' Bool -> Int
+                       -> ST s' (V.Vector (VertexId s w :+ e))
+    extractAdj marks i = let p = fmap not . UMV.read marks . (^.core.unVertexId)
+                         in GV.filterM  p $ inAdj V.! i
 
+    -- | Decreases the number of adjacencies that vertex j has
+    -- if it has <= 6 adjacencies left it has become available for processing
+    decrease                          :: UMV.MVector s' Int -> (VertexId s w :+ e')
+                                      -> ST s' (Maybe Int)
+    decrease counts (VertexId j :+ _) = do k <- UMV.read counts j
+                                           let k'  = k - 1
+                                           UMV.write counts j k'
+                                           pure $ if k' <= 6 then Just j else Nothing
 
     -- The actual algorithm that builds the items
-    build _   _    []    = pure ()
-    build inV outV (i:q) = do
-                             x <- MV.read inV i
-                             MV.write outV i ((\j -> VertexId j :+ ()) <$> adj x)
-                             nq <- mapM (decrease inV i) $ adj x
-                             build inV outV (catMaybes nq <> q)
+    build :: UMV.MVector s' Int -> UMV.MVector s' Bool
+          -> MV.MVector s' (V.Vector (VertexId s w :+ e)) -> [Int] -> ST s' ()
+    build _      _     _    []    = pure ()
+    build counts marks outV (i:q) = do
+                                      adjI <- extractAdj marks i
+                                      MV.write outV i $ adjI
+                                      UMV.write marks i True
+                                      nq   <- V.toList <$> mapM (decrease counts) adjI
+                                      build counts marks outV (catMaybes nq <> q)
 
 
-hasEdge     :: VertexId s w -> VertexId s w -> HasEdgeOracle s w a -> Bool
+
+-- | Test if u and v are connected by an edge.
+--
+-- running time: $O(1)$
+hasEdge     :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Bool
 hasEdge u v = isJust . findEdge u v
 
-findEdge :: VertexId s w -> VertexId s w -> HasEdgeOracle s w a -> Maybe a
-findEdge  (VertexId u) (VertexId v) (HasEdgeOracle os) = find' u v <|> find' v u
+
+-- | Find the edge data corresponding to edge (u,v) if such an edge exists
+--
+-- running time: $O(1)$
+findEdge :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Maybe a
+findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
   where
     find' j i = fmap (^.extra) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i
