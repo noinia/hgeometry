@@ -51,4 +51,14 @@ spec = do
     it "quickcheck segmentTree" $
       property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaive is
     it "quickcheck IntervalTree" $
-      property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaiveIT is
+      property $ \(Intervals is :: Intervals Word) -> allSameAsNaiveIT is
+
+
+newtype Intervals r = Intervals (NonEmpty.NonEmpty (Interval () r)) deriving (Show,Eq)
+
+-- don't generate double open intervals
+instance (Arbitrary r, Ord r) => Arbitrary (Intervals r) where
+  arbitrary = Intervals . NonEmpty.fromList <$> listOf1 (suchThat arbitrary p)
+    where
+      p (OpenInterval _ _) = False
+      p _                  = True

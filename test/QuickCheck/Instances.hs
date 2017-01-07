@@ -52,8 +52,12 @@ instance Arbitrary r => Arbitrary (EndPoint r) where
 instance (Arbitrary r, Ord r) => Arbitrary (Range r) where
   arbitrary = do
                 l <- arbitrary
-                r <- suchThat arbitrary (\x -> l^.unEndPoint <= x^.unEndPoint)
+                r <- suchThat arbitrary (p l)
                 return $ Range l r
+   where
+     p (Open l)   r = l <  r^.unEndPoint
+     p (Closed l) r = l <= r^.unEndPoint
+
 
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
