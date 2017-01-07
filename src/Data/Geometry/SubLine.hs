@@ -9,7 +9,6 @@ import           Data.Geometry.Line.Internal
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import           Data.Range
 import qualified Data.Traversable as T
 import           Data.UnBounded
 import           Data.Vinyl

@@ -10,7 +10,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon hiding (vertices)
+import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import qualified Data.Map as M
 import           Data.PlanarGraph

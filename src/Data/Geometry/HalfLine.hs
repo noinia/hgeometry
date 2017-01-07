@@ -13,7 +13,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.Range
 import qualified Data.Traversable as T
 import           Data.UnBounded
 

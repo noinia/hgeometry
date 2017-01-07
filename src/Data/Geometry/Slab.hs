@@ -13,7 +13,6 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
-import           Data.Range
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec

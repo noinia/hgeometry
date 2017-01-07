@@ -11,7 +11,6 @@ module Data.Geometry.Interval(
                              -- * querying the start and end of intervals
                              , HasStart(..), HasEnd(..)
                              -- * Working with intervals
-                             , width
                              , inInterval
                              , shiftLeft'
 

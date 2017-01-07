@@ -5,6 +5,7 @@ module Data.BinaryTree where
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
+import           Data.Maybe(mapMaybe)
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V
@@ -75,10 +76,10 @@ foldUp f g (Node l x r) = f (foldUp f g l) x (foldUp f g r)
 foldUpData     :: (w -> v -> w -> w) -> (a -> w) -> BinLeafTree v a -> BinLeafTree w a
 foldUpData f g = foldUp f' Leaf
   where
-    f' l v r = Node l (f (access l) v (access r)) r
+    f' l v r = Node l (f (access' l) v (access' r)) r
 
-    access (Leaf x)     = g x
-    access (Node _ v _) = v
+    access' (Leaf x)     = g x
+    access' (Node _ v _) = v
 
 -- | Takes two trees, that have the same structure, and uses the provided
 -- functions to "zip" them together
@@ -173,3 +174,10 @@ foldBinaryUp e f (Internal l x r) = let l' = foldBinaryUp e f l
                                         g  = maybe e snd . access
                                         b  = f x (g l') (g r')
                                     in Internal l' (x,b) r'
+
+toRoseTree'                  :: BinaryTree a -> Maybe (Tree.Tree a)
+toRoseTree' Nil              = Nothing
+toRoseTree' (Internal l v r) = Just $ Tree.Node v $ mapMaybe toRoseTree' [l,r]
+
+drawTree' :: Show a => BinaryTree a -> String
+drawTree' = maybe "Nil" (Tree.drawTree . fmap show) . toRoseTree'
