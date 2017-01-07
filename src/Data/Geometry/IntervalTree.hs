@@ -17,7 +17,6 @@ import           Data.Geometry.Interval.Util
 import           Data.Geometry.Properties
 import qualified Data.List as List
 import qualified Data.Map as M
-import           Data.Range
 
 --------------------------------------------------------------------------------
 
@@ -144,6 +143,9 @@ instance IntervalLike (Interval p r) where
 
 
 --------------------------------------------------------------------------------
+
+test'' = fromIntervals test
+test  = [Interval (Open (97 :+ ())) (Closed (228 :+ ())) ,Interval (Open (18 :+ ())) (Open (79 :+ ())),Interval (Closed (126 :+ ())) (Open (167 :+ ())),Interval (Closed (105 :+ ())) (Closed (158 :+ ())),Interval (Closed (126 :+ ())) (Closed (211 :+ ())),Interval (Closed (111 :+ ())) (Open (194 :+ ())),Interval (Closed (120 :+ ())) (Open (302 :+ ())),Interval (Closed (92 :+ ())) (Closed (140 :+ ()))]
 
 -- test = fromIntervals [ closedInterval 0 10
 --                      , closedInterval 5 15

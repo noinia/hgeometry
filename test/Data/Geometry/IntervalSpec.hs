@@ -50,10 +50,5 @@ spec = do
   describe "Same as Naive" $ do
     it "quickcheck segmentTree" $
       property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaive is
-    it "quickcheck segmentTree delete" $
-      property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) dels
-                 -> allSameAsNaive is dels
-
-
     it "quickcheck IntervalTree" $
       property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaiveIT is
