@@ -12,9 +12,10 @@ module Data.Range( EndPoint(..)
                  , shiftLeft, shiftRight
                  ) where
 
-import           Control.Lens
-import           Data.Geometry.Properties
-import           Frames.CoRec
+import Control.Lens
+import Data.Geometry.Properties
+import Frames.CoRec
+import Text.Printf(printf)
 
 --------------------------------------------------------------------------------
 
@@ -54,8 +55,11 @@ isClosed = not . isOpen
 data Range a = Range { _lower :: EndPoint a
                      , _upper :: EndPoint a
                      }
-               deriving (Show,Read,Eq,Functor,Foldable,Traversable)
+               deriving (Eq,Functor,Foldable,Traversable)
 makeLenses ''Range
+
+instance Show a => Show (Range a) where
+  show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
 
 type instance NumType (Range a) = a
 

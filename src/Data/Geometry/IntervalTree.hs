@@ -6,32 +6,20 @@ module Data.Geometry.IntervalTree( NodeData(..)
                                  , createTree, fromIntervals
                                  , insert, delete
                                  , stab, search
+                                 , toList
                                  ) where
 
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
 import           Data.Geometry.Interval
+import           Data.Geometry.Interval.Util
 import           Data.Geometry.Properties
 import qualified Data.List as List
 import qualified Data.Map as M
 import           Data.Range
 
 --------------------------------------------------------------------------------
-
--- | Open on left endpoint; so Closed before open
-newtype L r = L { _unL :: EndPoint r } deriving (Show,Eq)
-makeLenses ''L
-instance Ord r => Ord (L r) where
-  a `compare` b = f ( _unL a) `compare` f (_unL b)
-    where
-      f (Open x)   = (x,True)
-      f (Closed x) = (x,False)
-
--- | Order on right endpoint; so Open before Closed
-newtype R r = R { _unR :: EndPoint r } deriving (Show,Eq,Ord)
-makeLenses ''R
-
 
 -- | Information stored in a node of the Interval Tree
 data NodeData i r = NodeData { _splitPoint     :: !r
@@ -65,6 +53,16 @@ fromIntervals is = foldr insert (createTree pts) is
   where
     endPoints (toRange -> Range' a b) = [a,b]
     pts = List.sort . concatMap endPoints $ is
+
+-- | Lists the intervals. We don't guarantee anything about the order
+--
+-- running time: $O(n)$.
+toList :: IntervalTree i r -> [i]
+toList = toList' . _unIntervalTree
+  where
+    toList' Nil              = []
+    toList' (Internal l v r) =
+      concat [concat $ v^..intervalsLeft.traverse, toList' l, toList' r]
 
 --------------------------------------------------------------------------------
 
