@@ -16,18 +16,20 @@ module Data.Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
                                         ) where
 
 
-import           Data.Ext
-import           Data.Semigroup
+import           Control.DeepSeq
 import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.List as List
 import           Data.BinaryTree
-import           Data.Range
+import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.Interval.Util
-import           Data.Geometry.Properties
 import           Data.Geometry.IntervalTree (IntervalLike(..))
+import           Data.Geometry.Properties
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty)
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Range
+import           Data.Semigroup
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -35,24 +37,27 @@ import           Data.Geometry.IntervalTree (IntervalLike(..))
 data NodeData v r = NodeData { _splitPoint :: !(EndPoint r)
                              , _range      :: !(Range r)
                              , _assoc      :: !v
-                             } deriving (Show,Eq,Functor)
+                             } deriving (Show,Eq,Functor,Generic)
 makeLenses ''NodeData
+instance (NFData v, NFData r) => NFData (NodeData v r)
 
 -- | We store atomic ranges a bit more efficiently.
-data AtomicRange r = Singleton !r | AtomicRange deriving (Show,Eq,Functor)
+data AtomicRange r = Singleton !r | AtomicRange deriving (Show,Eq,Functor,Generic)
+instance NFData r => NFData (AtomicRange r)
 
 -- | Leaf nodes store an atomic range, and an associated data structure.
 data LeafData v r = LeafData  { _atomicRange :: !(AtomicRange r)
                               , _leafAssoc   :: !v
-                              } deriving (Show,Eq,Functor)
+                              } deriving (Show,Eq,Functor,Generic)
 makeLenses ''LeafData
+instance (NFData v, NFData r) => NFData (LeafData v r)
 
 --------------------------------------------------------------------------------
 
 -- | Segment tree on a Fixed set of endpoints
 newtype SegmentTree v r =
   SegmentTree { _unSegmentTree :: BinLeafTree (NodeData v r) (LeafData v r) }
-    deriving (Show,Eq)
+    deriving (Show,Eq,Generic,NFData)
 makeLenses ''SegmentTree
 
 
@@ -223,7 +228,7 @@ delete i (SegmentTree t) = SegmentTree $ delete' t
 -- * Listing the intervals stabbed
 
 -- | Interval
-newtype I a = I { _unI :: a} deriving (Show,Read,Eq,Ord)
+newtype I a = I { _unI :: a} deriving (Show,Read,Eq,Ord,Generic,NFData)
 
 type instance NumType (I a) = NumType a
 
@@ -254,9 +259,10 @@ fromIntervals' = fromIntervals I
 --------------------------------------------------------------------------------
 -- * Counting the number of segments intersected
 
-newtype Count = Count { getCount :: Int} deriving (Show,Eq,Ord,Num,Integral,Enum,Real)
+newtype Count = Count { getCount :: Int}
+              deriving (Show,Eq,Ord,Num,Integral,Enum,Real,Generic,NFData)
 
-newtype C a = C { _unC :: a} deriving (Show,Read,Eq,Ord)
+newtype C a = C { _unC :: a} deriving (Show,Read,Eq,Ord,Generic,NFData)
 
 instance Semigroup Count where
   a <> b = Count $ getCount a + getCount b

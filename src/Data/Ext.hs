@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass  #-}
 module Data.Ext where
 
 import Control.Lens
@@ -9,10 +10,12 @@ import Data.Functor.Apply (liftF2)
 import Data.Semigroup
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
-data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded)
+data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded,Generic,NFData)
 infixr 1 :+
 
 

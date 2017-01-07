@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveAnyClass   #-}
 module Data.Geometry.Interval(
                              -- * 1 dimensional Intervals
                                Interval(..)
@@ -18,6 +17,7 @@ module Data.Geometry.Interval(
                              )
        where
 
+import           Control.DeepSeq
 import           Control.Lens (makeLenses, (^.),(%~),(&), Lens')
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -29,12 +29,13 @@ import           Data.Semigroup
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
 newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
-                     deriving (Eq)
+                     deriving (Eq,Generic,NFData)
 makeLenses ''Interval
 
 instance (Show a, Show r) => Show (Interval a r) where

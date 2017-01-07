@@ -1,20 +1,19 @@
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Vector.VectorFixed where
 
-
+import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Boxed
 import           Data.Vector.Fixed.Cont (Z, S, ToPeano)
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
 import           Linear.Metric
 import qualified Linear.V3 as L3
 import           Linear.Vector
-
 
 --------------------------------------------------------------------------------
 
@@ -27,7 +26,7 @@ data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 -- | Datatype representing d dimensional vectors. Our implementation wraps the
 -- implementation provided by fixed-vector.
 newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec (ToPeano d) r }
-
+                                    deriving (Generic)
 
 unV :: Lens' (Vector d r) (Vec (ToPeano d) r)
 unV = lens _unV (const Vector)
@@ -73,6 +72,8 @@ deriving instance Arity d  => Applicative (Vector d)
 
 instance Arity d => Traversable (Vector d) where
   traverse f (Vector v) = Vector <$> traverse f v
+
+deriving instance (Arity d, NFData r) => NFData (Vector d r)
 
 
 instance Arity d => Additive (Vector d) where

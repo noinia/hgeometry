@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where
 
+import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
@@ -14,8 +15,8 @@ import qualified Data.List as L
 import           Data.Proxy
 import qualified Data.Traversable as T
 import qualified Data.Vector.Fixed as FV
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
-
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ import           GHC.TypeLits
 -- * A d-dimensional Point
 
 -- | A d-dimensional point.
-newtype Point d r = Point { toVec :: Vector d r }
+newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
 
 instance (Show r, Arity d) => Show (Point d r) where
   show (Point (Vector v)) = mconcat [ "Point", show $ FV.length v , " "
@@ -40,11 +41,12 @@ instance (Show r, Arity d) => Show (Point d r) where
 
 
 
-deriving instance (Eq r, Arity d)   => Eq (Point d r)
-deriving instance (Ord r, Arity d)  => Ord (Point d r)
-deriving instance Arity d           => Functor (Point d)
-deriving instance Arity d           => F.Foldable (Point d)
-deriving instance Arity d           => T.Traversable (Point d)
+deriving instance (Eq r, Arity d)     => Eq (Point d r)
+deriving instance (Ord r, Arity d)    => Ord (Point d r)
+deriving instance Arity d             => Functor (Point d)
+deriving instance Arity d             => F.Foldable (Point d)
+deriving instance Arity d             => T.Traversable (Point d)
+deriving instance (Arity d, NFData r) => NFData (Point d r)
 
 
 type instance NumType (Point d r) = r

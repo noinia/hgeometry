@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveAnyClass #-}
 module Data.Geometry.IntervalTree( NodeData(..)
                                  , splitPoint, intervalsLeft, intervalsRight
                                  , IntervalTree(..), unIntervalTree
@@ -9,6 +10,8 @@ module Data.Geometry.IntervalTree( NodeData(..)
                                  , toList
                                  ) where
 
+
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
@@ -17,6 +20,7 @@ import           Data.Geometry.Interval.Util
 import           Data.Geometry.Properties
 import qualified Data.List as List
 import qualified Data.Map as M
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -24,7 +28,7 @@ import qualified Data.Map as M
 data NodeData i r = NodeData { _splitPoint     :: !r
                              , _intervalsLeft  :: !(M.Map (L r) [i])
                              , _intervalsRight :: !(M.Map (R r) [i])
-                             } deriving (Show,Eq,Ord)
+                             } deriving (Show,Eq,Ord,Generic,NFData)
 makeLenses ''NodeData
 
 
@@ -32,7 +36,7 @@ makeLenses ''NodeData
 -- | IntervalTree type, storing intervals of type i
 newtype IntervalTree i r =
   IntervalTree { _unIntervalTree :: BinaryTree (NodeData i r) }
-  deriving (Show,Eq)
+  deriving (Show,Eq,Generic,NFData)
 makeLenses ''IntervalTree
 
 -- | Given an ordered list of points, create an interval tree

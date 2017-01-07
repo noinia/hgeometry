@@ -1,21 +1,24 @@
-{-# Language DeriveFunctor #-}
+{-# Language DeriveFunctor#-}
 {-# Language FunctionalDependencies #-}
 module Data.BinaryTree where
 
+import           Control.DeepSeq
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (mapMaybe)
 import           Data.Semigroup
-import           Data.Maybe(mapMaybe)
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
 data BinLeafTree v a = Leaf !a
                      | Node (BinLeafTree v a) !v (BinLeafTree v a)
-                     deriving (Show,Read,Eq,Ord,Functor)
+                     deriving (Show,Read,Eq,Ord,Functor,Generic)
 
+instance (NFData v, NFData a) => NFData (BinLeafTree v a)
 
 class Semigroup v => Measured v a | a -> v where
   measure :: a -> v
@@ -95,7 +98,7 @@ zipExactWith f g (Node l m r) (Node l' m' r') = Node (zipExactWith f g l l')
 zipExactWith _ _ _            _               =
     error "zipExactWith: tree structures not the same "
 
-newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord)
+newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord,Generic,NFData)
 
 instance Semigroup Size where
   x <> y = x + y
@@ -112,7 +115,8 @@ instance Measured Size (Elem a) where
 
 
 data Sized a = Sized !Size a
-             deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+             deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
+instance NFData a => NFData (Sized a)
 
 instance Semigroup a => Semigroup (Sized a) where
   (Sized i a) <> (Sized j b) = Sized (i <> j) (a <> b)
@@ -145,7 +149,8 @@ drawTree = Tree.drawTree . fmap show . toRoseTree
 
 data BinaryTree a = Nil
                   | Internal (BinaryTree a) !a (BinaryTree a)
-                  deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
+                  deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable,Generic)
+instance NFData a => NFData (BinaryTree a)
 
 -- | Get the element stored at the root, if it exists
 access                  :: BinaryTree a -> Maybe a

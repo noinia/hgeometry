@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DeriveAnyClass  #-}
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
@@ -16,13 +17,15 @@ import Control.Lens
 import Data.Geometry.Properties
 import Frames.CoRec
 import Text.Printf(printf)
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
 
 data EndPoint a = Open   a
                 | Closed a
-                deriving (Show,Read,Eq,Functor,Foldable,Traversable)
+                deriving (Show,Read,Eq,Functor,Foldable,Traversable,Generic,NFData)
 
 instance Ord a => Ord (EndPoint a) where
   -- | order on the actual value, and Open before Closed
@@ -55,7 +58,7 @@ isClosed = not . isOpen
 data Range a = Range { _lower :: EndPoint a
                      , _upper :: EndPoint a
                      }
-               deriving (Eq,Functor,Foldable,Traversable)
+               deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
 makeLenses ''Range
 
 instance Show a => Show (Range a) where
