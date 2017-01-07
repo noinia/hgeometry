@@ -23,6 +23,13 @@ data EndPoint a = Open   a
                 | Closed a
                 deriving (Show,Read,Eq,Functor,Foldable,Traversable)
 
+instance Ord a => Ord (EndPoint a) where
+  -- | order on the actual value, and Open before Closed
+  a `compare` b = f a `compare` f b
+    where
+      f (Open x)   = (x,False)
+      f (Closed x) = (x,True)
+
 _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
 _unEndPoint (Closed a) = a

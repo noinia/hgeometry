@@ -5,7 +5,7 @@ module Data.Geometry.IntervalTree( NodeData(..)
                                  , IntervalLike(..)
                                  , createTree, fromIntervals
                                  , insert, delete
-                                 , stab
+                                 , stab, search
                                  ) where
 
 import           Control.Lens
@@ -19,12 +19,27 @@ import           Data.Range
 
 --------------------------------------------------------------------------------
 
+-- | Open on left endpoint; so Closed before open
+newtype L r = L { _unL :: EndPoint r } deriving (Show,Eq)
+makeLenses ''L
+instance Ord r => Ord (L r) where
+  a `compare` b = f ( _unL a) `compare` f (_unL b)
+    where
+      f (Open x)   = (x,True)
+      f (Closed x) = (x,False)
+
+-- | Order on right endpoint; so Open before Closed
+newtype R r = R { _unR :: EndPoint r } deriving (Show,Eq,Ord)
+makeLenses ''R
+
+
 -- | Information stored in a node of the Interval Tree
 data NodeData i r = NodeData { _splitPoint     :: !r
-                             , _intervalsLeft  :: !(M.Map r [i])
-                             , _intervalsRight :: !(M.Map r [i])
+                             , _intervalsLeft  :: !(M.Map (L r) [i])
+                             , _intervalsRight :: !(M.Map (R r) [i])
                              } deriving (Show,Eq,Ord)
 makeLenses ''NodeData
+
 
 
 -- | IntervalTree type, storing intervals of type i
@@ -53,6 +68,11 @@ fromIntervals is = foldr insert (createTree pts) is
 
 --------------------------------------------------------------------------------
 
+-- | Find all intervals that stab x
+--
+-- $O(\log n + k)$, where k is the output size
+search :: Ord r => r -> IntervalTree i r -> [i]
+search = stab
 
 -- | Find all intervals that stab x
 --
@@ -62,12 +82,11 @@ stab x (IntervalTree t) = stab' t
   where
     stab' Nil = []
     stab' (Internal l (NodeData m ll rr) r)
-      | x <= m    = let is = f (<= x) . M.toAscList $ ll
+      | x <= m    = let is = f (<= L (Closed x)) . M.toAscList $ ll
                     in is ++ stab' l
-      | otherwise = let is = f (>= x) . M.toDescList $ rr
+      | otherwise = let is = f (>= R (Closed x)) . M.toDescList $ rr
                     in is ++ stab' r
     f p = concatMap snd . List.takeWhile (p . fst)
-
 
 --------------------------------------------------------------------------------
 
@@ -79,16 +98,16 @@ insert                    :: (Ord r, IntervalLike i, NumType i ~ r)
                           => i -> IntervalTree i r -> IntervalTree i r
 insert i (IntervalTree t) = IntervalTree $ insert' t
   where
-    ri@(Range' a b) = toRange i
+    ri@(Range a b) = toRange i
 
     insert' Nil = Nil
     insert' (Internal l nd@(_splitPoint -> m) r)
       | m `inRange` ri = Internal l (insert'' nd) r
-      | b <= m         = Internal (insert' l) nd r
+      | b <= Closed m  = Internal (insert' l) nd r
       | otherwise      = Internal l nd (insert' r)
 
-    insert'' (NodeData m l r) = NodeData m (M.insertWith (++) a [i] l)
-                                           (M.insertWith (++) b [i] r)
+    insert'' (NodeData m l r) = NodeData m (M.insertWith (++) (L a) [i] l)
+                                           (M.insertWith (++) (R b) [i] r)
 
 
 -- | Delete an interval from the Tree
@@ -98,15 +117,15 @@ delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i)
           => i -> IntervalTree i r -> IntervalTree i r
 delete i (IntervalTree t) = IntervalTree $ delete' t
   where
-    ri@(Range' a b) = toRange i
+    ri@(Range a b) = toRange i
 
     delete' Nil = Nil
     delete' (Internal l nd@(_splitPoint -> m) r)
       | m `inRange` ri = Internal l (delete'' nd) r
-      | b <= m         = Internal (delete' l) nd r
+      | b <= Closed m  = Internal (delete' l) nd r
       | otherwise      = Internal l nd (delete' r)
 
-    delete'' (NodeData m l r) = NodeData m (M.update f a l) (M.update f b r)
+    delete'' (NodeData m l r) = NodeData m (M.update f (L a) l) (M.update f (R b) r)
     f is = let is' = List.delete i is in if null is' then Nothing else Just is'
 
 
