@@ -42,7 +42,7 @@ module Data.PlanarGraph( Arc(..)
 
 import           Control.Applicative (Alternative(..))
 import           Control.Lens
-import           Control.Monad (forM_)
+import           Control.Monad (forM_, when)
 import           Control.Monad.ST (ST)
 import qualified Data.CircularList as C
 import           Data.Ext
@@ -60,6 +60,7 @@ import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -629,6 +630,24 @@ edgeOracle g = buildEdgeOracle [ (v, ext <$> neighboursOf v g)
                                ]
 
 
+data TestG
+
+type Vertex = VertexId TestG Primal_
+
+testEdges :: [(Vertex,[Vertex])]
+testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+            [ (0, [1])
+            , (1, [0,1,2,4])
+            , (2, [1,3,4])
+            , (3, [2,5])
+            , (4, [1,2,5])
+            , (5, [3,4])
+            ]
+
+buildEdgeOracle' :: [(Vertex,[Vertex])] -> EdgeOracle TestG Primal_ ()
+buildEdgeOracle' = buildEdgeOracle . map (\(i,vs) -> (i,fmap ext vs))
+
+
 -- | Builds an edge oracle that can be used to efficiently test if two vertices
 -- are connected by an edge.
 --
@@ -678,11 +697,14 @@ buildEdgeOracle inAdj' = EdgeOracle $ V.create $ do
           -> MV.MVector s' (V.Vector (VertexId s w :+ e)) -> [Int] -> ST s' ()
     build _      _     _    []    = pure ()
     build counts marks outV (i:q) = do
-                                      adjI <- extractAdj marks i
-                                      MV.write outV i $ adjI
-                                      UMV.write marks i True
-                                      nq   <- V.toList <$> mapM (decrease counts) adjI
-                                      build counts marks outV (catMaybes nq <> q)
+             b <- UMV.read marks i
+             nq <- if b then pure []
+                        else do
+                          adjI <- extractAdj marks i
+                          MV.write outV i adjI
+                          UMV.write marks i True
+                          V.toList <$> mapM (decrease counts) adjI
+             build counts marks outV (catMaybes nq <> q)
 
 
 
