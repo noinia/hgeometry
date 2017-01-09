@@ -7,13 +7,11 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , scalarMultiple
                            ) where
 
-import           Control.DeepSeq
 import qualified Data.Foldable as F
 import           Data.Geometry.Vector.VectorFixed
 import           Data.Geometry.Vector.VectorFixed as GV
 import           Data.Maybe
 import qualified Data.Vector.Fixed as FV
-import           GHC.Generics (Generic)
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm)
 import           Linear.Vector as LV

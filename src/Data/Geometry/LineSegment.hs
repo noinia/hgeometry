@@ -31,7 +31,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.Range
 import           Data.Vinyl
 import           Data.UnBounded
 import           Frames.CoRec

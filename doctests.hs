@@ -19,6 +19,8 @@ ghcExts = map ("-X" ++)
           , "TupleSections"
           , "MultiParamTypeClasses"
           , "LambdaCase"
+          , "TupleSections"
+
 
           , "StandaloneDeriving"
           , "GeneralizedNewtypeDeriving"
@@ -26,6 +28,7 @@ ghcExts = map ("-X" ++)
           , "DeriveFoldable"
           , "DeriveTraversable"
           , "AutoDeriveTypeable"
+          , "DeriveGeneric"
           , "FlexibleInstances"
           , "FlexibleContexts"
           ]

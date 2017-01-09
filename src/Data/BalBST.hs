@@ -113,7 +113,7 @@ insert x (BalBST n@Nav{..} t) = BalBST n (blacken $ insert' t)
 
 
 
-delete = undefined
+-- delete = undefined
 
 -- delete                        :: Eq a => a -> BalBST k a -> BalBST k a
 -- delete x (BalBST n@Nav{..} t) = delete' t
