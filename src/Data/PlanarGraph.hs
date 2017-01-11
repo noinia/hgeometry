@@ -266,12 +266,14 @@ fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
     oracle = fmap (^.core) . assignArcs . buildEdgeOracle
            . map (second $ map ext)  $ adjM'
 
-    toOrbit (u,adjU) = map (toDart u) adjU
+    toOrbit (u,adjU) = concatMap (toDart u) adjU
 
+    -- if u = v we have a self-loop, so we add both a positive and a negative dart
     toDart u v = let Just a = findEdge u v oracle
-                     dir    = if u <= v then Positive else Negative
-                 in Dart (Arc a) dir
-
+                 in case u `compare` v of
+                      LT -> [Dart (Arc a) Positive]
+                      EQ -> [Dart (Arc a) Positive, Dart (Arc a) Negative]
+                      GT -> [Dart (Arc a) Negative]
 
 
 assignArcs   :: EdgeOracle s w e -> EdgeOracle s w (Int :+ e)

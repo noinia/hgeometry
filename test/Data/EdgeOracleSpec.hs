@@ -55,6 +55,9 @@ edgeOracleSpec s es = do
       it "test negative edges " $
           (oracle `hasEdges` nonEdges es) `shouldBe` []
 
+      -- it "test maximum adjacency-list lengths" $
+      --     (filter (\v -> length v > 6) . _unEdgeOracle $ oracle) `shouldBe` []
+
 spec :: Spec
 spec = do
          edgeOracleSpec "testEdges" testEdges
