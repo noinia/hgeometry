@@ -42,25 +42,26 @@ module Data.PlanarGraph( Arc(..)
 
 import           Control.Applicative (Alternative(..))
 import           Control.Lens
-import           Control.Monad (forM_, when)
+import           Control.Monad (forM_)
 import           Control.Monad.ST (ST)
-import qualified Data.CircularList as C
+import           Control.Monad.State.Strict
+import           Data.Bifunctor
+import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.List as L
-import qualified Data.Map.Strict as SM
 import           Data.Maybe (catMaybes, isJust)
 import           Data.Permutation
 import           Data.Semigroup (Semigroup(..))
+import           Data.Traversable (fmapDefault,foldMapDefault)
 import           Data.Util
 import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Generic as GV
+import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
 
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -214,7 +215,7 @@ reorderEdgeData ds = V.create $ do
 
 
 -- | Construct a planar graph
-planarGraph'      :: Permutation (Dart s) -> PlanarGraph s Primal_ () () ()
+planarGraph'      :: Permutation (Dart s) -> PlanarGraph s w () () ()
 planarGraph' perm = PlanarGraph perm vData eData fData
   where
     d = size perm
@@ -239,48 +240,112 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
     perm  = toCycleRep n $ map (map fst) ds
 
 
--- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
---            u < v, to arcId's.
--- - a: the next available unused arcID
--- - x: the data value we are interested in computing
-type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
-
-
--- TODO: The idea is that with EdgeOracle this might be possible in O(n) time :)
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- vertices should be given in counter clockwise order.
 --
--- running time: $O(n \log n)$.
-fromAdjacencyLists      :: forall s.
-                           [(VertexId s Primal_, C.CList (VertexId s Primal_))]
-                        -> PlanarGraph s Primal_ () () ()
+-- running time: $O(n)$.
+--
+-- TODO: Figure out how to handle the self-loop
+fromAdjacencyLists      :: forall s w f. (Foldable f, Functor f)
+                        => [(VertexId s w, f (VertexId s w))]
+                        -> PlanarGraph s w () () ()
 fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
   where
-    n    = sum . fmap length $ adjM
-    perm = trd' . foldr toOrbit (STR mempty 0 mempty) $ adjM
+    n    = sum . fmap length $ perm
+    perm = map toOrbit  $ adjM'
+
+    adjM' = fmap (second F.toList) adjM
+
+    -- -- | Assign Arcs
+    -- adjM' = (^._1) . foldr assignArcs (SP [] 0) $ adjM
+
+    -- Build an edgeOracle, so that we can query the arcId assigned to
+    -- an edge in O(1) time.
+    oracle :: EdgeOracle s w Int
+    oracle = fmap (^.core) . assignArcs . buildEdgeOracle
+           . map (second $ map ext)  $ adjM'
+
+    toOrbit (u,adjU) = map (toDart u) adjU
+
+    toDart u v = let Just a = findEdge u v oracle
+                     dir    = if u <= v then Positive else Negative
+                 in Dart (Arc a) dir
 
 
-    -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
-    -- vertex with its adjacent vertices into an Orbit
-    toOrbit                     :: (VertexId s Primal_, C.CList (VertexId s Primal_))
-                                -> STR' s [[Dart s]]
-                                -> STR' s [[Dart s]]
-    toOrbit (u,vs) (STR m a dss) =
-      let (STR m' a' ds') = foldr (toDart . (u,)) (STR m a mempty) . C.toList $ vs
-      in STR m' a' (ds':dss)
+
+assignArcs   :: EdgeOracle s w e -> EdgeOracle s w (Int :+ e)
+assignArcs o = evalState (traverse f o) 0
+  where
+    f   :: e -> State Int (Int :+ e)
+    f e = do i <- get ; put (i+1) ; pure (i :+ e)
 
 
-    -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
-    -- representing this edge.
-    toDart                    :: (VertexId s Primal_,VertexId s Primal_)
-                              -> STR' s [Dart s]
-                              -> STR' s [Dart s]
-    toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
-                                    t'  = (min u v, max u v)
-                               in case SM.lookup t' m of
-      Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
-      Nothing -> STR (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
+
+
+--     -- Go through all of the edges we find an edge (u,v), with u <= v,
+--     -- assign an ArcId to this edge (and increment the next available arcId).
+--     -- if u > v. Don't assign anything.
+-- assignArcs                     :: (Ord v, Foldable f)
+--                                    => (v, f v)
+--                                    -> SP [(v, [v :+ Maybe Int])] Int
+--                                    -> SP [(v, [v :+ Maybe Int])] Int
+-- assignArcs (u,adjU) (SP acc i) = first (\adjU' -> (u,adjU'):acc)
+--                                    . foldr (assignArcs' u) (SP [] i)
+--                                    . F.toList $ adjU
+
+--     -- Go through all edges that have u as one endpoint.
+-- assignArcs'   :: Ord v => v -> v -> SP [v :+ Maybe Int] Int
+--                                  -> SP [v :+ Maybe Int] Int
+-- assignArcs' u v (SP acc i)
+--       | u <= v    = SP ((v :+ Just i)  : acc) (i+1)
+--       | otherwise = SP ((v :+ Nothing) : acc) i
+
+
+
+
+
+
+
+-- -- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
+-- --            u < v, to arcId's.
+-- -- - a: the next available unused arcID
+-- -- - x: the data value we are interested in computing
+-- type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
+
+-- -- | Construct a planar graph from a adjacency matrix. For every vertex, all
+-- -- vertices should be given in counter clockwise order.
+-- --
+-- -- running time: $O(n \log n)$.
+-- fromAdjacencyLists      :: forall s.
+--                            [(VertexId s Primal_, C.CList (VertexId s Primal_))]
+--                         -> PlanarGraph s Primal_ () () ()
+-- fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
+--   where
+--     n    = sum . fmap length $ adjM
+--     perm = trd' . foldr toOrbit (STR mempty 0 mempty) $ adjM
+
+
+--     -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
+--     -- vertex with its adjacent vertices into an Orbit
+--     toOrbit                     :: (VertexId s Primal_, C.CList (VertexId s Primal_))
+--                                 -> STR' s [[Dart s]]
+--                                 -> STR' s [[Dart s]]
+--     toOrbit (u,vs) (STR m a dss) =
+--       let (STR m' a' ds') = foldr (toDart . (u,)) (STR m a mempty) . C.toList $ vs
+--       in STR m' a' (ds':dss)
+
+
+--     -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
+--     -- representing this edge.
+--     toDart                    :: (VertexId s Primal_,VertexId s Primal_)
+--                               -> STR' s [Dart s]
+--                               -> STR' s [Dart s]
+--     toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
+--                                     t'  = (min u v, max u v)
+--                                in case SM.lookup t' m of
+--       Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
+--       Nothing -> STR (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
 
 
 --------------------------------------------------------------------------------
@@ -616,37 +681,29 @@ data Test
 -- main idea: store adjacency lists in such a way that we store an edge (u,v)
 -- either in u's adjacency list or in v's. This can be done s.t. all adjacency
 -- lists have length at most 6.
+--
+-- note: Every edge is stored exactly once (i.e. either at u or at v, but not both)
 newtype EdgeOracle s w a =
   EdgeOracle { _unEdgeOracle :: V.Vector (V.Vector (VertexId s w :+ a)) }
                          deriving (Show,Eq)
 
 instance Functor (EdgeOracle s w) where
-  fmap f (EdgeOracle v) = EdgeOracle $ fmap (fmap (&extra %~ f)) v
+  fmap = fmapDefault
+
+instance Foldable (EdgeOracle s w) where
+  foldMap = foldMapDefault
+
+instance Traversable (EdgeOracle s w) where
+  traverse f (EdgeOracle v) = EdgeOracle <$> traverse g v
+    where
+      -- g   :: V.Vector (VertexId :+ a) -> f (V.Vector (VertexId :+ b))
+      g = traverse (bitraverse pure f)
 
 
 edgeOracle   :: PlanarGraph s w v e f -> EdgeOracle s w ()
 edgeOracle g = buildEdgeOracle [ (v, ext <$> neighboursOf v g)
                                | v <- F.toList $ vertices' g
                                ]
-
-
-data TestG
-
-type Vertex = VertexId TestG Primal_
-
-testEdges :: [(Vertex,[Vertex])]
-testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
-            [ (0, [1])
-            , (1, [0,1,2,4])
-            , (2, [1,3,4])
-            , (3, [2,5])
-            , (4, [1,2,5])
-            , (5, [3,4])
-            ]
-
-buildEdgeOracle' :: [(Vertex,[Vertex])] -> EdgeOracle TestG Primal_ ()
-buildEdgeOracle' = buildEdgeOracle . map (\(i,vs) -> (i,fmap ext vs))
-
 
 -- | Builds an edge oracle that can be used to efficiently test if two vertices
 -- are connected by an edge.
@@ -722,3 +779,21 @@ findEdge :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Maybe a
 findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
   where
     find' j i = fmap (^.extra) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i
+
+
+
+--------------------------------------------------------------------------------
+
+data TestG
+
+type Vertex = VertexId TestG Primal_
+
+testEdges :: [(Vertex,[Vertex])]
+testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+            [ (0, [1])
+            , (1, [0,1,2,4])
+            , (2, [1,3,4])
+            , (3, [2,5])
+            , (4, [1,2,5])
+            , (5, [3,4])
+            ]
