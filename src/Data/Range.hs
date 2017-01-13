@@ -23,8 +23,8 @@ import Control.DeepSeq
 --------------------------------------------------------------------------------
 
 
-data EndPoint a = Open   a
-                | Closed a
+data EndPoint a = Open   !a
+                | Closed !a
                 deriving (Show,Read,Eq,Functor,Foldable,Traversable,Generic,NFData)
 
 instance Ord a => Ord (EndPoint a) where
@@ -55,8 +55,8 @@ isClosed = not . isOpen
 
 --------------------------------------------------------------------------------
 
-data Range a = Range { _lower :: EndPoint a
-                     , _upper :: EndPoint a
+data Range a = Range { _lower :: !(EndPoint a)
+                     , _upper :: !(EndPoint a)
                      }
                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
 makeLenses ''Range

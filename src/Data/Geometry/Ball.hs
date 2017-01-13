@@ -23,8 +23,8 @@ import           Linear.V3 (V3(..))
 -- * A d-dimensional ball
 
 -- | A d-dimensional ball.
-data Ball d p r = Ball { _center        :: Point d r :+ p
-                       , _squaredRadius :: r
+data Ball d p r = Ball { _center        :: !(Point d r :+ p)
+                       , _squaredRadius :: !r
                        }
 makeLenses ''Ball
 

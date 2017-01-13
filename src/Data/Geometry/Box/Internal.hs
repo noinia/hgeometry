@@ -45,8 +45,8 @@ instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
 -- * d-dimensional boxes
 
 
-data Box d p r = Box { _minP :: CWMin (Point d r) :+ p
-                     , _maxP :: CWMax (Point d r) :+ p
+data Box d p r = Box { _minP :: !(CWMin (Point d r) :+ p)
+                     , _maxP :: !(CWMax (Point d r) :+ p)
                      }
 makeLenses ''Box
 

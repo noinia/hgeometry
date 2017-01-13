@@ -18,8 +18,8 @@ import           Frames.CoRec
 
 -- | A line is given by an anchor point and a vector indicating the
 -- direction.
-data Line d r = Line { _anchorPoint :: Point  d r
-                     , _direction   :: Vector d r
+data Line d r = Line { _anchorPoint :: !(Point  d r)
+                     , _direction   :: !(Vector d r)
                      }
 makeLenses ''Line
 
