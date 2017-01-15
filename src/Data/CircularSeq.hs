@@ -26,10 +26,15 @@ module Data.CircularSeq( CSeq
 
                        , zipLWith, zipL
                        , zip3LWith
+
+
+                       , insertOrd, insertOrdBy
+                       , isShiftOf
                        ) where
 
-import           Control.Lens(lens, Lens')
+import           Control.Lens (lens, Lens', bimap)
 import qualified Data.Foldable as F
+import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (listToMaybe)
 import           Data.Semigroup
@@ -303,3 +308,63 @@ zipL = zipLWith (,)
 -- | same as zipLWith but with three items
 zip3LWith            :: (a -> b -> c -> d) -> CSeq a -> CSeq b -> CSeq c -> CSeq d
 zip3LWith f as bs cs = fromList $ zipWith3 f (F.toList as) (F.toList bs) (F.toList cs)
+
+
+
+
+-- | Given a circular seq, whose elements are in increasing order, insert the
+-- new element into the Circular seq in its sorted order.
+--
+-- >>> insertOrd 1 C.empty
+-- fromList [1]
+-- >>> insertOrd 1 $ C.fromList [2]
+-- fromList [2,1]
+-- >>> insertOrd 2 $ C.fromList [1,3]
+-- fromList [1,2,3]
+-- >>> insertOrd 31 ordList
+-- fromList [5,6,10,20,30,31,1,2,3]
+-- >>> insertOrd 1 ordList
+-- fromList [5,6,10,20,30,1,1,2,3]
+-- >>> insertOrd 4 ordList
+-- fromList [5,6,10,20,30,1,2,3,4]
+-- >>> insertOrd 11 ordList
+-- fromList [5,6,10,11,20,30,1,2,3]
+--
+-- running time: $O(n)$
+insertOrd :: Ord a => a -> CSeq a -> CSeq a
+insertOrd = insertOrdBy compare
+
+-- | Insert an element into an increasingly ordered circular list, with
+-- specified compare operator.
+--
+-- running time: $O(n)$
+insertOrdBy       :: (a -> a -> Ordering) -> a -> CSeq a -> CSeq a
+insertOrdBy cmp x = fromList . insertOrdBy' cmp x . F.toList . rightElements
+
+-- | List version of insertOrdBy; i.e. the list contains the elements in
+-- cirulcar order. Again produces a list that has the items in circular order.
+insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
+insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
+    ([],  _)   -> L.insertBy cmp x pref
+    (z:zs, GT) -> (z : L.insertBy cmp x zs) ++ pref
+    (_:_,  EQ) -> (x : xs) -- == x : rest ++ pref
+    (_:_,  LT) -> rest ++ L.insertBy cmp x pref
+  where
+    -- split the list at its maximum.
+    (pref,rest) = splitIncr cmp xs
+
+-- given a list of elements that is supposedly a a cyclic-shift of a list of
+-- increasing items, find the splitting point. I.e. returns a pair of lists
+-- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted
+-- order.
+splitIncr              :: (a -> a -> Ordering) -> [a] -> ([a],[a])
+splitIncr _   []       = ([],[])
+splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
+                      . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
+
+-- | Test if the circular list is a cyclic shift of the second list.
+-- Running time: O(n), where n is the size of the smallest list
+isShiftOf         :: Eq a => CSeq a -> CSeq a -> Bool
+xs `isShiftOf` ys = let rest = tail . F.toList . leftElements
+                    in maybe False (\xs' -> rest xs' == rest ys) $
+                       rotateTo (focus ys) xs

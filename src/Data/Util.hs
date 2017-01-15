@@ -1,7 +1,8 @@
 module Data.Util where
 
-import Data.Semigroup
 import Control.Lens
+import Data.Bifunctor
+import Data.Semigroup
 
 -- |  strict triple
 data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}
@@ -32,6 +33,9 @@ instance Field1 (SP a b) (SP c b) a c where
 
 instance Field2 (SP a b) (SP a c) b c where
   _2 = lens (\(SP _ b) -> b) (\(SP a _) c -> SP a c)
+
+instance Bifunctor SP where
+  bimap f g (SP a b) = SP (f a) (g b)
 
 -- | Strict pair with both items the same
 type Two a = SP a a
