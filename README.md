@@ -21,7 +21,8 @@ newtype Point (d :: Nat) (r :: *) = Point { toVec :: Vector d r }
 that a polyline is a proper polyline, and thus has at least two vertices.
 
 Please note that aspect (2), implementing good algorithms, is much work in
-progress. Only a few algorithms are currently available. Some examples are:
+progress. Only a few algorithms have been implemented, some of which could use
+some improvements. Currently, HGeometry provides the following algorithms:
 
 * two $O(n \log n)$ time algorithms for convex hull in
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
