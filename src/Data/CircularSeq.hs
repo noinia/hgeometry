@@ -315,8 +315,6 @@ zip3LWith f as bs cs = fromList $ zipWith3 f (F.toList as) (F.toList bs) (F.toLi
 -- | Given a circular seq, whose elements are in increasing order, insert the
 -- new element into the Circular seq in its sorted order.
 --
--- >>> insertOrd 1 C.empty
--- fromList [1]
 -- >>> insertOrd 1 $ C.fromList [2]
 -- fromList [2,1]
 -- >>> insertOrd 2 $ C.fromList [1,3]
