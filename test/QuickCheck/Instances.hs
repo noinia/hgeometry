@@ -3,6 +3,7 @@
 module QuickCheck.Instances where
 
 import           Control.Lens
+import           Data.BinaryTree
 import           Data.Ext
 import           Data.Geometry hiding (vector)
 import           Data.Geometry.Box
@@ -25,6 +26,21 @@ instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where
 
 instance Arbitrary a => Arbitrary (S2.Seq2 a) where
   arbitrary = S2.Seq2 <$> arbitrary <*> arbitrary <*> arbitrary
+
+instance Arbitrary a => Arbitrary (BinaryTree a) where
+  arbitrary = sized f
+    where f n | n <= 0    = pure Nil
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Internal <$> f l <*> arbitrary <*> f (n-l-1)
+
+instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
+  arbitrary = sized f
+    where f n | n <= 0    = Leaf <$> arbitrary
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Node <$> f l <*> arbitrary <*> f (n-l-1)
+
 
 instance (KnownNat n, Arbitrary a) => Arbitrary (Seq.LSeq n a) where
   arbitrary = (\s s' -> Seq.promise . Seq.fromList $ s <> s')
