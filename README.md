@@ -34,13 +34,15 @@ Tree (EMST), based on computing the Delaunay Triangulation.
 * an $O(\log^2 n)$ time algorithm to find extremal points and tangents on/to a
   convex polygon.
 * An optimal $O(n+m)$ time algorithm to compute the Minkowski sum of two convex
-  polygons.
+polygons.
+* An $O(1/\eps^dn\log n)$ time algorithm for constructing a Well-Separated pair
+  decomposition.
 
 It also has some geometric data structures. In particular, HGeometry contans an
 implementation of
 
-* A Segment Tree. The base tree is static.
-* An Interval Tree. The base tree is static.
+* A one dimensional Segment Tree. The base tree is static.
+* A one dimensional Interval Tree. The base tree is static.
 * A KD-Tree. The base tree is static.
 
 Numeric Types

@@ -6,19 +6,17 @@
 module Demo.GPXParser where
 
 
-import qualified Data.ByteString.Lazy as B
-
 import           Control.Applicative
+import           Control.Lens
 import           Control.Monad
+import qualified Data.ByteString.Lazy as B
+import           Data.Ext
+import           Data.Geometry.Point
 import           Data.Maybe
+import           Data.Semigroup
 import           Data.Time.Clock
 import           Data.Time.Format
 import           Text.XML.Expat.Tree
-
-import           Control.Lens
-
-import           Data.Geometry.Point
-import           Data.Ext
 
 import           Debug.Trace
 

@@ -12,11 +12,12 @@ import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
-import           Data.Geometry.PolyLine
 import           Data.Geometry.Ipe
+import           Data.Geometry.PolyLine
 import           Data.Geometry.Vector
 import           Data.List (isSuffixOf)
 import           Data.Maybe
+import           Data.Semigroup
 import qualified Data.Sequence as S
 import qualified Data.Text as T
 import           Data.Time.Calendar

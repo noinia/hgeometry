@@ -3,29 +3,25 @@ module Demo.MinDisk where
 
 import           Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
-
 import           Control.Applicative
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
-import qualified Data.Traversable as Tr
 import           Data.Geometry
 import           Data.Geometry.Ball
-import           Data.Geometry.Line
-import           Data.Geometry.PolyLine
-import           Data.Monoid
-
---import           Data.Geometry.Ipe
-
 import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Line
+import           Data.Geometry.PolyLine
 import           Data.Maybe
+import           Data.Semigroup
 import           Data.Seq2
+import qualified Data.Traversable as Tr
 import           Data.Vinyl
-import           System.Environment(getArgs)
-import           System.Random
 import           Options.Applicative
+import           System.Environment (getArgs)
+import           System.Random
 
 --------------------------------------------------------------------------------
 

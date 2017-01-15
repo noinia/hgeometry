@@ -11,36 +11,39 @@ import qualified Demo.DrawGPX as DrawGPX
 import qualified Demo.WriteEnsemble as EnsembleWriter
 import qualified Demo.MinDisk as MinDisk
 import qualified Demo.Delaunay as Delaunay
+import qualified Demo.ExpectedPairwiseDistance as ExpPWD
 
 
 
 
 --------------------------------------------------------------------------------
 
-data Options = BAPC           BAPCOptions
-             | DrawGPX        DrawGPX.Options
-             | EnsembleWriter EnsembleWriter.Options
-             | MinDisk        MinDisk.Options
-             | Delaunay       Delaunay.Options
+data Options = BAPC                      BAPCOptions
+             | DrawGPX                   DrawGPX.Options
+             | EnsembleWriter            EnsembleWriter.Options
+             | MinDisk                   MinDisk.Options
+             | Delaunay                  Delaunay.Options
+             | ExpectedPairwiseDistance  ExpPWD.Options
              deriving Data
 
 parser :: Parser Options
 parser = subparser (
-       command' DrawGPX        DrawGPX.options
-    <> command' EnsembleWriter EnsembleWriter.options
-    <> command' MinDisk        MinDisk.options
-    <> command' Delaunay       Delaunay.options
+       command' DrawGPX                        DrawGPX.options
+    <> command' EnsembleWriter                 EnsembleWriter.options
+    <> command' MinDisk                        MinDisk.options
+    <> command' Delaunay                       Delaunay.options
+    <> command' ExpectedPairwiseDistance       ExpPWD.options
     )
 
 
 mainWith       :: Options -> IO ()
 mainWith opts' = case opts' of
-  BAPC _              -> putStrLn "not yet"
-  DrawGPX opts        -> DrawGPX.mainWith opts
-  EnsembleWriter opts -> EnsembleWriter.mainWith opts
-  MinDisk opts        -> MinDisk.mainWith opts
-  Delaunay opts       -> Delaunay.mainWith opts
-
+  BAPC _                              -> putStrLn "not yet"
+  DrawGPX opts                        -> DrawGPX.mainWith opts
+  EnsembleWriter opts                 -> EnsembleWriter.mainWith opts
+  MinDisk opts                        -> MinDisk.mainWith opts
+  Delaunay opts                       -> Delaunay.mainWith opts
+  ExpectedPairwiseDistance opts       -> ExpPWD.mainWith opts
 
 --------------------------------------------------------------------------------
 

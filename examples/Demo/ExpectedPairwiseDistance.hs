@@ -2,26 +2,45 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.ExpectedPairwiseDistance where
 
+import           Algorithms.Geometry.Diameter
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
 import           Control.Lens
-import Data.Proxy
-import GHC.TypeLits(natVal,KnownNat)
+import           Control.Monad ((<=<))
 import           Data.BinaryTree
-import qualified Data.ByteString       as B
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Char (isSpace)
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
+import           Data.Proxy
+import           Data.Data
 import           Data.Semigroup
-
-import Control.Monad((<=<))
-import Debug.Trace
-import           Algorithms.Geometry.Diameter
-import qualified Data.Foldable as F
 import qualified Data.Set as Set
+import           GHC.TypeLits (natVal,KnownNat)
+import           Options.Applicative hiding ((<>))
+
+
+import           Debug.Trace
+--------------------------------------------------------------------------------
+
+
+data Options = Options { _inPath    :: FilePath }
+               deriving Data
+
+options :: ParserInfo Options
+options = info (helper <*> parser)
+               (  progDesc "Compute expected pairwise distance of the points in the input file."
+               <> header   "Expected Pairwise Distance"
+               )
+  where
+    parser = Options
+          <$> strOption (help "Input file"
+                         <> short 'i'
+                        )
 
 --------------------------------------------------------------------------------
 
@@ -64,8 +83,8 @@ approxPairwiseDistance eps pts =
     t     = withSizes . fairSplitTree . NonEmpty.fromList $ pts
     pairs = wellSeparatedPairs (4 / eps) t
 
-    size (access -> (Sized (Size i) _))  = fromIntegral i
-    repr (access -> (Sized _ (First p))) = p^.core
+    size (access' -> (Sized (Size i) _))  = fromIntegral i
+    repr (access' -> (Sized _ (First p))) = p^.core
 
 
 -- wspPairs = fairSplitTree . NonEmpty.fromList
@@ -106,13 +125,13 @@ n `choose` k = fromIntegral $ fac n' `div` (fac (n'-k') * fac k')
 withSizes :: SplitTree d p r a -> SplitTree d p r (Sized (First (Point d r :+ p)))
 withSizes = foldUp f Leaf
   where
-    f l (NodeData j b _) r = let nd = (access l) <> (access r)
+    f l (NodeData j b _) r = let nd = (access' l) <> (access' r)
                              in Node l (NodeData j b nd) r
 
 -- | Get the measurement for a given splittree
-access               :: BinLeafTree (NodeData d r (Sized (First a))) a -> Sized (First a)
-access (Leaf x)      = Sized 1 (First x)
-access (Node _ nd _) = nd^.nodeData
+access'               :: BinLeafTree (NodeData d r (Sized (First a))) a -> Sized (First a)
+access' (Leaf x)      = Sized 1 (First x)
+access' (Node _ nd _) = nd^.nodeData
 
 
 --
@@ -152,7 +171,7 @@ compareBoth1 eps pts = let exact  = pairwiseDist pts
                        in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
 
 
-
+mainWith (Options f) = compareBoth 0.05 f >>= print
 
 
 --------------------------------------------------------------------------------

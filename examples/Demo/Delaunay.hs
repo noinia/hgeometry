@@ -1,9 +1,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.Delaunay where
 
-import           Algorithms.Geometry.EuclideanMST.EuclideanMST
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror
 import           Algorithms.Geometry.DelaunayTriangulation.Types
+import           Algorithms.Geometry.EuclideanMST.EuclideanMST
 import           Control.Applicative
 import           Control.Lens
 import           Data.Data
@@ -11,6 +11,7 @@ import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Semigroup
 import           Data.Traversable
 import           Options.Applicative
 
