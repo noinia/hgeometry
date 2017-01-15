@@ -55,6 +55,7 @@ subTrees t = Nil : subTrees' t
     subTrees' tt@(Internal l _ r) = tt : subTrees' l <> subTrees' r
 
 
+-- | Splits the tree here, returns a pair (innerTree,outerTree)
 splitTree             :: BinaryTreeZipper a -> (BinaryTree a, BinaryTree a)
 splitTree (Loc t ctx) = let (Loc r _) = toRoot $ Loc Nil ctx
                         in (t, r)
