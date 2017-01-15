@@ -46,6 +46,10 @@ import           Data.Tuple (swap)
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> let ordList = fromList [5,6,10,20,30,1,2,3]
+
+
 -- | Nonempty circular sequence
 data CSeq a = CSeq !(Seq a) !a !(Seq a)
                      -- we keep the seq balanced, i.e. size left >= size right
@@ -315,18 +319,18 @@ zip3LWith f as bs cs = fromList $ zipWith3 f (F.toList as) (F.toList bs) (F.toLi
 -- | Given a circular seq, whose elements are in increasing order, insert the
 -- new element into the Circular seq in its sorted order.
 --
--- >>> insertOrd 1 $ C.fromList [2]
--- fromList [2,1]
--- >>> insertOrd 2 $ C.fromList [1,3]
--- fromList [1,2,3]
+-- >>> insertOrd 1 $ fromList [2]
+-- CSeq [2,1]
+-- >>> insertOrd 2 $ fromList [1,3]
+-- CSeq [1,2,3]
 -- >>> insertOrd 31 ordList
--- fromList [5,6,10,20,30,31,1,2,3]
+-- CSeq [5,6,10,20,30,31,1,2,3]
 -- >>> insertOrd 1 ordList
--- fromList [5,6,10,20,30,1,1,2,3]
+-- CSeq [5,6,10,20,30,1,1,2,3]
 -- >>> insertOrd 4 ordList
--- fromList [5,6,10,20,30,1,2,3,4]
+-- CSeq [5,6,10,20,30,1,2,3,4]
 -- >>> insertOrd 11 ordList
--- fromList [5,6,10,11,20,30,1,2,3]
+-- CSeq [5,6,10,11,20,30,1,2,3]
 --
 -- running time: $O(n)$
 insertOrd :: Ord a => a -> CSeq a -> CSeq a

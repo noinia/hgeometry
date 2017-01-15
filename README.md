@@ -35,7 +35,7 @@ Tree (EMST), based on computing the Delaunay Triangulation.
   convex polygon.
 * An optimal $O(n+m)$ time algorithm to compute the Minkowski sum of two convex
 polygons.
-* An $O(1/\eps^dn\log n)$ time algorithm for constructing a Well-Separated pair
+* An $O(1/\varepsilon^dn\log n)$ time algorithm for constructing a Well-Separated pair
   decomposition.
 
 It also has some geometric data structures. In particular, HGeometry contans an
@@ -45,15 +45,19 @@ implementation of
 * A one dimensional Interval Tree. The base tree is static.
 * A KD-Tree. The base tree is static.
 
+HGeometry also includes a datastructure/data type for planar graphs. In
+particular, it has a `EdgeOracle' data structure, that can be built in $O(n)$
+time that can test if the graph contains an edge in constant time.
+
 Numeric Types
 -------------
 
-All geometry types are parameterized by a numerical type r. It is well known
+All geometry types are parameterized by a numerical type `r`. It is well known
 that Floating-point arithmetic and Geometric algorithms don't go well together;
 i.e. because of floating point errors one may get completely wrong
-results. Hence, I *strongly* advise against using `Double' or `Float' for these
-types. In several algorithms it is sufficient if the type r is
-`Fractional'. Hence, you can use an exact number type such as `Rational'.
+results. Hence, I *strongly* advise against using `Double` or `Float` for these
+types. In several algorithms it is sufficient if the type `r` is
+`Fractional`. Hence, you can use an exact number type such as `Rational`.
 
 A Note on the Ext (:+) data type
 ---------------------------------

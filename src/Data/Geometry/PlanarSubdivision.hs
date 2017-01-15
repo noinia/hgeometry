@@ -97,7 +97,7 @@ fromVertices _ vs = g&vertexData .~ vData'
 --
 -- pre: the segments form a single connected component
 -- running time: $O(n\log n)$
-fromConnectedSegments     :: (Foldable f, Ord r, Num r)
+fromConnectedSegments       :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ EdgeData e)
                             -> PlanarSubdivision s [p] e () r
