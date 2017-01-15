@@ -134,7 +134,7 @@ search x = mconcat . stab x
 
 inAtomicRange                   :: Eq r => r -> AtomicRange r -> Bool
 x `inAtomicRange` (Singleton r) = x == r
-x `inAtomicRange` AtomicRange   = True
+_ `inAtomicRange` AtomicRange   = True
 
 
 -- | Returns the associated values of the nodes on the search path to x
@@ -171,7 +171,8 @@ getRange (Leaf (LeafData (Singleton r) _)) = Just $ Range (Closed r) (Closed r)
 getRange (Leaf _)                          = Nothing
 getRange (Node _ nd _)                     = Just $ nd^.range
 
-
+coversAtomic                      :: Ord r
+                                  => Range r -> Range r -> AtomicRange r -> Bool
 coversAtomic ri _   (Singleton r) = r `inRange` ri
 coversAtomic ri inR AtomicRange   = ri `covers` inR
 

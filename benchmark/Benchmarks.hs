@@ -33,8 +33,8 @@ genQueries _ n | n <= 0     = error "genQueries: need n > 0"
 
 
 main = defaultMain [
-  bgroup "IntervalTree" [ -- env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchBuild
-                         env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchQueryIT
+  bgroup "IntervalTree" [ env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchBuild
+                         -- env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchQueryIT
                         ]
   ]
 
@@ -55,7 +55,7 @@ benchQueryIT is = bgroup "queries"
     is'        = I <$> is
     r          = is^.to head.start.core
     setup n    = (IT.fromIntervals (take n is'),) <$> genQueries (I r) 100000
-    queryAll t = \r -> r -- map (flip IT.search t)
+    queryAll t = map (flip IT.search t)
 
 
 -- benchQueryIT          :: Ord r

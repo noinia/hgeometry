@@ -245,8 +245,6 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
 -- vertices should be given in counter clockwise order.
 --
 -- running time: $O(n)$.
---
--- TODO: Figure out how to handle the self-loop
 fromAdjacencyLists      :: forall s w f. (Foldable f, Functor f)
                         => [(VertexId s w, f (VertexId s w))]
                         -> PlanarGraph s w () () ()

@@ -32,7 +32,7 @@ progress. Only a few algorithms are currently available. Some examples are:
 * an $O(n \log n)$ time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation.
 * an $O(\log^2 n)$ time algorithm to find extremal points and tangents on/to a
-  convex polgon.
+  convex polygon.
 * An optimal $O(n+m)$ time algorithm to compute the Minkowski sum of two convex
   polygons.
 
@@ -41,7 +41,17 @@ implementation of
 
 * A Segment Tree. The base tree is static.
 * An Interval Tree. The base tree is static.
+* A KD-Tree. The base tree is static.
 
+Numeric Types
+-------------
+
+All geometry types are parameterized by a numerical type r. It is well known
+that Floating-point arithmetic and Geometric algorithms don't go well together;
+i.e. because of floating point errors one may get completely wrong
+results. Hence, I *strongly* advise against using `Double' or `Float' for these
+types. In several algorithms it is sufficient if the type r is
+`Fractional'. Hence, you can use an exact number type such as `Rational'.
 
 A Note on the Ext (:+) data type
 ---------------------------------
