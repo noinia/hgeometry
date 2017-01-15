@@ -1,16 +1,21 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE DeriveAnyClass  #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Data.Geometry.Box( module Data.Geometry.Box.Internal
                         , topSide, leftSide, bottomSide, rightSide
                         , sides, sides'
                         ) where
 
-import           Data.Geometry.Box.Internal
-import           Data.Geometry.LineSegment
+import Control.DeepSeq
+import Data.Geometry.Box.Internal
+import Data.Geometry.LineSegment
+import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
+
+deriving instance (NFData p, NFData r, Arity d) => NFData (Box d p r)
+
 
 topSide :: Num r => Rectangle p r -> LineSegment 2 p r
 topSide = (\(l,r,_,_) -> ClosedLineSegment l r) . corners

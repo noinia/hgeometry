@@ -1,8 +1,10 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Line.Internal where
 
+import           Control.DeepSeq
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
@@ -12,6 +14,8 @@ import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
+import           GHC.Generics (Generic)
+
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -20,15 +24,16 @@ import           Frames.CoRec
 -- direction.
 data Line d r = Line { _anchorPoint :: !(Point  d r)
                      , _direction   :: !(Vector d r)
-                     }
+                     } deriving Generic
 makeLenses ''Line
 
 instance (Show r, Arity d) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
-deriving instance (Eq r,   Arity d) => Eq            (Line d r)
-deriving instance Arity d           => Functor       (Line d)
-deriving instance Arity d           => F.Foldable    (Line d)
-deriving instance Arity d           => T.Traversable (Line d)
+deriving instance (Eq r,   Arity d)   => Eq            (Line d r)
+deriving instance (NFData r, Arity d) => NFData        (Line d r)
+deriving instance Arity d             => Functor       (Line d)
+deriving instance Arity d             => F.Foldable    (Line d)
+deriving instance Arity d             => T.Traversable (Line d)
 
 
 type instance Dimension (Line d r) = d

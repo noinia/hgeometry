@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass #-}
 module Data.Geometry.HalfLine where
+
 
 import           Control.Lens
 import           Data.Ext
@@ -15,6 +17,8 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Traversable as T
 import           Data.UnBounded
+import           GHC.Generics (Generic)
+import           Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Half-Lines
@@ -22,11 +26,13 @@ import           Data.UnBounded
 -- | d-dimensional Half-Lines
 data HalfLine d r = HalfLine { _startPoint        :: Point  d r
                              , _halfLineDirection :: Vector d r
-                             }
+                             } deriving Generic
 makeLenses ''HalfLine
 
-deriving instance (Show r, Arity d) => Show    (HalfLine d r)
-deriving instance (Eq r, Arity d)   => Eq      (HalfLine d r)
+deriving instance (Show r, Arity d)   => Show    (HalfLine d r)
+deriving instance (Eq r, Arity d)     => Eq      (HalfLine d r)
+deriving instance (NFData r, Arity d) => NFData  (HalfLine d r)
+
 deriving instance Arity d           => Functor (HalfLine d)
 deriving instance Arity d           => F.Foldable    (HalfLine d)
 deriving instance Arity d           => T.Traversable (HalfLine d)

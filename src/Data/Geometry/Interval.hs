@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE DeriveAnyClass   #-}
 module Data.Geometry.Interval(
                              -- * 1 dimensional Intervals
                                Interval(..)
@@ -35,8 +34,10 @@ import           GHC.Generics (Generic)
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
 newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
-                     deriving (Eq,Generic,NFData)
+                     deriving (Eq,Generic)
 makeLenses ''Interval
+
+deriving instance (NFData a, NFData r) => NFData (Interval a r)
 
 instance (Show a, Show r) => Show (Interval a r) where
   show ~(Interval l u) = concat [ "Interval (", show l, ") (", show u,")"]

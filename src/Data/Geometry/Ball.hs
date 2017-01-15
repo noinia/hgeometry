@@ -1,7 +1,9 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ball where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
@@ -16,6 +18,7 @@ import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Frames.CoRec
+import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V3 (V3(..))
 
@@ -25,7 +28,7 @@ import           Linear.V3 (V3(..))
 -- | A d-dimensional ball.
 data Ball d p r = Ball { _center        :: !(Point d r :+ p)
                        , _squaredRadius :: !r
-                       }
+                       } deriving Generic
 makeLenses ''Ball
 
 -- | A lens to get/set the radius of a Ball
@@ -33,8 +36,9 @@ radius :: Floating r => Lens' (Ball d p r) r
 radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
 
 
-deriving instance (Show r, Show p, Arity d) => Show (Ball d p r)
-deriving instance (Eq r, Eq p, Arity d)     => Eq (Ball d p r)
+deriving instance (Show r, Show p, Arity d)     => Show (Ball d p r)
+deriving instance (NFData p, NFData r, Arity d) => NFData (Ball d p r)
+deriving instance (Eq r, Eq p, Arity d)         => Eq (Ball d p r)
 
 type instance NumType   (Ball d p r) = r
 type instance Dimension (Ball d p r) = d

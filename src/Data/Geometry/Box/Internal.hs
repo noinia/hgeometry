@@ -1,9 +1,8 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Box.Internal where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
@@ -20,13 +19,14 @@ import           Data.Semigroup
 import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
+import           GHC.Generics (Generic)
 
 
 --------------------------------------------------------------------------------
 
 -- | Coordinate wize minimum
 newtype CWMin a = CWMin { _cwMin :: a }
-                deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic,NFData)
 makeLenses ''CWMin
 
 instance (Arity d, Ord r) => Semigroup (CWMin (Point d r)) where
@@ -34,7 +34,7 @@ instance (Arity d, Ord r) => Semigroup (CWMin (Point d r)) where
 
 -- | Coordinate wize maximum
 newtype CWMax a = CWMax { _cwMax :: a }
-                deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic,NFData)
 makeLenses ''CWMax
 
 instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
@@ -47,7 +47,7 @@ instance (Arity d, Ord r) => Semigroup (CWMax (Point d r)) where
 
 data Box d p r = Box { _minP :: !(CWMin (Point d r) :+ p)
                      , _maxP :: !(CWMax (Point d r) :+ p)
-                     }
+                     } deriving Generic
 makeLenses ''Box
 
 -- | Given the point with the lowest coordinates and the point with highest
