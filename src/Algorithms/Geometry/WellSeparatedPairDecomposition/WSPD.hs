@@ -113,11 +113,7 @@ fairSplitTree'       :: (Fractional r, Ord r, Arity d, Index' 0 d, KnownNat d
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
                      -> BinLeafTree Int (Point d r :+ p)
 fairSplitTree' n pts
-    -- | traceShow (n,pts) False = undefined
     | n <= 1    = let (p S2.:< _) = pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
-    -- | n == 2    = let j     = widestDimension pts
-    --                   [p,q] = F.toList $ pts^.ix' (j -1)
-                  -- in Node (Leaf $ dropIdx p) j (Leaf $ dropIdx q)
     | otherwise = foldr node' (V.last path) $ V.zip nodeLevels (V.init path)
   where
     -- note that points may also be assigned level 'Nothing'.
@@ -165,7 +161,6 @@ distributePoints'              :: Int                      -- ^ number of classe
                                -> PointSeq d (Idx :+ p) r  -- ^ input points
                                -> V.Vector (PointSeq d (Idx :+ p) r)
 distributePoints' k levels pts
-  -- | traceShow ("distributePoints ",k,levels) False = undefined
   | otherwise
   = fmap fromSeqUnsafe $ V.create $ do
     v <- MV.replicate k mempty
@@ -218,7 +213,6 @@ assignLevels                  :: (Fractional r, Ord r, Arity d, KnownNat d
                               -> [Level] -- ^ Levels used so far
                               -> RST s (NonEmpty.NonEmpty Level)
 assignLevels h m pts l prevLvls
-  -- | traceShow ("assignLevels ", h, m, l) False = undefined
   | m >= h    = pure (l NonEmpty.:| prevLvls)
   | otherwise = do
     pts' <- compactEnds pts
@@ -297,10 +291,7 @@ findAndCompact                   :: (Ord r, Arity d
                                  -> RST s ( PointSeq d (Idx :+ p) r
                                           , PointSeq d (Idx :+ p) r
                                           )
-findAndCompact j (l0 S2.:< s0) m
-  -- | traceShow ("findAndCompact ", j, (l0 S2.:< s0), m) False = undefined
-  | otherwise
-  = fmap select . stepL $ l0 S.<| s0
+findAndCompact j (l0 S2.:< s0) m = fmap select . stepL $ l0 S.<| s0
   where
     -- stepL and stepR together build a data structure (FAC l r S) that
     -- contains the left part of the list, i.e. the points before midpoint, and
