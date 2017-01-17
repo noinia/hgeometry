@@ -10,7 +10,7 @@ import qualified Data.Sequence as S
 --
 -- returns Nothing if no element satisfies p
 --
--- running time: $O(\log^2 n + T*\log n)$, where $T$ is the time to execute the
+-- running time: \(O(\log^2 n + T*\log n)\), where \(T\) is the time to execute the
 -- predicate.
 binarySearchSeq     :: (a -> Bool) -> Seq a -> Maybe Int
 binarySearchSeq p s = case S.viewr s of
@@ -31,7 +31,7 @@ binarySearchSeq p s = case S.viewr s of
 --
 -- all elements in s occur in either xs or ys.
 --
--- running time: $O(\log^2 n + T*\log n)$, where $T$ is the time to execute the
+-- running time: \(O(\log^2 n + T*\log n)\), where \(T\) is the time to execute the
 -- predicate.
 splitMonotone     :: (a -> Bool) -> Seq a -> (Seq a, Seq a)
 splitMonotone p s = case binarySearchSeq p s of
@@ -47,7 +47,7 @@ splitMonotone p s = case binarySearchSeq p s of
 -- Get the index h such that everything strictly smaller than h has: p i =
 -- False, and all i >= h, we have p h = True
 --
--- running time: $O(\log(u - l))$
+-- running time: \(O(\log(u - l))\)
 {-# SPECIALIZE binarySearch :: (Int -> Bool) -> Int -> Int -> Int #-}
 binarySearch       :: Integral a => (a -> Bool) -> a -> a -> a
 binarySearch p l u = let d = u - l

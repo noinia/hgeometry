@@ -80,7 +80,7 @@ type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 
 -- | convert the triangulation into a planarsubdivision
 --
--- running time: $O(n\log n)$.
+-- running time: \(O(n\log n)\).
 toPlanarSubdivision :: proxy s -> Triangulation p r -> PlanarSubdivision s p () () r
 toPlanarSubdivision px tr = PlanarSubdivision g
   where
@@ -90,7 +90,7 @@ toPlanarSubdivision px tr = PlanarSubdivision g
 
 -- | convert the triangulation into a plane graph
 --
--- running time: $O(n\log n)$.
+-- running time: \(O(n\log n)\).
 toPlaneGraph    :: forall proxy s p r.
                    proxy s -> Triangulation p r -> PlaneGraph s Primal_ p () () r
 toPlaneGraph _ tr = g & vertexData .~ tr^.positions

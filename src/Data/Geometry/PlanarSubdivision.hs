@@ -58,7 +58,7 @@ instance Functor (PlanarSubdivision s v e f) where
 
 -- | Construct a planar subdivision from a polygon
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 fromPolygon                            :: proxy s
                                        -> SimplePolygon p r
                                        -> f -- ^ data inside
@@ -96,7 +96,7 @@ fromVertices _ vs = g&vertexData .~ vData'
 -- | Constructs a connected planar subdivision.
 --
 -- pre: the segments form a single connected component
--- running time: $O(n\log n)$
+-- running time: \(O(n\log n)\)
 fromConnectedSegments       :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ EdgeData e)
@@ -108,7 +108,7 @@ fromConnectedSegments px ss = PlanarSubdivision $
 --
 -- pre: The segments form a single connected component
 --
--- running time: $O(n\log n)$
+-- running time: \(O(n\log n)\)
 fromConnectedSegments'      :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ e)

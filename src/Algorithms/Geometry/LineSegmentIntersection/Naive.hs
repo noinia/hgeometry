@@ -16,7 +16,7 @@ import           Frames.CoRec
 
 -- | Compute all intersections (naively)
 --
--- $O(n^2)$
+-- \(O(n^2)\)
 intersections :: forall r p. (Ord r, Fractional r)
               => [LineSegment 2 p r] -> Intersections p r
 intersections = foldr collect mempty . pairs

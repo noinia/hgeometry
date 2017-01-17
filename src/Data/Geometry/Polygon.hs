@@ -98,7 +98,7 @@ holes = lens g s
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
 outerVertex i = outerBoundary.C.item i
 
--- running time: $O(\log i)$
+-- running time: \(O(\log i)\)
 outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
 outerBoundaryEdge i p = let u = p^.outerVertex i
                             v = p^.outerVertex (i+1)
@@ -284,7 +284,7 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
 -- | Test if the outer boundary of the polygon is in clockwise or counter
 -- clockwise order.
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 --
 isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
 isCounterClockwise = (\x -> x == abs x) . signedArea
@@ -318,7 +318,7 @@ cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
 
 -- | Finds the extreme points, minimum and maximum, in a given direction
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
                    -> (Point 2 r :+ p, Point 2 r :+ p)
 extremesLinear u p = let vs = p^.outerBoundary

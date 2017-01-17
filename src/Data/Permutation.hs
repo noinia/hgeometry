@@ -55,7 +55,7 @@ next v i = let n = GV.length v in v GV.! ((i+1) `mod` n)
 -- | Lookup the indices of an element, i.e. in which orbit the item is, and the
 -- index within the orbit.
 --
--- runnign time: $O(1)$
+-- runnign time: \(O(1)\)
 lookupIdx        :: Enum a => Permutation a -> a -> (Int,Int)
 lookupIdx perm x = perm^.indexes.ix' (fromEnum x)
 

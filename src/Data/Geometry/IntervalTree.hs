@@ -41,7 +41,7 @@ makeLenses ''IntervalTree
 
 -- | Given an ordered list of points, create an interval tree
 --
--- $O(n)$
+-- \(O(n)\)
 createTree     :: Ord r => [r] -> IntervalTree i r
 createTree pts = IntervalTree . asBalancedBinTree
                . map (\m -> NodeData m mempty mempty) $ pts
@@ -49,7 +49,7 @@ createTree pts = IntervalTree . asBalancedBinTree
 
 -- | Build an interval tree
 --
--- $O(n \log n)$
+-- \(O(n \log n)\)
 fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
                  => [i] -> IntervalTree i r
 fromIntervals is = foldr insert (createTree pts) is
@@ -59,7 +59,7 @@ fromIntervals is = foldr insert (createTree pts) is
 
 -- | Lists the intervals. We don't guarantee anything about the order
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 toList :: IntervalTree i r -> [i]
 toList = toList' . _unIntervalTree
   where
@@ -71,13 +71,13 @@ toList = toList' . _unIntervalTree
 
 -- | Find all intervals that stab x
 --
--- $O(\log n + k)$, where k is the output size
+-- \(O(\log n + k)\), where k is the output size
 search :: Ord r => r -> IntervalTree i r -> [i]
 search = stab
 
 -- | Find all intervals that stab x
 --
--- $O(\log n + k)$, where k is the output size
+-- \(O(\log n + k)\), where k is the output size
 stab                    :: Ord r => r -> IntervalTree i r -> [i]
 stab x (IntervalTree t) = stab' t
   where
@@ -94,7 +94,7 @@ stab x (IntervalTree t) = stab' t
 -- | Insert :
 -- pre: the interval intersects some midpoint in the tree
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 insert                    :: (Ord r, IntervalLike i, NumType i ~ r)
                           => i -> IntervalTree i r -> IntervalTree i r
 insert i (IntervalTree t) = IntervalTree $ insert' t
@@ -113,7 +113,7 @@ insert i (IntervalTree t) = IntervalTree $ insert' t
 
 -- | Delete an interval from the Tree
 --
--- $O(\log n)$ (under some general position assumption)
+-- \(O(\log n)\) (under some general position assumption)
 delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i)
           => i -> IntervalTree i r -> IntervalTree i r
 delete i (IntervalTree t) = IntervalTree $ delete' t

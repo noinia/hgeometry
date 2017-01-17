@@ -94,7 +94,7 @@ focus (CSeq _ x _) = x
 
 -- | Access the i^th item  (w.r.t the focus) in the CSeq (indices modulo n).
 --
--- running time: $O(\log (i \mod n))$
+-- running time: \(O(\log (i \mod n))\)
 --
 -- >>> index (fromList [0..5]) 1
 -- 1
@@ -119,7 +119,7 @@ index s@(CSeq l x r) i' = let i  = i' `mod` length s
 
 -- | Adjusts the i^th element w.r.t the focus in the CSeq
 --
--- running time: $O(\log (i \mod n))$
+-- running time: \(O(\log (i \mod n))\)
 --
 -- >>> adjust (const 1000) 2 (fromList [0..5])
 -- CSeq [0,1,1000,3,4,5]
@@ -223,7 +223,7 @@ toNonEmpty = NonEmpty.fromList . F.toList
 --
 -- pre: 0 <= i < n
 --
--- running time: $O(\log i)$ amortized
+-- running time: \(O(\log i)\) amortized
 --
 -- >>> rotateNR 0 $ fromList [1..5]
 -- CSeq [1,2,3,4,5]
@@ -241,7 +241,7 @@ rotateNR i s = let (l, r')  = S.splitAt i $ rightElements s
 --
 -- pre: 0 <= i < n
 --
--- running time: $O(\log i)$ amoritzed
+-- running time: \(O(\log i)\) amoritzed
 --
 -- >>> rotateNL 0 $ fromList [1..5]
 -- CSeq [1,2,3,4,5]
@@ -262,7 +262,7 @@ rotateNL i s = let (x :< xs) = S.viewl $ rightElements s
 
 -- | Reversres the direction of the CSeq
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 --
 -- >>> reverseDirection $ fromList [1..5]
 -- CSeq [1,5,4,3,2]
@@ -332,14 +332,14 @@ zip3LWith f as bs cs = fromList $ zipWith3 f (F.toList as) (F.toList bs) (F.toLi
 -- >>> insertOrd 11 ordList
 -- CSeq [5,6,10,11,20,30,1,2,3]
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 insertOrd :: Ord a => a -> CSeq a -> CSeq a
 insertOrd = insertOrdBy compare
 
 -- | Insert an element into an increasingly ordered circular list, with
 -- specified compare operator.
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 insertOrdBy       :: (a -> a -> Ordering) -> a -> CSeq a -> CSeq a
 insertOrdBy cmp x = fromList . insertOrdBy' cmp x . F.toList . rightElements
 

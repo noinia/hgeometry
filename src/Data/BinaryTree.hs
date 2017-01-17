@@ -46,10 +46,10 @@ instance Traversable (BinLeafTree v) where
 instance Measured v a => Semigroup (BinLeafTree v a) where
   l <> r = node l r
 
--- | Create a balanced tree, i.e. a tree of height $O(\log n)$ with the
+-- | Create a balanced tree, i.e. a tree of height \(O(\log n)\) with the
 -- elements in the leaves.
 --
--- $O(n)$ time.
+-- \(O(n)\) time.
 asBalancedBinLeafTree :: NonEmpty a -> BinLeafTree Size (Elem a)
 asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
   where
@@ -60,7 +60,7 @@ asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
     merge (l :| r : []) = node l r :| []
     merge (l :| r : ts) = node l r <| (merge $ NonEmpty.fromList ts)
 -- -- the implementation below produces slightly less high trees, but runs in
--- -- O(n log n) time, as on every level it traverses the list passed down.
+-- -- \(O(n \log n)\) time, as on every level it traverses the list passed down.
 -- asBalancedBinLeafTree ys = asBLT (length ys') ys' where ys' = toList ys
 
 --     asBLT _ [x] = Leaf (Elem x)
@@ -159,7 +159,7 @@ access (Internal _ x _) = Just x
 
 -- | Create a balanced binary tree
 --
--- $O(n)$
+-- \(O(n)\)
 asBalancedBinTree :: [a] -> BinaryTree a
 asBalancedBinTree = mkTree . V.fromList
   where

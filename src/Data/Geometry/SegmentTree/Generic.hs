@@ -73,7 +73,7 @@ data BuildLeaf a = LeafSingleton a | LeafRange a a deriving (Show,Eq)
 -- | Given a sorted list of endpoints, without duplicates, construct a segment tree
 --
 --
--- $O(n)$ time
+-- \(O(n)\) time
 createTree                      :: NonEmpty r -> v -> SegmentTree v r
 -- createTree (r NonEmpty.:| []) v = SegmentTree . Leaf $ LeafData (Singleton r) v
 createTree pts                v = SegmentTree . fmap h . foldUpData f g . fmap _unElem
@@ -107,7 +107,7 @@ interleave (x NonEmpty.:| xs) ys = x NonEmpty.:| concat (zipWith (\a b -> [a,b])
 
 -- | Build a SegmentTree
 --
--- $O(n \log n)$
+-- \(O(n \log n)\)
 fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType i ~ r)
                    => (Interval p r -> i)
                    -> NonEmpty (Interval p r) -> SegmentTree v r
@@ -126,7 +126,7 @@ toList = undefined
 
 -- | Search for all intervals intersecting x
 --
--- $O(\log n + k)$ where k is the output size
+-- \(O(\log n + k)\) where \(k\) is the output size
 search   :: (Ord r, Monoid v) => r -> SegmentTree v r -> v
 search x = mconcat . stab x
 
@@ -139,7 +139,7 @@ _ `inAtomicRange` AtomicRange   = True
 
 -- | Returns the associated values of the nodes on the search path to x
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 stab                   :: Ord r => r -> SegmentTree v r -> [v]
 stab x (SegmentTree t) = stabRoot t
   where

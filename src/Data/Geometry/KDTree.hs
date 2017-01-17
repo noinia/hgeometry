@@ -69,7 +69,7 @@ toMaybe (Tree t) = Just t
 
 -- | Expects the input to be a set, i.e. no duplicates
 --
--- running time: $O(n \log n)$
+-- running time: \(O(n \log n)\)
 buildKDTree :: (Arity d, KnownNat d, Index' 0 d, Ord r)
             => [Point d r :+ p] -> KDTree d p r
 buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
@@ -121,7 +121,7 @@ reportSubTree = NonEmpty.fromList . F.toList . unKDT
 
 -- | Searches in a KDTree
 --
--- running time: $O(n^{(d-1)/d} + k)$
+-- running time: \(O(n^{(d-1)/d} + k)\)
 searchKDTree    :: (Arity d, Ord r)
                 => Box d q r -> KDTree d p r -> [Point d r :+ p]
 searchKDTree qr = maybe [] (searchKDTree' qr) . toMaybe
@@ -153,7 +153,7 @@ containedIn :: (Arity d, Ord r) => Box d q r -> Box d p r -> Bool
 
 type PointSet seq d p r = Vector d (seq (Point d r :+ p))
 
--- | running time: O(n)
+-- | running time: \(O(n)\)
 splitOn                 :: (Arity d, KnownNat d, Ord r)
                         => Coord d
                         -> PointSet (LSeq 2) d p r

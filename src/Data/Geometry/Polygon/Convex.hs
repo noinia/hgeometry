@@ -84,7 +84,7 @@ instance IsBoxable (ConvexPolygon p r) where
 --
 -- pre: The input polygon is strictly convex.
 --
--- running time: $O(\log n)$
+-- running time: \(O(\log n)\)
 --
 --
 extremes     :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r
@@ -97,7 +97,7 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 --
 -- pre: The input polygon is strictly convex.
 --
--- running time: $O(\log^2 n)$
+-- running time: \(O(\log^2 n)\)
 maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
 maxInDirection u = findMaxWith (cmpExtreme u)
 
@@ -153,7 +153,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 --  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
--- running time: $O(\log^2 n)$.
+-- running time: \(O(\log^2 n)\).
 leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
@@ -161,7 +161,7 @@ leftTangent poly q = findMaxWith (tangentCmp q) poly
 --  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
--- running time: $O(\log^2 n)$.
+-- running time: \(O(\log^2 n)\).
 rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 
@@ -291,7 +291,7 @@ a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
 --
 -- pre: input polygons are in CCW order.
 --
--- running time: $O(n+m)$.
+-- running time: \(O(n+m)\).
 minkowskiSum     :: (Ord r, Num r)
                  => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
 minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)

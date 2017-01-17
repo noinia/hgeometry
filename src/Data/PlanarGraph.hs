@@ -232,7 +232,7 @@ planarGraph' perm = PlanarGraph perm vData eData fData
 -- | Construct a planar graph, given the darts in cyclic order around each
 -- vertex.
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal_ () e ()
 planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
   where
@@ -244,7 +244,7 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- vertices should be given in counter clockwise order.
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 fromAdjacencyLists      :: forall s w f. (Foldable f, Functor f)
                         => [(VertexId s w, f (VertexId s w))]
                         -> PlanarGraph s w () () ()
@@ -316,7 +316,7 @@ assignArcs o = evalState (traverse f o) 0
 -- -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- -- vertices should be given in counter clockwise order.
 -- --
--- -- running time: $O(n \log n)$.
+-- -- running time: \(O(n \log n)\).
 -- fromAdjacencyLists      :: forall s.
 --                            [(VertexId s Primal_, C.CList (VertexId s Primal_))]
 --                         -> PlanarGraph s Primal_ () () ()
@@ -440,26 +440,26 @@ edges = V.filter (isPositive . fst) . darts
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 tailOf     :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 tailOf d g = VertexId . fst $ lookupIdx (g^.embedding) d
 
 -- | The vertex this dart is heading in to
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 headOf   :: Dart s -> PlanarGraph s w v e f -> VertexId s w
 headOf d = tailOf (twin d)
 
 -- | endPoints d g = (tailOf d g, headOf d g)
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 endPoints d g = (tailOf d g, headOf d g)
 
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --
--- running time: $O(k)$, where $k$ is the output size
+-- running time: \(O(k)\), where \(k\) is the output size
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
 incidentEdges (VertexId v) g = g^.embedding.orbits.ix' v
@@ -476,7 +476,7 @@ outgoingEdges v g = V.filter isPositive $ incidentEdges v g
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 -- around the vertex.
 --
--- running time: $O(k)$, where $k$ is the output size
+-- running time: \(O(k)\), where \(k\) is the output size
 neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 neighboursOf v g = otherVtx <$> incidentEdges v g
   where
@@ -495,19 +495,19 @@ neighboursOf v g = otherVtx <$> incidentEdges v g
 -- | Get the vertex data associated with a node. Note that updating this data may be
 -- expensive!!
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 vDataOf              :: VertexId s w -> Lens' (PlanarGraph s w v e f) v
 vDataOf (VertexId i) = vertexData.ix' i
 
 -- | Edge data of a given dart
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 eDataOf   :: Dart s -> Lens' (PlanarGraph s w v e f) e
 eDataOf d = rawDartData.ix' (fromEnum d)
 
 -- | Data of a face of a given face
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 fDataOf                       :: FaceId s w -> Lens' (PlanarGraph s w v e f) f
 fDataOf (FaceId (VertexId i)) = faceData.ix' i
 
@@ -519,7 +519,7 @@ endPointDataOf d = to $ endPointData d
 
 -- | Data corresponding to the endpoints of the dart
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 endPointData     :: Dart s -> PlanarGraph s w v e f -> (v,v)
 endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 
@@ -539,7 +539,7 @@ endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 -- :}
 -- True
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 dual   :: PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
 dual g = let perm = g^.embedding
          in PlanarGraph (cycleRep (elems perm) (apply perm . twin))
@@ -572,7 +572,7 @@ faces g = V.zip (faces' g) (g^.faceData)
 -- >>> leftFace (dart 0 "+1") myGraph
 -- FaceId 0
 --
--- running time: $O(1)$.
+-- running time: \(O(1)\).
 leftFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 leftFace d g = FaceId . headOf d $ dual g
 
@@ -588,7 +588,7 @@ leftFace d g = FaceId . headOf d $ dual g
 -- >>> rightFace (dart 0 "+1") myGraph
 -- FaceId 1
 --
--- running time: $O(1)$.
+-- running time: \(O(1)\).
 rightFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 rightFace d g = FaceId . tailOf d $ dual g
 
@@ -597,7 +597,7 @@ rightFace d g = FaceId . tailOf d $ dual g
 -- the outer face in counter clockwise order.
 --
 --
--- running time: $O(k)$, where $k$ is the output size.
+-- running time: \(O(k)\), where \(k\) is the output size.
 boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
 boundary (FaceId v) g = incidentEdges v $ dual g
 
@@ -606,7 +606,7 @@ boundary (FaceId v) g = incidentEdges v $ dual g
 -- the outer face in counter clockwise order.
 --
 --
--- running time: $O(k)$, where $k$ is the output size.
+-- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices     :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 
@@ -708,7 +708,7 @@ edgeOracle g = buildEdgeOracle [ (v, ext <$> neighboursOf v g)
 -- | Builds an edge oracle that can be used to efficiently test if two vertices
 -- are connected by an edge.
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 buildEdgeOracle        :: forall f s w e. (Foldable f)
                        => [(VertexId s w, f (VertexId s w :+ e))] -> EdgeOracle s w e
 buildEdgeOracle inAdj' = EdgeOracle $ V.create $ do
@@ -767,14 +767,14 @@ buildEdgeOracle inAdj' = EdgeOracle $ V.create $ do
 
 -- | Test if u and v are connected by an edge.
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 hasEdge     :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Bool
 hasEdge u v = isJust . findEdge u v
 
 
 -- | Find the edge data corresponding to edge (u,v) if such an edge exists
 --
--- running time: $O(1)$
+-- running time: \(O(1)\)
 findEdge :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Maybe a
 findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
   where

@@ -14,7 +14,7 @@ diameterNaive = maybe 0 (\(p,q) -> euclideanDist (p^.core) (q^.core))
 
 -- | Computes the Euclidean diametral pair by naively trying all pairs.
 --
--- running time: $O(n^2)$
+-- running time: \(O(n^2)\)
 diametralPairNaive :: (Ord r, Num r, Arity d)
                    => [Point d r :+ p] -> Maybe (Point d r :+ p, Point d r :+ p)
 diametralPairNaive = diametralPairWithNaive squaredEuclideanDist
@@ -23,7 +23,7 @@ diametralPairNaive = diametralPairWithNaive squaredEuclideanDist
 -- | Given a distance function and a list of points pts, computes the diametral
 -- pair by naively trying all pairs.
 --
--- running time: $O(n^2)$
+-- running time: \(O(n^2)\)
 diametralPairWithNaive               :: Ord r
                                      => (Point d r -> Point d r -> r)
                                      -> [Point d r :+ p]
