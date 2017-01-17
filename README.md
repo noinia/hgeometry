@@ -24,19 +24,19 @@ Please note that aspect (2), implementing good algorithms, is much work in
 progress. Only a few algorithms have been implemented, some of which could use
 some improvements. Currently, HGeometry provides the following algorithms:
 
-* two $O(n \log n)$ time algorithms for convex hull in
+* two \(O(n \log n)\) time algorithms for convex hull in
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
-* an $O(n)$ expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
+* an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an $O(n \log n)$ time algorithm for computing the Delaunay triangulation
+* an \(O(n \log n)\) time algorithm for computing the Delaunay triangulation
 (using divide and conqueror).
-* an $O(n \log n)$ time algorithm for computing the Euclidean Minimum Spanning
+* an \(O(n \log n)\) time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation.
-* an $O(\log^2 n)$ time algorithm to find extremal points and tangents on/to a
+* an \(O(\log^2 n)\) time algorithm to find extremal points and tangents on/to a
   convex polygon.
-* An optimal $O(n+m)$ time algorithm to compute the Minkowski sum of two convex
+* An optimal \(O(n+m)\) time algorithm to compute the Minkowski sum of two convex
 polygons.
-* An $O(1/\varepsilon^dn\log n)$ time algorithm for constructing a Well-Separated pair
+* An \(O(1/\varepsilon^dn\log n)\) time algorithm for constructing a Well-Separated pair
   decomposition.
 
 It also has some geometric data structures. In particular, HGeometry contans an
@@ -47,7 +47,7 @@ implementation of
 * A KD-Tree. The base tree is static.
 
 HGeometry also includes a datastructure/data type for planar graphs. In
-particular, it has a `EdgeOracle' data structure, that can be built in $O(n)$
+particular, it has a `EdgeOracle` data structure, that can be built in \(O(n)\)
 time that can test if the graph contains an edge in constant time.
 
 Numeric Types
