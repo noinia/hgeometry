@@ -13,7 +13,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Monoid
 
 
--- | O(n log n) time ConvexHull using Graham-Scan. The resulting polygon is
+-- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is
 -- given in clockwise order.
 convexHull            :: (Ord r, Num r)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r

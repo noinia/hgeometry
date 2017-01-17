@@ -12,7 +12,7 @@ import qualified Data.Vector.Unboxed.Mutable as UMV
 
 -- | DFS on a planar graph.
 --
--- Running time: $O(n)$
+-- Running time: \(O(n)\)
 --
 -- Note that since our planar graphs are always connected there is no need need
 -- for dfs to take a list of start vertices.
@@ -30,7 +30,7 @@ adjacencyLists g = V.toList . flip neighboursOf g <$> vertices' g
 
 -- | DFS, from a given vertex, on a graph in AdjacencyLists representation.
 --
--- Running time: $O(n)$
+-- Running time: \(O(n)\)
 dfs'          :: forall s w. AdjacencyLists s w -> VertexId s w -> Tree (VertexId s w)
 dfs' g start = runST $ do
                  bv     <- UMV.replicate n False -- bit vector of marks

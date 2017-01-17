@@ -44,8 +44,8 @@ import qualified Data.Vector as V
 
 -- | Computes the delaunay triangulation of a set of points.
 --
--- Running time: $O(n \log n)$
--- (note: We use an IntMap in the implementation. So maybe actually $O(n \log^2 n)$)
+-- Running time: \(O(n \log n)\)
+-- (note: We use an IntMap in the implementation. So maybe actually \(O(n \log^2 n)\))
 --
 -- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
 -- input does contain duplicate points, the implementation throws them away)
@@ -107,7 +107,7 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
 
 -- | Merge the two delaunay triangulations.
 --
--- running time: $O(n)$ (although we cheat a bit by using a IntMap)
+-- running time: \(O(n)\) (although we cheat a bit by using a IntMap)
 merge                            :: (Ord r, Fractional r)
                                  => Adj
                                  -> Adj

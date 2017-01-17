@@ -35,7 +35,7 @@ import Debug.Trace
 
 -- | Construct a split tree
 --
--- running time: $O(n \log n)$
+-- running time: \(O(n \log n)\)
 fairSplitTree     :: (Fractional r, Ord r, Arity d, Index' 0 d,
                       KnownNat d
                         , Show r, Show p
@@ -61,7 +61,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
 
 -- | Given a split tree, generate the Well separated pairs
 --
--- running time: $O(s^d n)$
+-- running time: \(O(s^d n)\)
 wellSeparatedPairs   :: (Floating r, Ord r, AlwaysTrueWSPD d)
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
@@ -73,7 +73,7 @@ wellSeparatedPairs s = f
 
 -- -- | Given a split tree, generate the well separated pairs such that one set is
 -- -- a singleton.
--- -- running time: $O(s^d n\log n)$
+-- -- running time: \(O(s^d n\log n)\)
 -- wellSeparatedPairSingletons   :: (Fractional r, Ord r, AlwaysTrueWSPD d)
 --                               => r -> SplitTree d p r a -> [(Point d r :+ p, PointSet d p r (Sized a))]
 -- wellSeparatedPairSingletons s t = concatMap split $ wellSeparatedPairs s t'

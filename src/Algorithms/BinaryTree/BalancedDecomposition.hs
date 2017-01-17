@@ -24,11 +24,11 @@ makeLenses ''Split
 
 
 -- | Given a binary tree with n nodes, splits it into two trees i,o of size
--- $n/3 <= i,o <= 2n/3$.
+-- \(n/3 <= i,o <= 2n/3\).
 --
 -- For n < 3 the inner tree is at least as large as the outer tree
 --
--- running time: $O(n)$
+-- running time: \(O(n)\)
 balancedSplit   :: BinaryTree a -> Split a
 balancedSplit t = (\(i,o) -> let i'@(SP _ k) = select i
                              in Split i' (select o &_2 .~ (n - k))
@@ -58,7 +58,7 @@ balancedSplit t = (\(i,o) -> let i'@(SP _ k) = select i
 -- -- | Computes a balanced decomposition of the input tree, i.e. recursively
 -- -- splits into trees of roughly equal size
 -- --
--- -- running time: $O(n\log n)$.
+-- -- running time: \(O(n\log n)\).
 -- balancedDecomposition     :: BinaryTree a -> BinaryTree a
 -- balancedDecomposition t = case t of
 --     Nil                -> t

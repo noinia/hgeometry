@@ -27,7 +27,7 @@ import           Debug.Trace
 
 -- | Compute all intersections
 --
--- $O((n+k)\log n)$, where $k$ is the number of intersections.
+-- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 intersections    :: (Ord r, Fractional r)
                  => [LineSegment 2 p r] -> Intersections p r
 intersections ss = merge $ sweep pts (SS.empty $ ordAtNav undefined)

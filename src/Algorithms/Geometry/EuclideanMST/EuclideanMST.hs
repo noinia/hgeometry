@@ -22,7 +22,7 @@ import           Data.Tree
 -- pre: the input is a *SET*, i.e. contains no duplicate points. (If the input
 -- does contain duplicate points, the implementation throws them away)
 --
--- running time: $O(n \log n)$
+-- running time: \(O(n \log n)\)
 euclideanMST     :: (Ord r, Fractional r)
                  => NonEmpty.NonEmpty (Point 2 r :+ p) -> Tree (Point 2 r :+ p)
 euclideanMST pts = (\v -> g^.vDataOf v) <$> t

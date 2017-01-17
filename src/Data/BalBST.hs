@@ -58,7 +58,7 @@ empty   :: TreeNavigator k a -> BalBST k a
 empty n = BalBST n Empty
 
 
--- | $O(n\log n)$
+-- | \(O(n\log n)\)
 fromList :: TreeNavigator k a -> [a] -> BalBST k a
 fromList n = foldr insert (empty n)
 
@@ -66,7 +66,7 @@ fromList' :: Ord a => [a] -> BalBST a a
 fromList' = fromList ordNav
 
 
--- -- | $O(n)$
+-- -- | \(O(n)\)
 -- fromAscList :: TreeNavigator k a -> [a] -> BalBST k a
 -- fromAscList = undefined
 
@@ -79,7 +79,7 @@ null (BalBST _ Empty) = True
 null _                = False
 
 -- | Test if an element occurs in the BST.
--- $O(\log n)$
+-- \(O(\log n)\)
 lookup :: Eq a => a -> BalBST k a -> Maybe a
 lookup x (BalBST Nav{..} t) = lookup' t
   where
@@ -89,7 +89,7 @@ lookup x (BalBST Nav{..} t) = lookup' t
       | goLeft x k           = lookup' l
       | otherwise            = lookup' r
 
--- | $O(\log n)$
+-- | \(O(\log n)\)
 member   :: Eq a => a -> BalBST k a -> Bool
 member x = isJust . lookup x
 
@@ -99,7 +99,7 @@ member x = isJust . lookup x
 
 -- | Insert an element in the BST.
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 insert :: a -> BalBST k a -> BalBST k a
 insert x (BalBST n@Nav{..} t) = BalBST n (blacken $ insert' t)
   where
@@ -128,7 +128,7 @@ insert x (BalBST n@Nav{..} t) = BalBST n (blacken $ insert' t)
 
 
 -- | Extract the minimum from the tree
--- $O(\log n)$.
+-- \(O(\log n)\)
 minView              :: BalBST k a -> Maybe (a, Tree k a)
 minView (BalBST n t) = minView' t
   where
@@ -137,7 +137,7 @@ minView (BalBST n t) = minView' t
     minView' (Node _ _ l _ r) = fmap (flip (joinWith n) r) <$> minView' l
 
 -- | Extract the maximum from the tree
--- $O(\log n)$.
+-- \(O(\log n)\)
 maxView              :: BalBST k a -> Maybe (a, Tree k a)
 maxView (BalBST n t) = maxView' t
   where
@@ -147,13 +147,13 @@ maxView (BalBST n t) = maxView' t
 
 -- | Joins two BSTs. Assumes that the ranges are disjoint. It takes the left Tree nav
 --
--- $O(\log n)$.
+-- \(O(\log n)\)
 join                           :: BalBST k a -> BalBST k a -> BalBST k a
 join (BalBST n l) (BalBST _ r) = BalBST n $ joinWith n l r
 
 -- | Joins two BSTs' with a specific Tree Navigator
 --
--- $O(\log n)$.
+-- \(O(\log n)\)
 joinWith               :: TreeNavigator k a -> Tree k a -> Tree k a -> Tree k a
 joinWith Nav{..} tl tr
     | lh >= rh         = blacken $ joinL tl tr
@@ -203,7 +203,7 @@ collect _   xs = Pair (map fst' xs) (snd' $ last xs)
 
 -- | Extract a prefix from the tree, i.e. a repeated 'minView'
 --
--- $O(\log n +k)$, where $k$ is the size of the extracted part
+-- \(O(\log n +k)\), where \(k\) is the size of the extracted part
 extractPrefix                      :: BalBST k a -> [Pair a (Tree k a)]
 extractPrefix (BalBST n@Nav{..} t) = extractPrefix' t
   where
@@ -215,7 +215,7 @@ extractPrefix (BalBST n@Nav{..} t) = extractPrefix' t
 
 -- | Extract a suffix from the tree, i.e. a repeated 'minView'
 --
--- $O(\log n +k)$, where $k$ is the size of the extracted part
+-- \(O(\log n +k)\), where \(k\) is the size of the extracted part
 extractSuffix                      :: BalBST k a -> [Pair a (Tree k a)]
 extractSuffix (BalBST n@Nav{..} t) = extract t
   where
@@ -231,7 +231,7 @@ data Split a b = Split a !b a deriving (Show,Eq)
 -- | Splits the tree at x. Note that if x occurs more often, no guarantees are
 -- given which one is found.
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 split                        :: Eq a => a -> BalBST k a -> Split (Tree k a) (Maybe a)
 split x (BalBST n@Nav{..} t) = split' t
   where
@@ -248,7 +248,7 @@ split x (BalBST n@Nav{..} t) = split' t
 
 -- | split based on a monotonic predicate
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 splitMonotone                        :: (a -> Bool) -> BalBST k a
                                      -> (BalBST k a, BalBST k a)
 splitMonotone p (BalBST n@Nav{..} t) = bimap (BalBST n) (BalBST n) $ split' t
@@ -293,7 +293,7 @@ showTree = maybe "Empty" T.drawTree . fmap (fmap show) . toRoseTree . toTree
 
 -- | Get the minimum in the tree. Errors when the tree is empty
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 unsafeMin                  :: Tree k a -> a
 unsafeMin (Leaf x)         = x
 unsafeMin (Node _ _ l _ _) = unsafeMin l
@@ -301,7 +301,7 @@ unsafeMin _                = error "unsafeMin: Empty"
 
 -- | Get the maximum in the tree. Errors when the tree is empty
 --
--- $O(\log n)$
+-- \(O(\log n)\)
 unsafeMax                  :: Tree k a -> a
 unsafeMax (Leaf x)         = x
 unsafeMax (Node _ _ _ _ r) = unsafeMax r
@@ -309,13 +309,13 @@ unsafeMax _                = error "unsafeMax: Empty"
 
 -- | Extract all elements in the tree
 --
--- $O(n)$
+-- \(O(n)\)
 toList :: BalBST k a -> [a]
 toList = toList' . toTree
 
 -- | Extract all elements in the tree
 --
--- $O(n)$
+-- \(O(n)\)
 toList'                  :: Tree k a -> [a]
 toList' Empty            = []
 toList' (Leaf x)         = [x]

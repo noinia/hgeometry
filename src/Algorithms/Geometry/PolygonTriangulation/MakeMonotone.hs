@@ -24,7 +24,7 @@ data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
 --
 -- pre: the polygon is given in CCW order
 --
--- running time: $O(n)$.
+-- running time: \(O(n)\).
 classifyVertices                   :: (Num r, Ord r)
                                     => SimplePolygon p r
                                     -> SimplePolygon (p :+ VertexType) r

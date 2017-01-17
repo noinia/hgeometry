@@ -24,8 +24,8 @@ mkPair pp@(p :+ _) qq@(q :+ _) = let dst = qdA p q
                                  in Min (Arg dst (Two pp qq))
 
 
--- | Naive algorithm to compute the closest pair in d dimensions. Runs in
--- O(n^2) time (for any constant d). Note that we need at least two elements
+-- | Naive algorithm to compute the closest pair in \(d\) dimensions. Runs in
+-- \(O(n^2)\) time (for any constant \(d\)). Note that we need at least two elements
 -- for there to be a closest pair.
 closestPair :: ( FV.Dim v ~ FV.S (FV.S n)
                , FV.Vector v (Point d r :+ p)

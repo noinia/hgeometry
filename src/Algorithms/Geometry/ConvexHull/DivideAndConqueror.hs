@@ -12,7 +12,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
 
--- | O(n log n) time ConvexHull using divide and conqueror.
+-- | \(O(n \log n)\) time ConvexHull using divide and conqueror.
 convexHull :: (Ord r, Num r)
            => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
 convexHull = unMerge

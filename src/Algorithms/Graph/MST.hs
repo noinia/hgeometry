@@ -23,14 +23,14 @@ import qualified Data.Vector.Unboxed.Mutable as UMV
 --
 -- The algorithm used is Kruskal's.
 --
--- running time: $O(n \log n)$
+-- running time: \(O(n \log n)\)
 mst   :: Ord e => PlanarGraph s w v e f -> Tree (VertexId s w)
 mst g = makeTree g $ mstEdges g
   -- TODO: Add edges/darts to the output somehow.
 
 -- | Computes the set of edges in the Minimum spanning tree
 --
--- running time: $O(n \log n)$
+-- running time: \(O(n \log n)\)
 mstEdges   :: Ord e => PlanarGraph s w v e f -> [Dart s]
 mstEdges g = runST $ do
           uf <- new (numVertices g)
