@@ -2,10 +2,12 @@
 module Data.Geometry.Polygon where
 
 import           Control.Lens hiding (Simple)
+import           Data.Bifoldable
 import           Data.Bifunctor
+import           Data.Bifunctor.Apply
+import           Data.Bitraversable
 import qualified Data.CircularSeq as C
 import           Data.Ext
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -15,6 +17,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
 import           Data.Semigroup
@@ -43,6 +46,22 @@ data PolygonType = Simple | Multi
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+
+instance Bifunctor (Polygon t) where
+  bimap = bimapDefault
+
+instance Bifoldable (Polygon t) where
+  bifoldMap = bifoldMapDefault
+
+instance Bitraversable (Polygon t) where
+  bitraverse f g p = case p of
+    SimplePolygon vs   -> SimplePolygon <$> bitraverseVertices f g vs
+    MultiPolygon vs hs -> MultiPolygon  <$> bitraverseVertices f g vs
+                                        <*> traverse (bitraverse f g) hs
+
+bitraverseVertices     :: (Applicative f, Traversable t) => (p -> f q) -> (r -> f s)
+                  -> t (Point 2 r :+ p) -> f (t (Point 2 s :+ q))
+bitraverseVertices f g = traverse (bitraverse (traverse g) f)
 
 type SimplePolygon = Polygon Simple
 
@@ -324,3 +343,14 @@ extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
 extremesLinear u p = let vs = p^.outerBoundary
                          f  = cmpExtreme u
                      in (F.minimumBy f vs, F.maximumBy f vs)
+
+
+-- | assigns unique integer numbers to all vertices. Numbers start from 0, and
+-- are increasing along the outer boundary. The vertices of holes
+-- will be numbered last, in the same order.
+--
+-- >>> numberVertices simplePoly
+-- SimplePolygon CSeq [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()]
+numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
+numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (\a r -> (a,r)) 0
+  -- TODO: Make sure that this does not have the same issues as foldl vs foldl'

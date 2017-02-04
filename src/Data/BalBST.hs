@@ -115,8 +115,15 @@ insert x (BalBST n@Nav{..} t) = BalBST n (blacken $ insert' t)
 
 -- delete = undefined
 
--- delete                        :: Eq a => a -> BalBST k a -> BalBST k a
--- delete x (BalBST n@Nav{..} t) = delete' t
+-- | Delete (one occurance of) an element.
+-- \(O(\log n)\)
+delete                        :: Eq a => a -> BalBST k a -> BalBST k a
+delete x t = let Split l _ r = split x t
+                 n           = nav t
+             in BalBST n $ joinWith n l r
+
+
+-- (BalBST n@Nav{..} t) = delete' t
 --   where
 --     delete' Empty      = Empty
 --     delete' l@(Leaf y) = if x == y then Empty else l
