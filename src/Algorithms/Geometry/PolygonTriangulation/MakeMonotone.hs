@@ -74,8 +74,8 @@ p `cmpSweep` q =
 makeMonotone      :: SimplePolygon p r -> proxy s -> PlanarSubdivision s p () Bool r
 makeMonotone pg _ = undefined
 
-ordAtNav :: (Fractional r, Ord r, Show r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
-ordAtNav r = traceShow ("ordAtNav",r) $ BO.ordAtNav r
+ordAtNav :: (Fractional r, Ord r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
+ordAtNav = BO.ordAtNav
 
 -- | The
 withIncidentEdges                    :: SimplePolygon p r
@@ -95,7 +95,7 @@ data StatusStruct r = SS { _statusStruct :: !(SS.BalBST r (LineSegment 2 Int r))
 makeLenses ''StatusStruct
 
 
-ix' i = traceShow i $ singular (ix i)
+ix' i = singular (ix i)
 
 findDiagonals    :: forall r p. (Fractional r, Ord r,          Show r, Show p)
                  => SimplePolygon p r -> [LineSegment 2 p r]
@@ -118,16 +118,13 @@ findDiagonals p' = map f . sweep
                      MV.write v i (STR pt p vt)
                    return v
 
-    initialSS = SS (SS.empty $ BO.ordAtNav undefined) mempty
+    initialSS = SS (SS.empty $ ordAtNav undefined) mempty
 
-    -- sweep :: NonEmpty.NonEmpty (Event r) -> SP [LineSegment 2 Int r] (StatusStruct r)
-    -- sweep = foldr (handle vertexInfo) (SP [] initialSS)
+    sweep  es = flip runReader vertexInfo $ evalStateT (sweep' es) initialSS
+    sweep' es = DList.toList <$> execWriterT (sweep'' es)
 
-    sweep  xs = flip runReader vertexInfo $ evalStateT (sweep'' xs) initialSS
-    sweep'' xs = DList.toList <$> execWriterT (sweep' xs)
-
-    sweep' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
-    sweep' = mapM_ handle
+    sweep'' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
+    sweep'' = mapM_ handle
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)
@@ -151,7 +148,7 @@ getEventType :: Event r -> Sweep p r VertexType
 getEventType = getVertexType . getIdx
 
 handle   :: (Fractional r, Ord r, Show r, Show p) => Event r -> Sweep p r ()
-handle e | traceShow (getIdx e, e) False = undefined
+-- handle e | traceShow (getIdx e, e) False = undefined
 handle e = let i = getIdx e in getEventType e >>= \case
     Start   -> handleStart   i e
     End     -> handleEnd     i e
@@ -163,8 +160,7 @@ handle e = let i = getIdx e in getEventType e >>= \case
 
 insertAt       :: (Ord r, Fractional r, Show r, Show q) => Point 2 r -> LineSegment 2 q r
                -> SS.BalBST r (LineSegment 2 q r) -> SS.BalBST r (LineSegment 2 q r)
-insertAt v e t | traceShow ("InsertAt", v, e) False = undefined
-               | otherwise  = SS.insert e $ t { SS.nav = ordAtNav (v^.yCoord) }
+insertAt v e t = SS.insert e $ t { SS.nav = ordAtNav (v^.yCoord) }
 
 deleteAt v e t = SS.delete e $ t { SS.nav = ordAtNav (v^.yCoord) }
 
@@ -183,15 +179,13 @@ handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             modify $ \ss -> ss&statusStruct %~ deleteAt v (adj^._1)
 
 -- | Adds edge (i,j) if e_j's helper is a merge vertex
-tellIfMerge i v j = do SP u ut' <- getHelper j
-                       let ut = traceShow ("tellIfMerge", ut') ut'
+tellIfMerge i v j = do SP u ut <- getHelper j
                        when (ut == Merge) (tell' $ ClosedLineSegment (v :+ i) u)
 
 -- | Get the helper of edge i, and its vertex type
 getHelper   :: Int -> Sweep p r (SP (Point 2 r :+ Int) VertexType)
-getHelper i | traceShow ("HelperOf ", i) False = undefined
-getHelper i = do Just ui    <- gets (^.helper.at (traceShowId i))
-                 STR u _ ut <- asks (^.ix' (traceShowId ui ))
+getHelper i = do Just ui    <- gets (^.helper.at i)
+                 STR u _ ut <- asks (^.ix' ui)
                  pure $ SP (u :+ ui) ut
 
 
@@ -214,10 +208,7 @@ handleSplit i (v :+ adj) = do Just ej <- gets $ \ss -> ss^.statusStruct.to (look
                               -- return the diagonal
                               tell' $ ClosedLineSegment (v :+ i) u
 
-handleMerge i e | traceShow ("Merge", i, e) False = undefined
-handleMerge i (v :+ adj) = do let ePred' = adj^._1.start.extra -- i-1
-                              st <- get
-                              let ePred = traceShow ("ST") ePred'
+handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                               tellIfMerge i v ePred
                               -- delete e_{i-1} from the status struct
                               modify $ \ss -> ss&statusStruct %~ deleteAt v (adj^._1)
