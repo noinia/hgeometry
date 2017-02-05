@@ -13,6 +13,8 @@ import           QuickCheck.Instances
 import           Test.QuickCheck
 
 
+import WSPDBench
+
 -- | generates n random intervals
 genIntervals                  :: (Ord r, Arbitrary r)
                               => proxy r -> Int -> IO [Interval () r]
@@ -32,11 +34,14 @@ genQueries _ n | n <= 0     = error "genQueries: need n > 0"
 --                  <*> genQueries   p n
 
 
-main = defaultMain [
-  bgroup "IntervalTree" [ env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchBuild
-                         -- env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchQueryIT
-                        ]
-  ]
+
+main = defaultMain [ benchWSPD ]
+
+intervalBench = bgroup "IntervalTree"
+    [ env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchBuild
+      -- env (genIntervals (I (5 :: Int)) (100000 :: Int)) benchQueryIT
+    ]
+
 
 benchBuild    :: (Ord r, NFData r) => [Interval () r] -> Benchmark
 benchBuild is = bgroup "build" [ bench (show n) $ nf IT.fromIntervals (take n is')

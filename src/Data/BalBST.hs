@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Data.BalBST where
 
+import           Control.Applicative((<|>))
 import           Data.Bifunctor
 import           Data.Function (on)
 import           Data.Functor.Contravariant
@@ -93,8 +94,16 @@ lookup x (BalBST Nav{..} t) = lookup' t
 member   :: Eq a => a -> BalBST k a -> Bool
 member x = isJust . lookup x
 
-
-
+-- | Search for the Predecessor
+-- \(O(\log n)\)
+lookupLE :: Ord k => k -> BalBST k a -> Maybe a
+lookupLE kx (BalBST n@Nav{..} t) = lookup' t
+  where
+    lookup' Empty            = Nothing
+    lookup' (Leaf y)         = if goLeft y kx then Just y else Nothing
+    lookup' (Node _ _ l k r)
+      | kx <= k              = lookup' l
+      | otherwise            = lookup' r <|> lookupMax (BalBST n l)
 
 
 -- | Insert an element in the BST.
@@ -143,6 +152,9 @@ minView (BalBST n t) = minView' t
     minView' (Leaf x)         = Just (x,Empty)
     minView' (Node _ _ l _ r) = fmap (flip (joinWith n) r) <$> minView' l
 
+lookupMin :: BalBST k b -> Maybe b
+lookupMin = fmap fst . maxView
+
 -- | Extract the maximum from the tree
 -- \(O(\log n)\)
 maxView              :: BalBST k a -> Maybe (a, Tree k a)
@@ -151,6 +163,10 @@ maxView (BalBST n t) = maxView' t
     maxView' Empty            = Nothing
     maxView' (Leaf x)         = Just (x,Empty)
     maxView' (Node _ _ l _ r) = fmap (joinWith n l) <$> maxView' r
+
+lookupMax :: BalBST k b -> Maybe b
+lookupMax = fmap fst . maxView
+
 
 -- | Joins two BSTs. Assumes that the ranges are disjoint. It takes the left Tree nav
 --

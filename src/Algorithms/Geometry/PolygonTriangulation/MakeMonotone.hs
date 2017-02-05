@@ -1,19 +1,34 @@
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotone where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
 import           Control.Lens
+import           Control.Monad (forM_, when)
+import           Control.Monad.Reader
+import           Control.Monad.State.Strict
+import           Control.Monad.Writer(WriterT, execWriterT,tell)
 import qualified Data.BalBST as SS
+import           Data.Bifunctor
 import           Data.CircularSeq (rotateL, rotateR, zip3LWith)
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Functor.Contravariant
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (catMaybes)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
 import           Data.Util
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
+import qualified Data.DList as DList
+
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -59,28 +74,8 @@ p `cmpSweep` q =
 makeMonotone      :: SimplePolygon p r -> proxy s -> PlanarSubdivision s p () Bool r
 makeMonotone pg _ = undefined
 
--- type StatusStruct r = SS.BalBST r (LineSegment 2 p r :+ e)
-
-ordAtNav :: (Fractional r, Ord r) => r -> SS.TreeNavigator r (LineSegment 2 p r :+ e)
-ordAtNav = contramap (view core) . BO.ordAtNav
-
-type StatusStruct r p e = SS.BalBST r (LineSegment 2 p r :+ e)
-
-type Helper p r = Point 2 r :+ (p :+ VertexType)
-
-type StatusStruct' p r = StatusStruct r p (Helper p r)
-
-
-helper :: Lens' (LineSegment 2 p r :+ e) e
-helper = extra
-
-vertexType :: Lens' (Helper p r) VertexType
-vertexType = extra.extra
-
-helper'   :: LineSegment 2 p r :+ (Helper p r) -> Point 2 r :+ p
-helper' e = (e^.helper) &extra %~ view core
-
-
+ordAtNav :: (Fractional r, Ord r, Show r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
+ordAtNav r = traceShow ("ordAtNav",r) $ BO.ordAtNav r
 
 -- | The
 withIncidentEdges                    :: SimplePolygon p r
@@ -88,56 +83,171 @@ withIncidentEdges                    :: SimplePolygon p r
 withIncidentEdges (SimplePolygon vs) =
     SimplePolygon $ zip3LWith f (rotateL vs) vs (rotateR vs)
   where
-    seg p q = LineSegment (Closed p) (Open q)
-    f p c n = c&extra .~ SP (seg p c) (seg p n)
+    f p c n = c&extra .~ SP (ClosedLineSegment p c) (ClosedLineSegment c n)
 
 
-findDiagonals  :: (Fractional r, Ord r) => SimplePolygon p r -> [LineSegment 2 p r]
-findDiagonals = view _1 . sweep . NonEmpty.sortBy cmpSweep
-              . polygonVertices . withIncidentEdges . classifyVertices
+type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
+
+data StatusStruct r = SS { _statusStruct :: !(SS.BalBST r (LineSegment 2 Int r))
+                         , _helper       :: !(IntMap.IntMap Int)
+                         -- ^ for every e_i, the id of the helper vertex
+                         } deriving (Show)
+makeLenses ''StatusStruct
+
+
+ix' i = traceShow i $ singular (ix i)
+
+findDiagonals    :: forall r p. (Fractional r, Ord r,          Show r, Show p)
+                 => SimplePolygon p r -> [LineSegment 2 p r]
+findDiagonals p' = map f . sweep
+                 . NonEmpty.sortBy (flip cmpSweep)
+                 . polygonVertices . withIncidentEdges
+                 . first (^._1) $ p
   where
-    sweep :: (Fractional r, Ord r)
-          => NonEmpty.NonEmpty (Event p r) -> SP [LineSegment 2 p r] (StatusStruct' p r)
-    sweep = foldr handle (SP [] (SS.empty $ ordAtNav undefined))
+    -- remaps to get the p value rather than the vertexId
+    f = first (\i -> vertexInfo^.ix' i._2)
 
-getEvent :: Two (LineSegment 2 (p :+ vt) r) -> vt
-getEvent = view (_1.end.extra.extra)
+    p :: SimplePolygon (SP Int (p :+ VertexType)) r
+    p = numberVertices . classifyVertices $ p'
+    vertexInfo :: V.Vector (STR (Point 2 r) p VertexType)
+    vertexInfo = let vs = polygonVertices p
+                     n  = F.length vs
+                 in V.create $ do
+                   v <- MV.new n
+                   forM_ vs $ \(pt :+ SP i (p :+ vt)) ->
+                     MV.write v i (STR pt p vt)
+                   return v
 
+    initialSS = SS (SS.empty $ BO.ordAtNav undefined) mempty
 
+    -- sweep :: NonEmpty.NonEmpty (Event r) -> SP [LineSegment 2 Int r] (StatusStruct r)
+    -- sweep = foldr (handle vertexInfo) (SP [] initialSS)
 
+    sweep  xs = flip runReader vertexInfo $ evalStateT (sweep'' xs) initialSS
+    sweep'' xs = DList.toList <$> execWriterT (sweep' xs)
 
+    sweep' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
+    sweep' = mapM_ handle
 
-type Event p r = Point 2 r :+ (Two (LineSegment 2 (p :+ VertexType) r))
+type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
+                   (StateT (StatusStruct r)
+                     (Reader (V.Vector (VertexInfo p r))))
 
-
-
-handle               :: (Fractional r, Ord r)
-                     => Event p r
-                     -> SP [LineSegment 2 p r] (StatusStruct' p r)
-                     -> SP [LineSegment 2 p r] (StatusStruct' p r)
-handle (p :+ adj) ss@(SP diags t) = case getEvent adj of
-    Start   -> SP diags (SS.insert (ei :+ pv) t')
-    End     -> let e  = undefined
-                   md = undefined
-               in SP (md <> diags) (SS.delete e t')
-    Split   -> let e = undefined
-                   d = ClosedLineSegment (p :+ x) (e^.helper)
-               in SP (d : diags) (SS.insert (ei :+ pv) t')
-    Merge   -> undefined
-    Regular -> undefined
-  where
-    ei = bimap (^.core) id $ adj^._2
-
-    x   = adj^._1.end.extra.core
-    pv  = p :+ (x :+ getEvent adj)
-    t'  = t { SS.nav = ordAtNav $ p^.yCoord }
+type VertexInfo p r = STR (Point 2 r) p VertexType
 
 
--- handle e@(getEvent -> p :+ Start) ss = undefined
+-- type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
+
+tell' :: LineSegment 2 Int r -> Sweep p r ()
+tell' = tell . DList.singleton
+
+getIdx :: Event r -> Int
+getIdx = view (extra._1.end.extra)
+
+getVertexType   :: Int -> Sweep p r VertexType
+getVertexType v = asks (^.ix' v._3)
+
+getEventType :: Event r -> Sweep p r VertexType
+getEventType = getVertexType . getIdx
+
+handle   :: (Fractional r, Ord r, Show r, Show p) => Event r -> Sweep p r ()
+handle e | traceShow (getIdx e, e) False = undefined
+handle e = let i = getIdx e in getEventType e >>= \case
+    Start   -> handleStart   i e
+    End     -> handleEnd     i e
+    Split   -> handleSplit   i e
+    Merge   -> handleMerge   i e
+    Regular | isLeftVertex i e -> handleRegularL i e
+            | otherwise        -> handleRegularR i e
 
 
---         :+ (e :+ Start)) ss =
+insertAt       :: (Ord r, Fractional r, Show r, Show q) => Point 2 r -> LineSegment 2 q r
+               -> SS.BalBST r (LineSegment 2 q r) -> SS.BalBST r (LineSegment 2 q r)
+insertAt v e t | traceShow ("InsertAt", v, e) False = undefined
+               | otherwise  = SS.insert e $ t { SS.nav = ordAtNav (v^.yCoord) }
 
+deleteAt v e t = SS.delete e $ t { SS.nav = ordAtNav (v^.yCoord) }
+
+
+-- handleStart   :: (Fractional r, Ord r, Show r) => Int -> Event r -> Sweep p r ()
+handleStart i (v :+ adj) = modify $ \(SS t h) ->
+                                SS (insertAt v (adj^._2) t)
+                                   (IntMap.insert i i h)
+
+-- handleEnd   :: (Fractional r, Ord r, Show r) => Int -> Event r -> Sweep p r ()
+handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
+                            -- lookup p's helper; if it is a merge vertex
+                            -- we insert a new segment
+                            tellIfMerge i v iPred
+                            -- delete e_{i-1} from the status struct
+                            modify $ \ss -> ss&statusStruct %~ deleteAt v (adj^._1)
+
+-- | Adds edge (i,j) if e_j's helper is a merge vertex
+tellIfMerge i v j = do SP u ut' <- getHelper j
+                       let ut = traceShow ("tellIfMerge", ut') ut'
+                       when (ut == Merge) (tell' $ ClosedLineSegment (v :+ i) u)
+
+-- | Get the helper of edge i, and its vertex type
+getHelper   :: Int -> Sweep p r (SP (Point 2 r :+ Int) VertexType)
+getHelper i | traceShow ("HelperOf ", i) False = undefined
+getHelper i = do Just ui    <- gets (^.helper.at (traceShowId i))
+                 STR u _ ut <- asks (^.ix' (traceShowId ui ))
+                 pure $ SP (u :+ ui) ut
+
+
+
+lookupLE     :: (Ord r, Fractional r , Show r) => Point 2 r
+             -> SS.BalBST r (LineSegment 2 Int r)
+             -> Maybe (LineSegment 2 Int r)
+lookupLE v t = SS.lookupLE (v^.yCoord) (t { SS.nav = ordAtNav (v^.yCoord) })
+
+
+handleSplit i (v :+ adj) = do Just ej <- gets $ \ss -> ss^.statusStruct.to (lookupLE v)
+                              let j = ej^.start.extra
+                              SP u _ <- getHelper j
+                              -- update the status struct:
+                              -- insert the new edge into the status Struct and
+                              -- set the helper of e_j to be v_i
+                              modify $ \(SS t h) ->
+                                SS (insertAt v (adj^._2) t)
+                                   (IntMap.insert i i . IntMap.insert j i $ h)
+                              -- return the diagonal
+                              tell' $ ClosedLineSegment (v :+ i) u
+
+handleMerge i e | traceShow ("Merge", i, e) False = undefined
+handleMerge i (v :+ adj) = do let ePred' = adj^._1.start.extra -- i-1
+                              st <- get
+                              let ePred = traceShow ("ST") ePred'
+                              tellIfMerge i v ePred
+                              -- delete e_{i-1} from the status struct
+                              modify $ \ss -> ss&statusStruct %~ deleteAt v (adj^._1)
+                              connectToLeft i v
+
+-- | finds the edge j to the left of v_i, and connect v_i to it if the helper
+-- of j is a merge vertex
+connectToLeft i v = do Just ej <- gets $ \ss -> ss^.statusStruct.to (lookupLE v)
+                       let j = ej^.start.extra
+                       tellIfMerge i v j
+                       modify $ \ss -> ss&helper %~ IntMap.insert j i
+
+
+-- | returns True if v the interior of the polygon is to the right of v
+isLeftVertex i (v :+ adj) = case (adj^._1.start) `cmpSweep` (v :+ i) of
+                              GT -> True
+                              _  -> False
+  -- if the predecessor occurs before the sweep, this must be a left vertex
+
+handleRegularL i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
+                                 tellIfMerge i v ePred
+                                 -- delete e_{i-1} from the status struct
+                                 modify $ \ss -> ss&statusStruct %~ deleteAt v (adj^._1)
+                                 -- insert a e_i in the status struct, and set its helper
+                                 -- to be v_i
+                                 modify $ \(SS t h) ->
+                                     SS (insertAt v (adj^._2) t)
+                                        (IntMap.insert i i h)
+
+handleRegularR i (v :+ _) = connectToLeft i v
 
 
 
@@ -187,3 +297,24 @@ testQ = point2 3 2
 --       (GT,_)  -> True
 --       (EQ,LT) -> True
 --       _       -> False
+
+
+testPolygon :: SimplePolygon Int Rational
+testPolygon = fromPoints [ point2 20 20 :+ 1
+                         , point2 18 19 :+ 2
+                         , point2 16 25 :+ 3
+                         , point2 13 23 :+ 4
+                         , point2 10 24 :+ 5
+                         , point2 6  22 :+ 6
+                         , point2 8  21 :+ 7
+                         , point2 7  18 :+ 8
+                         , point2 2  19 :+ 9
+                         , point2 1  10 :+ 10
+                         , point2 3  5  :+ 11
+                         , point2 11 7  :+ 12
+                         , point2 15 1  :+ 13
+                         , point2 12 15 :+ 14
+                         , point2 15 12 :+ 15
+                         ]
+
+vertexTypes = [Start,Merge,Start,Merge,Start,Regular,Regular,Merge,Start,Regular,End,Split,End,Split,End]

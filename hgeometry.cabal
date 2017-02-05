@@ -173,6 +173,7 @@ library
                 , bifunctors       >= 4.1
                 , bytestring       >= 0.10
                 , containers       >= 0.5.5
+                , dlist            >= 0.7
                 , contravariant    >= 1.4
                 , lens             >= 4.2
                 , linear           >= 1.10
@@ -405,12 +406,14 @@ test-suite bapc_examples
 
 benchmark benchmarks
 
-  hs-source-dirs: benchmark test
+  hs-source-dirs: benchmark test examples
 
   main-is: Benchmarks.hs
   type: exitcode-stdio-1.0
 
-  other-modules:
+  other-modules: QuickCheck.Instances
+                 Demo.ExpectedPairwiseDistance
+                 WSPDBench
 
   build-depends:
                 base
@@ -422,6 +425,9 @@ benchmark benchmarks
               , Frames
               , lens
               , QuickCheck
+              , bytestring
+              , containers
+              , optparse-applicative
 
   ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors
 
