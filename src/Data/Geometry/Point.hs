@@ -235,6 +235,10 @@ ccw p q r = case z `compare` 0 of
        Vector2 vx vy = r .-. p
        z             = ux * vy - uy * vx
 
+-- | Given three points p q and r determine the orientation when going from p to r via q.
+ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
+ccw' p q r = ccw (p^.core) (q^.core) (r^.core)
+
 -- | Sort the points arround the given point p in counter clockwise order with
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.

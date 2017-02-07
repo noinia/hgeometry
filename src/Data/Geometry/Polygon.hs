@@ -148,6 +148,22 @@ outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
 
+-- | Pairs every vertex with its incident edges. The first one is its
+-- predecessor edge, the second one its successor edge.
+--
+-- >>> mapM_ print . polygonVertices $ withIncidentEdges simplePoly
+-- Point2 [0 % 1,0 % 1] :+ SP LineSegment (Closed (Point2 [1 % 1,11 % 1] :+ ())) (Closed (Point2 [0 % 1,0 % 1] :+ ())) LineSegment (Closed (Point2 [0 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,0 % 1] :+ ()))
+-- Point2 [10 % 1,0 % 1] :+ SP LineSegment (Closed (Point2 [0 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,0 % 1] :+ ())) LineSegment (Closed (Point2 [10 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,10 % 1] :+ ()))
+-- Point2 [10 % 1,10 % 1] :+ SP LineSegment (Closed (Point2 [10 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,10 % 1] :+ ())) LineSegment (Closed (Point2 [10 % 1,10 % 1] :+ ())) (Closed (Point2 [5 % 1,15 % 1] :+ ()))
+-- Point2 [5 % 1,15 % 1] :+ SP LineSegment (Closed (Point2 [10 % 1,10 % 1] :+ ())) (Closed (Point2 [5 % 1,15 % 1] :+ ())) LineSegment (Closed (Point2 [5 % 1,15 % 1] :+ ())) (Closed (Point2 [1 % 1,11 % 1] :+ ()))
+-- Point2 [1 % 1,11 % 1] :+ SP LineSegment (Closed (Point2 [5 % 1,15 % 1] :+ ())) (Closed (Point2 [1 % 1,11 % 1] :+ ())) LineSegment (Closed (Point2 [1 % 1,11 % 1] :+ ())) (Closed (Point2 [0 % 1,0 % 1] :+ ()))
+withIncidentEdges                    :: SimplePolygon p r
+                                     -> SimplePolygon (Two (LineSegment 2 p r)) r
+withIncidentEdges (SimplePolygon vs) =
+    SimplePolygon $ C.zip3LWith f (C.rotateL vs) vs (C.rotateR vs)
+  where
+    f p c n = c&extra .~ SP (ClosedLineSegment p c) (ClosedLineSegment c n)
+
 -- -- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
 ---- with vertices i and i+1 with respect to the current focus. All indices
 -- -- modulo n.

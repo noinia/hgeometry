@@ -77,15 +77,6 @@ makeMonotone pg _ = undefined
 ordAtNav :: (Fractional r, Ord r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
 ordAtNav = BO.ordAtNav
 
--- | The
-withIncidentEdges                    :: SimplePolygon p r
-                                     -> SimplePolygon (Two (LineSegment 2 p r)) r
-withIncidentEdges (SimplePolygon vs) =
-    SimplePolygon $ zip3LWith f (rotateL vs) vs (rotateR vs)
-  where
-    f p c n = c&extra .~ SP (ClosedLineSegment p c) (ClosedLineSegment c n)
-
-
 type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
 
 data StatusStruct r = SS { _statusStruct :: !(SS.BalBST r (LineSegment 2 Int r))
@@ -118,7 +109,9 @@ findDiagonals p' = map f . sweep
                      MV.write v i (STR pt p vt)
                    return v
 
-    initialSS = SS (SS.empty $ ordAtNav undefined) mempty
+    initialSS = SS (SS.empty . ordAtNav
+                    $ error "MakeMonotone.findDiagionals uninitialized state")
+                   mempty
 
     sweep  es = flip runReader vertexInfo $ evalStateT (sweep' es) initialSS
     sweep' es = DList.toList <$> execWriterT (sweep'' es)
