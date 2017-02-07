@@ -28,6 +28,7 @@ extra-source-files:  README.md
                      test/Data/Geometry/Polygon/Convex/convexTests.ipe
                      test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
                      test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
+                     test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
                      examples/BAPC2014/sample.in
                      examples/BAPC2014/sample.out
                      examples/BAPC2014/testdata.in
@@ -115,6 +116,7 @@ library
                     Algorithms.Geometry.Diameter
 
                     Algorithms.Geometry.PolygonTriangulation.MakeMonotone
+                    Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
 
                     Algorithms.Geometry.LineSegmentIntersection.Naive
                     Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
@@ -331,6 +333,7 @@ test-suite hspec
                  Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec
                  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
                  Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec
+                 Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
 
                  QuickCheck.Instances
                  Util

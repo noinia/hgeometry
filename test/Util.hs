@@ -22,3 +22,9 @@ difference xs ys = (xs L.\\ ys) ++ (ys L.\\ xs)
 
 diffBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 diffBy p xs ys = foldr (L.deleteBy p) ys xs
+
+-- | \(O(n^2)\) set that ignores duplicates and order
+newtype NaiveSet a = NaiveSet [a] deriving (Show)
+
+instance Eq a => Eq (NaiveSet a) where
+  (NaiveSet xs) == (NaiveSet ys) = L.null $ difference xs ys

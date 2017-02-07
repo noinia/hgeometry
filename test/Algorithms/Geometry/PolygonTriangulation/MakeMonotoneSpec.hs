@@ -8,6 +8,7 @@ import Control.Lens
 import Test.Hspec
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
+import Data.Geometry.Ipe
 
 
 spec :: Spec

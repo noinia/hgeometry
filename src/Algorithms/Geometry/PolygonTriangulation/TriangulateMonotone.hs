@@ -1,35 +1,25 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone where
 
-
 import           Control.Lens
-import           Control.Monad (forM_, when)
-import           Control.Monad.Reader
-import           Control.Monad.State.Strict
-import           Control.Monad.Writer (WriterT, execWriterT,tell)
-import qualified Data.BalBST as SS
 import           Data.Bifunctor
 import qualified Data.CircularSeq as C
-import qualified Data.DList as DList
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Functor.Contravariant
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.IntMap as IntMap
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (catMaybes, listToMaybe)
+import           Data.Maybe (listToMaybe)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
 import           Data.Tuple (swap)
 import           Data.Util
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
 import           Debug.Trace
+
+--------------------------------------------------------------------------------
 
 --
 type MonotonePolygon p r = SimplePolygon p r
