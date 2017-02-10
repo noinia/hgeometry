@@ -2,7 +2,7 @@
 {-# Language TemplateHaskell #-}
 module Data.Geometry.Slab where
 
-import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both)
+import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both, from)
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -141,6 +141,21 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
     where
       dropExtra sub = sub&subRange %~ bimap (const ()) id
       singleton p = let x = ext $ toOffset p l in SubLine l (ClosedInterval x x)
+
+
+type instance IntersectionOf (LineSegment 2 p r) (Slab o a r) =
+  [NoIntersection, LineSegment 2 () r]
+
+instance (Fractional r, Ord r, HasBoundingLines o) =>
+         LineSegment 2 a r `IsIntersectableWith` (Slab o a r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+
+  seg `intersect` slab = match ((seg^._SubLine) `intersect` slab) $
+       (H $ \NoIntersection -> coRec   NoIntersection)
+    :& (H $ \sl             -> coRec $ sl^. from _SubLine)
+    :& RNil
+
+
 
 
 test :: SubLine 2 () Double
