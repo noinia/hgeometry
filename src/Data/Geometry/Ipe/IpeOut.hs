@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.IpeOut where
 
-import           Control.Lens
+import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Ball
+import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
@@ -101,8 +102,13 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
 
 instance HasDefaultIpeOut (SimplePolygon p r) where
   type DefaultIpeOut (SimplePolygon p r) = Path
-  defaultIpeOut = flip addAttributes ipeSimplePolygon $
-                    mempty <> attr SFill (IpeColor "red")
+  defaultIpeOut = flip addAttributes ipePolygon $
+                    mempty <> attr SFill (IpeColor "0.722 0.145 0.137")
+
+instance HasDefaultIpeOut (MultiPolygon p r) where
+  type DefaultIpeOut (MultiPolygon p r) = Path
+  defaultIpeOut = flip addAttributes ipePolygon $
+                    mempty <> attr SFill (IpeColor "0.722 0.145 0.137")
 
 instance HasDefaultIpeOut (ConvexPolygon p r) where
   type DefaultIpeOut (ConvexPolygon p r) = Path
@@ -175,11 +181,15 @@ ipeCircle' = IpeOut circle''
 fromPathSegment    :: IpeOut g (PathSegment r) -> IpeOut g (Path r)
 fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
 
-ipeSimplePolygon :: IpeOut (SimplePolygon p r) (Path r)
-ipeSimplePolygon = fromPathSegment . IpeOut $ PolygonPath . dropExt
+
+ipePolygon :: IpeOut (Polygon t p r) (Path r)
+ipePolygon = IpeOut $ io . first (const ())
   where
-    dropExt                    :: SimplePolygon p r -> SimplePolygon () r
-    dropExt (SimplePolygon vs) = SimplePolygon $ fmap (&extra .~ ()) vs
+    io                       :: forall t r. Polygon t () r -> Path r
+    io pg@(SimplePolygon vs) = pg^.re _asSimplePolygon
+    io pg@(MultiPolygon _ _) = pg^.re _asMultiPolygon
+
+
 
 
 

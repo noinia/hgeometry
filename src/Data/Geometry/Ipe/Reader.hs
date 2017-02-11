@@ -22,6 +22,8 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                , ipeReadObject
                                , ipeReadAttrs
                                , ipeReadRec
+
+                               , Coordinate(..)
                                ) where
 
 import           Control.Lens hiding (Const, rmap)

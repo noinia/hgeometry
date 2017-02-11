@@ -1,16 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.FromIpe where
 
-import           Control.Lens
+import           Control.Lens hiding (Simple)
 import           Data.Ext
+import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
+import           Data.Geometry.Properties
 import qualified Data.Seq2 as S2
-import qualified Data.Traversable as Tr
+import qualified Data.List.NonEmpty as NonEmpty
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -48,18 +50,35 @@ _asPolyLine :: Prism' (Path r) (PolyLine.PolyLine 2 () r)
 _asPolyLine = prism' poly2path path2poly
   where
     poly2path = Path . S2.l1Singleton  . PolyLineSegment
-    path2poly = preview (pathSegments.Tr.traverse._PolyLineSegment)
+    path2poly = preview (pathSegments.traverse._PolyLineSegment)
     -- TODO: Check that the path actually is a polyline, rather
     -- than ignoring everything that does not fit
 
--- | Convert to a simple polygon: simply takes the first closed path
-_asSimplePolygon :: Prism' (Path r) (SimplePolygon () r)
-_asSimplePolygon = prism' poly2path path2poly
+-- | Convert to a simple polygon
+_asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
+_asSimplePolygon = prism' polygonToPath path2poly
   where
-    poly2path = Path . S2.l1Singleton . PolygonPath
-    path2poly = preview (pathSegments.Tr.traverse._PolygonPath)
-    -- TODO: Check that the path actually is a simple polygon, rather
-    -- than ignoring everything that does not fit
+    path2poly p = pathToPolygon p >>= either pure (const Nothing)
+
+-- | Convert to a multipolygon
+_asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
+_asMultiPolygon = prism' polygonToPath path2poly
+  where
+    path2poly p = pathToPolygon p >>= either (const Nothing) pure
+
+polygonToPath                      :: Polygon t () r -> Path r
+polygonToPath pg@(SimplePolygon _) = Path . S2.l1Singleton . PolygonPath $ pg
+polygonToPath (MultiPolygon vs hs) = Path . S2.viewL1FromNonEmpty . fmap PolygonPath
+                                   $ SimplePolygon vs NonEmpty.:| hs
+
+
+pathToPolygon   :: Path r -> Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
+pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
+                    []                   -> Nothing
+                    [pg]                 -> Just . Left  $ pg
+                    SimplePolygon vs: hs -> Just . Right $ MultiPolygon vs hs
+
+
 
 -- | use the first prism to select the ipe object to depicle with, and the second
 -- how to select the geometry object from there on. Then we can select the geometry
@@ -76,13 +95,54 @@ _withAttrs po pg = prism' g2o o2g
 
 
 
--- testPath :: Path Int
--- testPath = Path . S2.l1Singleton  . PolyLineSegment . PolyLine.fromPoints . map ext
---          $ [ origin, point2 10 10, point2 200 100 ]
 
 
--- testPathAttrs :: IpeAttributes Path Int
--- testPathAttrs = attr SStroke (IpeColor (Named "red"))
+-- instance HasDefaultIpeObject Path where
+--   defaultIpeObject' = _IpePath
 
--- testObject :: IpeObject Int
--- testObject = IpePath (testPath :+ testPathAttrs)
+
+-- class HasDefaultFromIpe g where
+--   type DefaultFromIpe g :: * -> *
+--   defaultIpeObject :: proxy g -> Prism' (IpeObject r) (DefaultFromIpe g r :+ IpeAttributes (DefaultFromIpe g) r)
+--   defaultFromIpe   :: proxy g -> Prism' (DefaultFromIpe g (NumType g)) g
+
+
+class HasDefaultFromIpe g where
+  type DefaultFromIpe g :: * -> *
+  defaultFromIpe :: (r ~ NumType g)
+                 => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
+
+-- instance HasDefaultFromIpe (Point 2 r) where
+--   type DefaultFromIpe (Point 2 r) = IpeSymbol
+--   defaultFromIpe = _withAttrs _IpeUse symbolPoint
+
+
+instance HasDefaultFromIpe (LineSegment 2 () r) where
+  type DefaultFromIpe (LineSegment 2 () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asLineSegment
+
+instance HasDefaultFromIpe (PolyLine.PolyLine 2 () r) where
+  type DefaultFromIpe (PolyLine.PolyLine 2 () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asPolyLine
+
+
+instance HasDefaultFromIpe (SimplePolygon () r) where
+  type DefaultFromIpe (SimplePolygon () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asSimplePolygon
+
+instance HasDefaultFromIpe (MultiPolygon () r) where
+  type DefaultFromIpe (MultiPolygon () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
+
+
+-- | Read all g's from some ipe page(s).
+readAll :: (HasDefaultFromIpe g, r ~ NumType g, Foldable f)
+        => f (IpePage r) -> [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAll = foldMap (^..content.traverse.defaultFromIpe)
+
+
+-- | Convenience function from reading all g's from an ipe file. If there
+-- is an error reading or parsing the file the error is "thrown away".
+readAllFrom    :: (HasDefaultFromIpe g, r ~ NumType g, Coordinate r)
+               => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAllFrom fp = readAll <$> readSinglePageFile fp
