@@ -17,6 +17,8 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Util
 
+import Debug.Trace
+
 spec :: Spec
 spec = do
   describe "Testing Bentley Ottmann LineSegment Intersection" $ do

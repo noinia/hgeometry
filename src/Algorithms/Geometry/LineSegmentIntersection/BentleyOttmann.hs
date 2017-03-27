@@ -1,8 +1,10 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
-import qualified Data.BalBST as SS -- status struct
+import qualified Data.OrdSeq as SS -- status struct
+-- import qualified Data.BalBST as SS
 import           Data.Ext
 import           Data.Function (on)
 import           Data.Geometry.Interval
@@ -20,9 +22,11 @@ import           Data.Semigroup
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Frames.CoRec
+import qualified Data.Foldable as F
+import           Data.OrdSeq (Compare, OrdSeq)
 
 import           Debug.Trace
-
+import Data.Ratio
 --------------------------------------------------------------------------------
 
 -- | Compute all intersections
@@ -30,7 +34,7 @@ import           Debug.Trace
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 intersections    :: (Ord r, Fractional r)
                  => [LineSegment 2 p r] -> Intersections p r
-intersections ss = merge $ sweep pts (SS.empty $ ordAtNav undefined)
+intersections ss = merge $ sweep pts mempty
   where
     pts = EQ.fromAscList . groupStarts . L.sort . concatMap f $ ss
     f s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
@@ -98,16 +102,52 @@ startSegs e = case eventType e of
 
 --------------------------------------------------------------------------------
 
--- | The navigator that we use that orders the segments that intersect at a
--- horizontal line (from left to right)
-ordAtNav   :: (Ord r, Fractional r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
-ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
-  where
-    h s = match (s `intersect` horizontalLine y) $
-         (H $ \NoIntersection -> error "ordAtNav: No intersection")
+-- -- | The navigator that we use that orders the segments that intersect at a
+-- -- horizontal line (from left to right)
+-- ordAtNav   :: (Ord r, Fractional r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
+-- ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
+--   where
+--     h s = match (s `intersect` horizontalLine y) $
+--          (H $ \NoIntersection -> error $ noIntersectionMessage y)
+--       :& (H $ \p              -> p^.xCoord)
+--       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
+--       :& RNil
+
+noIntersectionMessage   :: r -> String
+noIntersectionMessage _ =  "ordAt: No intersection"
+
+noIntersectionMessageShow   :: Show r => r -> String
+noIntersectionMessageShow r = "ordAt at " <> show r <> ": No intersection"
+{-# RULES "noIntersectionMessage/show" forall (y :: Show r => r).
+      noIntersectionMessage y = noIntersectionMessageShow y
+  #-}
+
+
+-- | Compare based on the x-coordiante of the intersection with the horizontal
+-- line through y
+ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
+ordAt y = comparing (xCoordAt y)
+
+-- | Given a y coord and a line segment that intersects the horizontal line
+-- through y, compute the x-coordinate of this intersection point.
+xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+xCoordAt y s = match (s `intersect` horizontalLine y) $
+         (H $ \NoIntersection -> error $ noIntersectionMessage y)
       :& (H $ \p              -> p^.xCoord)
       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
       :& RNil
+
+
+-- horizSeg :: LineSegment 2 () Rational
+-- horizSeg = ClosedLineSegment (ext $ point2 (359103 % 100000) (408867 % 100000))
+--                              (ext $ point2 (180812 % 10000)  (408867 % 100000))
+
+-- 359103 % 100000
+-- 408867 % 100000
+-- 180812 % 100000
+
+
+
 
 
 --------------------------------------------------------------------------------
@@ -115,7 +155,7 @@ ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
 
 type EventQueue p r = EQ.Set (Event p r)
 
-type StatusStructure p r = SS.BalBST r (LineSegment 2 p r)
+type StatusStructure p r = SS.OrdSeq (LineSegment 2 p r)
 
 -- | Run the sweep handling all events
 sweep       :: (Ord r, Fractional r)
@@ -125,7 +165,7 @@ sweep eq ss = case EQ.minView eq of
     Just (e,eq') -> handle e eq' ss
 
 -- | Handle an event point
-handle                           :: (Ord r, Fractional r)
+handle                           :: forall r p. (Ord r, Fractional r)
                                  => Event p r -> EventQueue p r -> StatusStructure p r
                                  -> [IntersectionPoint p r]
 handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
@@ -134,13 +174,12 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     (before,contains',after) = extractContains p ss
     (ends,contains)          = L.partition (endsAt p) contains'
 
-
     toReport = case starts ++ contains' of
                  (_:_:_) -> [IntersectionPoint p $ associated (starts <> ends) contains]
                  _       -> []
 
     -- new status structure
-    ss' = before `SS.join` newSegs `SS.join` after
+    ss' = before <> newSegs <> after
 
     newSegs = toStatusStruct p $ starts ++ contains
 
@@ -148,7 +187,7 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     eq' = foldr EQ.insert eq es
 
     -- the new events:
-    es | SS.null newSegs = maybeToList $ app (findNewEvent p) sl sr
+    es | F.null newSegs  = maybeToList $ app (findNewEvent p) sl sr
        | otherwise       = let s'  = fst <$> SS.minView newSegs
                                s'' = fst <$> SS.maxView newSegs
                            in catMaybes [ app (findNewEvent p) sl  s'
@@ -164,24 +203,22 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 extractContains      :: (Fractional r, Ord r)
                      => Point 2 r -> StatusStructure p r
                      -> (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
-extractContains p ss = (before, mid1 ++ mid2, after)
+extractContains p ss = (before, F.toList $ mid1 <> mid2, after)
   where
-    n = ordAtNav (p^.yCoord)
-    SS.Split before (mid1,mid2) after = SS.splitExtract pred' sel $ ss { SS.nav = n}
-
-    pred' s = not $ SS.goLeft n s (p^.xCoord)
-    sel   s = p `onSegment` s
-
+    (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
+    -- Make sure to also select the horizontal segments containing p
+    (mid2, after) = SS.splitMonotonic (\s -> not $ p `onSegment` s) after'
 
 -- | Given a point and the linesegements that contain it. Create a piece of
 -- status structure for it.
 toStatusStruct      :: (Fractional r, Ord r)
                     => Point 2 r -> [LineSegment 2 p r] -> StatusStructure p r
-toStatusStruct p xs = ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
+toStatusStruct p xs = ss <> hors
+  -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs
-    ss           = SS.fromList (ordAtNav $ maxY xs) rest
-    hors         = SS.fromList (SS.ordNavBy rightEndpoint) hors'
+    ss           = SS.fromListBy (ordAt $ maxY xs) rest
+    hors         = SS.fromListBy (comparing rightEndpoint) hors'
 
     isHorizontal s  = s^.start.core.yCoord == s^.end.core.yCoord
 

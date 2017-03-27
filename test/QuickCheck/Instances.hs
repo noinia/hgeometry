@@ -21,8 +21,8 @@ import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
--- instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where
---   arbitrary = NonEmpty.fromList <$> listOf1 arbitrary
+instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where
+  arbitrary = NonEmpty.fromList <$> listOf1 arbitrary
 
 instance Arbitrary a => Arbitrary (S2.Seq2 a) where
   arbitrary = S2.Seq2 <$> arbitrary <*> arbitrary <*> arbitrary

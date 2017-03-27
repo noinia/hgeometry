@@ -1,9 +1,9 @@
 module Data.OrdSeq where
 
 
-
-import           Data.FingerTree hiding (null, viewl, viewr)
+import           Control.Lens (bimap)
 import qualified Data.FingerTree as FT
+import           Data.FingerTree hiding (null, viewl, viewr)
 import qualified Data.Foldable as F
 import           Data.Maybe
 import           Data.Semigroup
@@ -107,6 +107,14 @@ splitOn f x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
   where
     (l, m) = split (\(Key v) -> compare (f v) x `elem` [EQ,GT]) s
     (m',r) = split (\(Key v) -> compare (f v) x ==     GT)      m
+
+-- | Given a monotonic predicate p, splits the sequence s into two sequences
+--  (as,bs) such that all (not p) as and all p bs
+--
+-- \(O(\log n)\)
+splitMonotonic  :: (a -> Bool) -> OrdSeq a -> (OrdSeq a, OrdSeq a)
+splitMonotonic p = bimap OrdSeq OrdSeq . split (p . getKey) . _asFingerTree
+
 
 -- Deletes all elements from the OrdDeq
 --
