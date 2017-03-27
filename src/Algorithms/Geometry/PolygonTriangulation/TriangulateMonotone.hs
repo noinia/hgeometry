@@ -42,7 +42,7 @@ computeDiagonals    :: (Ord r, Num r, Show r, Show p)
 computeDiagonals pg = diags'' <> diags'
   where
     -- | run the stack computation
-    SP (_:stack') diags' = L.foldl' (\(SP stack acc) v -> (<> acc) <$> process v stack)
+    SP (_:stack') diags' = L.foldl' (\(SP stack acc) v' -> (<> acc) <$> process v' stack)
                                     (SP [v,u] []) vs'
     -- add vertices from the last guy w to all 'middle' guys of the final stack
     diags'' = map (seg w) $ init stack'
