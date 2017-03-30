@@ -1,7 +1,6 @@
 module Data.Util where
 
 import Control.Lens
-import Data.Bifunctor
 import Data.Semigroup
 
 -- |  strict triple

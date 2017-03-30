@@ -34,12 +34,11 @@ module Data.Seq( LSeq
                , promise
                ) where
 
-import           Control.Lens ((%~), (&), (<&>), (^?), Lens', bimap)
+import           Control.Lens ((%~), (&), (<&>), (^?), bimap)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
-import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
@@ -174,15 +173,17 @@ viewl xs = let ~(x S.:< ys) = S.viewl $ toSeq xs in x :< LSeq ys
 
 infixr 5 :<|
 
--- pattern (:<|) :: a -> LSeq n a -> LSeq (1 + n) a
+-- pattern (:<|)    :: a -> LSeq n a -> LSeq (1 + m) a
 pattern x :<| xs <- (viewl -> x :< xs)
   where
     x :<| xs = x <| xs
 
 infixr 5 :<<
 
+pattern (:<<)    :: a -> LSeq 0 a -> LSeq n a
 pattern x :<< xs <- (viewLSeq -> Just (x,xs))
 
+pattern EmptyL   :: LSeq n a
 pattern EmptyL   <- (viewLSeq -> Nothing)
 
 viewLSeq          :: LSeq n a -> Maybe (a,LSeq 0 a)
@@ -226,10 +227,10 @@ pattern xs :|> x <- (viewr -> xs :> x)
 
 --------------------------------------------------------------------------------
 
-testL = (eval (Proxy :: Proxy 2) $ fromList [1..5])
+-- testL = (eval (Proxy :: Proxy 2) $ fromList [1..5])
 
-testL' :: LSeq 2 Integer
-testL' = fromJust testL
+-- testL' :: LSeq 2 Integer
+-- testL' = fromJust testL
 
-test            :: Show a => LSeq (1 + n) a -> String
-test (x :<| xs) = show x ++ show xs
+-- test            :: Show a => LSeq (1 + n) a -> String
+-- test (x :<| xs) = show x ++ show xs
