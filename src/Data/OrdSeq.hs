@@ -128,6 +128,10 @@ deleteAll = deleteAllBy compare
 fromListBy     :: Compare a -> [a] -> OrdSeq a
 fromListBy cmp = foldr (insertBy cmp) mempty
 
+-- | inserts all eleements in order
+-- \(O(n\log n)\)
+fromListByOrd :: Ord a => [a] -> OrdSeq a
+fromListByOrd = fromListBy compare
 
 -- | O(n)
 fromAscList' :: [a] -> OrdSeq a

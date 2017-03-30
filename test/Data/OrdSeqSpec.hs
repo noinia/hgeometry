@@ -11,7 +11,7 @@ import           Test.QuickCheck
 
 
 instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
-  arbitrary = OrdSeq.fromListBy compare <$> arbitrary
+  arbitrary = OrdSeq.fromListByOrd <$> arbitrary
 
 
 spec :: Spec
@@ -33,10 +33,10 @@ spec = do
           let (_,_,r) = OrdSeq.splitOn id x xs
           in all (> x) r
     it "join" $
-      property $ \(xs :: [Word]) -> let ys = map (+ maximum xs) xs in
-          (F.toList $ OrdSeq.fromListBy compare xs <> OrdSeq.fromListBy compare ys)
+      property $ \x (xs :: [Int]) -> let (ys,zs) = List.partition (<= x) $ xs in
+          (F.toList $ OrdSeq.fromListByOrd ys <> OrdSeq.fromListByOrd zs)
           `shouldBe`
-          List.sort (xs <> ys)
+          List.sort (ys <> zs)
     it "positive member" $
       property $ \(xs :: OrdSeq Int) ->
          all (\x -> OrdSeq.memberBy compare x xs) xs
