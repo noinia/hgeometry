@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE LambdaCase  #-}
 module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD where
 
