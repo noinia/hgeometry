@@ -28,8 +28,7 @@ import qualified Data.Foldable as F
 import           Data.Function (on, )
 import           Data.Geometry
 import           Data.Geometry.Box (IsBoxable(..))
-import           Data.Geometry.Polygon (fromPoints, cmpExtreme)
-import           Data.Geometry.Properties
+import           Data.Geometry.Polygon (fromPoints)
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))

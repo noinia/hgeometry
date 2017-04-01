@@ -8,7 +8,7 @@ import Control.Lens
 import Test.Hspec
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
-import Data.Geometry.Ipe
+-- import Data.Geometry.Ipe
 
 
 spec :: Spec
@@ -24,7 +24,7 @@ spec = describe "GeomBook Example" $ do
 
   -- testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
 
-
+sort'       :: Ord a => (a,a) -> (a,a)
 sort' (x,y) = (min x y, max x y)
 
 geomBookPoly :: SimplePolygon Int Rational

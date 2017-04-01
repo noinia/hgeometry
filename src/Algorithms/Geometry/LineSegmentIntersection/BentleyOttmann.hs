@@ -6,7 +6,6 @@ import           Control.Lens hiding (contains)
 import qualified Data.OrdSeq as SS -- status struct
 -- import qualified Data.BalBST as SS
 import           Data.Ext
-import           Data.Function (on)
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -23,10 +22,8 @@ import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Frames.CoRec
 import qualified Data.Foldable as F
-import           Data.OrdSeq (Compare, OrdSeq)
+import           Data.OrdSeq (Compare)
 
-import           Debug.Trace
-import Data.Ratio
 --------------------------------------------------------------------------------
 
 -- | Compute all intersections
@@ -113,6 +110,7 @@ startSegs e = case eventType e of
 --       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
 --       :& RNil
 
+{-# INLINE noIntersectionMessage #-}
 noIntersectionMessage   :: r -> String
 noIntersectionMessage _ =  "ordAt: No intersection"
 
