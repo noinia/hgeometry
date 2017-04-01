@@ -11,6 +11,7 @@ import           Data.Geometry.Interval
 import           Data.Geometry.SubLine
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.OrdSeq (OrdSeq, fromListByOrd)
 import           Data.Proxy
 import           Data.Range
 import           Data.Semigroup
@@ -18,11 +19,13 @@ import qualified Data.Seq as Seq
 import qualified Data.Seq2 as S2
 import           GHC.TypeLits
 import           Test.QuickCheck
-
 --------------------------------------------------------------------------------
 
 -- instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where
 --   arbitrary = NonEmpty.fromList <$> listOf1 arbitrary
+
+instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
+  arbitrary = fromListByOrd <$> arbitrary
 
 instance Arbitrary a => Arbitrary (S2.Seq2 a) where
   arbitrary = S2.Seq2 <$> arbitrary <*> arbitrary <*> arbitrary

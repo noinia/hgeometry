@@ -3,16 +3,12 @@ module Data.OrdSeqSpec where
 
 import qualified Data.Foldable as F
 import qualified Data.List as List
-import qualified Data.OrdSeq as OrdSeq
 import           Data.OrdSeq (OrdSeq)
+import qualified Data.OrdSeq as OrdSeq
 import           Data.Semigroup
+import           QuickCheck.Instances
 import           Test.Hspec
 import           Test.QuickCheck
-
-
-instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
-  arbitrary = OrdSeq.fromListByOrd <$> arbitrary
-
 
 spec :: Spec
 spec = do
