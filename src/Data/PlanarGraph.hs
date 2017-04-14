@@ -13,7 +13,7 @@ module Data.PlanarGraph( Arc(..)
                        , VertexId(..)
 
                        , PlanarGraph
-                       , embedding, vertexData, dartData, faceData
+                       , embedding, vertexData, dartData, faceData, rawDartData
                        , edgeData
 
                        , planarGraph, planarGraph', fromAdjacencyLists
@@ -185,8 +185,8 @@ instance Show (VertexId s w) where
 -- vertices, edges, and faces, respectively.
 --
 -- The orbits in the embedding are assumed to be in counterclockwise order.
-data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding  :: Permutation (Dart s)
-                                                    , _vertexData :: V.Vector v
+data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutation (Dart s)
+                                                    , _vertexData  :: V.Vector v
                                                     , _rawDartData :: V.Vector e
                                                     , _faceData    :: V.Vector f
                                                     }
