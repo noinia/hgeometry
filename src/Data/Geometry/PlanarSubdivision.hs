@@ -12,6 +12,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.PlanarGraph
 import           Data.PlaneGraph
@@ -30,6 +31,11 @@ instance Bifunctor VertexData where
   bimap f g (VertexData p v) = VertexData (fmap f p) (g v)
 
 
+-- | Planar-subdivsions are internally represented as a *connected* planar
+-- graph. We distuinish two types of edges in this graph representation:
+-- Visible edges, which also appear in the original planar subdivision, and
+-- Invisible edges, which are essentially dummy edges making sure that the
+-- entire graph is connected.
 data EdgeType = Visible | Invisible deriving (Show,Read,Eq,Ord)
 
 data EdgeData e = EdgeData { _edgeType :: !EdgeType
@@ -100,7 +106,7 @@ fromVertices _ vs = g&vertexData .~ vData'
 fromConnectedSegments       :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ EdgeData e)
-                            -> PlanarSubdivision s [p] e () r
+                            -> PlanarSubdivision s (NonEmpty.NonEmpty p) e () r
 fromConnectedSegments px ss = PlanarSubdivision $
     fromConnectedSegments' px ss & faceData.traverse %~ FaceData []
 
@@ -112,17 +118,20 @@ fromConnectedSegments px ss = PlanarSubdivision $
 fromConnectedSegments'      :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ e)
-                            -> PlanarGraph s Primal_ (VertexData r [p]) e ()
+                            -> PlanarGraph s Primal_
+                                  (VertexData r (NonEmpty.NonEmpty p)) e ()
 fromConnectedSegments' _ ss = planarGraph dts & vertexData .~ vxData
   where
     pts         = M.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
     f (s :+ e)  = [ ( s^.start.core
-                    , SP [s^.start.extra] [(s^.end.core)   :+ h Positive e])
+                    , SP (sing $ s^.start.extra) [(s^.end.core)   :+ h Positive e])
                   , ( s^.end.core
-                    , SP [s^.end.extra]   [(s^.start.core) :+ h Negative e])
+                    , SP (sing $ s^.end.extra)   [(s^.start.core) :+ h Negative e])
                   ]
     g i (s :+ e) = s :+ (Arc i :+ e)
     h d (a :+ e) = (Dart a d, e)
+
+    sing x = x NonEmpty.:| []
 
     vts    = map (\(p,sp) -> (p,map (^.extra) . sortArround (ext p) <$> sp))
            . M.assocs $ pts

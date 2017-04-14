@@ -4,7 +4,6 @@ module Data.Geometry.Polygon where
 import           Control.Lens hiding (Simple)
 import           Data.Bifoldable
 import           Data.Bifunctor
-import           Data.Bifunctor.Apply
 import           Data.Bitraversable
 import qualified Data.CircularSeq as C
 import           Data.Ext
@@ -144,9 +143,17 @@ fromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 fromPoints = SimplePolygon . C.fromList
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
+--
+-- running time: \(O(n)\)
 outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
+-- | Lists all edges. No guarantees are given in what order the edges appear.
+--
+-- running time: \(O(n)\)
+listEdges    :: Polygon t p r -> [LineSegment 2 p r]
+listEdges pg = let f = F.toList . outerBoundaryEdges
+               in concatMap f (holeList pg) <> f pg
 
 -- | Pairs every vertex with its incident edges. The first one is its
 -- predecessor edge, the second one its successor edge.
