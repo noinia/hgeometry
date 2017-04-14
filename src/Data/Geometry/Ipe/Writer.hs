@@ -29,7 +29,6 @@ import           Data.Singletons
 import qualified Data.Text as T
 import qualified Data.Text as Text
 import           Data.Text (Text)
-import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
@@ -184,7 +183,7 @@ instance IpeWriteText r => IpeWriteText (IpeDash r) where
   ipeWriteText (DashPattern xs x) = (\ts t -> mconcat [ "["
                                                       , Text.intercalate " " ts
                                                       , "] ", t ])
-                                    <$> Tr.mapM ipeWriteText xs
+                                    <$> mapM ipeWriteText xs
                                     <*> ipeWriteText x
 
 instance IpeWriteText FillType where
@@ -196,7 +195,7 @@ instance IpeWriteText r => IpeWriteText (IpeArrow r) where
                                                             <*> ipeWriteText s
 
 instance IpeWriteText r => IpeWriteText (Path r) where
-  ipeWriteText = fmap concat' . Tr.sequence . fmap ipeWriteText . _pathSegments
+  ipeWriteText = fmap concat' . sequence . fmap ipeWriteText . _pathSegments
     where
       concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
 
@@ -227,23 +226,28 @@ instance IpeWriteText r => IpeWriteText (GT.Matrix 3 3 r) where
 
 
 instance IpeWriteText r => IpeWriteText (Operation r) where
-  ipeWriteText (MoveTo p)      = unwords' [ ipeWriteText p, Just "m"]
-  ipeWriteText (LineTo p)      = unwords' [ ipeWriteText p, Just "l"]
-  ipeWriteText (CurveTo p q r) = unwords' [ ipeWriteText p
-                                          , ipeWriteText q
-                                          , ipeWriteText r, Just "m"]
-  ipeWriteText (Ellipse m)     = unwords' [ ipeWriteText m, Just "e"]
-  -- TODO: The rest
-  ipeWriteText ClosePath       = Just "h"
+  ipeWriteText (MoveTo p)         = unwords' [ ipeWriteText p, Just "m"]
+  ipeWriteText (LineTo p)         = unwords' [ ipeWriteText p, Just "l"]
+  ipeWriteText (CurveTo p q r)    = unwords' [ ipeWriteText p
+                                             , ipeWriteText q
+                                             , ipeWriteText r, Just "c"]
+  ipeWriteText (QCurveTo p q)     = unwords' [ ipeWriteText p
+                                             , ipeWriteText q, Just "q"]
+  ipeWriteText (Ellipse m)        = unwords' [ ipeWriteText m, Just "e"]
+  ipeWriteText (ArcTo m p)        = unwords' [ ipeWriteText m
+                                             , ipeWriteText p, Just "a"]
+  ipeWriteText (Spline pts)       = unlines' $ map ipeWriteText pts <> [Just "s"]
+  ipeWriteText (ClosedSpline pts) = unlines' $ map ipeWriteText pts <> [Just "u"]
+  ipeWriteText ClosePath          = Just "h"
 
 
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
-  ipeWriteText pl = case pl^..points.Tr.traverse.core of
+  ipeWriteText pl = case pl^..points.traverse.core of
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
     -- the polyline type guarantees that there is at least one point
 
 instance IpeWriteText r => IpeWriteText (SimplePolygon () r) where
-  ipeWriteText pg = case pg^..outerBoundary.to F.toList.Tr.traverse.core of
+  ipeWriteText pg = case pg^..outerBoundary.to F.toList.traverse.core of
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
     _          -> Nothing
     -- TODO: We are not really guaranteed that there is at least one point, it would
@@ -369,7 +373,7 @@ instance (IpeWriteText r) => IpeWrite (IpeFile r) where
 instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
   ipeWrite p = ipeWrite path
     where
-      path = fromPolyLine $ p & points.Tr.traverse.extra .~ ()
+      path = fromPolyLine $ p & points.traverse.extra .~ ()
       -- TODO: Do something with the p's
 
 fromPolyLine :: PolyLine 2 () r -> Path r
