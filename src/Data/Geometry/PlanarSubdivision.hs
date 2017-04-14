@@ -62,6 +62,8 @@ instance Functor (PlanarSubdivision s v e f) where
 
 --------------------------------------------------------------------------------
 
+data PolygonFaceData = Inside | Outside deriving (Show,Read,Eq)
+
 -- | Construct a planar subdivision from a polygon
 --
 -- running time: \(O(n)\).
@@ -75,7 +77,7 @@ fromPolygon p (SimplePolygon vs) iD oD = PlanarSubdivision g'
     g      = fromVertices p vs
     fData' = V.fromList [FaceData [] iD, FaceData [] oD]
 
-    g'     = g & faceData .~ fData'
+    g'     = g & faceData             .~ fData'
                & dartData.traverse._2 .~ EdgeData Visible ()
 -- The following does not really work anymore
 -- frompolygon p (MultiPolygon vs hs) iD oD = PlanarSubdivision g'

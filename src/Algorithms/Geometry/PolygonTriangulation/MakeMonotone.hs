@@ -152,14 +152,18 @@ findDiagonals p' = map f . sweep
 
 
 
+
+
+
 -- | Computes a set of diagionals that decompose the polygon into y-monotone
 -- pieces.
 --
 -- running time: \(O(n\log n)\)
 makeMonotone      :: (Fractional r, Ord r)
                   => Polygon t p r -> proxy s
-                  -> PlanarSubdivision s p PolygonEdgeType () r
-makeMonotone pg px = constructSubdivision px (listEdges pg) (findDiagonals pg)
+                  -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+makeMonotone pg px = let (e:es) = listEdges pg
+                     in constructSubdivision px e es (findDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)

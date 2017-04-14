@@ -148,12 +148,13 @@ fromPoints = SimplePolygon . C.fromList
 outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
--- | Lists all edges. No guarantees are given in what order the edges appear.
+-- | Lists all edges. The edges on the outer boundary are given before the ones
+-- on the holes. However, no other guarantees are given on the order.
 --
 -- running time: \(O(n)\)
 listEdges    :: Polygon t p r -> [LineSegment 2 p r]
 listEdges pg = let f = F.toList . outerBoundaryEdges
-               in concatMap f (holeList pg) <> f pg
+               in  f pg <> concatMap f (holeList pg)
 
 -- | Pairs every vertex with its incident edges. The first one is its
 -- predecessor edge, the second one its successor edge.

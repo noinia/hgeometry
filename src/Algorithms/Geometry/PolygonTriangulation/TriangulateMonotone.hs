@@ -17,8 +17,6 @@ import           Data.Semigroup
 import           Data.Tuple (swap)
 import           Data.Util
 
-import           Debug.Trace
-
 --------------------------------------------------------------------------------
 
 --
@@ -72,7 +70,6 @@ seg u v = ClosedLineSegment (toVtx u) (toVtx v)
 process                    :: (Ord r, Num r, Show r, Show p)
                            => P p r -> Stack (P p r)
                            -> SP (Stack (P p r)) [LineSegment 2 p r]
-process v stack | traceShow ("process", v, " ", stack) False = undefined
 process v stack@(u:ws)
   | chainOf v /= chainOf u = SP [v,u]         (map (seg v) . init $ stack)
   | otherwise              = SP (v:w <> rest) (map (seg v) diags)
