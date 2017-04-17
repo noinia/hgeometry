@@ -14,18 +14,21 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
+import           Data.Maybe (mapMaybe)
 import           Data.PlanarGraph
 import           Data.PlaneGraph
 import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
 
-
 -- | Note that the functor instance is in v
 data VertexData r v = VertexData { _location :: !(Point 2 r)
                                  , _vData    :: !v
                                  } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 makeLenses ''VertexData
+
+vtxDataToExt                  :: VertexData r v -> Point 2 r :+ v
+vtxDataToExt (VertexData p v) = p :+ v
 
 instance Bifunctor VertexData where
   bimap f g (VertexData p v) = VertexData (fmap f p) (g v)
@@ -141,3 +144,22 @@ fromConnectedSegments' _ ss = planarGraph dts & vertexData .~ vxData
     vxData = V.fromList . map (\(p,sp) -> VertexData p (sp^._1)) $ vts
     -- The darts
     dts    = map (^._2._2) vts
+
+
+--------------------------------------------------------------------------------
+
+-- | Reports all visible segments as line segments
+edgeSegments    :: PlanarSubdivision s v e f r -> [(Dart s, LineSegment 2 v r :+ e)]
+edgeSegments ps = mapMaybe withSegment . F.toList . edges $ ps^.graph
+  where
+    withSegment (d,EdgeData et e) = let (p,q) = bimap vtxDataToExt vtxDataToExt
+                                              $ ps^.graph.endPointDataOf d
+                                        seg   = ClosedLineSegment p q
+                                    in case et of
+                                         Visible   -> Just (d, seg :+ e)
+                                         Invisible -> Nothing
+
+
+-- -- | Lists all faces of the planar graph. This ignores invisible edges
+-- rawFacePolygons    :: PlanarSubdivision s v e f r -> [(FaceId s, SomePolygon v r :+ f)]
+-- rawFacePolygons ps =

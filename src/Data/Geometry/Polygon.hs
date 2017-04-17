@@ -66,6 +66,10 @@ type SimplePolygon = Polygon Simple
 
 type MultiPolygon  = Polygon Multi
 
+-- | Either a simple or multipolygon
+type SomePolygon p r = Either (Polygon Simple p r) (Polygon Multi p r)
+
+
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
