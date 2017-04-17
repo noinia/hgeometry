@@ -160,9 +160,9 @@ findDiagonals p' = map f . sweep
 --
 -- running time: \(O(n\log n)\)
 makeMonotone      :: (Fractional r, Ord r)
-                  => Polygon t p r -> proxy s
+                  => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-makeMonotone pg px = let (e:es) = listEdges pg
+makeMonotone px pg = let (e:es) = listEdges pg
                      in constructSubdivision px e es (findDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
