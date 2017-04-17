@@ -22,21 +22,31 @@ import           Text.Parsec.Error (messageString, errorMessages)
 -- | Represent stuff that can be used as a coordinate in ipe. (similar to show/read)
 
 class Num r => Coordinate r where
-    fromSeq :: Integer -> Maybe Integer -> r
+    -- reads a coordinate. The input is an integer representing the
+    -- part before the decimal point, and a length and an integer
+    -- representing the part after the decimal point
+    fromSeq :: Integer -> Maybe (Int, Integer) -> r
 
-defaultFromSeq :: (Ord r, Fractional r) => Integer -> Maybe Integer -> r
-defaultFromSeq x Nothing  = fromInteger x
-defaultFromSeq x (Just y) = let x'        = fromInteger x
-                                y'        = fromInteger y
-                                asDecimal = head . dropWhile (>= 1) . iterate (* 0.1)
-                            in signum x' * (abs x' + asDecimal y')
+defaultFromSeq                :: (Ord r, Fractional r)
+                              => Integer -> Maybe (Int, Integer) -> r
+defaultFromSeq x Nothing      = fromInteger x
+defaultFromSeq x (Just (l,y)) = let x'          = fromInteger x
+                                    y'          = fromInteger y
+                                    asDecimal a =  a * (0.1 ^ l)
+                                in signum x' * (abs x' + asDecimal y')
 
 instance Coordinate Double where
   fromSeq = defaultFromSeq
 
 instance Coordinate (Ratio Integer) where
-    fromSeq x  Nothing = fromInteger x
-    fromSeq x (Just y) = fst . head $ readSigned readFloat (show x ++ "." ++ show y)
+  fromSeq = defaultFromSeq
+
+  -- x m =
+  --   (fromInteger $ signum x) * defaultFromSeq (abs x) m
+
+    -- fromSeq x  Nothing     = fromInteger x
+    -- fromSeq x (Just (l,y)) = fst . head $ readSigned readFloat
+    --                            (show x ++ "." ++ show y)
 
 -----------------------------------------------------------------------
 -- | Running the parsers
@@ -130,7 +140,8 @@ pPoint = point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
 pCoordinate :: Coordinate r => Parser r
 pCoordinate = fromSeq <$> pInteger <*> pDecimal
               where
-                pDecimal = pMaybe (pChar '.' *> pInteger)
+                pDecimal  = pMaybe (pChar '.' *> pPaddedNatural)
+
 
 pRectangle :: Coordinate r => Parser (Rectangle () r)
 pRectangle = (\p q -> box (ext p) (ext q)) <$> pPoint

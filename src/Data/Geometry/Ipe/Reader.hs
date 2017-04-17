@@ -351,7 +351,7 @@ firstRight = maybe (Left "No matching object") Right . firstOf (traverse._Right)
 
 
 instance Coordinate r => IpeRead (Group r) where
-  ipeRead (Element "group" _ chs) = Group <$> mapM ipeRead chs
+  ipeRead (Element "group" _ chs) = Right . Group . rights . map ipeRead $ chs
   ipeRead _                       = Left "ipeRead Group: expected Element, found Text"
 
 
@@ -391,59 +391,6 @@ instance Coordinate r => IpeRead (IpeFile r) where
 
 
 
-testz :: Either ConversionError (IpeObject Double)
-testz = (bimap (T.pack . show) id $ parse' defaultParseOptions testSym)
-               >>= ipeRead -- Object (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  -- ipeReadAttrs (Element _ ats _) =
-
-instance Coordinate r => IpeReadText (PolyLine 2 () r) where
-  ipeReadText t = readPathOperations t >>= fromOps
-    where
-      fromOps (MoveTo p:LineTo q:ops) = (\ps -> fromPoints' $ [p,q] ++ ps)
-                                     <$> validateAll "Expected LineTo p" _LineTo ops
-      fromOps _                       = Left "Expected MoveTo p:LineTo q:... "
-
-validateAll         :: ConversionError -> Prism' (Operation r) (Point 2 r) -> [Operation r]
-                    -> Either ConversionError [Point 2 r]
-validateAll err fld = bimap T.unlines id . validateAll' err fld
-
-
-validateAll' :: err -> Prism' (Operation r) (Point 2 r) -> [Operation r]
-               -> Either [err] [Point 2 r]
-validateAll' err field = toEither . foldr (\op' res -> f op' <> res) (Right' [])
-  where
-    f op' = maybe (Left' [err]) (\p -> Right' [p]) $ op' ^? field
-    toEither = either' Left Right
-
--- This is a bit of a hack
-instance Coordinate r => IpeRead (PolyLine 2 () r) where
-  ipeRead (Element "path" _ ts) = ipeReadText . T.unlines . map unText $ ts
-                                    -- apparently hexpat already splits the text into lines
-  ipeRead _                     = Left "iperead: no polyline."
-
-unText          :: Node t t1 -> t1
-unText (Text t) = t
-unText _        = error "unText: element found, text expected"
-
-instance Coordinate r => IpeRead (PathSegment r) where
-  ipeRead = fmap PolyLineSegment . ipeRead
-
-testP :: B.ByteString
-testP = "<path stroke=\"black\">\n128 656 m\n224 768 l\n304 624 l\n432 752 l\n</path>"
 
 
 --------------------------------------------------------------------------------

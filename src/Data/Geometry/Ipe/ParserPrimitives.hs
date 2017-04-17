@@ -2,7 +2,8 @@
 {-# Language OverloadedStrings  #-}
 module Data.Geometry.Ipe.ParserPrimitives( runP, runP'
                                          , pMany, pMany1, pChoice
-                                         , pChar, pSpace, pWhiteSpace, pInteger, pNatural
+                                         , pChar, pSpace, pWhiteSpace, pInteger
+                                         , pNatural, pPaddedNatural
                                          , (<*><>) , (<*><)
                                          , (<***>) , (<***) , (***>)
                                          , pMaybe , pCount , pSepBy
@@ -43,6 +44,11 @@ pChoice = choice . map try
 
 pNatural :: Parser Integer
 pNatural = read <$> pMany1 digit
+
+-- | parses an integer with a prefix of zeros. Returns the total length of the
+-- string parced (i.e. number of digits) and the resulting antural number.
+pPaddedNatural :: Parser (Int, Integer)
+pPaddedNatural = (\s -> (length s, read s)) <$> pMany1 digit
 
 pInteger :: Parser Integer
 pInteger = pNatural
