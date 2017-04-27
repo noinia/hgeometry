@@ -12,6 +12,7 @@ import qualified Demo.WriteEnsemble as EnsembleWriter
 import qualified Demo.MinDisk as MinDisk
 import qualified Demo.Delaunay as Delaunay
 import qualified Demo.ExpectedPairwiseDistance as ExpPWD
+import qualified Demo.TriangulateWorld as TriangulateWorld
 
 
 
@@ -24,6 +25,7 @@ data Options = BAPC                      BAPCOptions
              | MinDisk                   MinDisk.Options
              | Delaunay                  Delaunay.Options
              | ExpectedPairwiseDistance  ExpPWD.Options
+             | TriangulateWorld          TriangulateWorld.Options
              deriving Data
 
 parser :: Parser Options
@@ -33,6 +35,7 @@ parser = subparser (
     <> command' MinDisk                        MinDisk.options
     <> command' Delaunay                       Delaunay.options
     <> command' ExpectedPairwiseDistance       ExpPWD.options
+    <> command' TriangulateWorld               TriangulateWorld.options
     )
 
 
@@ -44,6 +47,7 @@ mainWith opts' = case opts' of
   MinDisk opts                        -> MinDisk.mainWith opts
   Delaunay opts                       -> Delaunay.mainWith opts
   ExpectedPairwiseDistance opts       -> ExpPWD.mainWith opts
+  TriangulateWorld opts               -> TriangulateWorld.mainWith opts
 
 --------------------------------------------------------------------------------
 

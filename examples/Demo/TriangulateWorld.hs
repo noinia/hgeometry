@@ -1,17 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.TriangulateWorld where
 
-import Data.Semigroup
--- import Control.Monad.Except
+import Algorithms.Geometry.PolygonTriangulation.MakeMonotone (makeMonotone)
+import Control.Lens
+import Data.Data
+import Data.Ext
 import Data.Geometry.Ipe
-import           Options.Applicative
-import           Data.Semigroup
-import           Control.Lens
 import Data.Geometry.PlanarSubdivision
-import           Data.Data
-import           Data.Ext
-import Algorithms.Geometry.PolygonTriangulation.MakeMonotone(makeMonotone)
+import Data.Semigroup
+import Options.Applicative
 
+--------------------------------------------------------------------------------
 
 data Options = Options { _inPath    :: FilePath
                        , _outFile   :: FilePath
