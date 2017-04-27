@@ -69,7 +69,6 @@ type MultiPolygon  = Polygon Multi
 -- | Either a simple or multipolygon
 type SomePolygon p r = Either (Polygon Simple p r) (Polygon Multi p r)
 
-
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
@@ -142,9 +141,12 @@ polygonVertices (MultiPolygon vs hs) =
   sconcat $ C.toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
-
+-- | Creates a simple polygon from the given list of vertices.
+--
+-- pre: the input list constains no repeated vertices.
 fromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 fromPoints = SimplePolygon . C.fromList
+
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --
