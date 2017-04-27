@@ -26,6 +26,7 @@ data Associated p r = Associated { _endPointOf        :: Set' (LineSegment 2 p r
                                  , _interiorTo        :: Set' (LineSegment 2 p r)
                                  } deriving (Show)
 
+
 instance (Eq p, Eq r) => Eq (Associated p r) where
   (Associated es is) == (Associated es' is') = f es es' && f is is'
     where
@@ -65,6 +66,13 @@ data IntersectionPoint p r =
                     } deriving (Show,Eq)
 makeLenses ''IntersectionPoint
 
+
+-- | reports true if all segments intersecting at the intersection point are
+-- actually endpoints.
+--
+-- \(O(1)\)
+isEndPointIntersection :: Associated p r -> Bool
+isEndPointIntersection = Map.null . _interiorTo
 
 
 -- newtype E a b = E (a -> b)
