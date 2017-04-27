@@ -61,19 +61,22 @@ type ConversionError = Text
 
 
 -- | Given a file path, tries to read an ipe file
-readRawIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
+readRawIpeFile :: (Coordinate r, Eq r)
+               => FilePath -> IO (Either ConversionError (IpeFile r))
 readRawIpeFile = fmap fromIpeXML . B.readFile
 
 
 -- | Given a file path, tries to read an ipe file. This function applies all
 -- matrices to objects.
-readIpeFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpeFile r))
+readIpeFile :: (Coordinate r, Eq r)
+            => FilePath -> IO (Either ConversionError (IpeFile r))
 readIpeFile = fmap (bimap id applyMatrices) . readRawIpeFile
 
 
 -- | Since most Ipe file contain only one page, we provide a shortcut for that
 -- as well. This function applies all matrices.
-readSinglePageFile :: Coordinate r => FilePath -> IO (Either ConversionError (IpePage r))
+readSinglePageFile :: (Coordinate r, Eq r)
+                   => FilePath -> IO (Either ConversionError (IpePage r))
 readSinglePageFile = fmap f . readIpeFile
   where
     f (Left e)  = Left e
@@ -166,7 +169,7 @@ instance Coordinate r => IpeReadText (IpeSize r) where
 instance Coordinate r => IpeReadText [Operation r] where
   ipeReadText = readPathOperations
 
-instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
+instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
   ipeReadText t = ipeReadText t >>= fromOpsN
     where
       fromOpsN xs = case fromOps xs of
@@ -181,7 +184,7 @@ instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
-                                      poly = Polygon.fromPoints pts
+                                      poly = Polygon.fromPoints . dropRepeats $ pts
                                       pl   = fromPoints pts
                                   in case xs of
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
@@ -192,7 +195,11 @@ instance Coordinate r => IpeReadText (NE.NonEmpty (PathSegment r)) where
 
       x <<| xs = (x:) <$> fromOps xs
 
-instance Coordinate r => IpeReadText (Path r) where
+
+dropRepeats :: Eq a => [a] -> [a]
+dropRepeats = map head . L.group
+
+instance (Coordinate r, Eq r) => IpeReadText (Path r) where
   ipeReadText = fmap (Path . S2.viewL1FromNonEmpty) . ipeReadText
 
 --------------------------------------------------------------------------------
@@ -303,7 +310,7 @@ allText = fmap T.unlines . mapM unT
     unT (Text t) = Right t
     unT _        = Left "allText: Expected Text, found an Element"
 
-instance Coordinate r => IpeRead (Path r) where
+instance (Coordinate r, Eq r) => IpeRead (Path r) where
   ipeRead (Element "path" _ chs) = allText chs >>= ipeReadText
   ipeRead _                      = Left "path: expected element, found text"
 
@@ -335,7 +342,7 @@ instance Coordinate r => IpeRead (Image r) where
   ipeRead (Element "image" ats _) = Image () <$> (lookup' "rect" ats >>= ipeReadText)
   ipeRead _                       = Left "Image: Element expected, text found"
 
-instance Coordinate r => IpeRead (IpeObject r) where
+instance (Coordinate r, Eq r) => IpeRead (IpeObject r) where
   ipeRead x = firstRight [ IpeUse       <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
                          , IpePath      <$> ipeReadObject (Proxy :: Proxy Path)      r x
                          , IpeGroup     <$> ipeReadObject (Proxy :: Proxy Group)     r x
@@ -350,7 +357,7 @@ firstRight :: [Either ConversionError a] -> Either ConversionError a
 firstRight = maybe (Left "No matching object") Right . firstOf (traverse._Right)
 
 
-instance Coordinate r => IpeRead (Group r) where
+instance (Coordinate r, Eq r) => IpeRead (Group r) where
   ipeRead (Element "group" _ chs) = Right . Group . rights . map ipeRead $ chs
   ipeRead _                       = Left "ipeRead Group: expected Element, found Text"
 
@@ -368,7 +375,7 @@ instance IpeRead View where
 
 -- TODO: this instance throws away all of our error collecting (and is pretty
 -- slow/stupid since it tries parsing all children with all parsers)
-instance Coordinate r => IpeRead (IpePage r) where
+instance (Coordinate r, Eq r) => IpeRead (IpePage r) where
   ipeRead (Element "page" _ chs) = Right $ IpePage (readAll chs) (readAll chs) (readAll chs)
   ipeRead _                      = Left "page: Element expected, text found"
       -- withDef   :: b -> Either a b -> Either c b
@@ -383,7 +390,7 @@ readAll   :: IpeRead a => [Node Text Text] -> [a]
 readAll   = rights . map ipeRead
 
 
-instance Coordinate r => IpeRead (IpeFile r) where
+instance (Coordinate r, Eq r) => IpeRead (IpeFile r) where
   ipeRead (Element "ipe" _ chs) = case readAll chs of
                                     []  -> Left "Ipe: no pages found"
                                     pgs -> Right $ IpeFile Nothing [] (NE.fromList pgs)

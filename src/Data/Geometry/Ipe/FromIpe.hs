@@ -143,6 +143,7 @@ readAll = foldMap (^..content.traverse.defaultFromIpe)
 
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".
-readAllFrom    :: (HasDefaultFromIpe g, r ~ NumType g, Coordinate r)
+readAllFrom    :: (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = readAll <$> readSinglePageFile fp
+
