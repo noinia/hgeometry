@@ -67,8 +67,8 @@ data IntersectionPoint p r =
 makeLenses ''IntersectionPoint
 
 
--- | reports true if all segments intersecting at the intersection point are
--- actually endpoints.
+-- | reports true if there is at least one segment for which this intersection
+-- point is interior.
 --
 -- \(O(1)\)
 isEndPointIntersection :: Associated p r -> Bool

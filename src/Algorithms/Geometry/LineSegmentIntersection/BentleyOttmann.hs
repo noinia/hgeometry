@@ -33,9 +33,22 @@ intersections    :: (Ord r, Fractional r)
                  => [LineSegment 2 p r] -> Intersections p r
 intersections ss = merge $ sweep pts mempty
   where
-    pts = EQ.fromAscList . groupStarts . L.sort . concatMap f $ ss
-    f s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
-          in [Event p (Start $ s :| []), Event q (End s)]
+    pts = EQ.fromAscList . groupStarts . L.sort . concatMap asEventPts $ ss
+
+-- | Computes all intersection points p s.t. p lies in the interior of at least
+-- one of the segments.
+--
+--  \(O((n+k)\log n)\), where \(k\) is the number of intersections.
+interiorIntersections :: (Ord r, Fractional r)
+                       => [LineSegment 2 p r] -> Intersections p r
+interiorIntersections = M.filter (not . isEndPointIntersection) . intersections
+
+
+-- | Computes the event points for a given line segment
+asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
+asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
+               in [Event p (Start $ s :| []), Event q (End s)]
+
 
 -- | Group the segments with the intersection points
 merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
@@ -128,12 +141,16 @@ ordAt y = comparing (xCoordAt y)
 
 -- | Given a y coord and a line segment that intersects the horizontal line
 -- through y, compute the x-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
 xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y s = match (s `intersect` horizontalLine y) $
+xCoordAt y s = match (toClosed s `intersect` horizontalLine y) $
          (H $ \NoIntersection -> error $ noIntersectionMessage y)
       :& (H $ \p              -> p^.xCoord)
       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
       :& RNil
+  where
+    toClosed (LineSegment' p q) = ClosedLineSegment p q
 
 
 -- horizSeg :: LineSegment 2 () Rational
@@ -162,6 +179,13 @@ sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
 
+
+
+isClosedStart                     :: Eq r => Point 2 r -> LineSegment 2 p r -> Bool
+isClosedStart p (LineSegment s e)
+  | p == s^.unEndPoint.core       = isClosed s
+  | otherwise                     = isClosed e
+
 -- | Handle an event point
 handle                           :: forall r p. (Ord r, Fractional r)
                                  => Event p r -> EventQueue p r -> StatusStructure p r
@@ -172,8 +196,11 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     (before,contains',after) = extractContains p ss
     (ends,contains)          = L.partition (endsAt p) contains'
 
-    toReport = case starts ++ contains' of
-                 (_:_:_) -> [IntersectionPoint p $ associated (starts <> ends) contains]
+    -- starting segments, exluding those that have an open starting point
+    starts' = filter (isClosedStart p) starts
+
+    toReport = case starts' ++ contains' of
+                 (_:_:_) -> [IntersectionPoint p $ associated (starts' <> ends) contains]
                  _       -> []
 
     -- new status structure
