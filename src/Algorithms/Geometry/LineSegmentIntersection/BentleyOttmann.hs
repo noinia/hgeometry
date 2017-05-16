@@ -147,13 +147,24 @@ ordAt y = comparing (xCoordAt y)
 --
 -- note that we will pretend that the line segment is closed, even if it is not
 xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y s = match (toClosed s `intersect` horizontalLine y) $
+xCoordAt y s = match (supportingLine s `intersect` horizontalLine y) $
          (H $ \NoIntersection -> error $ noIntersectionMessage y)
       :& (H $ \p              -> p^.xCoord)
       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
       :& RNil
-  where
-    toClosed (LineSegment' p q) = ClosedLineSegment p q
+      -- note that by assumption the segment intersects the horizontal line
+      -- so the point p that we get lies on the segment as well. I.e. we do not
+      -- need to check that it actually lies on that segment
+
+
+-- xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+-- xCoordAt y s = match (toClosed s `intersect` horizontalLine y) $
+--          (H $ \NoIntersection -> error $ noIntersectionMessage y)
+--       :& (H $ \p              -> p^.xCoord)
+--       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
+--       :& RNil
+--   where
+--     toClosed (LineSegment' p q) = ClosedLineSegment p q
 
 
 -- horizSeg :: LineSegment 2 () Rational
