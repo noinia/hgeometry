@@ -4,6 +4,9 @@ module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
 import qualified Data.OrdSeq as SS -- status struct
+-- import qualified Data.SlowSeq as SS -- status struct
+
+
 -- import qualified Data.BalBST as SS
 import           Data.Ext
 import           Data.Geometry.Interval
