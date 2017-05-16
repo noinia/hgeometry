@@ -1,6 +1,6 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
-import qualified Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
+import           Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Algorithms.Geometry.LineSegmentIntersection.Types
@@ -10,6 +10,7 @@ import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Polygon
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -80,13 +81,13 @@ data SelfIntersectionTestCase r = SITestCase { _siPolygon :: SimplePolygon () r
 
 
 siTestCases    :: FilePath -> Spec
-siTestCases fp = (runIO $ readInput fp) >>= \case
+siTestCases fp = (runIO $ readSiInput fp) >>= \case
     Left e    -> it "reading SelfIntersection file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ siToSpec tcs
 
 -- | polygons are considered self intersecting when they are red
-readSiInput    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readSiInput    :: FilePath -> IO (Either ConversionError [SelfIntersectionTestCase Rational])
 readSiInput fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ SITestCase pg (isRed a)
@@ -95,9 +96,10 @@ readSiInput fp = fmap f <$> readSinglePageFile fp
       where
         polies = page^..content.to flattenGroups.traverse
                ._withAttrs _IpePath _asSimplePolygon
-        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just "red"
+        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just (IpeColor (Named "red"))
 
 
+siToSpec                   :: SelfIntersectionTestCase Rational -> Spec
 siToSpec (SITestCase pg b) = it ("SelfIntersecting?: " <> take 50 (show pg)) $ do
                                hasSelfIntersections pg `shouldBe` b
 
