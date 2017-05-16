@@ -63,6 +63,17 @@ type instance IntersectionOf (SubLine 2 p r) (SubLine 2 q r) = [ NoIntersection
                                                                , SubLine 2 p r
                                                                ]
 
+-- | given point p, and a Subline l r such that p lies on line l, test if it
+-- lies on the subline, i.e. in the interval r
+onSubLine2 :: (Ord r, Num r) => Point 2 r -> SubLine 2 p r -> Bool
+p `onSubLine2` sl = 0 <= d && d <= squaredEuclideanDist a b
+  where
+    -- get the endpoints (a,b) of the subline
+    SubLine _ r = fixEndPoints sl
+    a = r^.start.extra.core
+    b = r^.end.extra.core
+    d = (p .-. a) `dot` (b .-. a)
+
 
 instance (Ord r, Fractional r) =>
          (SubLine 2 p r) `IsIntersectableWith` (SubLine 2 p r) where
@@ -84,6 +95,9 @@ instance (Ord r, Fractional r) =>
       :& RNil
     where
       s' = shiftLeft' (toOffset (m^.anchorPoint) l) s
+
+
+
 
 
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r)

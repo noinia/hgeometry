@@ -1,5 +1,6 @@
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
+import qualified Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 import           Algorithms.Geometry.LineSegmentIntersection.Types
@@ -12,12 +13,14 @@ import           Data.Geometry.Point
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import           Data.Proxy
+import           Data.Semigroup
 import qualified Data.Set as Set
 import           Test.Hspec
 import           Test.QuickCheck
 import           Util
 
-import Debug.Trace
+import           Debug.Trace
 
 spec :: Spec
 spec = do
@@ -25,9 +28,13 @@ spec = do
     -- toSpec (TestCase "myPoints" myPoints)
     -- toSpec (TestCase "myPoints'" myPoints')
     ipeSpec
+  describe "Self Intersecting Polygon Tests" $ do
+    siTestCases "selfIntersections.ipe"
+
+testPath = "test/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
-ipeSpec = testCases "test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe"
+ipeSpec = testCases (testPath <> "manual.ipe")
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput fp) >>= \case
@@ -65,3 +72,43 @@ sameAsNaive      :: (Fractional r, Ord r, Eq p
                     ) => [LineSegment 2 p r] -> Spec
 sameAsNaive segs = it "Same as Naive " $ do
     (Sweep.intersections segs) `shouldBe` (Naive.intersections segs)
+
+
+data SelfIntersectionTestCase r = SITestCase { _siPolygon :: SimplePolygon () r
+                                             , _isSelfIntersectiong :: Bool
+                                             } deriving (Show,Eq)
+
+
+siTestCases    :: FilePath -> Spec
+siTestCases fp = (runIO $ readInput fp) >>= \case
+    Left e    -> it "reading SelfIntersection file" $
+                   expectationFailure $ "Failed to read ipe file " ++ show e
+    Right tcs -> mapM_ siToSpec tcs
+
+-- | polygons are considered self intersecting when they are red
+readSiInput    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readSiInput fp = fmap f <$> readSinglePageFile fp
+  where
+    f page = [ SITestCase pg (isRed a)
+             | pg :+ a <- polies
+             ]
+      where
+        polies = page^..content.to flattenGroups.traverse
+               ._withAttrs _IpePath _asSimplePolygon
+        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just "red"
+
+
+siToSpec (SITestCase pg b) = it ("SelfIntersecting?: " <> take 50 (show pg)) $ do
+                               hasSelfIntersections pg `shouldBe` b
+
+
+
+flattenGroups :: [IpeObject r] -> [IpeObject r]
+flattenGroups = concatMap flattenGroups'
+
+flattenGroups'                              :: IpeObject r -> [IpeObject r]
+flattenGroups' (IpeGroup (Group gs :+ ats)) =
+      map (applyAts ats) . concatMap flattenGroups' $ gs
+    where
+      applyAts ats = id
+flattenGroups' o                            = [o]

@@ -77,3 +77,7 @@ asLineSegment'                            :: PolyLine d p r -> Maybe (LineSegmen
 asLineSegment' (PolyLine (S2.Seq2 p m q))
   | Seq.null m                            = Just $ ClosedLineSegment p q
   | otherwise                             = Nothing
+
+
+-- polylineEdges :: Polyline d p r -> NonEmpty.NonEmpty (LineSegment d p r)
+-- polylineEdges (Polyline )

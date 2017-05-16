@@ -89,6 +89,11 @@ onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r 
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
 
+-- | Specific 2d version of testing if apoint lies on a line.
+onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
+p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
+
+
 -- | The intersection of two lines is either: NoIntersection, a point or a line.
 type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
                                                      , Point 2 r
