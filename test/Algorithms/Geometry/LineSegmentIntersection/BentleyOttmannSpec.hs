@@ -30,7 +30,7 @@ spec = do
     -- toSpec (TestCase "myPoints'" myPoints')
     ipeSpec
   describe "Self Intersecting Polygon Tests" $ do
-    siTestCases "selfIntersections.ipe"
+    siTestCases (testPath <> "selfIntersections.ipe")
 
 testPath = "test/Algorithms/Geometry/LineSegmentIntersection/"
 

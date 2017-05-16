@@ -9,6 +9,7 @@ import qualified Data.Foldable as F
 import           Data.Maybe
 import           Data.Semigroup
 import qualified Data.Sequence as S
+import qualified Data.Sequence.Util as SU
 
 
 
@@ -128,13 +129,8 @@ splitMonotonic p = bimap OrdSeq OrdSeq . split p . _asSeq
 -- monotonic split for Sequences
 --
 -- \(O(\log^2 n)\)
-split     :: (a -> Bool) -> S.Seq a -> (S.Seq a, S.Seq a)
-split p s = case S.findIndexL p s of
-              Nothing -> (s,mempty)
-              Just i  -> S.splitAt i s
-
-
-
+split :: (a -> Bool) -> S.Seq a -> (S.Seq a, S.Seq a)
+split = SU.splitMonotone
 
 -- Deletes all elements from the OrdDeq
 --
