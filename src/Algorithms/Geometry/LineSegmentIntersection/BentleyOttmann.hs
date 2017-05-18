@@ -142,20 +142,6 @@ noIntersectionMessageShow r = "ordAt at " <> show r <> ": No intersection"
 ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
 ordAt y = comparing (xCoordAt y)
 
--- -- | Given a y coord and a line segment that intersects the horizontal line
--- -- through y, compute the x-coordinate of this intersection point.
--- --
--- -- note that we will pretend that the line segment is closed, even if it is not
--- xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
--- xCoordAt y s = match (supportingLine s `intersect` horizontalLine y) $
---          (H $ \NoIntersection -> error $ noIntersectionMessage y)
---       :& (H $ \p              -> p^.xCoord)
---       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
---       :& RNil
---       -- note that by assumption the segment intersects the horizontal line
---       -- so the point p that we get lies on the segment as well. I.e. we do not
---       -- need to check that it actually lies on that segment
-
 -- | Given a y coord and a line segment that intersects the horizontal line
 -- through y, compute the x-coordinate of this intersection point.
 --
@@ -169,29 +155,6 @@ xCoordAt y (LineSegment' (p@(Point2 px py) :+ _) (q@(Point2 qx qy) :+ _))
       | otherwise    = px + alpha * (qx - px)
   where
     alpha = (y - py) / (qy - py)
-
-
--- xCoordAt     :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
--- xCoordAt y s = match (toClosed s `intersect` horizontalLine y) $
---          (H $ \NoIntersection -> error $ noIntersectionMessage y)
---       :& (H $ \p              -> p^.xCoord)
---       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
---       :& RNil
---   where
---     toClosed (LineSegment' p q) = ClosedLineSegment p q
-
-
--- horizSeg :: LineSegment 2 () Rational
--- horizSeg = ClosedLineSegment (ext $ point2 (359103 % 100000) (408867 % 100000))
---                              (ext $ point2 (180812 % 10000)  (408867 % 100000))
-
--- 359103 % 100000
--- 408867 % 100000
--- 180812 % 100000
-
-
-
-
 
 --------------------------------------------------------------------------------
 -- * The Main Sweep
