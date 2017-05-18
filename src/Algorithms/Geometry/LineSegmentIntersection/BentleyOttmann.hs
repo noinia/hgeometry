@@ -115,28 +115,6 @@ startSegs e = case eventType e of
 
 --------------------------------------------------------------------------------
 
--- -- | The navigator that we use that orders the segments that intersect at a
--- -- horizontal line (from left to right)
--- ordAtNav   :: (Ord r, Fractional r) => r -> SS.TreeNavigator r (LineSegment 2 p r)
--- ordAtNav y = SS.Nav (\s x -> h s <= x) (min `on` h)
---   where
---     h s = match (s `intersect` horizontalLine y) $
---          (H $ \NoIntersection -> error $ noIntersectionMessage y)
---       :& (H $ \p              -> p^.xCoord)
---       :& (H $ \_              -> rightEndpoint s) -- the intersection is s itself
---       :& RNil
-
-{-# INLINE noIntersectionMessage #-}
-noIntersectionMessage   :: r -> String
-noIntersectionMessage _ =  "ordAt: No intersection"
-
-noIntersectionMessageShow   :: Show r => r -> String
-noIntersectionMessageShow r = "ordAt at " <> show r <> ": No intersection"
-{-# RULES "noIntersectionMessage/show" forall (y :: Show r => r).
-      noIntersectionMessage y = noIntersectionMessageShow y
-  #-}
-
-
 -- | Compare based on the x-coordiante of the intersection with the horizontal
 -- line through y
 ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
