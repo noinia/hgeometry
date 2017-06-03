@@ -65,26 +65,33 @@ type instance IntersectionOf (SubLine 2 p r) (SubLine 2 q r) = [ NoIntersection
 
 -- | given point p, and a Subline l r such that p lies on line l, test if it
 -- lies on the subline, i.e. in the interval r
-onSubLine2 :: (Ord r, Num r) => Point 2 r -> SubLine 2 p r -> Bool
-p `onSubLine2` sl = 0 <= d && d <= squaredEuclideanDist a b
+onSubLine                 :: (Ord r, Fractional r, Arity d)
+                          => Point d r -> SubLine d p r -> Bool
+onSubLine p (SubLine l r) = toOffset p l `inInterval` r
+
+-- | given point p, and a Subline l r such that p lies on line l, test if it
+-- lies on the subline, i.e. in the interval r
+onSubLine2        :: (Ord r, Num r) => Point 2 r -> SubLine 2 p r -> Bool
+p `onSubLine2` sl = d `inInterval` r
   where
     -- get the endpoints (a,b) of the subline
-    SubLine _ r = fixEndPoints sl
-    a = r^.start.extra.core
-    b = r^.end.extra.core
+    SubLine _ (Interval s e) = fixEndPoints sl
+    a = s^.unEndPoint.extra.core
+    b = e^.unEndPoint.extra.core
     d = (p .-. a) `dot` (b .-. a)
-
+    -- map to an interval corresponding to the length of the segment
+    r = Interval (s&unEndPoint.core .~ 0) (e&unEndPoint.core .~ squaredEuclideanDist b a)
+      -- note that we take the dist between b and a, so if these are infinity
+      -- we get maxInfinity as well
 
 instance (Ord r, Fractional r) =>
          (SubLine 2 p r) `IsIntersectableWith` (SubLine 2 p r) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  (SubLine l r) `intersect` (SubLine m s) = match (l `intersect` m) $
+  sl@(SubLine l r) `intersect` sm@(SubLine m s) = match (l `intersect` m) $
          (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \p@(Point _)    -> if (toOffset p l) `inInterval` r
-                                    &&
-                                    (toOffset p m) `inInterval` s
+      :& (H $ \p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
                                  then coRec p
                                  else coRec NoIntersection)
       :& (H $ \_             -> match (r `intersect` s') $
@@ -101,7 +108,7 @@ instance (Ord r, Fractional r) =>
 
 
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r)
-fromLine l = SubLine (fmap Val l) (OpenInterval (ext MinInfinity) (ext MaxInfinity))
+fromLine l = SubLine (fmap Val l) (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
 
 
 -- testL :: SubLine 2 () (UnBounded Rational)

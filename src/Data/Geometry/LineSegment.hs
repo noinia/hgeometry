@@ -86,6 +86,7 @@ instance HasEnd (LineSegment d p r) where
 
 _SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
 _SubLine = iso segment2SubLine subLineToSegment
+{-# INLINE _SubLine #-}
 
 segment2SubLine    :: (Fractional r, Eq r, Arity d)
                    => LineSegment d p r -> SubLine d p r
@@ -106,6 +107,7 @@ subLineToSegment sl = let (Interval s' e') = (fixEndPoints sl)^.subRange
 
 instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
   supportingLine s = lineThrough (s^.start.core) (s^.end.core)
+
 
 instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
   show ~(LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
