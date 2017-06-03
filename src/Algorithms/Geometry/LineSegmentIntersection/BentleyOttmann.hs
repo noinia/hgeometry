@@ -125,7 +125,7 @@ ordAt y = comparing (xCoordAt y)
 --
 -- note that we will pretend that the line segment is closed, even if it is not
 xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
-xCoordAt y (LineSegment' (p@(Point2 px py) :+ _) (q@(Point2 qx qy) :+ _))
+xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
       | py == qy     = px `max` qx  -- s is horizontal, and since it by the
                                     -- precondition it intersects the sweep
                                     -- line, we return the x-coord of the

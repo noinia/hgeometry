@@ -14,7 +14,6 @@ import           Data.Ratio
 import           Data.Semigroup
 import           Data.Text (Text)
 import qualified Data.Text as T
-import           Numeric
 import           Text.Parsec.Error (messageString, errorMessages)
 
 
