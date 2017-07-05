@@ -199,3 +199,25 @@ bisector     :: Fractional r => Point 2 r -> Point 2 r -> Line 2 r
 bisector p q = let v = q .-. p
                    h = p .+^ (v ^/ 2)
                in perpendicularTo (Line h v)
+
+
+-- | Compares the lines on slope. Vertical lines are considered larger than
+-- anything else.
+--
+-- >>> (Line origin (Vector2 5 1)) `cmpSlope` (Line origin (Vector2 3 3))
+-- LT
+-- >>> (Line origin (Vector2 5 1)) `cmpSlope` (Line origin (Vector2 (-3) 3))
+-- GT
+-- >>> (Line origin (Vector2 5 1)) `cmpSlope` (Line origin (Vector2 0 1))
+-- LT
+cmpSlope :: (Num r, Ord r) => Line 2 r -> Line 2 r -> Ordering
+(Line _ u) `cmpSlope` (Line _ v) = case ccw origin (f u) (f v) of
+                                     CCW      -> LT
+                                     CW       -> GT
+                                     CoLinear -> EQ
+  where
+    f w@(Vector2 x y) = Point $ case (x `compare` 0, y >= 0) of
+                                  (GT,_)    -> w
+                                  (EQ,True) -> w
+                                  _         -> (-1) *^ w
+                                  -- x < 0, or (x==0 and y <0 ; i.e. a vertical line)
