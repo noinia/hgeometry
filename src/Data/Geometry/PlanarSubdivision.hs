@@ -1,7 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.PlanarSubdivision where
 
-import           Control.Lens
+import           Control.Lens hiding (holes)
 import qualified Data.BalBST as SS
 import           Data.Bifunctor.Apply
 import qualified Data.CircularSeq as C
@@ -160,6 +162,40 @@ edgeSegments ps = mapMaybe withSegment . F.toList . edges $ ps^.graph
                                          Invisible -> Nothing
 
 
--- -- | Lists all faces of the planar graph. This ignores invisible edges
--- rawFacePolygons    :: PlanarSubdivision s v e f r -> [(FaceId s, SomePolygon v r :+ f)]
--- rawFacePolygons ps =
+edgeSegment :: Dart s -> PlanarSubdivision s v e f r -> LineSegment 2 v r :+ e
+edgeSegment = undefined
+
+
+
+rawFaceBoundary      :: FaceId s Primal_ -> PlanarSubdivision s v e f r
+                    -> SimplePolygon v r :+ f
+rawFaceBoundary i ps = pg :+ (gr^.fDataOf i.fData)
+  where
+    gr = ps^.graph
+    pg = fromPoints . F.toList . fmap (\j -> f (gr^.vDataOf j)) . boundaryVertices i $ gr
+    f (VertexData p v) = p :+ v
+
+rawFacePolygon :: FaceId s Primal_ -> PlanarSubdivision s v e f r
+                    -> SomePolygon v r :+ f
+rawFacePolygon i ps = case gr^.fDataOf i.holes of
+                        [] -> Left  res                               :+ x
+                        hs -> Right (MultiPolygon vs $ map toHole hs) :+ x
+  where
+    gr = ps^.graph
+    res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
+    toHole d = (rawFaceBoundary (leftFace d gr) ps)^.core
+
+
+
+-- | Lists all faces of the planar graph. This ignores invisible edges
+rawFacePolygons    :: PlanarSubdivision s v e f r
+                   -> V.Vector (FaceId s Primal_, SomePolygon v r :+ f)
+rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' . _graph $ ps
+--   where
+--     gr = ps^.graph
+
+--     f (i,FaceData hs x) = case hs of
+--                             [] -> Left  $ toPolygon i :+ x
+--                             _  -> Right
+
+--     toPolygon d = boundaryVertices gr
