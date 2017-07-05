@@ -105,8 +105,8 @@ outerBoundary = lens g s
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
 
-holes :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
-holes = lens g s
+polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
+polygonHoles = lens g s
   where
     g                     :: Polygon Multi p r -> [Polygon Simple p r]
     g (MultiPolygon _ hs) = hs
