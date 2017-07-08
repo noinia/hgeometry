@@ -3,18 +3,17 @@ module Data.Geometry.SubLineSpec where
 
 import Data.Ext
 import Control.Lens
-import Data.Geometry.LineSegment
-import Data.Geometry.Interval
+import Data.Geometry
 import Data.Geometry.Line
-import Data.Geometry.Point
 import Data.Geometry.SubLine
-import Data.Geometry.Vector
+import Data.Geometry.LineSegment
 import QuickCheck.Instances ()
 import Test.Hspec
 import Test.QuickCheck
-
-
-
+import Data.UnBounded
+import Frames.CoRec
+import Data.UnBounded
+import Data.Ratio
 
 
 spec :: Spec
@@ -30,6 +29,15 @@ spec = do
       ((Point2 (-1) (-1 :: Rational)) `onSubLine2`
        (seg^._SubLine))
     `shouldBe` False
+
+  it "Intersection test" $
+    let mySeg  = Val <$> ClosedLineSegment (ext origin) (ext $ Point2 (14 :: Rational) 0)
+        mySeg' = mySeg^._SubLine
+        myLine = fromLine $ lineThrough (Point2 0 0) (Point2 10 (0 :: Rational))
+    in (myLine `intersect` mySeg')
+       `shouldBe`
+       coRec (myLine&subRange .~ ClosedInterval (ext $ Val 0) (ext . Val $ 7 % 5))
+
 
 
 seg :: LineSegment 2 () Rational

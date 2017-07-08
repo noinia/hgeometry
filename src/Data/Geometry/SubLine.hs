@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Data.Geometry.SubLine where
 
 import           Control.Lens
@@ -16,7 +17,7 @@ import           Frames.CoRec
 
 --------------------------------------------------------------------------------
 
--- | Part of a line. The interval is ranged based on the unit-vector of the
+-- | Part of a line. The interval is ranged based on the vector of the
 -- line l, and s.t.t zero is the anchorPoint of l.
 data SubLine d p r = SubLine { _line     :: Line d r
                              , _subRange :: Interval p r
@@ -34,11 +35,16 @@ deriving instance Arity d                   => Functor (SubLine d p)
 deriving instance Arity d                   => F.Foldable (SubLine d p)
 deriving instance Arity d                   => T.Traversable (SubLine d p)
 
+instance Arity d => Bifunctor (SubLine d) where
+  bimap f g (SubLine l r) = SubLine (g <$> l) (bimap f g r)
+
 
 -- | Get the point at the given position along line, where 0 corresponds to the
 -- anchorPoint of the line, and 1 to the point anchorPoint .+^ directionVector
 pointAt              :: (Num r, Arity d) => r -> Line d r -> Point d r
 pointAt a (Line p v) = p .+^ (a *^ v)
+
+
 
 -- | Annotate the subRange with the actual ending points
 fixEndPoints    :: (Num r, Arity d) => SubLine d p r -> SubLine d (Point d r :+ p) r
@@ -89,23 +95,23 @@ instance (Ord r, Fractional r) =>
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  sl@(SubLine l r) `intersect` sm@(SubLine m s) = match (l `intersect` m) $
+  sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
          (H $ \NoIntersection -> coRec NoIntersection)
       :& (H $ \p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \_             -> match (r `intersect` s') $
+      :& (H $ \_             -> match (r `intersect` s'') $
                                       (H $ \NoIntersection -> coRec NoIntersection)
                                    :& (H $ \i              -> coRec $ SubLine l i)
                                    :& RNil
            )
       :& RNil
     where
-      s' = shiftLeft' (toOffset (m^.anchorPoint) l) s
-
-
-
-
+      -- s' = shiftLeft' (toOffset (m^.anchorPoint) l) $ s
+      s'  = (fixEndPoints sm)^.subRange
+      s'' = bimap (^.extra) id
+          $ s'&start.core .~ toOffset (s'^.start.extra.core) l
+              &end.core   .~ toOffset (s'^.end.extra.core)   l
 
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r)
 fromLine l = SubLine (fmap Val l) (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
