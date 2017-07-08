@@ -1,15 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.Ipe.IpeOut where
 
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Ball
-import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
+import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
@@ -17,9 +19,12 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Maybe (fromMaybe)
+import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import           Data.Text (Text)
+import           Frames.CoRec
 
 --------------------------------------------------------------------------------
 
@@ -45,7 +50,8 @@ asIpeObject' = flip asIpeObject
 -- ipe geometry object, the geometry object, and a record with its attributes,
 -- construct an ipe Object representing it.
 asIpeObjectWith          :: (ToObject i, NumType g ~ r)
-                      => IpeOut g (IpeObject' i r) -> g -> IpeAttributes i r -> IpeObject r
+                         => IpeOut g (IpeObject' i r) -> g -> IpeAttributes i r
+                         -> IpeObject r
 asIpeObjectWith io g ats = asIpe (ipeObject io ats) g
 
 
@@ -138,15 +144,22 @@ defaultClipRectangle :: (Num r, Ord r) => Rectangle () r
 defaultClipRectangle = boundingBox (point2 (-200) (-200)) <>
                        boundingBox (point2 1000 1000)
 
--- -- | An ipe out to draw a line, by clipping it to stay within a rectangle of
--- -- default size.
--- line :: IpeOut (Line 2 r) (IpeObject' Path r)
--- line = line' defaultClipRectangle
+-- | An ipe out to draw a line, by clipping it to stay within a rectangle of
+-- default size.
+line :: (Fractional r, Ord r) => IpeOut (Line 2 r) (IpeObject' Path r)
+line = lineWith defaultClipRectangle
 
--- -- | An ipe out to draw a line, by clipping it to stay within the rectangle
--- line'   :: Rectangle p r -> IpeOut (Line 2 r) (IpeObject' Path r)
--- line' r = IpeOut $ \l -> error "not implemented yet"
-
+-- | An ipe out to draw a line, by clipping it to stay within the rectangle.
+--
+-- pre: intersection of the line and the rectangle is a line segment
+-- (otherwise it arbitrarily inserts the bottom of the rectangle as the path)
+lineWith   :: forall p r. (Ord r, Fractional r)
+              => Rectangle p r -> IpeOut (Line 2 r) (IpeObject' Path r)
+lineWith r = IpeOut (asIpe defaultIpeOut . clip)
+  where
+    def    = bimap (const ()) id $ bottomSide r
+    clip l = fromMaybe def . asA (Proxy :: Proxy (LineSegment 2 () r))
+           $ l `intersect` r
 
 ipeLineSegment :: IpeOut (LineSegment 2 p r) (IpeObject' Path r)
 ipeLineSegment = noAttrs $ fromPathSegment ipeLineSegment'
@@ -188,6 +201,8 @@ ipePolygon = IpeOut $ io . first (const ())
     io                       :: forall t r. Polygon t () r -> Path r
     io pg@(SimplePolygon vs) = pg^.re _asSimplePolygon
     io pg@(MultiPolygon _ _) = pg^.re _asMultiPolygon
+
+
 
 
 
