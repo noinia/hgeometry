@@ -100,6 +100,7 @@ unsafeCoord i = vector . FV.element (i-1)
 coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 
+
 -- | Constructs a point from a list of coordinates
 --
 -- >>> pointFromList [1,2,3] :: Maybe (Point 3 Int)
@@ -154,8 +155,9 @@ point2 x y = Point $ v2 x y
 --
 -- >>> _point2 $ point2 1 2
 -- (1,2)
-_point2   :: Point 2 r -> (r,r)
-_point2 p = (p^.xCoord, p^.yCoord)
+_point2 :: Point 2 r -> (r,r)
+_point2 = _unV2 . toVec
+
 
 
 -- | Construct a 3 dimensional point
@@ -169,8 +171,8 @@ point3 x y z = Point $ v3 x y z
 --
 -- >>> _point3 $ point3 1 2 3
 -- (1,2,3)
-_point3   :: Point 3 r -> (r,r,r)
-_point3 p = (p^.xCoord, p^.yCoord, p^.zCoord)
+_point3 :: Point 3 r -> (r,r,r)
+_point3 = _unV3 . toVec
 
 
 type i <=. d = (Index' (i-1) d, Arity d)
