@@ -65,7 +65,11 @@ instance (Show r, Arity d) => Show (Vector d r) where
 
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
 deriving instance (Ord r, Arity d)  => Ord (Vector d r)
-deriving instance Arity d  => Functor (Vector d)
+-- deriving instance Arity d  => Functor (Vector d)
+
+-- for some weird reason, implemeting this myself yields is faster code
+instance Arity d  => Functor (Vector d) where
+  fmap f (Vector v) = Vector $ fmap f v
 
 deriving instance Arity d  => Foldable (Vector d)
 deriving instance Arity d  => Applicative (Vector d)
@@ -92,9 +96,9 @@ instance Arity d => Metric (Vector d)
 type instance V.Dim (Vector d) = ToPeano d
 
 instance Arity d => V.Vector (Vector d) r where
-  construct    = Vector <$> V.construct
-  inspect    v = V.inspect (_unV v)
-  basicIndex v = V.basicIndex (_unV v)
+  construct  = Vector <$> V.construct
+  inspect    = V.inspect . _unV
+  basicIndex = V.basicIndex . _unV
 
 -- ----------------------------------------
 

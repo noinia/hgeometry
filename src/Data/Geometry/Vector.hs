@@ -77,7 +77,7 @@ instance Eq r => Monoid (ScalarMultiple r) where
      | x == y               = Yes x
      | otherwise            = No
 
-
+-- | Actual implementation of scalarMultiple
 scalarMultiple'      :: (Eq r, Fractional r, GV.Arity d)
                      => Vector d r -> Vector d r -> Maybe r
 scalarMultiple' u v = g . F.foldr mappend mempty $ FV.zipWith f u v

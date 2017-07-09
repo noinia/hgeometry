@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -ddump-deriv #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where
@@ -99,6 +100,11 @@ unsafeCoord i = vector . FV.element (i-1)
 -- Point3 [1,2,4]
 coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
+{-# INLINABLE coord #-}
+
+-- somehow these rules don't fire
+-- {-# SPECIALIZE coord :: C 1 -> Lens' (Point 2 r) r#-}
+-- {-# SPECIALIZE coord :: C 2 -> Lens' (Point 2 r) r#-}
 
 
 -- | Constructs a point from a list of coordinates
@@ -185,6 +191,7 @@ type i <=. d = (Index' (i-1) d, Arity d)
 -- Point2 [10,2]
 xCoord :: (1 <=. d) => Lens' (Point d r) r
 xCoord = coord (C :: C 1)
+{-# INLINABLE xCoord #-}
 
 -- | Shorthand to access the second coordinate C 2
 --
@@ -194,6 +201,7 @@ xCoord = coord (C :: C 1)
 -- Point3 [1,3,3]
 yCoord :: (2 <=. d) => Lens' (Point d r) r
 yCoord = coord (C :: C 2)
+{-# INLINABLE yCoord #-}
 
 -- | Shorthand to access the third coordinate C 3
 --
@@ -203,7 +211,7 @@ yCoord = coord (C :: C 2)
 -- Point3 [1,2,4]
 zCoord :: (3 <=. d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
-
+{-# INLINABLE zCoord #-}
 
 
 --------------------------------------------------------------------------------
