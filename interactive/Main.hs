@@ -11,8 +11,8 @@ import qualified SDL.Primitive
 
 main :: IO ()
 main = do
-         SDL.initialize [SDL.InitVideo]
-         w <- SDL.createWindow "sdl2-gfx-example" SDL.defaultWindow
+         SDL.initialize [SDL.InitVideo, SDL.InitEvents]
+         w <- SDL.createWindow "sdl2 example" SDL.defaultWindow
          r <- SDL.createRenderer w (-1) SDL.defaultRenderer
          SDL.showWindow w
          let fps   = 60  -- How fast do we aim to render?
