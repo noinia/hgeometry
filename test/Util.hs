@@ -6,8 +6,10 @@ import Data.Proxy
 import Data.Ext
 import Data.Function(on)
 import qualified Data.List as L
+import Data.Singletons(Apply)
 
-byStrokeColour :: (Stroke ∈ AttributesOf g) => [IpeObject' g r] -> [[IpeObject' g r]]
+byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
+               => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
 byStrokeColour = map (map fst) . L.groupBy ((==) `on` snd) . L.sortOn snd
                . map (\x -> (x,lookup' x))
   where

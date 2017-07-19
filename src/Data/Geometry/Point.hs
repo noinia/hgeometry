@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -ddump-deriv #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Point where

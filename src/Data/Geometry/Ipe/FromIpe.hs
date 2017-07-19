@@ -5,9 +5,7 @@ import           Control.Lens hiding (Simple)
 import           Data.Ext
 import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
@@ -40,7 +38,6 @@ _asLineSegment = prism' seg2path path2seg
   where
     seg2path   = review _asPolyLine . PolyLine.fromLineSegment
     path2seg p = PolyLine.asLineSegment' =<< preview _asPolyLine p
-
 
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
