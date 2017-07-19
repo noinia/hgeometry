@@ -30,6 +30,8 @@ main' r fpsm = loop'
       -- SDL.rendererDrawColor r $= black
       SDL.clear r
 
+      let pg = Polygon.fromList . map ext $ [Point2 10 10, Point2 50 50, Point2 100 100]
+      drawPolygon r pg
 
       SDL.present r
       SDL.Framerate.delay_ fpsm -- Delay to keep framerate constant.
@@ -43,3 +45,11 @@ isKeyPress c e = case SDL.eventPayload e of
                    SDL.KeyboardEvent ke -> SDL.keyboardEventKeyMotion ke == SDL.Pressed
                                         && SDL.keyboardEventKeysym ke    == c
                    _                    -> False
+
+
+drawPolygon      :: MonadIO m => SDL.Renderer -> SimplePolygon p Int16 -> m ()
+drawPolygon r pg = SDL.Primitive.fillPolygon r xs ys c
+  where
+    c  = V4 0 0 0 0 -- black
+    xs = pg^..outerBoundary.core.xCoord
+    ys = pg^..outerBoundary.core.yCoord
