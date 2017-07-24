@@ -12,7 +12,9 @@ import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
 import           Data.Semigroup
 
-
+-- | Triangulates a polygon of \(n\) vertices
+--
+-- running time: \(O(n \log n)\)
 triangulate       :: (Ord r, Fractional r, Show p, Show r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r

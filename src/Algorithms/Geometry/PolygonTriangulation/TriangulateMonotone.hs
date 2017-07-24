@@ -6,25 +6,17 @@ import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (listToMaybe)
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
 import           Data.Tuple (swap)
 import           Data.Util
-
 --------------------------------------------------------------------------------
 
 --
 type MonotonePolygon p r = SimplePolygon p r
-
-triangulate :: (Ord r, Num r) => MonotonePolygon p r -> [LineSegment 2 p r]
-triangulate = undefined
-
 
 data LR = L | R deriving (Show,Eq)
 
@@ -35,7 +27,7 @@ data LR = L | R deriving (Show,Eq)
 -- pre: the input polygon is y-monotone and has \(n \geq 3\) vertices
 --
 -- running time: \(O(n)\)
-computeDiagonals    :: (Ord r, Num r, Show r, Show p)
+computeDiagonals    :: (Ord r, Num r)
                     => MonotonePolygon p r -> [LineSegment 2 p r]
 computeDiagonals pg = diags'' <> diags'
   where
@@ -67,7 +59,7 @@ toVtx = (&extra %~ (^.extra))
 seg     :: P p r -> P p r -> LineSegment 2 p r
 seg u v = ClosedLineSegment (toVtx u) (toVtx v)
 
-process                    :: (Ord r, Num r, Show r, Show p)
+process                    :: (Ord r, Num r)
                            => P p r -> Stack (P p r)
                            -> SP (Stack (P p r)) [LineSegment 2 p r]
 process v stack@(u:ws)
@@ -100,21 +92,21 @@ mergeBy cmp = go
 splitPolygon    :: Ord r => MonotonePolygon p r
                 -> ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
 splitPolygon pg = swap . bimap (f R) (f L) . second reverse
-                . L.break (pred (<=)) . F.toList . C.leftElements $ vs'
+                . L.break (pred' (<=)) . F.toList . C.leftElements $ vs'
   where
     f x = map ((&extra %~ (x :+)) . (^.extra._1.end))
 
-    pred cmp (v :+ SP a b) = let vy = v^.yCoord
-                                 ay = a^.start.core.yCoord
-                                 by = b^.end.core.yCoord
-                             in vy `cmp` ay && vy `cmp` by
+    pred' cmp (v :+ SP a b) = let vy = v^.yCoord
+                                  ay = a^.start.core.yCoord
+                                  by = b^.end.core.yCoord
+                              in vy `cmp` ay && vy `cmp` by
 
-    Just vs' = C.findRotateTo (pred (>=)) $ (withIncidentEdges pg) ^.outerBoundary
+    Just vs' = C.findRotateTo (pred' (>=)) $ (withIncidentEdges pg) ^.outerBoundary
 
 --------------------------------------------------------------------------------
 
-testPolygon = fromPoints . map ext $ [ point2 10 10
-                                     , point2 5 20
-                                     , point2 3 14
-                                     , point2 1 1
-                                     , point2 8 8 ]
+-- testPolygon = fromPoints . map ext $ [ point2 10 10
+--                                      , point2 5 20
+--                                      , point2 3 14
+--                                      , point2 1 1
+--                                      , point2 8 8 ]

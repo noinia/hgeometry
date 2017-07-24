@@ -15,14 +15,12 @@ import           Data.CircularSeq (rotateL, rotateR, zip3LWith)
 import qualified Data.DList as DList
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Functor.Contravariant
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (catMaybes)
 import           Data.Ord (comparing, Down(..))
 import           Data.OrdSeq (Compare, OrdSeq)
 import qualified Data.OrdSeq as OS
@@ -121,7 +119,7 @@ ix' i = singular (ix i)
 -- the polygon into y-monotone pieces.
 --
 -- running time: \(O(n\log n)\)
-findDiagonals    :: forall t r p. (Fractional r, Ord r)
+findDiagonals    :: forall t r p. (Fractional r, Ord r, Show r, Show p)
                  => Polygon t p r -> [LineSegment 2 p r]
 findDiagonals p' = map f . sweep
                  . NonEmpty.sortBy (flip cmpSweep)
@@ -159,7 +157,7 @@ findDiagonals p' = map f . sweep
 -- pieces.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r)
+makeMonotone      :: (Fractional r, Ord r, Show r, Show p)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 makeMonotone px pg = let (e:es) = listEdges pg
@@ -186,7 +184,8 @@ getVertexType v = asks (^.ix' v._3)
 getEventType :: Event r -> Sweep p r VertexType
 getEventType = getVertexType . getIdx
 
-handle   :: (Fractional r, Ord r) => Event r -> Sweep p r ()
+handle   :: (Fractional r, Ord r, Show r, Show p) => Event r -> Sweep p r ()
+-- handle e | traceShow ("Handle ", e) False = undefined
 handle e = let i = getIdx e in getEventType e >>= \case
     Start   -> handleStart   i e
     End     -> handleEnd     i e
@@ -210,7 +209,7 @@ handleStart i (v :+ adj) = modify $ \(SS t h) ->
                                 SS (insertAt v (adj^._2) t)
                                    (IntMap.insert i i h)
 
-handleEnd              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
+handleEnd              :: (Fractional r, Ord r, Show r, Show p) => Int -> Event r -> Sweep p r ()
 handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             -- lookup p's helper; if it is a merge vertex
                             -- we insert a new segment
