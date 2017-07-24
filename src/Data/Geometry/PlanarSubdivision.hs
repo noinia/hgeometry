@@ -17,7 +17,7 @@ module Data.Geometry.PlanarSubdivision( VertexId', FaceId'
 
                                       , vertices', vertices
                                       , edges', edges
-                                      , faces', faces
+                                      , faces', faces, internalFaces
                                       , darts'
 
                                       , headOf, tailOf, twin, endPoints, edgeTypeOf
@@ -270,6 +270,12 @@ faces' = PG.faces' . _graph
 -- | All faces with their face data.
 faces :: PlanarSubdivision s v e f r  -> V.Vector (FaceId' s, FaceData (Dart s) f)
 faces = PG.faces . _graph
+
+-- | Enumerates all faces with their face data exlcluding  the outer face
+internalFaces    :: (Ord r, Fractional r) => PlanarSubdivision s v e f r
+                 -> V.Vector (FaceId' s, FaceData (Dart s) f)
+internalFaces ps = let i = outerFaceId ps
+                   in V.filter (\(j,_) -> i /= j) $ faces ps
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
