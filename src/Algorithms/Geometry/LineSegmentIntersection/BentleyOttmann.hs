@@ -10,7 +10,6 @@ import qualified Data.OrdSeq as SS -- status struct
 -- import qualified Data.BalBST as SS
 import           Data.Ext
 import           Data.Geometry.Interval
-import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -70,7 +69,7 @@ groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
 
     sameStart (Event q (Start _)) = p == q
     sameStart _                   = False
-groupStarts (e : es)           = e : groupStarts es
+groupStarts (e : es)                 = e : groupStarts es
 
 
 --------------------------------------------------------------------------------

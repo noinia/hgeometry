@@ -49,8 +49,8 @@ incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
 hull'          :: (Ord r, Num r) => [Point 2 r :+ p] -> NonEmpty (Point 2 r :+ p)
 hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
   where
-    hull'' h  []    = h
-    hull'' h (p:ps) = hull'' (cleanMiddle (p:h)) ps
+    hull'' h  []     = h
+    hull'' h (p:ps') = hull'' (cleanMiddle (p:h)) ps'
 
     cleanMiddle h@[_,_]                         = h
     cleanMiddle h@(z:y:x:rest)

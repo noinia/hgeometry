@@ -262,17 +262,17 @@ ipeReadAttrs     :: forall proxy proxy' i r f ats.
 ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy ats)
 
 
-testSym :: B.ByteString
-testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
+-- testSym :: B.ByteString
+-- testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
 
 
 
 
 -- readAttrsFromXML :: B.ByteString -> Either
 
-readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
-readSymAttrs = readXML testSym
-               >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
+-- readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
+-- readSymAttrs = readXML testSym
+--                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
 
 
 

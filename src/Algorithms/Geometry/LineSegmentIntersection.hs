@@ -11,10 +11,6 @@ hasInteriorIntersections :: (Ord r, Fractional r)
                          => [LineSegment 2 p r] -> Bool
 hasInteriorIntersections = not . null . BO.interiorIntersections
 
--- isSelfIntersecting :: (Ord r, Fractional r) => PolyLine 2 p r -> Bool
--- isSelfIntersecting = hasInteriorIntersections . undefined
-
-
 -- | \(O(n \log n)\)
 hasSelfIntersections :: (Ord r, Fractional r) => Polygon t p r -> Bool
 hasSelfIntersections = hasInteriorIntersections . listEdges

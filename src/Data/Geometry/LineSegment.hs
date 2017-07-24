@@ -1,5 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-|
+Module    : Data.Geometry.LineSegment
+Description: Line segment data type and some basic functions on line segments
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Geometry.LineSegment( LineSegment
                                 , pattern LineSegment
                                 , pattern LineSegment'
