@@ -1,14 +1,20 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.TriangulateWorld where
 
+import Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
+import Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate)
 import Algorithms.Geometry.PolygonTriangulation.MakeMonotone (makeMonotone)
+import Data.Maybe(mapMaybe)
 import Control.Lens
 import Data.Data
 import Data.Ext
 import Data.Geometry.Ipe
+import Data.Geometry.Polygon
 import Data.Geometry.PlanarSubdivision
 import Data.Semigroup
 import Options.Applicative
+import qualified Data.Foldable as F
+
 
 --------------------------------------------------------------------------------
 
@@ -56,14 +62,21 @@ mainWith (Options inFile outFile) = do
   where
     runPage page = do
       let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asSimplePolygon
-          subdivs = map (\(pg :+ _) -> makeMonotone (Identity PX) pg) polies
+          polies' = filter (not . hasSelfIntersections . (^.core)) polies
+          subdivs = map (\(pg :+ _) -> triangulate (Identity PX) pg) polies'
+          yMonotones = tail . mapMaybe (^?_2.core._Left)
+                     . concatMap (F.toList.rawFacePolygons) $ subdivs
+          ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
           segs    = map (^._2.core) . concatMap edgeSegments $ subdivs
           out     = [ asIpeObject pg a
                     | pg :+ a <- polies
                     ] <>
                     [ asIpeObject s mempty
                     | s <- segs
-                    ]
+                    ] <>
+                    [ asIpeObject pg mempty
+                    | pg <- yMonotones ]
+      mapM_ print . map (\pg -> pg^.core.to polygonVertices.to length) $ polies'
       writeIpeFile outFile . singlePageFromContent $ out
 
 

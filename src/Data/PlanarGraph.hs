@@ -482,13 +482,6 @@ neighboursOf v g = otherVtx <$> incidentEdges v g
   where
     otherVtx d = let u = tailOf d g in if u == v then headOf d g else u
 
--- outgoingNeighbours :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
--- outgoingNeighbours = undefined
-
--- incomingNeighbours :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
--- incomingNeighbours = undefined
-
-
 --------------------------------------------------------------------------------
 -- * Access data
 
