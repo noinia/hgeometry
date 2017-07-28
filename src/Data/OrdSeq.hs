@@ -10,7 +10,7 @@ import           Data.Semigroup
 
 --------------------------------------------------------------------------------
 
-data Key a = NoKey | Key { getKey :: a } deriving (Show,Eq,Ord)
+data Key a = NoKey | Key { getKey :: !a } deriving (Show,Eq,Ord)
 
 instance Semigroup (Key a) where
   k <> NoKey = k

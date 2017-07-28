@@ -120,8 +120,8 @@ rev Positive = Negative
 -- | A dart represents a bi-directed edge. I.e. a dart has a direction, however
 -- the dart of the oposite direction is always present in the planar graph as
 -- well.
-data Dart s = Dart { _arc       :: !(Arc s)
-                   , _direction :: !Direction
+data Dart s = Dart { _arc       :: {-#UNPACK #-} !(Arc s)
+                   , _direction :: {-#UNPACK #-} !Direction
                    } deriving (Eq,Ord)
 makeLenses ''Dart
 
