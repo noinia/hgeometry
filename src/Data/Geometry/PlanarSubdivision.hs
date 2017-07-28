@@ -11,9 +11,11 @@ module Data.Geometry.PlanarSubdivision( VertexId', FaceId'
 
                                       , PlanarSubdivision(PlanarSubdivision), graph
                                       , PolygonFaceData(..)
+                                      , PlanarGraph
                                       , fromPolygon, fromConnectedSegments
 
                                       , numVertices, numEdges, numFaces, numDarts
+                                      , dual
 
                                       , vertices', vertices
                                       , edges', edges
@@ -55,7 +57,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (mapMaybe)
 import           Data.Ord (comparing)
-import           Data.PlanarGraph( PlanarGraph, planarGraph
+import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , Dart(..), VertexId(..), FaceId(..), Arc(..)
                                  , Direction(..), twin
                                  , World(..))
@@ -112,6 +114,7 @@ makeLenses ''PlanarSubdivision
 
 instance Functor (PlanarSubdivision s v e f) where
   fmap f s = s&graph.PG.vertexData.traverse.location %~ fmap f
+
 
 
 --------------------------------------------------------------------------------

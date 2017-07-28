@@ -42,7 +42,6 @@ module Data.PlanarGraph( Arc(..)
 
 import           Control.Applicative (Alternative(..))
 import           Control.Lens
-import           Control.Monad (forM_)
 import           Control.Monad.ST (ST)
 import           Control.Monad.State.Strict
 import           Data.Bifunctor
@@ -53,13 +52,13 @@ import           Data.Maybe (catMaybes, isJust)
 import           Data.Permutation
 import           Data.Semigroup (Semigroup(..))
 import           Data.Traversable (fmapDefault,foldMapDefault)
-import           Data.Util
+import           Data.Type.Equality(gcastWith, (:~:)(..))
+import           Unsafe.Coerce(unsafeCoerce)
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -163,6 +162,12 @@ type family Dual (sp :: World) where
   Dual Primal_ = Dual_
   Dual Dual_   = Primal_
 
+dualDualIdentity :: forall w. Dual (Dual w) :~: w
+dualDualIdentity = unsafeCoerce Refl
+          -- manual proof:
+          --    Dual (Dual Primal_) = Primal_
+          --    Dual (Dual Dual_)   = Dual_
+
 
 -- | A vertex in a planar graph. A vertex is tied to a particular planar graph
 -- by the phantom type s, and to a particular world w.
@@ -189,20 +194,69 @@ data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutatio
                                                     , _vertexData  :: V.Vector v
                                                     , _rawDartData :: V.Vector e
                                                     , _faceData    :: V.Vector f
+                                                    , _dual        :: PlanarGraph s (Dual w) f e v
                                                     }
                                       deriving (Show,Eq)
-makeLenses ''PlanarGraph
+
+-- ** Lenses and getters
+
+embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
+embedding = to _embedding
+
+vertexData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v' e f)
+                   (V.Vector v) (V.Vector v')
+vertexData = lens _vertexData (\g vD -> updateData (const vD) id id g)
+
+rawDartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
+                    (V.Vector e) (V.Vector e')
+rawDartData = lens _rawDartData (\g dD -> updateData id (const dD) id g)
+
+faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f')
+                 (V.Vector f) (V.Vector f')
+faceData = lens _faceData (\g fD -> updateData id id (const fD) g)
+
+dual :: Getter (PlanarGraph s w v e f) (PlanarGraph s (Dual w) f e v)
+dual = to _dual
 
 
 -- | lens to access the Dart Data
 dartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
-                 (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
-dartData = lens darts (\g xs -> g&rawDartData .~ reorderEdgeData xs)
+                (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
+dartData = lens darts (\g dD -> updateData id (const $ reorderEdgeData dD) id g)
 
 -- | edgeData is just an alias for 'dartData'
 edgeData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
                  (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
 edgeData = dartData
+
+-- | Helper function to update the data in a planar graph. Takes care to update
+-- both the data in the original graph as well as in the dual.
+updateData :: forall s w v e f v' e' f'
+           .  (V.Vector v -> V.Vector v')
+           -> (V.Vector e -> V.Vector e')
+           -> (V.Vector f -> V.Vector f')
+           -> PlanarGraph s w v  e  f
+           -> PlanarGraph s w v' e' f'
+updateData = gcastWith proof updateData'
+  where
+    proof :: Dual (Dual w) :~: w
+    proof = dualDualIdentity
+
+-- | The function that does the actual work for 'updateData'
+updateData'  :: (Dual (Dual w) ~ w)
+             => (V.Vector v -> V.Vector v')
+             -> (V.Vector e -> V.Vector e')
+             -> (V.Vector f -> V.Vector f')
+             -> PlanarGraph s w v  e  f
+             -> PlanarGraph s w v' e' f'
+updateData' fv fe ff (PlanarGraph em vtxData dData fData dg) = g'
+  where
+    vtxData' = fv vtxData
+    dData'   = fe dData
+    fData'   = ff fData
+
+    g'       = PlanarGraph em              vtxData' dData' fData'   dg'
+    dg'      = PlanarGraph (dg^.embedding) fData'   dData' vtxData' g'
 
 
 -- | Reorders the edge data to be in the right order to set edgeData
@@ -213,21 +267,23 @@ reorderEdgeData ds = V.create $ do
                                     MV.write v (fromEnum d) x
                                   pure v
 
+--------------------------------------------------------------------------------
+-- ** Constructing a Planar graph
 
 -- | Construct a planar graph
 planarGraph'      :: Permutation (Dart s) -> PlanarGraph s w () () ()
-planarGraph' perm = PlanarGraph perm vData eData fData
+planarGraph' perm = pg
   where
-    d = size perm
-    e = d `div` 2
-    v = V.length (perm^.orbits)
-    f = e - v + 2
+    pg = PlanarGraph perm vData eData fData (computeDual pg)
+        -- note the lazy calculation of computeDual that refers to pg itself
+    d  = size perm
+    e  = d `div` 2
+    v  = V.length (perm^.orbits)
+    f  = e - v + 2
 
     vData  = V.replicate v ()
     eData  = V.replicate d ()
     fData  = V.replicate f ()
-
-
 
 -- | Construct a planar graph, given the darts in cyclic order around each
 -- vertex.
@@ -349,6 +405,7 @@ assignArcs o = evalState (traverse f o) 0
 
 
 --------------------------------------------------------------------------------
+-- ** Convenience functions
 
 -- | Get the number of vertices
 --
@@ -528,17 +585,29 @@ endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 --                        , fromList [dart 1 "+1",dart 3 "-1",dart 2 "-1"]
 --                        , fromList [dart 4 "-1",dart 3 "+1",dart 5 "+1",dart 5 "-1"]
 --                        ]
---  in (dual myGraph)^.embedding.orbits == answer
+--  in (computeDual myGraph)^.embedding.orbits == answer
 -- :}
 -- True
 --
 -- running time: \(O(n)\).
-dual   :: PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
-dual g = let perm = g^.embedding
-         in PlanarGraph (cycleRep (elems perm) (apply perm . twin))
+computeDual :: forall s w v e f. PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
+computeDual = gcastWith proof computeDual'
+  where
+    proof :: Dual (Dual w) :~: w
+    proof = dualDualIdentity
+
+-- | Does the actual work for dualGraph
+computeDual'   :: (Dual (Dual w) ~ w)
+               => PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
+computeDual' g = dualG
+  where
+    perm  = g^.embedding
+    dualG = PlanarGraph (cycleRep (elems perm) (apply perm . twin))
                         (g^.faceData)
                         (g^.rawDartData)
                         (g^.vertexData)
+                        g
+
 
 -- | A face
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (Dual w) } deriving (Eq,Ord)
@@ -548,7 +617,7 @@ instance Show (FaceId s w) where
 
 -- | Enumerate all faces in the planar graph
 faces' :: PlanarGraph s w v e f -> V.Vector (FaceId s w)
-faces' = fmap FaceId . vertices' . dual
+faces' = fmap FaceId . vertices' . _dual
 
 -- | All faces with their face data.
 faces   :: PlanarGraph s w v e f -> V.Vector (FaceId s w, f)
@@ -567,7 +636,7 @@ faces g = V.zip (faces' g) (g^.faceData)
 --
 -- running time: \(O(1)\).
 leftFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
-leftFace d g = FaceId . headOf d $ dual g
+leftFace d g = FaceId . headOf d $ _dual g
 
 
 -- | The face to the right of the dart
@@ -583,7 +652,7 @@ leftFace d g = FaceId . headOf d $ dual g
 --
 -- running time: \(O(1)\).
 rightFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
-rightFace d g = FaceId . tailOf d $ dual g
+rightFace d g = FaceId . tailOf d $ _dual g
 
 
 -- | The darts bounding this face, for internal faces in clockwise order, for
@@ -592,7 +661,7 @@ rightFace d g = FaceId . tailOf d $ dual g
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
-boundary (FaceId v) g = incidentEdges v $ dual g
+boundary (FaceId v) g = incidentEdges v $ _dual g
 
 
 -- | The vertices bounding this face, for internal faces in clockwise order, for
