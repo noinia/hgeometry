@@ -92,7 +92,7 @@ toPlanarSubdivision px tr = PlanarSubdivision g
 --
 -- running time: \(O(n\log n)\).
 toPlaneGraph    :: forall proxy s p r.
-                   proxy s -> Triangulation p r -> PlaneGraph s Primal_ p () () r
+                   proxy s -> Triangulation p r -> PlaneGraph s Primal p () () r
 toPlaneGraph _ tr = g & vertexData .~ tr^.positions
   where
     g       = fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours

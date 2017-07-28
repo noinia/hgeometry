@@ -15,7 +15,7 @@ import           Data.Semigroup
 
 data TestG
 
-type Vertex = VertexId TestG Primal_
+type Vertex = VertexId TestG Primal
 
 -- | Report all adjacnecies from g missing in h
 missingAdjacencies     :: PlanarGraph s w v e f -> PlanarGraph s w v e f
@@ -59,15 +59,15 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
 --            u < v, to arcId's.
 -- - a: the next available unused arcID
 -- - x: the data value we are interested in computing
-type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
+type STR' s b = STR (SM.Map (VertexId s Primal,VertexId s Primal) Int) Int b
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- vertices should be given in counter clockwise order.
 --
 -- running time: $O(n \log n)$.
 fromAdjacencyListsOld      :: forall s f.(Foldable f, Functor f)
-                        => [(VertexId s Primal_, f (VertexId s Primal_))]
-                        -> PlanarGraph s Primal_ () () ()
+                        => [(VertexId s Primal, f (VertexId s Primal))]
+                        -> PlanarGraph s Primal () () ()
 fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
   where
     n    = sum . fmap length $ perm
@@ -77,7 +77,7 @@ fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
     -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
     -- vertex with its adjacent vertices into an Orbit
     toOrbit                     :: Foldable f
-                                => (VertexId s Primal_, f (VertexId s Primal_))
+                                => (VertexId s Primal, f (VertexId s Primal))
                                 -> STR' s [[Dart s]]
                                 -> STR' s [[Dart s]]
     toOrbit (u,vs) (STR m a dss) =
@@ -87,7 +87,7 @@ fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
 
     -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
     -- representing this edge.
-    toDart                    :: (VertexId s Primal_,VertexId s Primal_)
+    toDart                    :: (VertexId s Primal,VertexId s Primal)
                               -> STR' s [Dart s]
                               -> STR' s [Dart s]
     toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative

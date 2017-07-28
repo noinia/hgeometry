@@ -8,7 +8,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , World(..)
 
-                       , Dual
+                       , DualOf
 
                        , VertexId(..)
 
@@ -68,7 +68,7 @@ import           Debug.Trace
 -- >>> :{
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---     myGraph :: PlanarGraph Test Primal_ () String ()
+--     myGraph :: PlanarGraph Test Primal () String ()
 --     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")
@@ -156,17 +156,17 @@ instance Enum (Dart s) where
 
 
 -- | The world in which the graph lives
-data World = Primal_ | Dual_ deriving (Show,Eq)
+data World = Primal | Dual deriving (Show,Eq)
 
-type family Dual (sp :: World) where
-  Dual Primal_ = Dual_
-  Dual Dual_   = Primal_
+type family DualOf (sp :: World) where
+  DualOf Primal = Dual
+  DualOf Dual   = Primal
 
-dualDualIdentity :: forall w. Dual (Dual w) :~: w
+dualDualIdentity :: forall w. DualOf (DualOf w) :~: w
 dualDualIdentity = unsafeCoerce Refl
           -- manual proof:
-          --    Dual (Dual Primal_) = Primal_
-          --    Dual (Dual Dual_)   = Dual_
+          --    DualOf (DualOf Primal) = Primal
+          --    DualOf (DualOf Dual)   = Dual
 
 
 -- | A vertex in a planar graph. A vertex is tied to a particular planar graph
@@ -194,7 +194,7 @@ data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutatio
                                                     , _vertexData  :: V.Vector v
                                                     , _rawDartData :: V.Vector e
                                                     , _faceData    :: V.Vector f
-                                                    , _dual        :: PlanarGraph s (Dual w) f e v
+                                                    , _dual        :: PlanarGraph s (DualOf w) f e v
                                                     }
                                       deriving (Show,Eq)
 
@@ -215,7 +215,7 @@ faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f')
                  (V.Vector f) (V.Vector f')
 faceData = lens _faceData (\g fD -> updateData id id (const fD) g)
 
-dual :: Getter (PlanarGraph s w v e f) (PlanarGraph s (Dual w) f e v)
+dual :: Getter (PlanarGraph s w v e f) (PlanarGraph s (DualOf w) f e v)
 dual = to _dual
 
 
@@ -239,11 +239,11 @@ updateData :: forall s w v e f v' e' f'
            -> PlanarGraph s w v' e' f'
 updateData = gcastWith proof updateData'
   where
-    proof :: Dual (Dual w) :~: w
+    proof :: DualOf (DualOf w) :~: w
     proof = dualDualIdentity
 
 -- | The function that does the actual work for 'updateData'
-updateData'  :: (Dual (Dual w) ~ w)
+updateData'  :: (DualOf (DualOf w) ~ w)
              => (V.Vector v -> V.Vector v')
              -> (V.Vector e -> V.Vector e')
              -> (V.Vector f -> V.Vector f')
@@ -289,7 +289,7 @@ planarGraph' perm = pg
 -- vertex.
 --
 -- running time: \(O(n)\).
-planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal_ () e ()
+planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal () e ()
 planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
@@ -367,15 +367,15 @@ assignArcs o = evalState (traverse f o) 0
 -- --            u < v, to arcId's.
 -- -- - a: the next available unused arcID
 -- -- - x: the data value we are interested in computing
--- type STR' s b = STR (SM.Map (VertexId s Primal_,VertexId s Primal_) Int) Int b
+-- type STR' s b = STR (SM.Map (VertexId s Primal,VertexId s Primal) Int) Int b
 
 -- -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- -- vertices should be given in counter clockwise order.
 -- --
 -- -- running time: \(O(n \log n)\).
 -- fromAdjacencyLists      :: forall s.
---                            [(VertexId s Primal_, C.CList (VertexId s Primal_))]
---                         -> PlanarGraph s Primal_ () () ()
+--                            [(VertexId s Primal, C.CList (VertexId s Primal))]
+--                         -> PlanarGraph s Primal () () ()
 -- fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
 --   where
 --     n    = sum . fmap length $ adjM
@@ -384,7 +384,7 @@ assignArcs o = evalState (traverse f o) 0
 
 --     -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
 --     -- vertex with its adjacent vertices into an Orbit
---     toOrbit                     :: (VertexId s Primal_, C.CList (VertexId s Primal_))
+--     toOrbit                     :: (VertexId s Primal, C.CList (VertexId s Primal))
 --                                 -> STR' s [[Dart s]]
 --                                 -> STR' s [[Dart s]]
 --     toOrbit (u,vs) (STR m a dss) =
@@ -394,7 +394,7 @@ assignArcs o = evalState (traverse f o) 0
 
 --     -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
 --     -- representing this edge.
---     toDart                    :: (VertexId s Primal_,VertexId s Primal_)
+--     toDart                    :: (VertexId s Primal,VertexId s Primal)
 --                               -> STR' s [Dart s]
 --                               -> STR' s [Dart s]
 --     toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
@@ -590,15 +590,15 @@ endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
 -- True
 --
 -- running time: \(O(n)\).
-computeDual :: forall s w v e f. PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
+computeDual :: forall s w v e f. PlanarGraph s w v e f -> PlanarGraph s (DualOf w) f e v
 computeDual = gcastWith proof computeDual'
   where
-    proof :: Dual (Dual w) :~: w
+    proof :: DualOf (DualOf w) :~: w
     proof = dualDualIdentity
 
 -- | Does the actual work for dualGraph
-computeDual'   :: (Dual (Dual w) ~ w)
-               => PlanarGraph s w v e f -> PlanarGraph s (Dual w) f e v
+computeDual'   :: (DualOf (DualOf w) ~ w)
+               => PlanarGraph s w v e f -> PlanarGraph s (DualOf w) f e v
 computeDual' g = dualG
   where
     perm  = g^.embedding
@@ -610,7 +610,7 @@ computeDual' g = dualG
 
 
 -- | A face
-newtype FaceId s w = FaceId { _unFaceId :: VertexId s (Dual w) } deriving (Eq,Ord)
+newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) } deriving (Eq,Ord)
 
 instance Show (FaceId s w) where
   show (FaceId (VertexId i)) = "FaceId " ++ show i
@@ -697,7 +697,7 @@ boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 
 data Test
 
--- testG :: PlanarGraph Test Primal_ () String ()
+-- testG :: PlanarGraph Test Primal () String ()
 -- testG = planarGraph' [ [ (Dart aA Negative, "a-")
 --                        , (Dart aC Positive, "c+")
 --                        , (Dart aB Positive, "b+")
@@ -848,7 +848,7 @@ findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
 
 data TestG
 
-type Vertex = VertexId TestG Primal_
+type Vertex = VertexId TestG Primal
 
 testEdges :: [(Vertex,[Vertex])]
 testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))

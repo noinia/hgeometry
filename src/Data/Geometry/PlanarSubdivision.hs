@@ -70,9 +70,9 @@ import Debug.Trace
 
 --------------------------------------------------------------------------------
 
-type VertexId' s = VertexId s Primal_
+type VertexId' s = VertexId s Primal
 
-type FaceId' s = FaceId s Primal_
+type FaceId' s = FaceId s Primal
 
 -- | Note that the functor instance is in v
 data VertexData r v = VertexData { _location :: !(Point 2 r)
@@ -108,7 +108,7 @@ makeLenses ''FaceData
 
 
 newtype PlanarSubdivision s v e f r = PlanarSubdivision { _graph ::
-    PlanarGraph s Primal_ (VertexData r v) (EdgeData e) (FaceData (Dart s) f) }
+    PlanarGraph s Primal (VertexData r v) (EdgeData e) (FaceData (Dart s) f) }
       deriving (Show,Eq)
 makeLenses ''PlanarSubdivision
 
@@ -148,7 +148,7 @@ fromPolygon p (SimplePolygon vs) iD oD = PlanarSubdivision g'
 
 fromVertices      :: proxy s
                   -> C.CSeq (Point 2 r :+ p)
-                  -> PlanarGraph s Primal_ (VertexData r p) () ()
+                  -> PlanarGraph s Primal (VertexData r p) () ()
 fromVertices _ vs = g&PG.vertexData .~ vData'
   where
     n = length vs
@@ -178,7 +178,7 @@ fromConnectedSegments px ss = PlanarSubdivision $
 fromConnectedSegments'      :: (Foldable f, Ord r, Num r)
                             => proxy s
                             -> f (LineSegment 2 p r :+ e)
-                            -> PlanarGraph s Primal_
+                            -> PlanarGraph s Primal
                                   (VertexData r (NonEmpty.NonEmpty p)) e ()
 fromConnectedSegments' _ ss = planarGraph dts & PG.vertexData .~ vxData
   where

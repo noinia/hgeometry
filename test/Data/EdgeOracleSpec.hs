@@ -11,7 +11,7 @@ import           Test.Hspec
 
 data TestG
 
-type Vertex = VertexId TestG Primal_
+type Vertex = VertexId TestG Primal
 
 
 testEdges :: [(Vertex,[Vertex])]
@@ -24,7 +24,7 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (5, [3,4])
             ]
 
-buildEdgeOracle'  :: [(Vertex,[Vertex])] -> EdgeOracle TestG Primal_ ()
+buildEdgeOracle'  :: [(Vertex,[Vertex])] -> EdgeOracle TestG Primal ()
 buildEdgeOracle' = buildEdgeOracle . map (second $ fmap ext)
 
 -- | Flattens an adjacencylist representation into a set of edges
