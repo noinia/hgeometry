@@ -26,11 +26,15 @@ triangulate px pg = constructSubdivision px e es diags
 
     monotoneDiags = map (^._2.core) . filter (\e' -> e'^._2.extra == Diagonal)
                   . edgeSegments $ monotoneP
-    extraDiags    = concatMap (TM.computeDiagonals . toCounterClockWiseOrder)
+    extraDiags    = concatMap (TM.computeDiagonals . toCounterClockWiseOrder')
                   . lefts . map (^._2.core)
                   . filter (\f -> f^._1 /= outerFaceId')
                   . F.toList . rawFacePolygons $ monotoneP
     diags         = monotoneDiags <> extraDiags
+
+    -- we alredy know we get the polgyons in *clockwise* order, so skip the
+    -- check if it is counter clockwise
+    toCounterClockWiseOrder' = reverseOuterBoundary
 
     -- just to make sure that the proxies have different types
 wrap :: a -> Identity a

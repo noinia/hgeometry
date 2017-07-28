@@ -347,14 +347,18 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
 -- | Orient the outer boundary to clockwise order
 toClockwiseOrder         :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder p
-  | isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
+  | isCounterClockwise p = reverseOuterBoundary p
   | otherwise            = p
 
 -- | Orient the outer boundary to counter clockwise order
 toCounterClockWiseOrder    :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder p
-  | not $ isCounterClockwise p = p&outerBoundary %~ C.reverseDirection
+  | not $ isCounterClockwise p = reverseOuterBoundary p
   | otherwise                  = p
+
+reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
+reverseOuterBoundary p = p&outerBoundary %~ C.reverseDirection
+
 
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.
 asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
