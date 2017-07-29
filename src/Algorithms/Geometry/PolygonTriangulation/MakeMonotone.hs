@@ -18,6 +18,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
+import           Data.Geometry.Vector(Arity, Index')
 import           Data.Geometry.Polygon
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
@@ -103,7 +104,6 @@ p `cmpSweep` q =
 
 --------------------------------------------------------------------------------
 
-
 type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
 
 data StatusStruct r = SS { _statusStruct :: !(SS.OrdSeq (LineSegment 2 Int r))
@@ -148,11 +148,6 @@ findDiagonals p' = map f . sweep
     sweep'' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
     sweep'' = mapM_ handle
 
-
-
-
-
-
 -- | Computes a set of diagionals that decompose the polygon into y-monotone
 -- pieces.
 --
@@ -170,8 +165,6 @@ type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
 type VertexInfo p r = STR (Point 2 r) p VertexType
 
 
--- type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
-
 tell' :: LineSegment 2 Int r -> Sweep p r ()
 tell' = tell . DList.singleton
 
@@ -185,7 +178,6 @@ getEventType :: Event r -> Sweep p r VertexType
 getEventType = getVertexType . getIdx
 
 handle   :: (Fractional r, Ord r, Show r, Show p) => Event r -> Sweep p r ()
--- handle e | traceShow ("Handle ", e) False = undefined
 handle e = let i = getIdx e in getEventType e >>= \case
     Start   -> handleStart   i e
     End     -> handleEnd     i e
@@ -195,21 +187,23 @@ handle e = let i = getIdx e in getEventType e >>= \case
             | otherwise        -> handleRegularR i e
 
 
-insertAt       :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
-               -> OrdSeq (LineSegment 2 q r) -> OrdSeq (LineSegment 2 q r)
+insertAt   :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
+           -> OrdSeq (LineSegment 2 q r) -> OrdSeq (LineSegment 2 q r)
 insertAt v = SS.insertBy (ordAt $ v^.yCoord)
 
+deleteAt   :: (Fractional r, Ord r) => Point 2 r -> LineSegment 2 p r
+           -> OrdSeq (LineSegment 2 p r) -> OrdSeq (LineSegment 2 p r)
 deleteAt v = SS.deleteAllBy (ordAt $ v^.yCoord)
 
-  -- SS.delete e $ t { SS.nav = ordAtNav (v^.yCoord) }
 
-
-handleStart              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
+handleStart              :: (Fractional r, Ord r)
+                         => Int -> Event r -> Sweep p r ()
 handleStart i (v :+ adj) = modify $ \(SS t h) ->
                                 SS (insertAt v (adj^._2) t)
                                    (IntMap.insert i i h)
 
-handleEnd              :: (Fractional r, Ord r, Show r, Show p) => Int -> Event r -> Sweep p r ()
+handleEnd              :: (Fractional r, Ord r, Show r, Show p)
+                       => Int -> Event r -> Sweep p r ()
 handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             -- lookup p's helper; if it is a merge vertex
                             -- we insert a new segment
@@ -218,9 +212,8 @@ handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             modify $ \ss ->
                               ss&statusStruct %~ deleteAt v (adj^._1)
 
-
-
 -- | Adds edge (i,j) if e_j's helper is a merge vertex
+tellIfMerge       :: Int -> Point 2 r -> Int -> Sweep p r ()
 tellIfMerge i v j = do SP u ut <- getHelper j
                        when (ut == Merge) (tell' $ ClosedLineSegment (v :+ i) u)
 
@@ -229,7 +222,6 @@ getHelper   :: Int -> Sweep p r (SP (Point 2 r :+ Int) VertexType)
 getHelper i = do Just ui    <- gets (^.helper.at i)
                  STR u _ ut <- asks (^.ix' ui)
                  pure $ SP (u :+ ui) ut
-
 
 
 lookupLE     :: (Ord r, Fractional r)
@@ -252,6 +244,7 @@ handleSplit i (v :+ adj) = do Just ej <- gets $ \ss -> ss^.statusStruct.to (look
                               -- return the diagonal
                               tell' $ ClosedLineSegment (v :+ i) u
 
+handleMerge              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
 handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                               tellIfMerge i v ePred
                               -- delete e_{i-1} from the status struct
@@ -260,19 +253,20 @@ handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
 
 -- | finds the edge j to the left of v_i, and connect v_i to it if the helper
 -- of j is a merge vertex
+connectToLeft     :: (Fractional r, Ord r) => Int -> Point 2 r -> Sweep p r ()
 connectToLeft i v = do Just ej <- gets $ \ss -> ss^.statusStruct.to (lookupLE v)
                        let j = ej^.start.extra
                        tellIfMerge i v j
                        modify $ \ss -> ss&helper %~ IntMap.insert j i
 
-
 -- | returns True if v the interior of the polygon is to the right of v
+isLeftVertex              :: Ord r => Int -> Event r -> Bool
 isLeftVertex i (v :+ adj) = case (adj^._1.start) `cmpSweep` (v :+ i) of
                               GT -> True
                               _  -> False
   -- if the predecessor occurs before the sweep, this must be a left vertex
 
--- handleRegularL i (v :+ adj) | traceShow ("regularL ", (i,v,adj)) False = undefined
+handleRegularL              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
 handleRegularL i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                                  tellIfMerge i v ePred
                                  -- delete e_{i-1} from the status struct
@@ -284,7 +278,7 @@ handleRegularL i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
                                      SS (insertAt v (adj^._2) t)
                                         (IntMap.insert i i h)
 
-
+handleRegularR            :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
 handleRegularR i (v :+ _) = connectToLeft i v
 
 
@@ -314,13 +308,13 @@ handleRegularR i (v :+ _) = connectToLeft i v
 -- vertexTypes = [Start,Merge,Start,Merge,Start,Regular,Regular,Merge,Start,Regular,End,Split,End,Split,End]
 
 
-loadT = do pgs <- readAllFrom "/Users/frank/tmp/testPoly.ipe"
-                        :: IO [SimplePolygon () Rational :+ IpeAttributes Path Rational]
-           mapM_ print pgs
-           let diags = map (findDiagonals . (^.core)) pgs
-               f = asIpeGroup . map (asIpeObject' mempty)
-               out = [ asIpeGroup $ map (\(pg :+ a) -> asIpeObject pg a) pgs
-                     , asIpeGroup $ map f diags
-                     ]
-               outFile = "/Users/frank/tmp/out.ipe"
-           writeIpeFile outFile . singlePageFromContent $ out
+-- loadT = do pgs <- readAllFrom "/Users/frank/tmp/testPoly.ipe"
+--                         :: IO [SimplePolygon () Rational :+ IpeAttributes Path Rational]
+--            mapM_ print pgs
+--            let diags = map (findDiagonals . (^.core)) pgs
+--                f = asIpeGroup . map (asIpeObject' mempty)
+--                out = [ asIpeGroup $ map (\(pg :+ a) -> asIpeObject pg a) pgs
+--                      , asIpeGroup $ map f diags
+--                      ]
+--                outFile = "/Users/frank/tmp/out.ipe"
+--            writeIpeFile outFile . singlePageFromContent $ out

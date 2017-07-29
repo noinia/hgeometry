@@ -196,7 +196,21 @@ data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutatio
                                                     , _faceData    :: V.Vector f
                                                     , _dual        :: PlanarGraph s (DualOf w) f e v
                                                     }
-                                      deriving (Show,Eq)
+
+instance (Show v, Show e, Show f) => Show (PlanarGraph s w v e f) where
+  show (PlanarGraph e v r f _) = unwords [ "PlanarGraph"
+                                         , "embedding =", show e
+                                         , ", vertexData =", show v
+                                         , ", rawDartData =", show r
+                                         , ", faceData =", show f
+                                         ]
+
+instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
+  (PlanarGraph e v r f _) == (PlanarGraph e' v' r' f' _) =  e == e' && v == v'
+                                                         && r == r' && f == f'
+
+
+
 
 -- ** Lenses and getters
 
