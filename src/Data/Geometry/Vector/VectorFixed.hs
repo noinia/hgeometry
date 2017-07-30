@@ -13,6 +13,7 @@ import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
 import           Linear.Metric
 import qualified Linear.V3 as L3
+import qualified Linear.V2 as L2
 import           Linear.Vector
 
 --------------------------------------------------------------------------------
@@ -117,6 +118,10 @@ u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
 
 
 --------------------------------------------------------------------------------
+
+-- | Vonversion to a Linear.V2
+toV2                :: Vector 2 a -> L2.V2 a
+toV2 ~(Vector2 a b) = L2.V2 a b
 
 -- | Conversion to a Linear.V3
 toV3                  :: Vector 3 a -> L3.V3 a
