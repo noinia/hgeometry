@@ -253,7 +253,7 @@ library
 executable hgeometry-viewer
   if !flag(interactive)
     buildable: False
-  main-is: Main.hs
+  main-is: CairoSimple.hs
 
   if flag(interactive)
     build-depends: base
@@ -273,6 +273,19 @@ executable hgeometry-viewer
                  , vector
                  , sdl2-cairo             >= 0.1.0.3
                  , sdl2                   >= 2.2.0
+                 , gi-gtk                 >= 3.0.15
+                 , reactive-banana-gi-gtk >= 0.2.0.0
+                 , cairo                  >= 0.13.3.1
+                 , gi-glib
+                 , gi-cairo
+                 , gi-gdk
+                 , gi-gdkpixbuf
+                 , gi-gtk
+                 , transformers
+                 , linear
+                 , haskell-gi-base
+                 , reactive-banana        >= 1.1.0.1
+
 
 
   hs-source-dirs: interactive
