@@ -8,25 +8,26 @@ import           Control.Monad (forM_)
 import           Control.Monad.IO.Class (MonadIO)
 import           Control.Monad.Trans.Reader (runReaderT)
 import           Data.GI.Base
+import           Data.GI.Base.Signals (SignalInfo, HaskellCallbackType)
+import           Data.IORef
 import qualified Data.Text as T
 import           Foreign.Ptr (castPtr)
 import qualified GI.Cairo as GI.Cairo
 import qualified GI.GLib as GLib
-import qualified GI.Gtk as Gtk
 import qualified GI.Gdk as Gdk
+import qualified GI.Gtk as Gtk
 import           Graphics.Rendering.Cairo
 import qualified Graphics.Rendering.Cairo.Internal as Cairo.Internal
 import           Graphics.Rendering.Cairo.Types (Cairo(Cairo))
 import           Reactive.Banana
 import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
-import           Data.GI.Base.Signals(SignalInfo, HaskellCallbackType)
 
-import Data.Geometry.Point
+import           Data.Geometry.Point
 
 import qualified SDL.Cairo.Canvas as Canvas
-import SDL.Cairo.Canvas(Canvas)
-import Linear.V2(V2(..))
+import           SDL.Cairo.Canvas (Canvas)
+import           Linear.V2 (V2(..))
 --------------------------------------------------------------------------------
 
 -- | This function bridges gi-cairo with the hand-written cairo
@@ -68,18 +69,43 @@ newtype MouseMotionData = MouseMotionData (Point 2 Double)
 
 
 
-drawE                      :: Gtk.DrawingArea
-                           -> (Gtk.DrawingArea -> Canvas a)
-                           -> MomentIO (Event a)
-drawE drawingArea renderer = signalE1' drawingArea #draw $ \context -> do
-    width  <- realToFrac . fromIntegral <$> #getAllocatedWidth  drawingArea
-    height <- realToFrac . fromIntegral <$> #getAllocatedHeight drawingArea
-    renderCanvas context (V2 width height) (renderer drawingArea)
+
+
+draw                :: Gtk.DrawingArea -> Behavior (Canvas ()) -> MomentIO ()
+draw drawingArea bc = do
+    canvasRef <- liftIO $ newIORef blankCanvas
+
+    c <- valueBLater bc
+    liftIOLater $ writeIORef canvasRef c
+    e <- changes bc
+    reactimate' $ (fmap $ \c' -> do liftIO $ writeIORef canvasRef c'
+                                    #queueDraw drawingArea
+                  ) <$> e
+
+    _ <- on drawingArea #draw $ \context -> do
+        w <- realToFrac . fromIntegral <$> #getAllocatedWidth  drawingArea
+        h <- realToFrac . fromIntegral <$> #getAllocatedHeight drawingArea
+        canvas <- readIORef canvasRef
+        renderCanvas context (V2 w h) canvas
+        pure True
+    pure ()
+  where
+    blankCanvas = do Canvas.background $ Canvas.gray 255
+
+
+-- drawE                      :: Gtk.DrawingArea
+--                            -> (Gtk.DrawingArea -> Canvas a)
+--                            -> MomentIO (Event a)
+-- drawE drawingArea renderer = signalE1' drawingArea #draw $ \context -> do
+--     width  <- realToFrac . fromIntegral <$> #getAllocatedWidth  drawingArea
+--     height <- realToFrac . fromIntegral <$> #getAllocatedHeight drawingArea
+--     renderCanvas context (V2 width height) (renderer drawingArea)
 
 
 -- drawE                     :: Gtk.DrawingArea -> Render a -> MomentIO a
 -- drawE drawingArea renderer = signalE1' canvas #draw $ \context ->
 --                                renderWithContext context (renderer drawingArea)
+
 
 networkDescription :: MomentIO ()
 networkDescription = do
@@ -92,13 +118,24 @@ networkDescription = do
 
     mouseLabel <- castB b "mouseLabel" Gtk.Label
 
+    colorButton       <- castB b "colorButton" Gtk.Button
+    pressedE          <- signalE0 colorButton #clicked
+    colorButtonStateB <- accumB False (not <$ pressedE)
+
+
+
     drawingArea   <- castB b "canvas" Gtk.DrawingArea
 
     Gtk.widgetAddEvents drawingArea (gflagsToWord [ Gdk.EventMaskPointerMotionMask
                                                   , Gdk.EventMaskButtonPressMask
                                                   ])
 
-    canvasE <- drawE drawingArea updateCanvas'
+
+
+    draw drawingArea (updateCanvas colorButtonStateB)
+
+
+    -- canvasE <- drawE drawingArea updateCanvas'
 
     mouseMotionE <- signalE1' drawingArea #motionNotifyEvent $ \e -> do
                       x <- Gdk.getEventMotionX e
@@ -166,8 +203,18 @@ runGtk = do
 main :: IO ()
 main = runGtk `catch` (\(e::Gtk.GError) -> Gtk.gerrorMessage e >>= putStrLn . T.unpack)
 
-updateCanvas'             :: Gtk.DrawingArea -> Canvas ()
-updateCanvas' drawingArea = do
+
+
+updateCanvas :: Behavior Bool -> Behavior (Canvas ())
+updateCanvas = fmap f
+  where
+    f True  = updateCanvas'
+    f False = drawBlue
+
+
+
+updateCanvas'             :: Canvas ()
+updateCanvas'  = do
     Canvas.background $ Canvas.rgb 255 255 255
     Canvas.stroke $ Canvas.gray 10
     Canvas.fill $ Canvas.red 255
@@ -177,53 +224,6 @@ updateCanvas' drawingArea = do
     Canvas.line (V2 10 10) (V2 (25+frames) (25+frames))
 
 
-updateCanvas        :: Gtk.DrawingArea -> Render ()
-updateCanvas canvas = do
-    width'  <- fromIntegral <$> #getAllocatedWidth  canvas
-    height' <- fromIntegral <$> #getAllocatedHeight canvas
-    let width  = realToFrac width'
-        height = realToFrac height'
-
-    setSourceRGB 1 0 0
-    setLineWidth 20
-    setLineCap LineCapRound
-    setLineJoin LineJoinRound
-
-    moveTo 30 30
-    lineTo (width-30) (height-30)
-    lineTo (width-30) 30
-    lineTo 30 (height-30)
-    stroke
-
-    setSourceRGB 1 1 0
-    setLineWidth 4
-
-    save
-    translate (width / 2) (height / 2)
-    scale (width / 2) (height / 2)
-    arc 0 0 1 (135 * pi/180) (225 * pi/180)
-    restore
-    stroke
-
--- main' = do
---     window <- new Gtk.Window [ #title          := "Haskell-gi Cairo"
---                              , #defaultWidth   := 800
---                              , #defaultHeight  := 600
---                              ]
---     canvas <- Gtk.drawingAreaNew
---     -- on canvas Gtk.sizeRequest $ return (Gtk.Requisition 800 600)
-
---     set window [Gtk.containerChild := canvas]
-
---     on canvas #draw $ \context -> do
---       width <- fromIntegral  <$> #getAllocatedWidth  window
---       height <- fromIntegral <$> #getAllocatedHeight window
---       renderWithContext context (updateCanvas canvas width height)
---       return True
-
---     #showAll window
-
--- main = do
---     _ <- Gtk.init Nothing
---     main'
---     Gtk.main
+drawBlue   :: Canvas ()
+drawBlue = do
+    Canvas.background $ Canvas.blue 250
