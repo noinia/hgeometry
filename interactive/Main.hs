@@ -132,19 +132,18 @@ networkDescription = do
                                                   ])
 
 
-
-    draw drawingArea (updateCanvas colorButtonStateB)
-
-
     -- canvasE <- drawE drawingArea updateCanvas'
 
     mouseMotionE <- signalE1' drawingArea #motionNotifyEvent $ \e -> do
                       x <- Gdk.getEventMotionX e
                       y <- Gdk.getEventMotionY e
-                      return (x,y)
+                      return $! V2 x y
 
-    mouseMotionB  <- stepper ""                (showT <$> mouseMotionE)
-    sink mouseLabel   [#label :== mouseMotionB]
+    mouseMotionB  <- stepper (V2 0 0) mouseMotionE
+    -- sink mouseLabel   [#label :== mouseMotionB]
+
+
+    draw drawingArea (followMouse mouseMotionB)
 
 
 
@@ -205,6 +204,13 @@ main :: IO ()
 main = runGtk `catch` (\(e::Gtk.GError) -> Gtk.gerrorMessage e >>= putStrLn . T.unpack)
 
 
+followMouse :: Behavior (V2 Double) -> Behavior (Canvas ())
+followMouse = fmap $ \pos -> do
+    Canvas.background $ Canvas.blue 255
+    Canvas.stroke $ Canvas.red 250
+    Canvas.circle' pos 100
+
+
 
 updateCanvas :: Behavior Bool -> Behavior (Canvas ())
 updateCanvas = fmap f
@@ -223,6 +229,12 @@ updateCanvas'  = do
     let frames = 20
 
     Canvas.line (V2 10 10) (V2 (25+frames) (25+frames))
+
+    img <- Canvas.grab (Canvas.D 0 0 300 300)
+    Canvas.image img (V2 350 0)
+
+
+
 
 
 drawBlue   :: Canvas ()
