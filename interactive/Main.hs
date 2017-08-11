@@ -73,8 +73,10 @@ newtype MouseMotionData = MouseMotionData (Point 2 Double)
 
 draw                :: Gtk.DrawingArea -> Behavior (Canvas ()) -> MomentIO ()
 draw drawingArea bc = do
-    canvasRef <- liftIO $ newIORef blankCanvas
+    canvasRef <- liftIO . newIORef =<< valueB bc -- gets the initial canvas
 
+    -- set up reactive-banana to update the canvasRef on changes, and triger a
+    -- redraw
     c <- valueBLater bc
     liftIOLater $ writeIORef canvasRef c
     e <- changes bc
@@ -82,6 +84,7 @@ draw drawingArea bc = do
                                     #queueDraw drawingArea
                   ) <$> e
 
+    -- registers drawing event handler
     _ <- on drawingArea #draw $ \context -> do
         w <- realToFrac . fromIntegral <$> #getAllocatedWidth  drawingArea
         h <- realToFrac . fromIntegral <$> #getAllocatedHeight drawingArea
@@ -89,8 +92,6 @@ draw drawingArea bc = do
         renderCanvas context (V2 w h) canvas
         pure True
     pure ()
-  where
-    blankCanvas = do Canvas.background $ Canvas.gray 255
 
 
 -- drawE                      :: Gtk.DrawingArea
