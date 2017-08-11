@@ -1,12 +1,13 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE InstanceSigs  #-}
 module Data.Geometry.Box.Internal where
 
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
-import           Frames.CoRec (asA)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -18,8 +19,9 @@ import qualified Data.Range as R
 import           Data.Semigroup
 import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
-import           GHC.TypeLits
+import           Frames.CoRec (asA)
 import           GHC.Generics (Generic)
+import           GHC.TypeLits
 
 
 --------------------------------------------------------------------------------
@@ -85,7 +87,12 @@ instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
       f = maybe (coRec NoIntersection) (coRec . fromExtent)
       r `intersect'` s = asA (Proxy :: Proxy (R.Range r)) $ r `intersect` s
 
-
+instance Arity d => Bifunctor (Box d) where
+  bimap :: forall p q r s. (p -> q) -> (r -> s) -> Box d p r -> Box d q s
+  bimap f g (Box mi ma) = Box (bimap g' f mi) (bimap g' f ma)
+    where
+      g' :: Functor g => g (Point d r) -> g (Point d s)
+      g' = fmap (fmap g)
 
 -- -- In principle this should also just work for Boxes in higher dimensions. It is just
 -- -- that we need a better way to compute their corners
