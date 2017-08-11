@@ -68,7 +68,10 @@ deriving instance Ord  (Apply f label) => Ord  (Attr f label)
 
 makeLenses ''Attr
 
+pattern Attr   :: Apply f label -> Attr f label
 pattern Attr x = GAttr (Just x)
+
+pattern NoAttr :: Attr f label
 pattern NoAttr = GAttr Nothing
 
 -- | Give pref. to the *RIGHT*
