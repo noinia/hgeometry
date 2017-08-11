@@ -30,7 +30,7 @@ import           Data.Bifunctor
 import           Data.Semigroup
 import           Data.Ext
 import           Data.Geometry.Box.Internal
-import           Data.Geometry.Interval
+import           Data.Geometry.Interval hiding (width)
 import           Data.Geometry.Line.Internal
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
