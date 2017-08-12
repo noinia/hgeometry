@@ -199,7 +199,7 @@ ipePolygon :: IpeOut (Polygon t p r) (Path r)
 ipePolygon = IpeOut $ io . first (const ())
   where
     io                       :: forall t r. Polygon t () r -> Path r
-    io pg@(SimplePolygon vs) = pg^.re _asSimplePolygon
+    io pg@(SimplePolygon _)  = pg^.re _asSimplePolygon
     io pg@(MultiPolygon _ _) = pg^.re _asMultiPolygon
 
 

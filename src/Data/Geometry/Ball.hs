@@ -42,7 +42,7 @@ radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
 
 
 deriving instance (Show r, Show p, Arity d)     => Show (Ball d p r)
--- deriving instance (NFData p, NFData r, Arity d) => NFData (Ball d p r)
+instance (NFData p, NFData r, Arity d) => NFData (Ball d p r)
 deriving instance (Eq r, Eq p, Arity d)         => Eq (Ball d p r)
 
 type instance NumType   (Ball d p r) = r

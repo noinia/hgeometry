@@ -18,13 +18,11 @@ import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
-import           Data.Geometry.Vector(Arity, Index')
 import           Data.Geometry.Polygon
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing, Down(..))
-import           Data.OrdSeq (Compare, OrdSeq)
-import qualified Data.OrdSeq as OS
+import           Data.OrdSeq (OrdSeq)
 import qualified Data.OrdSeq as SS
 import           Data.Semigroup
 import           Data.Util
@@ -32,15 +30,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
 
-import           Data.Geometry.Ipe
-import           Debug.Trace
-
--- import Unsafe.Coerce
--- import Data.Coerce
--- import Data.Proxy
--- import Data.Reflection
--- import qualified Data.Map as Map
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
 
