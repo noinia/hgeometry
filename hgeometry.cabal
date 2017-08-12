@@ -253,7 +253,7 @@ library
 executable hgeometry-viewer
   if !flag(interactive)
     buildable: False
-  main-is: Main.hs
+  main-is: ConvexHull.hs
 
   if flag(interactive)
     build-depends: base
@@ -276,10 +276,10 @@ executable hgeometry-viewer
                  , gi-gtk                 >= 3.0.15
                  , reactive-banana-gi-gtk >= 0.2.0.0
                  , cairo                  >= 0.13.3.1
-                 , gi-glib
+                 -- , gi-glib
                  , gi-cairo
                  , gi-gdk
-                 , gi-gdkpixbuf
+                 -- , gi-gdkpixbuf
                  , gi-gtk
                  , transformers
                  , linear
@@ -291,6 +291,8 @@ executable hgeometry-viewer
   hs-source-dirs: interactive
 
   other-modules: RenderCanvas
+                 RenderUtil
+                 -- ConvexHull
 
   default-language: Haskell2010
 
