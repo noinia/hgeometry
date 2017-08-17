@@ -6,6 +6,7 @@ module Data.Geometry.Ipe.Writer where
 import           Control.Lens ((^.),(^..),(.~),(&), to)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
+import           Data.Colour.SRGB (RGB(..))
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
@@ -26,16 +27,15 @@ import           Data.Ratio
 import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import           Data.Singletons
+import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text as Text
-import           Data.Text (Text)
 import           Data.Vinyl
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 import           System.IO (hPutStrLn,stderr)
 import           Text.XML.Expat.Format (format')
 import           Text.XML.Expat.Tree
-
 --------------------------------------------------------------------------------
 
 -- | Given a prism to convert something of type g into an ipe file, a file path,
@@ -174,9 +174,12 @@ instance IpeWriteText PinType where
   ipeWriteText Horizontal = Just "h"
   ipeWriteText Vertical   = Just "v"
 
+instance IpeWriteText r => IpeWriteText (RGB r) where
+  ipeWriteText (RGB r g b) = unwords' . map ipeWriteText $ [r,g,b]
+
 deriving instance IpeWriteText r => IpeWriteText (IpeSize  r)
 deriving instance IpeWriteText r => IpeWriteText (IpePen   r)
-deriving instance IpeWriteText IpeColor
+deriving instance IpeWriteText r => IpeWriteText (IpeColor r)
 
 instance IpeWriteText r => IpeWriteText (IpeDash r) where
   ipeWriteText (DashNamed t) = Just t

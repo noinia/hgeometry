@@ -161,9 +161,9 @@ type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
   AttrMap r Pin             = PinType
   AttrMap r Transformations = TransformationTypes
 
-  AttrMap r Stroke = IpeColor
+  AttrMap r Stroke = IpeColor r
   AttrMap r Pen    = IpePen r
-  AttrMap r Fill   = IpeColor
+  AttrMap r Fill   = IpeColor r
   AttrMap r Size   = IpeSize r
 
   AttrMap r Dash     = IpeDash r

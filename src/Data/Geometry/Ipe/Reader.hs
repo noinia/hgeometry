@@ -26,13 +26,15 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                , Coordinate(..)
                                ) where
 
+import           Control.Applicative((<|>))
 import           Control.Lens hiding (Const, rmap)
 import qualified Data.ByteString as B
+import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.ParserPrimitives (pInteger)
+import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
 import           Data.Geometry.Ipe.PathParser
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Point
@@ -46,8 +48,8 @@ import           Data.Monoid
 import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Singletons
-import qualified Data.Text as T
 import           Data.Text (Text)
+import qualified Data.Text as T
 import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Data.Vinyl.Functor
@@ -156,8 +158,16 @@ ipeReadTextWith f t = case f t of
 instance Coordinate r => IpeReadText (Rectangle () r) where
   ipeReadText = readRectangle
 
-instance IpeReadText IpeColor where
-  ipeReadText = fmap IpeColor . ipeReadTextWith Right
+instance Coordinate r => IpeReadText (RGB r) where
+  ipeReadText = runParser (pRGB <|> pGrey)
+    where
+      pGrey = (\c -> RGB c c c) <$> pCoordinate
+      pRGB  = RGB <$> pCoordinate <* pWhiteSpace
+                  <*> pCoordinate <* pWhiteSpace
+                  <*> pCoordinate
+
+instance Coordinate r => IpeReadText (IpeColor r) where
+  ipeReadText = fmap IpeColor . ipeReadTextWith ipeReadText
 
 instance Coordinate r => IpeReadText (IpePen r) where
   ipeReadText = fmap IpePen . ipeReadTextWith readCoordinate

@@ -5,15 +5,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Attributes where
 
-import           Control.Lens hiding (rmap, Const)
-import           Data.Semigroup
-import           Data.Singletons
-import           Data.Singletons.TH
-import           Data.Text(Text)
-import           Data.Vinyl
-import           Data.Vinyl.Functor
-import           Data.Vinyl.TypeLevel
-import           GHC.Exts
+import Control.Lens hiding (rmap, Const)
+import Data.Colour.SRGB
+import Data.Semigroup
+import Data.Singletons
+import Data.Singletons.TH
+import Data.Text (Text)
+import Data.Vinyl
+import Data.Vinyl.Functor
+import Data.Vinyl.TypeLevel
+import GHC.Exts
 
 --------------------------------------------------------------------------------
 
@@ -195,11 +196,10 @@ data IpeValue v = Named Text | Valued v deriving (Show,Eq,Ord)
 instance IsString (IpeValue v) where
   fromString = Named . fromString
 
-type Colour = Text -- TODO: Make this a Colour.Colour
+newtype IpeSize  r = IpeSize  (IpeValue r)          deriving (Show,Eq,Ord)
+newtype IpePen   r = IpePen   (IpeValue r)          deriving (Show,Eq,Ord)
+newtype IpeColor r = IpeColor (IpeValue (RGB r))    deriving (Show,Eq)
 
-newtype IpeSize r = IpeSize  (IpeValue r)      deriving (Show,Eq,Ord)
-newtype IpePen  r = IpePen   (IpeValue r)      deriving (Show,Eq,Ord)
-newtype IpeColor  = IpeColor (IpeValue Colour) deriving (Show,Eq,Ord)
 
 
 -- -- | And the corresponding types

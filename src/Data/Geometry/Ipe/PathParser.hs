@@ -1,4 +1,5 @@
 {-# Language OverloadedStrings #-}
+{-# Language DefaultSignatures #-}
 module Data.Geometry.Ipe.PathParser where
 
 import           Data.Bifunctor
@@ -25,6 +26,8 @@ class Num r => Coordinate r where
     -- part before the decimal point, and a length and an integer
     -- representing the part after the decimal point
     fromSeq :: Integer -> Maybe (Int, Integer) -> r
+    default fromSeq :: (Ord r, Fractional r) => Integer -> Maybe (Int, Integer) -> r
+    fromSeq = defaultFromSeq
 
 defaultFromSeq                :: (Ord r, Fractional r)
                               => Integer -> Maybe (Int, Integer) -> r
@@ -32,20 +35,11 @@ defaultFromSeq x Nothing      = fromInteger x
 defaultFromSeq x (Just (l,y)) = let x'          = fromInteger x
                                     y'          = fromInteger y
                                     asDecimal a =  a * (0.1 ^ l)
-                                in signum x' * (abs x' + asDecimal y')
+                                    z           = if x' < 0 then (-1) else 1
+                                in z * (abs x' + asDecimal y')
 
-instance Coordinate Double where
-  fromSeq = defaultFromSeq
-
-instance Coordinate (Ratio Integer) where
-  fromSeq = defaultFromSeq
-
-  -- x m =
-  --   (fromInteger $ signum x) * defaultFromSeq (abs x) m
-
-    -- fromSeq x  Nothing     = fromInteger x
-    -- fromSeq x (Just (l,y)) = fst . head $ readSigned readFloat
-    --                            (show x ++ "." ++ show y)
+instance Coordinate Double
+instance Coordinate (Ratio Integer)
 
 -----------------------------------------------------------------------
 -- | Running the parsers
