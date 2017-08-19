@@ -9,6 +9,7 @@ import           Control.Monad.IO.Class (MonadIO)
 import           Control.Monad.Trans.Reader (runReaderT)
 import           Data.GI.Base
 import           Data.GI.Base.Signals (SignalInfo, HaskellCallbackType)
+import           Data.Geometry.Point
 import           Data.IORef
 import qualified Data.Text as T
 import           Foreign.Ptr (castPtr)
@@ -17,17 +18,14 @@ import qualified GI.GLib as GLib
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
 import           Graphics.Rendering.Cairo
+import           Graphics.Rendering.Cairo.Canvas (Canvas)
+import qualified Graphics.Rendering.Cairo.Canvas as Canvas
 import qualified Graphics.Rendering.Cairo.Internal as Cairo.Internal
 import           Graphics.Rendering.Cairo.Types (Cairo(Cairo))
+import           Linear.V2 (V2(..))
 import           Reactive.Banana
 import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
-
-import           Data.Geometry.Point
-
-import qualified SDL.Cairo.Canvas as Canvas
-import           SDL.Cairo.Canvas (Canvas)
-import           Linear.V2 (V2(..))
 --------------------------------------------------------------------------------
 
 -- | This function bridges gi-cairo with the hand-written cairo

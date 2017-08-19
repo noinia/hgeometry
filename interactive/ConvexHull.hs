@@ -14,13 +14,13 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as T
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
+import           Graphics.Rendering.Cairo.Canvas (Canvas)
+import qualified Graphics.Rendering.Cairo.Canvas as Canvas
 import           Reactive.Banana
 import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
 import qualified RenderCanvas as Render
 import           RenderUtil
-import           SDL.Cairo.Canvas (Canvas)
-import qualified SDL.Cairo.Canvas as Canvas
 
 --------------------------------------------------------------------------------
 
