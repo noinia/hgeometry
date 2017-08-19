@@ -96,7 +96,7 @@ readSiInput fp = fmap f <$> readSinglePageFile fp
       where
         polies = page^..content.to flattenGroups.traverse
                ._withAttrs _IpePath _asSimplePolygon
-        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just (IpeColor (Valued "red"))
+        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just (IpeColor (Named "red"))
 
 
 siToSpec                   :: SelfIntersectionTestCase Rational -> Spec

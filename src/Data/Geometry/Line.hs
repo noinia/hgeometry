@@ -20,7 +20,7 @@ import Data.Proxy
 import Data.UnBounded
 import Data.Vinyl.Lens
 import Data.Vinyl.Core
-import Frames.CoRec
+import Data.Vinyl.CoRec
 import qualified Data.List as L
 
 --------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ import           Data.Ord (Down(..), comparing)
 import           Data.Semigroup
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 import qualified Data.Foldable as F
 import           Data.OrdSeq (Compare)
 

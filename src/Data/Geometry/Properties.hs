@@ -4,17 +4,15 @@
 {-# LANGUAGE DefaultSignatures #-}
 module Data.Geometry.Properties where
 
-import           Data.Maybe(isNothing)
-import           Data.Proxy
-import           Data.Vinyl.Core
-import           Data.Vinyl.Functor
-import           Data.Vinyl.Lens
-import           Frames.CoRec
-import           GHC.TypeLits
+import Data.Maybe (isNothing)
+import Data.Proxy
+import Data.Vinyl.CoRec
+import Data.Vinyl.Core
+import Data.Vinyl.Functor
+import Data.Vinyl.Lens
+import GHC.TypeLits
 
-
-
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 -- | A type family for types that are associated with a dimension. The
 -- dimension is the dimension of the geometry they are embedded in.
@@ -35,7 +33,7 @@ type family IntersectionOf g h :: [*]
 
 -- | Helper to produce a corec
 coRec :: (a ∈ as) => a -> CoRec Identity as
-coRec = Col . Identity
+coRec = CoRec . Identity
 
 
 class IsIntersectableWith g h where

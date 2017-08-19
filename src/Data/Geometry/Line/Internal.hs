@@ -13,7 +13,7 @@ import           Data.Geometry.Vector
 import           Data.Ord (comparing)
 import qualified Data.Traversable as T
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
 
 

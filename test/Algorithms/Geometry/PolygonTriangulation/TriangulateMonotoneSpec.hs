@@ -1,18 +1,17 @@
 module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec where
 
-import Data.Vinyl
-
-import Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
-import Data.Geometry.Polygon
-import Data.Maybe
-import Data.Geometry
-import Data.Ext
-import Util
-import Control.Lens
-import Test.Hspec
+import           Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
+import           Control.Lens
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Ipe
+import           Data.Geometry.Polygon
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe
 import qualified Data.Set as Set
-import Data.Geometry.Ipe
+import           Data.Vinyl
+import           Test.Hspec
+import           Util
 
 
 spec :: Spec
@@ -25,7 +24,7 @@ testCases fp = (runIO $ readInput fp) >>= \case
     Right tcs -> mapM_ toSpec tcs
 
 
-data TestCase r = TestCase { _polygon  :: MonotonePolygon () r :+ IpeColor
+data TestCase r = TestCase { _polygon  :: MonotonePolygon () r :+ IpeColor r
                            , _solution :: [LineSegment 2 () r]
                            }
                   deriving (Show,Eq)
@@ -69,5 +68,5 @@ readInput fp = fmap f <$> readSinglePageFile fp
         -- right = either (const Nothing) Just
         -- solutionOf = right . fromList . map (^.core.symbolPoint) . filter isInSolution
 
-lookupColor           :: i :+ IpeAttributes Path r -> IpeColor
+lookupColor           :: i :+ IpeAttributes Path r -> IpeColor r
 lookupColor (_ :+ ats) = fromMaybe (IpeColor $ Named "black") $ lookupAttr SStroke ats

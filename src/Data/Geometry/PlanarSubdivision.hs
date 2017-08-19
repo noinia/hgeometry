@@ -200,6 +200,13 @@ fromConnectedSegments' _ ss = planarGraph dts & PG.vertexData .~ vxData
     -- The darts
     dts    = map (^._2._2) vts
 
+-- fromSegments :: (Foldable f, Ord r, Num r)
+--                 => proxy s -> f (LineSegment 2 p r :+ e)
+--                 -> PlanarGraph s Primal
+--                 (VertexData r (NonEmpty.NonEmpty p)) e ()
+-- fr
+
+
 --------------------------------------------------------------------------------
 -- * Basic Graph information
 

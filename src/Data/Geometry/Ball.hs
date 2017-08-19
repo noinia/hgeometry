@@ -22,7 +22,7 @@ import           Data.Geometry.Vector
 import qualified Data.List as L
 import qualified Data.Traversable as T
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
 import           Linear.Matrix
 import           Linear.V3 (V3(..))

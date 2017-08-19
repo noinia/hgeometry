@@ -40,7 +40,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 
 -- We bias to the RIGHT and to the TOP. i.e. if query point on the boundary of two traps
 -- we report the right and/or topmost one

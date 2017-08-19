@@ -10,7 +10,7 @@ import Data.List.NonEmpty(NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Geometry.Duality
 import Data.Proxy
-import Frames.CoRec
+import Data.Vinyl.CoRec
 
 type Envelope a r = NonEmpty (Line 2 r :+ a)
 

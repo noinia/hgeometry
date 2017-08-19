@@ -19,7 +19,7 @@ import qualified Data.Range as R
 import           Data.Semigroup
 import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
-import           Frames.CoRec (asA)
+import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 

@@ -4,7 +4,7 @@ import Data.Ext
 import Control.Lens
 import Data.Geometry
 import Data.Geometry.Box
-import Frames.CoRec
+import Data.Vinyl.CoRec
 import Test.Hspec
 import Data.Ratio
 

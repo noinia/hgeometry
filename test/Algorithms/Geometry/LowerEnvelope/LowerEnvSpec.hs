@@ -1,21 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Algorithms.Geometry.LowerEnvelope.LowerEnvSpec where
 
-import Data.Semigroup
-import Data.Maybe(mapMaybe)
-import Util
-import Data.List.NonEmpty(NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import Data.Ext
-import Control.Lens
-import Data.Geometry
-import Data.Geometry.Line
-import Frames.CoRec
-import Test.Hspec
-import Data.Ratio
-import Data.Geometry.Ipe
-import Data.Proxy
 import qualified Algorithms.Geometry.LowerEnvelope.DualCH as DualCH
+import           Control.Lens
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Ipe
+import           Data.Geometry.Line
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe (mapMaybe)
+import           Data.Proxy
+import           Data.Ratio
+import           Data.Semigroup
+import           Data.Vinyl.CoRec
+import           Test.Hspec
+import           Util
 -- import Algorithms.Geometry.LowerEnvelope.Types
 
 spec :: Spec
@@ -31,7 +31,7 @@ testCases fp = (runIO $ readInput fp) >>= \case
 
 
 data TestCase r = TestCase { _lines    :: NonEmpty (Line 2 r :+ ())
-                           , _color    :: Maybe IpeColor
+                           , _color    :: Maybe (IpeColor r)
                            , _solution :: [Point 2 r]
                            }
                   deriving (Show,Eq)

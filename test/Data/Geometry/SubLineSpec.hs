@@ -1,19 +1,18 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.SubLineSpec where
 
-import Data.Ext
 import Control.Lens
+import Data.Ext
 import Data.Geometry
 import Data.Geometry.Line
-import Data.Geometry.SubLine
 import Data.Geometry.LineSegment
+import Data.Geometry.SubLine
+import Data.Ratio
+import Data.UnBounded
+import Data.Vinyl.CoRec
 import QuickCheck.Instances ()
 import Test.Hspec
 import Test.QuickCheck
-import Data.UnBounded
-import Frames.CoRec
-import Data.UnBounded
-import Data.Ratio
 
 
 spec :: Spec

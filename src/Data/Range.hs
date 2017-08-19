@@ -15,7 +15,7 @@ module Data.Range( EndPoint(..)
 
 import Control.Lens
 import Data.Geometry.Properties
-import Frames.CoRec
+import Data.Vinyl.CoRec
 import Text.Printf(printf)
 import GHC.Generics (Generic)
 import Control.DeepSeq

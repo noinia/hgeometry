@@ -23,12 +23,11 @@ module Data.Geometry.LineSegment( LineSegment
                                 , flipSegment
                                 ) where
 
-import           Data.Ord(comparing)
-import           Control.Arrow((&&&))
+import           Control.Arrow ((&&&))
 import           Control.Lens
 import           Data.Bifunctor
-import           Data.Semigroup
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Box.Internal
 import           Data.Geometry.Interval hiding (width, midPoint)
 import           Data.Geometry.Line.Internal
@@ -37,10 +36,11 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.Vinyl
+import           Data.Ord (comparing)
+import           Data.Semigroup
 import           Data.UnBounded
-import           Frames.CoRec
-import qualified Data.Foldable as F
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments

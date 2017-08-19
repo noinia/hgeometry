@@ -11,7 +11,7 @@ import           Data.Geometry.Properties
 import qualified Data.Map as M
 import           Data.Semigroup
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 
 
 -- | Compute all intersections (naively)

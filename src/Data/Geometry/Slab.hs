@@ -15,7 +15,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import qualified Data.Traversable as T
 import           Data.Vinyl
-import           Frames.CoRec
+import           Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------
 

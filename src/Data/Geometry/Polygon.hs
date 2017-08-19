@@ -21,7 +21,7 @@ import           Data.Maybe (mapMaybe)
 import           Data.Proxy
 import           Data.Semigroup
 import           Data.Util
-import           Frames.CoRec (asA)
+import           Data.Vinyl.CoRec (asA)
 
 
 --------------------------------------------------------------------------------
