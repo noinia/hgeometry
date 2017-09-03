@@ -10,6 +10,7 @@ import           Data.Ext
 import           Data.GI.Base
 import           Data.Geometry
 import           Data.Geometry.Ipe
+import           Data.Geometry.Box
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as T
@@ -22,6 +23,7 @@ import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
 import qualified RenderCanvas as Render
 import           RenderUtil
+import           Linear.V2 (V2(..))
 
 
 --------------------------------------------------------------------------------
@@ -57,6 +59,8 @@ networkDescription = do
     -- colorButtonStateB <- accumB False (not <$ pressedE)
 
     drawingArea   <- castB b "canvas" Gtk.DrawingArea
+    drawingAreaH <- realToFrac . fromIntegral . snd <$> #getPreferredHeight drawingArea
+
 
     Gtk.widgetAddEvents drawingArea (gflagsToWord [ Gdk.EventMaskPointerMotionMask
                                                   , Gdk.EventMaskButtonPressMask
@@ -66,27 +70,32 @@ networkDescription = do
     mousePressedE <- signalE1' drawingArea #buttonPressEvent $ \e -> do
                       x <- Gdk.getEventButtonX e
                       y <- Gdk.getEventButtonY e
-                      return $! Point2 x y
+                      return $! Point2 x ((-1*y) + drawingAreaH)
 
     -- -- our points that we collect by mouse clicks
     -- pointSetB <- accumB [] ((\p -> (p:)) <$> mousePressedE)
 
-    -- -- show the mouse coordinates
-    -- mouseMotionE <- signalE1' drawingArea #motionNotifyEvent $ \e -> do
-    --                   x <- Gdk.getEventMotionX e
-    --                   y <- Gdk.getEventMotionY e
-    --                   return $! Point2 x y
-    -- mouseMotionB  <- stepper ""                (showT <$> mouseMotionE)
-    -- sink mouseLabel   [#label :== mouseMotionB]
+    -- show the mouse coordinates
+    mouseMotionE <- signalE1' drawingArea #motionNotifyEvent $ \e -> do
+                      x <- Gdk.getEventMotionX e
+                      y <- Gdk.getEventMotionY e
+                      return $! Point2 x ((-1*y) + drawingAreaH)
+    mouseMotionB  <- stepper ""                (showT <$> mouseMotionE)
+    sink mouseLabel   [#label :== mouseMotionB]
 
     let inFile = "/Users/frank/tmp/test.ipe"
     Right page <- liftIO $ readSinglePageFile inFile
 
 
     -- draw everything
-    draw drawingArea (drawHull <$> pure page)
+    draw drawingArea (mirrored drawingAreaH drawHull <$> pure page)
 
     #showAll window
+
+mirrored       :: Double -> (a -> Canvas ()) -> a -> Canvas ()
+mirrored h d x = do Canvas.scale     $ V2 1 (-1)
+                    Canvas.translate $ V2 0 (-1*h)
+                    d x
 
 drawHull     :: IpePage Double -> Canvas ()
 drawHull page = do

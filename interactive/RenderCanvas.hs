@@ -19,7 +19,7 @@ import qualified Data.Text as T
 
 
 rectangle    :: (Real r, Ord r, Num r) => Rectangle p r -> Canvas ()
-rectangle r' = let r                  = bimap id realToFrac r'
+rectangle r' = let r                       = bimap id realToFrac r'
                    (Point2 x y :+ _,_,_,_) = corners r
                in Canvas.rect $ Canvas.D x y (width r) (height r)
 
