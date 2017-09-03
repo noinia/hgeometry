@@ -55,19 +55,21 @@ ipeUse (Symbol p _) = Canvas.circle' (realToFrac <$> p^.vector.to toV2) 10
 ipePath          :: Real r => Path r -> Canvas ()
 ipePath (Path p) = mapM_ pathSegment p
 
-ipeGroup :: Real r => Group r -> Canvas ()
+ipeGroup :: RealFrac r => Group r -> Canvas ()
 ipeGroup = mapM_ ipeObject . _groupItems
 
-ipeObject' :: forall g r. (g r -> Canvas ())
-           -> g r :+ IpeAttributes g r
-           -> Canvas ()
+ipeObject'              :: forall g r. (RealFrac r, AllSatisfy ApplyAttr (AttributesOf g))
+                        => (g r -> Canvas ())
+                        -> g r :+ IpeAttributes g r
+                        -> Canvas ()
 ipeObject' f (i :+ ats) = do
                             Canvas.pushMatrix
                             applyAttributes (Proxy :: Proxy g) ats
                             f i
                             Canvas.popMatrix
 
-ipeObject                  :: Real r => IpeObject r -> Canvas ()
+ipeObject                  :: RealFrac r
+                           => IpeObject r -> Canvas ()
 ipeObject (IpeGroup g)     = ipeObject' ipeGroup g
 ipeObject (IpeImage _)     = undefined
 ipeObject (IpeTextLabel _) = undefined
@@ -76,13 +78,16 @@ ipeObject (IpeUse p)       = ipeObject' ipeUse  p
 ipeObject (IpePath p)      = ipeObject' ipePath p
 
 
+applyAttributes               :: (RealFrac r, AllSatisfy ApplyAttr (AttributesOf g))
+                              => proxy g -> IpeAttributes g r -> Canvas ()
+applyAttributes _ (Attrs ats) = applyAttributes' ats
 
+applyAttributes'            :: (RealFrac r, AllSatisfy ApplyAttr rs)
+                            => Rec (Attr (AttrMapSym1 r)) rs
+                            -> Canvas ()
+applyAttributes' RNil       = pure ()
+applyAttributes' (a :& ats) = applyAttribute a >> applyAttributes' ats
 
-
-applyAttributes               :: proxy g -> IpeAttributes g r -> Canvas ()
-applyAttributes _ (Attrs ats) = undefined -- unCanvasM $ rfoldMap applyAttribute ats
-
--- applyAttribute :: Attr f label -> Canvas ()
 
 newtype CanvasM = CanvasM { unCanvasM :: Canvas () }
 instance Monoid CanvasM where
@@ -95,7 +100,7 @@ applyAttribute' :: (RealFrac r, ApplyAttr label)
 applyAttribute' = CanvasM . applyAttribute
 
 
-class ApplyAttr label where
+class ApplyAttr (label :: AttributeUniverse) where
   applyAttribute :: RealFrac r => Attr (AttrMapSym1 r) label -> Canvas ()
 
 
@@ -107,8 +112,29 @@ instance ApplyAttr Fill where
   applyAttribute NoAttr   = pure ()
   applyAttribute (Attr c) = maybe (pure ()) Canvas.fill $ toCanvasColor c
 
+instance ApplyAttr Pen where
+  applyAttribute NoAttr            = pure ()
+  applyAttribute (Attr (IpePen p)) = case p of
+      Named t  -> pure () -- TODO
+      Valued v -> Canvas.strokeWeight (realToFrac v)
+
+instance ApplyAttr Clip where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Size where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Dash where
+  applyAttribute _ = pure ()
+
 
 instance ApplyAttr Layer where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr LineCap where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr LineJoin where
   applyAttribute _ = pure ()
 
 instance ApplyAttr A.Matrix where
@@ -117,14 +143,27 @@ instance ApplyAttr A.Matrix where
 instance ApplyAttr Pin where
   applyAttribute _ = pure ()
 
+instance ApplyAttr FillRule where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Arrow where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr RArrow where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Opacity where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Tiling where
+  applyAttribute _ = pure ()
+
+instance ApplyAttr Gradient where
+  applyAttribute _ = pure ()
+
 instance ApplyAttr Transformations where
   applyAttribute _ = pure ()
 
-instance ApplyAttr Pen where
-  applyAttribute NoAttr            = pure ()
-  applyAttribute (Attr (IpePen p)) = case p of
-      Named t  -> pure () -- TODO
-      Valued v -> Canvas.strokeWeight (realToFrac v)
 
 
 
