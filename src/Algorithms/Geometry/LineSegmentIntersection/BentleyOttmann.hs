@@ -3,12 +3,8 @@ module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
-import qualified Data.OrdSeq as SS -- status struct
--- import qualified Data.SlowSeq as SS -- status struct
-
-
--- import qualified Data.BalBST as SS
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -19,12 +15,12 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
+import           Data.OrdSeq (Compare)
+import qualified Data.OrdSeq as SS -- status struct
 import           Data.Semigroup
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import qualified Data.Foldable as F
-import           Data.OrdSeq (Compare)
 
 --------------------------------------------------------------------------------
 
@@ -45,12 +41,10 @@ interiorIntersections :: (Ord r, Fractional r)
                        => [LineSegment 2 p r] -> Intersections p r
 interiorIntersections = M.filter (not . isEndPointIntersection) . intersections
 
-
 -- | Computes the event points for a given line segment
 asEventPts   :: Ord r => LineSegment 2 p r -> [Event p r]
 asEventPts s = let [p,q] = L.sortBy ordPoints [s^.start.core,s^.end.core]
                in [Event p (Start $ s :| []), Event q (End s)]
-
 
 -- | Group the segments with the intersection points
 merge :: Ord r =>  [IntersectionPoint p r] -> Intersections p r
@@ -63,14 +57,12 @@ groupStarts []                       = []
 groupStarts (Event p (Start s) : es) = Event p (Start ss) : groupStarts rest
   where
     (ss',rest) = L.span sameStart es
-
     -- sort the segs on lower endpoint
     ss         = let (x:|xs) = s in x :| (xs ++ concatMap startSegs ss')
 
     sameStart (Event q (Start _)) = p == q
     sameStart _                   = False
 groupStarts (e : es)                 = e : groupStarts es
-
 
 --------------------------------------------------------------------------------
 -- * Data type for Events
@@ -105,7 +97,6 @@ instance Ord r => Ord (Event p r) where
 ordPoints     :: Ord r => Point 2 r -> Point 2 r -> Ordering
 ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 
-
 -- | Get the segments that start at the given event point
 startSegs   :: Event p r -> [LineSegment 2 p r]
 startSegs e = case eventType e of
@@ -136,8 +127,7 @@ xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
 --------------------------------------------------------------------------------
 -- * The Main Sweep
 
-type EventQueue p r = EQ.Set (Event p r)
-
+type EventQueue      p r = EQ.Set (Event p r)
 type StatusStructure p r = SS.OrdSeq (LineSegment 2 p r)
 
 -- | Run the sweep handling all events
@@ -146,8 +136,6 @@ sweep       :: (Ord r, Fractional r)
 sweep eq ss = case EQ.minView eq of
     Nothing      -> []
     Just (e,eq') -> handle e eq' ss
-
-
 
 isClosedStart                     :: Eq r => Point 2 r -> LineSegment 2 p r -> Bool
 isClosedStart p (LineSegment s e)
@@ -163,22 +151,18 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
     starts                   = startSegs e
     (before,contains',after) = extractContains p ss
     (ends,contains)          = L.partition (endsAt p) contains'
-
     -- starting segments, exluding those that have an open starting point
-    starts' = filter (isClosedStart p) starts
-
+    starts'  = filter (isClosedStart p) starts
     toReport = case starts' ++ contains' of
                  (_:_:_) -> [IntersectionPoint p $ associated (starts' <> ends) contains]
                  _       -> []
 
     -- new status structure
     ss' = before <> newSegs <> after
-
     newSegs = toStatusStruct p $ starts ++ contains
 
     -- the new eeventqueue
     eq' = foldr EQ.insert eq es
-
     -- the new events:
     es | F.null newSegs  = maybeToList $ app (findNewEvent p) sl sr
        | otherwise       = let s'  = fst <$> SS.minView newSegs
