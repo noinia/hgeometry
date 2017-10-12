@@ -139,7 +139,7 @@ fromAscList' = OrdSeq . fromList . fmap Elem
 
 
 -- | \(O(\log n)\)
-lookupBy                  :: Compare a -> a -> OrdSeq a -> Maybe a
+lookupBy         :: Compare a -> a -> OrdSeq a -> Maybe a
 lookupBy cmp x s = let (_,m,_) = splitBy cmp x s in listToMaybe . F.toList $ m
 
 memberBy        :: Compare a -> a -> OrdSeq a -> Bool

@@ -36,7 +36,7 @@ module Data.Geometry.PlanarSubdivision( VertexId', FaceId'
                                       , eDataOf, endPointsOf, endPointData
                                       , fDataOf
 
-                                      , edgeSegments
+                                      , edgeSegment, edgeSegments
                                       , rawFacePolygon, rawFaceBoundary
                                       , rawFacePolygons
 
@@ -308,7 +308,6 @@ endPoints d = PG.endPoints d . _graph
 
 edgeTypeOf   :: Dart s -> Lens' (PlanarSubdivision s v e f r ) EdgeType
 edgeTypeOf d = graph.PG.eDataOf d.edgeType
-
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --

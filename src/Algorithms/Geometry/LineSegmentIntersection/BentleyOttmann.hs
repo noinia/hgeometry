@@ -105,7 +105,7 @@ startSegs e = case eventType e of
 
 --------------------------------------------------------------------------------
 
--- | Compare based on the x-coordiante of the intersection with the horizontal
+-- | Compare based on the x-coordinate of the intersection with the horizontal
 -- line through y
 ordAt   :: (Fractional r, Ord r) => r -> Compare (LineSegment 2 p r)
 ordAt y = comparing (xCoordAt y)

@@ -528,6 +528,8 @@ endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 endPoints d g = (tailOf d g, headOf d g)
 
 
+
+
 -- | All edges incident to vertex v, in counterclockwise order around v.
 --
 -- running time: \(O(k)\), where \(k\) is the output size

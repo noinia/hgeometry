@@ -2,11 +2,12 @@ module Data.Sequence.Util where
 
 import Data.Sequence(Seq, ViewL(..),ViewR(..))
 import qualified Data.Sequence as S
+import qualified Data.Vector.Generic as V
 
 --------------------------------------------------------------------------------
 
--- | Get the index h such that everything strictly smaller than h has: p i =
--- False, and all i >= h, we have p h = True
+-- | Given a monotonic predicate, Get the index h such that everything strictly
+-- smaller than h has: p i = False, and all i >= h, we have p h = True
 --
 -- returns Nothing if no element satisfies p
 --
@@ -22,6 +23,23 @@ binarySearchSeq p s = case S.viewr s of
   where
     p' = p . S.index s
     u  = S.length s - 1
+
+-- | Given a monotonic predicate, get the index h such that everything strictly
+-- smaller than h has: p i = False, and all i >= h, we have p h = True
+--
+-- returns Nothing if no element satisfies p
+--
+-- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
+-- predicate.
+binarySearchVec                             :: V.Vector v a
+                                            => (a -> Bool) -> v a -> Maybe Int
+binarySearchVec p' v | V.null v   = Nothing
+                     | not $ p n' = Nothing
+                     | otherwise  = Just $ if p 0 then 0
+                                                  else binarySearch p 0 n'
+  where
+    n' = V.length v - 1
+    p = p' . (v V.!)
 
 
 -- | Partition the seq s given a monotone predicate p into (xs,ys) such that
