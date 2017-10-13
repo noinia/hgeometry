@@ -4,6 +4,7 @@ module Data.Geometry.Point where
 
 import           Control.DeepSeq
 import           Control.Lens
+import           Data.Aeson
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
@@ -39,15 +40,12 @@ instance (Show r, Arity d) => Show (Point d r) where
                                     , show $ F.toList v
                                     ]
 
-
-
 deriving instance (Eq r, Arity d)     => Eq (Point d r)
 deriving instance (Ord r, Arity d)    => Ord (Point d r)
 deriving instance Arity d             => Functor (Point d)
 deriving instance Arity d             => F.Foldable (Point d)
 deriving instance Arity d             => T.Traversable (Point d)
 deriving instance (Arity d, NFData r) => NFData (Point d r)
-
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
@@ -58,6 +56,12 @@ instance Arity d =>  Affine (Point d) where
   p .-. q = toVec p ^-^ toVec q
   p .+^ v = Point $ toVec p ^+^ v
 
+instance (FromJSON r, Arity d, KnownNat d) => FromJSON (Point d r) where
+  parseJSON = fmap Point . parseJSON
+
+instance (ToJSON r, Arity d) => ToJSON (Point d r) where
+  toJSON     = toJSON     . toVec
+  toEncoding = toEncoding . toVec
 
 -- | Point representing the origin in d dimensions
 --

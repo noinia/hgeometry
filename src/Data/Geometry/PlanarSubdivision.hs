@@ -43,11 +43,13 @@ module Data.Geometry.PlanarSubdivision( VertexId', FaceId'
                                       , VertexId(..), FaceId(..), Dart, World(..)
                                       ) where
 
-import           Control.Lens hiding (holes, holesOf)
+import           Control.Lens hiding (holes, holesOf, (.=))
+import           Data.Aeson
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
+import           Data.Generic
 import           Data.Geometry.Interval
 import           Data.Geometry.Line (cmpSlope, supportingLine)
 import           Data.Geometry.LineSegment
@@ -57,16 +59,15 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (mapMaybe)
 import           Data.Ord (comparing)
+import qualified Data.PlanarGraph as PG
 import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , Dart(..), VertexId(..), FaceId(..), Arc(..)
                                  , Direction(..), twin
                                  , World(..))
-import qualified Data.PlanarGraph as PG
 import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
-
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -86,25 +87,45 @@ vtxDataToExt (VertexData p v) = p :+ v
 instance Bifunctor VertexData where
   bimap f g (VertexData p v) = VertexData (fmap f p) (g v)
 
+instance (FromJSON r, FromJSON v) => FromJSON (VertexData r v) where
+  parseJSON = (\(l :+ d) -> VertexData l d) <$> parseJSON
+
+instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
+  toJSON     = toJSON     . vtxDataToExt
+  toEncoding = toEncoding . vtxDataToExt
+
 
 -- | Planar-subdivsions are internally represented as a *connected* planar
 -- graph. We distuinish two types of edges in this graph representation:
 -- Visible edges, which also appear in the original planar subdivision, and
 -- Invisible edges, which are essentially dummy edges making sure that the
 -- entire graph is connected.
-data EdgeType = Visible | Invisible deriving (Show,Read,Eq,Ord)
+data EdgeType = Visible | Invisible deriving (Show,Read,Eq,Ord,Generic)
+
+instance FromJSON EdgeType
+instance ToJSON EdgeType where
+  toEncoding = genericToEncoding defaultOptions
+
 
 data EdgeData e = EdgeData { _edgeType :: !EdgeType
                            , _eData    :: !e
-                           } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                           } deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
 makeLenses ''EdgeData
+
+instance FromJSON e => FromJSON (EdgeData e)
+instance ToJSON e => ToJSON (EdgeData e) where
+  toEncoding = genericToEncoding defaultOptions
 
 
 -- | The Face data consists of the data itself and a list of holes
 data FaceData h f = FaceData { _holes :: [h]
                              , _fData :: !f
-                             } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                             } deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
 makeLenses ''FaceData
+
+instance (FromJSON h, FromJSON f) => FromJSON (FaceData h f)
+instance (ToJSON h, ToJSON f)     => ToJSON (FaceData h f) where
+  toEncoding = genericToEncoding defaultOptions
 
 
 newtype PlanarSubdivision s v e f r = PlanarSubdivision { _graph ::
@@ -115,6 +136,14 @@ makeLenses ''PlanarSubdivision
 instance Functor (PlanarSubdivision s v e f) where
   fmap f s = s&graph.PG.vertexData.traverse.location %~ fmap f
 
+
+-- instance (ToJSON v, ToJSON e, ToJSON f, ToJSON v)
+--          => ToJSON (PlanarSubdivision s v e f r) where
+--   toJSON ps = object [ "vertices" .= fmap (\(v,d) -> v :+ d) . vertices $ ps
+--                      , "edges"    .= fmap (\(e,d) -> e :+ d) . edges    $ ps
+--                      , "faces"    .= fmap (\(f,d) -> f :+ d) . faces    $ ps
+--                      , "darts"    .= darts' ps
+--                      ]
 
 
 --------------------------------------------------------------------------------

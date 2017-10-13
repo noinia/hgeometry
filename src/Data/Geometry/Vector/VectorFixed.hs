@@ -4,7 +4,9 @@ module Data.Geometry.Vector.VectorFixed where
 
 import           Control.DeepSeq
 import           Control.Lens
+import           Data.Aeson
 import qualified Data.Foldable as F
+import           Data.Proxy
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Boxed
 import           Data.Vector.Fixed.Cont (Z, S, ToPeano)
@@ -12,8 +14,8 @@ import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
 import           Linear.Metric
-import qualified Linear.V3 as L3
 import qualified Linear.V2 as L2
+import qualified Linear.V3 as L3
 import           Linear.Vector
 
 --------------------------------------------------------------------------------
@@ -101,7 +103,22 @@ instance Arity d => V.Vector (Vector d) r where
   inspect    = V.inspect . _unV
   basicIndex = V.basicIndex . _unV
 
--- ----------------------------------------
+instance (FromJSON r, Arity d, KnownNat d)  => FromJSON (Vector d r) where
+  parseJSON y = parseJSON y >>= \xs -> case vectorFromList xs of
+                  Nothing -> fail . mconcat $
+                    [ "FromJSON (Vector d a), wrong number of elements. Expected "
+                    , show $ natVal (Proxy :: Proxy d)
+                    , " elements but found "
+                    , show $ length xs
+                    , "."
+                    ]
+                  Just v -> pure v
+
+instance (ToJSON r, Arity d) => ToJSON (Vector d r) where
+  toJSON     = toJSON     . F.toList
+  toEncoding = toEncoding . F.toList
+
+------------------------------------------
 
 type AlwaysTrueDestruct pd d = (Arity pd, ToPeano d ~ S (ToPeano pd))
 

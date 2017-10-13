@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE OverloadedStrings  #-}
 module Data.Ext where
 
-import Control.Lens
+import Control.Lens hiding ((.=))
 import Data.Biapplicative
 import Data.Bifoldable
 import Data.Bifunctor.Apply
@@ -12,7 +13,8 @@ import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
 import GHC.Generics (Generic)
 import Control.DeepSeq
-
+import Data.Aeson
+import Data.Aeson.Types(typeMismatch)
 --------------------------------------------------------------------------------
 
 data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded,Generic,NFData)
@@ -43,6 +45,13 @@ instance Bitraversable1 (:+) where
 instance (Semigroup core, Semigroup extra) => Semigroup (core :+ extra) where
   (c :+ e) <> (c' :+ e') = c <> c' :+ e <> e'
 
+instance (ToJSON core, ToJSON extra) => ToJSON (core :+ extra) where
+  toJSON     (c :+ e) = object ["core" .= c, "extra" .= e]
+  toEncoding (c :+ e) = pairs  ("core" .= c <> "extra" .= e)
+
+instance (FromJSON core, FromJSON extra) => FromJSON (core :+ extra) where
+  parseJSON (Object v) = (:+) <$> v .: "core" <*> v .: "extra"
+  parseJSON invalid    = typeMismatch "Ext (:+)" invalid
 
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c
