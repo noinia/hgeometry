@@ -26,8 +26,16 @@ data PointLocationDS s v e f r = PointLocationDS {
       , _subdivision :: PlanarSubdivision s v e f r
       , _outerFace   :: FaceId' s
       } deriving (Show,Eq)
-makeLenses ''PointLocationDS
--- TODO: These shouldn't really be lenses
+
+sweepStruct :: Getter (PointLocationDS s v e f r) (V.Vector (Bottom r :+ StatusStructure s))
+sweepStruct = to _sweepStruct
+
+subdivision :: Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
+subdivision = to _subdivision
+
+outerFace   :: Getter (PointLocationDS s v e f r) (FaceId' s)
+outerFace   = to _outerFace
+
 
 -- | Builds a pointlocation data structure on the planar subdivision with \(n\)
 -- vertices.

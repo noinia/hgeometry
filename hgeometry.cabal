@@ -97,6 +97,7 @@ library
 
                     Data.Geometry.KDTree
                     Data.Geometry.PlanarSubdivision
+                    Data.Geometry.PlanarSubdivision.Core
 
                     -- * Algorithms
                     Algorithms.Util
@@ -428,8 +429,9 @@ test-suite hspec
 
 
   build-depends:        base
-                      , hspec        >= 2.1
-                      , QuickCheck   >= 2.5
+                      , hspec                >= 2.1
+                      , QuickCheck           >= 2.5
+                      -- , quickcheck-instances >= 0.3.15
                       , hgeometry
                       , lens
                       , data-clist

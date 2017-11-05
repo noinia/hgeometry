@@ -5,6 +5,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , dot, norm
                            , isScalarMultipleOf
                            , scalarMultiple
+                           , FV.replicate
                            ) where
 
 import qualified Data.Foldable as F

@@ -8,14 +8,14 @@ import           Control.Lens
 import           Data.Either (lefts)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.PlanarSubdivision
+import           Data.Geometry.PlanarSubdivision.Core
 import           Data.Geometry.Polygon
 import           Data.Semigroup
 
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate       :: (Ord r, Fractional r, Show p, Show r)
+triangulate       :: (Ord r, Fractional r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 triangulate px pg = constructSubdivision px e es diags

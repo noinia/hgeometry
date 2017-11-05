@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Data.PlanarGraph( Arc(..)
                        , Direction(..), rev
 
@@ -17,6 +18,7 @@ module Data.PlanarGraph( Arc(..)
                        , edgeData
 
                        , planarGraph, planarGraph', fromAdjacencyLists
+                       , toAdjacencyLists
 
                        , numVertices, numDarts, numEdges, numFaces
                        , darts', darts, edges', edges, vertices', vertices, faces', faces
@@ -40,10 +42,12 @@ module Data.PlanarGraph( Arc(..)
                        , hasEdge
                        ) where
 
+import           Data.ByteString (ByteString)
 import           Control.Applicative (Alternative(..))
-import           Control.Lens
+import           Control.Lens hiding ((.=))
 import           Control.Monad.ST (ST)
 import           Control.Monad.State.Strict
+import           Data.Aeson
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
@@ -52,13 +56,15 @@ import           Data.Maybe (catMaybes, isJust)
 import           Data.Permutation
 import           Data.Semigroup (Semigroup(..))
 import           Data.Traversable (fmapDefault,foldMapDefault)
-import           Data.Type.Equality(gcastWith, (:~:)(..))
-import           Unsafe.Coerce(unsafeCoerce)
+import           Data.Type.Equality (gcastWith, (:~:)(..))
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import           Unsafe.Coerce (unsafeCoerce)
+import qualified Data.Yaml.Pretty as YamlP
+
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -127,6 +133,7 @@ makeLenses ''Dart
 
 
 
+
 instance Show (Dart s) where
   show (Dart a d) = "Dart (" ++ show a ++ ") " ++ show d
 
@@ -171,13 +178,15 @@ dualDualIdentity = unsafeCoerce Refl
 
 -- | A vertex in a planar graph. A vertex is tied to a particular planar graph
 -- by the phantom type s, and to a particular world w.
-newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int } deriving (Eq,Ord,Enum)
+newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
+                                deriving (Eq,Ord,Enum,ToJSON)
 -- VertexId's are in the range 0...|orbits|-1
-makeLenses ''VertexId
+
+unVertexId :: Getter (VertexId s w) Int
+unVertexId = to _unVertexId
 
 instance Show (VertexId s w) where
   show (VertexId i) = "VertexId " ++ show i
-
 
 --------------------------------------------------------------------------------
 -- * The graph type itself
@@ -211,6 +220,18 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
 
 
 
+instance (ToJSON v, ToJSON e, ToJSON f)
+         => ToJSON (PlanarGraph s w v e f) where
+  toJSON     = object . encodeJSON
+  toEncoding = pairs . mconcat . encodeJSON
+
+encodeJSON   :: (ToJSON f, ToJSON e, ToJSON v, KeyValue t)
+             => PlanarGraph s w v e f -> [t]
+encodeJSON g = [ "vertices"    .= ((\(v,d) -> v :+ d)             <$> vertices g)
+               , "edges"       .= ((\(e,d) -> endPoints e g :+ d) <$> edges g)
+               , "faces"       .= ((\(f,d) -> f :+ d)             <$> faces g)
+               , "adjacencies" .= toAdjacencyLists g
+               ]
 
 -- ** Lenses and getters
 
@@ -315,8 +336,8 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
 -- vertices should be given in counter clockwise order.
 --
 -- running time: \(O(n)\).
-fromAdjacencyLists      :: forall s w f. (Foldable f, Functor f)
-                        => [(VertexId s w, f (VertexId s w))]
+fromAdjacencyLists      :: forall s w h. (Foldable h, Functor h)
+                        => [(VertexId s w, h (VertexId s w))]
                         -> PlanarGraph s w () () ()
 fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
   where
@@ -350,6 +371,12 @@ assignArcs o = evalState (traverse f o) 0
     f   :: e -> State Int (Int :+ e)
     f e = do i <- get ; put (i+1) ; pure (i :+ e)
 
+-- | Produces the adjacencylists for all vertices in the graph. For every vertex, the
+-- adjacent vertices are given in counter clockwise order.
+--
+-- running time: \(O(n)\)
+toAdjacencyLists    :: PlanarGraph s w v e f -> [(VertexId s w, V.Vector (VertexId s w))]
+toAdjacencyLists pg = map (\u -> (u,neighboursOf u pg)) . V.toList . vertices' $ pg
 
 
 
@@ -626,7 +653,8 @@ computeDual' g = dualG
 
 
 -- | A face
-newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) } deriving (Eq,Ord)
+newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
+                   deriving (Eq,Ord,ToJSON)
 
 instance Show (FaceId s w) where
   show (FaceId (VertexId i)) = "FaceId " ++ show i
@@ -713,26 +741,26 @@ boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 
 data Test
 
--- testG :: PlanarGraph Test Primal () String ()
--- testG = planarGraph' [ [ (Dart aA Negative, "a-")
---                        , (Dart aC Positive, "c+")
---                        , (Dart aB Positive, "b+")
---                        , (Dart aA Positive, "a+")
---                        ]
---                      , [ (Dart aE Negative, "e-")
---                        , (Dart aB Negative, "b-")
---                        , (Dart aD Negative, "d-")
---                        , (Dart aG Positive, "g+")
---                        ]
---                      , [ (Dart aE Positive, "e+")
---                        , (Dart aD Positive, "d+")
---                        , (Dart aC Negative, "c-")
---                        ]
---                      , [ (Dart aG Negative, "g-")
---                        ]
---                      ]
---   where
---     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+testG :: PlanarGraph Test Primal () String ()
+testG = planarGraph [ [ (Dart aA Negative, "a-")
+                      , (Dart aC Positive, "c+")
+                      , (Dart aB Positive, "b+")
+                      , (Dart aA Positive, "a+")
+                      ]
+                    , [ (Dart aE Negative, "e-")
+                      , (Dart aB Negative, "b-")
+                      , (Dart aD Negative, "d-")
+                      , (Dart aG Positive, "g+")
+                      ]
+                    , [ (Dart aE Positive, "e+")
+                      , (Dart aD Positive, "d+")
+                      , (Dart aC Negative, "c-")
+                      ]
+                    , [ (Dart aG Negative, "g-")
+                      ]
+                    ]
+  where
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
 
 
 --------------------------------------------------------------------------------
@@ -875,3 +903,9 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (4, [1,2,5])
             , (5, [3,4])
             ]
+
+serializeToYaml :: (ToJSON v, ToJSON e, ToJSON f) => PlanarGraph s w v e f -> ByteString
+serializeToYaml = YamlP.encodePretty (YamlP.setConfCompare cmp YamlP.defConfig)
+  where
+    cmp k1 k2 = lookup k1 order `compare` lookup k2 order
+    order = zip ["vertices","edges","faces","adjacencies"] [0..]

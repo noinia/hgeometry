@@ -16,7 +16,7 @@ import qualified Data.DList as DList
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
-import           Data.Geometry.PlanarSubdivision
+import           Data.Geometry.PlanarSubdivision.Core
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.IntMap as IntMap
@@ -109,7 +109,7 @@ ix' i = singular (ix i)
 -- the polygon into y-monotone pieces.
 --
 -- running time: \(O(n\log n)\)
-findDiagonals    :: forall t r p. (Fractional r, Ord r, Show r, Show p)
+findDiagonals    :: forall t r p. (Fractional r, Ord r)
                  => Polygon t p r -> [LineSegment 2 p r]
 findDiagonals p' = map f . sweep
                  . NonEmpty.sortBy (flip cmpSweep)
@@ -142,7 +142,7 @@ findDiagonals p' = map f . sweep
 -- pieces.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r, Show r, Show p)
+makeMonotone      :: (Fractional r, Ord r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 makeMonotone px pg = let (e:es) = listEdges pg
@@ -167,7 +167,7 @@ getVertexType v = asks (^.ix' v._3)
 getEventType :: Event r -> Sweep p r VertexType
 getEventType = getVertexType . getIdx
 
-handle   :: (Fractional r, Ord r, Show r, Show p) => Event r -> Sweep p r ()
+handle   :: (Fractional r, Ord r) => Event r -> Sweep p r ()
 handle e = let i = getIdx e in getEventType e >>= \case
     Start   -> handleStart   i e
     End     -> handleEnd     i e
@@ -192,7 +192,7 @@ handleStart i (v :+ adj) = modify $ \(SS t h) ->
                                 SS (insertAt v (adj^._2) t)
                                    (IntMap.insert i i h)
 
-handleEnd              :: (Fractional r, Ord r, Show r, Show p)
+handleEnd              :: (Fractional r, Ord r)
                        => Int -> Event r -> Sweep p r ()
 handleEnd i (v :+ adj) = do let iPred = adj^._1.start.extra  -- i-1
                             -- lookup p's helper; if it is a merge vertex
