@@ -67,6 +67,7 @@ splitMonotone p s = case binarySearchSeq p s of
 --
 -- running time: \(O(\log(u - l))\)
 {-# SPECIALIZE binarySearch :: (Int -> Bool) -> Int -> Int -> Int #-}
+{-# SPECIALIZE binarySearch :: (Word -> Bool) -> Word -> Word -> Word #-}
 binarySearch       :: Integral a => (a -> Bool) -> a -> a -> a
 binarySearch p l u = let d = u - l
                          m = l + (d `div` 2)

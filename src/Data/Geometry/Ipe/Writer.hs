@@ -14,7 +14,6 @@ import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Types
-import qualified Data.Geometry.Ipe.Types as IT
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
