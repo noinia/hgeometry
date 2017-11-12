@@ -182,7 +182,7 @@ data World = World { screen :: Canvas.Dim }
 -- some drawing
 drawWorld' :: Canvas ()
 drawWorld' = do
-    -- Canvas.background $ Canvas.gray 255
+    Canvas.background $ Canvas.gray 255
     Canvas.stroke $ Canvas.gray 0
     forM_ [1..20] $ \i ->
       forM_ [1..16] $ \j -> do
