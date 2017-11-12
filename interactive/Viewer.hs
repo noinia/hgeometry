@@ -4,29 +4,25 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
-import Control.Monad(forM_)
-
 import           Control.Exception (catch)
 import           Control.Lens
+import           Control.Monad (forM_)
 import           Data.Ext
 import           Data.GI.Base
-import           Data.Geometry
-import           Data.Geometry.Ipe
-import           Data.Geometry.Box
-import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as T
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
 import           Graphics.Rendering.Cairo.Canvas (Canvas)
 import qualified Graphics.Rendering.Cairo.Canvas as Canvas
+import           Linear.Affine ((.-.),(.+^))
+import           Linear.V2
+import           Linear.Vector ((*^))
 import           Reactive.Banana
 import           Reactive.Banana.Frameworks
 import           Reactive.Banana.GI.Gtk
 import qualified RenderCanvas as Render
 import           RenderUtil
-import           Linear.V2 (V2(..))
-
 
 main :: IO ()
 main = runGtk `catch` (\(e::Gtk.GError) -> Gtk.gerrorMessage e >>= putStrLn . T.unpack)
@@ -47,12 +43,12 @@ toArrowKey _       = Nothing
 
 
 
-toDirection UpKey    = Vector2 0    1
-toDirection DownKey  = Vector2 0    (-1)
-toDirection LeftKey  = Vector2 (-1) 0
-toDirection RightKey = Vector2 1    0
 
-
+toDirection          :: Num a => ArrowKey -> V2 a
+toDirection UpKey    = V2 0    1
+toDirection DownKey  = V2 0    (-1)
+toDirection LeftKey  = V2 (-1) 0
+toDirection RightKey = V2 1    0
 
 
 networkDescription :: MomentIO ()
@@ -91,22 +87,22 @@ networkDescription = do
     mousePressedE <- signalE1' drawingArea #buttonPressEvent $ \e -> do
                       x <- Gdk.getEventButtonX e
                       y <- Gdk.getEventButtonY e
-                      return $! Point2 x ((-1*y) + drawingAreaH)
+                      return $! V2 x ((-1*y) + drawingAreaH)
 
     lastMousePressB <- stepper undefined mousePressedE
 
     -- mouse release
-    mouseReleasedE <- signalE1' drawingArea #buttonReleaseEvent $ \e -> do
-                        x <- Gdk.getEventButtonX e
-                        y <- Gdk.getEventButtonY e
-                        return $! Point2 x ((-1*y) + drawingAreaH)
+    -- mouseReleasedE <- signalE1' drawingArea #buttonReleaseEvent $ \e -> do
+    --                     x <- Gdk.getEventButtonX e
+    --                     y <- Gdk.getEventButtonY e
+    --                     return $! V2 x ((-1*y) + drawingAreaH)
 
     -- mouse coordinates
     mouseMotionE <- signalE1' drawingArea #motionNotifyEvent $ \e -> do
                       x  <- Gdk.getEventMotionX e
                       y  <- Gdk.getEventMotionY e
                       st <- Gdk.getEventMotionState e
-                      let !p = Point2 x ((-1*y) + drawingAreaH)
+                      let !p = V2 x ((-1*y) + drawingAreaH)
                       return (p,st)
     mouseMotionB  <- stepper undefined mouseMotionE
 
@@ -115,29 +111,9 @@ networkDescription = do
 
         -- sample the displacement vector whenever we are have a move event
         -- and the moude button is still on
-
         dragOffsetE = dragOffsetB
                    <@ filterE ((Gdk.ModifierTypeButton1Mask `elem`) . snd) mouseMotionE
-    -- dragViewPositionB ::
-    -- dragViewPositionB =  <$> viewPosB <*> dragOffsetB
 
-
-
-
-
-
-
-
-    -- (fst <$> mouseMotionE)
-    -- sink mouseLabel   [#label :== mouseMotionB]
-
-    -- let mouseDragE = filterE ((Gdk.ModifierTypeButton1Mask `elem`) . snd) mouseMotionE
-    -- -- mouseDragB <- stepper origin (fst <$> mouseDragE)
-
-    --     mouseDragInitialE = mousePressedB <@ mouseDragE
-
-    --     -- An event that has the offset of a dragging event
-    --     dragOffsetE = apply () mouseDragE
 
     zoomLevelB <- accumB 1 $ (\dy -> (+0.1*dy)) <$> scrollE
 
@@ -145,20 +121,16 @@ networkDescription = do
     let lastPosE = unions [ (\k -> (.+^ 2 *^ toDirection k)) <$> arrowKeyE   -- key event
                           , (\v -> (.+^ v))                  <$> dragOffsetE -- drag event
                           ]
-
-    viewPortPosB <- accumB (Point2 (drawingAreaW/2) (drawingAreaH/2)) $ lastPosE
-
-
+    viewPortPosB <- accumB (V2 (drawingAreaW/2) (drawingAreaH/2)) $ lastPosE
 
     let viewPortB = ViewPort <$> pure drawWorld'
                              <*> pure (V2 drawingAreaW drawingAreaH)
-                             <*> (toV2 . toVec <$> viewPortPosB)
+                             <*> viewPortPosB
                              <*> zoomLevelB
                              <*> pure 0
 
     -- draw everything
     draw drawingArea (mirrored drawingAreaH render <$> viewPortB)
-
     #showAll window
 
 data ViewPort a = ViewPort { drawWorld             :: Canvas a
@@ -168,16 +140,10 @@ data ViewPort a = ViewPort { drawWorld             :: Canvas a
                            , rotation              :: Double
                            }
 
--- drawScreen (ViewPort _ (V2 w h) (V2 cx cy)) = Canvas.rect $ Canvas.D (cx-w/2) (cy-h/2) w h
-
-
 clippingWindow :: ViewPort a -> Canvas.Dim
 clippingWindow (ViewPort _ (V2 w h) (V2 cx cy) z _) = let x = cx - z*w/2
                                                           y = cy - z*h/2
                                                       in Canvas.D x y (z*w) (z*h)
-
-data World = World { screen :: Canvas.Dim }
-             deriving (Show,Eq)
 
 -- some drawing
 drawWorld' :: Canvas ()
@@ -197,8 +163,7 @@ mirrored h d x = do Canvas.scale     $ V2 1 (-1)
 -- | Render the view
 render    :: ViewPort a -> Canvas a
 render vp = do
-    let r@(Canvas.D x y _ _) = clippingWindow vp
-        (V2 h w) = screenSize vp
+    let (Canvas.D x y _ _) = clippingWindow vp
 
     Canvas.scale $ V2 (1/zoomLevel vp) (1/zoomLevel vp) -- scale everything s.t. the
                                                         -- cippingWindow equals
