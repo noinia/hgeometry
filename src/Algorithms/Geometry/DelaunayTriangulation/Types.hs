@@ -11,8 +11,10 @@ import           Data.Geometry.PlanarSubdivision
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
 import qualified Data.Map.Strict as SM
-import           Data.PlaneGraph
+import qualified Data.PlaneGraph  as PG
+import qualified Data.PlanarGraph as PPG
 import qualified Data.Vector as V
+
 
 --------------------------------------------------------------------------------
 
@@ -84,43 +86,16 @@ type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 toPlanarSubdivision :: proxy s -> Triangulation p r -> PlanarSubdivision s p () () r
 toPlanarSubdivision px tr = PlanarSubdivision g
   where
-    g = toPlaneGraph px tr & vertexData.traverse  %~ (\(v :+ e) -> VertexData v e)
-                           & dartData.traverse._2 %~ EdgeData Visible
-                           & faceData.traverse    %~ FaceData []
+    g = toPlaneGraph px tr & PG.dartData.traverse._2 %~ EdgeData Visible
+                           & PG.faceData.traverse    %~ FaceData []
 
 -- | convert the triangulation into a plane graph
 --
 -- running time: \(O(n\log n)\).
 toPlaneGraph    :: forall proxy s p r.
-                   proxy s -> Triangulation p r -> PlaneGraph s Primal p () () r
-toPlaneGraph _ tr = g & vertexData .~ tr^.positions
+                   proxy s -> Triangulation p r -> PG.PlaneGraph s p () () r
+toPlaneGraph _ tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
-    g       = fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
+    g       = PG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
     f i adj = (VertexId i, VertexId <$> adj)
-
-
-  -- (planarGraph' . P.toCycleRep n $ perm)&vertexData .~ tr^.positions
-  -- where
-  --   neighs    = C.rightElements <$> tr^.neighbours
-  --   n         = sum . fmap length $ neighs
-
-  --   vtxIDs = [0..]
-  --   perm = trd' . foldr toOrbit (ST mempty 0 mempty) $ zip vtxIDs (V.toList neighs)
-
-  --   -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
-  --   -- vertex with its adjacent vertices into an Orbit
-  --   toOrbit                     :: (VertexID,[VertexID]) -> ST' [[Dart s]]
-  --                               -> ST' [[Dart s]]
-  --   toOrbit (u,vs) (ST m a dss) =
-  --     let (ST m' a' ds') = foldr (toDart . (u,)) (ST m a mempty) vs
-  --     in ST m' a' (ds':dss)
-
-
-  --   -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
-  --   -- representing this edge.
-  --   toDart                   :: (VertexID,VertexID) -> ST' [Dart s] -> ST' [Dart s]
-  --   toDart (u,v) (ST m a ds) = let dir = if u < v then Positive else Negative
-  --                                  t'  = (min u v, max u v)
-  --                              in case M.lookup t' m of
-  --     Just a' -> ST m                  a     (Dart (Arc a') dir : ds)
-  --     Nothing -> ST (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
+    vtxData = (\(loc :+ p) -> VertexData loc p) <$> tr^.positions

@@ -7,7 +7,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Core
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.PlanarGraph as PG
+import qualified Data.PlaneGraph as PG
 import           Data.Semigroup
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -32,9 +32,9 @@ constructSubdivision                  :: (Num r, Ord r)
                                       -> PlanarSubdivision s
                                             p PolygonEdgeType PolygonFaceData r
 constructSubdivision px e origs diags =
-    subdiv & graph.PG.vertexData.traverse.vData  %~ NonEmpty.head
-           & graph.PG.faceData                   .~ faceData'
-           & graph.PG.rawDartData.traverse.eData %~ snd
+    subdiv & planeGraph.PG.vertexData.traverse        %~ NonEmpty.head
+           & planeGraph.PG.faceData                   .~ faceData'
+           & planeGraph.PG.rawDartData.traverse.eData %~ snd
   where
     subdiv = fromConnectedSegments px $ e' : origs' <> diags'
 
@@ -42,7 +42,7 @@ constructSubdivision px e origs diags =
     origs' = (:+ EdgeData Visible (False,Original)) <$> origs
     e'     = e :+ EdgeData Visible (True, Original)
 
-    g = subdiv^.graph
+    g = subdiv^.planeGraph
 
     -- the darts incident to internal faces
     queryDarts = concatMap shouldQuery . F.toList . PG.edges' $ g

@@ -25,14 +25,14 @@ import           Data.Tree
 -- running time: \(O(n \log n)\)
 euclideanMST     :: (Ord r, Fractional r)
                  => NonEmpty.NonEmpty (Point 2 r :+ p) -> Tree (Point 2 r :+ p)
-euclideanMST pts = (\v -> g^.vDataOf v) <$> t
+euclideanMST pts = (\v -> g^.locationOf v :+ g^.vDataOf v) <$> t
   where
     -- since we care only about the relative order of the edges we can use the
     -- squared Euclidean distance rather than the Euclidean distance, thus
     -- avoiding the Floating constraint
     g = withEdgeDistances squaredEuclideanDist . toPlaneGraph (Proxy :: Proxy MSTW)
       . delaunayTriangulation $ pts
-    t = mst g
+    t = mst $ g^.graph
 
 
 data MSTW

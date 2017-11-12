@@ -16,7 +16,7 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.PlanarGraph (faceData,rawDartData, vertexData)
+import           Data.PlaneGraph (faceData,rawDartData,vertexData)
 import qualified Data.Vector as V
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
@@ -32,8 +32,8 @@ fromPolygon                               :: (Ord r, Fractional r) => proxy s
                                           -> PlanarSubdivision s p () f r
 fromPolygon p pg@(SimplePolygon _)  iD oD = fromSimplePolygon p pg iD oD
 fromPolygon p pg@(MultiPolygon _ _) iD oD =
-    (triangulate p pg)&graph.faceData.traverse.fData    %~ f
-                      &graph.rawDartData.traverse.eData .~ ()
+    (triangulate p pg)&planeGraph.faceData.traverse.fData    %~ f
+                      &planeGraph.rawDartData.traverse.eData .~ ()
   where
     f Inside  = iD
     f Outside = oD
@@ -49,8 +49,8 @@ fromPolygons           :: (Ord r, Fractional r)
                        -> NonEmpty (SimplePolygon p r :+ f)
                        -> f -- ^ data outside the polygons
                        -> PlanarSubdivision s (Maybe p) () f r
-fromPolygons px pgs oD = subd&graph.faceData .~ faceData'
-                             &graph.vertexData.traverse.vData %~ getP
+fromPolygons px pgs oD = subd&planeGraph.faceData .~ faceData'
+                             &planeGraph.vertexData.traverse %~ getP
   where
     faceData' = fmap (\(fi, FaceData hs _) -> FaceData hs (getFData fi)) . faces $ subd
 
@@ -70,6 +70,8 @@ fromPolygons px pgs oD = subd&graph.faceData .~ faceData'
     -- corners of the slightly enlarged boundingbox
     (a,b,c,d) = corners . bimap (const $ Outer oD) id
               . grow 1 . boundingBoxList . fmap (^.core) $ pgs
+
+    --TODO: We need to mark the edges of the outer square as invisible.
 
     -- Main Idea: Assign the vertices the hole-number on which they occur. For
     -- each face we then find an incident vertex to find the data corresponding

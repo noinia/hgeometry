@@ -11,7 +11,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , DualOf
 
-                       , VertexId(..)
+                       , VertexId(..), VertexId'
 
                        , PlanarGraph
                        , embedding, vertexData, dartData, faceData, rawDartData
@@ -31,7 +31,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , dual
 
-                       , FaceId(..)
+                       , FaceId(..), FaceId'
                        , leftFace, rightFace, boundary, boundaryVertices
 
 
@@ -181,6 +181,9 @@ dualDualIdentity = unsafeCoerce Refl
 newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
                                 deriving (Eq,Ord,Enum,ToJSON)
 -- VertexId's are in the range 0...|orbits|-1
+
+type VertexId' s = VertexId s Primal
+
 
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
@@ -656,6 +659,8 @@ computeDual' g = dualG
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
                    deriving (Eq,Ord,ToJSON)
 
+type FaceId' s = FaceId s Primal
+
 instance Show (FaceId s w) where
   show (FaceId (VertexId i)) = "FaceId " ++ show i
 
@@ -885,6 +890,8 @@ findEdge :: VertexId s w -> VertexId s w -> EdgeOracle s w a -> Maybe a
 findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
   where
     find' j i = fmap (^.extra) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i
+
+
 
 
 

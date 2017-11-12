@@ -2,14 +2,15 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.PlanarSubdivision.Core( VertexId', FaceId'
-                                           , VertexData(VertexData), vData, location
+                                           , VertexData(VertexData), PG.vData, PG.location
 
                                            , EdgeType(..)
                                            , EdgeData(EdgeData), edgeType, eData
 
                                            , FaceData(FaceData), holes, fData
 
-                                           , PlanarSubdivision(PlanarSubdivision), graph
+                                           , PlanarSubdivision(PlanarSubdivision)
+                                           , planeGraph
                                            , PolygonFaceData(..)
                                            , PlanarGraph
                                            , fromSimplePolygon, fromConnectedSegments
@@ -22,7 +23,7 @@ module Data.Geometry.PlanarSubdivision.Core( VertexId', FaceId'
                                            , faces', faces, internalFaces
                                            , darts'
 
-                                           , headOf, tailOf, twin, endPoints, edgeTypeOf
+                                           , headOf, tailOf, PG.twin, endPoints, edgeTypeOf
 
                                            , incidentEdges, incomingEdges, outgoingEdges
                                            , neighboursOf
@@ -45,63 +46,27 @@ module Data.Geometry.PlanarSubdivision.Core( VertexId', FaceId'
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Aeson
-import           Data.ByteString (ByteString)
-import qualified Data.CircularSeq as C
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry.Interval
-import           Data.Geometry.Line (cmpSlope, supportingLine)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Box
 import           Data.Geometry.Properties
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Maybe (mapMaybe)
-import           Data.Ord (comparing)
-import qualified Data.PlanarGraph as PG
-import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
-                                 , Dart(..), VertexId(..), FaceId(..), Arc(..)
-                                 , Direction(..), twin
-                                 , World(..))
-import           Data.Semigroup
-import           Data.Util
+import qualified Data.PlaneGraph as PG
+import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
+                                , Dart, VertexId(..), FaceId(..)
+                                , World(..)
+                                , VertexId', FaceId'
+                                , VertexData(..)
+                                )
 import qualified Data.Vector as V
-import qualified Data.Yaml as Yaml
-import qualified Data.Yaml.Pretty as YamlP
 import           GHC.Generics (Generic)
 
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
-type VertexId' s = VertexId s Primal
-
-type FaceId' s = FaceId s Primal
-
--- | Note that the functor instance is in v
-data VertexData r v = VertexData { _location :: !(Point 2 r)
-                                 , _vData    :: !v
-                                 } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
-makeLenses ''VertexData
-
-vtxDataToExt                  :: VertexData r v -> Point 2 r :+ v
-vtxDataToExt (VertexData p v) = p :+ v
-
-instance Bifunctor VertexData where
-  bimap f g (VertexData p v) = VertexData (fmap f p) (g v)
-
-instance (FromJSON r, FromJSON v) => FromJSON (VertexData r v) where
-  parseJSON = fmap (\(l :+ d) -> VertexData l d) . parseJSON
-
-instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
-  toJSON     = toJSON     . vtxDataToExt
-  toEncoding = toEncoding . vtxDataToExt
-
-
--- | Planar-subdivsions are internally represented as a *connected* planar
+-- | Planar-subdivsions are internally represented as an *connected* plane
 -- graph. We distuinish two types of edges in this graph representation:
 -- Visible edges, which also appear in the original planar subdivision, and
 -- Invisible edges, which are essentially dummy edges making sure that the
@@ -122,7 +87,6 @@ instance FromJSON e => FromJSON (EdgeData e)
 instance ToJSON e => ToJSON (EdgeData e) where
   toEncoding = genericToEncoding defaultOptions
 
-
 -- | The Face data consists of the data itself and a list of holes
 data FaceData h f = FaceData { _holes :: [h]
                              , _fData :: !f
@@ -134,16 +98,19 @@ instance (ToJSON h, ToJSON f)     => ToJSON (FaceData h f) where
   toEncoding = genericToEncoding defaultOptions
 
 
-newtype PlanarSubdivision s v e f r = PlanarSubdivision { _graph ::
-    PlanarGraph s Primal (VertexData r v) (EdgeData e) (FaceData (Dart s) f) }
-      deriving (Show,Eq)
+--------------------------------------------------------------------------------
+-- * The Planar Subdivision Type
+
+newtype PlanarSubdivision s v e f r = PlanarSubdivision { _planeGraph ::
+    PlaneGraph s v (EdgeData e) (FaceData (Dart s) f) r}
+      deriving (Show,Eq,Functor)
 makeLenses ''PlanarSubdivision
 
 type instance NumType   (PlanarSubdivision s v e f r) = r
 type instance Dimension (PlanarSubdivision s v e f r) = 2
 
-instance Functor (PlanarSubdivision s v e f) where
-  fmap f s = s&graph.PG.vertexData.traverse.location %~ fmap f
+instance IsBoxable (PlanarSubdivision s v e f r) where
+  boundingBox = boundingBox . _planeGraph
 
 
 -- instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
@@ -157,15 +124,11 @@ instance Functor (PlanarSubdivision s v e f) where
 
 --       showVtx ()
 
-
-
-instance IsBoxable (PlanarSubdivision s v e f r) where
-  boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices
-
-
 --------------------------------------------------------------------------------
 -- * Constructing a planar subdivision
 
+-- | Data type that expresses whether or not we are inside or outside the
+-- polygon.
 data PolygonFaceData = Inside | Outside deriving (Show,Read,Eq)
 
 -- | Construct a planar subdivision from a simple polygon
@@ -176,38 +139,10 @@ fromSimplePolygon                            :: proxy s
                                              -> f -- ^ data inside
                                              -> f -- ^ data outside the polygon
                                              -> PlanarSubdivision s p () f r
-fromSimplePolygon p (SimplePolygon vs) iD oD = PlanarSubdivision g'
+fromSimplePolygon p pg iD oD = PlanarSubdivision . f $ PG.fromSimplePolygon p pg iD oD
   where
-    g      = fromVertices p vs
-    fData' = V.fromList [FaceData [] iD, FaceData [] oD]
-
-    g'     = g & PG.faceData             .~ fData'
-               & PG.dartData.traverse._2 .~ EdgeData Visible ()
-
--- The following does not really work anymore
--- frompolygon p (MultiPolygon vs hs) iD oD = PlanarSubdivision g'
---   where
---     g      = fromVertices p vs
---     hs'    = map (\h -> fromPolygon p h oD iD) hs
---            -- note that oD and iD are exchanged
---     fData' = V.fromList [FaceData iD hs', FaceData oD []]
-
-
-
-
-
-fromVertices      :: proxy s
-                  -> C.CSeq (Point 2 r :+ p)
-                  -> PlanarGraph s Primal (VertexData r p) () ()
-fromVertices _ vs = g&PG.vertexData .~ vData'
-  where
-    n = length vs
-    g = planarGraph [ [ (Dart (Arc i)               Positive, ())
-                      , (Dart (Arc $ (i+1) `mod` n) Negative, ())
-                      ]
-                    | i <- [0..(n-1)]]
-    vData' = V.fromList . map (\(p :+ e) -> VertexData p e) . F.toList $ vs
-
+    f g = g & PG.faceData.traverse    %~ FaceData []
+            & PG.dartData.traverse._2 .~ EdgeData Visible ()
 
 -- | Constructs a connected planar subdivision.
 --
@@ -218,44 +153,7 @@ fromConnectedSegments       :: (Foldable f, Ord r, Num r)
                             -> f (LineSegment 2 p r :+ EdgeData e)
                             -> PlanarSubdivision s (NonEmpty.NonEmpty p) e () r
 fromConnectedSegments px ss = PlanarSubdivision $
-    fromConnectedSegments' px ss & PG.faceData.traverse %~ FaceData []
-
--- | Constructs a planar graph
---
--- pre: The segments form a single connected component
---
--- running time: \(O(n\log n)\)
-fromConnectedSegments'      :: (Foldable f, Ord r, Num r)
-                            => proxy s
-                            -> f (LineSegment 2 p r :+ e)
-                            -> PlanarGraph s Primal
-                                  (VertexData r (NonEmpty.NonEmpty p)) e ()
-fromConnectedSegments' _ ss = planarGraph dts & PG.vertexData .~ vxData
-  where
-    pts         = M.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
-    f (s :+ e)  = [ ( s^.start.core
-                    , SP (sing $ s^.start.extra) [(s^.end.core)   :+ h Positive e])
-                  , ( s^.end.core
-                    , SP (sing $ s^.end.extra)   [(s^.start.core) :+ h Negative e])
-                  ]
-    g i (s :+ e) = s :+ (Arc i :+ e)
-    h d (a :+ e) = (Dart a d, e)
-
-    sing x = x NonEmpty.:| []
-
-    vts    = map (\(p,sp) -> (p,map (^.extra) . sortArround (ext p) <$> sp))
-           . M.assocs $ pts
-    -- vertex Data
-    vxData = V.fromList . map (\(p,sp) -> VertexData p (sp^._1)) $ vts
-    -- The darts
-    dts    = map (^._2._2) vts
-
--- fromSegments :: (Foldable f, Ord r, Num r)
---                 => proxy s -> f (LineSegment 2 p r :+ e)
---                 -> PlanarGraph s Primal
---                 (VertexData r (NonEmpty.NonEmpty p)) e ()
--- fr
-
+    PG.fromConnectedSegments px ss & PG.faceData.traverse %~ FaceData []
 
 --------------------------------------------------------------------------------
 -- * Basic Graph information
@@ -265,54 +163,52 @@ fromConnectedSegments' _ ss = planarGraph dts & PG.vertexData .~ vxData
 -- >>> numVertices myGraph
 -- 4
 numVertices :: PlanarSubdivision s v e f r  -> Int
-numVertices = PG.numVertices . _graph
+numVertices = PG.numVertices . _planeGraph
 
 -- | Get the number of Darts
 --
 -- >>> numDarts myGraph
 -- 12
 numDarts :: PlanarSubdivision s v e f r  -> Int
-numDarts = PG.numDarts . _graph
+numDarts = PG.numDarts . _planeGraph
 
 -- | Get the number of Edges
 --
 -- >>> numEdges myGraph
 -- 6
 numEdges :: PlanarSubdivision s v e f r  -> Int
-numEdges = PG.numEdges . _graph
+numEdges = PG.numEdges . _planeGraph
 
 -- | Get the number of faces
 --
 -- >>> numFaces myGraph
 -- 4
 numFaces :: PlanarSubdivision s v e f r  -> Int
-numFaces = PG.numFaces . _graph
+numFaces = error "not implemented yet"
+--FIXME!!
+
 
 -- | Enumerate all vertices
 --
 -- >>> vertices' myGraph
 -- [VertexId 0,VertexId 1,VertexId 2,VertexId 3]
 vertices'   :: PlanarSubdivision s v e f r  -> V.Vector (VertexId' s)
-vertices' = PG.vertices' . _graph
+vertices' = PG.vertices' . _planeGraph
 
 -- | Enumerate all vertices, together with their vertex data
 
 -- >>> vertices myGraph
 -- [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
 vertices   :: PlanarSubdivision s v e f r  -> V.Vector (VertexId' s, VertexData r v)
-vertices = PG.vertices . _graph
-
-
-
-
+vertices = PG.vertices . _planeGraph
 
 -- | Enumerate all darts
 darts' :: PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-darts' = PG.darts' . _graph
+darts' = PG.darts' . _planeGraph
 
 -- | Enumerate all edges. We report only the Positive darts
 edges' :: PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-edges' = PG.edges' . _graph
+edges' = PG.edges' . _planeGraph
 
 -- | Enumerate all edges with their edge data. We report only the Positive
 -- darts.
@@ -325,57 +221,61 @@ edges' = PG.edges' . _graph
 -- (Dart (Arc 4) +1,"e+")
 -- (Dart (Arc 3) +1,"d+")
 edges :: PlanarSubdivision s v e f r  -> V.Vector (Dart s, EdgeData e)
-edges = PG.edges . _graph
+edges = PG.edges . _planeGraph
 
 -- | Enumerate all faces in the planar subdivision
 faces' :: PlanarSubdivision s v e f r  -> V.Vector (FaceId' s)
-faces' = PG.faces' . _graph
+faces' = error "not implemented"
 
 -- | All faces with their face data.
 faces :: PlanarSubdivision s v e f r  -> V.Vector (FaceId' s, FaceData (Dart s) f)
-faces = PG.faces . _graph
+faces = error "not implemented"
 
 -- | Enumerates all faces with their face data exlcluding  the outer face
 internalFaces    :: (Ord r, Fractional r) => PlanarSubdivision s v e f r
                  -> V.Vector (FaceId' s, FaceData (Dart s) f)
 internalFaces ps = let i = outerFaceId ps
-                   in V.filter (\(j,_) -> i /= j) $ faces ps
+                 in V.filter (\(j,_) -> i /= j) $ faces ps
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
 -- running time: \(O(1)\)
 tailOf   :: Dart s -> PlanarSubdivision s v e f r  -> VertexId' s
-tailOf d = PG.tailOf d . _graph
+tailOf d = PG.tailOf d . _planeGraph
 
 -- | The vertex this dart is heading in to
 --
 -- running time: \(O(1)\)
 headOf   :: Dart s -> PlanarSubdivision s v e f r  -> VertexId' s
-headOf d = PG.headOf d . _graph
+headOf d = PG.headOf d . _planeGraph
 
 -- | endPoints d g = (tailOf d g, headOf d g)
 --
 -- running time: \(O(1)\)
 endPoints   :: Dart s -> PlanarSubdivision s v e f r
             -> (VertexId' s, VertexId' s)
-endPoints d = PG.endPoints d . _graph
+endPoints d = PG.endPoints d . _planeGraph
 
 edgeTypeOf   :: Dart s -> Lens' (PlanarSubdivision s v e f r ) EdgeType
-edgeTypeOf d = graph.PG.eDataOf d.edgeType
+edgeTypeOf d = planeGraph.PG.eDataOf d.edgeType
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
+
+-- TODO: filter invisible edges
 --
 -- running time: \(O(k)\), where \(k\) is the output size
 incidentEdges   :: VertexId' s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
-incidentEdges v = PG.incidentEdges v . _graph
+incidentEdges v = PG.incidentEdges v . _planeGraph
+
+
 
 -- | All incoming edges incident to vertex v, in counterclockwise order around v.
 incomingEdges   :: VertexId' s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
-incomingEdges v = PG.incomingEdges v . _graph
+incomingEdges v = PG.incomingEdges v . _planeGraph
 
 -- | All outgoing edges incident to vertex v, in counterclockwise order around v.
 outgoingEdges   :: VertexId' s -> PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-outgoingEdges v = PG.outgoingEdges v . _graph
+outgoingEdges v = PG.outgoingEdges v . _planeGraph
 
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
 -- around the vertex.
@@ -383,7 +283,7 @@ outgoingEdges v = PG.outgoingEdges v . _graph
 -- running time: \(O(k)\), where \(k\) is the output size
 neighboursOf   :: VertexId' s -> PlanarSubdivision s v e f r
                -> V.Vector (VertexId' s)
-neighboursOf v = PG.neighboursOf v . _graph
+neighboursOf v = PG.neighboursOf v . _planeGraph
 
 -- | The face to the left of the dart
 --
@@ -398,7 +298,7 @@ neighboursOf v = PG.neighboursOf v . _graph
 --
 -- running time: \(O(1)\).
 leftFace   :: Dart s -> PlanarSubdivision s v e f r  -> FaceId' s
-leftFace d = PG.leftFace d . _graph
+leftFace d = PG.leftFace d . _planeGraph
 
 -- | The face to the right of the dart
 --
@@ -413,7 +313,7 @@ leftFace d = PG.leftFace d . _graph
 --
 -- running time: \(O(1)\).
 rightFace   :: Dart s -> PlanarSubdivision s v e f r  -> FaceId' s
-rightFace d = PG.rightFace d . _graph
+rightFace d = PG.rightFace d . _planeGraph
 
 
 -- | The darts bounding this face, for internal faces in clockwise order, for
@@ -422,7 +322,7 @@ rightFace d = PG.rightFace d . _graph
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundary   :: FaceId' s -> PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-boundary f = PG.boundary f . _graph
+boundary f = PG.boundary f . _planeGraph
 
 
 -- | The vertices bounding this face, for internal faces in clockwise order, for
@@ -432,7 +332,7 @@ boundary f = PG.boundary f . _graph
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices   :: FaceId' s -> PlanarSubdivision s v e f r
                    -> V.Vector (VertexId' s)
-boundaryVertices f = PG.boundaryVertices f . _graph
+boundaryVertices f = PG.boundaryVertices f . _planeGraph
 
 
 -- | Lists the holes in this face, given as a list of darts to arbitrary darts
@@ -440,99 +340,81 @@ boundaryVertices f = PG.boundaryVertices f . _graph
 --
 -- running time: \(O(k)\), where \(k\) is the number of darts returned.
 holesOf   :: FaceId' s -> PlanarSubdivision s v e f r -> [Dart s]
-holesOf f = view (graph.PG.fDataOf f.holes)
+holesOf f = view (planeGraph.PG.fDataOf f.holes)
 
 --------------------------------------------------------------------------------
 -- * Access data
 
 
 locationOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) (Point 2 r)
-locationOf v = graph.PG.vDataOf v.location
+locationOf v = planeGraph.PG.locationOf v
 
 -- | Get the vertex data associated with a node. Note that updating this data may be
 -- expensive!!
 --
 -- running time: \(O(1)\)
-vDataOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) v
-vDataOf v = graph.PG.vDataOf v.vData
+vDataOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r) v
+vDataOf v = planeGraph.PG.vDataOf v
 
 -- | Edge data of a given dart
 --
 -- running time: \(O(1)\)
 eDataOf   :: Dart s -> Lens' (PlanarSubdivision s v e f r ) e
-eDataOf d = graph.PG.eDataOf d.eData
+eDataOf d = planeGraph.PG.eDataOf d.eData
 
 -- | Data of a face of a given face
 --
 -- running time: \(O(1)\)
 fDataOf   :: FaceId' s -> Lens' (PlanarSubdivision s v e f r ) f
-fDataOf f = graph.PG.fDataOf f.fData
+fDataOf f = planeGraph.PG.fDataOf f.fData
 
 
 -- class HasData t v e f r where
 --   type DataOf t v e f r
 --   dataOf :: t -> Lens' (PlanarSubdivision s v e f r) (DataOf t v e f r)
 
-
+-- | Getter for the data at the endpoints of a dart
+--
+-- running time: \(O(1)\)
 endPointsOf   :: Dart s -> Getter (PlanarSubdivision s v e f r )
                                   (VertexData r v, VertexData r v)
-endPointsOf d = graph.PG.endPointDataOf d
-
+endPointsOf d = planeGraph.PG.endPointsOf d
 
 -- | Data corresponding to the endpoints of the dart
 --
 -- running time: \(O(1)\)
 endPointData   :: Dart s -> PlanarSubdivision s v e f r
                ->  (VertexData r v, VertexData r v)
-endPointData d = PG.endPointData d . _graph
+endPointData d = PG.endPointData d . _planeGraph
 
 --------------------------------------------------------------------------------
 
 -- | gets the id of the outer face
 --
 -- running time: \(O(n)\)
-outerFaceId    :: (Ord r, Fractional r) => PlanarSubdivision s v e f r -> FaceId' s
-outerFaceId ps = leftFace d ps
-  where
-    (v,_)  = V.minimumBy (comparing (^._2.location.xCoord)) . vertices $ ps
-    d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
-           .  fmap (\d' -> d' :+ (edgeSegment d' ps)^.core.to supportingLine)
-           $ incidentEdges v ps
-    -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
-    -- basically: find the leftmost vertex, find the incident edge with the largest slope
-    -- and take the face left of that edge. This is the outerface.
-    -- note that this requires that the edges are straight line segments
-    --
+outerFaceId :: (Ord r, Fractional r) => PlanarSubdivision s v e f r -> FaceId' s
+outerFaceId = PG.outerFaceId . _planeGraph
 
 --------------------------------------------------------------------------------
 
 -- | Reports all visible segments as line segments
-edgeSegments    :: PlanarSubdivision s v e f r -> [(Dart s, LineSegment 2 v r :+ e)]
-edgeSegments ps = mapMaybe withSegment . F.toList . edges $ ps
-  where
-    withSegment (d,EdgeData et e) = let (p,q) = bimap vtxDataToExt vtxDataToExt
-                                              $ ps^.endPointsOf d
-                                        seg   = ClosedLineSegment p q
-                                    in case et of
-                                         Visible   -> Just (d, seg :+ e)
-                                         Invisible -> Nothing
-
+edgeSegments :: PlanarSubdivision s v e f r -> [(Dart s, LineSegment 2 v r :+ e)]
+edgeSegments = map (\x -> x&_2.extra %~ _eData)
+             . filter (\x -> x^._2.extra.edgeType == Visible)
+             . PG.edgeSegments . _planeGraph
 
 -- | Given a dart and the subdivision constructs the line segment representing it
 --
 -- \(O(1)\)
-edgeSegment      :: Dart s -> PlanarSubdivision s v e f r -> LineSegment 2 v r :+ e
-edgeSegment d ps = seg :+ ps^.eDataOf d
-  where
-    seg = let (p,q) = bimap vtxDataToExt vtxDataToExt $ ps^.endPointsOf d
-          in ClosedLineSegment p q
+edgeSegment   :: Dart s -> PlanarSubdivision s v e f r -> LineSegment 2 v r :+ e
+edgeSegment d = (\x -> x&extra %~ _eData) . PG.edgeSegment d . _planeGraph
 
-rawFaceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r
-                    -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = pg :+ (ps^.fDataOf i)
-  where
-    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.PG.vDataOf j.to vtxDataToExt)
-       . boundaryVertices i $ ps
+
+-- TODO, This should ignore invisible edges!!!!
+
+rawFaceBoundary   :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
+rawFaceBoundary i = (\x -> x&extra %~ _fData) . PG.rawFaceBoundary i . _planeGraph
+
 
 rawFacePolygon :: FaceId' s -> PlanarSubdivision s v e f r
                     -> SomePolygon v r :+ f
@@ -543,21 +425,10 @@ rawFacePolygon i ps = case holesOf i ps of
     res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
     toHole d = (rawFaceBoundary (leftFace d ps) ps)^.core
 
-
-
 -- | Lists all faces of the planar graph. This ignores invisible edges
 rawFacePolygons    :: PlanarSubdivision s v e f r
                    -> V.Vector (FaceId' s, SomePolygon v r :+ f)
 rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
---   where
---     gr = ps^.graph
-
---     f (i,FaceData hs x) = case hs of
---                             [] -> Left  $ toPolygon i :+ x
---                             _  -> Right
-
---     toPolygon d = boundaryVertices gr
-
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the planar subdivision
