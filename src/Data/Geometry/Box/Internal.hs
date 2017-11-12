@@ -63,6 +63,12 @@ fromExtent rs = Box (CWMin (Point $ fmap (^.R.lower.R.unEndPoint) rs) :+ mempty)
                     (CWMax (Point $ fmap (^.R.upper.R.unEndPoint) rs) :+ mempty)
 
 
+-- | Given a center point and a vector specifying the box width's, construct a box.
+fromCenter      :: (Arity d, Fractional r) => Point d r -> Vector d r -> Box d () r
+fromCenter c ws = let f x r = R.ClosedRange (x-r) (x+r)
+                  in fromExtent $ FV.zipWith f (toVec c) ((/2) <$> ws)
+
+
 -- | Center of the box
 centerPoint   :: (Arity d, Fractional r) => Box d p r -> Point d r
 centerPoint b = Point $ w V.^/ 2
