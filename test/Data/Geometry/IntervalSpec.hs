@@ -13,7 +13,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Seq as Seq
 import qualified Data.Set as Set
 import           GHC.TypeLits
-import           QuickCheck.Instances ()
+import           Test.QuickCheck.HGeometryInstances ()
 import           Test.Hspec
 import           Test.QuickCheck
 import           Util

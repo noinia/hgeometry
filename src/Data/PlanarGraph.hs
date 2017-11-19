@@ -25,6 +25,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , tailOf, headOf, endPoints
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
+                       , nextIncidentEdge, prevIncidentEdge
 
                        , vDataOf, eDataOf, fDataOf, endPointDataOf, endPointData
 
@@ -33,7 +34,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , FaceId(..), FaceId'
                        , leftFace, rightFace, boundary, boundaryVertices
-
+                       , nextEdge, prevEdge
 
 
                        , EdgeOracle
@@ -42,7 +43,7 @@ module Data.PlanarGraph( Arc(..)
                        , hasEdge
                        ) where
 
-import           Data.ByteString (ByteString)
+
 import           Control.Applicative (Alternative(..))
 import           Control.Lens hiding ((.=))
 import           Control.Monad.ST (ST)
@@ -52,7 +53,7 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Maybe (catMaybes, isJust)
+import           Data.Maybe (catMaybes, isJust, fromJust)
 import           Data.Permutation
 import           Data.Semigroup (Semigroup(..))
 import           Data.Traversable (fmapDefault,foldMapDefault)
@@ -63,9 +64,9 @@ import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 import           Unsafe.Coerce (unsafeCoerce)
-import qualified Data.Yaml.Pretty as YamlP
 
 
+import           Data.Yaml.Util
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -94,8 +95,8 @@ import           Debug.Trace
 --                           ]
 -- :}
 
--- TODO: Add a fig. of the Graph
-
+-- This represents the following graph:
+-- ![myGraph](docs/Data/PlanarGraph/testG.png)
 
 --------------------------------------------------------------------------------
 
@@ -179,11 +180,10 @@ dualDualIdentity = unsafeCoerce Refl
 -- | A vertex in a planar graph. A vertex is tied to a particular planar graph
 -- by the phantom type s, and to a particular world w.
 newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
-                                deriving (Eq,Ord,Enum,ToJSON)
+                                deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 -- VertexId's are in the range 0...|orbits|-1
 
 type VertexId' s = VertexId s Primal
-
 
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
@@ -222,7 +222,6 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
                                                          && r == r' && f == f'
 
 
-
 instance (ToJSON v, ToJSON e, ToJSON f)
          => ToJSON (PlanarGraph s w v e f) where
   toJSON     = object . encodeJSON
@@ -231,12 +230,50 @@ instance (ToJSON v, ToJSON e, ToJSON f)
 encodeJSON   :: (ToJSON f, ToJSON e, ToJSON v, KeyValue t)
              => PlanarGraph s w v e f -> [t]
 encodeJSON g = [ "vertices"    .= ((\(v,d) -> v :+ d)             <$> vertices g)
-               , "edges"       .= ((\(e,d) -> endPoints e g :+ d) <$> edges g)
+               , "darts"       .= ((\(e,d) -> endPoints e g :+ d) <$> darts g)
                , "faces"       .= ((\(f,d) -> f :+ d)             <$> faces g)
                , "adjacencies" .= toAdjacencyLists g
                ]
 
--- ** Lenses and getters
+
+instance (FromJSON v, FromJSON e, FromJSON f)
+         => FromJSON (PlanarGraph s Primal v e f) where
+  parseJSON = withObject "" $ \v -> buildFromJSON <$> v .: "vertices"
+                                                  <*> v .: "darts"
+                                                  <*> v .: "faces"
+                                                  <*> v .: "adjacencies"
+
+
+buildFromJSON             :: V.Vector (VertexId' s :+ v)
+                          -> V.Vector ((VertexId' s, VertexId' s) :+ e)
+                          -> V.Vector (FaceId' s :+ f)
+                          -> [(VertexId' s, V.Vector (VertexId' s))]
+                          -> PlanarGraph s Primal v e f
+buildFromJSON vs es fs as = g&vertexData .~ reorder vs _unVertexId
+                             &dartData   .~ ds
+                             &faceData   .~ reorder fs (_unVertexId._unFaceId)
+  where
+    g = fromAdjacencyLists as
+    oracle = edgeOracle g
+    findEdge' (u,v) = fromJust $ findEdge u v oracle
+    ds = es&traverse %~ \(e:+x) -> (findEdge' e,x)
+    -- for the face data we don't really know enough to reconstruct them I think
+    -- i.e. we may not have the guarnatee that the faceId's are the same in the
+    -- old graph and the new one
+
+    -- make sure we order the data values appropriately
+    reorder v f = V.create $ do
+                               v' <- MV.new (V.length v)
+                               forM_ v $ \(i :+ x) ->
+                                 MV.write v' (f i) x
+                               pure v'
+
+
+
+
+
+
+-- ** lenses and getters
 
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
@@ -309,6 +346,8 @@ reorderEdgeData ds = V.create $ do
 -- ** Constructing a Planar graph
 
 -- | Construct a planar graph
+--
+-- running time: \(O(n)\).
 planarGraph'      :: Permutation (Dart s) -> PlanarGraph s w () () ()
 planarGraph' perm = pg
   where
@@ -337,6 +376,8 @@ planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
 -- vertices should be given in counter clockwise order.
+--
+-- pre: No self-loops, and no multi-edges
 --
 -- running time: \(O(n)\).
 fromAdjacencyLists      :: forall s w h. (Foldable h, Functor h)
@@ -377,11 +418,14 @@ assignArcs o = evalState (traverse f o) 0
 -- | Produces the adjacencylists for all vertices in the graph. For every vertex, the
 -- adjacent vertices are given in counter clockwise order.
 --
+-- Note that in case a vertex u as a self loop, we have that this vertexId occurs
+-- twice in the list of neighbours, i.e.: u : [...,u,..,u,...]. Similarly, if there are
+-- multiple darts between a pair of edges they occur multiple times.
+--
 -- running time: \(O(n)\)
 toAdjacencyLists    :: PlanarGraph s w v e f -> [(VertexId s w, V.Vector (VertexId s w))]
 toAdjacencyLists pg = map (\u -> (u,neighboursOf u pg)) . V.toList . vertices' $ pg
-
-
+-- TODO: something weird happens when we have self-loops here.
 
 --     -- Go through all of the edges we find an edge (u,v), with u <= v,
 --     -- assign an ArcId to this edge (and increment the next available arcId).
@@ -585,6 +629,25 @@ neighboursOf v g = otherVtx <$> incidentEdges v g
   where
     otherVtx d = let u = tailOf d g in if u == v then headOf d g else u
 
+-- | Given a dart d that points into some vertex v, report the next dart in the
+-- cyclic order around v.
+--
+-- running time: \(O(1)\)
+nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
+nextIncidentEdge d g = let perm  = g^.embedding
+                           (i,j) = lookupIdx perm d
+                       in next (perm^.orbits.ix' i) j
+
+-- | Given a dart d that points into some vertex v, report the next dart in the
+-- cyclic order around v.
+--
+-- running time: \(O(1)\)
+prevIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
+prevIncidentEdge d g = let perm  = g^.embedding
+                           (i,j) = lookupIdx perm d
+                       in previous (perm^.orbits.ix' i) j
+
+
 --------------------------------------------------------------------------------
 -- * Access data
 
@@ -657,7 +720,7 @@ computeDual' g = dualG
 
 -- | A face
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
-                   deriving (Eq,Ord,ToJSON)
+                   deriving (Eq,Ord,ToJSON,FromJSON)
 
 type FaceId' s = FaceId s Primal
 
@@ -704,6 +767,15 @@ rightFace     :: Dart s -> PlanarGraph s w v e f -> FaceId s w
 rightFace d g = FaceId . tailOf d $ _dual g
 
 
+-- | Get the next edge along the face
+nextEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
+nextEdge d = nextIncidentEdge d . _dual
+
+-- | Get the previous edge along the face
+prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
+prevEdge d = prevIncidentEdge d . _dual
+
+
 -- | The darts bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.
 --
@@ -720,6 +792,10 @@ boundary (FaceId v) g = incidentEdges v $ _dual g
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices     :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
 boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
+
+-- -- | Gets the next dart along the face
+-- nextDart     :: Dart s -> PlanarGraph s w v e f -> Dart s
+-- nextDart d g = f rightFace e
 
 --------------------------------------------------------------------------------
 -- Testing stuff
@@ -768,19 +844,11 @@ testG = planarGraph [ [ (Dart aA Negative, "a-")
     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
 
 
+
+
+
+
 --------------------------------------------------------------------------------
-
-
-
--- type ArcID = Int
-
--- -- | ST' is a strict triple (m,a,x) containing:
--- --
--- -- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
--- --            u < v, to arcId's.
--- -- - a: the next available unused arcID
--- -- - x: the data value we are interested in computing
--- type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 
 
 --------------------------------------------------------------------------------
@@ -811,10 +879,22 @@ instance Traversable (EdgeOracle s w) where
       g = traverse (bitraverse pure f)
 
 
-edgeOracle   :: PlanarGraph s w v e f -> EdgeOracle s w ()
-edgeOracle g = buildEdgeOracle [ (v, ext <$> neighboursOf v g)
+-- | Given a planar graph, construct an edge oracle. Given a pair of vertices
+-- this allows us to efficiently find the dart representing this edge in the
+-- graph.
+--
+-- pre: No self-loops and no multi-edges!!!
+--
+-- running time: \(O(n)\)
+edgeOracle   :: PlanarGraph s w v e f -> EdgeOracle s w (Dart s)
+edgeOracle g = buildEdgeOracle [ (v, mkAdjacency v <$> incidentEdges v g)
                                | v <- F.toList $ vertices' g
                                ]
+  where
+    mkAdjacency v d = otherVtx v d :+ d
+    otherVtx v d = let u = tailOf d g in if u == v then headOf d g else u
+
+
 
 -- | Builds an edge oracle that can be used to efficiently test if two vertices
 -- are connected by an edge.
@@ -899,6 +979,8 @@ findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
 
 data TestG
 
+
+
 type Vertex = VertexId TestG Primal
 
 testEdges :: [(Vertex,[Vertex])]
@@ -910,9 +992,3 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (4, [1,2,5])
             , (5, [3,4])
             ]
-
-serializeToYaml :: (ToJSON v, ToJSON e, ToJSON f) => PlanarGraph s w v e f -> ByteString
-serializeToYaml = YamlP.encodePretty (YamlP.setConfCompare cmp YamlP.defConfig)
-  where
-    cmp k1 k2 = lookup k1 order `compare` lookup k2 order
-    order = zip ["vertices","edges","faces","adjacencies"] [0..]

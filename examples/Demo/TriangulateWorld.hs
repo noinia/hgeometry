@@ -67,7 +67,7 @@ mainWith (Options inFile outFile) = do
           yMonotones = tail . mapMaybe (^?_2.core._Left)
                      . concatMap (F.toList.rawFacePolygons) $ subdivs
           ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
-          segs    = map (^._2.core) . concatMap edgeSegments $ subdivs
+          segs    = map (^._2.core) . concatMap (F.toList . edgeSegments) $ subdivs
           out     = [ asIpeObject pg a
                     | pg :+ a <- polies
                     ] <>

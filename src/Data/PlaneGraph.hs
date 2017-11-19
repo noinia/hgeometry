@@ -19,6 +19,8 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
                       , incidentEdges, incomingEdges, outgoingEdges
                       , neighboursOf
+                      , nextIncidentEdge, prevIncidentEdge
+
 
                       , leftFace, rightFace
                       , boundary, boundaryVertices
@@ -68,8 +70,6 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
 import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
-import qualified Data.Yaml as Yaml
-import qualified Data.Yaml.Pretty as YamlP
 import           GHC.Generics (Generic)
 import           Debug.Trace
 
@@ -99,7 +99,7 @@ instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r =
     PlaneGraph { _graph :: PlanarGraph s Primal (VertexData r v) e f }
-      deriving (Show,Eq)
+      deriving (Show,Eq,ToJSON)
 makeLenses ''PlaneGraph
 
 type instance NumType   (PlaneGraph s v e f r) = r
@@ -315,6 +315,21 @@ neighboursOf   :: VertexId' s -> PlaneGraph s v e f r
                -> V.Vector (VertexId' s)
 neighboursOf v = PG.neighboursOf v . _graph
 
+-- | Given a dart d that points into some vertex v, report the next dart in the
+-- cyclic order around v.
+--
+-- running time: \(O(1)\)
+nextIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
+nextIncidentEdge d = PG.nextIncidentEdge d . _graph
+
+-- | Given a dart d that points into some vertex v, report the next dart in the
+-- cyclic order around v.
+--
+-- running time: \(O(1)\)
+prevIncidentEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
+prevIncidentEdge d = PG.prevIncidentEdge d . _graph
+
+
 -- | The face to the left of the dart
 --
 -- >>> leftFace (dart 1 "+1") myGraph
@@ -424,8 +439,8 @@ outerFaceId ps = leftFace d ps
 --------------------------------------------------------------------------------
 
 -- | Reports all edges as line segments
-edgeSegments    :: PlaneGraph s v e f r -> [(Dart s, LineSegment 2 v r :+ e)]
-edgeSegments ps = map withSegment . F.toList . edges $ ps
+edgeSegments    :: PlaneGraph s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
+edgeSegments ps = fmap withSegment . edges $ ps
   where
     withSegment (d,e) = let (p,q) = bimap vtxDataToExt vtxDataToExt
                                   $ ps^.endPointsOf d

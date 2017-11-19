@@ -138,6 +138,7 @@ pattern Point2       :: r -> r -> Point 2 r
 pattern Point2 x y   <- (_point2 -> (x,y))
   where
     Point2 x y = point2 x y
+{-# COMPLETE Point2 #-}
 
 -- | Similarly, we can write:
 --
@@ -152,6 +153,7 @@ pattern Point3       :: r -> r -> r -> Point 3 r
 pattern Point3 x y z <- (_point3 -> (x,y,z))
   where
     Point3 x y z = point3 x y z
+{-# COMPLETE Point3 #-}
 
 -- | Construct a 2 dimensional point
 --

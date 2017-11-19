@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module QuickCheck.Instances where
+module Test.QuickCheck.HGeometryInstances where
 
 import           Control.Lens
 import           Data.BinaryTree
@@ -19,6 +19,7 @@ import qualified Data.Seq as Seq
 import qualified Data.Seq2 as S2
 import           GHC.TypeLits
 import           Test.QuickCheck
+
 --------------------------------------------------------------------------------
 
 -- instance Arbitrary a => Arbitrary (NonEmpty.NonEmpty a) where

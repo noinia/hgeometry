@@ -51,6 +51,10 @@ flag examples
   default:     False
   manual:      True
 
+flag with-quickcheck
+  description: Include QuickCheck instances
+  default:     True
+  manual:      False
 
 flag interactive
   description: Build  interactive parts
@@ -175,6 +179,7 @@ library
                     -- * Other
                     System.Random.Shuffle
                     Control.Monad.State.Persistent
+                    Data.Yaml.Util
 
 
 
@@ -219,6 +224,10 @@ library
                , mtl
                , random
                , template-haskell
+
+  if flag(with-quickcheck)
+    build-depends: QuickCheck           >= 2.5
+    exposed-modules: Test.QuickCheck.HGeometryInstances
 
 
   hs-source-dirs: src
@@ -424,7 +433,6 @@ test-suite hspec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
 
-                 QuickCheck.Instances
                  Util
 
 

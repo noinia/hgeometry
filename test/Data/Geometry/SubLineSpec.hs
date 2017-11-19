@@ -10,7 +10,7 @@ import Data.Geometry.SubLine
 import Data.Ratio
 import Data.UnBounded
 import Data.Vinyl.CoRec
-import QuickCheck.Instances ()
+import Test.QuickCheck.HGeometryInstances ()
 import Test.Hspec
 import Test.QuickCheck
 

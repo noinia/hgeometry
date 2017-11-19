@@ -52,6 +52,10 @@ cycleOf perm x = perm^.orbits.ix' (perm^.indexes.ix' (fromEnum x)._1)
 next     :: GV.Vector v a => v a -> Int -> a
 next v i = let n = GV.length v in v GV.! ((i+1) `mod` n)
 
+-- | Previous item in a cyclic permutation
+previous     :: GV.Vector v a => v a -> Int -> a
+previous v i = let n = GV.length v in v GV.! ((i-1) `mod` n)
+
 -- | Lookup the indices of an element, i.e. in which orbit the item is, and the
 -- index within the orbit.
 --

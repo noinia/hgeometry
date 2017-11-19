@@ -75,6 +75,7 @@ pattern ClosedRange l u = Range (Closed l) (Closed u)
 -- | A range from l to u, ignoring/forgetting the type of the enpoints
 pattern Range'     :: a -> a -> Range a
 pattern Range' l u <- ((\r -> (r^.lower.unEndPoint,r^.upper.unEndPoint) -> (l,u)))
+{-# COMPLETE Range' #-}
 
 
 prettyShow             :: Show a => Range a -> String

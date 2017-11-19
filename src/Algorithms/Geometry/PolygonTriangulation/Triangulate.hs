@@ -25,7 +25,7 @@ triangulate px pg = constructSubdivision px e es diags
     outerFaceId'  = outerFaceId monotoneP
 
     monotoneDiags = map (^._2.core) . filter (\e' -> e'^._2.extra == Diagonal)
-                  . edgeSegments $ monotoneP
+                  . F.toList . edgeSegments $ monotoneP
     extraDiags    = concatMap (TM.computeDiagonals . toCounterClockWiseOrder')
                   . lefts . map (^._2.core)
                   . filter (\f -> f^._1 /= outerFaceId')

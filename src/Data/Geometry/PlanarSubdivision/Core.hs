@@ -398,9 +398,9 @@ outerFaceId = PG.outerFaceId . _planeGraph
 --------------------------------------------------------------------------------
 
 -- | Reports all visible segments as line segments
-edgeSegments :: PlanarSubdivision s v e f r -> [(Dart s, LineSegment 2 v r :+ e)]
-edgeSegments = map (\x -> x&_2.extra %~ _eData)
-             . filter (\x -> x^._2.extra.edgeType == Visible)
+edgeSegments :: PlanarSubdivision s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
+edgeSegments = fmap (\x -> x&_2.extra %~ _eData)
+             . V.filter (\x -> x^._2.extra.edgeType == Visible)
              . PG.edgeSegments . _planeGraph
 
 -- | Given a dart and the subdivision constructs the line segment representing it

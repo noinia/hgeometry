@@ -204,8 +204,10 @@ pattern Vector2       :: r -> r -> Vector 2 r
 pattern Vector2 x y   <- (_unV2 -> (x,y))
   where
     Vector2 x y = v2 x y
+{-# COMPLETE Vector2 #-}
 
 pattern Vector3       :: r -> r -> r -> Vector 3 r
 pattern Vector3 x y z <- (_unV3 -> (x,y,z))
   where
     Vector3 x y z = v3 x y z
+{-# COMPLETE Vector3 #-}

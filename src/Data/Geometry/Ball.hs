@@ -117,6 +117,7 @@ type Sphere d p r = Boundary (Ball d p r)
 
 pattern Sphere     :: Point d r :+ p -> r -> Sphere d p r
 pattern Sphere c r = Boundary (Ball c r)
+{-# COMPLETE Sphere #-}
 
 
 
@@ -128,12 +129,14 @@ type Disk p r = Ball 2 p r
 
 pattern Disk     :: Point 2 r :+ p -> r -> Disk p r
 pattern Disk c r = Ball c r
+{-# COMPLETE Disk #-}
 
 
 type Circle p r = Sphere 2 p r
 
 pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r
 pattern Circle c r = Sphere c r
+{-# COMPLETE Circle #-}
 
 -- | Given three points, get the disk through the three points. If the three
 -- input points are colinear we return Nothing
