@@ -40,7 +40,7 @@ module Data.PlanarGraph( Arc(..)
                        , EdgeOracle
                        , edgeOracle, buildEdgeOracle
                        , findEdge
-                       , hasEdge
+                       , hasEdge, findDart
                        ) where
 
 
@@ -255,7 +255,8 @@ buildFromJSON vs es fs as = g&vertexData .~ reorder vs _unVertexId
   where
     g = fromAdjacencyLists as
     oracle = edgeOracle g
-    findEdge' (u,v) = fromJust $ findEdge u v oracle
+    findEdge' (u,v) = fromJust $ findDart u v oracle
+
     ds = es&traverse %~ \(e:+x) -> (findEdge' e,x)
     -- for the face data we don't really know enough to reconstruct them I think
     -- i.e. we may not have the guarnatee that the faceId's are the same in the
@@ -610,6 +611,7 @@ endPoints d g = (tailOf d g, headOf d g)
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
 incidentEdges (VertexId v) g = g^.embedding.orbits.ix' v
+  -- TODO: The Delaunay triang. stuff seems to produce these in clockwise order instead
 
 -- | All incoming edges incident to vertex v, in counterclockwise order around v.
 incomingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
@@ -637,6 +639,7 @@ nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 nextIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
                        in next (perm^.orbits.ix' i) j
+
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
 -- cyclic order around v.
@@ -971,9 +974,15 @@ findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
   where
     find' j i = fmap (^.extra) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i
 
-
-
-
+-- | Given a pair of vertices (u,v) returns the dart, oriented from u to v,
+-- corresponding to these vertices.
+--
+-- running time: \(O(1)\)
+findDart :: VertexId s w -> VertexId s w -> EdgeOracle s w (Dart s) -> Maybe (Dart s)
+findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id v u
+    -- looks up j in the adjacencylist of i and applies f to the result
+  where
+    find' f j i = fmap (f . (^.extra)) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i
 
 --------------------------------------------------------------------------------
 
