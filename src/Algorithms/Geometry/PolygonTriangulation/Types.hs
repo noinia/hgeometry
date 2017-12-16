@@ -46,7 +46,7 @@ constructSubdivision px e origs diags =
 
     -- the darts incident to internal faces
     queryDarts = concatMap shouldQuery . F.toList . PG.edges' $ g
-    shouldQuery d = case g^.PG.eDataOf d.eData of
+    shouldQuery d = case g^.dataOf d.eData of
                       (True, Original) -> [d]
                       (True, Diagonal) -> [d, twin d]
                       _                -> []

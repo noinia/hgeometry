@@ -23,13 +23,13 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
 
                       , leftFace, rightFace
+                      , nextEdge, prevEdge
                       , boundary, boundaryVertices
                       , outerFaceId
 
-                      , locationOf, vDataOf
+                      , locationOf, HasDataOf(..)
 
-                      , eDataOf, endPointsOf, endPointData
-                      , fDataOf
+                      , endPointsOf, endPointData
                       , vertexData, faceData, dartData, rawDartData
 
                       , edgeSegment, edgeSegments
@@ -66,6 +66,7 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , Direction(..), twin
                                  , World(..)
                                  , FaceId', VertexId'
+                                 , HasDataOf(..)
                                  )
 import           Data.Semigroup
 import           Data.Util
@@ -99,7 +100,7 @@ instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r =
     PlaneGraph { _graph :: PlanarGraph s Primal (VertexData r v) e f }
-      deriving (Show,Eq,ToJSON)
+      deriving (Show,Eq,ToJSON,FromJSON)
 makeLenses ''PlaneGraph
 
 type instance NumType   (PlaneGraph s v e f r) = r
@@ -110,6 +111,8 @@ instance Functor (PlaneGraph s v e f) where
 
 instance IsBoxable (PlaneGraph s v e f r) where
   boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices
+
+
 
 
 --------------------------------------------------------------------------------
@@ -361,6 +364,21 @@ rightFace   :: Dart s -> PlaneGraph s v e f r  -> FaceId' s
 rightFace d = PG.rightFace d . _graph
 
 
+-- | Get the next edge along the face
+--
+--
+-- running time: \(O(1)\).
+nextEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
+nextEdge d = PG.nextEdge d . _graph
+
+-- | Get the previous edge along the face
+--
+--
+-- running time: \(O(1)\).
+prevEdge   :: Dart s -> PlaneGraph s v e f r -> Dart s
+prevEdge d = PG.prevEdge d . _graph
+
+
 -- | The darts bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.
 --
@@ -383,26 +401,21 @@ boundaryVertices f = PG.boundaryVertices f . _graph
 -- * Access data
 
 locationOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) (Point 2 r)
-locationOf v = graph.PG.vDataOf v.location
+locationOf v = graph.PG.dataOf v.location
 
--- | Get the vertex data associated with a node. Note that updating this data may be
--- expensive!!
---
--- running time: \(O(1)\)
-vDataOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) v
-vDataOf v = graph.PG.vDataOf v.vData
 
--- | Edge data of a given dart
---
--- running time: \(O(1)\)
-eDataOf   :: Dart s -> Lens' (PlaneGraph s v e f r ) e
-eDataOf d = graph.PG.eDataOf d
+instance HasDataOf (PlaneGraph s v e f r) (VertexId' s) where
+  type DataOf (PlaneGraph s v e f r) (VertexId' s) = v
+  dataOf v = graph.dataOf v.vData
 
--- | Data of a face of a given face
---
--- running time: \(O(1)\)
-fDataOf   :: FaceId' s -> Lens' (PlaneGraph s v e f r ) f
-fDataOf f = graph.PG.fDataOf f
+instance HasDataOf (PlaneGraph s v e f r) (Dart s) where
+  type DataOf (PlaneGraph s v e f r) (Dart s) = e
+  dataOf d = graph.dataOf d
+
+instance HasDataOf (PlaneGraph s v e f r) (FaceId' s) where
+  type DataOf (PlaneGraph s v e f r) (FaceId' s) = f
+  dataOf f = graph.dataOf f
+
 
 -- | Getter for the data at the endpoints of a dart
 --
@@ -451,7 +464,7 @@ edgeSegments ps = fmap withSegment . edges $ ps
 --
 -- \(O(1)\)
 edgeSegment      :: Dart s -> PlaneGraph s v e f r -> LineSegment 2 v r :+ e
-edgeSegment d ps = seg :+ ps^.eDataOf d
+edgeSegment d ps = seg :+ ps^.dataOf d
   where
     seg = let (p,q) = bimap vtxDataToExt vtxDataToExt $ ps^.endPointsOf d
           in ClosedLineSegment p q
@@ -461,9 +474,9 @@ edgeSegment d ps = seg :+ ps^.eDataOf d
 -- runningtime: \(O(k)\), where \(k\) is the size of the face.
 rawFaceBoundary      :: FaceId' s -> PlaneGraph s v e f r
                     -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = pg :+ (ps^.fDataOf i)
+rawFaceBoundary i ps = pg :+ (ps^.dataOf i)
   where
-    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.PG.vDataOf j.to vtxDataToExt)
+    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
        . boundaryVertices i $ ps
 
 -- | Alias for rawFace Boundary

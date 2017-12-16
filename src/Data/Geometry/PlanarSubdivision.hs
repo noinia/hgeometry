@@ -56,7 +56,7 @@ fromPolygons px pgs oD = subd&planeGraph.faceData .~ faceData'
 
     -- given a faceId lookup the
     getFData fi = let v = boundaryVertices fi subd V.! 0
-                  in subd^.vDataOf v.to holeData
+                  in subd^.dataOf v.to holeData
 
     -- note that we intentionally reverse the order of iDd and oD in the call below,
     -- as our holes are now outside

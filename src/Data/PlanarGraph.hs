@@ -19,6 +19,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , planarGraph, planarGraph', fromAdjacencyLists
                        , toAdjacencyLists
+                       , buildFromJSON
 
                        , numVertices, numDarts, numEdges, numFaces
                        , darts', darts, edges', edges, vertices', vertices, faces', faces
@@ -27,8 +28,7 @@ module Data.PlanarGraph( Arc(..)
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
                        , nextIncidentEdge, prevIncidentEdge
 
-                       , vDataOf, eDataOf, fDataOf, endPointDataOf, endPointData
-
+                       , HasDataOf(..), endPointDataOf, endPointData
 
                        , dual
 
@@ -66,8 +66,9 @@ import qualified Data.Vector.Unboxed.Mutable as UMV
 import           Unsafe.Coerce (unsafeCoerce)
 
 
-import           Data.Yaml.Util
-import           Debug.Trace
+-- import           Data.Yaml.Util
+-- import           Debug.Trace
+
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -244,6 +245,9 @@ instance (FromJSON v, FromJSON e, FromJSON f)
                                                   <*> v .: "adjacencies"
 
 
+-- | Helper function to build the graph from JSON data
+--
+-- running time: \(O(n)\)
 buildFromJSON             :: V.Vector (VertexId' s :+ v)
                           -> V.Vector ((VertexId' s, VertexId' s) :+ e)
                           -> V.Vector (FaceId' s :+ f)
@@ -560,7 +564,7 @@ darts' = elems . _embedding
 -- (Dart (Arc 2) -1,"c-")
 -- (Dart (Arc 5) -1,"g-")
 darts   :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
-darts g = (\d -> (d,g^.eDataOf d)) <$> darts' g
+darts g = (\d -> (d,g^.dataOf d)) <$> darts' g
 
 -- | Enumerate all edges. We report only the Positive darts
 edges' :: PlanarGraph s w v e f -> V.Vector (Dart s)
@@ -654,24 +658,25 @@ prevIncidentEdge d g = let perm  = g^.embedding
 --------------------------------------------------------------------------------
 -- * Access data
 
--- | Get the vertex data associated with a node. Note that updating this data may be
--- expensive!!
---
--- running time: \(O(1)\)
-vDataOf              :: VertexId s w -> Lens' (PlanarGraph s w v e f) v
-vDataOf (VertexId i) = vertexData.ix' i
 
--- | Edge data of a given dart
---
--- running time: \(O(1)\)
-eDataOf   :: Dart s -> Lens' (PlanarGraph s w v e f) e
-eDataOf d = rawDartData.ix' (fromEnum d)
+class HasDataOf g i where
+  type DataOf g i
+  -- | get the data associated with the value i.
+  --
+  -- running time: \(O(1)\) to read the data, \(O(n)\) to write it.
+  dataOf :: i -> Lens' g (DataOf g i)
 
--- | Data of a face of a given face
---
--- running time: \(O(1)\)
-fDataOf                       :: FaceId s w -> Lens' (PlanarGraph s w v e f) f
-fDataOf (FaceId (VertexId i)) = faceData.ix' i
+instance HasDataOf (PlanarGraph s w v e f) (VertexId s w) where
+  type DataOf (PlanarGraph s w v e f) (VertexId s w) = v
+  dataOf (VertexId i) = vertexData.ix' i
+
+instance HasDataOf (PlanarGraph s w v e f) (Dart s) where
+  type DataOf (PlanarGraph s w v e f) (Dart s) = e
+  dataOf d = rawDartData.ix' (fromEnum d)
+
+instance HasDataOf (PlanarGraph s w v e f) (FaceId s w) where
+  type DataOf (PlanarGraph s w v e f) (FaceId s w) = f
+  dataOf (FaceId (VertexId i)) = faceData.ix' i
 
 
 -- | Data corresponding to the endpoints of the dart
@@ -683,7 +688,7 @@ endPointDataOf d = to $ endPointData d
 --
 -- running time: \(O(1)\)
 endPointData     :: Dart s -> PlanarGraph s w v e f -> (v,v)
-endPointData d g = let (u,v) = endPoints d g in (g^.vDataOf u, g^.vDataOf v)
+endPointData d g = let (u,v) = endPoints d g in (g^.dataOf u, g^.dataOf v)
 
 --------------------------------------------------------------------------------
 -- * The Dual graph
@@ -771,10 +776,14 @@ rightFace d g = FaceId . tailOf d $ _dual g
 
 
 -- | Get the next edge along the face
+--
+-- running time: \(O(1)\).
 nextEdge   :: Dart s -> PlanarGraph s w v e f -> Dart s
 nextEdge d = nextIncidentEdge d . _dual
 
 -- | Get the previous edge along the face
+--
+-- running time: \(O(1)\).
 prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 prevEdge d = prevIncidentEdge d . _dual
 
