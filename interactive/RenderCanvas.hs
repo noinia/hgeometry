@@ -115,7 +115,7 @@ instance ApplyAttr Fill where
 instance ApplyAttr Pen where
   applyAttribute NoAttr            = pure ()
   applyAttribute (Attr (IpePen p)) = case p of
-      Named t  -> pure () -- TODO
+      Named _  -> pure () -- TODO
       Valued v -> Canvas.strokeWeight (realToFrac v)
 
 instance ApplyAttr Clip where

@@ -28,6 +28,9 @@ import           Linear.V2 (V2(..))
 
 --------------------------------------------------------------------------------
 
+
+
+
 main :: IO ()
 main = runGtk `catch` (\(e::Gtk.GError) -> Gtk.gerrorMessage e >>= putStrLn . T.unpack)
   where
@@ -96,6 +99,32 @@ mirrored       :: Double -> (a -> Canvas ()) -> a -> Canvas ()
 mirrored h d x = do Canvas.scale     $ V2 1 (-1)
                     Canvas.translate $ V2 0 (-1*h)
                     d x
+
+
+-- data ViewPort a = ViewPort { world        :: Canvas a
+--                            , screenCenter :: Point 2 Double
+--                            , screenWidth  :: Double
+--                            , screenHeight :: Double
+--                            -- some rotation maybe
+--                            } deriving (Functor)
+
+
+-- screen                   :: ViewPort a -> Rectangle () Double
+-- screen (ViewPort _ c w h) = fromCenter c (Vector2 w h)
+
+
+-- renderViewPort' :: ViewPort a -> Canvas a
+-- renderViewPort' (ViewPort wrld c w h) = do x <- world vp
+--                                            let r = w/2
+--                                            rect (c^.xCoord - r) (c^.yCoord - r) w h
+--                                            return x
+
+-- renderViewPort   :: ViewPort a -> Canvas a
+-- renderViewPort vp = do pushMatrix
+--                        a <- world vp
+
+
+
 
 drawHull     :: IpePage Double -> Canvas ()
 drawHull page = do
