@@ -95,12 +95,12 @@ mainWith (Options inFile outFile) = do
 
 -- type ValT = EitherT IO
 
-flattenGroups :: [IpeObject r] -> [IpeObject r]
-flattenGroups = concatMap flattenGroups'
+-- flattenGroups :: [IpeObject r] -> [IpeObject r]
+-- flattenGroups = concatMap flattenGroups'
 
-flattenGroups'                              :: IpeObject r -> [IpeObject r]
-flattenGroups' (IpeGroup (Group gs :+ ats)) =
-      map (applyAts ats) . concatMap flattenGroups' $ gs
-    where
-      applyAts ats = id
-flattenGroups' o                            = [o]
+-- flattenGroups'                              :: IpeObject r -> [IpeObject r]
+-- flattenGroups' (IpeGroup (Group gs :+ ats)) =
+--       map (applyAts ats) . concatMap flattenGroups' $ gs
+--     where
+--       applyAts ats = id
+-- flattenGroups' o                            = [o]

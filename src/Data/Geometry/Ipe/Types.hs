@@ -288,6 +288,17 @@ commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)
     s (IpeUse i)       a = IpeUse       $ i&select .~ a
     s (IpePath i)      a = IpePath      $ i&select .~ a
 
+-- | collect all non-group objects
+flattenGroups :: [IpeObject r] -> [IpeObject r]
+flattenGroups = concatMap flattenGroups'
+  where
+    flattenGroups'                              :: IpeObject r -> [IpeObject r]
+    flattenGroups' (IpeGroup (Group gs :+ ats)) =
+      map (applyAts ats) . concatMap flattenGroups' $ gs
+        where
+          applyAts _ = id
+    flattenGroups' o                            = [o]
+
 --------------------------------------------------------------------------------
 
 

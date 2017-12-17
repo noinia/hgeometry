@@ -105,12 +105,12 @@ siToSpec (SITestCase pg b) = it ("SelfIntersecting?: " <> take 50 (show pg)) $ d
 
 
 
-flattenGroups :: [IpeObject r] -> [IpeObject r]
-flattenGroups = concatMap flattenGroups'
+-- flattenGroups :: [IpeObject r] -> [IpeObject r]
+-- flattenGroups = concatMap flattenGroups'
 
-flattenGroups'                              :: IpeObject r -> [IpeObject r]
-flattenGroups' (IpeGroup (Group gs :+ ats)) =
-      map (applyAts ats) . concatMap flattenGroups' $ gs
-    where
-      applyAts ats = id
-flattenGroups' o                            = [o]
+-- flattenGroups'                              :: IpeObject r -> [IpeObject r]
+-- flattenGroups' (IpeGroup (Group gs :+ ats)) =
+--       map (applyAts ats) . concatMap flattenGroups' $ gs
+--     where
+--       applyAts ats = id
+-- flattenGroups' o                            = [o]
