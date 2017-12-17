@@ -32,6 +32,7 @@ module Data.CircularSeq( CSeq
                        , isShiftOf
                        ) where
 
+import           Control.DeepSeq
 import           Control.Lens (lens, Lens', bimap)
 import qualified Data.Foldable as F
 import qualified Data.List as L
@@ -43,6 +44,7 @@ import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
 import qualified Data.Sequence as S
 import qualified Data.Traversable as T
 import           Data.Tuple (swap)
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -52,7 +54,10 @@ import           Data.Tuple (swap)
 
 -- | Nonempty circular sequence
 data CSeq a = CSeq !(Seq a) !a !(Seq a)
+  deriving (Generic)
                      -- we keep the seq balanced, i.e. size left >= size right
+
+instance NFData a => NFData (CSeq a)
 
 instance Eq a => Eq (CSeq a) where
   a == b = asSeq a == asSeq b

@@ -20,6 +20,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , bottomMost
                                    ) where
 
+import           Control.DeepSeq
 import           Control.Lens hiding ((:<), (:>))
 import           Data.CircularSeq (focus,CSeq)
 import qualified Data.CircularSeq as C
@@ -39,7 +40,7 @@ import qualified Data.Sequence as S
 --------------------------------------------------------------------------------
 
 newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
-                          deriving (Show,Eq,PointFunctor)
+                          deriving (Show,Eq,PointFunctor,NFData)
 makeLenses ''ConvexPolygon
 
 -- | Polygons are per definition 2 dimensional

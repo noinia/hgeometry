@@ -516,18 +516,19 @@ benchmark benchmarks
 
   hs-source-dirs: benchmark test examples
 
-  main-is: TriangWorldBench.hs
-           --Benchmarks.hs
+  main-is: Benchmarks.hs
   type: exitcode-stdio-1.0
 
-  other-modules: QuickCheck.Instances
+  other-modules: Benchmark.Util
+                 Algorithms.Geometry.ConvexHullBench
+                 Data.Geometry.IntervalTreeBench
                  Demo.ExpectedPairwiseDistance
                  Demo.TriangulateWorld
                  WSPDBench
 
   build-depends:
                 base
-              , criterion >= 1.1.4.0 && < 1.2
+              , criterion >= 1.1.4.0
               , semigroups
               , deepseq
               , deepseq-generics

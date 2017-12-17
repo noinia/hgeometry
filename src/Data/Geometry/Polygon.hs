@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Polygon where
 
+import           Control.DeepSeq
 import           Control.Lens hiding (Simple)
 import           Data.Bifoldable
 import           Data.Bifunctor
@@ -22,7 +23,6 @@ import           Data.Proxy
 import           Data.Semigroup
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
-
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -57,6 +57,10 @@ instance Bitraversable (Polygon t) where
     SimplePolygon vs   -> SimplePolygon <$> bitraverseVertices f g vs
     MultiPolygon vs hs -> MultiPolygon  <$> bitraverseVertices f g vs
                                         <*> traverse (bitraverse f g) hs
+
+instance (NFData p, NFData r) => NFData (Polygon t p r) where
+  rnf (SimplePolygon vs)   = rnf vs
+  rnf (MultiPolygon vs hs) = rnf (vs,hs)
 
 bitraverseVertices     :: (Applicative f, Traversable t) => (p -> f q) -> (r -> f s)
                   -> t (Point 2 r :+ p) -> f (t (Point 2 s :+ q))
