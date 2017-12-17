@@ -57,8 +57,10 @@ instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
 instance (Arbitrary r, Arity d) => Arbitrary (Point d r) where
   arbitrary = Point <$> arbitrary
 
-instance (Arbitrary r, Arity d, Num r) => Arbitrary (Line d r) where
-  arbitrary = lineThrough <$> arbitrary <*> arbitrary
+instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
+  arbitrary = do p <- arbitrary
+                 q <- suchThat arbitrary (/= p)
+                 return $ lineThrough p q
 
 instance (Arbitrary r, Arity d, Ord r) => Arbitrary (Box d () r) where
   arbitrary = (\p (q :: Point d r) -> boundingBoxList' [p,q]) <$> arbitrary <*> arbitrary
