@@ -2,6 +2,10 @@ module Algorithms.Geometry.ConvexHullBench where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConqueror as DivideAndConqueror
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
+
+import qualified Algorithms.Geometry.Graham as GS
+import qualified Algorithms.Geometry.GrahamFam as GF
+
 import           Benchmark.Util
 import           Control.DeepSeq
 import           Control.Lens
@@ -42,7 +46,13 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
   where
     take' n = NonEmpty.fromList . NonEmpty.take n
 
-    build pts = [ bench "sort"       $ nf NonEmpty.sort pts
-                , bench "grahamScan" $ nf GrahamScan.convexHull pts
-                , bench "Div&Conq"   $ nf DivideAndConqueror.convexHull pts
+    build pts = [ bench "sort"               $ nf NonEmpty.sort pts'
+                , bench "grahamScan"         $ nf GrahamScan.convexHull pts
+                , bench "grahamScanWithoutP" $ nf GS.convexHull pts'
+                , bench "grahamScanFamily"   $ nf GF.convexHull pts''
+
+                --, bench "Div&Conq"   $ nf DivideAndConqueror.convexHull pts
                 ]
+      where
+        pts'  = fmap (GS.fromP) pts
+        pts'' = fmap (GF.fromP) pts
