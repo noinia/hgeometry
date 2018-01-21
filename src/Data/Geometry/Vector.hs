@@ -1,18 +1,21 @@
 module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , module LV
+                           , Arity
                            , Affine(..)
                            , qdA, distanceA
                            , dot, norm
                            , isScalarMultipleOf
                            , scalarMultiple
+                           -- reexports
                            , FV.replicate
+                           , FV.imap,
                            ) where
 
 import qualified Data.Foldable as F
 import           Data.Geometry.Vector.VectorFixed
-import           Data.Geometry.Vector.VectorFixed as GV
 import           Data.Maybe
 import qualified Data.Vector.Fixed as FV
+import           Data.Vector.Fixed (Arity)
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm)
 import           Linear.Vector as LV
@@ -36,12 +39,12 @@ import           Linear.Vector as LV
 -- True
 -- >>> v2 2 1 `isScalarMultipleOf` v2 4 0
 -- False
-isScalarMultipleOf       :: (Eq r, Fractional r, GV.Arity d)
+isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
                          => Vector d r -> Vector d r -> Bool
 u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
 
 -- | Get the scalar labmda s.t. v = lambda * u (if it exists)
-scalarMultiple     :: (Eq r, Fractional r, GV.Arity d)
+scalarMultiple     :: (Eq r, Fractional r, Arity d)
                    => Vector d r -> Vector d r -> Maybe r
 scalarMultiple u v
       | allZero u || allZero v = Just 0
@@ -61,7 +64,7 @@ scalarMultiple u v
 --     allLambda (_, myLambda) (b,Just lambda) = (myLambda == lambda && b, Just lambda)
 
 
-allZero :: (GV.Arity d, Eq r, Num r) => Vector d r -> Bool
+allZero :: (Arity d, Eq r, Num r) => Vector d r -> Bool
 allZero = F.all (== 0)
 
 
@@ -79,7 +82,7 @@ instance Eq r => Monoid (ScalarMultiple r) where
      | otherwise            = No
 
 -- | Actual implementation of scalarMultiple
-scalarMultiple'      :: (Eq r, Fractional r, GV.Arity d)
+scalarMultiple'      :: (Eq r, Fractional r, Arity d)
                      => Vector d r -> Vector d r -> Maybe r
 scalarMultiple' u v = g . F.foldr mappend mempty $ FV.zipWith f u v
   where

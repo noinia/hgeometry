@@ -101,7 +101,7 @@ library
 
                     Data.Geometry.KDTree
                     Data.Geometry.PlanarSubdivision
-                    Data.Geometry.PlanarSubdivision.Core
+                    Data.Geometry.PlanarSubdivision.Basic
 
                     -- * Algorithms
                     Algorithms.Util
@@ -214,7 +214,7 @@ library
                -- , tranformers      > 0.3
 
                , vector           >= 0.11
-               , fixed-vector     >= 0.6.4.0 && < 1.0
+               , fixed-vector     >= 1.0
                , data-clist       >= 0.0.7.2
 
                , hexpat           >= 0.20.9
@@ -226,7 +226,8 @@ library
                , template-haskell
 
   if flag(with-quickcheck)
-    build-depends: QuickCheck           >= 2.5
+    build-depends: QuickCheck              >= 2.5
+                 , quickcheck-instances    >= 0.3
     exposed-modules: Test.QuickCheck.HGeometryInstances
 
 
@@ -442,7 +443,6 @@ test-suite hspec
                       , hspec                >= 2.1
                       , QuickCheck           >= 2.5
                       , approximate-equality >= 1.1.0.2
-                      -- , quickcheck-instances >= 0.3.15
                       , hgeometry
                       , lens
                       , data-clist

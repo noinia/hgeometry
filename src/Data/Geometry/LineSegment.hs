@@ -41,6 +41,7 @@ import           Data.Semigroup
 import           Data.UnBounded
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -129,7 +130,7 @@ instance PointFunctor (LineSegment d p) where
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBox (l^.start.core) <> boundingBox (l^.end.core)
 
-instance (Num r, AlwaysTruePFT d) => IsTransformable (LineSegment d p r) where
+instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
 
 instance Arity d => Bifunctor (LineSegment d) where

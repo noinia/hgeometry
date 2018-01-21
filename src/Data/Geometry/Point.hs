@@ -101,9 +101,12 @@ unsafeCoord i = vector . FV.element (i-1)
 -- Point3 [10,2,3]
 -- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
 -- Point3 [1,2,4]
-coord   :: forall proxy i d r. (Index' (i-1) d, Arity d) => proxy i -> Lens' (Point d r) r
+coord   :: forall proxy i d r. (1 <= i, i <= d, ((i - 1) + 1) ~ i
+                               , Arity (i - 1), Arity d
+                               ) => proxy i -> Lens' (Point d r) r
 coord _ = vector . Vec.element (Proxy :: Proxy (i-1))
 {-# INLINABLE coord #-}
+
 
 -- somehow these rules don't fire
 -- {-# SPECIALIZE coord :: C 1 -> Lens' (Point 2 r) r#-}
@@ -186,15 +189,13 @@ _point3 :: Point 3 r -> (r,r,r)
 _point3 = _unV3 . toVec
 
 
-type i <=. d = (Index' (i-1) d, Arity d)
-
 -- | Shorthand to access the first coordinate C 1
 --
 -- >>> point3 1 2 3 ^. xCoord
 -- 1
 -- >>> point2 1 2 & xCoord .~ 10
 -- Point2 [10,2]
-xCoord :: (1 <=. d) => Lens' (Point d r) r
+xCoord :: (1 <= d, Arity d) => Lens' (Point d r) r
 xCoord = coord (C :: C 1)
 {-# INLINABLE xCoord #-}
 
@@ -204,7 +205,7 @@ xCoord = coord (C :: C 1)
 -- 2
 -- >>> point3 1 2 3 & yCoord %~ (+1)
 -- Point3 [1,3,3]
-yCoord :: (2 <=. d) => Lens' (Point d r) r
+yCoord :: (2 <= d, Arity d) => Lens' (Point d r) r
 yCoord = coord (C :: C 2)
 {-# INLINABLE yCoord #-}
 
@@ -214,7 +215,7 @@ yCoord = coord (C :: C 2)
 -- 3
 -- >>> point3 1 2 3 & zCoord %~ (+1)
 -- Point3 [1,2,4]
-zCoord :: (3 <=. d) => Lens' (Point d r) r
+zCoord :: (3 <= d, Arity d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
 {-# INLINABLE zCoord #-}
 
@@ -270,7 +271,7 @@ data Quadrant = TopRight | TopLeft | BottomLeft | BottomRight
 -- | Quadrants around point c; quadrants are closed on their "previous"
 -- boundary (i..e the boundary with the previous quadrant in the CCW order),
 -- open on next boundary. The origin itself is assigned the topRight quadrant
-quadrantWith                   :: (Ord r, 1 <=. d, 2 <=. d)
+quadrantWith                   :: (Ord r, 1 <= d, 2 <= d, Arity d)
                                => Point d r :+ q -> Point d r :+ p -> Quadrant
 quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                       , (c^.yCoord) `compare` (p^.yCoord) ) of
@@ -285,7 +286,7 @@ quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                    (LT, GT) -> BottomRight
 
 -- | Quadrants with respect to the origin
-quadrant :: (Ord r, Num r, 1 <=. d, 2 <=. d) => Point d r :+ p -> Quadrant
+quadrant :: (Ord r, Num r, 1 <= d, 2 <= d, Arity d) => Point d r :+ p -> Quadrant
 quadrant = quadrantWith (ext origin)
 
 -- | Given a center point c, and a set of points, partition the points into
@@ -293,7 +294,7 @@ quadrant = quadrantWith (ext origin)
 -- reported in the order topLeft, topRight, bottomLeft, bottomRight. The points
 -- are in the same order as they were in the original input lists.
 -- Points with the same x-or y coordinate as p, are "rounded" to above.
-partitionIntoQuadrants       :: (Ord r, 1 <=. d, 2 <=. d)
+partitionIntoQuadrants       :: (Ord r, 1 <= d, 2 <= d, Arity d)
                              => Point d r :+ q
                              -> [Point d r :+ p]
                              -> ( [Point d r :+ p], [Point d r :+ p]

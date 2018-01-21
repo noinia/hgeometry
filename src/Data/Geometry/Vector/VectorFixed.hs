@@ -8,8 +8,9 @@ import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Proxy
 import qualified Data.Vector.Fixed as V
+import           Data.Vector.Fixed (Arity)
 import           Data.Vector.Fixed.Boxed
-import           Data.Vector.Fixed.Cont (Z, S, ToPeano)
+import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
@@ -28,25 +29,22 @@ data C (n :: Nat) = C deriving (Show,Read,Eq,Ord)
 
 -- | Datatype representing d dimensional vectors. Our implementation wraps the
 -- implementation provided by fixed-vector.
-newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec (ToPeano d) r }
+newtype Vector (d :: Nat)  (r :: *) = Vector { _unV :: Vec d r }
                                     deriving (Generic)
 
-unV :: Lens' (Vector d r) (Vec (ToPeano d) r)
+unV :: Lens' (Vector d r) (Vec d r)
 unV = lens _unV (const Vector)
 
 ----------------------------------------
-type Arity  (n :: Nat)  = V.Arity (ToPeano n)
-
-type Index' i d = V.Index (ToPeano i) (ToPeano d)
-
 
 -- | Lens into the i th element
-element   :: forall proxy i d r. (Arity d, Index' i d) => proxy i -> Lens' (Vector d r) r
-element _ = V.elementTy (undefined :: (ToPeano i))
+element   :: forall proxy i d r. (Arity d, Arity i, (i + 1) <= d)
+          => proxy i -> Lens' (Vector d r) r
+element _ = V.elementTy (Proxy :: Proxy i)
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
-element'   :: forall d r. (KnownNat d, Arity d) => Int -> Traversal' (Vector d r) r
+element'   :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 element' i f v
   | 0 <= i && i < fromInteger (natVal (C :: C d)) = f (v V.! i)
                                                  <&> \a -> (v&V.element i .~ a)
@@ -96,7 +94,7 @@ instance Arity d => Affine (Vector d) where
 
 instance Arity d => Metric (Vector d)
 
-type instance V.Dim (Vector d) = ToPeano d
+type instance V.Dim (Vector d) = d
 
 instance Arity d => V.Vector (Vector d) r where
   construct  = Vector <$> V.construct
@@ -120,12 +118,9 @@ instance (ToJSON r, Arity d) => ToJSON (Vector d r) where
 
 ------------------------------------------
 
-type AlwaysTrueDestruct pd d = (Arity pd, ToPeano d ~ S (ToPeano pd))
-
-
 -- | Get the head and tail of a vector
-destruct            :: AlwaysTrueDestruct predD d
-                    => Vector d r -> (r, Vector predD r)
+destruct            :: (Arity d, Arity (d + 1), 1 <= (d + 1))
+                    => Vector (d + 1) r -> (r, Vector d r)
 destruct (Vector v) = (V.head v, Vector $ V.tail v)
 
 
@@ -150,34 +145,23 @@ fromV3 (L3.V3 a b c) = v3 a b c
 
 ----------------------------------------------------------------------------------
 
-
-type AlwaysTrueSnoc d = ToPeano (1 + d) ~ S (ToPeano d)
-
 -- | Add an element at the back of the vector
-snoc :: (AlwaysTrueSnoc d, Arity d) => Vector d r -> r -> Vector (1 + d) r
+snoc :: (Arity (d + 1), Arity d) => Vector d r -> r -> Vector (d + 1) r
 snoc = flip V.snoc
 
 -- | Get a vector of the first d - 1 elements.
-init :: AlwaysTrueDestruct predD d => Vector d r -> Vector predD r
+init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
 init = Vector . V.reverse . V.tail . V.reverse . _unV
 
+type Prefix i d = ( Peano (i + 1) ~ S (Peano i)
+                  , Peano (d + 1) ~ S (Peano d)
+                  , KnownNat i, Arity i)
+
 -- | Get a prefix of i elements of a vector
-prefix :: (Prefix (ToPeano i) (ToPeano d)) => Vector d r -> Vector i r
-prefix (Vector v) = Vector $ prefix' v
-
-class Prefix i d where
-  prefix' :: Vec d r -> Vec i r
-
-instance Prefix Z d where
-  prefix' _ = V.vector V.empty
-
-instance (V.Arity i, V.Arity d, Prefix i d) => Prefix (S i) (S d) where
-  prefix' v = V.vector $ V.head v `V.cons` (prefix' $ V.tail v)
-
-
--- | Map with indices
-imap :: Arity d => (Int -> r -> s ) -> Vector d r -> Vector d s
-imap = V.imap
+prefix :: forall i d r. (Arity d, Prefix i d, i <= d)
+       => Vector d r -> Vector i r
+prefix = let i = fromInteger . natVal $ (Proxy :: Proxy i)
+         in V.fromList . take i . V.toList
 
 --------------------------------------------------------------------------------
 -- * Functions specific to two and three dimensional vectors.

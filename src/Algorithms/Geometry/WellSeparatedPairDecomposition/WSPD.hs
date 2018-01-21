@@ -35,10 +35,8 @@ import Debug.Trace
 -- | Construct a split tree
 --
 -- running time: \(O(n \log n)\)
-fairSplitTree     :: (Fractional r, Ord r, Arity d, Index' 0 d,
-                      KnownNat d
-                        , Show r, Show p
-
+fairSplitTree     :: (Fractional r, Ord r, Arity d, 1 <= d
+                     , Show r, Show p
                      )
                   => NonEmpty.NonEmpty (Point d r :+ p) -> SplitTree d p r ()
 fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
@@ -61,7 +59,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
 -- | Given a split tree, generate the Well separated pairs
 --
 -- running time: \(O(s^d n)\)
-wellSeparatedPairs   :: (Floating r, Ord r, AlwaysTrueWSPD d)
+wellSeparatedPairs   :: (Floating r, Ord r, Arity d, Arity (d + 1))
                      => r -> SplitTree d p r a -> [WSP d p r a]
 wellSeparatedPairs s = f
   where
@@ -106,7 +104,7 @@ wellSeparatedPairs s = f
 -- (PointSeq))'s. Since we have the level assignment, we can compute these
 -- lists by traversing each original input list (i.e. one for every dimension)
 -- once, and partition the points based on their level assignment.
-fairSplitTree'       :: (Fractional r, Ord r, Arity d, Index' 0 d, KnownNat d
+fairSplitTree'       :: (Fractional r, Ord r, Arity d, 1 <= d
                         , Show r, Show p
                         )
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
@@ -186,7 +184,7 @@ distributePoints' k levels pts
 -- time.
 --
 -- so, basically, run reIndex points in ST as well.
-reIndexPoints      :: (Arity d, Index' 0 d)
+reIndexPoints      :: (Arity d, 1 <= d)
                    => GV.Vector d (PointSeq d (Idx :+ p) r)
                    -> GV.Vector d (PointSeq d (Idx :+ p) r)
 reIndexPoints ptsV = fmap reIndex ptsV
@@ -356,10 +354,10 @@ extends = GV.imap (\i pts@(l S2.:< _) ->
 --------------------------------------------------------------------------------
 -- * Finding Well Separated Pairs
 
-type AlwaysTrueWSPD d = ( Arity d, KnownNat d
-                        , AlwaysTruePFT d, AlwaysTrueTransformation d)
+-- type AlwaysTrueWSPD d = ( Arity d, KnownNat d
+--                         , AlwaysTruePFT d, AlwaysTrueTransformation d)
 
-findPairs                     :: (Floating r, Ord r, AlwaysTrueWSPD d)
+findPairs                     :: (Floating r, Ord r, Arity d, Arity (d + 1))
                               => r -> SplitTree d p r a -> SplitTree d p r a
                               -> [WSP d p r a]
 findPairs s l r
@@ -369,7 +367,7 @@ findPairs s l r
 
 
 -- | Test if the two sets are well separated with param s
-areWellSeparated                     :: ( AlwaysTrueWSPD d, Fractional r, Ord r)
+areWellSeparated                     :: (Arity d, Arity (d + 1), Fractional r, Ord r)
                                      => r -- ^ separation factor
                                      -> SplitTree d p r a
                                      -> SplitTree d p r a -> Bool
@@ -391,7 +389,7 @@ areWellSeparated s l        r        = boxBox s (bbOf l)   (bbOf r)
 --     b' = translateBy v . scaleUniformlyBy s . translateBy ((-1) *^ v) $ b
 
 -- | Test if the two boxes are sufficiently far appart
-boxBox         :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
+boxBox         :: (Fractional r, Ord r, Arity d, Arity (d + 1))
                => r -> Box d p r -> Box d p r -> Bool
 boxBox s lb rb = boxBox' lb rb && boxBox' rb lb
   where

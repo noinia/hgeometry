@@ -1,32 +1,34 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UnicodeSyntax #-}
 module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
-import Control.Lens ((^.), re, bimap)
-import Data.Ext
-import Data.Geometry.Boundary
-import Data.Geometry.Box
-import Data.Geometry.Line.Internal
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.SubLine
-import Data.Geometry.Transformation
-import Data.Geometry.Vector
-import Data.Maybe (mapMaybe)
-import Data.Proxy
-import Data.UnBounded
-import Data.Vinyl.Lens
-import Data.Vinyl.Core
-import Data.Vinyl.CoRec
+import           Control.Lens ((^.), re, bimap)
+import           Data.Ext
+import           Data.Geometry.Boundary
+import           Data.Geometry.Box
+import           Data.Geometry.Line.Internal
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.SubLine
+import           Data.Geometry.Transformation
+import           Data.Geometry.Vector
 import qualified Data.List as L
+import           Data.Maybe (mapMaybe)
+import           Data.Proxy
+import           Data.UnBounded
+import           Data.Vinyl.CoRec
+import           Data.Vinyl.Core
+import           Data.Vinyl.Lens
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
 -- | Lines are transformable, via line segments
-instance (Num r, AlwaysTruePFT d) => IsTransformable (Line d r) where
+instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) where
   transformBy t = supportingLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => Line d r -> LineSegment d () r

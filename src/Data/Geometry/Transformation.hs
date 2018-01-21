@@ -38,21 +38,21 @@ mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
 -- * Transformations
 
 -- | A type representing a Transformation for d dimensional objects
-newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (1 + d) (1 + d) r }
+newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (d + 1) (d + 1) r }
 
-transformationMatrix :: Lens' (Transformation d r) (Matrix (1 + d) (1 + d) r)
+transformationMatrix :: Lens' (Transformation d r) (Matrix (d + 1) (d + 1) r)
 transformationMatrix = lens _transformationMatrix (const Transformation)
 
-deriving instance (Show r, Arity (1 + d)) => Show (Transformation d r)
-deriving instance (Eq r, Arity (1 + d))   => Eq (Transformation d r)
-deriving instance (Ord r, Arity (1 + d))  => Ord (Transformation d r)
-deriving instance Arity (1 + d)           => Functor (Transformation d)
+deriving instance (Show r, Arity (d + 1)) => Show (Transformation d r)
+deriving instance (Eq r, Arity (d + 1))   => Eq (Transformation d r)
+deriving instance (Ord r, Arity (d + 1))  => Ord (Transformation d r)
+deriving instance Arity (d + 1)           => Functor (Transformation d)
 
 type instance NumType (Transformation d r) = r
 
 
 -- | Compose transformations (right to left)
-(|.|) :: (Num r, Arity (1 + d)) => Transformation d r -> Transformation d r -> Transformation d r
+(|.|) :: (Num r, Arity (d + 1)) => Transformation d r -> Transformation d r -> Transformation d r
 (Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
 
 --------------------------------------------------------------------------------
@@ -67,17 +67,13 @@ transformAllBy :: (Functor c, IsTransformable g)
 transformAllBy t = fmap (transformBy t)
 
 
-type AlwaysTruePFT d = AlwaysTrueDestruct d  (1 + d)
-
-
 transformPointFunctor   :: ( PointFunctor g, Num r, d ~ Dimension (g r)
-                           , AlwaysTruePFT d
+                           , Arity d, Arity (d + 1)
                            ) => Transformation d r -> g r -> g r
 transformPointFunctor t = pmap (transformBy t)
 
-instance ( Num r
-         , Arity d, AlwaysTrueDestruct d (1 + d)
-         ) => IsTransformable (Point d r) where
+instance (Num r, Arity d, Arity (d + 1))
+         => IsTransformable (Point d r) where
   transformBy (Transformation m) (Point v) = Point . V.init $ m `mult` v'
     where
       v'    = snoc v 1
@@ -86,36 +82,36 @@ instance ( Num r
 --------------------------------------------------------------------------------
 -- * Common transformations
 
-translation   :: ( Num r, Arity (1 + d)
-                 , AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
+translation   :: (Num r, Arity d, Arity (d + 1))
               => Vector d r -> Transformation d r
 translation v = Transformation . Matrix $ V.imap transRow (snoc v 1)
 
 
-scaling   :: (Num r, Arity (1 + d), AlwaysTrueSnoc d, Arity d) => Vector d r -> Transformation d r
+scaling   :: (Num r, Arity d, Arity (d + 1))
+          => Vector d r -> Transformation d r
 scaling v = Transformation . Matrix $ V.imap mkRow (snoc v 1)
 
-uniformScaling :: (Num r, Arity (1 + d), AlwaysTrueSnoc d, Arity d) => r -> Transformation d r
+uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
 uniformScaling = scaling . pure
 
 --------------------------------------------------------------------------------
 -- * Functions that execute transformations
 
-type AlwaysTrueTransformation d = (Arity (1 + d), AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
+-- type AlwaysTrueTransformation d = (Arity (1 + d), AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
 
 translateBy :: ( IsTransformable g, Num (NumType g)
-               , AlwaysTrueTransformation (Dimension g)
+               , Arity (Dimension g), Arity (Dimension g + 1)
                ) => Vector (Dimension g) (NumType g) -> g -> g
 translateBy = transformBy . translation
 
 scaleBy :: ( IsTransformable g, Num (NumType g)
-           , AlwaysTrueTransformation (Dimension g)
+           , Arity (Dimension g), Arity (Dimension g + 1)
            ) => Vector (Dimension g) (NumType g) -> g -> g
 scaleBy = transformBy . scaling
 
 
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
-                    , AlwaysTrueTransformation (Dimension g)
+                    , Arity (Dimension g), Arity (Dimension g + 1)
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 
@@ -129,5 +125,10 @@ mkRow     :: forall d r. (Arity d, Num r) => Int -> r -> Vector d r
 mkRow i x = set (FV.element i) x zero
 
 -- | Row in a translation matrix
-transRow     :: forall n r. (Arity n, Index' (n-1) n, Num r) => Int -> r -> Vector n r
-transRow i x = set (V.element (Proxy :: Proxy (n-1))) x $ mkRow i 1
+-- transRow     :: forall n r. ( Arity n, Arity (n- 1), ((n - 1) + 1) ~ n
+--                             , Num r) => Int -> r -> Vector n r
+-- transRow i x = set (V.element (Proxy :: Proxy (n-1))) x $ mkRow i 1
+
+transRow     :: forall n r. (Arity n, Arity (n + 1), Num r)
+             => Int -> r -> Vector (n + 1) r
+transRow i x = set (V.element (Proxy :: Proxy n)) x $ mkRow i 1

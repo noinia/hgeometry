@@ -16,6 +16,7 @@ import qualified Data.List.NonEmpty as NE
 import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as Seq
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)
@@ -40,7 +41,7 @@ instance Semigroup (PolyLine d p r) where
 instance Arity d => IsBoxable (PolyLine d p r) where
   boundingBox = boundingBoxList . NE.fromList . toListOf (points.traverse.core)
 
-instance (Num r, AlwaysTruePFT d) => IsTransformable (PolyLine d p r) where
+instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor
 
 instance PointFunctor (PolyLine d p) where

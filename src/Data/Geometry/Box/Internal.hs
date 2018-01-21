@@ -11,7 +11,7 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Vector (Vector, Arity, Index',C(..))
+import           Data.Geometry.Vector (Vector, Arity, C(..))
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import           Data.Proxy
@@ -132,7 +132,8 @@ instance PointFunctor (Box d p) where
   pmap f (Box mi ma) = Box (first (fmap f) mi) (first (fmap f) ma)
 
 
-instance (Num r, AlwaysTruePFT d) => IsTransformable (Box d p r) where
+instance (Num r, Arity d, Arity (d + 1))
+         => IsTransformable (Box d p r) where
   -- Note that this does not guarantee the box is still a proper box Only use
   -- this to do translations and scalings. Other transformations may produce
   -- unexpected results.
@@ -184,7 +185,8 @@ size = fmap R.width . extent
 -- 1
 -- >>> widthIn (C :: C 3) (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
 -- 3
-widthIn   :: forall proxy p i d r. (Arity d, Num r, Index' (i-1) d) => proxy i -> Box d p r -> r
+widthIn   :: forall proxy p i d r. (Arity d, Arity (i - 1), Num r, ((i-1)+1) <= d)
+          => proxy i -> Box d p r -> r
 widthIn _ = view (V.element (C :: C (i - 1))) . size
 
 

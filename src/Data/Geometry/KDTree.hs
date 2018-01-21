@@ -70,11 +70,11 @@ toMaybe (Tree t) = Just t
 -- | Expects the input to be a set, i.e. no duplicates
 --
 -- running time: \(O(n \log n)\)
-buildKDTree :: (Arity d, KnownNat d, Index' 0 d, Ord r)
+buildKDTree :: (Arity d, 1 <= d, Ord r)
             => [Point d r :+ p] -> KDTree d p r
 buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
 
-buildKDTree' :: (Arity d, KnownNat d, Index' 0 d, Ord r)
+buildKDTree' :: (Arity d, 1 <= d, Ord r)
              => NonEmpty.NonEmpty (Point d r :+ p) -> KDTree' d p r
 buildKDTree' = KDT . addBoxes . build (Coord 1) . toPointSet . Seq.fromNonEmpty
   where     -- compute one tree with bounding boxes, then merge them together
@@ -102,7 +102,7 @@ compareOn i p q = let f = (^.core.unsafeCoord i)
                   in (f p, p^.core) `compare` (f q, q^.core)
 
 
-build      :: (Index' 0 d, Arity d, KnownNat d, Ord r)
+build      :: (1 <= d, Arity d, Ord r)
            => Coord d
            -> PointSet (LSeq 1) d p r
            -> BinLeafTree (Split' d r) (Point d r :+ p)
@@ -179,7 +179,7 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
     unzip' = bimap vectorFromListUnsafe vectorFromListUnsafe . unzip . F.toList
 
 
-asSingleton   :: (Index' 0 d, Arity d) => PointSet (LSeq 1) d p r
+asSingleton   :: (1 <= d, Arity d) => PointSet (LSeq 1) d p r
               -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
 asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
                   _ :< _ Seq.:<< _ -> Right $ coerce v
