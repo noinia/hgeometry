@@ -27,7 +27,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , boundary, boundaryVertices
                       , outerFaceId
 
-                      , locationOf, HasDataOf(..)
+                      , vertexDataOf, locationOf, HasDataOf(..)
 
                       , endPointsOf, endPointData
                       , vertexData, faceData, dartData, rawDartData
@@ -400,8 +400,11 @@ boundaryVertices f = PG.boundaryVertices f . _graph
 --------------------------------------------------------------------------------
 -- * Access data
 
+vertexDataOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) (VertexData r v)
+vertexDataOf v = graph.PG.dataOf v
+
 locationOf   :: VertexId' s -> Lens' (PlaneGraph s v e f r ) (Point 2 r)
-locationOf v = graph.PG.dataOf v.location
+locationOf v = vertexDataOf v.location
 
 
 instance HasDataOf (PlaneGraph s v e f r) (VertexId' s) where

@@ -24,9 +24,8 @@ import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , Dart, VertexId(..), FaceId(..), twin
                                 , World(..)
                                 , VertexId', FaceId'
-                                , VertexData(..)
+                                , VertexData, location, vData
                                 , HasDataOf(..)
-                                , location, vData
                                 )
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as V
@@ -62,6 +61,14 @@ newtype ComponentId s = ComponentId { unCI :: Int }
 
 --------------------------------------------------------------------------------
 
+data Raw s ia a = Raw { _compId  :: {-# UNPACK #-} !(ComponentId s)
+                      , _idxVal  :: {-# UNPACK #-} !ia
+                      , _dataVal :: !a
+                      } deriving (Eq,Show,Functor,Foldable,Traversable)
+makeLenses ''Raw
+
+
+
 -- | A planarsubdivision is essentially a bunch of plane-graphs; one for every
 -- connected component. These graphs store the global ID's (darts, vertexId's, faceId's)
 -- in their data values. This essentially gives us a mapping between the two.
@@ -70,14 +77,14 @@ newtype ComponentId s = ComponentId { unCI :: Int }
 -- the edges to the the holes, we store the global edgeId's rather than the
 -- 'local' edgeId (dart)'s.
 data PlanarSubdivision s v e f r =
-  PlanarSubdivision { _graphs     :: V.Vector (PlaneGraph (Wrap s)
-                                                          (VertexId' s)
-                                                          (Dart s)
-                                                          (FaceData (Dart s) (FaceId' s))
-                                                          r)
-                    , _vertexData :: V.Vector (ComponentId s, VertexId' (Wrap s), v)
-                    , _edgeData   :: V.Vector (ComponentId s, Dart (Wrap s), e)
-                    , _faceData   :: V.Vector (ComponentId s, FaceId' s, f)
+  PlanarSubdivision { _graphs      :: V.Vector (PlaneGraph (Wrap s)
+                                                           (VertexId' s)
+                                                           (Dart s)
+                                                           (FaceData (Dart s) (FaceId' s))
+                                                           r)
+                    , _rawVertexData :: V.Vector (Raw s (VertexId' (Wrap s)) v)
+                    , _rawDartData   :: V.Vector (Raw s (Dart      (Wrap s)) e)
+                    , _rawFaceData   :: V.Vector (Raw s (FaceId'   (Wrap s)) f)
                     } deriving (Show,Eq,Functor)
 makeLenses ''PlanarSubdivision
 
@@ -92,8 +99,9 @@ makeLenses ''PlanarSubdivision
 type instance NumType   (PlanarSubdivision s v e f r) = r
 type instance Dimension (PlanarSubdivision s v e f r) = 2
 
--- instance IsBoxable (PlanarSubdivision s v e f r) where
---   boundingBox = boundingBox . _planeGraph
+instance IsBoxable (PlanarSubdivision s v e f r) where
+  boundingBox = boundingBoxList' . V.toList . _graphs
+
 
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f r)
                                        (PlaneGraph (Wrap s)
@@ -107,20 +115,25 @@ component ci = graphs.ix' (unCI ci)
 
 
 
+
+
 --------------------------------------------------------------------------------
 
 fromPlaneGraph   :: forall s v e f r. PlaneGraph s v e f r -> PlanarSubdivision s v e f r
 fromPlaneGraph g = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
   where
     c = ComponentId 0
-    vd = V.imap (\i v -> (c, VertexId i, v))          $ g^.PG.vertexData
-    ed = fmap (\(d,dd) -> (c, coerce d, dd))          $ g^.PG.dartData
-    fd = V.imap (\i f -> (c, FaceId (VertexId i), f)) $ g^.PG.faceData
+    vd = V.imap (\i v  -> Raw c (VertexId i) v)          $ g^.PG.vertexData
+    ed = fmap (\(d,dd) -> Raw c (coerce d)   dd)         $ g^.PG.dartData
+    fd = V.imap (\i f  -> Raw c (FaceId (VertexId i)) f) $ g^.PG.faceData
 
     g' :: PlaneGraph s (VertexId' s) (Dart s) (FaceData (Dart s) (FaceId' s)) r
     g' = g&PG.faceData   %~ V.imap (\i _ -> FaceData mempty (FaceId (VertexId i)))
           &PG.vertexData %~ V.imap (\i _ -> VertexId i)
           &PG.dartData   %~ fmap (\(d,_) -> (d,d))
+
+-- rawDartData
+
 
 -- | Construct a planar subdivision from a simple polygon
 --
@@ -157,28 +170,28 @@ data PolygonFaceData = Inside | Outside deriving (Show,Read,Eq)
 -- >>> numVertices myGraph
 -- 4
 numVertices :: PlanarSubdivision s v e f r  -> Int
-numVertices = V.length . _vertexData
+numVertices = V.length . _rawVertexData
 
 -- | Get the number of Darts
 --
 -- >>> numDarts myGraph
 -- 12
 numDarts :: PlanarSubdivision s v e f r  -> Int
-numDarts = V.length . _edgeData
+numDarts = V.length . _rawDartData
 
 -- | Get the number of Edges
 --
 -- >>> numEdges myGraph
 -- 6
 numEdges :: PlanarSubdivision s v e f r  -> Int
-numEdges = (`div` 2) . V.length . _edgeData
+numEdges = (`div` 2) . V.length . _rawDartData
 
 -- | Get the number of faces
 --
 -- >>> numFaces myGraph
 -- 4
 numFaces :: PlanarSubdivision s v e f r  -> Int
-numFaces = V.length . _faceData
+numFaces = V.length . _rawFaceData
 
 -- | Enumerate all vertices
 --
@@ -201,7 +214,7 @@ darts' = undefined
 
 -- | Enumerate all edges. We report only the Positive darts
 edges' :: PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-edges' = filter isPositive . darts'
+edges' = V.filter isPositive . darts'
 
 -- | Enumerate all edges with their edge data. We report only the Positive
 -- darts.
@@ -229,34 +242,49 @@ edges = undefined -- PG.edges . _planeGraph
 
 
 -- | Note that using the setting part of this lens may be very expensive!!
-vertexLens    :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) (VertexData v r)
-vertexLens (VertexId vi) = lens get' set'
+vertexDataOf               :: VertexId' s
+                           -> Lens' (PlanarSubdivision s v e f r ) (VertexData r v)
+vertexDataOf (VertexId vi) = lens get' set''
   where
-    get' ps = let (ci,wvdi,x)  = ps^.vertexData.ix' vi
-                  vd           = ps^.component ci.PG.vertexData.ix' wvdi
+    get' ps = let (Raw ci wvdi x) = ps^.rawVertexData.ix' vi
+                  vd              = ps^.component ci.PG.vertexDataOf wvdi
               in vd&vData .~ x
-    set' ps x = let (ci,wvdi,x)  = ps^.vertexData.ix' vi
-                in ps&vertexData.ix' vi._3 .~ x^.vData
-                     &component ci.PG.vertexData.ix' wvdi.location .~ x^.vData
-
-
-
+    set'' ps x = let (Raw ci wvdi _)  = ps^.rawVertexData.ix' vi
+                 in ps&rawVertexData.ix' vi.dataVal               .~ (x^.vData)
+                      &component ci.PG.vertexDataOf wvdi.location .~ (x^.location)
 
 locationOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) (Point 2 r)
-locationOf v = vertexLens.location
+locationOf v = vertexDataOf v.location
 
+
+faceDataOf    :: FaceId' s -> Lens' (PlanarSubdivision s v e f r)
+                                    (FaceData (Dart s) (FaceId' s), f)
+faceDataOf fi = lens getF setF
+  where
+    (FaceId (VertexId i)) = fi
+    getF ps = let (Raw ci wfi x) = ps^.rawFaceData.ix' i
+              in (ps^.component ci.dataOf wfi, x)
+
+    setF ps (fd,x) = let (Raw ci wfi _) = ps^.rawFaceData.ix' i
+                     in ps&component ci.dataOf wfi   .~ fd
+                          &rawFaceData.ix' i.dataVal .~ x
 
 instance HasDataOf (PlanarSubdivision s v e f r) (VertexId' s) where
   type DataOf (PlanarSubdivision s v e f r) (VertexId' s) = v
-  dataOf v = vertexLens.vData v
+  dataOf v = vertexDataOf v.vData
 
--- instance HasDataOf (PlanarSubdivision s v e f r) (Dart s) where
---   type DataOf (PlanarSubdivision s v e f r) (Dart s) = e
---   dataOf d = planeGraph.dataOf d.eData
+instance HasDataOf (PlanarSubdivision s v e f r) (Dart s) where
+  type DataOf (PlanarSubdivision s v e f r) (Dart s) = e
+  dataOf d = rawDartData.ix' (fromEnum d).dataVal
 
--- instance HasDataOf (PlanarSubdivision s v e f r) (FaceId' s) where
---   type DataOf (PlanarSubdivision s v e f r) (FaceId' s) = f
---   dataOf f = planeGraph.dataOf f.fData
+instance HasDataOf (PlanarSubdivision s v e f r) (FaceId' s) where
+  type DataOf (PlanarSubdivision s v e f r) (FaceId' s) = f
+  dataOf f = faceDataOf f._2
+
+
+
+
+
 
 
 -- -- | Getter for the data at the endpoints of a dart
