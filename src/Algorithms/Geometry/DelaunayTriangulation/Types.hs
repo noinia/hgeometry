@@ -82,16 +82,14 @@ type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 
 -- | convert the triangulation into a planarsubdivision
 --
--- running time: \(O(n\log n)\).
-toPlanarSubdivision :: proxy s -> Triangulation p r -> PlanarSubdivision s p () () r
-toPlanarSubdivision px tr = PlanarSubdivision g
-  where
-    g = toPlaneGraph px tr & PG.dartData.traverse._2 %~ EdgeData Visible
-                           & PG.faceData.traverse    %~ FaceData []
+-- running time: \(O(n)\).
+toPlanarSubdivision    :: (Ord r, Fractional r)
+                       => proxy s -> Triangulation p r -> PlanarSubdivision s p () () r
+toPlanarSubdivision px = fromPlaneGraph . toPlaneGraph px
 
 -- | convert the triangulation into a plane graph
 --
--- running time: \(O(n\log n)\).
+-- running time: \(O(n)\).
 toPlaneGraph    :: forall proxy s p r.
                    proxy s -> Triangulation p r -> PG.PlaneGraph s p () () r
 toPlaneGraph _ tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData

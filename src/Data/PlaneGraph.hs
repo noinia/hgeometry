@@ -118,7 +118,9 @@ instance IsBoxable (PlaneGraph s v e f r) where
 --------------------------------------------------------------------------------
 -- * Constructing a Plane Graph
 
--- | Construct a plane graph from a simple polygon
+-- | Construct a plane graph from a simple polygon.
+--
+-- the interior of the polygon will have faceId 0
 --
 -- running time: \(O(n)\).
 fromSimplePolygon                            :: proxy s

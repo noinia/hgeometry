@@ -8,7 +8,7 @@ import           Control.Lens
 import           Data.Either (lefts)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry.PlanarSubdivision.Core
+import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
 import           Data.Semigroup
 

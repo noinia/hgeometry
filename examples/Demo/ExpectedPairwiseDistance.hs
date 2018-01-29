@@ -20,7 +20,7 @@ import           Data.Proxy
 import           Data.Data
 import           Data.Semigroup
 import qualified Data.Set as Set
-import           GHC.TypeLits (natVal,KnownNat)
+import           GHC.TypeLits
 import           Options.Applicative hiding ((<>))
 
 
@@ -56,7 +56,7 @@ expectedPairwiseDistance k pts = makeExpected k pts pairwiseDist
 --
 -- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
 approxExpectedPairwiseDistance          :: (Floating r, Ord r
-                                           , AlwaysTrueWSPD d, Index' 0 d
+                                           , Arity d, Arity (d+1), 1 <= d
                                          , Show r, Show p)
                                          => r -> Int -> [Point d r :+ p] -> r
 approxExpectedPairwiseDistance eps k pts =
@@ -73,7 +73,7 @@ pairwiseDist pts = sum [ euclideanDist (p^.core) (q^.core) | p <- pts, q <- pts]
 -- | $(1+\eps)$-approximation of the sum of the pairwise distances.
 --
 -- running time: $O(n(1/eps)^d + n\log n)$, where $n$ is the number of points
-approxPairwiseDistance         :: (Floating r, Ord r, AlwaysTrueWSPD d, Index' 0 d
+approxPairwiseDistance         :: (Floating r, Ord r, Arity d, Arity (d+1), 1 <= d
                                   , Show r, Show p)
                                => r -> [Point d r :+ p] -> r
 approxPairwiseDistance _   []  = 0
@@ -179,7 +179,7 @@ mainWith (Options f) = compareBoth 0.05 f >>= print
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Floating r, Ord r, AlwaysTrueWSPD d, Ord p)
+uncovered         :: (Floating r, Ord r, Arity d, Arity (d+1), Ord p)
                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
 uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
   where

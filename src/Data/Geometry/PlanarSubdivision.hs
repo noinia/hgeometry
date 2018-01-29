@@ -1,22 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Core
+module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
                                       , fromPolygon, fromPolygons
                                       ) where
 
-import           Algorithms.Geometry.PolygonTriangulation.Triangulate
+-- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Control.Lens hiding (holes, holesOf, (.=))
 import qualified Data.CircularSeq as CSeq
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
-import           Data.Geometry.PlanarSubdivision.Core
+import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.PlaneGraph (faceData,rawDartData,vertexData)
 import qualified Data.Vector as V
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
@@ -31,9 +30,9 @@ fromPolygon                               :: (Ord r, Fractional r) => proxy s
                                           -> f -- ^ data outside the polygon
                                           -> PlanarSubdivision s p () f r
 fromPolygon p pg@(SimplePolygon _)  iD oD = fromSimplePolygon p pg iD oD
-fromPolygon p pg@(MultiPolygon _ _) iD oD =
-    (triangulate p pg)&planeGraph.faceData.traverse.fData    %~ f
-                      &planeGraph.rawDartData.traverse.eData .~ ()
+fromPolygon p pg@(MultiPolygon _ _) iD oD = undefined
+    -- (triangulate p pg)&planeGraph.faceData.traverse.fData    %~ f
+    --                   &planeGraph.rawDartData.traverse.eData .~ ()
   where
     f Inside  = iD
     f Outside = oD
@@ -49,27 +48,28 @@ fromPolygons           :: (Ord r, Fractional r)
                        -> NonEmpty (SimplePolygon p r :+ f)
                        -> f -- ^ data outside the polygons
                        -> PlanarSubdivision s (Maybe p) () f r
-fromPolygons px pgs oD = subd&planeGraph.faceData .~ faceData'
-                             &planeGraph.vertexData.traverse %~ getP
-  where
-    faceData' = fmap (\(fi, FaceData hs _) -> FaceData hs (getFData fi)) . faces $ subd
+fromPolygons px pgs oD = undefined
+  -- subd&planeGraph.faceData .~ faceData'
+  --                            &planeGraph.vertexData.traverse %~ getP
+  -- where
+  --   faceData' = fmap (\(fi, FaceData hs _) -> FaceData hs (getFData fi)) . faces $ subd
 
-    -- given a faceId lookup the
-    getFData fi = let v = boundaryVertices fi subd V.! 0
-                  in subd^.dataOf v.to holeData
+  --   -- given a faceId lookup the
+  --   getFData fi = let v = boundaryVertices fi subd V.! 0
+  --                 in subd^.dataOf v.to holeData
 
-    -- note that we intentionally reverse the order of iDd and oD in the call below,
-    -- as our holes are now outside
-    subd = fromPolygon px (MultiPolygon (CSeq.fromList [a,b,c,d]) holes') (Just oD) Nothing
+  --   -- note that we intentionally reverse the order of iDd and oD in the call below,
+  --   -- as our holes are now outside
+  --   subd = fromPolygon px (MultiPolygon (CSeq.fromList [a,b,c,d]) holes') (Just oD) Nothing
 
-    -- for every polygon, construct a hole.
-    holes' = map withF . F.toList $ pgs
-    -- add the facedata to the vertex data
-    withF (pg :+ f) = bimap (\p -> Hole f p) id pg
+  --   -- for every polygon, construct a hole.
+  --   holes' = map withF . F.toList $ pgs
+  --   -- add the facedata to the vertex data
+  --   withF (pg :+ f) = bimap (\p -> Hole f p) id pg
 
-    -- corners of the slightly enlarged boundingbox
-    (a,b,c,d) = corners . bimap (const $ Outer oD) id
-              . grow 1 . boundingBoxList . fmap (^.core) $ pgs
+  --   -- corners of the slightly enlarged boundingbox
+  --   (a,b,c,d) = corners . bimap (const $ Outer oD) id
+  --             . grow 1 . boundingBoxList . fmap (^.core) $ pgs
 
     --TODO: We need to mark the edges of the outer square as invisible.
 
