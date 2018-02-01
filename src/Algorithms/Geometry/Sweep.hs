@@ -15,24 +15,23 @@ newtype Tagged (s :: *) a = Tagged { unTag :: a} deriving (Show,Eq,Ord)
 tag   :: proxy s -> a -> Tagged s a
 tag _ = Tagged
 
-newtype Timed t a = Timed {atTime :: t -> a }
+newtype Timed s t a = Timed {atTime :: (Tagged s t) -> a }
 
 
-
-instance (Reifies s t, Ord k) => Ord (Timed (Tagged s t) k) where
+instance (Reifies s t, Ord k) => Ord (Timed s t k) where
   compare = compare_
 
-instance (Reifies s t, Ord k) => Eq (Timed (Tagged s t) k) where
+instance (Reifies s t, Ord k) => Eq (Timed s t k) where
   a == b = a `compare` b == EQ
 
 compare_                       :: forall s t k. (Ord k, Reifies s t)
-                               => Timed (Tagged s t) k -> Timed (Tagged s t) k
+                               => Timed s t k -> Timed s t k
                                -> Ordering
 (Timed f) `compare_` (Timed g) = let t = reflect (Proxy :: Proxy s)
                                  in f (Tagged t) `compare` g (Tagged t)
 
 
-coerceTo :: proxy s -> f (Timed t k) -> f (Timed (Tagged s t) k)
+coerceTo :: proxy s -> f (Timed s' t k) -> f (Timed s t k)
 coerceTo _ = unsafeCoerce
 
 -- runAt       :: forall t k r f. Ord k
@@ -44,54 +43,54 @@ coerceTo _ = unsafeCoerce
 
 
 
-runAt       :: forall t k r f v. Ord k
+runAt       :: forall s0 t k r f v. Ord k
             => t
-            -> f (Timed t k) v
-            -> (forall s. Reifies s t => f (Timed (Tagged s t) k) v -> r)
+            -> f (Timed s0 t k) v
+            -> (forall s. Reifies s t => f (Timed s t k) v -> r)
             -> r
 runAt t m f = reify t $ \prx -> f (m' prx)
   where
     -- f'    :: Reifies s t => Proxy s -> f (Timed (Tagged s t) k) -> r
     -- f' _  = unsafeCoerce f
 
-    m'   :: Proxy s -> f (Timed (Tagged s t) k) v
+    m'   :: Proxy s -> f (Timed s t k) v
     m' _ = unsafeCoerce m
 
 
 
 
-getTime :: Timed (Tagged s Int) Int
+getTime :: Timed s Int Int
 getTime = Timed unTag
 
-constT   :: proxy s -> Int -> Timed (Tagged s Int) Int
+constT   :: proxy s -> Int -> Timed s Int Int
 constT _ i = Timed (const i)
 
 
 test1 i = reify 5 $ \prx -> getTime < constT prx i
 
 
-unTagged :: f (Timed (Tagged s t) k) v -> f (Timed t k) v
+unTagged :: f (Timed s t k) v -> f (Timed () t k) v
 unTagged = unsafeCoerce
 
 
 
 
 
-test2M   :: Reifies s0 Int => proxy s0 -> Map (Timed (Tagged s0 Int) Int) String
+test2M   :: Reifies s0 Int => proxy s0 -> Map (Timed s0 Int Int) String
 test2M p = Map.fromList [ (constT p 10, "ten")
                         , (getTime, "timed")
                         ]
 
 
-query :: forall s v. Ord (Timed (Tagged s Int) Int)
-      => Map (Timed (Tagged s Int) Int) v -> Maybe v
+query :: forall s v. Ord (Timed s Int Int)
+      => Map (Timed s Int Int) v -> Maybe v
 query = fmap snd . Map.lookupGE (constT (Proxy :: Proxy s) 4)
 
 
 test2   :: Int -> Maybe String
 test2 t = runAt t m query
   where
-    m :: Map (Timed Int Int) String
+    m :: Map (Timed () Int Int) String
     m = reify 0 $ \p -> unTagged $ test2M p
 
 
