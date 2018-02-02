@@ -31,33 +31,20 @@ compare_                       :: forall s t k. (Ord k, Reifies s t)
                                  in f (Tagged t) `compare` g (Tagged t)
 
 
-coerceTo :: proxy s -> f (Timed s' t k) -> f (Timed s t k)
+coerceTo :: proxy s -> f (Timed s' t k) v -> f (Timed s t k) v
 coerceTo _ = unsafeCoerce
 
--- runAt       :: forall t k r f. Ord k
---             => t -> f (Timed t k)
---             -> (forall s. Reifies s t => f (Timed (Tagged s t) k) -> r)
---             -> r
--- runAt t m f = reify t $ \prx -> f (coerceTo prx m)
+unTagged :: f (Timed s t k) v -> f (Timed () t k) v
+unTagged = coerceTo (Proxy :: Proxy ())
 
 
-
-
+-- | Runs a computation at a given time.
 runAt       :: forall s0 t k r f v. Ord k
             => t
             -> f (Timed s0 t k) v
             -> (forall s. Reifies s t => f (Timed s t k) v -> r)
             -> r
-runAt t m f = reify t $ \prx -> f (m' prx)
-  where
-    -- f'    :: Reifies s t => Proxy s -> f (Timed (Tagged s t) k) -> r
-    -- f' _  = unsafeCoerce f
-
-    m'   :: Proxy s -> f (Timed s t k) v
-    m' _ = unsafeCoerce m
-
-
-
+runAt t m f = reify t $ \prx -> f (coerceTo prx m)
 
 getTime :: Timed s Int Int
 getTime = Timed unTag
@@ -69,14 +56,10 @@ constT _ i = Timed (const i)
 test1 i = reify 5 $ \prx -> getTime < constT prx i
 
 
-unTagged :: f (Timed s t k) v -> f (Timed () t k) v
-unTagged = unsafeCoerce
 
 
 
-
-
-test2M   :: Reifies s0 Int => proxy s0 -> Map (Timed s0 Int Int) String
+test2M   :: Reifies s Int => proxy s -> Map (Timed s Int Int) String
 test2M p = Map.fromList [ (constT p 10, "ten")
                         , (getTime, "timed")
                         ]

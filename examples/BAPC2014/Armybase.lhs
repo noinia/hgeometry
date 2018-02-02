@@ -60,7 +60,7 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 
 
 
-> triangArea :: Triangle p Int -> Half
+> triangArea :: Triangle 2 p Int -> Half
 > triangArea = Half . doubleArea
 
 
@@ -193,7 +193,7 @@ ternary search.
 
 
 > findLargestTriang        :: Point 2 Int -> Point 2 Int
->                          -> Unimodal (Array Int) (Point 2 Int) -> Triangle () Int
+>                          -> Unimodal (Array Int) (Point 2 Int) -> Triangle 2 () Int
 > findLargestTriang p q us = triang . ternarySearchArray area' $ us
 >   where
 >     triang v = Triangle (ext p) (ext q) (ext v)

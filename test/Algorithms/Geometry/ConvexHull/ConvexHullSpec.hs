@@ -17,7 +17,8 @@ import qualified Data.Set as Set
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
-import           Test.QuickCheck.HGeometryInstances
+import           Test.QuickCheck.HGeometryInstances()
+import           Test.QuickCheck.Instances()
 import           Util
 
 import           Debug.Trace

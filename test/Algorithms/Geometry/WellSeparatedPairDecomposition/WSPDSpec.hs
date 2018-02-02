@@ -13,6 +13,7 @@ import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           Test.Hspec
 import           Util
+import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -68,7 +69,7 @@ points1 = ext <$> NonEmpty.fromList [point2 0 0, point2 1 1, point2 2 100, point
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Floating r, Ord r, AlwaysTrueWSPD d, Ord p)
+uncovered         :: (Floating r, Ord r, Arity d, Arity (d+1), Ord p)
                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
 uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
   where

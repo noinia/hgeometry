@@ -129,6 +129,8 @@ library
 
                     Algorithms.Geometry.Diameter
 
+                    Algorithms.Geometry.Sweep
+
                     Algorithms.Geometry.PolygonTriangulation.Types
                     Algorithms.Geometry.PolygonTriangulation.Triangulate
                     Algorithms.Geometry.PolygonTriangulation.MakeMonotone
@@ -207,6 +209,7 @@ library
                 , deepseq          >= 1.1
                 , fingertree       >= 0.1
                 , colour           >= 2.3.3
+                , reflection       >= 2.1
 
                -- , validation       >= 0.4
 
@@ -220,6 +223,7 @@ library
                , hexpat           >= 0.20.9
                , aeson            >= 1.0
                , yaml             >= 0.8
+
 
                , mtl
                , random
@@ -442,6 +446,7 @@ test-suite hspec
   build-depends:        base
                       , hspec                >= 2.1
                       , QuickCheck           >= 2.5
+                      , quickcheck-instances    >= 0.3
                       , approximate-equality >= 1.1.0.2
                       , hgeometry
                       , lens

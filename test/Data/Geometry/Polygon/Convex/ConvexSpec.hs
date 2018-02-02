@@ -16,6 +16,7 @@ import           Data.Traversable (traverse)
 import           Test.QuickCheck.HGeometryInstances ()
 import           Test.Hspec
 import           Test.QuickCheck
+import           Test.QuickCheck.Instances()
 
 
 

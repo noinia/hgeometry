@@ -22,7 +22,7 @@ sameAsNaive         :: (Ord r, Ord p, Arity d)
                     => [Point d r :+ p] -> KDTree d p r -> Box d q r -> Bool
 sameAsNaive pts t q = Set.fromList (searchKDTree q t) == Set.fromList (naive q pts)
 
-allSameAsNaive     :: (Ord r, Ord p, Arity d, KnownNat d, Index' 0 d, Foldable f)
+allSameAsNaive     :: (Ord r, Ord p, Arity d, 1 <= d, Foldable f)
                    => f (Point d r :+ p) -> [Box d () r] -> Bool
 allSameAsNaive pts = let pts' = F.toList pts
                      in  all (sameAsNaive pts' $ buildKDTree pts')
