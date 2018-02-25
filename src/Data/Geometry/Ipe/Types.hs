@@ -50,7 +50,7 @@ makeLenses ''Image
 type instance NumType   (Image r) = r
 type instance Dimension (Image r) = 2
 
-instance Num r => IsTransformable (Image r) where
+instance Fractional r => IsTransformable (Image r) where
   transformBy t = over rect (transformBy t)
 
 --------------------------------------------------------------------------------
@@ -68,10 +68,10 @@ type instance Dimension (TextLabel r) = 2
 type instance NumType   (MiniPage r) = r
 type instance Dimension (MiniPage r) = 2
 
-instance Num r => IsTransformable (TextLabel r) where
+instance Fractional r => IsTransformable (TextLabel r) where
   transformBy t (Label txt p) = Label txt (transformBy t p)
 
-instance Num r => IsTransformable (MiniPage r) where
+instance Fractional r => IsTransformable (MiniPage r) where
   transformBy t (MiniPage txt p w) = MiniPage txt (transformBy t p) w
 
 width                  :: MiniPage t -> t
@@ -90,7 +90,7 @@ makeLenses ''IpeSymbol
 type instance NumType   (IpeSymbol r) = r
 type instance Dimension (IpeSymbol r) = 2
 
-instance Num r => IsTransformable (IpeSymbol r) where
+instance Fractional r => IsTransformable (IpeSymbol r) where
   transformBy t = over symbolPoint (transformBy t)
 
 
@@ -118,7 +118,7 @@ makePrisms ''PathSegment
 type instance NumType   (PathSegment r) = r
 type instance Dimension (PathSegment r) = 2
 
-instance Num r => IsTransformable (PathSegment r) where
+instance Fractional r => IsTransformable (PathSegment r) where
   transformBy t (PolyLineSegment p) = PolyLineSegment $ transformBy t p
   transformBy t (PolygonPath p)     = PolygonPath $ transformBy t p
   transformBy _ _                   = error "transformBy: not implemented yet"
@@ -132,7 +132,7 @@ makeLenses ''Path
 type instance NumType   (Path r) = r
 type instance Dimension (Path r) = 2
 
-instance Num r => IsTransformable (Path r) where
+instance Fractional r => IsTransformable (Path r) where
   transformBy t (Path s) = Path $ fmap (transformBy t) s
 
 -- | type that represents a path in ipe.
@@ -203,7 +203,7 @@ newtype Group r = Group { _groupItems :: [IpeObject r] }
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
 
-instance Num r => IsTransformable (Group r) where
+instance Fractional r => IsTransformable (Group r) where
   transformBy t (Group s) = Group $ fmap (transformBy t) s
 
 
@@ -256,7 +256,7 @@ instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
 instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
 instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
 
-instance Num r => IsTransformable (IpeObject r) where
+instance Fractional r => IsTransformable (IpeObject r) where
   transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
   transformBy t (IpeImage i)     = IpeImage     $ i&core %~ transformBy t
   transformBy t (IpeTextLabel i) = IpeTextLabel $ i&core %~ transformBy t
@@ -383,7 +383,7 @@ applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ a
     (mm,ats') = takeAttr (Proxy :: Proxy AT.Matrix) ats
 
 -- | Applies the matrix to an ipe object if it has one.
-applyMatrix                  :: Num r => IpeObject r -> IpeObject r
+applyMatrix                  :: Fractional r => IpeObject r -> IpeObject r
 applyMatrix (IpeGroup i)     = IpeGroup . applyMatrix'
                              $ i&core.groupItems.traverse %~ applyMatrix
                              -- note that for a group we first (recursively)
@@ -395,10 +395,10 @@ applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
 applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
 applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
 
-applyMatrices   :: Num r => IpeFile r -> IpeFile r
+applyMatrices   :: Fractional r => IpeFile r -> IpeFile r
 applyMatrices f = f&pages.traverse %~ applyMatricesPage
 
-applyMatricesPage   :: Num r => IpePage r -> IpePage r
+applyMatricesPage   :: Fractional r => IpePage r -> IpePage r
 applyMatricesPage p = p&content.traverse %~ applyMatrix
 
 

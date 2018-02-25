@@ -48,7 +48,7 @@ type instance Dimension (ConvexPolygon p r) = 2
 type instance NumType   (ConvexPolygon p r) = r
 
 
-instance Num r => IsTransformable (ConvexPolygon p r) where
+instance Fractional r => IsTransformable (ConvexPolygon p r) where
   transformBy = transformPointFunctor
 
 instance IsBoxable (ConvexPolygon p r) where

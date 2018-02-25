@@ -132,7 +132,7 @@ instance PointFunctor (Box d p) where
   pmap f (Box mi ma) = Box (first (fmap f) mi) (first (fmap f) ma)
 
 
-instance (Num r, Arity d, Arity (d + 1))
+instance (Fractional r, Arity d, Arity (d + 1))
          => IsTransformable (Box d p r) where
   -- Note that this does not guarantee the box is still a proper box Only use
   -- this to do translations and scalings. Other transformations may produce

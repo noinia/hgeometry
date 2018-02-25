@@ -121,6 +121,10 @@ pointFromList :: Arity d => [r] -> Maybe (Point d r)
 pointFromList = fmap Point . Vec.vectorFromList
 
 
+-- | Project a point down into a lower dimension.
+projectPoint :: (Arity i, Arity d, i <= d) => Point d r -> Point i r
+projectPoint = Point . prefix . toVec
+
 --------------------------------------------------------------------------------
 -- * Convenience functions to construct 2 and 3 dimensional points
 

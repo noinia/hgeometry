@@ -3,7 +3,7 @@
 module Data.Geometry.Vector.VectorFixed where
 
 import           Control.DeepSeq
-import           Control.Lens
+import           Control.Lens hiding (element)
 import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Proxy
@@ -153,6 +153,9 @@ snoc = flip V.snoc
 init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
 init = Vector . V.reverse . V.tail . V.reverse . _unV
 
+last :: forall d r. (Arity d, Arity (d + 1)) => Vector (d + 1) r -> r
+last = view $ element (Proxy :: Proxy d)
+
 type Prefix i d = ( Peano (i + 1) ~ S (Peano i)
                   , Peano (d + 1) ~ S (Peano d)
                   , KnownNat i, Arity i)
@@ -174,14 +177,12 @@ v2 a b = Vector $ V.mk2 a b
 v3      :: r -> r -> r -> Vector 3 r
 v3 a b c = Vector $ V.mk3 a b c
 
-
 -- | Destruct a 2 dim vector into a pair
 _unV2 :: Vector 2 r -> (r,r)
 _unV2 v = let [x,y] = V.toList v in (x,y)
 
 _unV3 :: Vector 3 r -> (r,r,r)
 _unV3 v = let [x,y,z] = V.toList v in (x,y,z)
-
 
 -- | Pattern synonym for two and three dim vectors
 pattern Vector2       :: r -> r -> Vector 2 r
@@ -195,3 +196,10 @@ pattern Vector3 x y z <- (_unV3 -> (x,y,z))
   where
     Vector3 x y z = v3 x y z
 {-# COMPLETE Vector3 #-}
+
+
+pattern Vector4         :: r -> r -> r -> r -> Vector 4 r
+pattern Vector4 x y z a <- (V.toList -> [x,y,z,a])
+  where
+    Vector4 x y z a = V.mk4 x y z a
+{-# COMPLETE Vector4 #-}

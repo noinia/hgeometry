@@ -130,7 +130,7 @@ instance PointFunctor (LineSegment d p) where
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBox (l^.start.core) <> boundingBox (l^.end.core)
 
-instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (LineSegment d p r) where
+instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (LineSegment d p r) where
   transformBy = transformPointFunctor
 
 instance Arity d => Bifunctor (LineSegment d) where

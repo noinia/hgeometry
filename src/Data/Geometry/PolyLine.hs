@@ -41,7 +41,7 @@ instance Semigroup (PolyLine d p r) where
 instance Arity d => IsBoxable (PolyLine d p r) where
   boundingBox = boundingBoxList . NE.fromList . toListOf (points.traverse.core)
 
-instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (PolyLine d p r) where
+instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (PolyLine d p r) where
   transformBy = transformPointFunctor
 
 instance PointFunctor (PolyLine d p) where

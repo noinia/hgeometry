@@ -67,16 +67,20 @@ transformAllBy :: (Functor c, IsTransformable g)
 transformAllBy t = fmap (transformBy t)
 
 
-transformPointFunctor   :: ( PointFunctor g, Num r, d ~ Dimension (g r)
+transformPointFunctor   :: ( PointFunctor g, Fractional r, d ~ Dimension (g r)
                            , Arity d, Arity (d + 1)
                            ) => Transformation d r -> g r -> g r
 transformPointFunctor t = pmap (transformBy t)
 
-instance (Num r, Arity d, Arity (d + 1))
+instance (Fractional r, Arity d, Arity (d + 1))
          => IsTransformable (Point d r) where
-  transformBy (Transformation m) (Point v) = Point . V.init $ m `mult` v'
+  transformBy t = Point . transformBy t . toVec
+
+instance (Fractional r, Arity d, Arity (d + 1))
+         => IsTransformable (Vector d r) where
+  transformBy (Transformation m) v = f $ m `mult` snoc v 1
     where
-      v'    = snoc v 1
+      f u   = (/ V.last u) <$> V.init u
 
 
 --------------------------------------------------------------------------------

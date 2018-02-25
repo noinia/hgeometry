@@ -21,7 +21,7 @@ import           Text.Parsec.Error (messageString, errorMessages)
 -----------------------------------------------------------------------
 -- | Represent stuff that can be used as a coordinate in ipe. (similar to show/read)
 
-class Num r => Coordinate r where
+class Fractional r => Coordinate r where
     -- reads a coordinate. The input is an integer representing the
     -- part before the decimal point, and a length and an integer
     -- representing the part after the decimal point

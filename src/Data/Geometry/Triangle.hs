@@ -28,7 +28,7 @@ type instance Dimension (Triangle d p r) = d
 instance PointFunctor (Triangle d p) where
   pmap f (Triangle p q r) = Triangle (p&core %~ f) (q&core %~ f) (r&core %~ f)
 
-instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (Triangle d p r) where
+instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Triangle d p r) where
   transformBy = transformPointFunctor
 
 

@@ -51,7 +51,7 @@ instance HasSupportingLine (HalfLine d r) where
   supportingLine ~(HalfLine p v) = Line p v
 
 -- Half-Lines are transformable
-instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (HalfLine d r) where
+instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (HalfLine d r) where
   transformBy t = toHalfLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => HalfLine d r -> LineSegment d () r

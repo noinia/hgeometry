@@ -89,7 +89,7 @@ instance PointFunctor (Polygon t p) where
   pmap f (SimplePolygon vs)   = SimplePolygon (fmap (first f) vs)
   pmap f (MultiPolygon vs hs) = MultiPolygon  (fmap (first f) vs) (map (pmap f) hs)
 
-instance Num r => IsTransformable (Polygon t p r) where
+instance Fractional r => IsTransformable (Polygon t p r) where
   transformBy = transformPointFunctor
 
 instance IsBoxable (Polygon t p r) where

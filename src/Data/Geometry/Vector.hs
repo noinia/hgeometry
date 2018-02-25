@@ -3,7 +3,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , Arity
                            , Affine(..)
                            , qdA, distanceA
-                           , dot, norm
+                           , dot, norm, signorm
                            , isScalarMultipleOf
                            , scalarMultiple
                            -- reexports
@@ -13,15 +13,18 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
 
 import qualified Data.Foldable as F
 import           Data.Geometry.Vector.VectorFixed
+import           Data.Geometry.Properties
 import           Data.Maybe
 import qualified Data.Vector.Fixed as FV
 import           Data.Vector.Fixed (Arity)
 import           Linear.Affine (Affine(..), qdA, distanceA)
-import           Linear.Metric (dot,norm)
+import           Linear.Metric (dot,norm,signorm)
 import           Linear.Vector as LV
 
 --------------------------------------------------------------------------------
 
+type instance Dimension (Vector d r) = d
+type instance NumType (Vector d r) =r
 
 -- | Test if v is a scalar multiple of u.
 --

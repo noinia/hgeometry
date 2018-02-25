@@ -28,7 +28,7 @@ import           GHC.TypeLits
 --------------------------------------------------------------------------------
 
 -- | Lines are transformable, via line segments
-instance (Num r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) where
+instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) where
   transformBy t = supportingLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => Line d r -> LineSegment d () r
