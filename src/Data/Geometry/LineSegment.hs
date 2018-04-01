@@ -64,18 +64,20 @@ pattern LineSegment           :: EndPoint (Point d r :+ p)
                               -> EndPoint (Point d r :+ p)
                               -> LineSegment d p r
 pattern LineSegment       s t = GLineSegment (Interval s t)
+{-# COMPLETE LineSegment #-}
 
 -- | Gets the start and end point, but forgetting if they are open or closed.
 pattern LineSegment'          :: Point d r :+ p
                               -> Point d r :+ p
                               -> LineSegment d p r
 pattern LineSegment'      s t <- ((^.start) &&& (^.end) -> (s,t))
-
+{-# COMPLETE LineSegment' #-}
 
 pattern ClosedLineSegment     :: Point d r :+ p
                               -> Point d r :+ p
                               -> LineSegment d p r
 pattern ClosedLineSegment s t = GLineSegment (ClosedInterval s t)
+{-# COMPLETE ClosedLineSegment #-}
 
 type instance Dimension (LineSegment d p r) = d
 type instance NumType   (LineSegment d p r) = r

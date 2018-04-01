@@ -49,7 +49,7 @@ class IsIntersectableWith g h where
 
   -- | Helper to implement `intersects`.
   nonEmptyIntersection :: proxy g -> proxy h -> Intersection g h -> Bool
-  {-# MINIMAL intersect , nonEmptyIntersection #-}
+  {-# MINIMAL intersect, nonEmptyIntersection #-}
 
   default nonEmptyIntersection :: ( NoIntersection ∈ IntersectionOf g h
                                   , RecApplicative (IntersectionOf g h)

@@ -7,8 +7,8 @@ import           Data.Geometry.Transformation
 
 -- | The boundary of a geometric object.
 newtype Boundary g = Boundary g
-                   deriving (Show,Eq,Ord,Read,IsTransformable)
-
+                   deriving (Show,Eq,Ord,Read,IsTransformable
+                            ,Functor,Foldable,Traversable)
 
 type instance NumType (Boundary g)   = NumType g
 type instance Dimension (Boundary g) = Dimension g
