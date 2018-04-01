@@ -12,7 +12,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
                       , vertices', vertices
                       , edges', edges
-                      , faces', faces, internalFaces
+                      , faces', faces, internalFaces, faces''
                       , darts'
 
                       , headOf, tailOf, twin, endPoints
@@ -25,7 +25,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , leftFace, rightFace
                       , nextEdge, prevEdge
                       , boundary, boundaryVertices
-                      , outerFaceId
+                      , outerFaceId, outerFaceDart
 
                       , vertexDataOf, locationOf, HasDataOf(..)
 
@@ -273,11 +273,19 @@ faces' = PG.faces' . _graph
 faces :: PlaneGraph s v e f r  -> V.Vector (FaceId' s, f)
 faces = PG.faces . _graph
 
--- | Enumerates all faces with their face data exlcluding  the outer face
-internalFaces    :: (Ord r, Fractional r) => PlaneGraph s v e f r
-                 -> V.Vector (FaceId' s, f)
-internalFaces ps = let i = outerFaceId ps
-                   in V.filter (\(j,_) -> i /= j) $ faces ps
+
+-- | Reports the outerface and all internal faces separately.
+-- running time: \(O(n)\)
+faces''   :: (Ord r, Fractional r)
+          => PlaneGraph s v e f r -> ((FaceId' s, f), V.Vector (FaceId' s, f))
+faces'' g = let i = outerFaceId g
+            in ((i,g^.dataOf i), V.filter (\(j,_) -> i /= j) $ faces g)
+
+-- | Reports all internal faces.
+-- running time: \(O(n)\)
+internalFaces :: (Ord r, Fractional r)
+              => PlaneGraph s v e f r -> V.Vector (FaceId' s, f)
+internalFaces = snd . faces''
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
@@ -442,7 +450,15 @@ endPointData d = PG.endPointData d . _graph
 --
 -- running time: \(O(n)\)
 outerFaceId    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> FaceId' s
-outerFaceId ps = leftFace d ps
+outerFaceId ps = leftFace (outerFaceDart ps) ps
+
+
+-- | gets a dart incident to the outer face (in particular, that has the
+-- outerface onits left)
+--
+-- running time: \(O(n)\)
+outerFaceDart    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> Dart s
+outerFaceDart ps = d
   where
     (v,_)  = V.minimumBy (comparing (^._2.location.xCoord)) . vertices $ ps
     d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
@@ -453,6 +469,8 @@ outerFaceId ps = leftFace d ps
     -- and take the face left of that edge. This is the outerface.
     -- note that this requires that the edges are straight line segments
     --
+
+
 
 --------------------------------------------------------------------------------
 
