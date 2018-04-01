@@ -21,6 +21,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
 import           Data.Semigroup
+import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
 
@@ -73,6 +74,9 @@ type MultiPolygon  = Polygon Multi
 -- | Either a simple or multipolygon
 type SomePolygon p r = Either (Polygon Simple p r) (Polygon Multi p r)
 
+type instance Dimension (SomePolygon p r) = 2
+type instance NumType   (SomePolygon p r) = r
+
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
@@ -94,6 +98,24 @@ instance Fractional r => IsTransformable (Polygon t p r) where
 
 instance IsBoxable (Polygon t p r) where
   boundingBox = boundingBoxList' . toListOf (outerBoundary.traverse.core)
+
+type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
+  '[Seq.Seq (Either (Point 2 r) (LineSegment 2 () r))]
+
+-- instance IsIntersectableWith (Line 2 r) (Boundary (Polygon t p r)) where
+--   nonEmptyIntersection _ _ (CoRec xs) = null xs
+--   l `intersect` (Boundary (SimplePolygon vs)) =
+--     undefined
+  -- l `intersect` (Boundary (MultiPolygon vs hs)) = coRec .
+  --    Seq.sortBy f . Seq.fromList
+  --     . concatMap (unpack . (l `intersect`) . Boundary)
+  --     $ SimplePolygon vs : hs
+  --   where
+  --     unpack (CoRec x) = x
+  --     f = undefined
+
+
+
 
 -- * Functions on Polygons
 
