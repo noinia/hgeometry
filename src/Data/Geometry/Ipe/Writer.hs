@@ -17,7 +17,7 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon (SimplePolygon, outerBoundary)
+import           Data.Geometry.Polygon (Polygon, outerBoundary, holeList, asSimplePolygon)
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Vector
 import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
@@ -90,9 +90,15 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: t -> Maybe (Node Text Text)
 
+instance (IpeWrite l, IpeWrite r) => IpeWrite (Either l r) where
+  ipeWrite = either ipeWrite ipeWrite
 
 instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
   ipeWriteText att = _getAttr att >>= ipeWriteText
+
+instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
+  ipeWriteText = either ipeWriteText ipeWriteText
+
 
 -- | Functon to write all attributes in a Rec
 ipeWriteAttrs           :: ( AllSatisfy IpeAttrName rs
@@ -248,12 +254,16 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
     -- the polyline type guarantees that there is at least one point
 
-instance IpeWriteText r => IpeWriteText (SimplePolygon () r) where
-  ipeWriteText pg = case pg^..outerBoundary.to F.toList.traverse.core of
-    (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
-    _          -> Nothing
+instance IpeWriteText r => IpeWriteText (Polygon t () r) where
+  ipeWriteText pg = fmap mconcat . traverse f $ asSimplePolygon pg : holeList pg
+    where
+      f pg' = case pg'^..outerBoundary.traverse.core of
+        (p : rest) -> unlines' . map ipeWriteText
+                    $ MoveTo p : map LineTo rest ++ [ClosePath]
+        _          -> Nothing
     -- TODO: We are not really guaranteed that there is at least one point, it would
     -- be nice if the type could guarantee that.
+
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p

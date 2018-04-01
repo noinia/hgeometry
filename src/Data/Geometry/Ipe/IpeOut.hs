@@ -106,15 +106,14 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
   type DefaultIpeOut (PolyLine 2 p r) = Path
   defaultIpeOut = noAttrs ipePolyLine
 
-instance HasDefaultIpeOut (SimplePolygon p r) where
-  type DefaultIpeOut (SimplePolygon p r) = Path
+instance HasDefaultIpeOut (Polygon t p r) where
+  type DefaultIpeOut (Polygon t p r) = Path
   defaultIpeOut = flip addAttributes ipePolygon $
                     mempty <> attr SFill (IpeColor "0.722 0.145 0.137")
 
-instance HasDefaultIpeOut (MultiPolygon p r) where
-  type DefaultIpeOut (MultiPolygon p r) = Path
-  defaultIpeOut = flip addAttributes ipePolygon $
-                    mempty <> attr SFill (IpeColor "0.722 0.145 0.137")
+instance HasDefaultIpeOut (SomePolygon p r) where
+  type DefaultIpeOut (SomePolygon p r) = Path
+  defaultIpeOut = IpeOut $ either (asIpe defaultIpeOut) (asIpe defaultIpeOut)
 
 instance HasDefaultIpeOut (ConvexPolygon p r) where
   type DefaultIpeOut (ConvexPolygon p r) = Path
