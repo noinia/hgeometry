@@ -33,7 +33,7 @@ module Data.PlanarGraph( Arc(..)
                        , dual
 
                        , FaceId(..), FaceId'
-                       , leftFace, rightFace, boundary, boundaryVertices
+                       , leftFace, rightFace, boundary, boundary', boundaryVertices
                        , nextEdge, prevEdge
 
 
@@ -53,7 +53,7 @@ import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Maybe (catMaybes, isJust, fromJust)
+import           Data.Maybe (catMaybes, isJust, fromJust, fromMaybe)
 import           Data.Permutation
 import           Data.Semigroup (Semigroup(..))
 import           Data.Traversable (fmapDefault,foldMapDefault)
@@ -202,7 +202,8 @@ instance Show (VertexId s w) where
 -- The types v, e, and f are the are the types of the data associated with the
 -- vertices, edges, and faces, respectively.
 --
--- The orbits in the embedding are assumed to be in counterclockwise order.
+-- The orbits in the embedding are assumed to be in counterclockwise
+-- order. Therefore, every dart directly bounds the face to its right.
 data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutation (Dart s)
                                                     , _vertexData  :: V.Vector v
                                                     , _rawDartData :: V.Vector e
@@ -797,6 +798,19 @@ boundary              :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (Dart s
 boundary (FaceId v) g = incidentEdges v $ _dual g
 
 
+-- | Generates the darts incident to a face, starting with the given dart.
+--
+--
+-- \(O(k)\), where \(k\) is the number of darts reported
+boundary'     :: Dart s -> PlanarGraph s w v e f -> V.Vector (Dart s)
+boundary' d g = fromMaybe (error "boundary'")  . rotateTo d $ boundary (rightFace d g) g
+  where
+    rotateTo     :: Eq a => a -> V.Vector a -> Maybe (V.Vector a)
+    rotateTo x v = f <$> V.elemIndex x v
+      where
+        f i = let (a,b) = V.splitAt i v  in b <> a
+
+
 -- | The vertices bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.
 --
@@ -1010,3 +1024,26 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (4, [1,2,5])
             , (5, [3,4])
             ]
+
+
+myGraph :: PlanarGraph Test Primal () String ()
+myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+                            , (Dart aC Positive, "c+")
+                            , (Dart aB Positive, "b+")
+                            , (Dart aA Positive, "a+")
+                            ]
+                          , [ (Dart aE Negative, "e-")
+                            , (Dart aB Negative, "b-")
+                            , (Dart aD Negative, "d-")
+                            , (Dart aG Positive, "g+")
+                            ]
+                          , [ (Dart aE Positive, "e+")
+                            , (Dart aD Positive, "d+")
+                            , (Dart aC Negative, "c-")
+                            ]
+                          , [ (Dart aG Negative, "g-")
+                            ]
+                          ]
+  where
+    -- dart i s = Dart (Arc i) (read s)
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

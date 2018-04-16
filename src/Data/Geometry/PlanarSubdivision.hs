@@ -17,6 +17,9 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector as V
+import qualified Data.PlaneGraph as PG
+import Data.Proxy
+
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible
@@ -24,18 +27,27 @@ import qualified Data.Vector as V
 --
 -- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a polygon
 -- with holes.
-fromPolygon                               :: (Ord r, Fractional r) => proxy s
-                                          -> Polygon t p r
-                                          -> f -- ^ data inside
-                                          -> f -- ^ data outside the polygon
-                                          -> PlanarSubdivision s p () f r
-fromPolygon p pg@(SimplePolygon _)  iD oD = fromSimplePolygon p pg iD oD
-fromPolygon p pg@(MultiPolygon _ _) iD oD = undefined
-    -- (triangulate p pg)&planeGraph.faceData.traverse.fData    %~ f
-    --                   &planeGraph.rawDartData.traverse.eData .~ ()
+fromPolygon                              :: forall proxy t p f r s.
+                                            (Ord r, Fractional r) => proxy s
+                                         -> Polygon t p r
+                                         -> f -- ^ data inside
+                                         -> f -- ^ data outside the polygon
+                                         -> PlanarSubdivision s p () f r
+fromPolygon p pg@(SimplePolygon _) iD oD = fromSimplePolygon p pg iD oD
+fromPolygon _ (MultiPolygon vs hs) iD oD = PlanarSubdivision cs vd dd fd
   where
-    f Inside  = iD
-    f Outside = oD
+    wp = Proxy :: Proxy (Wrap s)
+
+    -- the components
+    cs = undefined
+    cs' = PG.fromSimplePolygon wp (SimplePolygon vs) iD oD
+        : map (\h -> PG.fromSimplePolygon wp h oD iD) hs
+
+    vd = undefined
+    dd = undefined
+    fd = undefined
+
+
 
 
 -- | Given a list of *disjoint* polygons, construct a planarsubdivsion

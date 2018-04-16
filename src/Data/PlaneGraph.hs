@@ -24,7 +24,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
                       , leftFace, rightFace
                       , nextEdge, prevEdge
-                      , boundary, boundaryVertices
+                      , boundary, boundary', boundaryVertices
                       , outerFaceId, outerFaceDart
 
                       , vertexDataOf, locationOf, HasDataOf(..)
@@ -118,10 +118,12 @@ instance IsBoxable (PlaneGraph s v e f r) where
 --------------------------------------------------------------------------------
 -- * Constructing a Plane Graph
 
--- | Construct a plane graph from a simple polygon.
+-- | Construct a plane graph from a simple polygon. It is assumed that the
+-- polygon is given in counterclockwise order.
 --
 -- the interior of the polygon will have faceId 0
 --
+-- pre: the input polygon is given in counterclockwise order
 -- running time: \(O(n)\).
 fromSimplePolygon                            :: proxy s
                                              -> SimplePolygon p r
@@ -153,9 +155,9 @@ fromVertices _ vs = g&PG.vertexData .~ vData'
 --
 -- running time: \(O(n\log n)\)
 fromConnectedSegments      :: (Foldable f, Ord r, Num r)
-                            => proxy s
-                            -> f (LineSegment 2 p r :+ e)
-                            -> PlaneGraph s (NonEmpty.NonEmpty p) e () r
+                           => proxy s
+                           -> f (LineSegment 2 p r :+ e)
+                           -> PlaneGraph s (NonEmpty.NonEmpty p) e () r
 fromConnectedSegments _ ss = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxData
   where
     pts         = M.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
@@ -397,6 +399,13 @@ prevEdge d = PG.prevEdge d . _graph
 boundary   :: FaceId' s -> PlaneGraph s v e f r  -> V.Vector (Dart s)
 boundary f = PG.boundary f . _graph
 
+-- | Generates the darts incident to a face, starting with the given dart.
+--
+--
+-- \(O(k)\), where \(k\) is the number of darts reported
+boundary'   :: Dart s -> PlaneGraph s v e f r -> V.Vector (Dart s)
+boundary' d = PG.boundary' d . _graph
+
 
 -- | The vertices bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.
@@ -454,7 +463,7 @@ outerFaceId ps = leftFace (outerFaceDart ps) ps
 
 
 -- | gets a dart incident to the outer face (in particular, that has the
--- outerface onits left)
+-- outerface on its left)
 --
 -- running time: \(O(n)\)
 outerFaceDart    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> Dart s
