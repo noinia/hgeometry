@@ -61,7 +61,8 @@ spec = do
     it "outerFace tests" $
       let [d] = toList $ holesOf (outerFaceId triangle) triangle
       in leftFace d triangle `shouldBe` (outerFaceId triangle)
-    testSpec
+    testSpec testPoly
+    testSpec testPoly2
     -- describe "incidentDarts" $ do
     --   forM_ (darts' triangle) $ \d ->
     --     it "incidentDarts indiv"  $
@@ -117,17 +118,17 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
 
 
 
-testSpec :: Spec
-testSpec = do
-  sameAsConnectedPG (PG.fromSimplePolygon (Id Test) testPoly Inside Outside)
-                    (PS.fromSimplePolygon (Id Test) testPoly Inside Outside)
-  sameAsConnectedPG (TM.triangulate' (Id Test) testPoly)
-                    (TM.triangulate  (Id Test) testPoly)
-  sameAsConnectedPG (TR.triangulate' (Id Test) testPoly)
-                    (TR.triangulate  (Id Test) testPoly)
+testSpec    :: (Ord r, Eq p, Fractional r, Show r, Show p)
+            => SimplePolygon p r -> Spec
+testSpec pg = do
+  sameAsConnectedPG (PG.fromSimplePolygon (Id Test) pg Inside Outside)
+                    (PS.fromSimplePolygon (Id Test) pg Inside Outside)
+  -- sameAsConnectedPG (TM.triangulate' (Id Test) pg)
+  --                   (TM.triangulate  (Id Test) pg)
+  sameAsConnectedPG (TR.triangulate' (Id Test) pg)
+                    (TR.triangulate  (Id Test) pg)
 
 
-testPolyP  = fromSimplePolygon (Id Test) testPoly Inside Outside
 
 testPoly :: SimplePolygon () Rational
 testPoly = toCounterClockWiseOrder . fromPoints $ map ext $ [
@@ -140,11 +141,32 @@ testPoly = toCounterClockWiseOrder . fromPoints $ map ext $ [
                                                             ]
 
 
+testPoly2 :: SimplePolygon () Rational
+testPoly2 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
+                                                             , Point2 128 688
+                                                             , Point2 176 672
+                                                             , Point2 256 672
+                                                             , Point2 272 608
+                                                             , Point2 384 656
+                                                             , Point2 336 768
+                                                             , Point2 272 720
+                                                             ]
+
+
+testPolyP  = fromSimplePolygon (Id Test) testPoly2 Inside Outside
 testPolygPlaneG = fromJust $ testPolyP^?components.ix 0
 
-test = TR.triangulate (Id Test) testPoly
-test' = TR.triangulate' (Id Test) testPoly
+monotonePs = MM.makeMonotone (Id Test) testPoly2
+monotonePlaneG = fromJust $ monotonePs^?components.ix 0
+
+test = TR.triangulate (Id Test) testPoly2
+test' = TR.triangulate' (Id Test) testPoly2
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
+
+printMP = mapM_ printAsIpeSelection
+        . map (asIpeObject' mempty . (^.core) . snd)
+        . toList . rawFacePolygons $ monotonePs
+
 
 
 printP = mapM_ printAsIpeSelection
@@ -154,4 +176,4 @@ printP = mapM_ printAsIpeSelection
 
 printPP = mapM_ printAsIpeSelection
         . map (asIpeObject' mempty . (^.core) . snd)
-         . toList . rawFacePolygons $ test
+        . toList . rawFacePolygons $ test

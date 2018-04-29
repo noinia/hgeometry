@@ -109,12 +109,12 @@ ix' i = singular (ix i)
 -- the polygon into y-monotone pieces.
 --
 -- running time: \(O(n\log n)\)
-findDiagonals    :: forall t r p. (Fractional r, Ord r)
-                 => Polygon t p r -> [LineSegment 2 p r]
-findDiagonals p' = map f . sweep
-                 . NonEmpty.sortBy (flip cmpSweep)
-                 . polygonVertices . withIncidentEdges
-                 . first (^._1) $ pg
+computeDiagonals    :: forall t r p. (Fractional r, Ord r)
+                    => Polygon t p r -> [LineSegment 2 p r]
+computeDiagonals p' = map f . sweep
+                    . NonEmpty.sortBy (flip cmpSweep)
+                    . polygonVertices . withIncidentEdges
+                    . first (^._1) $ pg
   where
     -- remaps to get the p value rather than the vertexId
     f = first (\i -> vertexInfo^.ix' i._2)
@@ -146,7 +146,7 @@ makeMonotone      :: (Fractional r, Ord r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 makeMonotone px pg = let (e:es) = listEdges pg
-                     in constructSubdivision px e es (findDiagonals pg)
+                     in constructSubdivision px e es (computeDiagonals pg)
 
 type Sweep p r = WriterT (DList.DList (LineSegment 2 Int r))
                    (StateT (StatusStruct r)
@@ -301,7 +301,7 @@ handleRegularR i (v :+ _) = connectToLeft i v
 -- loadT = do pgs <- readAllFrom "/Users/frank/tmp/testPoly.ipe"
 --                         :: IO [SimplePolygon () Rational :+ IpeAttributes Path Rational]
 --            mapM_ print pgs
---            let diags = map (findDiagonals . (^.core)) pgs
+--            let diags = map (computeDiagonals . (^.core)) pgs
 --                f = asIpeGroup . map (asIpeObject' mempty)
 --                out = [ asIpeGroup $ map (\(pg :+ a) -> asIpeObject pg a) pgs
 --                      , asIpeGroup $ map f diags

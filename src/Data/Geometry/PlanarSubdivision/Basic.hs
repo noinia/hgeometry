@@ -180,9 +180,9 @@ fromPlaneGraph'        :: forall s v e f r. PlaneGraph s v e f r -> Dart s
 fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
   where
     c = ComponentId 0
-    vd = V.imap    (\i v        -> Raw c (VertexId i) v)             $ g^.PG.vertexData
-    ed = V.zipWith (\d dd       -> Raw c d            dd) allDarts'' $ g^.PG.rawDartData
-    fd = swapOf . V.imap (\i f  -> Raw c (mkFaceId i) f)             $ g^.PG.faceData
+    vd = V.imap    (\i v   -> Raw c (VertexId i) v)             $ g^.PG.vertexData
+    ed = V.zipWith (\d dd  -> Raw c d            dd) allDarts'' $ g^.PG.rawDartData
+    fd = V.imap (\i f      -> Raw c (mkFaceId i) f) . swapOf    $ g^.PG.faceData
 
     g' :: PlaneGraph s (VertexId' s) (Dart s) (FaceData (Dart s) (FaceId' s)) r
     g' = g&PG.faceData    %~ V.imap (\i _ -> mkFaceData i)
@@ -195,9 +195,9 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     -- make sure the outerFaceId is 0
     (FaceId (VertexId of')) = PG.leftFace ofD g
 
-    -- at index i we are now storing the outerface
-    mkFaceData i | i == 0    = faceData (Seq.singleton ofD) of'
-                 | i == of'  = faceData mempty 0
+    -- at index i we are storing the outerface
+    mkFaceData i | i == of'  = faceData (Seq.singleton ofD) 0
+                 | i == 0    = faceData mempty of'
                  | otherwise = faceData mempty i
     faceData xs i = FaceData xs (FaceId . VertexId $ i)
 
@@ -207,7 +207,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     mkFaceId' i | i == 0    = of'
                 | i == of'  = 0
                 | otherwise = i
-    swapOf = V.modify (\v -> MV.unsafeSwap v 0 of')
+    swapOf = V.modify (\v -> MV.swap v 0 of')
 
 
 
