@@ -13,12 +13,40 @@ import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
 import           Data.Tuple (swap)
 import           Data.Util
+import           Algorithms.Geometry.PolygonTriangulation.Types
+import           Data.PlaneGraph (PlaneGraph)
+import           Data.Geometry.PlanarSubdivision.Basic(PolygonFaceData, PlanarSubdivision)
+
 --------------------------------------------------------------------------------
 
 --
 type MonotonePolygon p r = SimplePolygon p r
 
 data LR = L | R deriving (Show,Eq)
+
+-- | Triangulates a polygon of \(n\) vertices
+--
+-- running time: \(O(n \log n)\)
+triangulate        :: (Ord r, Fractional r)
+                   => proxy s -> MonotonePolygon p r
+                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+triangulate px pg' = constructSubdivision px e es (computeDiagonals pg)
+  where
+    pg     = toCounterClockWiseOrder pg'
+    (e:es) = listEdges pg
+  -- TODO: Find a way to construct the graph in O(n) time.
+
+-- | Triangulates a polygon of \(n\) vertices
+--
+-- running time: \(O(n \log n)\)
+triangulate'        :: (Ord r, Fractional r)
+                    => proxy s -> MonotonePolygon p r
+                    -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
+triangulate' px pg' = constructGraph px e es (computeDiagonals pg)
+  where
+    pg     = toCounterClockWiseOrder pg'
+    (e:es) = listEdges pg
+  -- TODO: Find a way to construct the graph in O(n) time.
 
 
 -- | Given a y-monotone polygon in counter clockwise order computes the diagonals

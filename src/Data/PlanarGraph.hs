@@ -41,6 +41,8 @@ module Data.PlanarGraph( Arc(..)
                        , edgeOracle, buildEdgeOracle
                        , findEdge
                        , hasEdge, findDart
+
+                       , allDarts
                        ) where
 
 
@@ -163,6 +165,11 @@ instance Enum (Dart s) where
                                 Positive -> 2*i
                                 Negative -> 2*i + 1
 
+
+-- | Enumerates all darts such that
+-- allDarts !! i = d   <=> i == fromEnum d
+allDarts :: [Dart s]
+allDarts = concatMap (\a -> [Dart a Positive, Dart a Negative]) [Arc 0..]
 
 -- | The world in which the graph lives
 data World = Primal | Dual deriving (Show,Eq)

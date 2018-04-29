@@ -53,6 +53,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
 
                                            , rawVertexData, rawDartData, rawFaceData
                                            , dataVal
+
+                                           , dartMapping, Raw(..)
                                            ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -69,7 +71,7 @@ import qualified Data.List as L
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Permutation (ix')
-import           Data.PlanarGraph (toAdjacencyLists,buildFromJSON, isPositive)
+import           Data.PlanarGraph (toAdjacencyLists,buildFromJSON, isPositive, allDarts)
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , Dart, VertexId(..), FaceId(..), twin
@@ -178,14 +180,17 @@ fromPlaneGraph'        :: forall s v e f r. PlaneGraph s v e f r -> Dart s
 fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
   where
     c = ComponentId 0
-    vd = V.imap (\i v           -> Raw c (VertexId i) v)  $ g^.PG.vertexData
-    ed = fmap (\(d,dd)          -> Raw c (coerce d)   dd) $ g^.PG.dartData
-    fd = swapOf . V.imap (\i f  -> Raw c (mkFaceId i) f)  $ g^.PG.faceData
+    vd = V.imap    (\i v        -> Raw c (VertexId i) v)             $ g^.PG.vertexData
+    ed = V.zipWith (\d dd       -> Raw c d            dd) allDarts'' $ g^.PG.rawDartData
+    fd = swapOf . V.imap (\i f  -> Raw c (mkFaceId i) f)             $ g^.PG.faceData
 
     g' :: PlaneGraph s (VertexId' s) (Dart s) (FaceData (Dart s) (FaceId' s)) r
-    g' = g&PG.faceData   %~ V.imap (\i _ -> mkFaceData i)
-          &PG.vertexData %~ V.imap (\i _ -> VertexId i)
-          &PG.dartData   %~ fmap (\(d,_) -> (d,d))
+    g' = g&PG.faceData    %~ V.imap (\i _ -> mkFaceData i)
+          &PG.vertexData  %~ V.imap (\i _ -> VertexId i)
+          &PG.rawDartData .~ allDarts''
+
+    allDarts'' :: forall s'. V.Vector (Dart s')
+    allDarts'' = allDarts' (PG.numDarts g)
 
     -- make sure the outerFaceId is 0
     (FaceId (VertexId of')) = PG.leftFace ofD g
@@ -203,6 +208,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
                 | i == of'  = 0
                 | otherwise = i
     swapOf = V.modify (\v -> MV.unsafeSwap v 0 of')
+
 
 
 
@@ -283,9 +289,11 @@ vertices    :: PlanarSubdivision s v e f r  -> V.Vector (VertexId' s, VertexData
 vertices ps = (\vi -> (vi,ps^.vertexDataOf vi)) <$> vertices' ps
 
 -- | Enumerate all darts
-darts'    :: PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-darts' ps = let n = numDarts ps
-            in V.fromList $ map toEnum [0..n-1]
+darts' :: PlanarSubdivision s v e f r  -> V.Vector (Dart s)
+darts' = allDarts' . numDarts
+
+allDarts'   :: forall s'. Int -> V.Vector (Dart s')
+allDarts' n = V.fromList $ take n allDarts
 
 
 -- | Enumerate all edges. We report only the Positive darts
@@ -321,6 +329,15 @@ internalFaces ps = let i = outerFaceId ps
                    in V.filter (\(j,_) -> i /= j) $ faces ps
 
 
+-- -- | lens to access the Dart Data
+-- dartData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e' f r)
+--                  (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
+-- dartData = graph.PG.dartData
+
+
+
+
+
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
 -- running time: \(O(1)\)
@@ -342,7 +359,7 @@ headOf d ps = let (_,d',g) = asLocalD d ps
 -- running time: \(O(1)\)
 endPoints      :: Dart s -> PlanarSubdivision s v e f r
                -> (VertexId' s, VertexId' s)
-endPoints d ps = (headOf d ps, tailOf d ps)
+endPoints d ps = (tailOf d ps, headOf d ps)
 
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
@@ -575,3 +592,7 @@ rawFacePolygon i ps = case F.toList $ holesOf i ps of
 rawFacePolygons    :: PlanarSubdivision s v e f r
                    -> V.Vector (FaceId' s, SomePolygon v r :+ f)
 rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
+
+
+
+dartMapping ps = ps^.component (ComponentId 0).PG.dartData
