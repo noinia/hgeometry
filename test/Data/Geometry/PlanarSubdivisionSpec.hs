@@ -19,11 +19,12 @@ import qualified Data.List as L
 import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
 import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 
-import           Data.Maybe (fromJust)
 import           Control.Lens hiding (holesOf)
-import           Data.PlaneGraph.Draw
+import           Data.Either (lefts)
 import           Data.Geometry.Ipe
 import           Data.Geometry.PlanarSubdivision.Draw
+import           Data.Maybe (fromJust)
+import           Data.PlaneGraph.Draw
 
 
 data Test = Test
@@ -63,6 +64,9 @@ spec = do
       in leftFace d triangle `shouldBe` (outerFaceId triangle)
     testSpec testPoly
     testSpec testPoly2
+    testSpec testPoly3
+    testSpec testPoly4
+
     -- describe "incidentDarts" $ do
     --   forM_ (darts' triangle) $ \d ->
     --     it "incidentDarts indiv"  $
@@ -153,14 +157,37 @@ testPoly2 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
                                                              ]
 
 
-testPolyP  = fromSimplePolygon (Id Test) testPoly2 Inside Outside
+
+testPoly3 :: SimplePolygon () Rational
+testPoly3 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 367
+                                                             , Point2 128 176
+                                                             , Point2 240 336
+                                                             , Point2 80 272
+                                                             , Point2 48 400
+                                                             , Point2 96 384
+                                                             , Point2 240 496
+                                                             ]
+
+
+
+testPoly4 :: SimplePolygon () Rational
+testPoly4 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 64 544
+                                                             , Point2 320 527
+                                                             , Point2 208 496
+                                                             , Point2 48 432
+                                                             , Point2 16 560
+                                                             ]
+
+
+
+testPolyP  = fromSimplePolygon (Id Test) testPoly3 Inside Outside
 testPolygPlaneG = fromJust $ testPolyP^?components.ix 0
 
-monotonePs = MM.makeMonotone (Id Test) testPoly2
+monotonePs = MM.makeMonotone (Id Test) testPoly3
 monotonePlaneG = fromJust $ monotonePs^?components.ix 0
 
-test = TR.triangulate (Id Test) testPoly2
-test' = TR.triangulate' (Id Test) testPoly2
+test = TR.triangulate (Id Test) testPoly3
+test' = TR.triangulate' (Id Test) testPoly3
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
 printMP = mapM_ printAsIpeSelection
@@ -174,6 +201,13 @@ printP = mapM_ printAsIpeSelection
        . toList . PG.rawFacePolygons $ test'
 
 
-printPP = mapM_ printAsIpeSelection
+printPPX = mapM_ printAsIpeSelection
         . map (asIpeObject' mempty . (^.core) . snd)
-        . toList . rawFacePolygons $ test
+        . toList . rawFacePolygons
+
+printPP = printPPX test
+
+parts' = map (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
+       . lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
+
+parts'' = lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs

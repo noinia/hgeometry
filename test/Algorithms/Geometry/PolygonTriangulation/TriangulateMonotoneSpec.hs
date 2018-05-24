@@ -15,7 +15,8 @@ import           Util
 
 
 spec :: Spec
-spec = testCases "test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe"
+spec = do testCases "test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe"
+          testCases "test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe"
 
 testCases    :: FilePath -> Spec
 testCases fp = (runIO $ readInput fp) >>= \case
