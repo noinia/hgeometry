@@ -91,11 +91,12 @@ process                    :: (Ord r, Num r)
                            => P p r -> Stack (P p r)
                            -> SP (Stack (P p r)) [LineSegment 2 p r]
 process v stack@(u:ws)
-  | chainOf v /= chainOf u = SP [v,u]         (map (seg v) . init $ stack)
-  | otherwise              = SP (v:w <> rest) (map (seg v) diags)
+  | chainOf v /= chainOf u = SP [v,u]      (map (seg v) . init $ stack)
+  | otherwise              = SP (v:w:rest) (map (seg v) popped)
       where
-        (diags,rest) = bimap (map fst) (map fst) . L.span (isInside v) $ zip ws stack
-        w            = take 1 . reverse $ diags
+        (popped,rest) = bimap (map fst) (map fst) . L.span (isInside v) $ zip ws stack
+        w             = last $ u:popped
+
 
 -- | test if m blocks the line segment from v to u
 isInside          :: (Ord r, Num r) => P p r -> (P p r, P p r) -> Bool

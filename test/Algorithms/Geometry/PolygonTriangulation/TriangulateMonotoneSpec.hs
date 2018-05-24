@@ -55,7 +55,7 @@ readInput fp = fmap f <$> readSinglePageFile fp
              | pg <- map g polies
              ]
       where
-        g x@(pg :+ _) = pg :+ lookupColor x
+        g x@(pg :+ _) = toCounterClockWiseOrder pg :+ lookupColor x
 
         polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
         segs   = page^..content.traverse._withAttrs _IpePath _asLineSegment
