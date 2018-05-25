@@ -44,14 +44,13 @@ import qualified Data.Geometry.Transformation as Trans
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (fromMaybe, mapMaybe)
-import           Data.Monoid
 import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Traversable as Tr
-import           Data.Vinyl
+import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 import           Text.XML.Expat.Tree

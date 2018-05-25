@@ -90,6 +90,10 @@ class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   --                  => IpeOut g (IpeObject (NumType g))
   -- defaultIpeObject = IpeOut $ flip asIpeObject mempty
 
+-- instance HasDefaultIpeOut g => HasDefaultIpeOut [g] where
+--   type DefaultIpeOut [g] = Group
+--   defaultIpeOut = IpeOut $ asIpeGroup . map (asIpeObject' mempty)
+
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
   defaultIpeOut = ipeDiskMark

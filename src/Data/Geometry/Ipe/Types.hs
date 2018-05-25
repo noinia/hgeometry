@@ -8,7 +8,7 @@ module Data.Geometry.Ipe.Types where
 
 import           Control.Lens
 import           Data.Proxy
-import           Data.Vinyl
+import           Data.Vinyl hiding (Label)
 
 import           Data.Ext
 import           Data.Geometry.Box(Rectangle)

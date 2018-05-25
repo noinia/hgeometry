@@ -12,11 +12,12 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            ) where
 
 import qualified Data.Foldable as F
-import           Data.Geometry.Vector.VectorFixed
 import           Data.Geometry.Properties
+import           Data.Geometry.Vector.VectorFixed
 import           Data.Maybe
-import qualified Data.Vector.Fixed as FV
+import           Data.Semigroup
 import           Data.Vector.Fixed (Arity)
+import qualified Data.Vector.Fixed as FV
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm)
 import           Linear.Vector as LV
@@ -73,16 +74,19 @@ allZero = F.all (== 0)
 
 data ScalarMultiple r = No | Maybe | Yes r deriving (Eq,Show)
 
-instance Eq r => Monoid (ScalarMultiple r) where
-  mempty = Maybe
-
-  No      `mappend` _       = No
-  _       `mappend` No      = No
-  Maybe   `mappend` x       = x
-  x       `mappend` Maybe   = x
-  (Yes x) `mappend` (Yes y)
+instance Eq r => Semigroup (ScalarMultiple r) where
+  No      <> _       = No
+  _       <> No      = No
+  Maybe   <> x       = x
+  x       <> Maybe   = x
+  (Yes x) <> (Yes y)
      | x == y               = Yes x
      | otherwise            = No
+
+
+instance Eq r => Monoid (ScalarMultiple r) where
+  mempty = Maybe
+  mappend = (<>)
 
 -- | Actual implementation of scalarMultiple
 scalarMultiple'      :: (Eq r, Fractional r, Arity d)

@@ -76,11 +76,13 @@ pattern NoAttr :: Attr f label
 pattern NoAttr = GAttr Nothing
 
 -- | Give pref. to the *RIGHT*
-instance Monoid (Attr f l) where
-  mempty                 = NoAttr
-  _ `mappend` b@(Attr _) = b
-  a `mappend` _          = a
+instance Semigroup (Attr f l) where
+  _ <> b@(Attr _) = b
+  a <> _          = a
 
+instance Monoid (Attr f l) where
+  mempty  = NoAttr
+  mappend = (<>)
 
 newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) =
   Attrs { _unAttrs :: Rec (Attr f) ats }

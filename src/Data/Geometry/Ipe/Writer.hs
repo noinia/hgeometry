@@ -29,7 +29,7 @@ import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text as Text
-import           Data.Vinyl
+import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
 import           System.IO (hPutStrLn,stderr)

@@ -55,13 +55,16 @@ runParser p = bimap errorText fst . runP p
 
 -- Collect errors
 data Either' l r = Left' l | Right' r deriving (Show,Eq)
+
+instance (Semigroup l, Semigroup r) => Semigroup (Either' l r) where
+  (Left' l)  <> (Left' l')  = Left' $ l <> l'
+  (Left' l)  <> _           = Left' l
+  _          <> (Left' l')  = Left' l'
+  (Right' r) <> (Right' r') = Right' $ r <> r'
+
 instance (Semigroup l, Semigroup r, Monoid r) => Monoid (Either' l r) where
   mempty = Right' mempty
-  (Left' l)  `mappend` (Left' l')  = Left' $ l <> l'
-  (Left' l)  `mappend` _           = Left' l
-  _          `mappend` (Left' l')  = Left' l'
-  (Right' r) `mappend` (Right' r') = Right' $ r <> r'
-
+  mappend = (<>)
 either' :: (l -> a) -> (r -> a) -> Either' l r -> a
 either' lf _  (Left' l)  = lf l
 either' _  rf (Right' r) = rf r
