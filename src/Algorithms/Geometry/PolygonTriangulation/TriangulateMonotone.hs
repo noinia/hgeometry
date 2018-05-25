@@ -76,6 +76,8 @@ type P p r = Point 2 r :+ (LR :+ p)
 type Stack a = [a]
 
 
+
+
 -- type Scan p r = State (Stack (P p r))
 
 chainOf :: P p r -> LR
@@ -90,6 +92,7 @@ seg u v = ClosedLineSegment (toVtx u) (toVtx v)
 process                    :: (Ord r, Num r)
                            => P p r -> Stack (P p r)
                            -> SP (Stack (P p r)) [LineSegment 2 p r]
+process _ []               = error "TriangulateMonotone.process: absurd. empty stack"
 process v stack@(u:ws)
   | chainOf v /= chainOf u = SP [v,u]      (map (seg v) . init $ stack)
   | otherwise              = SP (v:w:rest) (map (seg v) popped)
@@ -98,10 +101,10 @@ process v stack@(u:ws)
         w             = last $ u:popped
 
 
--- | test if m blocks the line segment from v to u
+-- | test if m does not block the line segment from v to u
 isInside          :: (Ord r, Num r) => P p r -> (P p r, P p r) -> Bool
 isInside v (u, m) = case ccw' v m u of
-                     CoLinear -> True
+                     CoLinear -> False
                      CCW      -> chainOf v == R
                      CW       -> chainOf v == L
 
@@ -117,20 +120,31 @@ mergeBy cmp = go
 
 
 -- | When the polygon is in counter clockwise order we return (leftChain,rightChain)
--- ordered from the top-down
+-- ordered from the top-down.
+--
+-- if there are multiple points with the maximum yCoord (or minimumYCoord) we
+-- split the polygon at some arbitary one(s).
+--
+-- running time: \(O(n)\)
 splitPolygon    :: Ord r => MonotonePolygon p r
                 -> ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
-splitPolygon pg = swap . bimap (f R) (f L) . second reverse
-                . L.break (pred' (<=)) . F.toList . C.leftElements $ vs'
+splitPolygon pg = swap
+                . bimap (f R) (f L)
+                . second reverse
+                . L.break (\v -> v^.core.yCoord == vMinY)
+                . F.toList . C.leftElements $ vs'
   where
-    f x = map ((&extra %~ (x :+)) . (^.extra._1.end))
-
-    pred' cmp (v :+ SP a b) = let vy = v^.yCoord
-                                  ay = a^.start.core.yCoord
-                                  by = b^.end.core.yCoord
-                              in vy `cmp` ay && vy `cmp` by
-
-    Just vs' = C.findRotateTo (pred' (>=)) $ (withIncidentEdges pg) ^.outerBoundary
+    f x = map (&extra %~ (x :+))
+    -- rotates the list to the vtx with max ycoord
+    Just vs' = C.findRotateTo (\v -> v^.core.yCoord == vMaxY)
+             $ pg^.outerBoundary
+    -- find the y coord of the vtx with maximum and minimum YCoord note that we
+    -- are not using fmap (^.core.yCoord) here since that means we kind of need
+    -- a lazy fmap (depending on what DS the boundary is stored in).
+    vMaxY = getY F.maximumBy
+    vMinY = getY F.minimumBy
+    getY ff = let p = ff (comparing (^.core.yCoord)) $ pg^.outerBoundary
+              in p^.core.yCoord
 
 --------------------------------------------------------------------------------
 
@@ -139,3 +153,11 @@ splitPolygon pg = swap . bimap (f R) (f L) . second reverse
 --                                      , point2 3 14
 --                                      , point2 1 1
 --                                      , point2 8 8 ]
+
+testPoly5 :: SimplePolygon () Rational
+testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 384
+                                                             , Point2 128 176
+                                                             , Point2 224 320
+                                                             , Point2 48 400
+                                                             , Point2 160 384
+                                                             ]

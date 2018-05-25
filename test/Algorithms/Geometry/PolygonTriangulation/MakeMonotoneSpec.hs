@@ -18,7 +18,7 @@ spec = describe "GeomBook Example" $ do
            `shouldBe` geomBookVertexTypes
          it "Diagonals" $
            (Set.fromList . map (\s -> sort' (s^.start.extra,s^.end.extra))
-            $ findDiagonals geomBookPoly)
+            $ computeDiagonals geomBookPoly)
            `shouldBe` geomBookDiagonals
 
 
