@@ -11,7 +11,6 @@ import           Data.Geometry.Polygon
 import qualified Data.List as L
 import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
-import           Data.Tuple (swap)
 import           Data.Util
 import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Data.PlaneGraph (PlaneGraph)
@@ -122,29 +121,28 @@ mergeBy cmp = go
 -- | When the polygon is in counter clockwise order we return (leftChain,rightChain)
 -- ordered from the top-down.
 --
--- if there are multiple points with the maximum yCoord (or minimumYCoord) we
--- split the polygon at some arbitary one(s).
+-- if there are multiple points with the maximum yCoord we pick the rightmost one,
+-- if there are multiple point with the minimum yCoord we pick the leftmost one.
 --
 -- running time: \(O(n)\)
 splitPolygon    :: Ord r => MonotonePolygon p r
                 -> ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
-splitPolygon pg = swap
-                . bimap (f R) (f L)
+splitPolygon pg = bimap (f L) (f R)
                 . second reverse
-                . L.break (\v -> v^.core.yCoord == vMinY)
-                . F.toList . C.leftElements $ vs'
+                . L.break (\v -> v^.core == vMinY)
+                . F.toList . C.rightElements $ vs'
   where
     f x = map (&extra %~ (x :+))
     -- rotates the list to the vtx with max ycoord
-    Just vs' = C.findRotateTo (\v -> v^.core.yCoord == vMaxY)
+    Just vs' = C.findRotateTo (\v -> v^.core == vMaxY)
              $ pg^.outerBoundary
-    -- find the y coord of the vtx with maximum and minimum YCoord note that we
-    -- are not using fmap (^.core.yCoord) here since that means we kind of need
-    -- a lazy fmap (depending on what DS the boundary is stored in).
     vMaxY = getY F.maximumBy
     vMinY = getY F.minimumBy
-    getY ff = let p = ff (comparing (^.core.yCoord)) $ pg^.outerBoundary
-              in p^.core.yCoord
+    swap' (Point2 x y) = Point2 y x
+    getY ff = let p = ff (comparing (^.core.to swap')) $ pg^.outerBoundary
+              in p^.core
+
+
 
 --------------------------------------------------------------------------------
 
@@ -154,10 +152,27 @@ splitPolygon pg = swap
 --                                      , point2 1 1
 --                                      , point2 8 8 ]
 
+
+
+
+
+
 testPoly5 :: SimplePolygon () Rational
-testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 384
-                                                             , Point2 128 176
-                                                             , Point2 224 320
-                                                             , Point2 48 400
-                                                             , Point2 160 384
+testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 176 736
+                                                             , Point2 240 688
+                                                             , Point2 240 608
+                                                             , Point2 128 576
+                                                             , Point2 64 640
+                                                             , Point2 80 720
+                                                             , Point2 128 752
                                                              ]
+
+
+-- testPoly5 :: SimplePolygon () Rational
+-- testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 320 320
+--                                                              , Point2 256 320
+--                                                              , Point2 224 320
+--                                                              , Point2 128 240
+--                                                              , Point2 64 224
+--                                                              , Point2 256 192
+--                                                              ]
