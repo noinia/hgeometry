@@ -178,16 +178,24 @@ testPoly4 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 64 544
                                                              , Point2 16 560
                                                              ]
 
+testPoly5 :: SimplePolygon () Rational
+testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 384
+                                                             , Point2 128 176
+                                                             , Point2 224 320
+                                                             , Point2 48 400
+                                                             , Point2 160 384
+                                                             , Point2 240 496
+                                                             ]
 
 
-testPolyP  = fromSimplePolygon (Id Test) testPoly3 Inside Outside
+testPolyP  = fromSimplePolygon (Id Test) testPoly5 Inside Outside
 testPolygPlaneG = fromJust $ testPolyP^?components.ix 0
 
-monotonePs = MM.makeMonotone (Id Test) testPoly3
+monotonePs = MM.makeMonotone (Id Test) testPoly5
 monotonePlaneG = fromJust $ monotonePs^?components.ix 0
 
-test = TR.triangulate (Id Test) testPoly3
-test' = TR.triangulate' (Id Test) testPoly3
+test = TR.triangulate (Id Test) testPoly5
+test' = TR.triangulate' (Id Test) testPoly5
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
 printMP = mapM_ printAsIpeSelection
