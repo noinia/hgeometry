@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hgeometry
-version:             0.6.0.0
+version:             0.7.0.0
 synopsis:            Geometric Algorithms, Data structures, and Data types.
 description:
   HGeometry provides some basic geometry types, and geometric algorithms and
@@ -17,7 +17,7 @@ author:              Frank Staals
 maintainer:          frank@fstaals.net
 -- copyright:
 
-tested-with:         GHC >= 7.10.2
+tested-with:         GHC >= 8.2
 
 category:            Geometry
 build-type:          Simple
@@ -529,6 +529,8 @@ benchmark benchmarks
 
   other-modules: Benchmark.Util
                  Algorithms.Geometry.ConvexHullBench
+                 Algorithms.Geometry.Graham
+                 Algorithms.Geometry.GrahamFam
                  Data.Geometry.IntervalTreeBench
                  Demo.ExpectedPairwiseDistance
                  Demo.TriangulateWorld

@@ -85,7 +85,7 @@ instance ReadGPX TrackPoint where
 extract = (\(Text s) -> s) . head . eChildren
 
 readTime' :: String -> UTCTime
-readTime' = readTime defaultTimeLocale "%0C%y-%m-%dT%TZ"
+readTime' = parseTimeOrError True defaultTimeLocale "%0C%y-%m-%dT%TZ"
 
 -- instance ReadGPX Position where
 --   parseGPX x@(Element "Position" _ _) = (\l l' -> Position $ point2 l l') <$> lat <*> lon
