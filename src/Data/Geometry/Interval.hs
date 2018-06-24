@@ -74,7 +74,7 @@ pattern ClosedInterval l u = GInterval (ClosedRange l u)
 
 pattern Interval     :: EndPoint (r :+ a) -> EndPoint (r :+ a) -> Interval a r
 pattern Interval l u = GInterval (Range l u)
-
+{-# COMPLETE Interval #-}
 
 --------------------------------------------------------------------------------
 
