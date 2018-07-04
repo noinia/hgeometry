@@ -193,8 +193,8 @@ type instance IxValue (VectorFamily d r) = r
 --------------------------------------------------------------------------------
 
 
-vectorFromList :: Arity d => [a] -> Maybe (Vector d a)
+vectorFromList :: ImplicitArity d => [a] -> Maybe (VectorFamily d a)
 vectorFromList = undefined -- fmap VectorFamily . V.fromListM
 
-vectorFromListUnsafe :: Arity d => [a] -> Vector d a
+vectorFromListUnsafe :: ImplicitArity d => [a] -> VectorFamily d a
 vectorFromListUnsafe = undefined -- VectorFamily . V.fromList

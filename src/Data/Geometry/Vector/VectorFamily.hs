@@ -9,7 +9,10 @@ import           Control.Lens hiding (element)
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
-import           Data.Geometry.Vector.VectorFamilyPeano (VectorFamily, Arity)
+import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
+                                                        , VectorFamilyF
+                                                        , ImplicitArity
+                                                        )
 import           Data.Maybe (fromMaybe)
 import           Data.Proxy
 import           Data.Semigroup
@@ -72,11 +75,11 @@ pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
 
 --------------------------------------------------------------------------------
 
-vectorFromList :: Arity d => [a] -> Maybe (Vector d a)
-vectorFromList = fmap Vector . Fam.vectorFromList
+-- vectorFromList :: Arity d => [a] -> Maybe (Vector d a)
+-- vectorFromList = fmap Vector . Fam.vectorFromList
 
-vectorFromListUnsafe :: Arity d => [a] -> Vector d a
-vectorFromListUnsafe = Vector . Fam.vectorFromListUnsafe
+-- vectorFromListUnsafe :: Arity d => [a] -> Vector d a
+-- vectorFromListUnsafe = Vector . Fam.vectorFromListUnsafe
 
 
 -- -- destruct            :: (Vec d r, Vec (d + 1) r, 1 <= (d + 1))
