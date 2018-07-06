@@ -531,9 +531,11 @@ benchmark benchmarks
   type: exitcode-stdio-1.0
 
   other-modules: Benchmark.Util
-                 Algorithms.Geometry.ConvexHullBench
-                 Algorithms.Geometry.Graham
-                 Algorithms.Geometry.GrahamFam
+                 Algorithms.Geometry.ConvexHull.Bench
+                 Algorithms.Geometry.ConvexHull.GrahamV2
+                 Algorithms.Geometry.ConvexHull.GrahamFam
+                 Algorithms.Geometry.ConvexHull.GrahamFamPeano
+                 Algorithms.Geometry.ConvexHull.GrahamFixed
                  Data.Geometry.IntervalTreeBench
                  Demo.ExpectedPairwiseDistance
                  Demo.TriangulateWorld
@@ -542,6 +544,8 @@ benchmark benchmarks
   build-depends:
                 base
               , criterion >= 1.1.4.0
+              , fixed-vector
+              , linear
               , semigroups
               , deepseq
               , deepseq-generics

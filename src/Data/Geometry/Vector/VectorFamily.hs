@@ -41,8 +41,13 @@ type Arity d = ( ImplicitArity (Peano d)
                , Fam.FromPeano (Peano d) ~ d
                )
 
-deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
-deriving instance (Ord r, Arity d) => Ord (Vector d r)
+instance (Eq r,  Arity d) => Eq  (Vector d r) where
+  (MKVector u) == (MKVector v) = u == v
+  {-# INLINE (==) #-}
+
+instance (Ord r, Arity d) => Ord (Vector d r) where
+  (MKVector u) `compare` (MKVector v) = u `compare` v
+  {-# INLINE compare #-}
 
 deriving instance Arity d => Functor     (Vector d)
 deriving instance Arity d => Foldable    (Vector d)

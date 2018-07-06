@@ -1,24 +1,29 @@
-module Algorithms.Geometry.GrahamFam( convexHull
-                                 , upperHull
-                                 , lowerHull, fromP
-                                 ) where
+{-# LANGUAGE UndecidableInstances #-}
+module Algorithms.Geometry.ConvexHull.GrahamFixed( convexHull
+                                                 , upperHull
+                                                 , lowerHull, fromP
+                                                 ) where
 
-
+import           Control.DeepSeq
 import           Control.Lens ((^.))
 import           Data.Ext
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
-import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Vector.Fixed (Arity)
+import qualified Data.Geometry.Vector.VectorFixed as VF
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Monoid
-import           Control.DeepSeq
-import GHC.TypeLits
+import           GHC.TypeLits
 
 
-data MyPoint (d :: Nat) r where
-  MyPoint :: !r -> !r -> MyPoint 2 r
-  MyP     :: Point d r -> MyPoint d r
+newtype MyPoint d r = MyPoint (VF.Vector d r)
+
+deriving instance (Arity d, Eq r)  => Eq (MyPoint d r)
+deriving instance (Arity d, Ord r) => Ord (MyPoint d r)
+deriving instance (Arity d, Show r) => Show (MyPoint d r)
+deriving instance (NFData (VF.Vector d r)) => NFData (MyPoint d r)
+
+pattern MyPoint2 x y = MyPoint (VF.Vector2 x y)
 
 
 -- instance (NFData r, Arity d) => NFData (MyPoint d r)  where
@@ -26,24 +31,26 @@ data MyPoint (d :: Nat) r where
 --   rnf (MyP p)       = rnf p
 
 toP                    :: MyPoint 2 r :+ e -> Point 2 r :+ e
-toP (MyPoint x y :+ e) = Point2 x y :+ e
+toP (MyPoint2 x y :+ e) = Point2 x y :+ e
 
 fromP                   :: Point 2 r :+ e -> MyPoint 2 r :+ e
-fromP (Point2 x y :+ e) = MyPoint x y :+ e
+fromP (Point2 x y :+ e) = MyPoint2 x y :+ e
 
 
 subt :: Num r => MyPoint 2 r -> MyPoint 2 r -> MyPoint 2 r
-(MyPoint x y) `subt` (MyPoint a b) = MyPoint (x-a) (y-b)
+(MyPoint2 x y) `subt` (MyPoint2 a b) = MyPoint2 (x-a) (y-b)
+
+newtype ConvexPolygon p r = ConvexPolygon [Point 2 r :+ p] deriving (Show,Eq,NFData)
 
 -- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is
 -- given in clockwise order.
 convexHull            :: (Ord r, Num r)
                       => NonEmpty (MyPoint 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [toP p]
+convexHull (p :| []) = ConvexPolygon $ [toP p]
 convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in ConvexPolygon . fromPoints . map toP . reverse $ lh ++ uh
+                       in ConvexPolygon . map toP . reverse $ lh ++ uh
 
 upperHull  :: (Ord r, Num r) => NonEmpty (MyPoint 2 r :+ p) -> NonEmpty (MyPoint 2 r :+ p)
 upperHull = hull id
@@ -63,7 +70,7 @@ hull f pts         = hull' .  f
                    . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
 incXdecY  :: Ord r => (MyPoint 2 r) :+ p -> (MyPoint 2 r) :+ q -> Ordering
-incXdecY (MyPoint px py :+ _) (MyPoint qx qy :+ _) =
+incXdecY (MyPoint2 px py :+ _) (MyPoint2 qx qy :+ _) =
   compare px qx <> compare qy py
 
 
@@ -92,6 +99,6 @@ ccwP p q r = case z `compare` 0 of
               EQ -> CoLinear
      where
 
-       MyPoint ux uy = q `subt` p
-       MyPoint vx vy = r `subt` p
-       z             = ux * vy - uy * vx
+       MyPoint2 ux uy = q `subt` p
+       MyPoint2 vx vy = r `subt` p
+       z              = ux * vy - uy * vx
