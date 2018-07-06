@@ -13,6 +13,7 @@ import           Data.Proxy
 import           Data.Semigroup
 import           Data.Traversable (foldMapDefault,fmapDefault)
 import qualified Data.Vector.Fixed as V
+import qualified Data.Vector.Fixed.Cont as Cont
 import           Data.Vector.Fixed.Cont (Peano(..), PeanoNum(..), Fun(..))
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
@@ -23,8 +24,7 @@ import qualified Linear.V4 as L4
 import           Linear.Vector
 
 --------------------------------------------------------------------------------
--- * d dimensional Vectors
-
+-- * Natural number stuff
 
 type One = S Z
 type Two = S One
@@ -49,6 +49,15 @@ instance ImplicitPeano Z where
 instance ImplicitPeano d => ImplicitPeano (S d) where
   implicitPeano = SS implicitPeano
 
+--------------------------------------------------------------------------------
+-- * d dimensional Vectors
+
+-- | Datatype representing d dimensional vectors. The default implementation is
+-- based n VectorFixed. However, for small vectors we automatically select a
+-- more efficient representation.
+newtype VectorFamily (d :: PeanoNum) (r :: *) =
+  VectorFamily { _unVF :: VectorFamilyF d r }
+
 -- | Mapping between the implementation type, and the actual implementation.
 type family VectorFamilyF (d :: PeanoNum) :: * -> * where
   VectorFamilyF Z        = Const ()
@@ -58,16 +67,20 @@ type family VectorFamilyF (d :: PeanoNum) :: * -> * where
   VectorFamilyF Four     = L4.V4
   VectorFamilyF (Many d) = FV.Vector (FromPeano (Many d))
 
+type instance V.Dim (VectorFamily d)  = FromPeano d
+type instance Index   (VectorFamily d r) = Int
+type instance IxValue (VectorFamily d r) = r
 
--- | Datatype representing d dimensional vectors. The default implementation is
--- based n VectorFixed. However, for small vectors we automatically select a
--- more efficient representation.
-newtype VectorFamily (d :: PeanoNum) (r :: *) =
-  VectorFamily { _unVF :: VectorFamilyF d r }
+type instance V.Dim L2.V2 = 2
+type instance V.Dim L3.V3 = 3
+type instance V.Dim L4.V4 = 4
+
+unVF :: Lens (VectorFamily  d r) (VectorFamily d t)
+             (VectorFamilyF d r) (VectorFamilyF d t)
+unVF = lens _unVF (const VectorFamily)
+{-# INLINE unVF #-}
 
 type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
-
-
 
 instance (Eq r, ImplicitArity d) => Eq (VectorFamily d r) where
   (VectorFamily u) == (VectorFamily v) = case (implicitPeano :: SingPeano d) of
@@ -144,13 +157,6 @@ instance ImplicitArity d => Applicative (VectorFamily d) where
   {-# INLINE liftA2 #-}
 
 
-
-
-type instance V.Dim (VectorFamily d)  = FromPeano d
-
-
-
-
 instance ImplicitArity d => V.Vector (VectorFamily d) r where
   construct = fmap VectorFamily $ case (implicitPeano :: SingPeano d) of
                 SZ                         -> Fun $ Const ()
@@ -168,17 +174,8 @@ instance ImplicitArity d => V.Vector (VectorFamily d) r where
                 (SS (SS (SS (SS SZ))))     -> let (L4.V4 x y z w) = v in f x y z w
                 (SS (SS (SS (SS (SS _))))) -> V.inspect v ff
   {-# INLINE inspect #-}
-  -- basicIndex (VectorFamily v) i = case (implicitPeano :: SingPeano d) of
-  --               SZ                         -> err
-  --               (SS SZ)                    -> if i == 0 then runIdentity v else err
-  --               (SS (SS SZ))               -> let (L2.V2 x y) = v     in f x y
-  --               (SS (SS (SS SZ)))          -> let (L3.V3 x y z) = v   in f x y z
-  --               (SS (SS (SS (SS SZ))))     -> let (L4.V4 x y z w) = v in f x y z w
-  --               (SS (SS (SS (SS (SS _))))) -> V.basicIndex v i
-  --   where
-  --     err = error "VectorFamily: basicIndex out of range"
-  -- {-# INLINE basicIndex #-}
-
+  basicIndex v i = v^.singular (element' i)
+  {-# INLINE basicIndex #-}
 
 instance (ImplicitArity d, Show r) => Show (VectorFamily d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
@@ -186,15 +183,127 @@ instance (ImplicitArity d, Show r) => Show (VectorFamily d r) where
 
 deriving instance (NFData (VectorFamilyF d r)) => NFData (VectorFamily d r)
 
+instance ImplicitArity d => Ixed (VectorFamily d r) where
+  ix = element'
 
-type instance Index   (VectorFamily d r) = Int
-type instance IxValue (VectorFamily d r) = r
+element' :: forall d r. ImplicitArity d => Int -> Traversal' (VectorFamily d r) r
+element' = case (implicitPeano :: SingPeano d) of
+               SZ                         -> elem0
+               (SS SZ)                    -> elem1
+               (SS (SS SZ))               -> elem2
+               (SS (SS (SS SZ)))          -> elem3
+               (SS (SS (SS (SS SZ))))     -> elem4
+               (SS (SS (SS (SS (SS _))))) -> elemD
+{-# INLINE element' #-}
+
+elem0   :: Int -> Traversal' (VectorFamily Z r) r
+elem0 _ = \_ v -> pure v
+{-# INLINE elem0 #-}
+-- zero length vectors don't store any elements
+
+elem1 :: Int -> Traversal' (VectorFamily One r) r
+elem1 = \case
+           0 -> unVF.(lens runIdentity (\_ -> Identity))
+           _ -> \_ v -> pure v
+{-# INLINE elem1 #-}
+
+elem2 :: Int -> Traversal' (VectorFamily Two r) r
+elem2 = \case
+          0 -> unVF.L2._x
+          1 -> unVF.L2._y
+          _ -> \_ v -> pure v
+{-# INLINE elem2 #-}
+
+elem3 :: Int -> Traversal' (VectorFamily Three r) r
+elem3 = \case
+          0 -> unVF.L3._x
+          1 -> unVF.L3._y
+          2 -> unVF.L3._z
+          _ -> \_ v -> pure v
+{-# INLINE elem3 #-}
+
+elem4 :: Int -> Traversal' (VectorFamily Four r) r
+elem4 = \case
+          0 -> unVF.L4._x
+          1 -> unVF.L4._y
+          2 -> unVF.L4._z
+          3 -> unVF.L4._w
+          _ -> \_ v -> pure v
+{-# INLINE elem4 #-}
+
+elemD   :: V.Arity (FromPeano (Many d)) => Int -> Traversal' (VectorFamily (Many d) r) r
+elemD i = unVF.FV.element' i
+{-# INLINE elemD #-}
+
+
+instance ImplicitArity d => Metric (VectorFamily d)
+
+instance ImplicitArity d => Additive (VectorFamily d) where
+  zero = pure 0
+  u ^+^ v = V.zipWith (+) u v
+
+instance ImplicitArity d => Affine (VectorFamily d) where
+  type Diff (VectorFamily d) = VectorFamily d
+
+  u .-. v = u ^-^ v
+  p .+^ v = p ^+^ v
 
 --------------------------------------------------------------------------------
 
+vectorFromList :: ImplicitArity d => [r] -> Maybe (VectorFamily d r)
+vectorFromList = V.fromListM
 
-vectorFromList :: ImplicitArity d => [a] -> Maybe (VectorFamily d a)
-vectorFromList = undefined -- fmap VectorFamily . V.fromListM
+vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
+vectorFromListUnsafe = V.fromList
 
-vectorFromListUnsafe :: ImplicitArity d => [a] -> VectorFamily d a
-vectorFromListUnsafe = undefined -- VectorFamily . V.fromList
+head' :: ImplicitArity (S d) => VectorFamily (S d) r -> r
+head' = undefined
+
+
+-- -- | Get the head and tail of a vector
+-- destruct   :: (ImplicitArity d, ImplicitArity (S d))
+--            => VectorFamily (S d) r -> (r, VectorFamily d r)
+-- destruct v = (V.head v, V.tail v)
+
+
+
+-- -- | /O(1)/ Tail of vector.
+-- tail' :: ArityPeano n => Fun (S d) r b -> Fun d r b
+-- tail' (Fun f) = f $ \g -> f
+
+-- Cont.ContVec (1+n) a -> Cont.ContVec n a
+
+-- tail' (Cont.CVecPeano cont) = Cont.ContVec $ \f -> cont $ Cont.constFun f
+-- # INLINE tail' #
+
+-- -- | Get the head and tail of a vector
+-- destruct   :: ImplicitArity d
+--            => VectorFamily (S d) r -> (r, VectorFamily d r)
+-- destruct v = case (implicitPeano :: SingPeano d) of
+--                 -- SZ                         -> f
+--                 (SS SZ)                    -> let (Vector1 x) = v in (x, pure)
+--                 (SS (SS SZ))               -> let (Vector2 x y) = v in (x, Vector1 y)
+--                 (SS (SS (SS SZ)))          -> let (Vector3 x y z) = v   in (x, Vector2 y z)
+--                 (SS (SS (SS (SS SZ))))     -> let (Vector4 x y z w) = v in (x, Vector3 y z w)
+--                 (SS (SS (SS (SS (SS _))))) -> let (VectorFamily v') = v
+--                                                   (x,v'') = destruct v'
+--                                               in (x, Vector)
+
+
+--                   (V.head v', V.tail v')
+
+
+
+
+
+-- pattern Vector1   :: r -> VectorFamily One r
+-- pattern Vector1 x = (VectorFamily (Identity x))
+
+-- pattern Vector2     :: r -> r -> VectorFamily Two r
+-- pattern Vector2 x y = (VectorFamily (L2.V2 x y))
+
+-- pattern Vector3        :: r -> r -> r -> VectorFamily Three r
+-- pattern Vector3 x y z  = (VectorFamily (L3.V3 x y z))
+
+-- pattern Vector4         :: r -> r -> r -> r -> VectorFamily Four r
+-- pattern Vector4 x y z w = (VectorFamily (L4.V4 x y z w))
