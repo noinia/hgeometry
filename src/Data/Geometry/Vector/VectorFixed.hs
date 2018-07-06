@@ -156,12 +156,8 @@ init = Vector . V.reverse . V.tail . V.reverse . _unV
 last :: forall d r. (Arity d, Arity (d + 1)) => Vector (d + 1) r -> r
 last = view $ element (Proxy :: Proxy d)
 
-type Prefix i d = ( Peano (i + 1) ~ S (Peano i)
-                  , Peano (d + 1) ~ S (Peano d)
-                  , KnownNat i, Arity i)
-
 -- | Get a prefix of i elements of a vector
-prefix :: forall i d r. (Arity d, Prefix i d, i <= d)
+prefix :: forall i d r. (Arity d, Arity i, i <= d)
        => Vector d r -> Vector i r
 prefix = let i = fromInteger . natVal $ (Proxy :: Proxy i)
          in V.fromList . take i . V.toList

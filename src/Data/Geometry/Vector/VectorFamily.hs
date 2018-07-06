@@ -14,7 +14,7 @@ import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
                                                         )
 import           Data.Semigroup
 import qualified Data.Vector.Fixed as V
-import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..), Fun(..))
+import           Data.Vector.Fixed.Cont (Peano)
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
 import           Linear.Metric
@@ -64,10 +64,7 @@ instance (Arity d, Show r) => Show (Vector d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
                    , show $ F.toList v ]
 
-
 deriving instance (NFData (VectorFamily (Peano d) r)) => NFData (Vector d r)
-
-
 
 --------------------------------------------------------------------------------
 -- * Convenience "constructors"
@@ -95,12 +92,9 @@ vectorFromList = V.fromListM
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
-
-
-
--- destruct            :: (Arity d, Arity (d + 1), 1 <= (d + 1))
---                     => Vector (d + 1) r -> (r, Vector d r)
--- destruct (Vector v) = (V.head v, V.tail v)
+destruct              :: (Arity d, Arity (d + 1))
+                      => Vector (d + 1) r -> (r, Vector d r)
+destruct (MKVector v) = MKVector <$> Fam.destruct v
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors
@@ -116,7 +110,30 @@ element _ = singular . element' . fromInteger $ natVal (C :: C i)
 element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 element' = V.element
 
+
 --------------------------------------------------------------------------------
+-- * Snoccing and consindg
+
+-- | Add an element at the back of the vector
+snoc :: (Arity (d + 1), Arity d
+        ) => Vector d r -> r -> Vector (d + 1) r
+snoc = flip V.snoc
+
+-- | Get a vector of the first d - 1 elements.
+init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
+init = V.reverse . V.tail . V.reverse
+
+last :: forall d r. (Arity d, Arity (d + 1)) => Vector (d + 1) r -> r
+last = view $ element (C :: C d)
+
+-- | Get a prefix of i elements of a vector
+prefix :: forall i d r. (Arity d, Arity i, i <= d)
+       => Vector d r -> Vector i r
+prefix = let i = fromInteger . natVal $ (C :: C i)
+         in vectorFromListUnsafe . take i . V.toList
+
+--------------------------------------------------------------------------------
+-- * Specific on 3-dimensional vectors
 
 -- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r

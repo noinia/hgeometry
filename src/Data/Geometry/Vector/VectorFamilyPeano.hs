@@ -5,6 +5,7 @@ module Data.Geometry.Vector.VectorFamilyPeano where
 import           Control.Applicative (liftA2)
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
+import           Data.Aeson(FromJSON(..),ToJSON(..))
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
@@ -248,6 +249,21 @@ instance ImplicitArity d => Affine (VectorFamily d) where
   u .-. v = u ^-^ v
   p .+^ v = p ^+^ v
 
+instance (FromJSON r, ImplicitArity d)  => FromJSON (VectorFamily d r) where
+  parseJSON y = parseJSON y >>= \xs -> case vectorFromList xs of
+                  Nothing -> fail . mconcat $
+                    [ "FromJSON (Vector d a), wrong number of elements. Expected "
+                    , show $ natVal (Proxy :: Proxy (FromPeano d))
+                    , " elements but found "
+                    , show $ length xs
+                    , "."
+                    ]
+                  Just v -> pure v
+
+instance (ToJSON r, ImplicitArity d) => ToJSON (VectorFamily d r) where
+  toJSON     = toJSON     . F.toList
+  toEncoding = toEncoding . F.toList
+
 --------------------------------------------------------------------------------
 
 vectorFromList :: ImplicitArity d => [r] -> Maybe (VectorFamily d r)
@@ -256,54 +272,12 @@ vectorFromList = V.fromListM
 vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
 vectorFromListUnsafe = V.fromList
 
-head' :: ImplicitArity (S d) => VectorFamily (S d) r -> r
-head' = undefined
+-- | Get the head and tail of a vector
+destruct   :: (ImplicitArity d, ImplicitArity (S d))
+           => VectorFamily (S d) r -> (r, VectorFamily d r)
+destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+  -- FIXME: this implementaion of tail is not particularly nice
 
-
--- -- | Get the head and tail of a vector
--- destruct   :: (ImplicitArity d, ImplicitArity (S d))
---            => VectorFamily (S d) r -> (r, VectorFamily d r)
--- destruct v = (V.head v, V.tail v)
-
-
-
--- -- | /O(1)/ Tail of vector.
--- tail' :: ArityPeano n => Fun (S d) r b -> Fun d r b
--- tail' (Fun f) = f $ \g -> f
-
--- Cont.ContVec (1+n) a -> Cont.ContVec n a
-
--- tail' (Cont.CVecPeano cont) = Cont.ContVec $ \f -> cont $ Cont.constFun f
--- # INLINE tail' #
-
--- -- | Get the head and tail of a vector
--- destruct   :: ImplicitArity d
---            => VectorFamily (S d) r -> (r, VectorFamily d r)
--- destruct v = case (implicitPeano :: SingPeano d) of
---                 -- SZ                         -> f
---                 (SS SZ)                    -> let (Vector1 x) = v in (x, pure)
---                 (SS (SS SZ))               -> let (Vector2 x y) = v in (x, Vector1 y)
---                 (SS (SS (SS SZ)))          -> let (Vector3 x y z) = v   in (x, Vector2 y z)
---                 (SS (SS (SS (SS SZ))))     -> let (Vector4 x y z w) = v in (x, Vector3 y z w)
---                 (SS (SS (SS (SS (SS _))))) -> let (VectorFamily v') = v
---                                                   (x,v'') = destruct v'
---                                               in (x, Vector)
-
-
---                   (V.head v', V.tail v')
-
-
-
-
-
--- pattern Vector1   :: r -> VectorFamily One r
--- pattern Vector1 x = (VectorFamily (Identity x))
-
--- pattern Vector2     :: r -> r -> VectorFamily Two r
--- pattern Vector2 x y = (VectorFamily (L2.V2 x y))
-
--- pattern Vector3        :: r -> r -> r -> VectorFamily Three r
--- pattern Vector3 x y z  = (VectorFamily (L3.V3 x y z))
-
--- pattern Vector4         :: r -> r -> r -> r -> VectorFamily Four r
--- pattern Vector4 x y z w = (VectorFamily (L4.V4 x y z w))
+snoc     :: (ImplicitArity d, ImplicitArity (S d), (1 + FromPeano d) ~ (FromPeano d + 1))
+         => VectorFamily d r -> r -> VectorFamily (S d) r
+snoc = flip V.snoc
