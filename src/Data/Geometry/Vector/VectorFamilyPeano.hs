@@ -182,7 +182,15 @@ instance (ImplicitArity d, Show r) => Show (VectorFamily d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
                    , show $ F.toList v ]
 
-deriving instance (NFData (VectorFamilyF d r)) => NFData (VectorFamily d r)
+instance (NFData r, ImplicitArity d) => NFData (VectorFamily d r) where
+  rnf (VectorFamily v) = case (implicitPeano :: SingPeano d) of
+                           SZ                         -> rnf v
+                           (SS SZ)                    -> rnf v
+                           (SS (SS SZ))               -> rnf v
+                           (SS (SS (SS SZ)))          -> rnf v
+                           (SS (SS (SS (SS SZ))))     -> rnf v
+                           (SS (SS (SS (SS (SS _))))) -> rnf v
+  {-# INLINE rnf #-}
 
 instance ImplicitArity d => Ixed (VectorFamily d r) where
   ix = element'
@@ -241,7 +249,7 @@ instance ImplicitArity d => Metric (VectorFamily d)
 
 instance ImplicitArity d => Additive (VectorFamily d) where
   zero = pure 0
-  u ^+^ v = V.zipWith (+) u v
+  u ^+^ v = liftA2 (+) u v
 
 instance ImplicitArity d => Affine (VectorFamily d) where
   type Diff (VectorFamily d) = VectorFamily d

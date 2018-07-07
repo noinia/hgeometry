@@ -4,9 +4,10 @@ module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
+import           Data.Aeson
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
-import           Data.Geometry.Vector.VectorFixed(C(..))
+import           Data.Geometry.Vector.VectorFixed (C(..))
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
 import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
                                                         , VectorFamilyF
@@ -23,6 +24,7 @@ import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
 import           Linear.Vector
 
+
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
 
@@ -36,8 +38,12 @@ type instance V.Dim   (Vector d)   = d
 type instance Index   (Vector d r) = Int
 type instance IxValue (Vector d r) = r
 
+unV :: Lens (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
+unV = lens _unV (const MKVector)
+
 type Arity d = ImplicitArity (Peano d)
 
+-- type Arity2 d = Arity d
 type Arity2 d = (Arity d, Fam.FromPeano (Peano d) ~ d)
 
 
@@ -47,12 +53,13 @@ deriving instance (Ord r, Arity d) => Ord (Vector d r)
 deriving instance Arity d => Functor     (Vector d)
 deriving instance Arity d => Foldable    (Vector d)
 deriving instance Arity d => Traversable (Vector d)
+deriving instance Arity d => Applicative (Vector d)
 
 deriving instance Arity d => Additive (Vector d)
 deriving instance Arity d => Metric (Vector d)
 deriving instance Arity d => Affine (Vector d)
 
-instance Arity2 d => Ixed (Vector d r) where
+instance Arity d => Ixed (Vector d r) where
   ix = element'
 
 instance Arity2 d => V.Vector (Vector d) r where
@@ -64,7 +71,12 @@ instance (Arity d, Show r) => Show (Vector d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
                    , show $ F.toList v ]
 
-deriving instance (NFData (VectorFamily (Peano d) r)) => NFData (Vector d r)
+deriving instance (FromJSON r, Arity d) => FromJSON (Vector d r)
+instance (ToJSON r, Arity d) => ToJSON (Vector d r) where
+  toJSON     = toJSON . _unV
+  toEncoding = toEncoding . _unV
+
+deriving instance (NFData r, Arity d) => NFData (Vector d r)
 
 --------------------------------------------------------------------------------
 -- * Convenience "constructors"
@@ -100,16 +112,18 @@ destruct (MKVector v) = MKVector <$> Fam.destruct v
 -- * Indexing vectors
 
 -- | Lens into the i th element
-element   :: forall proxy i d r. (Arity2 d, Arity2 i, (i + 1) <= d)
+element   :: forall proxy i d r. (Arity d, Arity i, KnownNat i, (i + 1) <= d)
           => proxy i -> Lens' (Vector d r) r
 element _ = singular . element' . fromInteger $ natVal (C :: C i)
 
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
-element' :: forall d r. Arity2 d => Int -> Traversal' (Vector d r) r
-element' = V.element
-
+element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
+element' i = unV.(e (C :: C d) i)
+  where
+    e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
+    e _ = Fam.element'
 
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg

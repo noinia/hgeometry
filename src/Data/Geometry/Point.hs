@@ -36,9 +36,9 @@ import           GHC.TypeLits
 newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
 
 instance (Show r, Arity d) => Show (Point d r) where
-  show (Point (Vector v)) = mconcat [ "Point", show $ FV.length v , " "
-                                    , show $ F.toList v
-                                    ]
+  show (Point v) = mconcat [ "Point", show $ F.length v , " "
+                           , show $ F.toList v
+                           ]
 
 deriving instance (Eq r, Arity d)     => Eq (Point d r)
 deriving instance (Ord r, Arity d)    => Ord (Point d r)
@@ -167,14 +167,14 @@ pattern Point3 x y z <- (_point3 -> (x,y,z))
 -- >>> point2 1 2
 -- Point2 [1,2]
 point2     :: r -> r -> Point 2 r
-point2 x y = Point $ v2 x y
+point2 x y = Point $ Vector2 x y
 
 -- | Destruct a 2 dimensional point
 --
 -- >>> _point2 $ point2 1 2
 -- (1,2)
 _point2 :: Point 2 r -> (r,r)
-_point2 = _unV2 . toVec
+_point2 = (\(Vector2 x y) -> (x,y)) . toVec
 
 
 
@@ -183,14 +183,14 @@ _point2 = _unV2 . toVec
 -- >>> point3 1 2 3
 -- Point3 [1,2,3]
 point3       :: r -> r -> r -> Point 3 r
-point3 x y z = Point $ v3 x y z
+point3 x y z = Point $ Vector3 x y z
 
 -- | Destruct a 3 dimensional point
 --
 -- >>> _point3 $ point3 1 2 3
 -- (1,2,3)
 _point3 :: Point 3 r -> (r,r,r)
-_point3 = _unV3 . toVec
+_point3 = (\(Vector3 x y z) -> (x,y,z)) . toVec
 
 
 -- | Shorthand to access the first coordinate C 1
