@@ -7,6 +7,7 @@ import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
 import qualified Algorithms.Geometry.ConvexHull.GrahamV2   as GV
 import qualified Algorithms.Geometry.ConvexHull.GrahamFam  as GFam
 import qualified Algorithms.Geometry.ConvexHull.GrahamFamPeano  as GPeano
+import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
 import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
 
 
@@ -52,6 +53,7 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
                 , bench "sort_Linear.V2"       $ nf NonEmpty.sort ptsV2
                 , bench "sort_FamPeano"        $ nf NonEmpty.sort ptsFamPeano
                 , bench "sort_Family"          $ nf NonEmpty.sort ptsFam
+                , bench "sort_Family6"         $ nf NonEmpty.sort ptsFam6
                 , bench "sort_Fixed"           $ nf NonEmpty.sort ptsFix
 
                 , bench "grahamScan"           $ nf GrahamScan.convexHull pts
@@ -66,4 +68,5 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
         ptsV2       = fmap (GV.fromP) pts
         ptsFamPeano = fmap (GPeano.fromP) pts
         ptsFam      = fmap (GFam.fromP) pts
+        ptsFam6     = fmap (GFam6.fromP) pts
         ptsFix      = fmap (GFix.fromP) pts
