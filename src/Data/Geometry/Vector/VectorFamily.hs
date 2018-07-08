@@ -34,14 +34,15 @@ import           Linear.Vector
 -- more efficient representation.
 newtype Vector (d :: Nat) (r :: *) = MKVector { _unV :: VectorFamily (Peano d) r }
 
-type instance V.Dim   (Vector d)   = d
+type instance V.Dim   (Vector d)   = Fam.FromPeano (Peano d)
 type instance Index   (Vector d r) = Int
 type instance IxValue (Vector d r) = r
 
 unV :: Lens (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
 unV = lens _unV (const MKVector)
+{-# INLINE unV #-}
 
-type Arity d = ImplicitArity (Peano d)
+type Arity d = (ImplicitArity (Peano d), KnownNat d)
 
 -- type Arity2 d = Arity d
 type Arity2 d = (Arity d, Fam.FromPeano (Peano d) ~ d)
@@ -62,7 +63,7 @@ deriving instance Arity d => Affine (Vector d)
 instance Arity d => Ixed (Vector d r) where
   ix = element'
 
-instance Arity2 d => V.Vector (Vector d) r where
+instance Arity d => V.Vector (Vector d) r where
   construct  = MKVector <$> V.construct
   inspect    = V.inspect . _unV
   basicIndex = V.basicIndex . _unV
@@ -98,10 +99,10 @@ pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
 
 --------------------------------------------------------------------------------
 
-vectorFromList :: Arity2 d => [r] -> Maybe (Vector d r)
+vectorFromList :: Arity d => [r] -> Maybe (Vector d r)
 vectorFromList = V.fromListM
 
-vectorFromListUnsafe :: Arity2 d => [r] -> Vector d r
+vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
 destruct              :: (Arity2 d, Arity2 (d + 1))
@@ -112,9 +113,10 @@ destruct (MKVector v) = MKVector <$> Fam.destruct v
 -- * Indexing vectors
 
 -- | Lens into the i th element
-element   :: forall proxy i d r. (Arity d, Arity i, KnownNat i, (i + 1) <= d)
+element   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
           => proxy i -> Lens' (Vector d r) r
 element _ = singular . element' . fromInteger $ natVal (C :: C i)
+{-# INLINE element #-}
 
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
@@ -124,6 +126,7 @@ element' i = unV.(e (C :: C d) i)
   where
     e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
     e _ = Fam.element'
+{-# INLINE element' #-}
 
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
@@ -141,7 +144,7 @@ last :: forall d r. (Arity2 d, Arity2 (d + 1)) => Vector (d + 1) r -> r
 last = view $ element (C :: C d)
 
 -- | Get a prefix of i elements of a vector
-prefix :: forall i d r. (Arity d, Arity2 i, i <= d)
+prefix :: forall i d r. (Arity d, Arity i, i <= d)
        => Vector d r -> Vector i r
 prefix = let i = fromInteger . natVal $ (C :: C i)
          in vectorFromListUnsafe . take i . F.toList
