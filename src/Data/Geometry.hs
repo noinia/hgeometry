@@ -12,8 +12,8 @@ module Data.Geometry( module Data.Geometry.Properties
                     , module Data.Geometry.LineSegment
                     , module Data.Geometry.PolyLine
                     , module Data.Geometry.Polygon
-                    , module Linear.Affine
-                    , module Linear.Vector
+                    -- , module Linear.Affine
+                    -- , module Linear.Vector
                     ) where
 
 import Data.Geometry.Vector as V hiding (last)
@@ -24,5 +24,5 @@ import Data.Geometry.PolyLine hiding (fromPoints)
 import Data.Geometry.Polygon hiding (fromPoints)
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
-import Linear.Affine hiding (Point, Vector, origin)
-import Linear.Vector
+-- import Linear.Affine hiding (Point, Vector, origin)
+-- import Linear.Vector
