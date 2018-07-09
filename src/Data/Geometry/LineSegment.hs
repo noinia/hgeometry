@@ -51,16 +51,14 @@ import           GHC.TypeLits
 -- contain additional data of type p. We can think of a Line-Segment being defined as
 --
 --
--- >>>  data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p))
--- >>>                                       (EndPoint (Point d r :+ p))
+-- >>>  data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p)) (EndPoint (Point d r :+ p))
 newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
 makeLenses ''LineSegment
 
 -- | Pattern that essentially models the line segment as a:
 --
--- >>> data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p))
--- >>>                                      (EndPoint (Point d r :+ p))
+-- >>> data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p)) (EndPoint (Point d r :+ p))
 pattern LineSegment           :: EndPoint (Point d r :+ p)
                               -> EndPoint (Point d r :+ p)
                               -> LineSegment d p r
