@@ -1,5 +1,11 @@
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE OverloadedStrings  #-}
+{-|
+Module    : Data.Ext
+Description: A pair-like data type to represent a 'core' type that has extra information as well.
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Ext where
 
 import Control.Lens hiding ((.=))
@@ -17,6 +23,8 @@ import Data.Aeson
 import Data.Aeson.Types(typeMismatch)
 --------------------------------------------------------------------------------
 
+-- | Our Ext type that represents the core datatype core extended with extra
+-- information of type 'extra'.
 data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded,Generic,NFData)
 infixr 1 :+
 
