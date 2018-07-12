@@ -217,7 +217,10 @@ onSegment       :: (Ord r, Fractional r, Arity d)
 p `onSegment` l = let s          = l^.start.core
                       t          = l^.end.core
                       inRange' x = 0 <= x && x <= 1
-                  in maybe False inRange' $ scalarMultiple (p .-. s) (t .-. s)
+                  in
+                  if s == t -- zero length segment
+                  then p == s
+                  else maybe False inRange' $ scalarMultiple (p .-. s) (t .-. s)
 
 
 -- | The left and right end point (or left below right if they have equal x-coords)
