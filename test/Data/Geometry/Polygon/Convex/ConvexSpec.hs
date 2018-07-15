@@ -47,7 +47,7 @@ toSingleSpec poly u = it msg $
 
 -- | generates 360 vectors "equally" spaced/angled
 directions :: Num r => [Vector 2 r]
-directions = map (fmap toRat . uncurry v2 . (cos &&& sin) . toRad) ([0..359] :: [Double])
+directions = map (fmap toRat . uncurry Vector2 . (cos &&& sin) . toRad) ([0..359] :: [Double])
   where
     toRad i = i * (pi / 180)
     toRat x = fromIntegral . round $ 100000 * x
