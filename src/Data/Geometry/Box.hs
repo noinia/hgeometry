@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Data.Geometry.Box( module Data.Geometry.Box.Internal

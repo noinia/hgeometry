@@ -14,8 +14,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import qualified Data.List as L
 import           Data.Proxy
-import qualified Data.Traversable as T
-import qualified Data.Vector.Fixed as FV
+import qualified Data.Geometry.Vector.VectorFamily as FV
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 --------------------------------------------------------------------------------
@@ -43,8 +42,8 @@ instance (Show r, Arity d) => Show (Point d r) where
 deriving instance (Eq r, Arity d)     => Eq (Point d r)
 deriving instance (Ord r, Arity d)    => Ord (Point d r)
 deriving instance Arity d             => Functor (Point d)
-deriving instance Arity d             => F.Foldable (Point d)
-deriving instance Arity d             => T.Traversable (Point d)
+deriving instance Arity d             => Foldable (Point d)
+deriving instance Arity d             => Traversable (Point d)
 deriving instance (Arity d, NFData r) => NFData (Point d r)
 
 type instance NumType (Point d r) = r
@@ -90,7 +89,7 @@ vector = lens toVec (const Point)
 -- >>> point3 1 2 3 ^. unsafeCoord 2
 -- 2
 unsafeCoord   :: Arity d => Int -> Lens' (Point d r) r
-unsafeCoord i = vector . FV.element (i-1)
+unsafeCoord i = vector . singular (ix (i-1))
                 -- Points are 1 indexed, vectors are 0 indexed
 
 -- | Get the coordinate in a given dimension

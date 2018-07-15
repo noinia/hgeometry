@@ -46,14 +46,14 @@ lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
 lineThrough p q = Line p (q .-. p)
 
 verticalLine   :: Num r => r -> Line 2 r
-verticalLine x = Line (point2 x 0) (v2 0 1)
+verticalLine x = Line (point2 x 0) (Vector2 0 1)
 
 horizontalLine   :: Num r => r -> Line 2 r
-horizontalLine y = Line (point2 0 y) (v2 1 0)
+horizontalLine y = Line (point2 0 y) (Vector2 1 0)
 
 -- | Given a line l with anchor point p, get the line perpendicular to l that also goes through p.
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
-perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (v2 (-vy) vx)
+perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 
 
 
@@ -151,7 +151,7 @@ instance HasSupportingLine (Line d r) where
 
 -- | Create a line from the linear function ax + b
 fromLinearFunction     :: Num r => r -> r -> Line 2 r
-fromLinearFunction a b = Line (point2 0 b) (v2 1 a)
+fromLinearFunction a b = Line (point2 0 b) (Vector2 1 a)
 
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical

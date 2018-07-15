@@ -1,6 +1,6 @@
-module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
+module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , module LV
-                           , Arity
+                           , C(..)
                            , Affine(..)
                            , qdA, distanceA
                            , dot, norm, signorm
@@ -11,12 +11,13 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFixed
                            , FV.imap,
                            ) where
 
+import           Control.Applicative (liftA2)
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
-import           Data.Geometry.Vector.VectorFixed
+import           Data.Geometry.Vector.VectorFamily
+import           Data.Geometry.Vector.VectorFixed(C(..))
 import           Data.Maybe
 import           Data.Semigroup
-import           Data.Vector.Fixed (Arity)
 import qualified Data.Vector.Fixed as FV
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm)
@@ -91,7 +92,7 @@ instance Eq r => Monoid (ScalarMultiple r) where
 -- | Actual implementation of scalarMultiple
 scalarMultiple'      :: (Eq r, Fractional r, Arity d)
                      => Vector d r -> Vector d r -> Maybe r
-scalarMultiple' u v = g . F.foldr mappend mempty $ FV.zipWith f u v
+scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
   where
     f 0  0  = Maybe -- we don't know lambda yet, but it may still be a scalar mult.
     f _  0  = No      -- Not a scalar multiple

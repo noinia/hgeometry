@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Algorithms.Geometry.WellSeparatedPairDecomposition.Types where
 
 import           Control.Lens hiding (Level)

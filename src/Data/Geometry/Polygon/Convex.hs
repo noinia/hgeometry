@@ -40,8 +40,11 @@ import qualified Data.Sequence as S
 --------------------------------------------------------------------------------
 
 newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
-                          deriving (Show,Eq,PointFunctor,NFData)
+                          deriving (Show,Eq,NFData)
 makeLenses ''ConvexPolygon
+
+instance PointFunctor (ConvexPolygon p) where
+  pmap f (ConvexPolygon p) = ConvexPolygon $ pmap f p
 
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (ConvexPolygon p r) = 2

@@ -131,12 +131,10 @@ element' i = unV.(e (C :: C d) i)
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
 
--- type Arity2 d = Arity d
-type Arity2 d = (Arity d, Fam.FromPeano (Peano d) ~ d)
-
 -- | Add an element at the back of the vector
-snoc :: (Arity2 (d + 1), Arity2 d) => Vector d r -> r -> Vector (d + 1) r
-snoc = flip V.snoc
+snoc     :: (Arity (d + 1), Arity d) => Vector d r -> r -> Vector (d + 1) r
+snoc v x = vectorFromListUnsafe . (++ [x]) $ F.toList v
+  -- FIXME: horrible implementation here as well
 
 -- | Get a vector of the first d - 1 elements.
 init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
@@ -153,7 +151,6 @@ prefix = let i = fromInteger . natVal $ (C :: C i)
 
 --------------------------------------------------------------------------------
 -- * Specific on 3-dimensional vectors
-
 -- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
 (Vector u) `cross` (Vector v) = Vector $ u `L3.cross` v
