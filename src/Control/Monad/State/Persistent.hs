@@ -13,7 +13,7 @@ import Data.List.NonEmpty(NonEmpty(..),(<|),toList)
 
 -- | A State monad that can store earlier versions of the state.
 newtype PersistentStateT s m a =
-  PersistentStateT { runPersistentStateT' :: StateT (NonEmpty s) m a }
+  PersistentStateT (StateT (NonEmpty s) m a)
   deriving (Functor,Applicative,Monad)
            -- We store all the versions in reverse order
 

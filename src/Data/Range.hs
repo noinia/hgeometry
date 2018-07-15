@@ -1,5 +1,11 @@
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE DeriveAnyClass  #-}
+{-|
+Module    : Data.Range
+Description: Generic Ranges (Intervals)
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
@@ -22,7 +28,7 @@ import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
-
+-- | Endpoints of a range may either be open or closed.
 data EndPoint a = Open   !a
                 | Closed !a
                 deriving (Show,Read,Eq,Functor,Foldable,Traversable,Generic,NFData)
@@ -55,6 +61,7 @@ isClosed = not . isOpen
 
 --------------------------------------------------------------------------------
 
+-- | Data type for representing ranges.
 data Range a = Range { _lower :: !(EndPoint a)
                      , _upper :: !(EndPoint a)
                      }
@@ -72,7 +79,7 @@ pattern OpenRange   l u = Range (Open l)   (Open u)
 pattern ClosedRange     :: a -> a -> Range a
 pattern ClosedRange l u = Range (Closed l) (Closed u)
 
--- | A range from l to u, ignoring/forgetting the type of the enpoints
+-- | A range from l to u, ignoring/forgetting the type of the endpoints
 pattern Range'     :: a -> a -> Range a
 pattern Range' l u <- ((\r -> (r^.lower.unEndPoint,r^.upper.unEndPoint) -> (l,u)))
 {-# COMPLETE Range' #-}

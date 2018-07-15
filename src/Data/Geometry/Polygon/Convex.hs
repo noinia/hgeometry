@@ -27,9 +27,13 @@ import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on, )
-import           Data.Geometry
 import           Data.Geometry.Box (IsBoxable(..))
-import           Data.Geometry.Polygon (fromPoints)
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Polygon (fromPoints, SimplePolygon, cmpExtreme, outerBoundary)
+import           Data.Geometry.Properties
+import           Data.Geometry.Transformation
+import           Data.Geometry.Vector
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))

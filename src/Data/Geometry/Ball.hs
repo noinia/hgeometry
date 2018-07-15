@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-|
 Module    : Data.Geometry.Ball
-Description: d-dimensional Balls and Spheres
+Description: \(d\)-dimensional Balls and Spheres
 Copyright : (c) Frank Staals
 License : See LICENCE file
 -}

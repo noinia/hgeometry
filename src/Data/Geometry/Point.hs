@@ -1,5 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-|
+Module    : Data.Geometry.Point
+Description: \(d\)-dimensional points
+Copyright : (c) Frank Staals
+License : See LICENCE file
+-}
 module Data.Geometry.Point where
 
 import           Control.DeepSeq
