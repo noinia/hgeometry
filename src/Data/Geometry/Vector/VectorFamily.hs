@@ -7,6 +7,7 @@ import           Control.Lens hiding (element)
 import           Data.Aeson
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
+import qualified Data.List as L
 import           Data.Geometry.Vector.VectorFixed (C(..))
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
 import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
@@ -35,6 +36,8 @@ import           Linear.Vector
 newtype Vector (d :: Nat) (r :: *) = MKVector { _unV :: VectorFamily (Peano d) r }
 
 type instance V.Dim   (Vector d)   = Fam.FromPeano (Peano d)
+-- the above definition is a bit convoluted, but it allows us to make Vector an instance of
+-- V.Vector having only an Arity constraint rather than an Arity2 constraint.
 type instance Index   (Vector d r) = Int
 type instance IxValue (Vector d r) = r
 
@@ -43,10 +46,6 @@ unV = lens _unV (const MKVector)
 {-# INLINE unV #-}
 
 type Arity d = (ImplicitArity (Peano d), KnownNat d)
-
--- type Arity2 d = Arity d
-type Arity2 d = (Arity d, Fam.FromPeano (Peano d) ~ d)
-
 
 deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
 deriving instance (Ord r, Arity d) => Ord (Vector d r)
@@ -105,9 +104,10 @@ vectorFromList = V.fromListM
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
-destruct              :: (Arity2 d, Arity2 (d + 1))
-                      => Vector (d + 1) r -> (r, Vector d r)
-destruct (MKVector v) = MKVector <$> Fam.destruct v
+destruct   :: (Arity d, Arity (d + 1))
+           => Vector (d + 1) r -> (r, Vector d r)
+destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+  -- FIXME: this implementaion of tail is not particularly nice
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors
@@ -131,16 +131,18 @@ element' i = unV.(e (C :: C d) i)
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
 
+-- type Arity2 d = Arity d
+type Arity2 d = (Arity d, Fam.FromPeano (Peano d) ~ d)
+
 -- | Add an element at the back of the vector
-snoc :: (Arity2 (d + 1), Arity2 d
-        ) => Vector d r -> r -> Vector (d + 1) r
+snoc :: (Arity2 (d + 1), Arity2 d) => Vector d r -> r -> Vector (d + 1) r
 snoc = flip V.snoc
 
 -- | Get a vector of the first d - 1 elements.
-init :: (Arity2 d, Arity2 (d + 1)) => Vector (d + 1) r -> Vector d r
-init = V.reverse . V.tail . V.reverse
+init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
+init = vectorFromListUnsafe . L.init . F.toList
 
-last :: forall d r. (Arity2 d, Arity2 (d + 1)) => Vector (d + 1) r -> r
+last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
 last = view $ element (C :: C d)
 
 -- | Get a prefix of i elements of a vector
