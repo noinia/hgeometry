@@ -20,7 +20,6 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import qualified Data.List as L
 import           Data.Proxy
-import qualified Data.Geometry.Vector.VectorFamily as FV
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 --------------------------------------------------------------------------------
@@ -29,7 +28,7 @@ import           GHC.TypeLits
 -- $setup
 -- >>> :{
 -- let myVector :: Vector 3 Int
---     myVector = v3 1 2 3
+--     myVector = Vector3 1 2 3
 --     myPoint = Point myVector
 -- :}
 
@@ -82,7 +81,7 @@ origin = Point $ pure 0
 --
 -- >>> (point3 1 2 3) ^. vector
 -- Vector3 [1,2,3]
--- >>> origin & vector .~ v3 1 2 3
+-- >>> origin & vector .~ Vector3 1 2 3
 -- Point3 [1,2,3]
 vector :: Lens' (Point d r) (Vector d r)
 vector = lens toVec (const Point)
