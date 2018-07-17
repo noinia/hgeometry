@@ -30,19 +30,19 @@ type instance NumType (Vector d r) =r
 
 -- | Test if v is a scalar multiple of u.
 --
--- >>> v2 1 1 `isScalarMultipleOf` v2 10 10
+-- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 10 10
 -- True
--- >>> v2 1 1 `isScalarMultipleOf` v2 10 1
+-- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 10 1
 -- False
--- >>> v2 1 1 `isScalarMultipleOf` v2 11.1 11.1
+-- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 11.1 11.1
 -- True
--- >>> v2 1 1 `isScalarMultipleOf` v2 11.1 11.2
+-- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 11.1 11.2
 -- False
--- >>> v2 2 1 `isScalarMultipleOf` v2 11.1 11.2
+-- >>> Vector2 2 1 `isScalarMultipleOf` Vector2 11.1 11.2
 -- False
--- >>> v2 2 1 `isScalarMultipleOf` v2 4 2
+-- >>> Vector2 2 1 `isScalarMultipleOf` Vector2 4 2
 -- True
--- >>> v2 2 1 `isScalarMultipleOf` v2 4 0
+-- >>> Vector2 2 1 `isScalarMultipleOf` Vector2 4 0
 -- False
 isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
                          => Vector d r -> Vector d r -> Bool
