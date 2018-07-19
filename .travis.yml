@@ -1,45 +1,193 @@
-# This is the simple Travis configuration, which is intended for use
-# on applications which do not require cross-platform and
-# multiple-GHC-version support. For more information and other
-# options, see:
+# packcheck-0.3.1
+# You can use any of the options supported by packcheck as environment
+# variables here.  See https://github.com/harendra-kumar/packcheck for all
+# options and their explanation.
+env:
+  # ------------------------------------------------------------------------
+  # Global options, you can use these per build as well
+  # ------------------------------------------------------------------------
+  global:
+  # ------------------------------------------------------------------------
+  # Common options
+  # ------------------------------------------------------------------------
+  # - GHC_OPTIONS="-Werror"
+  - CABAL_REINIT_CONFIG=y
+  - LC_ALL=C.UTF-8
+
+  # ------------------------------------------------------------------------
+  # What to build
+  # ------------------------------------------------------------------------
+  # - DISABLE_TEST=y
+  # - DISABLE_BENCH=y
+  # - DISABLE_DOCS=y
+  # - DISABLE_SDIST_BUILD=y
+  # - DISABLE_DIST_CHECKS=y
+  - ENABLE_INSTALL=y
+
+  # ------------------------------------------------------------------------
+  # stack options
+  # ------------------------------------------------------------------------
+  # Note requiring a specific version of stack using STACKVER may fail due to
+  # github API limit while checking and upgrading/downgrading to the specific
+  # version.
+  #- STACKVER="1.6.5"
+  - STACK_UPGRADE="y"
+
+  # ------------------------------------------------------------------------
+  # cabal options
+  # ------------------------------------------------------------------------
+  - CABAL_CHECK_RELAX=y
+  - CABAL_NO_SANDBOX=y
+  - CABAL_HACKAGE_MIRROR=hackage.haskell.org:http://hackage.fpcomplete.com
+
+  # ------------------------------------------------------------------------
+  # Where to find the required tools
+  # ------------------------------------------------------------------------
+  - PATH=/bin:/usr/bin
+  - TOOLS_DIR=/opt
+
+  # ------------------------------------------------------------------------
+  # Location of packcheck.sh (the shell script invoked to perform CI tests ).
+  # ------------------------------------------------------------------------
+  # You can either commit the packcheck.sh script at this path in your repo or
+  # you can use it by specifying the PACKCHECK_REPO_URL option below in which
+  # case it will be automatically copied from the packcheck repo to this path
+  # during CI tests. In any case it is finally invoked from this path.
+  - PACKCHECK_LOCAL_PATH="./packcheck.sh"
+  # If you have not committed packcheck.sh in your repo at PACKCHECK_LOCAL_PATH
+  # then it is automatically pulled from this URL.
+  - PACKCHECK_GITHUB_URL="https://raw.githubusercontent.com/harendra-kumar/packcheck"
+  - PACKCHECK_GITHUB_COMMIT="caa581a30f6423f6bdbf9b1b3b7c0e07eaa549fd"
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+# This matrix has total of 6 builds enabled, we try to cover last three major
+# GHC versions, stack, cabal, Linux and OSX with minimum number of builds
+# possible. You can uncomment other disabled builds or comment out existing
+# ones to your taste.
 #
-# https://docs.haskellstack.org/en/stable/travis_ci/
-#
-# Copy these contents into the root directory of your Github project in a file
-# named .travis.yml
-
-# Use new container infrastructure to enable caching
-sudo: false
-
-# Do not choose a language; we provide our own build tools.
-language: generic
-
-# Caching so the next build will be fast too.
-cache:
-  directories:
-  - $HOME/.stack
-
-# Ensure necessary system libraries are present
-addons:
-  apt:
-    packages:
-      - libgmp-dev
-
+# We pre-install the cabal-install package to not incur the penalty of building
+# it the first time in cached builds or every time in uncached builds.
 matrix:
   include:
-  - env: STACK_YAML=stack-ghc8.2.yaml
-  - env: STACK_YAML=stack-ghc8.4.yaml
 
-before_install:
-# Download and unpack the stack executable
-- mkdir -p ~/.local/bin
-- export PATH=$HOME/.local/bin:$PATH
-- travis_retry curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  # --------------------------------------------------------------------------
+  # (Linux) stack builds (BUILD=stack). Some common envvars for stack builds
+  # are: STACK_YAML, STACK_OPTIONS, STACK_BUILD_OPTIONS
+  # --------------------------------------------------------------------------
 
-install:
-# Build dependencies
-- stack --no-terminal --install-ghc test --only-dependencies
+  # #- env: BUILD=stack RESOLVER=lts-6 GHCVER=7.10.3
+  # #  addons: {apt: {packages: [cabal-install-1.22], sources: [hvr-ghc]}}
+
+  # - env: BUILD=stack RESOLVER=lts-9 GHCVER=8.0.2
+  #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
+
+  # # Use cabal-install-1.24 for stack solver to work
+  # - env: BUILD=stack RESOLVER=lts-11 GHCVER=8.2.2
+  #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
+
+  # # Use cabal-install-1.24 for stack solver to work
+  # - env: BUILD=stack RESOLVER=nightly
+  #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
+
+  # You can keep a STACK_YAML file at any path location
+  - env: BUILD=stack STACK_YAML=stack-8.2.yaml
+  - env: BUILD=stack STACK_YAML=stack-8.4.yaml
+
+  # You can specify build flags like this:
+  #- env: BUILD=stack RESOLVER=lts-11 STACK_BUILD_OPTIONS="--flag packcheck:dev"
+
+  # --------------------------------------------------------------------------
+  # (Linux) cabal builds (BUILD=cabal, BUILD=cabal-new). Common envvars are:
+  # CABAL_CONFIGURE_OPTIONS (cabal), CABAL_NEWBUILD_OPTIONS (cabal-new)
+  # --------------------------------------------------------------------------
+
+  #- env: BUILD=cabal GHCVER=7.10.3
+  #  addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.3], sources: [hvr-ghc]}}
+
+  #- env: BUILD=cabal GHCVER=8.0.2
+  #  addons: {apt: {packages: [cabal-install-1.24,ghc-8.0.2], sources: [hvr-ghc]}}
+
+  # Disabled by default as we have a cabal ghc-8.2.2 build for OSX
+  #- env: BUILD=cabal-new GHCVER=8.2.2
+  #  addons: {apt: {packages: [cabal-install-2.0,ghc-8.2.2], sources: [hvr-ghc]}}
+
+  - env: BUILD=cabal-new GHCVER=8.4.3
+    addons: {apt: {packages: [cabal-install-2.2,ghc-8.4.3], sources: [hvr-ghc]}}
+
+  - env: BUILD=cabal-new GHCVER=head
+    addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}
+
+  # You can specify build flags like this:
+  #- env: BUILD=cabal-new CABAL_NEWBUILD_OPTIONS="--flags=dev"
+  #  addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}
+
+  # --------------------------------------------------------------------------
+  # OS X builds
+  # --------------------------------------------------------------------------
+
+  # GHC 8.2.2/cabal build using stack!
+  # - env: BUILD=cabal-new RESOLVER=lts-11 GHCVER=8.2.2
+  #   os: osx
+
+  # GHC 8.2.2/stack
+  #- env: BUILD=stack RESOLVER=lts-11 GHCVER=8.2.2
+  #  os: osx
+
+  # --------------------------------------------------------------------------
+  # Lint e.g. HLINT_COMMANDS="hlint lint src; hlint lint test"
+  # --------------------------------------------------------------------------
+
+  #- env: BUILD=stack RESOLVER=lts-11 HLINT_COMMANDS="hlint lint ."
+
+  # --------------------------------------------------------------------------
+  # Build and send coverage report to coveralls.io using hpc-coveralls
+  # Works only with BUILD=cabal; add your project to coveralls.io first
+  # For available options see hpc-coveralls docs.
+  # --------------------------------------------------------------------------
+
+  #- env: BUILD=cabal COVERALLS_OPTIONS="--coverage-mode=StrictlyFullLines --exclude-dir=test test"
+  #  addons: {apt: {packages: [cabal-install-2.0,ghc-8.2.2], sources: [hvr-ghc]}}
+
+  # --------------------------------------------------------------------------
+  # Builds that are allowed to fail
+  # --------------------------------------------------------------------------
+
+  allow_failures:
+  # - env: BUILD=stack RESOLVER=nightly
+  - env: BUILD=cabal-new GHCVER=head
+  # - env: BUILD=stack RESOLVER=lts-11 HLINT_COMMANDS="hlint lint ."
+
+# ------------------------------------------------------------------------
+#  Settings beyond this point are advanced and normally not tweaked
+# ------------------------------------------------------------------------
+
+language: generic
+sudo: false
+cache:
+  directories:
+  - $HOME/.cabal
+  - $HOME/.ghc
+  - $HOME/.local
+  - $HOME/.stack
+install: true
 
 script:
-# Build the package, its tests, and its docs and run the tests
-- stack --no-terminal test --haddock --no-haddock-deps
+  - |
+    # If a custom stack-yaml is specified, replace the default with that
+    if test -e "$STACK_YAML"; then rm -f stack.yaml && ln -sv $STACK_YAML stack.yaml; else true; fi
+    unset STACK_YAML
+
+    # Get packcheck if needed
+    CURL=$(which curl)
+    PACKCHECK_URL=${PACKCHECK_GITHUB_URL}/${PACKCHECK_GITHUB_COMMIT}/packcheck.sh
+    if test ! -e "$PACKCHECK_LOCAL_PATH"; then $CURL -sL -o "$PACKCHECK_LOCAL_PATH" $PACKCHECK_URL; fi;
+    chmod +x $PACKCHECK_LOCAL_PATH
+
+    # This script is governed by various PACKCHECK envvars that are set above.
+    # In addition, hpc-coveralls needs TRAVIS, TRAVIS_JOB_ID variables set by
+    # the travis CI environment.
+  - bash -c "$PACKCHECK_LOCAL_PATH $BUILD PATH=/bin:/usr/bin"
