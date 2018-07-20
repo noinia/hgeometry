@@ -22,15 +22,17 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-extra-source-files:  README.md
-                     changelog.md
-                     resources/basic.isy
-                     test/Data/Geometry/pointInPolygon.ipe
-                     test/Data/Geometry/Polygon/Convex/convexTests.ipe
-                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
+data-files:          resources/basic.isy
                      test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
+                     test/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
+                     test/Algorithms/Geometry/LineSegmentIntersection/test.ipe
+                     test/Algorithms/Geometry/LineSegmentIntersection/test2.ipe
                      test/Algorithms/Geometry/LowerEnvelope/manual.ipe
                      test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
+                     test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
+                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
+                     test/Data/Geometry/pointInPolygon.ipe
+                     test/Data/Geometry/Polygon/Convex/convexTests.ipe
                      examples/BAPC2014/sample.in
                      examples/BAPC2014/sample.out
                      examples/BAPC2014/testdata.in
@@ -41,7 +43,11 @@ extra-source-files:  README.md
                      examples/BAPC2012/sampleG.out
 
 
-cabal-version:       >=1.10
+
+extra-source-files:  README.md
+                     changelog.md
+
+cabal-version:       >=2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
