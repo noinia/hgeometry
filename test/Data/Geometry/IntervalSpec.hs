@@ -52,7 +52,7 @@ spec :: Spec
 spec = modifyMaxSuccess (const 1000) $ do
     describe "Same as Naive" $ do
       it "quickcheck segmentTree" $
-        property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaive is
+        property $ \(Intervals is :: Intervals Word) -> allSameAsNaive is
       it "quickcheck IntervalTree" $
         property $ \(Intervals is :: Intervals Word) -> allSameAsNaiveIT is
 
@@ -65,5 +65,5 @@ instance (Arbitrary r, Ord r) => Arbitrary (Intervals r) where
   arbitrary = Intervals . NonEmpty.fromList <$> listOf1 (suchThat arbitrary p)
     where
       p (OpenInterval _ _) = False
-      p (Interval s e)     = not $  isOpen s /= isOpen e
-                                 && s^.unEndPoint.core == e^.unEndPoint.core
+      p (Interval s e)     = not (isOpen s /= isOpen e
+                                  && s^.unEndPoint.core == e^.unEndPoint.core)
