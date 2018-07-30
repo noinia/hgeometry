@@ -57,7 +57,10 @@ deriving instance Arity d => Applicative (Vector d)
 
 deriving instance Arity d => Additive (Vector d)
 deriving instance Arity d => Metric (Vector d)
-deriving instance Arity d => Affine (Vector d)
+instance Arity d => Affine (Vector d) where
+  type instance Diff (Vector d) = Vector d
+  u .-. v = u ^-^ v
+  p .+^ v = p ^+^ v
 
 instance Arity d => Ixed (Vector d r) where
   ix = element'
