@@ -24,12 +24,15 @@ import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.List.NonEmpty(NonEmpty)
 
+import Data.Geometry.Ipe
+import Data.Geometry.PlanarSubdivision.Draw
+
 --------------------------------------------------------------------------------
 
 -- | Data type representing a two dimensional planar arrangement
 data Arrangement s v e f r = Arrangement {
     _subdivision            :: PlanarSubdivision s v (Maybe e) f r
-  , _boundingBox            :: Box 2 () r
+  , _boundedArea            :: Box 2 () r
   , _unboundedIntersections :: V.Vector (Point 2 r, Maybe (Line 2 r :+ e))
   } deriving (Show,Eq)
   -- unboundedIntersections also stores the corners of the box. They are not
@@ -58,19 +61,31 @@ constructArrangementInBox          :: (Ord r, Fractional r)
                                    -> Arrangement s () p () r
 constructArrangementInBox px rect ls = Arrangement subdiv rect (V.fromList parts')
   where
-    subdiv = fromConnectedSegments px (segs <> boundarySegs)
+    subdiv = fromConnectedSegments px segs
                 & rawVertexData.traverse.dataVal .~ ()
+    (segs,parts') = computeSegsAndParts rect ls
 
+computeSegsAndParts         :: (Ord r, Fractional r)
+                            => Box 2 () r
+                            -> [Line 2 r :+ p]
+                            -> ( [LineSegment 2 () r :+ Maybe p]
+                               , [(Point 2 r, Maybe (Line 2 r :+ p))]
+                               )
+computeSegsAndParts rect ls = ( segs <> boundarySegs, parts')
+  where
     segs         = map (&extra %~ Just)
                  . concatMap (\(l,ls') -> perLine rect l ls') $ makePairs ls
-    boundarySegs = map (:+ Nothing) . toSegments $ map fst parts'
+    boundarySegs = map (:+ Nothing) . toSegments . dupFirst $ map fst parts'
+    dupFirst = \case []       -> []
+                     xs@(x:_) -> xs ++ [x]
     parts'       = unBoundedParts rect ls
+
 
 
 perLine       :: forall r p. (Ord r, Fractional r)
               => Box 2 () r -> Line 2 r :+ p -> [Line 2 r :+ p]
               -> [LineSegment 2 () r :+ p]
-perLine b m ls = map (:+ m^.extra) . toSegments $ vs <> vs'
+perLine b m ls = map (:+ m^.extra) . toSegments . List.sort $ vs <> vs'
   where
     vs  = mapMaybe (m `intersectionPoint`) ls
     vs' = maybe [] (\(p,q) -> [p,q]) . asA (Proxy :: Proxy (Point 2 r, Point 2 r))
@@ -83,7 +98,7 @@ intersectionPoint (l :+ _) (m :+ _) = asA (Proxy :: Proxy (Point 2 r)) $ l `inte
 
 
 toSegments      :: Ord r => [Point 2 r] -> [LineSegment 2 () r]
-toSegments ps = let pts = map ext . List.sort $ ps in
+toSegments ps = let pts = map ext $ ps in
   zipWith ClosedLineSegment pts (tail pts)
 
 
@@ -91,10 +106,7 @@ toSegments ps = let pts = map ext . List.sort $ ps in
 --
 -- running time: \(O(n^2)\), where \(n\) is the number of input lines
 makeBoundingBox :: (Ord r, Fractional r) => [Line 2 r :+ p] -> Box 2 () r
-makeBoundingBox = grow . boundingBoxList' . intersections
-  where
-    grow b = b&minP.core.cwMin %~ (.-^ Vector2 1 1)
-              &maxP.core.cwMax %~ (.+^ Vector2 1 1)
+makeBoundingBox = grow 1 . boundingBoxList' . intersections
 
 -- | Computes all intersections
 intersections :: (Ord r, Fractional r) => [Line 2 r :+ p] -> [Point 2 r]
@@ -175,3 +187,26 @@ allPairs ys = go ys
   where
     go []     = []
     go (x:xs) = map (x,) xs ++ go xs
+
+
+--------------------------------------------------------------------------------
+
+data Test = Test
+
+test = do
+         let fp = "test/Data/Geometry/arrangement.ipe"
+             outFile = "/tmp/out.ipe"
+         Right ls <- fmap f <$> readSinglePageFile fp
+         print ls
+         let arr = constructArrangement (Identity Test) ls
+             (segs,parts') = computeSegsAndParts (arr^.boundedArea) ls
+             out = [ asIpe drawPlanarSubdivision (arr^.subdivision) ]
+         mapM_ print segs
+         writeIpeFile outFile . singlePageFromContent $ out
+  where
+    f     :: IpePage Rational -> [Line 2 Rational :+ ()]
+    f page = [ ext $ supportingLine s
+             | (s :+ ats) <- segs
+             ]
+      where
+        segs = page^..content.traverse._withAttrs _IpePath _asLineSegment

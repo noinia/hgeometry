@@ -11,7 +11,7 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Vector (Vector, Arity, C(..))
+import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import           Data.Proxy
@@ -56,6 +56,12 @@ makeLenses ''Box
 -- coordinates, create a box.
 box          :: Point d r :+ p -> Point d r :+ p -> Box d p r
 box low high = Box (low&core %~ CWMin) (high&core %~ CWMax)
+
+-- | grows the box by x on all sides
+grow     :: (Num r, Arity d) => r -> Box d p r -> Box d p r
+grow x b = let v = V.replicate x
+           in b&minP.core.cwMin %~ (.-^ v)
+               &maxP.core.cwMax %~ (.+^ v)
 
 -- | Build a d dimensional Box given d ranges.
 fromExtent    :: Arity d => Vector d (R.Range r) -> Box d () r
