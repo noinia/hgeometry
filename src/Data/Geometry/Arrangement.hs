@@ -2,42 +2,48 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 module Data.Geometry.Arrangement where
 
-import Data.Geometry.Boundary
-import Data.Semigroup
-import Data.Util
-import Control.Lens
-import Data.Proxy
-import Data.Maybe
-import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Vector
-import Data.Geometry.Line
-import Data.Geometry.Box
-import Data.Geometry.Properties
-import Data.Geometry.PlanarSubdivision
-import Data.Geometry.LineSegment
-import Data.Vinyl.CoRec
-import qualified Data.Vector as V
-import qualified Data.Map as Map
-import qualified Data.Set as Set
+import           Control.Lens
+import qualified Data.CircularSeq as CSeq
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
+import           Data.Geometry.Box
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
+import           Data.Geometry.PlanarSubdivision
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.Vector
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import Data.List.NonEmpty(NonEmpty)
+import qualified Data.Map as Map
+import           Data.Maybe
+import           Data.Ord (Down(..))
+import           Data.Proxy
+import           Data.Semigroup
+import           Data.Sequence.Util
+import qualified Data.Set as Set
+import qualified Data.Vector as V
+import           Data.Vinyl.CoRec
 
-import Data.Geometry.Ipe
-import Data.Geometry.PlanarSubdivision.Draw
-
+import           Data.Geometry.Ipe
+import           Data.Geometry.PlanarSubdivision.Draw
+import           Debug.Trace
 --------------------------------------------------------------------------------
+
+type ArrangementBoundary s e r = V.Vector (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
 
 -- | Data type representing a two dimensional planar arrangement
 data Arrangement s v e f r = Arrangement {
     _subdivision            :: PlanarSubdivision s v (Maybe e) f r
-  , _boundedArea            :: Box 2 () r
-  , _unboundedIntersections :: V.Vector (Point 2 r, Maybe (Line 2 r :+ e))
+  , _boundedArea            :: Rectangle () r
+  , _unboundedIntersections :: ArrangementBoundary s e r
   } deriving (Show,Eq)
   -- unboundedIntersections also stores the corners of the box. They are not
   -- associated with any line
 makeLenses ''Arrangement
+
 
 
 --------------------------------------------------------------------------------
@@ -56,17 +62,17 @@ constructArrangement px ls = let b  = makeBoundingBox ls
 -- assumed this box is the boundingbox of the intersections in the Arrangement)
 constructArrangementInBox          :: (Ord r, Fractional r)
                                    => proxy s
-                                   -> Box 2 () r
+                                   -> Rectangle () r
                                    -> [Line 2 r :+ p]
                                    -> Arrangement s () p () r
-constructArrangementInBox px rect ls = Arrangement subdiv rect (V.fromList parts')
+constructArrangementInBox px rect ls = Arrangement subdiv rect (link parts' subdiv)
   where
     subdiv = fromConnectedSegments px segs
                 & rawVertexData.traverse.dataVal .~ ()
     (segs,parts') = computeSegsAndParts rect ls
 
 computeSegsAndParts         :: (Ord r, Fractional r)
-                            => Box 2 () r
+                            => Rectangle () r
                             -> [Line 2 r :+ p]
                             -> ( [LineSegment 2 () r :+ Maybe p]
                                , [(Point 2 r, Maybe (Line 2 r :+ p))]
@@ -83,7 +89,7 @@ computeSegsAndParts rect ls = ( segs <> boundarySegs, parts')
 
 
 perLine       :: forall r p. (Ord r, Fractional r)
-              => Box 2 () r -> Line 2 r :+ p -> [Line 2 r :+ p]
+              => Rectangle () r -> Line 2 r :+ p -> [Line 2 r :+ p]
               -> [LineSegment 2 () r :+ p]
 perLine b m ls = map (:+ m^.extra) . toSegments . List.sort $ vs <> vs'
   where
@@ -105,7 +111,7 @@ toSegments ps = let pts = map ext $ ps in
 -- | Constructs a boundingbox containing all intersections
 --
 -- running time: \(O(n^2)\), where \(n\) is the number of input lines
-makeBoundingBox :: (Ord r, Fractional r) => [Line 2 r :+ p] -> Box 2 () r
+makeBoundingBox :: (Ord r, Fractional r) => [Line 2 r :+ p] -> Rectangle () r
 makeBoundingBox = grow 1 . boundingBoxList' . intersections
 
 -- | Computes all intersections
@@ -161,18 +167,30 @@ sideIntersections ls s = let l   = supportingLine s :+ undefined
                          in List.sortOn fst . filter (flip onSegment s . fst)
                           . mapMaybe (\m -> (,m) <$> l `intersectionPoint` m) $ ls
 
--- | Constructs the unbounded intersections
+-- | Constructs the unbounded intersections. Reported in clockwise direction.
 unBoundedParts         :: (Ord r, Fractional r)
-                       => Box 2 () r
+                       => Rectangle () r
                        -> [Line 2 r :+ p]
                        -> [(Point 2 r, Maybe (Line 2 r :+ p))]
 unBoundedParts rect ls = [tl] <> t <> [tr] <> reverse r <> [br] <> reverse b <> [bl] <> l
   where
     sideIntersections' = over (traverse._2) Just . sideIntersections ls
-    (t,r,b,l)     = map' sideIntersections'      $ sides   rect
-    (tl,tr,br,bl) = map' ((,Nothing) . (^.core)) $ corners rect
+    (t,r,b,l)     = map4 sideIntersections'      $ sides   rect
+    (tl,tr,br,bl) = map4 ((,Nothing) . (^.core)) $ corners rect
 
-    map' f (a,b',c,d) = (f a, f b', f c, f d)
+
+map4              :: (a -> b) -> (a,a,a,a) -> (b,b,b,b)
+map4 f (a,b',c,d) = (f a, f b', f c, f d)
+
+-- | Links the vertices  of the outer boundary with those in the subdivision
+link       :: Eq r => [(Point 2 r, a)] -> PlanarSubdivision s v (Maybe e) f r
+           -> V.Vector (Point 2 r, VertexId' s, a)
+link vs ps = V.fromList . map (\((p,x),(_,y)) -> (p,y,x)) . F.toList
+           . fromJust' $ alignWith (\(p,_) (q,_) -> p == q) (CSeq.fromList vs) vs'
+  where
+    vs' = CSeq.fromList . map (\v -> (ps^.locationOf v,v) ) . V.toList
+        $ boundaryVertices (outerFaceId ps) ps
+    fromJust' = fromMaybe (error "Data.Geometry.Arrangement.link: fromJust")
 
 --------------------------------------------------------------------------------
 
@@ -188,6 +206,84 @@ allPairs ys = go ys
     go []     = []
     go (x:xs) = map (x,) xs ++ go xs
 
+-- | Given a predicate that tests if two elements of a CSeq match, find a
+-- rotation of the seqs such at they match.
+--
+-- Running time: \(O(n)\)
+alignWith         :: (a -> b -> Bool) -> CSeq.CSeq a -> CSeq.CSeq b
+                  -> Maybe (CSeq.CSeq (a,b))
+alignWith p xs ys = CSeq.zipL xs <$> CSeq.findRotateTo (p (CSeq.focus xs)) ys
+
+--------------------------------------------------------------------------------
+
+-- | Given an Arrangement and a line in the arrangement, follow the line
+-- through he arrangement.
+--
+traverseLine       :: (Ord r, Fractional r, Show r)
+                   => Line 2 r -> Arrangement s v e f r -> [Dart s]
+traverseLine l arr = let md    = traceShowId $ findStart l arr
+                         dup x = (x,x)
+                     in maybe [] (List.unfoldr (fmap dup . follow arr)) md
+
+-- | Find the starting point of the line  the arrangement
+findStart       :: (Ord r, Fractional r, Show r)
+                => Line 2 r -> Arrangement s v e f r -> Maybe (Dart s)
+findStart l arr = do
+    (p,_) <- traceShowId $ asA (Proxy :: Proxy (Point 2 r, Point 2 r))
+            $ l `intersect` (Boundary $ arr^.boundedArea)
+    (_,v,_) <- findStartVertex p arr
+    findStartDart (arr^.subdivision) $ traceShowId v
+
+findStartVertex       :: (Ord r, Fractional r)
+                      => Point 2 r
+                      -> Arrangement s v e f r
+                      -> Maybe (Point 2 r, VertexId' s, Maybe (Line 2 r :+ e))
+findStartVertex p arr = do
+    ss <- findSide p
+    i  <- binarySearchVec (pred' ss) (arr^.unboundedIntersections)
+    pure $ arr^.unboundedIntersections.singular (ix i)
+  where
+    (t,r,b,l) = sides'' $ arr^.boundedArea
+    sides'' = map4 (\(ClosedLineSegment a b) -> LineSegment (Closed a) (Open b)) . sides
+
+    findSide q = fmap fst . List.find (onSegment q . snd) $ zip [1..] [t,r,b,l]
+
+    pred' ss (q,_,_) = let Just j = findSide q
+                           x      = before (ss,p) (j,q)
+                       in  x == LT || x == EQ
+
+    before (i,p') (j,q') = case i `compare` j of
+                                LT -> LT
+                                GT -> GT
+                                EQ | i == 2 || i == 3 -> Down p' `compare` Down q'
+                                   | otherwise        -> p' `compare` q'
+
+
+-- | Find the starting dart of the given vertex
+--
+-- running me: \(O(k)\) where \(k\) is the degree of the vertex
+findStartDart      :: PlanarSubdivision s v (Maybe e) f r -> VertexId' s -> Maybe (Dart s)
+findStartDart ps v =
+    List.find (\d -> isJust $ ps^.dataOf d) . V.toList $ traceShowId $ incidentEdges v ps
+    -- the "real" dart is the one that has ata associated to it.
+
+
+
+
+
+-- | Given an incoming dart, find the outgoing dart colinear with the incoming
+-- one.
+--
+-- running time: \(O(k)\), where k is the degree of the vertex d points to
+follow       :: (Ord r, Num r) => Arrangement s v e f r -> Dart s -> Maybe (Dart s)
+follow arr d = List.find extends . V.toList $ incidentEdges v ps
+  where
+    ps = arr^.subdivision
+    v  = headOf d ps
+    (up,vp) = over both (^.location) $ endPointData d ps
+
+    extends d' = let wp = ps^.locationOf (tailOf d' ps)
+                 in d' /= d && d' /= twin d && ccw up vp wp == CoLinear
 
 --------------------------------------------------------------------------------
 
@@ -201,7 +297,13 @@ test = do
          let arr = constructArrangement (Identity Test) ls
              (segs,parts') = computeSegsAndParts (arr^.boundedArea) ls
              out = [ asIpe drawPlanarSubdivision (arr^.subdivision) ]
-         mapM_ print segs
+         -- print arr
+         print "darts:"
+         print $ traverseLine ((head ls)^.core) arr
+
+
+         let (q :+ (),_,_,_) = corners $ arr^.boundedArea
+         print $ findStartVertex q arr
          writeIpeFile outFile . singlePageFromContent $ out
   where
     f     :: IpePage Rational -> [Line 2 Rational :+ ()]
