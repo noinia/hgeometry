@@ -36,7 +36,8 @@ type ArrangementBoundary s e r = V.Vector (Point 2 r, VertexId' s, Maybe (Line 2
 
 -- | Data type representing a two dimensional planar arrangement
 data Arrangement s v e f r = Arrangement {
-    _subdivision            :: PlanarSubdivision s v (Maybe e) f r
+    _inputLines             :: V.Vector (Line 2 r :+ e)
+  , _subdivision            :: PlanarSubdivision s v (Maybe e) f r
   , _boundedArea            :: Rectangle () r
   , _unboundedIntersections :: ArrangementBoundary s e r
   } deriving (Show,Eq)
@@ -60,12 +61,13 @@ constructArrangement px ls = let b  = makeBoundingBox ls
 
 -- | Constructs the arrangemnet inside the box. (for parts to be useful, it is
 -- assumed this box is the boundingbox of the intersections in the Arrangement)
-constructArrangementInBox          :: (Ord r, Fractional r)
-                                   => proxy s
-                                   -> Rectangle () r
-                                   -> [Line 2 r :+ p]
-                                   -> Arrangement s () p () r
-constructArrangementInBox px rect ls = Arrangement subdiv rect (link parts' subdiv)
+constructArrangementInBox            :: (Ord r, Fractional r)
+                                     => proxy s
+                                     -> Rectangle () r
+                                     -> [Line 2 r :+ p]
+                                     -> Arrangement s () p () r
+constructArrangementInBox px rect ls =
+    Arrangement (V.fromList ls) subdiv rect (link parts' subdiv)
   where
     subdiv = fromConnectedSegments px segs
                 & rawVertexData.traverse.dataVal .~ ()
@@ -234,6 +236,14 @@ findStart l arr = do
     (_,v,_) <- findStartVertex p arr
     findStartDart (arr^.subdivision) $ traceShowId v
 
+-- | Given a point on the boundary of the boundedArea box; find the vertex
+--  this point corresponds to.
+--
+-- running time: \(O(\log n)\)
+--
+-- basically; maps every point to a tuple of the point and the side the
+-- point occurs on. We then binary search to find the point we are looking
+-- for.
 findStartVertex       :: (Ord r, Fractional r)
                       => Point 2 r
                       -> Arrangement s v e f r
@@ -259,52 +269,36 @@ findStartVertex p arr = do
                                    | otherwise        -> p' `compare` q'
 
 
--- | Find the starting dart of the given vertex
+-- | Find the starting dart of the given vertex v. Reports a dart s.t.
+-- tailOf d = v
 --
 -- running me: \(O(k)\) where \(k\) is the degree of the vertex
 findStartDart      :: PlanarSubdivision s v (Maybe e) f r -> VertexId' s -> Maybe (Dart s)
-findStartDart ps v =
-    List.find (\d -> isJust $ ps^.dataOf d) . V.toList $ traceShowId $ incidentEdges v ps
+findStartDart ps v = V.find (\d -> isJust $ ps^.dataOf d) $ incidentEdges v ps
     -- the "real" dart is the one that has ata associated to it.
 
 
-
-
-
--- | Given an incoming dart, find the outgoing dart colinear with the incoming
--- one.
+-- | Given a dart d that incoming to v (headOf d == v), find the outgoing dart
+-- colinear with the incoming one. Again reports dart d' s.t. tailOf d' = v
 --
 -- running time: \(O(k)\), where k is the degree of the vertex d points to
 follow       :: (Ord r, Num r) => Arrangement s v e f r -> Dart s -> Maybe (Dart s)
-follow arr d = List.find extends . V.toList $ incidentEdges v ps
+follow arr d = V.find extends $ incidentEdges v ps
   where
     ps = arr^.subdivision
     v  = headOf d ps
     (up,vp) = over both (^.location) $ endPointData d ps
 
-    extends d' = let wp = ps^.locationOf (tailOf d' ps)
-                 in d' /= d && d' /= twin d && ccw up vp wp == CoLinear
+    extends d' = let wp = ps^.locationOf (headOf d' ps)
+                 in d' /= twin d && ccw up vp wp == CoLinear
 
 --------------------------------------------------------------------------------
 
 data Test = Test
 
-test = do
-         let fp = "test/Data/Geometry/arrangement.ipe"
-             outFile = "/tmp/out.ipe"
-         Right ls <- fmap f <$> readSinglePageFile fp
-         print ls
-         let arr = constructArrangement (Identity Test) ls
-             (segs,parts') = computeSegsAndParts (arr^.boundedArea) ls
-             out = [ asIpe drawPlanarSubdivision (arr^.subdivision) ]
-         -- print arr
-         print "darts:"
-         print $ traverseLine ((head ls)^.core) arr
-
-
-         let (q :+ (),_,_,_) = corners $ arr^.boundedArea
-         print $ findStartVertex q arr
-         writeIpeFile outFile . singlePageFromContent $ out
+readArr fp = do  Right ls <- fmap f <$> readSinglePageFile fp
+                 print ls
+                 pure $ constructArrangement (Identity Test) ls
   where
     f     :: IpePage Rational -> [Line 2 Rational :+ ()]
     f page = [ ext $ supportingLine s
@@ -312,3 +306,22 @@ test = do
              ]
       where
         segs = page^..content.traverse._withAttrs _IpePath _asLineSegment
+
+readArr' = readArr "test/Data/Geometry/arrangement.ipe"
+
+test = do
+         let outFile = "/tmp/out.ipe"
+         arr <- readArr'
+         let ls = arr^..inputLines.traverse
+             (segs,parts') = computeSegsAndParts (arr^.boundedArea) ls
+             out = [ asIpe drawPlanarSubdivision (arr^.subdivision) ]
+         -- print arr
+         print "darts:"
+         mapM_ (f $ arr^.subdivision) $ traverseLine ((head ls)^.core) arr
+
+
+         let (q :+ (),_,_,_) = corners $ arr^.boundedArea
+         print $ findStartVertex q arr
+         writeIpeFile outFile . singlePageFromContent $ out
+  where
+    f ps d = let (e:+ _) = edgeSegment d ps in printAsIpeSelection e
