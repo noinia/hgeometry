@@ -13,18 +13,14 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import           Data.Geometry.Vector
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import           Data.Maybe
 import           Data.Ord (Down(..))
 import           Data.Proxy
 import           Data.Semigroup
 import           Data.Sequence.Util
-import qualified Data.Set as Set
 import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 import           Data.Vinyl.CoRec
 
 import           Data.Geometry.Ipe
@@ -44,8 +40,6 @@ data Arrangement s v e f r = Arrangement {
   -- unboundedIntersections also stores the corners of the box. They are not
   -- associated with any line
 makeLenses ''Arrangement
-
-
 
 --------------------------------------------------------------------------------
 
@@ -221,20 +215,22 @@ alignWith p xs ys = CSeq.zipL xs <$> CSeq.findRotateTo (p (CSeq.focus xs)) ys
 -- | Given an Arrangement and a line in the arrangement, follow the line
 -- through he arrangement.
 --
-traverseLine       :: (Ord r, Fractional r, Show r)
+traverseLine       :: (Ord r, Fractional r)
                    => Line 2 r -> Arrangement s v e f r -> [Dart s]
-traverseLine l arr = let md    = traceShowId $ findStart l arr
+traverseLine l arr = let md    = findStart l arr
                          dup x = (x,x)
                      in maybe [] (List.unfoldr (fmap dup . follow arr)) md
 
 -- | Find the starting point of the line  the arrangement
-findStart       :: (Ord r, Fractional r, Show r)
+findStart       :: (Ord r, Fractional r)
                 => Line 2 r -> Arrangement s v e f r -> Maybe (Dart s)
 findStart l arr = do
-    (p,_) <- traceShowId $ asA (Proxy :: Proxy (Point 2 r, Point 2 r))
-            $ l `intersect` (Boundary $ arr^.boundedArea)
+    (p,_)   <- asA (Proxy :: Proxy (Point 2 r, Point 2 r)) $
+                 l `intersect` (Boundary $ arr^.boundedArea)
     (_,v,_) <- findStartVertex p arr
-    findStartDart (arr^.subdivision) $ traceShowId v
+    findStartDart (arr^.subdivision) v
+
+
 
 -- | Given a point on the boundary of the boundedArea box; find the vertex
 --  this point corresponds to.
@@ -294,8 +290,23 @@ follow arr d = V.find extends $ incidentEdges v ps
 
 --------------------------------------------------------------------------------
 
+-- TODO: we can skip the findStart by just traversing from all boundary points
+
+-- computeFaceData :: (Arrangement s v e f r -> Dart s -> f')
+--                -> Arrangement s v e f r -> V.Vertex f'
+-- computeFaceData arr f = fmap fromJust . V.create $ do
+--                           v <- MV.replicate (arr^.subdivision.to numFaces) Nothing
+--                           mapM_ (computeFaceData' arr f v) $ arr^.inputLines
+--                           pure v
+
+
+-- computeFaceData' arr f v l = mapM_ (assign ) traverseLine arr l
+
+--------------------------------------------------------------------------------
+
 data Test = Test
 
+readArr :: FilePath -> IO (Arrangement Test () () () Rational)
 readArr fp = do  Right ls <- fmap f <$> readSinglePageFile fp
                  print ls
                  pure $ constructArrangement (Identity Test) ls
@@ -307,8 +318,10 @@ readArr fp = do  Right ls <- fmap f <$> readSinglePageFile fp
       where
         segs = page^..content.traverse._withAttrs _IpePath _asLineSegment
 
+readArr' :: IO (Arrangement Test () () () Rational)
 readArr' = readArr "test/Data/Geometry/arrangement.ipe"
 
+test :: IO ()
 test = do
          let outFile = "/tmp/out.ipe"
          arr <- readArr'

@@ -8,6 +8,7 @@ import Data.Ext
 import Data.Geometry.Point
 import Data.Geometry.Vector
 import Data.Geometry.Ball
+import Data.Geometry.LineSegment
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 import GHC.TypeLits
@@ -31,6 +32,9 @@ instance PointFunctor (Triangle d p) where
 instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Triangle d p r) where
   transformBy = transformPointFunctor
 
+sideSegments                  :: Triangle d p r -> [LineSegment d p r]
+sideSegments (Triangle p q r) =
+  [ClosedLineSegment p q, ClosedLineSegment q r, ClosedLineSegment r p]
 
 -- | Compute the area of a triangle
 area   :: Fractional r => Triangle 2 p r -> r
