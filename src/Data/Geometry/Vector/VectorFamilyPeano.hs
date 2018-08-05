@@ -9,13 +9,10 @@ import           Data.Aeson(FromJSON(..),ToJSON(..))
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
-import           Data.Maybe (fromMaybe)
 import           Data.Proxy
 import           Data.Semigroup
-import           Data.Traversable (foldMapDefault,fmapDefault)
 import qualified Data.Vector.Fixed as V
-import qualified Data.Vector.Fixed.Cont as Cont
-import           Data.Vector.Fixed.Cont (Peano(..), PeanoNum(..), Fun(..))
+import           Data.Vector.Fixed.Cont (PeanoNum(..), Fun(..))
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
 import           Linear.Metric

@@ -10,7 +10,6 @@ import           Data.Proxy
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed (Arity)
 import           Data.Vector.Fixed.Boxed
-import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..))
