@@ -19,7 +19,6 @@ module Data.Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.BinaryTree
-import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.IntervalTree (IntervalLike(..))
 import           Data.Geometry.Properties
@@ -258,13 +257,16 @@ fromIntervals' = fromIntervals I
 --------------------------------------------------------------------------------
 -- * Counting the number of segments intersected
 
-newtype Count = Count { getCount :: Int}
+newtype Count = Count { getCount :: Word }
               deriving (Show,Eq,Ord,Num,Integral,Enum,Real,Generic,NFData)
 
 newtype C a = C { _unC :: a} deriving (Show,Read,Eq,Ord,Generic,NFData)
 
 instance Semigroup Count where
   a <> b = Count $ getCount a + getCount b
+instance Monoid Count where
+  mempty = 0
+  mappend = (<>)
 
 instance Measured Count (C i) where
   measure _ = 1
@@ -277,29 +279,29 @@ instance Assoc Count (C i) where
 --------------------------------------------------------------------------------
 -- * Testing stuff
 
-test'' = fromIntervals' . NonEmpty.fromList $ test
-test = [Interval (Closed (238 :+ ())) (Open (309 :+ ())), Interval (Closed (175 :+ ())) (Closed (269 :+ ())),Interval (Closed (255 :+ ())) (Open (867 :+ ())),Interval (Open (236 :+ ())) (Closed (863 :+ ())),Interval (Open (150 :+ ())) (Closed (161 :+ ())),Interval (Closed (35 :+ ())) (Closed (77 :+ ()))]
+-- test'' = fromIntervals' . NonEmpty.fromList $ test
+-- test = [Interval (Closed (238 :+ ())) (Open (309 :+ ())), Interval (Closed (175 :+ ())) (Closed (269 :+ ())),Interval (Closed (255 :+ ())) (Open (867 :+ ())),Interval (Open (236 :+ ())) (Closed (863 :+ ())),Interval (Open (150 :+ ())) (Closed (161 :+ ())),Interval (Closed (35 :+ ())) (Closed (77 :+ ()))]
 
 
--- q =        [78]
+-- -- q =        [78]
 
--- test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
---                                             , closedInterval 5 15
---                                             , closedInterval 1 4
---                                             , closedInterval 3 9
---                                             ]
-tst = fromIntervals' . NonEmpty.fromList $ [ closedInterval 1 6
-                                           , closedInterval 2 6
-                                           -- , Interval (Closed $ ext 0) (Open $ ext 1)
-                                           ]
-
-
-
-closedInterval a b = ClosedInterval (ext a) (ext b)
-
-showT :: (Show r, Show v) => SegmentTree v r -> String
-showT = drawTree . _unSegmentTree
+-- -- test = fromIntervals' . NonEmpty.fromList $ [ closedInterval 0 10
+-- --                                             , closedInterval 5 15
+-- --                                             , closedInterval 1 4
+-- --                                             , closedInterval 3 9
+-- --                                             ]
+-- tst = fromIntervals' . NonEmpty.fromList $ [ closedInterval 1 6
+--                                            , closedInterval 2 6
+--                                            -- , Interval (Closed $ ext 0) (Open $ ext 1)
+--                                            ]
 
 
-test' :: (Show r, Num r, Ord r, Enum r) => SegmentTree [I (Interval () r)] r
-test' = insert (I $ closedInterval 6 14) $ createTree (NonEmpty.fromList [2,4..20]) []
+
+-- closedInterval a b = ClosedInterval (ext a) (ext b)
+
+-- showT :: (Show r, Show v) => SegmentTree v r -> String
+-- showT = drawTree . _unSegmentTree
+
+
+-- test' :: (Show r, Num r, Ord r, Enum r) => SegmentTree [I (Interval () r)] r
+-- test' = insert (I $ closedInterval 6 14) $ createTree (NonEmpty.fromList [2,4..20]) []
