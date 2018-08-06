@@ -3,7 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Ipe.Writer where
 
-import           Control.Lens ((^.),(^..),(.~),(&), to)
+import           Control.Lens ((^.), (^..), (.~), (&))
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Colour.SRGB (RGB(..))
