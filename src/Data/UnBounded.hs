@@ -13,7 +13,7 @@ module Data.UnBounded( Top, topToMaybe
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.Traversable as T
-
+import           Data.Functor.Classes
 
 --------------------------------------------------------------------------------
 -- * Top and Bottom
@@ -23,7 +23,7 @@ import qualified Data.Traversable as T
 --
 -- >>> data Top a = ValT a | Top
 newtype Top a = GTop { topToMaybe :: Maybe a }
-                deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad)
+                deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1)
 
 pattern ValT  :: a -> Top a
 pattern ValT x = GTop (Just x)
@@ -31,11 +31,14 @@ pattern ValT x = GTop (Just x)
 pattern Top    :: Top a
 pattern Top    = GTop Nothing
 
+instance Ord1 Top where
+  liftCompare _   Top       Top       = EQ
+  liftCompare _   _         Top       = LT
+  liftCompare _   Top       _         = GT
+  liftCompare cmp ~(ValT x) ~(ValT y) = x `cmp` y
+
 instance Ord a => Ord (Top a) where
-  Top       `compare` Top      = EQ
-  _         `compare` Top      = LT
-  Top       `compare` _        = GT
-  ~(ValT x) `compare` ~(ValT y) = x `compare` y
+  compare = compare1
 
 instance Show a => Show (Top a) where
   show Top       = "Top"
@@ -49,7 +52,7 @@ instance Show a => Show (Top a) where
 --
 -- >>> data Bottom a = Bottom | ValB a
 newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
-                 deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad)
+                 deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1,Ord1)
 
 pattern Bottom :: Bottom a
 pattern Bottom = GBottom Nothing

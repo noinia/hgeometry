@@ -2,16 +2,17 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Triangle where
 
-import Data.Bifunctor
 import Control.Lens
+import Data.Bifunctor
 import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Vector
+import Data.Geometry.Ball (Disk, disk)
+import Data.Geometry.Boundary
 import Data.Geometry.HyperPlane
-import Data.Geometry.Ball(Disk, disk)
 import Data.Geometry.LineSegment
+import Data.Geometry.Point
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
+import Data.Geometry.Vector
 import GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -64,3 +65,48 @@ inscribedDisk (Triangle p q r) = disk (p^.core) (q^.core) (r^.core)
 
 instance Num r => HasSupportingPlane (Triangle 3 p r) where
   supportingPlane (Triangle p q r) = from3Points (p^.core) (q^.core) (r^.core)
+
+
+-- | Given a point q and a triangle, q inside the triangle, get the baricentric
+-- cordinates of q
+toBarricentric                                 :: Fractional r
+                                               => Point 2 r -> Triangle 2 p r
+                                               -> Vector 3 r
+toBarricentric (Point2 qx qy) (Triangle a b c) = Vector3 alpha beta gamma
+  where
+    Point2 ax ay = a^.core
+    Point2 bx by = b^.core
+    Point2 cx cy = c^.core
+
+    dett  = (by - cy)*(ax - cx) + (cx - bx)*(ay - cy)
+
+    alpha = ((by - cy)*(qx - cx) + (cx - bx)*(qy - cy)) / dett
+    beta  = ((cy - ay)*(qx - cx) + (ax - cx)*(qy - cy)) / dett
+    gamma = 1 - alpha - beta
+    -- see https://en.wikipedia.org/wiki/Barycentric_coordinate_system#Conversion_between_barycentric_and_Cartesian_coordinates
+
+-- | Given a vector of barricentric coordinates and a triangle, get the
+-- corresponding point in the same coordinate sytsem as the vertices of the
+-- triangle.
+fromBarricentric                                  :: (Arity d, Num r)
+                                                  => Vector 3 r -> Triangle d p r
+                                                  -> Point d r
+fromBarricentric (Vector3 a b c) (Triangle p q r) = let f = view (core.vector) in
+    Point $ a *^ f p ^+^ b *^ f q ^+^ c *^ f r
+
+
+-- | Tests if a point lies inside a triangle, on its boundary, or outside the triangle
+triangleTest     :: (Ord r, Fractional r)
+                 => Point 2 r -> Triangle 2 p r -> PointLocationResult
+triangleTest q t
+    | all (`inRange` (OpenRange   0 1)) [a,b,c] = Inside
+    | all (`inRange` (ClosedRange 0 1)) [a,b,c] = OnBoundary
+    | otherwise                                 = Outside
+  where
+    Vector3 a b c = toBarricentric q t
+
+-- | Test if a point lies inside or on the boundary of a triangle
+inTriangle       :: (Ord r, Fractional r)
+                 => Point 2 r -> Triangle 2 p r -> Bool
+q `inTriangle` t = let Vector3 a b c = toBarricentric q t
+                   in all (`inRange` (ClosedRange 0 1)) [a,b,c]

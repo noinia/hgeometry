@@ -67,11 +67,9 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
-import qualified Data.List as L
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Permutation (ix')
-import           Data.PlanarGraph (toAdjacencyLists,buildFromJSON, isPositive, allDarts)
+import           Data.PlanarGraph (isPositive, allDarts)
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , Dart, VertexId(..), FaceId(..), twin
@@ -595,4 +593,5 @@ rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
 
 
 
+dartMapping    :: PlanarSubdivision s v e f r -> V.Vector (Dart (Wrap s), Dart s)
 dartMapping ps = ps^.component (ComponentId 0).PG.dartData
