@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Permutation where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Control.Monad (forM)
 import           Control.Monad.ST (runST)
@@ -11,6 +12,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -24,8 +26,10 @@ data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
                                                -- implies that a is the j^th
                                                -- item in the i^th orbit
                                  }
-                   deriving (Show,Eq)
+                   deriving (Show,Eq,Generic)
 makeLenses ''Permutation
+
+instance NFData a => NFData (Permutation a)
 
 instance Functor Permutation where
   fmap = T.fmapDefault

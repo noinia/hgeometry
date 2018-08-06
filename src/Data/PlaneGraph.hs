@@ -45,7 +45,6 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Aeson
-import           Data.ByteString (ByteString)
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -72,14 +71,14 @@ import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
 -- | Note that the functor instance is in v
 data VertexData r v = VertexData { _location :: !(Point 2 r)
                                  , _vData    :: !v
-                                 } deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+                                 } deriving (Show,Eq,Ord,Generic
+                                            ,Functor,Foldable,Traversable)
 makeLenses ''VertexData
 
 vtxDataToExt                  :: VertexData r v -> Point 2 r :+ v
@@ -100,7 +99,7 @@ instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r =
     PlaneGraph { _graph :: PlanarGraph s Primal (VertexData r v) e f }
-      deriving (Show,Eq,ToJSON,FromJSON)
+      deriving (Show,Eq,ToJSON,FromJSON,Generic)
 makeLenses ''PlaneGraph
 
 type instance NumType   (PlaneGraph s v e f r) = r
