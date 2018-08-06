@@ -136,3 +136,16 @@ mkRow i x = set (FV.element i) x zero
 transRow     :: forall n r. (Arity n, Arity (n + 1), Num r)
              => Int -> r -> Vector (n + 1) r
 transRow i x = set (V.element (Proxy :: Proxy n)) x $ mkRow i 1
+
+--------------------------------------------------------------------------------
+-- * 3D Rotations
+
+-- | Given three new unit-length basis vectors (u,v,w) that map to (x,y,z),
+-- construct the appropriate rotation that does this.
+--
+--
+rotateTo                 :: Num r => Vector 3 (Vector 3 r) -> Transformation 3 r
+rotateTo (Vector3 u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
+                                                             (snoc v        0)
+                                                             (snoc w        0)
+                                                             (Vector4 0 0 0 1)

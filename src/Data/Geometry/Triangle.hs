@@ -7,11 +7,14 @@ import Control.Lens
 import Data.Ext
 import Data.Geometry.Point
 import Data.Geometry.Vector
-import Data.Geometry.Ball
+import Data.Geometry.HyperPlane
+import Data.Geometry.Ball(Disk, disk)
 import Data.Geometry.LineSegment
 import Data.Geometry.Properties
 import Data.Geometry.Transformation
 import GHC.TypeLits
+
+--------------------------------------------------------------------------------
 
 data Triangle d p r = Triangle (Point d r :+ p)
                                (Point d r :+ p)
@@ -57,3 +60,7 @@ doubleArea (Triangle a b c) = abs $ ax*by - ax*cy
 inscribedDisk                  :: (Eq r, Fractional r)
                                => Triangle 2 p r -> Maybe (Disk () r)
 inscribedDisk (Triangle p q r) = disk (p^.core) (q^.core) (r^.core)
+
+
+instance Num r => HasSupportingPlane (Triangle 3 p r) where
+  supportingPlane (Triangle p q r) = from3Points (p^.core) (q^.core) (r^.core)

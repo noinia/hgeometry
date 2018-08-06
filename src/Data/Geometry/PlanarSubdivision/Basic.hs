@@ -113,8 +113,8 @@ newtype ComponentId s = ComponentId { unCI :: Int }
   deriving (Show,Eq,Ord,Generic,Bounded,Enum)
 
 
-data Raw s ia a = Raw { _compId  :: {-# UNPACK #-} !(ComponentId s)
-                      , _idxVal  :: {-# UNPACK #-} !ia
+data Raw s ia a = Raw { _compId  :: !(ComponentId s)
+                      , _idxVal  :: !ia
                       , _dataVal :: !a
                       } deriving (Eq,Show,Functor,Foldable,Traversable)
 makeLenses ''Raw
