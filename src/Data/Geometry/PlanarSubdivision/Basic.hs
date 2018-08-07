@@ -52,6 +52,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
 
 
                                            , rawVertexData, rawDartData, rawFaceData
+                                           , vertexData, dartData, faceData
                                            , dataVal
 
                                            , dartMapping, Raw(..)
@@ -115,8 +116,10 @@ data Raw s ia a = Raw { _compId  :: !(ComponentId s)
                       , _idxVal  :: !ia
                       , _dataVal :: !a
                       } deriving (Eq,Show,Functor,Foldable,Traversable)
-makeLenses ''Raw
 
+-- | get the dataVal of a Raw
+dataVal :: Lens (Raw s ia a) (Raw s ia b) a b
+dataVal = lens (\(Raw _ _ x) -> x) (\(Raw c i _) y -> Raw c i y)
 
 
 --------------------------------------------------------------------------------
@@ -194,10 +197,10 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     (FaceId (VertexId of')) = PG.leftFace ofD g
 
     -- at index i we are storing the outerface
-    mkFaceData i | i == of'  = faceData (Seq.singleton ofD) 0
-                 | i == 0    = faceData mempty of'
-                 | otherwise = faceData mempty i
-    faceData xs i = FaceData xs (FaceId . VertexId $ i)
+    mkFaceData i | i == of'  = faceData' (Seq.singleton ofD) 0
+                 | i == 0    = faceData' mempty of'
+                 | otherwise = faceData' mempty i
+    faceData' xs i = FaceData xs (FaceId . VertexId $ i)
 
 
     mkFaceId :: forall s'. Int -> FaceId' s'
@@ -319,6 +322,9 @@ faces' ps = let n = numFaces ps
 faces    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s, FaceData (Dart s) f)
 faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
+
+
+
 -- | Enumerates all faces with their face data exlcluding  the outer face
 internalFaces    :: (Ord r, Fractional r)
                  => PlanarSubdivision s v e f r
@@ -327,13 +333,38 @@ internalFaces ps = let i = outerFaceId ps
                    in V.filter (\(j,_) -> i /= j) $ faces ps
 
 
--- -- | lens to access the Dart Data
--- dartData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e' f r)
---                  (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
--- dartData = graph.PG.dartData
+-- | lens to access the Dart Data
+dartData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e' f r)
+                 (V.Vector (Dart s, e))        (V.Vector (Dart s, e'))
+dartData = lens getF setF
+  where
+    getF     = V.imap (\i x -> (toEnum i, x^.dataVal)) . _rawDartData
+    setF ps ds' = ps&rawDartData %~ mkDS' ds'
 
+    assignDart ds v (d,x) = let i = fromEnum d
+                                y = ds V.! i
+                            in MV.write v i (y&dataVal .~ x)
 
+    mkDS' ds' ds = V.create $ do
+                     v <- MV.new (V.length ds)
+                     mapM_ (assignDart ds v) ds'
+                     pure v
 
+-- | Lens to the facedata of the faces themselves. The indices correspond to the faceIds
+faceData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e f' r)
+                 (V.Vector f)                  (V.Vector f')
+faceData = lens getF setF
+  where
+    getF = fmap (^.dataVal) . _rawFaceData
+    setF ps v' = ps&rawFaceData %~ V.zipWith (\x' x -> x&dataVal .~ x') v'
+
+-- | Lens to the facedata of the vertexdata themselves. The indices correspond to the vertexId's
+vertexData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v' e f r)
+                   (V.Vector v)                  (V.Vector v')
+vertexData = lens getF setF
+  where
+    getF = fmap (^.dataVal) . _rawVertexData
+    setF ps v' = ps&rawVertexData %~ V.zipWith (\x' x -> x&dataVal .~ x') v'
 
 
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
