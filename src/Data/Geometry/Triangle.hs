@@ -96,9 +96,9 @@ fromBarricentric (Vector3 a b c) (Triangle p q r) = let f = view (core.vector) i
 
 
 -- | Tests if a point lies inside a triangle, on its boundary, or outside the triangle
-triangleTest     :: (Ord r, Fractional r)
+inTriangle     :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> PointLocationResult
-triangleTest q t
+inTriangle q t
     | all (`inRange` (OpenRange   0 1)) [a,b,c] = Inside
     | all (`inRange` (ClosedRange 0 1)) [a,b,c] = OnBoundary
     | otherwise                                 = Outside
@@ -106,7 +106,7 @@ triangleTest q t
     Vector3 a b c = toBarricentric q t
 
 -- | Test if a point lies inside or on the boundary of a triangle
-inTriangle       :: (Ord r, Fractional r)
+onTriangle       :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> Bool
-q `inTriangle` t = let Vector3 a b c = toBarricentric q t
+q `onTriangle` t = let Vector3 a b c = toBarricentric q t
                    in all (`inRange` (ClosedRange 0 1)) [a,b,c]

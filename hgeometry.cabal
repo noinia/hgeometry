@@ -30,6 +30,7 @@ data-files:          resources/basic.isy
                      test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
                      test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
                      test/Data/Geometry/pointInPolygon.ipe
+                     test/Data/Geometry/pointInTriangle.ipe
                      test/Data/Geometry/Polygon/Convex/convexTests.ipe
                      examples/BAPC2014/sample.in
                      examples/BAPC2014/sample.out
@@ -422,7 +423,8 @@ test-suite doctests
   ghc-options:   -threaded
   main-is:       doctests.hs
   build-depends: base
-               , doctest >= 0.8
+               , doctest             >= 0.8
+               , doctest-discover
 
   default-language:    Haskell2010
 
@@ -451,6 +453,7 @@ test-suite hspec
                  Data.Geometry.LineSpec
                  Data.Geometry.SubLineSpec
                  Data.Geometry.PlanarSubdivisionSpec
+                 Data.Geometry.TriangleSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
