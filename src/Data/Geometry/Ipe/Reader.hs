@@ -37,6 +37,8 @@ import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
 import           Data.Geometry.Ipe.PathParser
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Value
+import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Polygon as Polygon

@@ -11,6 +11,7 @@ import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -113,7 +114,7 @@ instance HasDefaultIpeOut (PolyLine 2 p r) where
 instance HasDefaultIpeOut (Polygon t p r) where
   type DefaultIpeOut (Polygon t p r) = Path
   defaultIpeOut = flip addAttributes ipePolygon $
-                    mempty <> attr SFill (IpeColor "0.722 0.145 0.137")
+                    attr SFill (IpeColor "0.722 0.145 0.137")
 
 instance HasDefaultIpeOut (SomePolygon p r) where
   type DefaultIpeOut (SomePolygon p r) = Path

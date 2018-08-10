@@ -22,6 +22,7 @@ import           Data.Maybe(mapMaybe)
 import           Data.Singletons.TH(genDefunSymbols)
 
 import           Data.Geometry.Ipe.Literal
+import           Data.Geometry.Ipe.Color
 import qualified Data.Geometry.Ipe.Attributes as AT
 import           Data.Geometry.Ipe.Attributes hiding (Matrix)
 import           Data.Text(Text)

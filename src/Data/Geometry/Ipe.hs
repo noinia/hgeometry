@@ -10,6 +10,8 @@ module Data.Geometry.Ipe( module Data.Geometry.Ipe.Types
                         , module Data.Geometry.Ipe.IpeOut
                         , module Data.Geometry.Ipe.FromIpe
                         , module Data.Geometry.Ipe.Attributes
+                        , module Data.Geometry.Ipe.Value
+                        , module Data.Geometry.Ipe.Color
                         ) where
 
 import Data.Geometry.Ipe.Types
@@ -18,3 +20,5 @@ import Data.Geometry.Ipe.Reader
 import Data.Geometry.Ipe.IpeOut
 import Data.Geometry.Ipe.FromIpe
 import Data.Geometry.Ipe.Attributes
+import Data.Geometry.Ipe.Value
+import Data.Geometry.Ipe.Color(IpeColor(..))

@@ -14,6 +14,8 @@ import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Value
+import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine

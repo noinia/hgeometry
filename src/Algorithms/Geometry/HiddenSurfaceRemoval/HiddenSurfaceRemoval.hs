@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval where
 
 import           Control.Applicative
@@ -22,23 +23,30 @@ import           Data.UnBounded
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+import           Data.Vinyl.CoRec
+
 --------------------------------------------------------------------------------
 
 type PriQ a = [a]
 
-render         :: (Ord r, Fractional r)
-               => proxy s
-               -> Point 3 r -- ^ the viewpoint
-               -> [Triangle 2 v r :+ (Triangle 3 q r :+ f)]
-               -> Arrangement s () () (Maybe f) r
-render px vp ts = undefined
+render          :: forall proxy s r v q f. (Ord r, Fractional r)
+                => proxy s
+                -> Point 3 r -- ^ the viewpoint
+                -> [Tri v q f r]
+                -> Arrangement s (Tri v q f r) () (Maybe EdgeSide) (Maybe (Tri v q f r)) r
+render px vp ts = arr'&subdivision.dartData .~ ds
   where
-    arr = constructArrangement px $ concatMap f ts
-    f t = map (\s -> supportingLine s :+ SP s t) . sideSegments $ t^.core
+    arr   :: Arrangement s (Tri v q f r) () (Maybe (Tri v q f r)) () r
+    arr   = constructArrangement px $ concatMap f ts
+    arr'  = arr&subdivision.faceData .~ fas
+
+    fas = naiveAssignment vp arr ts
+    ds  = dartAssignments arr'
+
+    f t = map (\s -> supportingLine s :+ t) . sideSegments $ t^.core
 
 
 type Tri v q f r = Triangle 2 v r :+ (Triangle 3 q r :+ f)
-type T v q f r = SP (LineSegment 2 v r) (Tri v q f r)
 
 
 -- -- | Given a point on the boundary of a projected triangle T, get the point in
@@ -58,9 +66,9 @@ type T v q f r = SP (LineSegment 2 v r) (Tri v q f r)
 -- -- | Given a point on the projected triangle tw, get the point in
 -- -- R^3 on the corresponding triangle in R^3
 liftToR3              :: (Ord r, Fractional r) => Point 2 r -> Tri v q f r -> Point 3 r
-liftToR3 q (t2 :+ t3) = fromBarricentric (toBarricentric q t2) t^3.core
+liftToR3 q (t2 :+ t3) = fromBarricentric (toBarricentric q t2) (t3^.core)
 
-data EdgeSide = L | R | None deriving (Show,Eq)
+data EdgeSide = L | R deriving (Show,Eq)
 
 
 
@@ -101,9 +109,26 @@ fromAssignments idxOf n as = V.create $ do
                                mapM_ (\(k :+ v) -> MV.modify vec (<|> Just v) (idxOf k)) as
                                pure vec
 
+-- | Computes which darts should be drawn
+dartAssignments     :: (Ord r, Fractional r)
+                    => Arrangement s l () e (Maybe (Tri v q f r)) r
+                    -> V.Vector (Dart s,Maybe EdgeSide)
+dartAssignments arr = (\d -> (d,f d)) <$> darts' ps
+  where
+    -- if p,q both occur in the trinagle, return Just x, otherwise ret. nothing
+    inTri (p,q) x t | all (`onTriangle` (t^.core)) [p,q] = Just x
+                    | otherwise                  = Nothing
 
-dartAssignments :: Arrangement s () (T v q f r) (T v q f r) r -> [Dart s :+ EdgeSide]
-dartAssignments = undefined
+    ps  = arr^.subdivision
+          -- if the endpoints of this dart both occur in the left triangle
+          -- then the dart forms the left boundary, otherwise the right boundary
+          --
+          -- FIXME: We should test if left occurs before right or vice versa
+          -- rather than just picking left.
+    f d = let pts = bimap (^.location) (^.location) $ ps^.endPointsOf d
+              g i x = ps^.dataOf i >>= inTri pts x
+          in (g (leftFace d ps) L <|> g (rightFace d ps) R)
+
 
 
 
@@ -113,15 +138,15 @@ dartAssignments = undefined
 -- running time: \(O(n^3)\), where \(n\) is the number of input triangles.
 naiveAssignment           :: (Ord r, Fractional r)
                           => Point 3 r
-                          -> Arrangement s () (T v q f r) () r
+                          -> Arrangement s l () (Maybe (Tri v q f r)) () r
                           -> [Tri v q f r]
-                          -> [FaceId' s :+ Maybe (Tri v q f r)]
-naiveAssignment vp arr ts = mapMaybe f . V.toList $ faces' ps
+                          -> V.Vector (Maybe (Tri v q f r))
+naiveAssignment vp arr ts = f <$> faces' ps
   where
     f i = let (pg :+ _) = rawFaceBoundary i ps
               c         = centroid pg
-              mt        = minimumBy' (compareDepthOrder' vp c) $ filter (c `inTriangle`) ts
-          in (\t -> i :+ Just t) <$> mt
+          in minimumBy' (compareDepthOrder' vp c) $
+               filter (\t -> c `onTriangle` (t^.core)) ts
     ps = arr^.subdivision
   -- observe that all faces in the arrangement are convex, so the centroid
   -- lies inside the face
@@ -129,6 +154,12 @@ naiveAssignment vp arr ts = mapMaybe f . V.toList $ faces' ps
   -- observe that since we explicitly filter the triangles to contain c, we can indeed
   -- safely use compareDepthOrder'
 
+
+--
+-- >>> minimumBy' compare []
+-- Nothing
+-- >>> minimumBy' compare [1,0,5]
+-- Just 0
 minimumBy'     :: Foldable f => (a -> a -> Ordering) -> f a -> Maybe a
 minimumBy' cmp = topToMaybe  . List.minimumBy (liftCompare cmp)
                . (Top :) . fmap ValT . F.toList
@@ -171,7 +202,7 @@ minimumBy' cmp = topToMaybe  . List.minimumBy (liftCompare cmp)
 --                          , _exitRight  :: !a
 --                          } deriving (Show,Eq, Functor, Foldable, Traversable)
 
--- stateChanges          :: Arrangement s () (T v q f r) () r -> Dart s -> Dart s
+-- stateChanges          :: Arrangement s l () (T v q f r) () r -> Dart s -> Dart s
 --                       -> Changes [T v q f r]
 -- stateChanges arr pd d = Changes lEnters rEnters lLeaves rLeaves
 --   where
