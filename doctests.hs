@@ -33,27 +33,34 @@ ghcExts = map ("-X" ++)
           , "FlexibleContexts"
           ]
 
-files = mconcat [ geomModules
-                , dataModules
-                ]
+files = map toFile modules
 
-prefixWith s = map (\s' -> "src/" <> s <> s')
+toFile = (\s -> "src/" <> s <> ".hs") . replace '.' '/'
 
+replace     :: Eq a => a -> a -> [a] -> [a]
+replace a b = go
+  where
+    go []                 = []
+    go (c:cs) | c == a    = b:go cs
+              | otherwise = c:go cs
 
-dataModules = prefixWith "Data/" [ "Range.hs"
-                                 , "CircularList/Util.hs"
-                                 , "Permutation.hs"
-                                 , "CircularSeq.hs"
-                                 , "PlanarGraph.hs"
-                                 ]
+modules =
+  [ "Data.Range"
+  , "Data.CircularList.Util"
+  , "Data.Permutation"
+  , "Data.CircularSeq"
+  , "Data.PlanarGraph"
 
-geomModules = prefixWith "Data/Geometry/" [ "Point.hs"
-                                          , "Vector.hs"
-                                          , "Line.hs"
-                                          , "Line/Internal.hs"                                                                        , "Interval.hs"
-                                          , "LineSegment.hs"
-                                          , "PolyLine.hs"
-                                          , "Polygon.hs"
-                                          , "Ball.hs"
-                                          , "Box.hs"
-                                          ]
+  , "Data.Geometry.Point"
+  , "Data.Geometry.Vector"
+  , "Data.Geometry.Line"
+  , "Data.Geometry.Line.Internal"
+  , "Data.Geometry.Interval"
+  , "Data.Geometry.LineSegment"
+  , "Data.Geometry.PolyLine"
+  , "Data.Geometry.Polygon"
+  , "Data.Geometry.Ball"
+  , "Data.Geometry.Box"
+
+  -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
+  ]

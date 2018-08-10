@@ -76,10 +76,9 @@ import           Unsafe.Coerce (unsafeCoerce)
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> :{
--- data Test
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---     myGraph :: PlanarGraph Test Primal () String ()
+--     myGraph :: PlanarGraph () Primal () String ()
 --     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")
