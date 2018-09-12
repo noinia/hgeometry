@@ -25,25 +25,41 @@ data Zipper a = Zipper { focus      :: Tree a
                        }
               deriving (Show,Eq)
 
-
+-- | Create a new zipper focussiong on the root.
 root :: Tree a -> Zipper a
 root = flip Zipper []
 
-firstChild                          :: Zipper a -> Maybe (Zipper a)
-firstChild (Zipper (Node x chs) as) = case chs of
-                                        []       -> Nothing
-                                        (c:chs') -> Just $ Zipper c (([],x,chs'):as)
-
+-- | Move the focus to the parent of this node.
 up               :: Zipper a -> Maybe (Zipper a)
 up (Zipper t as) = case as of
                      []              -> Nothing
                      ((ls,p,rs):as') -> Just $ Zipper (Node p (reverse ls <> [t] <> rs)) as'
 
+-- | Move the focus to the first child of this node.
+--
+-- >>> firstChild $ root myTree
+-- Just (Zipper {focus = Node {rootLabel = 1, subForest = []}, ancestors = [([],0,[Node {rootLabel = 2, subForest = []},Node {rootLabel = 3, subForest = [Node {rootLabel = 4, subForest = []}]}])]})
+firstChild                          :: Zipper a -> Maybe (Zipper a)
+firstChild (Zipper (Node x chs) as) = case chs of
+                                        []       -> Nothing
+                                        (c:chs') -> Just $ Zipper c (([],x,chs'):as)
+
+-- | Move the focus to the next sibling of this node
+--
+-- >>> (firstChild $ root myTree) >>= nextSibling
+-- Just (Zipper {focus = Node {rootLabel = 2, subForest = []}, ancestors = [([Node {rootLabel = 1, subForest = []}],0,[Node {rootLabel = 3, subForest = [Node {rootLabel = 4, subForest = []}]}])]})
 nextSibling               :: Zipper a -> Maybe (Zipper a)
 nextSibling (Zipper t as) = case as of
                               []                  -> Nothing -- no parent
                               ((_,_,[]):_)        -> Nothing -- no next sibling
                               ((ls,p,(r:rs)):as') -> Just $ Zipper r ((t:ls,p,rs):as')
+
+-- | Move the focus to the next sibling of this node
+prevSibling               :: Zipper a -> Maybe (Zipper a)
+prevSibling (Zipper t as) = case as of
+                              []                  -> Nothing -- no parent
+                              (([],_,_):_)        -> Nothing -- no prev sibling
+                              (((l:ls),p,rs):as') -> Just $ Zipper l ((ls,p,t:rs):as')
 
 -- | Given a zipper that focussses on some subtree t, construct a list with
 -- zippers that focus on each child.
@@ -128,7 +144,7 @@ findNode p = listToMaybe . findNodes (p . rootLabel)
 -- >>> findNodes ((< 4) . rootLabel) myTree
 -- [[0],[0,1],[0,2],[0,3]]
 -- >>> findNodes (even . rootLabel) myTree
---- [[0],[0,2],[0,3,4]]
+-- [[0],[0,2],[0,3,4]]
 -- >>> let size = length in findNodes ((> 1) . size) myTree
 -- [[0],[0,3]]
 findNodes   :: (Tree a -> Bool) -> Tree a -> [[a]]

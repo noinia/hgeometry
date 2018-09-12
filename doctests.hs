@@ -50,6 +50,7 @@ modules =
   , "Data.Permutation"
   , "Data.CircularSeq"
   , "Data.PlanarGraph"
+  , "Data.Tree.Util"
 
   , "Data.Geometry.Point"
   , "Data.Geometry.Vector"
