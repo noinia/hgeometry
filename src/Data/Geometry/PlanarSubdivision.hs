@@ -98,10 +98,3 @@ holeData (Hole f _) = f
 getP            :: HoleData f p -> Maybe p
 getP (Outer _)  = Nothing
 getP (Hole _ p) = Just p
-
--- | grows the box by x on all sides
-grow     :: (Num r, Arity d) => r -> Box d p r -> Box d p r
-grow x b = let mi = minPoint b
-               ma = maxPoint b
-               v  = Vec.replicate x
-           in box (mi&core %~ (.+^ ((-1) *^ v))) (ma&core %~ (.+^ v))

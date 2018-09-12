@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.IntervalSpec where
 
+import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
@@ -10,6 +11,7 @@ import qualified Data.Geometry.IntervalTree as IntTree
 import           Data.Geometry.SegmentTree (SegmentTree, I(..))
 import qualified Data.Geometry.SegmentTree as SegTree
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Range
 import qualified Data.Seq as Seq
 import qualified Data.Set as Set
 import           GHC.TypeLits
@@ -50,16 +52,18 @@ spec :: Spec
 spec = modifyMaxSuccess (const 1000) $ do
     describe "Same as Naive" $ do
       it "quickcheck segmentTree" $
-        property $ \(is :: NonEmpty.NonEmpty (Interval () Word)) -> allSameAsNaive is
+        property $ \(Intervals is :: Intervals Word) -> allSameAsNaive is
       it "quickcheck IntervalTree" $
         property $ \(Intervals is :: Intervals Word) -> allSameAsNaiveIT is
 
 
 newtype Intervals r = Intervals (NonEmpty.NonEmpty (Interval () r)) deriving (Show,Eq)
 
--- don't generate double open intervals
+-- don't generate double open intervals, and don't generate intervals in which
+-- one endpoint is open, the other is closed, but at the same point
 instance (Arbitrary r, Ord r) => Arbitrary (Intervals r) where
   arbitrary = Intervals . NonEmpty.fromList <$> listOf1 (suchThat arbitrary p)
     where
       p (OpenInterval _ _) = False
-      p _                  = True
+      p (Interval s e)     = not (isOpen s /= isOpen e
+                                  && s^.unEndPoint.core == e^.unEndPoint.core)

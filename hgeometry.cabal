@@ -22,14 +22,16 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-extra-source-files:  README.md
-                     resources/basic.isy
-                     test/Data/Geometry/pointInPolygon.ipe
-                     test/Data/Geometry/Polygon/Convex/convexTests.ipe
-                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
+data-files:          resources/basic.isy
                      test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
+                     test/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
                      test/Algorithms/Geometry/LowerEnvelope/manual.ipe
                      test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
+                     test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
+                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
+                     test/Data/Geometry/pointInPolygon.ipe
+                     test/Data/Geometry/pointInTriangle.ipe
+                     test/Data/Geometry/Polygon/Convex/convexTests.ipe
                      examples/BAPC2014/sample.in
                      examples/BAPC2014/sample.out
                      examples/BAPC2014/testdata.in
@@ -40,7 +42,11 @@ extra-source-files:  README.md
                      examples/BAPC2012/sampleG.out
 
 
-cabal-version:       >=1.10
+
+extra-source-files:  README.md
+                     changelog.md
+
+cabal-version:       2.0
 source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
@@ -88,6 +94,7 @@ library
                     Data.Geometry.SubLine
                     Data.Geometry.HalfLine
                     Data.Geometry.PolyLine
+                    Data.Geometry.HyperPlane
                     Data.Geometry.Triangle
                     -- Data.Geometry.Plane
                     Data.Geometry.Slab
@@ -103,9 +110,14 @@ library
                     Data.Geometry.SegmentTree.Generic
 
                     Data.Geometry.KDTree
+
                     Data.Geometry.PlanarSubdivision
                     Data.Geometry.PlanarSubdivision.Basic
                     Data.Geometry.PlanarSubdivision.Draw
+
+                    Data.Geometry.Arrangement
+                    Data.Geometry.Arrangement.Internal
+                    Data.Geometry.Arrangement.Draw
 
                     -- * Algorithms
                     Algorithms.Util
@@ -145,6 +157,9 @@ library
                     Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
                     Algorithms.Geometry.LineSegmentIntersection.Types
 
+                    Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval
+
+
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
@@ -152,6 +167,8 @@ library
                     -- * Ipe Types
                     Data.Geometry.Ipe
                     Data.Geometry.Ipe.Literal
+                    Data.Geometry.Ipe.Value
+                    Data.Geometry.Ipe.Color
                     Data.Geometry.Ipe.Attributes
                     Data.Geometry.Ipe.Types
                     Data.Geometry.Ipe.Writer
@@ -199,7 +216,7 @@ library
 
   -- other-extensions:
   build-depends:
-                  base             >= 4.9       &&     < 5
+                  base             >= 4.10      &&     < 5
                 , bifunctors       >= 4.1
                 , bytestring       >= 0.10
                 , containers       >= 0.5.5
@@ -211,7 +228,7 @@ library
                 , semigroups       >= 0.18
                 , singletons       >= 2.0
                 , text             >= 1.1.1.0
-                , vinyl            >= 0.6
+                , vinyl            >= 0.6        && < 0.9
                 , deepseq          >= 1.1
                 , fingertree       >= 0.1
                 , colour           >= 2.3.3
@@ -412,7 +429,8 @@ test-suite doctests
   ghc-options:   -threaded
   main-is:       doctests.hs
   build-depends: base
-               , doctest >= 0.8
+               , doctest             >= 0.8
+--               , doctest-discover
 
   default-language:    Haskell2010
 
@@ -423,12 +441,16 @@ test-suite hspec
   main-is:              Spec.hs
   ghc-options:   -O2 -fno-warn-unticked-promoted-constructors
 
+  build-tool-depends: hspec-discover:hspec-discover
+
+
   other-modules: Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
                  Data.OrdSeqSpec
                  Data.Geometry.Ipe.ReaderSpec
                  Data.Geometry.PolygonSpec
+                 Data.Geometry.LineSegmentSpec
                  Data.Geometry.PointSpec
                  Data.Geometry.Polygon.Convex.ConvexSpec
                  Data.Geometry.KDTreeSpec
@@ -437,6 +459,8 @@ test-suite hspec
                  Data.Geometry.LineSpec
                  Data.Geometry.SubLineSpec
                  Data.Geometry.PlanarSubdivisionSpec
+                 Data.Geometry.TriangleSpec
+                 Data.Geometry.ArrangementSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
@@ -446,6 +470,7 @@ test-suite hspec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
+                 Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
 
                  Util
 
@@ -537,6 +562,8 @@ benchmark benchmarks
                  Algorithms.Geometry.ConvexHull.GrahamFam
                  Algorithms.Geometry.ConvexHull.GrahamFamPeano
                  Algorithms.Geometry.ConvexHull.GrahamFixed
+                 Data.Geometry.Vector.VectorFamily6
+                 Algorithms.Geometry.ConvexHull.GrahamFam6
                  Data.Geometry.IntervalTreeBench
                  Demo.ExpectedPairwiseDistance
                  Demo.TriangulateWorld

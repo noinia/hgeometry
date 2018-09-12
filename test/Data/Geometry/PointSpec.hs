@@ -2,12 +2,18 @@ module Data.Geometry.PointSpec where
 
 import Data.Ext
 import Data.Geometry.Point
+import Data.Geometry.Vector
 import Test.Hspec
 import qualified Data.CircularList as C
 
 
 spec :: Spec
 spec = do
+  describe "Add vector to point" $ do
+    it "2d" $
+      origin .+^ Vector2 1 2 `shouldBe` Point2 1 2
+    it "3d" $
+      origin .+^ Vector3 1 2 3 `shouldBe` Point3 1 2 3
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
       sortArround (ext origin) (map ext [ point2 (-3) (-3)

@@ -151,9 +151,9 @@ pMatrix = (\a b -> mkMatrix (a:b)) <$> pCoordinate
 
 -- | Generate a matrix from a list of 6 coordinates.
 mkMatrix               :: Coordinate r => [r] -> Matrix 3 3 r
-mkMatrix [a,b,c,d,e,f] = Matrix $ v3 (v3 a c e)
-                                     (v3 b d f)
-                                     (v3 0 0 1)
+mkMatrix [a,b,c,d,e,f] = Matrix $ Vector3 (Vector3 a c e)
+                                          (Vector3 b d f)
+                                          (Vector3 0 0 1)
                            -- We need the matrix in the following order:
                          -- 012
                          -- 345

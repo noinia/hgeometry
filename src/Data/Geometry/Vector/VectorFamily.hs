@@ -4,9 +4,11 @@ module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
+import           Data.Aeson
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
-import           Data.Geometry.Vector.VectorFixed(C(..))
+import qualified Data.List as L
+import           Data.Geometry.Vector.VectorFixed (C(..))
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
 import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
                                                         , VectorFamilyF
@@ -23,6 +25,7 @@ import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
 import           Linear.Vector
 
+
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
 
@@ -32,30 +35,32 @@ import           Linear.Vector
 -- more efficient representation.
 newtype Vector (d :: Nat) (r :: *) = MKVector { _unV :: VectorFamily (Peano d) r }
 
-type instance V.Dim   (Vector d)   = d
+type instance V.Dim   (Vector d)   = Fam.FromPeano (Peano d)
+-- the above definition is a bit convoluted, but it allows us to make Vector an instance of
+-- V.Vector having only an Arity constraint rather than an Arity2 constraint.
 type instance Index   (Vector d r) = Int
 type instance IxValue (Vector d r) = r
 
-type Arity d = ( ImplicitArity (Peano d)
-               , V.Arity d
-               , Fam.FromPeano (Peano d) ~ d
-               )
+unV :: Lens (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
+unV = lens _unV (const MKVector)
+{-# INLINE unV #-}
 
-instance (Eq r,  Arity d) => Eq  (Vector d r) where
-  (MKVector u) == (MKVector v) = u == v
-  {-# INLINE (==) #-}
+type Arity d = (ImplicitArity (Peano d), KnownNat d)
 
-instance (Ord r, Arity d) => Ord (Vector d r) where
-  (MKVector u) `compare` (MKVector v) = u `compare` v
-  {-# INLINE compare #-}
+deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
+deriving instance (Ord r, Arity d) => Ord (Vector d r)
 
 deriving instance Arity d => Functor     (Vector d)
 deriving instance Arity d => Foldable    (Vector d)
 deriving instance Arity d => Traversable (Vector d)
+deriving instance Arity d => Applicative (Vector d)
 
 deriving instance Arity d => Additive (Vector d)
 deriving instance Arity d => Metric (Vector d)
-deriving instance Arity d => Affine (Vector d)
+instance Arity d => Affine (Vector d) where
+  type Diff (Vector d) = Vector d
+  u .-. v = u ^-^ v
+  p .+^ v = p ^+^ v
 
 instance Arity d => Ixed (Vector d r) where
   ix = element'
@@ -69,25 +74,35 @@ instance (Arity d, Show r) => Show (Vector d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
                    , show $ F.toList v ]
 
-deriving instance (NFData (VectorFamily (Peano d) r)) => NFData (Vector d r)
+deriving instance (FromJSON r, Arity d) => FromJSON (Vector d r)
+instance (ToJSON r, Arity d) => ToJSON (Vector d r) where
+  toJSON     = toJSON . _unV
+  toEncoding = toEncoding . _unV
+
+deriving instance (NFData r, Arity d) => NFData (Vector d r)
 
 --------------------------------------------------------------------------------
 -- * Convenience "constructors"
 
 pattern Vector   :: VectorFamilyF (Peano d) r -> Vector d r
 pattern Vector v = MKVector (VectorFamily v)
+{-# COMPLETE Vector #-}
 
 pattern Vector1   :: r -> Vector 1 r
 pattern Vector1 x = (Vector (Identity x))
+{-# COMPLETE Vector1 #-}
 
 pattern Vector2     :: r -> r -> Vector 2 r
 pattern Vector2 x y = (Vector (L2.V2 x y))
+{-# COMPLETE Vector2 #-}
 
 pattern Vector3        :: r -> r -> r -> Vector 3 r
 pattern Vector3 x y z  = (Vector (L3.V3 x y z))
+{-# COMPLETE Vector3 #-}
 
 pattern Vector4         :: r -> r -> r -> r -> Vector 4 r
 pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
+{-# COMPLETE Vector4 #-}
 
 --------------------------------------------------------------------------------
 
@@ -97,49 +112,53 @@ vectorFromList = V.fromListM
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
-destruct              :: (Arity d, Arity (d + 1))
-                      => Vector (d + 1) r -> (r, Vector d r)
-destruct (MKVector v) = MKVector <$> Fam.destruct v
+destruct   :: (Arity d, Arity (d + 1))
+           => Vector (d + 1) r -> (r, Vector d r)
+destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+  -- FIXME: this implementaion of tail is not particularly nice
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors
 
 -- | Lens into the i th element
-element   :: forall proxy i d r. (Arity d, Arity i, (i + 1) <= d)
+element   :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d)
           => proxy i -> Lens' (Vector d r) r
 element _ = singular . element' . fromInteger $ natVal (C :: C i)
+{-# INLINE element #-}
 
 
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
 element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
-element' = V.element
-
+element' i = unV.(e (C :: C d) i)
+  where
+    e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
+    e _ = Fam.element'
+{-# INLINE element' #-}
 
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
 
 -- | Add an element at the back of the vector
-snoc :: (Arity (d + 1), Arity d
-        ) => Vector d r -> r -> Vector (d + 1) r
-snoc = flip V.snoc
+snoc     :: (Arity (d + 1), Arity d) => Vector d r -> r -> Vector (d + 1) r
+snoc v x = vectorFromListUnsafe . (++ [x]) $ F.toList v
+  -- FIXME: horrible implementation here as well
 
 -- | Get a vector of the first d - 1 elements.
 init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
-init = V.reverse . V.tail . V.reverse
+init = vectorFromListUnsafe . L.init . F.toList
 
-last :: forall d r. (Arity d, Arity (d + 1)) => Vector (d + 1) r -> r
+last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
 last = view $ element (C :: C d)
 
 -- | Get a prefix of i elements of a vector
 prefix :: forall i d r. (Arity d, Arity i, i <= d)
        => Vector d r -> Vector i r
 prefix = let i = fromInteger . natVal $ (C :: C i)
-         in vectorFromListUnsafe . take i . V.toList
+         in vectorFromListUnsafe . take i . F.toList
 
 --------------------------------------------------------------------------------
 -- * Specific on 3-dimensional vectors
-
 -- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
 (Vector u) `cross` (Vector v) = Vector $ u `L3.cross` v

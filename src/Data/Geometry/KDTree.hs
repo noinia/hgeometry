@@ -1,9 +1,10 @@
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.KDTree where
 
 import           Control.Lens hiding (imap, element, Empty, (:<))
 import           Data.BinaryTree
-import           Data.Coerce
+import           Unsafe.Coerce(unsafeCoerce)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
@@ -182,5 +183,5 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
 asSingleton   :: (1 <= d, Arity d) => PointSet (LSeq 1) d p r
               -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
 asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
-                  _ :< _ Seq.:<< _ -> Right $ coerce v
+                  _ :< _ Seq.:<< _ -> Right $ unsafeCoerce v
                   p :< _           -> Left p -- only one element

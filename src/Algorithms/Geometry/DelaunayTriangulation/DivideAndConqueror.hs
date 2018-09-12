@@ -13,7 +13,7 @@ import qualified Data.CircularList.Util as CU
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
-import           Data.Geometry
+import           Data.Geometry hiding (rotateTo)
 import           Data.Geometry.Ball (disk, insideBall)
 import           Data.Geometry.Polygon
 import qualified Data.Geometry.Polygon.Convex as Convex

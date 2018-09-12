@@ -7,6 +7,14 @@ import Data.Semigroup
 data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}
                deriving (Show,Eq,Ord,Functor)
 
+instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (STR a b c) where
+  (STR a b c) <> (STR d e f) = STR (a <> d) (b <> e) (c <> f)
+
+instance (Semigroup a, Semigroup b, Semigroup c
+         , Monoid a, Monoid b, Monoid c) => Monoid (STR a b c) where
+  mempty = STR mempty mempty mempty
+  mappend = (<>)
+
 
 instance Field1 (STR a b c) (STR d b c) a d where
   _1 = lens fst' (\(STR _ b c) d -> STR d b c)
@@ -26,6 +34,10 @@ data SP a b = SP !a !b deriving (Show,Eq,Ord,Functor)
 
 instance (Semigroup a, Semigroup b) => Semigroup (SP a b) where
   (SP a b) <> (SP c d) = SP (a <> c) (b <> d)
+
+instance (Semigroup a, Semigroup b, Monoid a, Monoid b) => Monoid (SP a b) where
+  mempty = SP mempty mempty
+  mappend = (<>)
 
 instance Field1 (SP a b) (SP c b) a c where
   _1 = lens (\(SP a _) -> a) (\(SP _ b) c -> SP c b)

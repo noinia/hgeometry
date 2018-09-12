@@ -6,7 +6,7 @@
 module Data.Geometry.Ipe.Attributes where
 
 import Control.Lens hiding (rmap, Const)
-import Data.Colour.SRGB
+import Data.Geometry.Ipe.Value
 import Data.Semigroup
 import Data.Singletons
 import Data.Singletons.TH
@@ -192,20 +192,10 @@ data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 --                              deriving (Show,Eq)
 
 
--- | Many types either consist of a symbolc value, or a value of type v
-data IpeValue v = Named Text | Valued v deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
-
-instance IsString (IpeValue v) where
-  fromString = Named . fromString
 
 newtype IpeSize  r = IpeSize  (IpeValue r)          deriving (Show,Eq,Ord)
 newtype IpePen   r = IpePen   (IpeValue r)          deriving (Show,Eq,Ord)
-newtype IpeColor r = IpeColor (IpeValue (RGB r))    deriving (Show,Eq)
 
-instance Ord r => Ord (IpeColor r) where
-  (IpeColor c) `compare` (IpeColor c') = fmap f c `compare` fmap f c'
-    where
-      f (RGB r g b) = (r,g,b)
 
 
 -- -- | And the corresponding types

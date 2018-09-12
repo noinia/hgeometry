@@ -8,9 +8,11 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
+import           Data.Geometry.Triangle
 import           Data.Geometry.Properties
 import qualified Data.Seq2 as S2
 import qualified Data.List.NonEmpty as NonEmpty
+import Data.List.NonEmpty(NonEmpty(..))
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -56,6 +58,19 @@ _asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
 _asSimplePolygon = prism' polygonToPath path2poly
   where
     path2poly p = pathToPolygon p >>= either pure (const Nothing)
+
+-- | Convert to a triangle
+_asTriangle :: Prism' (Path r) (Triangle 2 () r)
+_asTriangle = prism' triToPath path2tri
+  where
+    triToPath (Triangle p q r) = polygonToPath . fromPoints . map (&extra .~ ()) $ [p,q,r]
+    path2tri p = case p^..pathSegments.traverse._PolygonPath of
+                    []   -> Nothing
+                    [pg] -> case polygonVertices pg of
+                              (a :| [b,c]) -> Just $ Triangle a b c
+                              _            -> Nothing
+                    _    -> Nothing
+
 
 -- | Convert to a multipolygon
 _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)

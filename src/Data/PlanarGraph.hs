@@ -47,6 +47,7 @@ module Data.PlanarGraph( Arc(..)
 
 
 import           Control.Applicative (Alternative(..))
+import           Control.DeepSeq
 import           Control.Lens hiding ((.=))
 import           Control.Monad.ST (ST)
 import           Control.Monad.State.Strict
@@ -65,9 +66,8 @@ import qualified Data.Vector.Generic as GV
 import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import           GHC.Generics (Generic)
 import           Unsafe.Coerce (unsafeCoerce)
-
-
 -- import           Data.Yaml.Util
 -- import           Debug.Trace
 
@@ -78,7 +78,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 -- >>> :{
 -- let dart i s = Dart (Arc i) (read s)
 --     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
---     myGraph :: PlanarGraph Test Primal () String ()
+--     myGraph :: PlanarGraph () Primal () String ()
 --     myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")
@@ -105,13 +105,15 @@ import           Unsafe.Coerce (unsafeCoerce)
 
 -- | An Arc is a directed edge in a planar graph. The type s is used to tie
 -- this arc to a particular graph.
-newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded)
+newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded,Generic,NFData)
 
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
 
 
-data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum)
+data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum,Generic)
+
+instance NFData Direction
 
 instance Show Direction where
   show Positive = "+1"
@@ -130,13 +132,12 @@ rev Positive = Negative
 -- | A dart represents a bi-directed edge. I.e. a dart has a direction, however
 -- the dart of the oposite direction is always present in the planar graph as
 -- well.
-data Dart s = Dart { _arc       :: {-#UNPACK #-} !(Arc s)
-                   , _direction :: {-#UNPACK #-} !Direction
-                   } deriving (Eq,Ord)
+data Dart s = Dart { _arc       :: !(Arc s)
+                   , _direction :: !Direction
+                   } deriving (Eq,Ord,Generic)
 makeLenses ''Dart
 
-
-
+instance NFData (Dart s)
 
 instance Show (Dart s) where
   show (Dart a d) = "Dart (" ++ show a ++ ") " ++ show d
@@ -188,7 +189,7 @@ dualDualIdentity = unsafeCoerce Refl
 -- | A vertex in a planar graph. A vertex is tied to a particular planar graph
 -- by the phantom type s, and to a particular world w.
 newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
-                                deriving (Eq,Ord,Enum,ToJSON,FromJSON)
+                                deriving (Eq,Ord,Enum,ToJSON,FromJSON,Generic,NFData)
 -- VertexId's are in the range 0...|orbits|-1
 
 type VertexId' s = VertexId s Primal
@@ -216,7 +217,7 @@ data PlanarGraph s (w :: World) v e f = PlanarGraph { _embedding   :: Permutatio
                                                     , _rawDartData :: V.Vector e
                                                     , _faceData    :: V.Vector f
                                                     , _dual        :: PlanarGraph s (DualOf w) f e v
-                                                    }
+                                                    } deriving (Generic)
 
 instance (Show v, Show e, Show f) => Show (PlanarGraph s w v e f) where
   show (PlanarGraph e v r f _) = unwords [ "PlanarGraph"
@@ -853,28 +854,28 @@ boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
 --                               ]
 --                             ]
 
-data Test
+-- data Test
 
-testG :: PlanarGraph Test Primal () String ()
-testG = planarGraph [ [ (Dart aA Negative, "a-")
-                      , (Dart aC Positive, "c+")
-                      , (Dart aB Positive, "b+")
-                      , (Dart aA Positive, "a+")
-                      ]
-                    , [ (Dart aE Negative, "e-")
-                      , (Dart aB Negative, "b-")
-                      , (Dart aD Negative, "d-")
-                      , (Dart aG Positive, "g+")
-                      ]
-                    , [ (Dart aE Positive, "e+")
-                      , (Dart aD Positive, "d+")
-                      , (Dart aC Negative, "c-")
-                      ]
-                    , [ (Dart aG Negative, "g-")
-                      ]
-                    ]
-  where
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+-- testG :: PlanarGraph Test Primal () String ()
+-- testG = planarGraph [ [ (Dart aA Negative, "a-")
+--                       , (Dart aC Positive, "c+")
+--                       , (Dart aB Positive, "b+")
+--                       , (Dart aA Positive, "a+")
+--                       ]
+--                     , [ (Dart aE Negative, "e-")
+--                       , (Dart aB Negative, "b-")
+--                       , (Dart aD Negative, "d-")
+--                       , (Dart aG Positive, "g+")
+--                       ]
+--                     , [ (Dart aE Positive, "e+")
+--                       , (Dart aD Positive, "d+")
+--                       , (Dart aC Negative, "c-")
+--                       ]
+--                     , [ (Dart aG Negative, "g-")
+--                       ]
+--                     ]
+--   where
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
 
 
 
@@ -1016,41 +1017,39 @@ findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id
 
 --------------------------------------------------------------------------------
 
-data TestG
+-- data TestG
+
+-- type Vertex = VertexId TestG Primal
+
+-- testEdges :: [(Vertex,[Vertex])]
+-- testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+--             [ (0, [1])
+--             , (1, [0,1,2,4])
+--             , (2, [1,3,4])
+--             , (3, [2,5])
+--             , (4, [1,2,5])
+--             , (5, [3,4])
+--             ]
 
 
-
-type Vertex = VertexId TestG Primal
-
-testEdges :: [(Vertex,[Vertex])]
-testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
-            [ (0, [1])
-            , (1, [0,1,2,4])
-            , (2, [1,3,4])
-            , (3, [2,5])
-            , (4, [1,2,5])
-            , (5, [3,4])
-            ]
-
-
-myGraph :: PlanarGraph Test Primal () String ()
-myGraph = planarGraph [ [ (Dart aA Negative, "a-")
-                            , (Dart aC Positive, "c+")
-                            , (Dart aB Positive, "b+")
-                            , (Dart aA Positive, "a+")
-                            ]
-                          , [ (Dart aE Negative, "e-")
-                            , (Dart aB Negative, "b-")
-                            , (Dart aD Negative, "d-")
-                            , (Dart aG Positive, "g+")
-                            ]
-                          , [ (Dart aE Positive, "e+")
-                            , (Dart aD Positive, "d+")
-                            , (Dart aC Negative, "c-")
-                            ]
-                          , [ (Dart aG Negative, "g-")
-                            ]
-                          ]
-  where
-    -- dart i s = Dart (Arc i) (read s)
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+-- myGraph :: PlanarGraph Test Primal () String ()
+-- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+--                             , (Dart aC Positive, "c+")
+--                             , (Dart aB Positive, "b+")
+--                             , (Dart aA Positive, "a+")
+--                             ]
+--                           , [ (Dart aE Negative, "e-")
+--                             , (Dart aB Negative, "b-")
+--                             , (Dart aD Negative, "d-")
+--                             , (Dart aG Positive, "g+")
+--                             ]
+--                           , [ (Dart aE Positive, "e+")
+--                             , (Dart aD Positive, "d+")
+--                             , (Dart aC Negative, "c-")
+--                             ]
+--                           , [ (Dart aG Negative, "g-")
+--                             ]
+--                           ]
+--   where
+--     -- dart i s = Dart (Arc i) (read s)
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Test.QuickCheck.HGeometryInstances where
