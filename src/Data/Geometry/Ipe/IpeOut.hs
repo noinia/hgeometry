@@ -9,9 +9,9 @@ import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
+import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -21,6 +21,7 @@ import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Maybe (fromMaybe)
+import           Data.Profunctor
 import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Seq2 as S2
@@ -32,6 +33,9 @@ import           Data.Vinyl.CoRec
 -- | An IpeOut is essentially a funciton to convert a geometry object of type
 -- 'g' into an ipe object of type 'i'.
 newtype IpeOut g i = IpeOut { asIpe :: g -> i } deriving (Functor)
+
+instance Profunctor IpeOut where
+  dimap f g (IpeOut h) = IpeOut $ g . h . f
 
 
 -- | Given an geometry object, and a record with its attributes, construct an ipe
