@@ -1,11 +1,10 @@
 module Data.Geometry.PlanarSubdivision.Draw where
 
-import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Ipe
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.Vector as V
-import           Data.Vinyl
+
 
 drawPlanarSubdivision :: forall s v e f r. IpeOut (PlanarSubdivision s v e f r) (IpeObject r)
 drawPlanarSubdivision = IpeOut draw
