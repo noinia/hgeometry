@@ -21,9 +21,7 @@ import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Maybe (fromMaybe)
-import           Data.Profunctor
 import           Data.Proxy
-import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import           Data.Text (Text)
 import           Data.Vinyl.CoRec

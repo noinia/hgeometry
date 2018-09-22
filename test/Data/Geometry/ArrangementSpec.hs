@@ -1,37 +1,61 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.ArrangementSpec where
 
-import Data.Traversable(traverse)
-import Data.Ext
-import Control.Lens
-import Control.Applicative
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Ipe
-import Data.Proxy
-import Test.Hspec
+import           Control.Applicative
+import           Control.Lens
+import qualified Data.ByteString as B
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Arrangement
+import           Data.Geometry.Arrangement.Draw
+import           Data.Geometry.Ipe
+import           Data.Geometry.Ipe
+import           Data.Proxy
+import           Data.Traversable (traverse)
+import           Test.Hspec
 
 spec :: Spec
-spec = pure () -- testCases "test/Data/Geometry/arrangement.ipe"
+spec = testCases "test/Data/Geometry/arrangement.ipe"
 
 
--- testCases    :: FilePath -> Spec
--- testCases fp = runIO (readInputFromFile fp) >>= \case
---     Left e    -> it "reading arrangement file" $
---                    expectationFailure $ "Failed to read ipe file " ++ show e
---     Right tcs -> mapM_ toSpec tcs
+testCases    :: FilePath -> Spec
+testCases fp = runIO (readInputFromFile fp) >>= \case
+    Left e    -> it "reading arrangement file" $
+                   expectationFailure $ "Failed to read ipe file " ++ show e
+    Right tcs -> mapM_ toSpec tcs
 
 
--- --   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
--- --   describe "Point in Polygon tests" $ do
--- --     it "returns the first element of a list" $ do
--- --       head [23 ..] `shouldBe` (23 :: Int)
+--   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+--   describe "Point in Polygon tests" $ do
+--     it "returns the first element of a list" $ do
+--       head [23 ..] `shouldBe` (23 :: Int)
 
 
-data TestCase r = TestCase { _lines      :: [Line 2 r]
+data TestCase r = TestCase { _lines      :: [Line 2 r :+ ()]
+                           , _outFile    :: FilePath -- ^ filename of the output arrangement,
+                                                     -- as an ipe file
                            }
                   deriving (Show)
 
+
+shouldBeFile      :: IO B.ByteString -> FilePath -> Expectation
+shouldBeFile a fp = do
+                      ans <- B.readFile fp
+                      a `shouldReturn` ans
+
+data Test = Test
+
+drawArr    :: [Line 2 Rational :+ a] -> B.ByteString
+drawArr ls = let arr = constructArrangement (Identity Test) ls
+                 out = [ asIpe drawArrangement arr ]
+                 Just bs = toIpeXML . singlePageFromContent $ out
+             in bs
+
+
+toSpec                       :: TestCase Rational -> Spec
+toSpec (TestCase ls outFile) = do
+                                 it "test drawing arrangement" $
+                                   (pure $ drawArr ls) `shouldBeFile` outFile
 
 -- toSingleSpec poly r q = it msg $ (q `inPolygon` poly) `shouldBe` r
 --   where
@@ -50,8 +74,14 @@ data TestCase r = TestCase { _lines      :: [Line 2 r]
 readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
-    f   :: IpePage Rational -> [TestCase Rational]
-    f _ = []
+    f      :: IpePage Rational -> [TestCase Rational]
+    f page = [ TestCase [ ext $ supportingLine s
+                        | (s :+ _ats) <- segs
+                        ]
+                        (fp <> ".out.ipe")
+             ]
+      where
+        segs = page^..content.traverse._withAttrs _IpePath _asLineSegment
     -- f page = [ TestCase poly
     --                     [ s^.symbolPoint | s <- myPoints ats, isInsidePt  s ]
     --                     [ s^.symbolPoint | s <- myPoints ats, isBorderPt  s ]

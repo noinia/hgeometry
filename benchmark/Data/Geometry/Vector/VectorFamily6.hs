@@ -10,7 +10,6 @@ import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
 import           Data.Maybe (fromMaybe)
 import           Data.Proxy
-import           Data.Semigroup
 import           Data.Traversable (foldMapDefault,fmapDefault)
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Cont (Peano(..), PeanoNum(..), Fun(..))

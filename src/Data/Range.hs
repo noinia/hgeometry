@@ -49,7 +49,7 @@ unEndPoint = lens _unEndPoint f
   where
     f (Open _) a   = Open a
     f (Closed _) a = Closed a
-
+{-# INLINE unEndPoint #-}
 
 isOpen          :: EndPoint a -> Bool
 isOpen (Open _) = True

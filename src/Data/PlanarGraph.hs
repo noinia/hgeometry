@@ -271,9 +271,7 @@ buildFromJSON vs es fs as = g&vertexData .~ reorder vs _unVertexId
     findEdge' (u,v) = fromJust $ findDart u v oracle
 
     ds = es&traverse %~ \(e:+x) -> (findEdge' e,x)
-    -- for the face data we don't really know enough to reconstruct them I think
-    -- i.e. we may not have the guarnatee that the faceId's are the same in the
-    -- old graph and the new one
+    -- TODO: do we have enough infor to reconstruct the face info?
 
     -- make sure we order the data values appropriately
     reorder v f = V.create $ do

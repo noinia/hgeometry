@@ -9,18 +9,15 @@ import           Data.Functor.Classes
 import           Data.Geometry.Arrangement
 import           Data.Geometry.HyperPlane
 import           Data.Geometry.Line
-import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon (centroid)
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
-import           Data.Maybe
 import           Data.Proxy
 import           Data.Semigroup
 import           Data.UnBounded
-import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Vinyl.CoRec
@@ -81,7 +78,7 @@ compareDepthOrder vp q a b = distOf a `compare` distOf b
   where
     l        = lineThrough vp q
     distOf t = maybe err (squaredEuclideanDist vp) $ intersectionPoint l (t^.extra.core)
-    err      = error "HiddenSurfaceremoval. depthOrdert: no intersection"
+    err      = error "HiddenSurfaceremoval. depthOrder: no intersection"
 
 
 -- | Given a view point vp and a projected point q, order the two triangles
