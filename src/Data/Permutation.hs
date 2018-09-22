@@ -49,7 +49,7 @@ size perm = GV.length (perm^.indexes)
 
 -- | The cycle containing a given item
 cycleOf        :: Enum a => Permutation a -> a -> Orbit a
-cycleOf perm x = perm^?!orbits.ix (perm^.indexes.ix' (fromEnum x)._1)
+cycleOf perm x = perm^?!orbits.ix (perm^?!indexes.ix (fromEnum x)._1)
 
 
 -- | Next item in a cyclic permutation
@@ -65,12 +65,12 @@ previous v i = let n = GV.length v in v GV.! ((i-1) `mod` n)
 --
 -- runnign time: \(O(1)\)
 lookupIdx        :: Enum a => Permutation a -> a -> (Int,Int)
-lookupIdx perm x = perm^.indexes.ix' (fromEnum x)
+lookupIdx perm x = perm^?!indexes.ix (fromEnum x)
 
 -- | Apply the permutation, i.e. consider the permutation as a function.
 apply        :: Enum a => Permutation a -> a -> a
 apply perm x = let (c,i) = lookupIdx perm x
-               in next (perm^.orbits.ix' c) i
+               in next (perm^?!orbits.ix c) i
 
 
 -- | Find the cycle in the permutation starting at element s
@@ -112,13 +112,3 @@ genIndexes n os = UV.create $ do
   where
     f i c = zipWith (\x j -> (fromEnum x,(i,j))) c [0..]
     ixes' = concat $ zipWith f [0..] os
-
-
-
---------------------------------------------------------------------------------
--- * Helper stuff
-
--- | lens indexing into a vector
-ix'   :: (GV.Vector v a, Index (v a) ~ Int, IxValue (v a) ~ a, Ixed (v a))
-      => Int -> Lens' (v a) a
-ix' i = singular (ix i)

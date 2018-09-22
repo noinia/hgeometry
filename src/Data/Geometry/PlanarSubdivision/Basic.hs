@@ -69,7 +69,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Permutation (ix')
 import           Data.PlanarGraph (isPositive, allDarts)
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
@@ -161,7 +160,7 @@ instance IsBoxable (PlanarSubdivision s v e f r) where
 
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f r)
                                        (Component s r)
-component ci = components.ix' (unCI ci)
+component ci = components.singular (ix $ unCI ci)
 
 --------------------------------------------------------------------------------
 
@@ -482,7 +481,7 @@ holesOf f ps = ps^.faceDataOf f.holes
 
 asLocalD      :: Dart s -> PlanarSubdivision s v e f r
               -> (ComponentId s, Dart (Wrap s), Component s r)
-asLocalD d ps = let (Raw ci d' _) = ps^.rawDartData.ix' (fromEnum d)
+asLocalD d ps = let (Raw ci d' _) = ps^?!rawDartData.ix (fromEnum d)
                 in (ci,d',ps^.component ci)
 
 
@@ -490,12 +489,12 @@ asLocalD d ps = let (Raw ci d' _) = ps^.rawDartData.ix' (fromEnum d)
 
 asLocalV                 :: VertexId' s -> PlanarSubdivision s v e f r
                          -> (ComponentId s, VertexId' (Wrap s), Component s r)
-asLocalV (VertexId v) ps = let (Raw ci v' _) = ps^.rawVertexData.ix' v
+asLocalV (VertexId v) ps = let (Raw ci v' _) = ps^?!rawVertexData.ix v
                            in (ci,v',ps^.component ci)
 
 asLocalF                          :: FaceId' s -> PlanarSubdivision s v e f r
                                   -> (ComponentId s, FaceId' (Wrap s), Component s r)
-asLocalF (FaceId (VertexId f)) ps = let (Raw ci f' _) = ps^.rawFaceData.ix' f
+asLocalF (FaceId (VertexId f)) ps = let (Raw ci f' _) = ps^?!rawFaceData.ix f
                                     in (ci,f',ps^.component ci)
 
 
@@ -505,11 +504,11 @@ vertexDataOf               :: VertexId' s
                            -> Lens' (PlanarSubdivision s v e f r ) (VertexData r v)
 vertexDataOf (VertexId vi) = lens get' set''
   where
-    get' ps = let (Raw ci wvdi x) = ps^.rawVertexData.ix' vi
+    get' ps = let (Raw ci wvdi x) = ps^?!rawVertexData.ix vi
                   vd              = ps^.component ci.PG.vertexDataOf wvdi
               in vd&vData .~ x
-    set'' ps x = let (Raw ci wvdi _)  = ps^.rawVertexData.ix' vi
-                 in ps&rawVertexData.ix' vi.dataVal               .~ (x^.vData)
+    set'' ps x = let (Raw ci wvdi _)  = ps^?!rawVertexData.ix vi
+                 in ps&rawVertexData.ix vi.dataVal                .~ (x^.vData)
                       &component ci.PG.vertexDataOf wvdi.location .~ (x^.location)
 
 locationOf   :: VertexId' s -> Lens' (PlanarSubdivision s v e f r ) (Point 2 r)
@@ -521,15 +520,15 @@ faceDataOf    :: FaceId' s -> Lens' (PlanarSubdivision s v e f r)
 faceDataOf fi = lens getF setF
   where
     (FaceId (VertexId i)) = fi
-    getF ps = let (Raw ci wfi x) = ps^.rawFaceData.ix' i
+    getF ps = let (Raw ci wfi x) = ps^?!rawFaceData.ix i
                   fd             = ps^.component ci.dataOf wfi
               in fd&fData .~ x
 
-    setF ps fd = let (Raw ci wfi _) = ps^.rawFaceData.ix' i
+    setF ps fd = let (Raw ci wfi _) = ps^?!rawFaceData.ix i
                      fd'            = fd&fData .~ fi
                      x              = fd^.fData
-                 in ps&component ci.dataOf wfi   .~ fd'
-                      &rawFaceData.ix' i.dataVal .~ x
+                 in ps&component ci.dataOf wfi  .~ fd'
+                      &rawFaceData.ix i.dataVal .~ x
 
 instance HasDataOf (PlanarSubdivision s v e f r) (VertexId' s) where
   type DataOf (PlanarSubdivision s v e f r) (VertexId' s) = v
@@ -537,7 +536,7 @@ instance HasDataOf (PlanarSubdivision s v e f r) (VertexId' s) where
 
 instance HasDataOf (PlanarSubdivision s v e f r) (Dart s) where
   type DataOf (PlanarSubdivision s v e f r) (Dart s) = e
-  dataOf d = rawDartData.ix' (fromEnum d).dataVal
+  dataOf d = rawDartData.singular (ix (fromEnum d)).dataVal
 
 instance HasDataOf (PlanarSubdivision s v e f r) (FaceId' s) where
   type DataOf (PlanarSubdivision s v e f r) (FaceId' s) = f

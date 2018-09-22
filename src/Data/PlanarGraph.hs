@@ -620,7 +620,7 @@ endPoints d g = (tailOf d g, headOf d g)
 -- running time: \(O(k)\), where \(k\) is the output size
 incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
                              -> V.Vector (Dart s)
-incidentEdges (VertexId v) g = g^.embedding.orbits.ix' v
+incidentEdges (VertexId v) g = g^?!embedding.orbits.ix v
   -- TODO: The Delaunay triang. stuff seems to produce these in clockwise order instead
 
 -- | All incoming edges incident to vertex v, in counterclockwise order around v.
@@ -648,7 +648,7 @@ neighboursOf v g = otherVtx <$> incidentEdges v g
 nextIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 nextIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
-                       in next (perm^.orbits.ix' i) j
+                       in next (perm^?!orbits.ix i) j
 
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
@@ -658,7 +658,7 @@ nextIncidentEdge d g = let perm  = g^.embedding
 prevIncidentEdge     :: Dart s -> PlanarGraph s w v e f -> Dart s
 prevIncidentEdge d g = let perm  = g^.embedding
                            (i,j) = lookupIdx perm d
-                       in previous (perm^.orbits.ix' i) j
+                       in previous (perm^?!orbits.ix i) j
 
 
 --------------------------------------------------------------------------------
@@ -674,15 +674,15 @@ class HasDataOf g i where
 
 instance HasDataOf (PlanarGraph s w v e f) (VertexId s w) where
   type DataOf (PlanarGraph s w v e f) (VertexId s w) = v
-  dataOf (VertexId i) = vertexData.ix' i
+  dataOf (VertexId i) = vertexData.singular (ix i)
 
 instance HasDataOf (PlanarGraph s w v e f) (Dart s) where
   type DataOf (PlanarGraph s w v e f) (Dart s) = e
-  dataOf d = rawDartData.ix' (fromEnum d)
+  dataOf d = rawDartData.singular (ix (fromEnum d))
 
 instance HasDataOf (PlanarGraph s w v e f) (FaceId s w) where
   type DataOf (PlanarGraph s w v e f) (FaceId s w) = f
-  dataOf (FaceId (VertexId i)) = faceData.ix' i
+  dataOf (FaceId (VertexId i)) = faceData.singular (ix i)
 
 
 -- | Data corresponding to the endpoints of the dart
