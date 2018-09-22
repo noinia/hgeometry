@@ -33,7 +33,8 @@ module Data.PlanarGraph( Arc(..)
                        , dual
 
                        , FaceId(..), FaceId'
-                       , leftFace, rightFace, boundary, boundary', boundaryVertices
+                       , leftFace, rightFace
+                       , boundaryDart, boundary, boundary', boundaryVertices
                        , nextEdge, prevEdge
 
 
@@ -236,14 +237,21 @@ instance (ToJSON v, ToJSON e, ToJSON f)
   toJSON     = object . encodeJSON
   toEncoding = pairs . mconcat . encodeJSON
 
+
+-- | Enclodes the planar graph as a JSON object.  note that every face is
+-- stored together with a dart bounding the face. (and so that the face lies to
+-- its right. Otherwise we cannot reconstruct the face data appropriately.
 encodeJSON   :: (ToJSON f, ToJSON e, ToJSON v, KeyValue t)
              => PlanarGraph s w v e f -> [t]
-encodeJSON g = [ "vertices"    .= ((\(v,d) -> v :+ d)             <$> vertices g)
-               , "darts"       .= ((\(e,d) -> endPoints e g :+ d) <$> darts g)
-               , "faces"       .= ((\(f,d) -> f :+ d)             <$> faces g)
+encodeJSON g = [ "vertices"    .= ((\(v,x) -> v :+ x)             <$> vertices g)
+               , "darts"       .= ((\(e,x) -> endPoints e g :+ x) <$> darts g)
+               , "faces"       .= ((\(f,x) -> f :+ x)             <$> faces g)
                , "adjacencies" .= toAdjacencyLists g
                ]
-
+  -- where
+  --   faces'' = withBoundaryDart  <$> faces g
+  --   withBoundaryDart (f,x) = let d = boundaryDart f g
+  --                            in (f, endPoints d g, x)
 
 instance (FromJSON v, FromJSON e, FromJSON f)
          => FromJSON (PlanarGraph s Primal v e f) where
@@ -793,6 +801,12 @@ nextEdge d = nextIncidentEdge d . _dual
 prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 prevEdge d = prevIncidentEdge d . _dual
 
+
+-- | Gets a dart bounding this face. I.e. a dart d such that the face lies to
+-- the right of the dart.
+boundaryDart   :: FaceId s w -> PlanarGraph s w v e f -> Dart s
+boundaryDart f = V.head . boundary f
+-- TODO: make sure that this is indeed to the right.
 
 -- | The darts bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.

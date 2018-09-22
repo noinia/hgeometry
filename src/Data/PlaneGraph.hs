@@ -40,22 +40,24 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
 
                       , withEdgeDistances
+                      , writePlaneGraph, readPlaneGraph
                       ) where
 
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Aeson
+import qualified Data.ByteString as B
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
+import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Line (cmpSlope, supportingLine)
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Box
-import           Data.Geometry.Properties
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import           Data.Geometry.Properties
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Ord (comparing)
@@ -67,7 +69,8 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , FaceId', VertexId'
                                  , HasDataOf(..)
                                  )
-import           Data.Util
+import           Data.Yaml.Util
+import           Data.Yaml(ParseException)
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
 
@@ -524,16 +527,16 @@ rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph
 
---
--- readPlaneGraph :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
---                           => proxy s -> ByteString
---                          -> Either String (PlaneGraph s v e f r)
--- readPlaneGraph = undefined--  parseEither
+-- | Reads a plane graph from a bytestring
+readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+                 => proxy s -> B.ByteString
+                 -> Either ParseException (PlaneGraph s v e f r)
+readPlaneGraph _ = decodeYaml
 
-
--- writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
---                           => PlaneGraph s v e f r -> ByteString
--- writePlaneGraph = YamlP.encodePretty YamlP.defConfig
+-- | Writes a plane graph to a bytestring
+writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
+                => PlaneGraph s v e f r -> B.ByteString
+writePlaneGraph = encodeYaml
 
 --------------------------------------------------------------------------------
 
