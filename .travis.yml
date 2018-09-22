@@ -79,16 +79,6 @@ matrix:
   # are: STACK_YAML, STACK_OPTIONS, STACK_BUILD_OPTIONS
   # --------------------------------------------------------------------------
 
-  # #- env: BUILD=stack RESOLVER=lts-6 GHCVER=7.10.3
-  # #  addons: {apt: {packages: [cabal-install-1.22], sources: [hvr-ghc]}}
-
-  # - env: BUILD=stack RESOLVER=lts-9 GHCVER=8.0.2
-  #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
-
-  # # Use cabal-install-1.24 for stack solver to work
-  # - env: BUILD=stack RESOLVER=lts-11 GHCVER=8.2.2
-  #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
-
   # # Use cabal-install-1.24 for stack solver to work
   # - env: BUILD=stack RESOLVER=nightly
   #   addons: {apt: {packages: [cabal-install-1.24], sources: [hvr-ghc]}}
@@ -96,26 +86,16 @@ matrix:
   # You can keep a STACK_YAML file at any path location
   - env: BUILD=stack STACK_YAML=stack-ghc8.4.yaml
 
-  # You can specify build flags like this:
-  #- env: BUILD=stack RESOLVER=lts-11 STACK_BUILD_OPTIONS="--flag packcheck:dev"
-
   # --------------------------------------------------------------------------
   # (Linux) cabal builds (BUILD=cabal, BUILD=cabal-new). Common envvars are:
   # CABAL_CONFIGURE_OPTIONS (cabal), CABAL_NEWBUILD_OPTIONS (cabal-new)
   # --------------------------------------------------------------------------
 
-  #- env: BUILD=cabal GHCVER=7.10.3
-  #  addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.3], sources: [hvr-ghc]}}
-
-  #- env: BUILD=cabal GHCVER=8.0.2
-  #  addons: {apt: {packages: [cabal-install-1.24,ghc-8.0.2], sources: [hvr-ghc]}}
-
-  # Disabled by default as we have a cabal ghc-8.2.2 build for OSX
-  #- env: BUILD=cabal-new GHCVER=8.2.2
-  #  addons: {apt: {packages: [cabal-install-2.0,ghc-8.2.2], sources: [hvr-ghc]}}
-
   - env: BUILD=cabal-new GHCVER=8.4.3
     addons: {apt: {packages: [cabal-install-2.2,ghc-8.4.3], sources: [hvr-ghc]}}
+
+  - env: BUILD=cabal-new GHCVER=8.6.1
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.1], sources: [hvr-ghc]}}
 
   - env: BUILD=cabal-new GHCVER=head
     addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}

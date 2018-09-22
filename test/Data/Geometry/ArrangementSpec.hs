@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.ArrangementSpec where
 
-import           Control.Applicative
 import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Ext
@@ -9,9 +8,6 @@ import           Data.Geometry
 import           Data.Geometry.Arrangement
 import           Data.Geometry.Arrangement.Draw
 import           Data.Geometry.Ipe
-import           Data.Geometry.Ipe
-import           Data.Proxy
-import           Data.Traversable (traverse)
 import           Test.Hspec
 
 spec :: Spec
