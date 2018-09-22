@@ -6,9 +6,8 @@ import           Control.Lens
 import           Data.BinaryTree
 import           Data.BinaryTree.Zipper
 import qualified Data.Foldable as F
-import           Data.Maybe(fromJust)
 import           Data.Ord (comparing)
-import           Data.Semigroup
+import           Data.Semigroup (Sum(..))
 import           Data.Util
 
 --------------------------------------------------------------------------------

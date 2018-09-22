@@ -1,7 +1,6 @@
 module Data.BinaryTree.Zipper where
 
 import Data.BinaryTree
-import Data.Semigroup
 
 --------------------------------------------------------------------------------
 

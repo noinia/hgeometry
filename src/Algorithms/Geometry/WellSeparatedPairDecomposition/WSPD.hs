@@ -20,7 +20,6 @@ import           Data.Maybe
 import           Data.Ord (comparing)
 import           Data.Range
 import qualified Data.Range as Range
-import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as S
 import qualified Data.Vector as V

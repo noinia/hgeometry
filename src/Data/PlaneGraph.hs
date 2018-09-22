@@ -67,7 +67,6 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , FaceId', VertexId'
                                  , HasDataOf(..)
                                  )
-import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)

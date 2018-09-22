@@ -37,7 +37,6 @@ import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Ord (comparing)
-import           Data.Semigroup
 import           Data.UnBounded
 import           Data.Vinyl
 import           Data.Vinyl.CoRec

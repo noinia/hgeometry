@@ -14,7 +14,6 @@ import Data.Bifoldable
 import Data.Bifunctor.Apply
 import Data.Bitraversable
 import Data.Functor.Apply (liftF2)
-import Data.Semigroup
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
 import GHC.Generics (Generic)

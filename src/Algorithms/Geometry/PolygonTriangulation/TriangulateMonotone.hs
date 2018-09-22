@@ -10,7 +10,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List as L
 import           Data.Ord (comparing, Down(..))
-import           Data.Semigroup
 import           Data.Util
 import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Data.PlaneGraph (PlaneGraph)

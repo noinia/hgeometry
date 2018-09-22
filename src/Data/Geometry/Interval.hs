@@ -24,7 +24,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Range
-import           Data.Semigroup
+import           Data.Semigroup(Arg(..))
 import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec

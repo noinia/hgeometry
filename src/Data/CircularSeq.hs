@@ -38,7 +38,6 @@ import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (listToMaybe)
-import           Data.Semigroup
 import           Data.Semigroup.Foldable hiding (toNonEmpty)
 import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
 import qualified Data.Sequence as S

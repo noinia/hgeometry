@@ -6,7 +6,6 @@ import           Control.DeepSeq
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
-import           Data.Semigroup
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V

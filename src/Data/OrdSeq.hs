@@ -6,7 +6,6 @@ import qualified Data.FingerTree as FT
 import           Data.FingerTree hiding (null, viewl, viewr)
 import qualified Data.Foldable as F
 import           Data.Maybe
-import           Data.Semigroup
 
 --------------------------------------------------------------------------------
 

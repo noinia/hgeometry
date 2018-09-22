@@ -11,7 +11,6 @@ import           Data.Geometry.Box
 import           Data.Geometry.SubLine
 import           Data.OrdSeq (OrdSeq, fromListByOrd)
 import           Data.Proxy
-import           Data.Semigroup
 import qualified Data.Seq as Seq
 import qualified Data.Seq2 as S2
 import           GHC.TypeLits

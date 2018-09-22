@@ -26,7 +26,7 @@ import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
-import           Data.Semigroup
+import           Data.Semigroup(sconcat)
 import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)

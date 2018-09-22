@@ -5,7 +5,6 @@ import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
-import           Data.Semigroup
 import qualified Data.Sequence as S
 import qualified Data.Traversable as T
 import           Prelude hiding (foldr,foldl,head,tail,last,length)

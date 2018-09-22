@@ -58,7 +58,6 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Maybe (catMaybes, isJust, fromJust, fromMaybe)
 import           Data.Permutation
-import           Data.Semigroup (Semigroup(..))
 import           Data.Traversable (fmapDefault,foldMapDefault)
 import           Data.Type.Equality (gcastWith, (:~:)(..))
 import qualified Data.Vector as V

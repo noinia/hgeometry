@@ -3,60 +3,60 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
-                                           , VertexData(VertexData), PG.vData, PG.location
+                                            , VertexData(VertexData), PG.vData, PG.location
 
-                                           , FaceData(FaceData), holes, fData
+                                            , FaceData(FaceData), holes, fData
 
-                                           , PlanarSubdivision(PlanarSubdivision)
-                                           , Wrap
+                                            , PlanarSubdivision(PlanarSubdivision)
+                                            , Wrap
 
-                                           , Component, ComponentId
+                                            , Component, ComponentId
 
-                                           , PolygonFaceData(..)
-                                           , PlanarGraph
-                                           , PlaneGraph
-                                           , fromSimplePolygon
-                                           , fromConnectedSegments
-                                           , fromPlaneGraph, fromPlaneGraph'
+                                            , PolygonFaceData(..)
+                                            , PlanarGraph
+                                            , PlaneGraph
+                                            , fromSimplePolygon
+                                            , fromConnectedSegments
+                                            , fromPlaneGraph, fromPlaneGraph'
 
-                                           , numVertices, numEdges, numFaces, numDarts
-                                           , dual
+                                            , numVertices, numEdges, numFaces, numDarts
+                                            , dual
 
-                                           , components, component
-                                           , vertices', vertices
-                                           , edges', edges
-                                           , faces', faces, internalFaces
-                                           , darts'
+                                            , components, component
+                                            , vertices', vertices
+                                            , edges', edges
+                                            , faces', faces, internalFaces
+                                            , darts'
 
-                                           , headOf, tailOf, twin, endPoints
+                                            , headOf, tailOf, twin, endPoints
 
-                                           , incidentEdges, incomingEdges, outgoingEdges
-                                           , nextIncidentEdge
-                                           , neighboursOf
+                                            , incidentEdges, incomingEdges, outgoingEdges
+                                            , nextIncidentEdge
+                                            , neighboursOf
 
-                                           , leftFace, rightFace
-                                           , outerBoundaryDarts, boundaryVertices, holesOf
-                                           , outerFaceId
-                                           , boundary'
+                                            , leftFace, rightFace
+                                            , outerBoundaryDarts, boundaryVertices, holesOf
+                                            , outerFaceId
+                                            , boundary'
 
-                                           , locationOf
-                                           , HasDataOf(..)
+                                            , locationOf
+                                            , HasDataOf(..)
 
-                                           , endPointsOf, endPointData
+                                            , endPointsOf, endPointData
 
-                                           , edgeSegment, edgeSegments
-                                           , rawFacePolygon, rawFaceBoundary
-                                           , rawFacePolygons
+                                            , edgeSegment, edgeSegments
+                                            , rawFacePolygon, rawFaceBoundary
+                                            , rawFacePolygons
 
-                                           , VertexId(..), FaceId(..), Dart, World(..)
+                                            , VertexId(..), FaceId(..), Dart, World(..)
 
 
-                                           , rawVertexData, rawDartData, rawFaceData
-                                           , vertexData, dartData, faceData
-                                           , dataVal
+                                            , rawVertexData, rawDartData, rawFaceData
+                                            , vertexData, dartData, faceData
+                                            , dataVal
 
-                                           , dartMapping, Raw(..)
-                                           ) where
+                                            , dartMapping, Raw(..)
+                                            ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Aeson

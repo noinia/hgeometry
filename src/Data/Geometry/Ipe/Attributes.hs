@@ -7,7 +7,6 @@ module Data.Geometry.Ipe.Attributes where
 
 import Control.Lens hiding (rmap, Const)
 import Data.Geometry.Ipe.Value
-import Data.Semigroup
 import Data.Singletons
 import Data.Singletons.TH
 import Data.Text (Text)

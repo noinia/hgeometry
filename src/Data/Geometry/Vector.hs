@@ -17,7 +17,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
 import           Data.Geometry.Vector.VectorFixed(C(..))
 import           Data.Maybe
-import           Data.Semigroup
 import qualified Data.Vector.Fixed as FV
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm)

@@ -16,7 +16,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
 import           Data.Proxy
-import           Data.Semigroup
 import           Data.UnBounded
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV

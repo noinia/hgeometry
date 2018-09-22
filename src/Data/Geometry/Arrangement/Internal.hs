@@ -17,10 +17,8 @@ import qualified Data.List as List
 import           Data.Maybe
 import           Data.Ord (Down(..))
 import           Data.Proxy
-import           Data.Semigroup
 import           Data.Sequence.Util
 import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 import           Data.Vinyl.CoRec
 
 

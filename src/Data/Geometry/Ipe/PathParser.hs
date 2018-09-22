@@ -12,7 +12,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Ratio
-import           Data.Semigroup
 import           Data.Text (Text)
 import qualified Data.Text as T
 import           Text.Parsec.Error (messageString, errorMessages)

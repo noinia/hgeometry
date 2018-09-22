@@ -1,7 +1,8 @@
 module Data.Util where
 
 import Control.Lens
-import Data.Semigroup
+
+--------------------------------------------------------------------------------
 
 -- |  strict triple
 data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}

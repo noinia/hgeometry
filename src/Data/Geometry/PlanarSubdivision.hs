@@ -18,7 +18,7 @@ import qualified Data.Geometry.Vector as Vec
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector as V
 import qualified Data.PlaneGraph as PG
-import Data.Proxy
+import           Data.Proxy
 
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision

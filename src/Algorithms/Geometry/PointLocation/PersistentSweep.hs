@@ -2,9 +2,7 @@
 module Algorithms.Geometry.PointLocation.PersistentSweep where
 
 import           Control.Lens hiding (contains, below)
-import           Control.Monad.Reader
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
@@ -12,7 +10,6 @@ import           Data.Geometry.Point
 import qualified Data.List as L
 import           Data.Ord (comparing)
 import qualified Data.OrdSeq as SS -- status struct
-import           Data.Semigroup
 import           Data.Sequence.Util (binarySearchVec)
 import           Data.UnBounded
 import qualified Data.Vector as V

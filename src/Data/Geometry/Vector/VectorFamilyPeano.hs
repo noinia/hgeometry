@@ -10,7 +10,6 @@ import           Data.Aeson(FromJSON(..),ToJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
 import           Data.Proxy
-import           Data.Semigroup
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Cont (PeanoNum(..), Fun(..))
 import           GHC.TypeLits

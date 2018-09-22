@@ -14,7 +14,6 @@ import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
                                                         , VectorFamilyF
                                                         , ImplicitArity
                                                         )
-import           Data.Semigroup
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Cont (Peano)
 import           GHC.TypeLits

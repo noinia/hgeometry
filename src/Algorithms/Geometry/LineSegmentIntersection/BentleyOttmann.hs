@@ -17,7 +17,6 @@ import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
 import           Data.OrdSeq (Compare)
 import qualified Data.OrdSeq as SS -- status struct
-import           Data.Semigroup
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Data.Vinyl.CoRec

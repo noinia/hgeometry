@@ -13,7 +13,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NE
-import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as Seq
 import           GHC.TypeLits

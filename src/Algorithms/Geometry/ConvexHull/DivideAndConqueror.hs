@@ -9,7 +9,6 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup
 import           Data.Semigroup.Foldable
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conqueror. The resulting polygon is

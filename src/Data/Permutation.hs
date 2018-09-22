@@ -49,7 +49,7 @@ size perm = GV.length (perm^.indexes)
 
 -- | The cycle containing a given item
 cycleOf        :: Enum a => Permutation a -> a -> Orbit a
-cycleOf perm x = perm^.orbits.ix' (perm^.indexes.ix' (fromEnum x)._1)
+cycleOf perm x = perm^?!orbits.ix (perm^.indexes.ix' (fromEnum x)._1)
 
 
 -- | Next item in a cyclic permutation

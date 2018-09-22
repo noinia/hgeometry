@@ -11,8 +11,8 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.List as L
 import qualified Data.Map as Map
-import           Data.Semigroup
 
+--------------------------------------------------------------------------------
 
 -- get the endpoints of a line segment
 endPoints'   :: (HasEnd s, HasStart s) => s -> (StartCore s, EndCore s)

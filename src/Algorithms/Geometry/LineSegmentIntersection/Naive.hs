@@ -9,7 +9,6 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import qualified Data.Map as M
-import           Data.Semigroup
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 

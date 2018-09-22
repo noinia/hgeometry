@@ -24,7 +24,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing, Down(..))
 import           Data.OrdSeq (OrdSeq)
 import qualified Data.OrdSeq as SS
-import           Data.Semigroup
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV

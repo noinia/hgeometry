@@ -1,6 +1,5 @@
 module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker where
 
-import Data.Semigroup
 import Data.Ord(comparing)
 import Control.Lens hiding (only)
 import Data.Ext
@@ -11,6 +10,8 @@ import Data.Geometry.LineSegment
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as S
 import qualified Data.Foldable as F
+
+--------------------------------------------------------------------------------
 
 -- | Line simplification with the well-known Douglas Peucker alogrithm. Given a distance
 -- value eps adn a polyline pl, constructs a simplification of pl (i.e. with

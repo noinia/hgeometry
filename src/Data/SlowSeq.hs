@@ -7,7 +7,6 @@ import           Control.Lens (bimap)
 import           Data.FingerTree(ViewL(..),ViewR(..))
 import qualified Data.Foldable as F
 import           Data.Maybe
-import           Data.Semigroup
 import qualified Data.Sequence as S
 import qualified Data.Sequence.Util as SU
 

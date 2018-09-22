@@ -8,7 +8,6 @@ import           Data.Ext
 import           Data.Geometry.Box
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr

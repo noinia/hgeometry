@@ -48,7 +48,6 @@ import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
 import qualified Data.Seq2 as S2
-import           Data.Semigroup ((<>))
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T

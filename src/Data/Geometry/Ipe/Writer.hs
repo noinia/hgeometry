@@ -25,7 +25,6 @@ import           Data.Geometry.Vector
 import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
 import           Data.Proxy
 import           Data.Ratio
-import           Data.Semigroup
 import qualified Data.Seq2 as S2
 import           Data.Singletons
 import           Data.Text (Text)
