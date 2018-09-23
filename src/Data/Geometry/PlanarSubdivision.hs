@@ -6,17 +6,10 @@ module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.B
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
-import           Control.Lens hiding (holes, holesOf, (.=))
-import qualified Data.CircularSeq as CSeq
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Geometry.Box
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as Vec
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.Vector as V
 import qualified Data.PlaneGraph as PG
 import           Data.Proxy
 
