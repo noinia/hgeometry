@@ -29,11 +29,13 @@ makeLenses ''Line
 
 instance (Show r, Arity d) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
-deriving instance (Eq r,   Arity d)   => Eq            (Line d r)
 deriving instance (NFData r, Arity d) => NFData        (Line d r)
 deriving instance Arity d             => Functor       (Line d)
 deriving instance Arity d             => F.Foldable    (Line d)
 deriving instance Arity d             => T.Traversable (Line d)
+
+instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
+  l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
 
 
 type instance Dimension (Line d r) = d

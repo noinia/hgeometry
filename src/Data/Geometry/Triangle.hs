@@ -23,6 +23,7 @@ data Triangle d p r = Triangle (Point d r :+ p)
 
 deriving instance (Arity d, Show r, Show p) => Show (Triangle d p r)
 deriving instance (Arity d, Read r, Read p) => Read (Triangle d p r)
+deriving instance (Arity d, Eq r, Eq p)     => Eq (Triangle d p r)
 
 instance Arity d => Functor (Triangle d p) where
   fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)

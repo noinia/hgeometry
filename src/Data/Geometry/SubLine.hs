@@ -30,7 +30,7 @@ type instance Dimension (SubLine d p r) = d
 type instance NumType   (SubLine d p r) = r
 
 deriving instance (Show r, Show p, Arity d) => Show (SubLine d p r)
-deriving instance (Eq r, Eq p, Arity d)     => Eq (SubLine d p r)
+deriving instance (Eq r, Fractional r, Eq p, Arity d)     => Eq (SubLine d p r)
 deriving instance Arity d                   => Functor (SubLine d p)
 deriving instance Arity d                   => F.Foldable (SubLine d p)
 deriving instance Arity d                   => T.Traversable (SubLine d p)
