@@ -1,3 +1,4 @@
+{-# LANGUAGE PartialTypeSignatures #-}
 module Data.Geometry.PlanarSubdivisionSpec where
 
 
@@ -26,6 +27,10 @@ import           Data.Geometry.PlanarSubdivision.Draw
 import           Data.Maybe (fromJust)
 import           Data.PlaneGraph.Draw
 
+import Data.Geometry.LineSegment
+import Data.Geometry.Interval
+import Data.Range
+import Data.Ratio
 
 data Test = Test
 data Id a = Id a
@@ -62,6 +67,7 @@ spec = do
     it "outerFace tests" $
       let [d] = toList $ holesOf (outerFaceId triangle) triangle
       in leftFace d triangle `shouldBe` (outerFaceId triangle)
+    noEmptyFacesSpec
     testSpec testPoly
     testSpec testPoly2
     testSpec testPoly3
@@ -219,3 +225,70 @@ parts' = map (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
        . lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
 
 parts'' = lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
+
+
+--------------------------------------------------------------------------------
+
+noEmptyFacesSpec :: Spec
+noEmptyFacesSpec = describe "fromConnectedSegments, correct handling of high degree vertex" $ do
+    it "ps1" $
+      draw' testSegs `shouldBe` mempty
+    it "ps5" $
+      draw' testSegs2 `shouldBe` mempty
+    it "ps3" $
+      draw' testSegs3 `shouldBe` mempty
+    -- segs4 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments_simple2.ipe"
+    -- it "connected_simple2.ipe" $
+    --   draw' segs4 `shouldBe` mempty
+    -- segs2 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments_simple.ipe"
+    -- it "connected_simple.ipe" $
+    --   draw' segs2 `shouldBe` mempty
+    -- segs3 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments.ipe"
+    -- it "connectedsegments.ipe" $
+    --   draw' segs3 `shouldBe` mempty
+  where
+    draw' = draw . fromConnectedSegments (Identity Test1)
+
+readFromIpeFile    :: FilePath -> IO [LineSegment 2 () Rational :+ _]
+readFromIpeFile fp = do Right page <- readSinglePageFile fp
+                        pure $
+                           page^..content.traverse._withAttrs _IpePath _asLineSegment
+
+data Test1 = Test1
+
+testX = do segs <- readFromIpeFile "test/Data/Geometry/connectedsegments_simple2.ipe"
+           let ps = fromConnectedSegments (Identity Test1) segs
+           print $ draw ps
+
+
+draw = V.filter isEmpty . rawFacePolygons
+  where
+    isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
+    isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
+
+testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
+                   [ (origin, Point2 10 10)
+                   , (origin, Point2 12 10)
+                   , (origin, Point2 20 5)
+                   , (origin, Point2 13 20)
+                   , (Point2 10 10, Point2 12 10)
+                   , (Point2 10 10, Point2 13 20)
+                   , (Point2 12 10, Point2 20 5)
+                   ]
+
+testSegs2 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
+                   [ (Point2 160 192, Point2 80 112)
+                   , (Point2 80 112, Point2 192 96)
+                   , (Point2 192 96, Point2 160 192)
+                   ]
+
+
+testSegs3 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
+                   [ (origin, Point2 10 0)
+                   , (Point2 10 0, Point2 10 10)
+                   , (origin, Point2 10 10)
+
+                   , (origin, Point2 (-10) 0)
+                   , (Point2 (-10) 0, Point2 (-10) (-10))
+                   , (origin, Point2 (-10) (-10))
+                   ]
