@@ -69,9 +69,11 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , FaceId', VertexId'
                                  , HasDataOf(..)
                                  )
-import           Data.Yaml.Util
-import           Data.Yaml(ParseException)
+import           Data.Util
 import qualified Data.Vector as V
+import           Data.Version
+import           Data.Yaml (ParseException)
+import           Data.Yaml.Util
 import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
@@ -536,7 +538,11 @@ readPlaneGraph _ = decodeYaml
 -- | Writes a plane graph to a bytestring
 writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
                 => PlaneGraph s v e f r -> B.ByteString
-writePlaneGraph = encodeYaml
+writePlaneGraph = encodeYaml . Versioned planeGraphVersion
+
+
+planeGraphVersion :: Version
+planeGraphVersion = makeVersion [1,0]
 
 --------------------------------------------------------------------------------
 
