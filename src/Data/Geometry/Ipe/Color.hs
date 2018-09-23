@@ -6,7 +6,7 @@ import           Data.Geometry.Ipe.Value
 import           Data.Text
 --------------------------------------------------------------------------------
 
-newtype IpeColor r = IpeColor (IpeValue (RGB r))    deriving (Show,Eq)
+newtype IpeColor r = IpeColor (IpeValue (RGB r))    deriving (Show,Read,Eq)
 
 instance Ord r => Ord (IpeColor r) where
   (IpeColor c) `compare` (IpeColor c') = fmap f c `compare` fmap f c'
@@ -16,11 +16,6 @@ instance Ord r => Ord (IpeColor r) where
 -- | Creates a named color
 named :: Text -> IpeColor r
 named = IpeColor . Named
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 -- * Basic Named colors

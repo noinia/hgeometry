@@ -22,6 +22,10 @@ import qualified Data.List as L
 import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
+import           Text.ParserCombinators.ReadPrec (lift)
+import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
+
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -43,6 +47,17 @@ instance (Show r, Arity d) => Show (Point d r) where
   show (Point v) = mconcat [ "Point", show $ F.length v , " "
                            , show $ F.toList v
                            ]
+instance (Read r, Arity d) => Read (Point d r) where
+  readPrec     = lift readPt
+  readListPrec = readListPrecDefault
+
+readPt :: forall d r. (Arity d, Read r) => ReadP (Point d r)
+readPt = do let d = natVal (Proxy :: Proxy d)
+            _  <- string $ "Point" <> show d <> " "
+            rs <- readPrec_to_P readPrec minPrec
+            case pointFromList rs of
+              Just p -> pure p
+              _      -> pfail
 
 deriving instance (Eq r, Arity d)     => Eq (Point d r)
 deriving instance (Ord r, Arity d)    => Ord (Point d r)

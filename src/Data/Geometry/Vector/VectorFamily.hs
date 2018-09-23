@@ -23,7 +23,10 @@ import qualified Linear.V2 as L2
 import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
 import           Linear.Vector
-
+import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
+import           Text.ParserCombinators.ReadPrec (lift)
+import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
+import           Data.Proxy
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -72,6 +75,18 @@ instance Arity d => V.Vector (Vector d) r where
 instance (Arity d, Show r) => Show (Vector d r) where
   show v = mconcat [ "Vector", show $ F.length v , " "
                    , show $ F.toList v ]
+
+instance (Read r, Arity d) => Read (Vector d r) where
+  readPrec     = lift readVec
+  readListPrec = readListPrecDefault
+
+readVec :: forall d r. (Arity d, Read r) => ReadP (Vector d r)
+readVec = do let d = natVal (Proxy :: Proxy d)
+             _  <- string $ "Vector" <> show d <> " "
+             rs <- readPrec_to_P readPrec minPrec
+             case vectorFromList rs of
+               Just v -> pure v
+               _      -> pfail
 
 deriving instance (FromJSON r, Arity d) => FromJSON (Vector d r)
 instance (ToJSON r, Arity d) => ToJSON (Vector d r) where

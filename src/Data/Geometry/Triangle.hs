@@ -22,6 +22,7 @@ data Triangle d p r = Triangle (Point d r :+ p)
                                (Point d r :+ p)
 
 deriving instance (Arity d, Show r, Show p) => Show (Triangle d p r)
+deriving instance (Arity d, Read r, Read p) => Read (Triangle d p r)
 
 instance Arity d => Functor (Triangle d p) where
   fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)
@@ -35,6 +36,12 @@ instance PointFunctor (Triangle d p) where
 
 instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Triangle d p r) where
   transformBy = transformPointFunctor
+
+
+-- | convenience function to construct a triangle without associated data.
+triangle'       :: Point d r -> Point d r -> Point d r -> Triangle d () r
+triangle' p q r = Triangle (ext p) (ext q) (ext r)
+
 
 sideSegments                  :: Triangle d p r -> [LineSegment d p r]
 sideSegments (Triangle p q r) =
