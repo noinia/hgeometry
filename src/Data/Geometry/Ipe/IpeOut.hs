@@ -25,6 +25,7 @@ import           Data.Proxy
 import qualified Data.Seq2 as S2
 import           Data.Text (Text)
 import           Data.Vinyl.CoRec
+import           Linear.Affine ((.+^))
 
 --------------------------------------------------------------------------------
 
@@ -100,6 +101,16 @@ class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
 instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
   defaultIpeOut = ipeDiskMark
+
+instance (Fractional r, Ord r) => HasDefaultIpeOut (Line 2 r) where
+  type DefaultIpeOut (Line 2 r) = Path
+  defaultIpeOut = lmap toSeg ipeLineSegment
+    where
+      b :: Rectangle () r
+      b = box (ext $ Point2 (-200) (-200)) (ext $ Point2 1200 1200)
+      naive (Line p v) = ClosedLineSegment (ext p) (ext $ p .+^ v)
+      toSeg l = fromMaybe (naive l) . asA (Proxy :: Proxy (LineSegment 2 () r))
+              $ l `intersect` b
 
 instance HasDefaultIpeOut (LineSegment 2 p r) where
   type DefaultIpeOut (LineSegment 2 p r) = Path
