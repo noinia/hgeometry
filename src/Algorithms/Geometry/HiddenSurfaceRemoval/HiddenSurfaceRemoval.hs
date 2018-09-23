@@ -15,31 +15,106 @@ import           Data.Geometry.Polygon (centroid)
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Proxy
 import           Data.UnBounded
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Vinyl.CoRec
 
+import           Data.Geometry.Arrangement.Draw
+import           Data.Geometry.Ipe
+import           Data.Geometry.Ipe.Color (IpeColor(..))
+import           Data.Geometry.Polygon
+import           Debug.Trace
+import           System.IO.Unsafe
 --------------------------------------------------------------------------------
 
 type PriQ a = [a]
 
-render          :: forall proxy s r v q f. (Ord r, Fractional r)
+
+draw1 :: IO ()
+draw1 = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
+  where
+    out = map (\(l:+_) -> asIpeObject l mempty) $ collectLines scene
+
+draw' :: IO ()
+draw' = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
+  where
+    out = [asIpe drawArrangement arr' ]
+    arr = testz (Proxy :: Proxy Test) origin scene
+    arr' = traceShow (V.filter isEmpty . rawFacePolygons $ arr^.subdivision) arr
+
+    isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
+    isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
+
+-- collect xs = [ head ys
+--              | (x:+_) <- xs, let ys = filter (\(y:+_) -> y == x) xs, length ys > 1
+--              ]
+
+-- ordNub :: Ord a => [a :+ b] -> [a :+ b]
+-- ordNub = List.groupBy (comparing (^.core)) . List.sortOn (^.core)
+
+
+-- | group the elements that have the same core value.
+--
+-- running time: \(O(n^2)\)
+--
+-- >>> groupLines [1 :+ "a", 1 :+ "b", 2 :+ "c", 1 :+ "d", 2 :+ "e", 3 :+ "f"]
+-- [1 :+ "a" :| ["b","d"],2 :+ "c" :| ["e"],3 :+ "f" :| []]
+groupLines :: forall l e. Eq l => [l :+ e] -> [l :+ NonEmpty e]
+groupLines = foldr (\(l:+e) -> insert' l e) []
+  where
+    insert'       :: l -> e -> [l :+ NonEmpty e] -> [l :+ NonEmpty e]
+    insert' l e r = case foldr ins (False,[]) r of
+                       (False,r') -> (l :+ (e :| [])) : r'
+                       (True,r')  -> r'
+      where
+        ins t@(m :+ ys) (b,acc) | m == l    = (True, (m :+ (e NonEmpty.<| ys)) : acc)
+                                | otherwise = (b,    t:acc)
+
+
+render          :: forall proxy s r v q f. (Ord r, Fractional r
+                                           , Show r, Show v, Show q, Show f, IpeWriteText r
+                                           )
                 => proxy s
                 -> Point 3 r -- ^ the viewpoint
                 -> [Tri v q f r]
-                -> Arrangement s (Tri v q f r) () (Maybe EdgeSide) (Maybe (Tri v q f r)) r
-render px vp ts = arr'&subdivision.dartData .~ ds
+                -> Arrangement s (NonEmpty (Tri v q f r))
+                                 ()
+                                 (Maybe EdgeSide)
+                                 (Maybe (Tri v q f r))
+                                 r
+render px vp ts = arr''&subdivision.dartData .~ ds
   where
-    arr   :: Arrangement s (Tri v q f r) () (Maybe (Tri v q f r)) () r
-    arr   = constructArrangement px $ concatMap f ts
+    arr   :: Arrangement s (NonEmpty (Tri v q f r)) () (Maybe (NonEmpty (Tri v q f r))) () r
+    arr   = constructArrangement px $ collectLines ts
+    arr'' = arr `seq` arr'
     arr'  = arr&subdivision.faceData .~ fas
 
     fas = naiveAssignment vp arr ts
     ds  = dartAssignments arr'
 
+-- | Given a list of triangles, collect all supporting lines
+collectLines :: (Eq r, Fractional r) => [Tri v q f r] -> [Line 2 r :+ NonEmpty (Tri v q f r)]
+collectLines = groupLines . concatMap f
+  where
     f t = map (\s -> supportingLine s :+ t) . sideSegments $ t^.core
+
+
+
+testz            :: forall proxy s r v q f. (Ord r, Fractional r
+                                           , Show r, Show v, Show q, Show f, IpeWriteText r
+                                           )
+                 => proxy s
+                -> Point 3 r -- ^ the viewpoint
+                -> [Tri v q f r]
+                -> Arrangement s
+                               (NonEmpty (Tri v q f r)) ()
+                               (Maybe (NonEmpty (Tri v q f r))) () r
+                -- [Line 2 r :+ Tri v q f r]
+testz px vp ts = constructArrangement px $ collectLines ts
 
 
 type Tri v q f r = Triangle 2 v r :+ (Triangle 3 q r :+ f)
@@ -59,8 +134,8 @@ type Tri v q f r = Triangle 2 v r :+ (Triangle 3 q r :+ f)
 --     vs                  :: Triangle d q r -> [Point d r]
 --     vs (Triangle a b c) = map (^.core) [a,b,c]
 
--- -- | Given a point on the projected triangle tw, get the point in
--- -- R^3 on the corresponding triangle in R^3
+-- | Given a point on the projected triangle tw, get the point in
+-- R^3 on the corresponding triangle in R^3
 liftToR3              :: (Ord r, Fractional r) => Point 2 r -> Tri v q f r -> Point 3 r
 liftToR3 q (t2 :+ t3) = fromBarricentric (toBarricentric q t2) (t3^.core)
 
@@ -96,6 +171,11 @@ intersectionPoint     :: (Ord r, Fractional r)
                       => Line 3 r -> Triangle 3 p r -> Maybe (Point 3 r)
 intersectionPoint l t = asA (Proxy :: Proxy (Point 3 r)) $ l `intersect` supportingPlane t
 
+-- | Given a mapping function, pairs of keys and values, and a length n,
+-- construct a vector that such that for every pair (k,v) the vector stores
+-- Just v at the index (idxOf k).
+--
+-- pre: assumes the indexOf function is injective
 --
 -- >>> fromAssignments id 5 [0 :+ 0, 1 :+ 1, 3 :+ 3, 4 :+ 4]
 -- [Just 0,Just 1,Nothing,Just 3,Just 4]
@@ -134,7 +214,7 @@ dartAssignments arr = (\d -> (d,f d)) <$> darts' ps
 -- running time: \(O(n^3)\), where \(n\) is the number of input triangles.
 naiveAssignment           :: (Ord r, Fractional r)
                           => Point 3 r
-                          -> Arrangement s l () (Maybe (Tri v q f r)) () r
+                          -> Arrangement s l () g () r
                           -> [Tri v q f r]
                           -> V.Vector (Maybe (Tri v q f r))
 naiveAssignment vp arr ts = f <$> faces' ps
@@ -206,3 +286,41 @@ minimumBy' cmp = topToMaybe  . List.minimumBy (liftCompare cmp)
 --     rEnters = []
 --     lLeaves = []
 --     rLeaves = []
+
+
+
+--------------------------------------------------------------------------------
+
+data Test
+
+
+test ::
+  Arrangement
+    Test
+    (NonEmpty (Tri () () (IpeColor Rational) Rational))
+    ()
+    (Maybe EdgeSide)
+    (Maybe (Tri () () (IpeColor Rational) Rational))
+    Rational
+test = render (Proxy :: Proxy Test) vp scene
+  where
+    vp = origin
+
+
+scene  :: [Tri () () (IpeColor Rational) Rational]
+scene = fmap (fmap' realToFrac) scene'
+
+fmap' :: (a -> b) ->  Tri v q f a -> Tri v q f b
+fmap' f (t2 :+ (t3 :+ x)) = fmap f t2 :+ (fmap f t3 :+ x)
+
+
+scene' :: [Tri () () (IpeColor Rational) Double]
+scene' = read "[ Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named \"red\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named \"blue\"))        ,Triangle (Point2 [-7.5,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named \"green\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [112.5,-0.0] :+ ()) (Point2 [135.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named \"red\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,125.0] :+ ()) (Point2 [-15.0,150.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named \"green\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-750.0,-150.0] :+ ()) (Point2 [-750.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named \"blue\"))]"
+
+
+-- scene = [ Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named "red"))
+--         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "blue"))
+--         ,Triangle (Point2 [-7.5,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "green"))
+--         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [112.5,-0.0] :+ ()) (Point2 [135.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named "red"))
+--         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,125.0] :+ ()) (Point2 [-15.0,150.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named "green"))
+--         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-750.0,-150.0] :+ ()) (Point2 [-750.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named "blue"))]
