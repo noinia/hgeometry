@@ -9,7 +9,7 @@ import qualified Data.Foldable as F
 import qualified Data.Set as S
 import qualified Data.Vector as V
 import qualified Data.Map.Strict as SM
-import           Data.Semigroup
+
 
 
 

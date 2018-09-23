@@ -79,12 +79,12 @@ computeSegsAndParts rect ls = ( segs <> boundarySegs, parts')
     parts'       = unBoundedParts rect ls
 
 
-
 perLine       :: forall r l. (Ord r, Fractional r)
               => Rectangle () r -> Line 2 r :+ l -> [Line 2 r :+ l]
               -> [LineSegment 2 () r :+ l]
-perLine b m ls = map (:+ m^.extra) . toSegments . List.sort $ vs <> vs'
+perLine b m ls = map (:+ m^.extra) . toSegments . rmDuplicates . List.sort $ vs <> vs'
   where
+    rmDuplicates = map head . List.group
     vs  = mapMaybe (m `intersectionPoint`) ls
     vs' = maybe [] (\(p,q) -> [p,q]) . asA (Proxy :: Proxy (Point 2 r, Point 2 r))
         $ (m^.core) `intersect` (Boundary b)
