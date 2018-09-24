@@ -63,6 +63,9 @@ doubleArea (Triangle a b c) = abs $ ax*by - ax*cy
     Point2 bx by = b^.core
     Point2 cx cy = c^.core
 
+-- | Checks if the triangle is degenerate, i.e. has zero area.
+isDegenerateTriangle :: (Num r, Eq r) => Triangle 2 p r -> Bool
+isDegenerateTriangle = (== 0) . doubleArea
 
 -- | get the inscribed disk. Returns Nothing if the triangle is degenerate,
 -- i.e. if the points are colinear.
@@ -118,3 +121,9 @@ onTriangle       :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> Bool
 q `onTriangle` t = let Vector3 a b c = toBarricentric q t
                    in all (`inRange` (ClosedRange 0 1)) [a,b,c]
+
+
+-- myQ :: Point 2 Rational
+-- myQ = read "Point2 [(-5985) % 16,(-14625) % 1]"
+-- myTri :: Triangle 2 () Rational
+-- myTri = read "Triangle (Point2 [(-15) % 1,0 % 1] :+ ()) (Point2 [225 % 2,0 % 1] :+ ()) (Point2 [135 % 1,0 % 1] :+ ())"

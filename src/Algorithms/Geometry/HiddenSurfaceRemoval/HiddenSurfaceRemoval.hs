@@ -42,9 +42,12 @@ draw1 = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
 draw' :: IO ()
 draw' = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
   where
-    out = [asIpe drawArrangement arr' ]
+    out = [asIpe drawArrangement test]
+    -- out = traceShow fas $ [asIpe drawArrangement arr' ]
     arr = testz (Proxy :: Proxy Test) origin scene
     arr' = traceShow (V.filter isEmpty . rawFacePolygons $ arr^.subdivision) arr
+    fas = naiveAssignment origin arr scene
+
 
     isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
     isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
@@ -75,19 +78,25 @@ groupLines = foldr (\(l:+e) -> insert' l e) []
                                 | otherwise = (b,    t:acc)
 
 
-render          :: forall proxy s r v q f. (Ord r, Fractional r
+-- | removes degenerate (zero area) triangles
+dropDegenerate :: (Eq r, Num r) => [Triangle 2 p r :+ a] -> [Triangle 2 p r :+ a]
+dropDegenerate = filter (not . isDegenerateTriangle . (^.core))
+
+render           :: forall proxy s r v q f. (Ord r, Fractional r
                                            , Show r, Show v, Show q, Show f, IpeWriteText r
                                            )
-                => proxy s
-                -> Point 3 r -- ^ the viewpoint
-                -> [Tri v q f r]
-                -> Arrangement s (NonEmpty (Tri v q f r))
-                                 ()
-                                 (Maybe EdgeSide)
-                                 (Maybe (Tri v q f r))
-                                 r
-render px vp ts = arr''&subdivision.dartData .~ ds
+                 => proxy s
+                 -> Point 3 r -- ^ the viewpoint
+                 -> [Tri v q f r]
+                 -> Arrangement s (NonEmpty (Tri v q f r))
+                                  ()
+                                  (Maybe EdgeSide)
+                                  (Maybe (Tri v q f r))
+                                  r
+render px vp ts' = arr''&subdivision.dartData .~ ds
   where
+    -- remove degeneate triangles
+    ts    = dropDegenerate ts'
     arr   :: Arrangement s (NonEmpty (Tri v q f r)) () (Maybe (NonEmpty (Tri v q f r))) () r
     arr   = constructArrangement px $ collectLines ts
     arr'' = arr `seq` arr'
@@ -212,7 +221,9 @@ dartAssignments arr = (\d -> (d,f d)) <$> darts' ps
 -- visible triangle for every face. We do so by just sampling a point in the face
 --
 -- running time: \(O(n^3)\), where \(n\) is the number of input triangles.
-naiveAssignment           :: (Ord r, Fractional r)
+naiveAssignment           :: (Ord r, Fractional r
+                             , Show r, Show v, Show q, Show f
+                             )
                           => Point 3 r
                           -> Arrangement s l () g () r
                           -> [Tri v q f r]
@@ -221,7 +232,7 @@ naiveAssignment vp arr ts = f <$> faces' ps
   where
     f i = let (pg :+ _) = rawFaceBoundary i ps
               c         = centroid pg
-          in minimumBy' (compareDepthOrder' vp c) $
+          in minimumBy' (compareDepthOrder' vp c) . traceShowId $
                filter (\t -> c `onTriangle` (t^.core)) ts
     ps = arr^.subdivision
   -- observe that all faces in the arrangement are convex, so the centroid
@@ -230,7 +241,7 @@ naiveAssignment vp arr ts = f <$> faces' ps
   -- observe that since we explicitly filter the triangles to contain c, we can indeed
   -- safely use compareDepthOrder'
 
-
+onTriangle' q t = traceShow (q,t) $ q `onTriangle` t
 --
 -- >>> minimumBy' compare []
 -- Nothing
@@ -308,7 +319,7 @@ test = render (Proxy :: Proxy Test) vp scene
 
 
 scene  :: [Tri () () (IpeColor Rational) Rational]
-scene = fmap (fmap' realToFrac) scene'
+scene = dropDegenerate $ fmap (fmap' realToFrac) scene'
 
 fmap' :: (a -> b) ->  Tri v q f a -> Tri v q f b
 fmap' f (t2 :+ (t3 :+ x)) = fmap f t2 :+ (fmap f t3 :+ x)
