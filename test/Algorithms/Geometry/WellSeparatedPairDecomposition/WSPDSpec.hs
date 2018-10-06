@@ -8,7 +8,7 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Seq2 as S2
+import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           Test.Hspec
@@ -58,9 +58,9 @@ distributePointsTest = describe "DistributePoints tests" $ do
 --     output = v2 (f [ origin :+ 0, point2 1 1 :+ 1, point2 5 5 :+ 2 ])
 --                 (f [ point2 1 1 :+ 1, point2 5 5 :+ 2, origin :+ 0 ])
 
---     f = S2.viewL1FromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
+--     f =  LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
-ptSeq = S2.viewL1FromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
+ptSeq = LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
 -- coversAll
 

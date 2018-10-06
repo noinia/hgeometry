@@ -47,7 +47,7 @@ import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
-import qualified Data.Seq2 as S2
+import qualified Data.LSeq as LSeq
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
@@ -211,7 +211,7 @@ dropRepeats :: Eq a => [a] -> [a]
 dropRepeats = map head . L.group
 
 instance (Coordinate r, Eq r) => IpeReadText (Path r) where
-  ipeReadText = fmap (Path . S2.viewL1FromNonEmpty) . ipeReadText
+  ipeReadText = fmap (Path . LSeq.fromNonEmpty) . ipeReadText
 
 --------------------------------------------------------------------------------
 -- Reading attributes

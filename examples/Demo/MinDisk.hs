@@ -14,9 +14,9 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
 import           Data.Geometry.PolyLine
+import qualified Data.LSeq as LSeq
 import           Data.Maybe
 import           Data.Semigroup
-import           Data.Seq2
 import qualified Data.Traversable as Tr
 import           Data.Vinyl
 import           Options.Applicative

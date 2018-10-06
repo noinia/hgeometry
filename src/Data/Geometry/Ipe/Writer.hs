@@ -13,19 +13,20 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
+import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Value
-import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon (Polygon, outerBoundary, holeList, asSimplePolygon)
 import qualified Data.Geometry.Transformation as GT
 import           Data.Geometry.Vector
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
 import           Data.Proxy
 import           Data.Ratio
-import qualified Data.Seq2 as S2
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
@@ -253,6 +254,7 @@ instance IpeWriteText r => IpeWriteText (Operation r) where
 instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
   ipeWriteText pl = case pl^..points.traverse.core of
     (p : rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest
+    _          -> error "ipeWriteText. absurd. no vertices polyline"
     -- the polyline type guarantees that there is at least one point
 
 instance IpeWriteText r => IpeWriteText (Polygon t () r) where
@@ -270,6 +272,7 @@ instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
   ipeWriteText (PolygonPath     p) = ipeWriteText p
   ipeWriteText (EllipseSegment  m) = ipeWriteText $ Ellipse m
+  ipeWriteText _                   = error "ipeWriteText: PathSegment, not implemented yet."
 
 instance IpeWriteText r => IpeWrite (Path r) where
   ipeWrite p = (\t -> Element "path" [] [Text t]) <$> ipeWriteText p
@@ -390,7 +393,7 @@ instance (IpeWriteText r, IpeWrite p) => IpeWrite (PolyLine 2 p r) where
       -- TODO: Do something with the p's
 
 fromPolyLine :: PolyLine 2 () r -> Path r
-fromPolyLine = Path . S2.l1Singleton . PolyLineSegment
+fromPolyLine = Path . LSeq.fromNonEmpty . (:| []) . PolyLineSegment
 
 
 instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where

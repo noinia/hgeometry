@@ -2,7 +2,6 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Algorithms.Geometry.SmallestEnclosingBall.Types where
 
-import           Data.Monoid
 import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ball

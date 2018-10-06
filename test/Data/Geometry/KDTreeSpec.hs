@@ -6,7 +6,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Box
 import           Data.Geometry.KDTree
-import qualified Data.Seq as Seq
+import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import           GHC.TypeLits
 import           Test.QuickCheck.HGeometryInstances()
@@ -32,22 +32,22 @@ allSame v = case F.toList v of
               []     -> True
               (x:xs) -> all (== x) xs
 
--- newtype Pts n d r = Pts (PointSet (Seq.LSeq n) d () r)
+-- newtype Pts n d r = Pts (PointSet (LSeq.LSeq n) d () r)
 -- deriving instance (Arity d, Show r) => Show (Pts n d r)
 
 -- instance (KnownNat n, Arity d, KnownNat d, Arbitrary r, Ord r) => Arbitrary (Pts n d r) where
---   arbitrary = Pts . toPointSet . Seq.toNonEmpty <$> arbitrary
+--   arbitrary = Pts . toPointSet . LSeq.toNonEmpty <$> arbitrary
 
 
 spec :: Spec
 spec = do
   describe "splitOn" $ do
     it "quickheck: left set same points" $
-      property $ \c (pts :: Seq.LSeq 2 (Point 2 Int :+ ())) ->
+      property $ \c (pts :: LSeq.LSeq 2 (Point 2 Int :+ ())) ->
                    let (l,_,_) = splitOn (toEnum c) (toPointSet pts)
                    in allSame . fmap (Set.fromList . F.toList) $ l
     it "quickheck: right set same points" $
-      property $ \c (pts :: Seq.LSeq 2 (Point 2 Int :+ ())) ->
+      property $ \c (pts :: LSeq.LSeq 2 (Point 2 Int :+ ())) ->
                    let (_,_,r) = splitOn (toEnum c) (toPointSet pts)
                    in allSame . fmap (Set.fromList . F.toList) $ r
   describe "Same as Naive" $ do

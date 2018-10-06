@@ -6,22 +6,23 @@ module Data.Geometry.PolyLine where
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import           Data.LSeq (LSeq, pattern (:<|))
+import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Seq2 as S2
-import qualified Data.Sequence as Seq
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)
 
--- | A Poly line in R^d
-newtype PolyLine d p r = PolyLine { _points :: S2.Seq2 (Point d r :+ p) }
+-- | A Poly line in R^d has at least 2 vertices
+newtype PolyLine d p r = PolyLine { _points :: LSeq 2 (Point d r :+ p) }
 makeLenses ''PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
@@ -52,7 +53,7 @@ instance Arity d => Bifunctor (PolyLine d) where
 
 -- | pre: The input list contains at least two points
 fromPoints :: [Point d r :+ p] -> PolyLine d p r
-fromPoints = PolyLine . S2.fromList
+fromPoints = PolyLine . LSeq.forceLSeq (C  :: C 2) . LSeq.fromList
 
 -- | pre: The input list contains at least two points. All extra vields are
 -- initialized with mempty.
@@ -65,19 +66,12 @@ fromLineSegment                     :: LineSegment d p r -> PolyLine d p r
 fromLineSegment ~(LineSegment' p q) = fromPoints [p,q]
 
 -- | Convert to a closed line segment by taking the first two points.
-asLineSegment                              :: PolyLine d p r -> LineSegment d p r
-asLineSegment (PolyLine (S2.Seq2 p mid q)) = ClosedLineSegment p (f $ Seq.viewl mid)
-  where
-    f Seq.EmptyL    = q
-    f (q' Seq.:< _) = q'
+asLineSegment                            :: PolyLine d p r -> LineSegment d p r
+asLineSegment (PolyLine (p :<| q :<| _)) = ClosedLineSegment p q
 
 -- | Stricter version of asLineSegment that fails if the Polyline contains more
 -- than two points.
-asLineSegment'                            :: PolyLine d p r -> Maybe (LineSegment d p r)
-asLineSegment' (PolyLine (S2.Seq2 p m q))
-  | Seq.null m                            = Just $ ClosedLineSegment p q
-  | otherwise                             = Nothing
-
-
--- polylineEdges :: Polyline d p r -> NonEmpty.NonEmpty (LineSegment d p r)
--- polylineEdges (Polyline )
+asLineSegment'                :: PolyLine d p r -> Maybe (LineSegment d p r)
+asLineSegment' (PolyLine pts) = case F.toList pts of
+                                  [p,q] -> Just $ ClosedLineSegment p q
+                                  _     -> Nothing

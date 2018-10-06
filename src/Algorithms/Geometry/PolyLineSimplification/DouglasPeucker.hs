@@ -1,15 +1,15 @@
 module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker where
 
-import Data.Ord(comparing)
-import Control.Lens hiding (only)
-import Data.Ext
-import Data.Geometry.PolyLine
-import Data.Geometry.Point
-import Data.Geometry.Vector
-import Data.Geometry.LineSegment
-import qualified Data.Seq2 as S2
-import qualified Data.Sequence as S
+import           Control.Lens hiding (only)
+import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.PolyLine
+import           Data.Geometry.Vector
+import qualified Data.LSeq as LSeq
+import           Data.LSeq (LSeq, pattern (:|>))
+import           Data.Ord (comparing)
 
 --------------------------------------------------------------------------------
 
@@ -25,7 +25,9 @@ douglasPeucker eps pl
     | dst <= (eps*eps) = fromPoints [a,b]
     | otherwise        = douglasPeucker eps pref `merge` douglasPeucker eps subf
   where
-    pts@(S2.Seq2 a _ b) = pl^.points
+    pts     = pl^.points
+    a       = LSeq.head pts
+    b       = LSeq.last pts
     (i,dst)             = maxDist pts (ClosedLineSegment a b)
 
     (pref,subf)         = split i pl
@@ -35,24 +37,27 @@ douglasPeucker eps pl
 
 -- | Concatenate the two polylines, dropping their shared vertex
 merge          :: PolyLine d p r -> PolyLine d p r -> PolyLine d p r
-merge pref sub = PolyLine $ pref' >+< (sub^.points)
+merge pref sub = PolyLine $ pref' `append` (sub^.points)
   where
-    (pref' S2.:>> _) = S2.viewr $ pref^.points
-    ~(a S2.:< as) >+< bs = S2.fromSeqUnsafe $ a S.<| as <> S2.toSeq bs
+    (pref' :|> _) = pref^.points
+    append     :: LSeq.LSeq n a ->  LSeq.LSeq m a -> LSeq.LSeq m a
+    append a b = LSeq.promise $ LSeq.append a b
+    -- our seq is actually even longer
+
 
 -- | Split the polyline at the given vertex. Both polylines contain this vertex
 split                  :: Int -> PolyLine d p r
                        -> (PolyLine d p r, PolyLine d p r)
 split i (PolyLine pts) = bimap f f (as,bs)
   where
-    f = PolyLine . S2.fromSeqUnsafe
-    as = S2.take (i+1) pts
-    bs = S2.drop i     pts
+    f = PolyLine . LSeq.forceLSeq (C  :: C 2)
+    as = LSeq.take (i+1) pts
+    bs = LSeq.drop i     pts
 
 -- | Given a sequence of points, find the index of the point that has the
 -- Furthest distance to the LineSegment. The result is the index of the point
 -- and this distance.
 maxDist       :: (Ord r, Fractional r, Arity d)
-              => S2.Seq2 (Point d r :+ p) -> LineSegment d p r -> (Int,r)
-maxDist pts s = F.maximumBy (comparing snd) . S2.mapWithIndex (\i (p :+ _) ->
+              => LSeq n (Point d r :+ p) -> LineSegment d p r -> (Int,r)
+maxDist pts s = F.maximumBy (comparing snd) . LSeq.mapWithIndex (\i (p :+ _) ->
                                                      (i,sqDistanceToSeg p s)) $ pts

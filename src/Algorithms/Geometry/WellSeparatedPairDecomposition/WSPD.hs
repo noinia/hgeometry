@@ -9,25 +9,26 @@ import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
-import           Data.Geometry.Transformation
-import           Data.Geometry.Properties
 import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
+import qualified Data.IntMap.Strict as IntMap
+import qualified Data.LSeq as LSeq
+import           Data.LSeq (LSeq(..),ViewL(..),ViewR(..),pattern (:<|),pattern (:|>))
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Data.Ord (comparing)
 import           Data.Range
 import qualified Data.Range as Range
-import qualified Data.Seq2 as S2
 import qualified Data.Sequence as S
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           GHC.TypeLits
-import qualified Data.IntMap.Strict as IntMap
 
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -44,7 +45,7 @@ fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
     n    = length $ pts'^.GV.element (C :: C 0)
 
     sortOn' i = NonEmpty.sortWith (^.core.unsafeCoord i)
-    sortOn  i = S2.viewL1FromNonEmpty . sortOn' (i + 1)
+    sortOn  i = LSeq.fromNonEmpty . sortOn' (i + 1)
     -- sorts the points on the first coordinate, and then associates each point
     -- with an index,; its rank in terms of this first coordinate.
     g = NonEmpty.zipWith (\i (p :+ e) -> p :+ (i :+ e)) (NonEmpty.fromList [0..])
@@ -109,7 +110,7 @@ fairSplitTree'       :: (Fractional r, Ord r, Arity d, 1 <= d
                      => Int -> GV.Vector d (PointSeq d (Idx :+ p) r)
                      -> BinLeafTree Int (Point d r :+ p)
 fairSplitTree' n pts
-    | n <= 1    = let (p S2.:< _) = pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
+    | n <= 1    = let p = LSeq.head $ pts^.GV.element (C :: C 0) in Leaf (dropIdx p)
     | otherwise = foldr node' (V.last path) $ V.zip nodeLevels (V.init path)
   where
     -- note that points may also be assigned level 'Nothing'.
@@ -167,7 +168,7 @@ distributePoints' k levels pts
     level p = maybe (k-1) _unLevel $ levels V.! (p^.extra.core)
     append v i p = MV.read v i >>= MV.write v i . (S.|> p)
 
-
+fromSeqUnsafe = LSeq.promise . LSeq.fromSeq
 
 -- | Given a sequence of points, whose index is increasing in the first
 -- dimension, i.e. if idx p < idx q, then p[0] < q[0].
@@ -249,9 +250,9 @@ hasLevel = fmap isJust . levelOf
 -- | Remove allready assigned points from the sequence
 --
 -- pre: there are points remaining
-compactEnds'               :: PointSeq d (Idx :+ p) r
-                           -> RST s (PointSeq d (Idx :+ p) r)
-compactEnds' (l0 S2.:< s0) = fmap fromSeqUnsafe . goL $ l0 S.<| s0
+compactEnds'              :: PointSeq d (Idx :+ p) r
+                          -> RST s (PointSeq d (Idx :+ p) r)
+compactEnds' (l0 :<| s0) = fmap fromSeqUnsafe . goL $ l0 S.<| toSeq s0
   where
     goL s@(S.viewl -> l S.:< s') = hasLevel l >>= \case
                                      False -> goR s
@@ -287,7 +288,7 @@ findAndCompact                   :: (Ord r, Arity d
                                  -> RST s ( PointSeq d (Idx :+ p) r
                                           , PointSeq d (Idx :+ p) r
                                           )
-findAndCompact j (l0 S2.:< s0) m = fmap select . stepL $ l0 S.<| s0
+findAndCompact j (l0 :<| s0) m = fmap select . stepL $ l0 S.<| toSeq s0
   where
     -- stepL and stepR together build a data structure (FAC l r S) that
     -- contains the left part of the list, i.e. the points before midpoint, and
@@ -344,10 +345,9 @@ widths = fmap Range.width . extends
 --
 -- pre: points are sorted according to their dimension
 extends :: Arity d => GV.Vector d (PointSeq d p r) -> GV.Vector d (Range r)
-extends = GV.imap (\i pts@(l S2.:< _) ->
-                     let (_ S2.:> r) = S2.viewL1toR1 pts
-                     in ClosedRange (l^.core.unsafeCoord (i + 1))
-                                    (r^.core.unsafeCoord (i + 1)))
+extends = GV.imap (\i pts ->
+                     ClosedRange ((LSeq.head pts)^.core.unsafeCoord (i + 1))
+                                 ((LSeq.last pts)^.core.unsafeCoord (i + 1)))
 
 
 --------------------------------------------------------------------------------
@@ -441,11 +441,6 @@ bbOf (Node _ (NodeData _ b _) _) = b
 children'              :: BinLeafTree v a -> [BinLeafTree v a]
 children' (Leaf _)     = []
 children' (Node l _ r) = [l,r]
-
-
-fromSeqUnsafe                         :: S.Seq a -> S2.ViewL1 a
-fromSeqUnsafe (S.viewl -> (l S.:< s)) = l S2.:< s
-fromSeqUnsafe _                       = error "fromSeqUnsafe: Empty seq"
 
 
 -- | Turn a traversal into lens

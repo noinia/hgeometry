@@ -8,11 +8,10 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
-import           Data.Geometry.Triangle
 import           Data.Geometry.Properties
-import qualified Data.Seq2 as S2
-import qualified Data.List.NonEmpty as NonEmpty
-import Data.List.NonEmpty(NonEmpty(..))
+import           Data.Geometry.Triangle
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty(..))
 
 --------------------------------------------------------------------------------
 -- $setup
@@ -20,12 +19,13 @@ import Data.List.NonEmpty(NonEmpty(..))
 -- import           Data.Geometry.Ipe.Attributes
 --
 -- let testPath :: Path Int
---     testPath = Path . S2.l1Singleton  . PolyLineSegment . PolyLine.fromPoints . map ext
+--     testPath = Path . fromSingleton  . PolyLineSegment
+--              . PolyLine.fromPoints . map ext
 --              $ [ origin, point2 10 10, point2 200 100 ]
 --
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor (Named "red"))
-
+--
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
@@ -48,7 +48,7 @@ _asLineSegment = prism' seg2path path2seg
 _asPolyLine :: Prism' (Path r) (PolyLine.PolyLine 2 () r)
 _asPolyLine = prism' poly2path path2poly
   where
-    poly2path = Path . S2.l1Singleton  . PolyLineSegment
+    poly2path = Path . fromSingleton  . PolyLineSegment
     path2poly = preview (pathSegments.traverse._PolyLineSegment)
     -- TODO: Check that the path actually is a polyline, rather
     -- than ignoring everything that does not fit
@@ -79,9 +79,9 @@ _asMultiPolygon = prism' polygonToPath path2poly
     path2poly p = pathToPolygon p >>= either (const Nothing) pure
 
 polygonToPath                      :: Polygon t () r -> Path r
-polygonToPath pg@(SimplePolygon _) = Path . S2.l1Singleton . PolygonPath $ pg
-polygonToPath (MultiPolygon vs hs) = Path . S2.viewL1FromNonEmpty . fmap PolygonPath
-                                   $ SimplePolygon vs NonEmpty.:| hs
+polygonToPath pg@(SimplePolygon _) = Path . fromSingleton . PolygonPath $ pg
+polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
+                                   $ (SimplePolygon vs) :| hs
 
 
 pathToPolygon   :: Path r -> Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
@@ -159,3 +159,5 @@ readAllFrom    :: (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = readAll <$> readSinglePageFile fp
 
+fromSingleton :: a -> LSeq.LSeq 1 a
+fromSingleton = LSeq.fromNonEmpty . (:| [])

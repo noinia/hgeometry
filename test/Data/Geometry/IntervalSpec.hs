@@ -12,7 +12,6 @@ import           Data.Geometry.SegmentTree (SegmentTree, I(..))
 import qualified Data.Geometry.SegmentTree as SegTree
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range
-import qualified Data.Seq as Seq
 import qualified Data.Set as Set
 import           GHC.TypeLits
 import           Test.Hspec

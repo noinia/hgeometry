@@ -32,7 +32,7 @@ import           GHC.Exts
 
 
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Seq2     as S2
+import qualified Data.LSeq          as LSeq
 
 --------------------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ instance Fractional r => IsTransformable (PathSegment r) where
 
 
 -- | A path is a non-empty sequence of PathSegments.
-newtype Path r = Path { _pathSegments :: S2.ViewL1 (PathSegment r) }
+newtype Path r = Path { _pathSegments :: LSeq.LSeq 1 (PathSegment r) }
                  deriving (Show,Eq)
 makeLenses ''Path
 

@@ -83,8 +83,6 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           GHC.Generics (Generic)
 
-import Data.Geometry.Ipe
-
 --------------------------------------------------------------------------------
 
 -- | The Face data consists of the data itself and a list of holes
@@ -237,25 +235,25 @@ fromConnectedSegments    :: (Foldable f, Ord r, Fractional r)
                          -> PlanarSubdivision s (NonEmpty p) e () r
 fromConnectedSegments px = fromPlaneGraph . PG.fromConnectedSegments px
 
-g1 = PG.fromConnectedSegments (Identity Test1) testSegs
-ps1 = fromConnectedSegments (Identity Test1) testSegs
+-- g1 = PG.fromConnectedSegments (Identity Test1) testSegs
+-- ps1 = fromConnectedSegments (Identity Test1) testSegs
 
-data Test1 = Test1
+-- data Test1 = Test1
 
-draw = V.filter isEmpty . rawFacePolygons
-  where
-    isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
-    isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
+-- draw = V.filter isEmpty . rawFacePolygons
+--   where
+--     isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
+--     isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
 
-testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
-                   [ (origin, Point2 10 10)
-                   , (origin, Point2 12 10)
-                   , (origin, Point2 20 5)
-                   , (origin, Point2 13 20)
-                   , (Point2 10 10, Point2 12 10)
-                   , (Point2 10 10, Point2 13 20)
-                   , (Point2 12 10, Point2 20 5)
-                   ]
+-- testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
+--                    [ (origin, Point2 10 10)
+--                    , (origin, Point2 12 10)
+--                    , (origin, Point2 20 5)
+--                    , (origin, Point2 13 20)
+--                    , (Point2 10 10, Point2 12 10)
+--                    , (Point2 10 10, Point2 13 20)
+--                    , (Point2 12 10, Point2 20 5)
+--                    ]
 
 
 --------------------------------------------------------------------------------

@@ -20,9 +20,10 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import qualified Data.LSeq as LSeq
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Proxy
-import qualified Data.Seq2 as S2
 import           Data.Text (Text)
 import           Data.Vinyl.CoRec
 import           Linear.Affine ((.+^))
@@ -209,7 +210,7 @@ ipeCircle' = IpeOut circle''
 
 -- | Helper to construct a IpeOut g Path, for when we already have an IpeOut g PathSegment
 fromPathSegment    :: IpeOut g (PathSegment r) -> IpeOut g (Path r)
-fromPathSegment io = IpeOut $ Path . S2.l1Singleton . asIpe io
+fromPathSegment io = IpeOut $ Path . LSeq.fromNonEmpty . (:| []) . asIpe io
 
 
 ipePolygon :: IpeOut (Polygon t p r) (Path r)

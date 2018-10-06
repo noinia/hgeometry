@@ -11,8 +11,7 @@ import           Data.Geometry.Box
 import           Data.Geometry.SubLine
 import           Data.OrdSeq (OrdSeq, fromListByOrd)
 import           Data.Proxy
-import qualified Data.Seq as Seq
-import qualified Data.Seq2 as S2
+import qualified Data.LSeq as LSeq
 import           GHC.TypeLits
 import           Test.QuickCheck
 
@@ -23,9 +22,6 @@ import           Test.QuickCheck
 
 instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
   arbitrary = fromListByOrd <$> arbitrary
-
-instance Arbitrary a => Arbitrary (S2.Seq2 a) where
-  arbitrary = S2.Seq2 <$> arbitrary <*> arbitrary <*> arbitrary
 
 instance Arbitrary a => Arbitrary (BinaryTree a) where
   arbitrary = sized f
@@ -42,8 +38,8 @@ instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
                               Node <$> f l <*> arbitrary <*> f (n-l-1)
 
 
-instance (KnownNat n, Arbitrary a) => Arbitrary (Seq.LSeq n a) where
-  arbitrary = (\s s' -> Seq.promise . Seq.fromList $ s <> s')
+instance (KnownNat n, Arbitrary a) => Arbitrary (LSeq.LSeq n a) where
+  arbitrary = (\s s' -> LSeq.promise . LSeq.fromList $ s <> s')
             <$> vector (fromInteger . natVal $ (Proxy :: Proxy n))
             <*> arbitrary
 

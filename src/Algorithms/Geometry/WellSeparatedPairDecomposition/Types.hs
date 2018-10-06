@@ -8,7 +8,7 @@ import           Data.Ext
 import           Data.Geometry.Box
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import qualified Data.Seq2 as S2
+import qualified Data.LSeq as LSeq
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 
@@ -45,7 +45,7 @@ instance Traversable (NodeData d r) where
 --------------------------------------------------------------------------------
 -- * Implementation types
 
-type PointSeq d p r = S2.ViewL1 (Point d r :+ p)
+type PointSeq d p r = LSeq.LSeq 1 (Point d r :+ p)
 
 
 data Level = Level { _unLevel   :: Int

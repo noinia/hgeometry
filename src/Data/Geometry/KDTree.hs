@@ -14,8 +14,8 @@ import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Proxy
-import           Data.Seq (LSeq(..), ViewL(..))
-import qualified Data.Seq as Seq
+import           Data.LSeq (LSeq(..), ViewL(..), pattern (:<|))
+import qualified Data.LSeq as LSeq
 import           Data.Util
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
@@ -77,7 +77,7 @@ buildKDTree = maybe Empty (Tree . buildKDTree') . NonEmpty.nonEmpty
 
 buildKDTree' :: (Arity d, 1 <= d, Ord r)
              => NonEmpty.NonEmpty (Point d r :+ p) -> KDTree' d p r
-buildKDTree' = KDT . addBoxes . build (Coord 1) . toPointSet . Seq.fromNonEmpty
+buildKDTree' = KDT . addBoxes . build (Coord 1) . toPointSet . LSeq.fromNonEmpty
   where     -- compute one tree with bounding boxes, then merge them together
     addBoxes t = let bbt = foldUpData (\l _ r -> boundingBoxList' [l,r])
                                       (boundingBox . (^.core)) t
@@ -94,7 +94,7 @@ toPointSet :: (Arity d, Ord r)
            => LSeq n (Point d r :+ p) -> PointSet (LSeq n) d p r
 toPointSet = FV.imap sort . FV.replicate
   where
-    sort i = Seq.unstableSortBy (compareOn $ 1 + i)
+    sort i = LSeq.unstableSortBy (compareOn $ 1 + i)
 
 
 compareOn       :: (Ord r, Arity d)
@@ -166,13 +166,13 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
     -- i = traceShow (c,j) j
 
     m = let xs = fromJust $ pts^?element' (i-1)
-        in xs `Seq.index` (F.length xs `div` 2)
+        in xs `LSeq.index` (F.length xs `div` 2)
 
     -- Since the input seq has >= 2 elems, F.length xs / 2 >= 1. It follows
     -- that the both sets thus have at least one elemnt.
     -- f :: LSeq 2 _ -> (LSeq 1 _, LSeq 1 _)
-    f = bimap Seq.promise Seq.promise
-      . Seq.partition (\p -> compareOn i p m == LT)
+    f = bimap LSeq.promise LSeq.promise
+      . LSeq.partition (\p -> compareOn i p m == LT)
 
     (l,r) = unzip' . fmap f $ pts
 
@@ -180,8 +180,9 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
     unzip' = bimap vectorFromListUnsafe vectorFromListUnsafe . unzip . F.toList
 
 
-asSingleton   :: (1 <= d, Arity d) => PointSet (LSeq 1) d p r
+asSingleton   :: (1 <= d, Arity d)
+              => PointSet (LSeq 1) d p r
               -> Either (Point d r :+ p) (PointSet (LSeq 2) d p r)
-asSingleton v = case Seq.viewl $ v^.element (C :: C 0) of
-                  _ :< _ Seq.:<< _ -> Right $ unsafeCoerce v
-                  p :< _           -> Left p -- only one element
+asSingleton v = case v^.element (C :: C 0) of
+                  (p :<| s) | null s -> Left p -- only one lement
+                  _                  -> Right $ unsafeCoerce v

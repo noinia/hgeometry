@@ -49,6 +49,7 @@ modules =
   , "Data.CircularList.Util"
   , "Data.Permutation"
   , "Data.CircularSeq"
+  , "Data.LSeq"
   , "Data.PlanarGraph"
   , "Data.Tree.Util"
 
