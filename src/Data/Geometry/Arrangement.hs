@@ -4,6 +4,7 @@ module Data.Geometry.Arrangement( Arrangement(..)
 
                                 , constructArrangement
                                 , constructArrangementInBox
+                                , constructArrangementInBox'
 
                                 , traverseLine
                                 , findStart, findStartVertex, findStartDart

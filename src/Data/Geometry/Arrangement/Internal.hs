@@ -47,16 +47,31 @@ constructArrangement       :: (Ord r, Fractional r)
                            -> [Line 2 r :+ l]
                            -> Arrangement s l () (Maybe l) () r
 constructArrangement px ls = let b  = makeBoundingBox ls
-                             in constructArrangementInBox px b ls
+                             in constructArrangementInBox' px b ls
 
--- | Constructs the arrangemnet inside the box. (for parts to be useful, it is
--- assumed this box is the boundingbox of the intersections in the Arrangement)
+-- | Constructs the arrangemnet inside the box.  note that the resulting box
+-- may be larger than the given box to make sure that all vertices of the
+-- arrangement actually fit.
+--
+-- running time: \(O(n^2\log n\)
 constructArrangementInBox            :: (Ord r, Fractional r)
                                      => proxy s
                                      -> Rectangle () r
                                      -> [Line 2 r :+ l]
                                      -> Arrangement s l () (Maybe l) () r
-constructArrangementInBox px rect ls =
+constructArrangementInBox px rect ls = let b  = makeBoundingBox ls
+                                       in constructArrangementInBox' px (b <> rect) ls
+
+
+-- | Constructs the arrangemnet inside the box. (for parts to be useful, it is
+-- assumed this boxfits at least the boundingbox of the intersections in the
+-- Arrangement)
+constructArrangementInBox'            :: (Ord r, Fractional r)
+                                      => proxy s
+                                      -> Rectangle () r
+                                      -> [Line 2 r :+ l]
+                                      -> Arrangement s l () (Maybe l) () r
+constructArrangementInBox' px rect ls =
     Arrangement (V.fromList ls) subdiv rect (link parts' subdiv)
   where
     subdiv = fromConnectedSegments px segs
