@@ -1,14 +1,18 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.PlanarGraphSpec where
 
 
-import           Data.Util
-import           Data.PlanarGraph
-import           Data.Permutation(toCycleRep)
-import           Test.Hspec
 import qualified Data.Foldable as F
-import qualified Data.Set as S
-import qualified Data.Vector as V
 import qualified Data.Map.Strict as SM
+import           Data.Permutation (toCycleRep)
+import           Data.PlanarGraph
+import qualified Data.PlanarGraph as PlanarGraph
+import qualified Data.Set as S
+import           Data.Util
+import qualified Data.Vector as V
+import           Test.Hspec
+import           Test.QuickCheck
+import           Test.QuickCheck.HGeometryInstances ()
 
 
 
@@ -33,14 +37,14 @@ sameGraphs s g h = do
       it "Missing edges from h in g" $
           (missingAdjacencies h g) `shouldBe` []
 
-
-
-
 spec :: Spec
-spec = sameGraphs "testEdges" (fromAdjacencyLists testEdges) (fromAdjacencyListsOld testEdges)
-
-
-
+spec = do
+    describe "PlanarGraph spec" $ do
+      sameGraphs "testEdges" (fromAdjacencyLists testEdges) (fromAdjacencyListsOld testEdges)
+    it "quickheck Dart:  (toEnum (fromEnum d)) = d" $
+      property $ \(d :: Dart TestG) -> toEnum (fromEnum d) `shouldBe` d
+    it "quickheck Dart: fromEnum (toEnum i) = i" $
+      property $ \(NonNegative i) -> fromEnum ((toEnum i) :: Dart TestG) `shouldBe` i
 
 testEdges :: [(Vertex,[Vertex])]
 testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
@@ -90,7 +94,7 @@ fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
     toDart                    :: (VertexId s Primal,VertexId s Primal)
                               -> STR' s [Dart s]
                               -> STR' s [Dart s]
-    toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
+    toDart (u,v) (STR m a ds) = let dir = if u < v then PlanarGraph.Positive else Negative
                                     t'  = (min u v, max u v)
                                in case SM.lookup t' m of
       Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
