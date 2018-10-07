@@ -9,6 +9,7 @@ import           Data.Geometry.Arrangement
 import           Data.Geometry.Arrangement.Draw
 import           Data.Geometry.Ipe
 import           Test.Hspec
+import           Util(runOnFile)
 
 spec :: Spec
 spec = testCases "test/Data/Geometry/arrangement.ipe"
@@ -33,12 +34,6 @@ data TestCase r = TestCase { _lines      :: [Line 2 r :+ ()]
                            }
                   deriving (Show)
 
-
-shouldBeFile      :: IO B.ByteString -> FilePath -> Expectation
-shouldBeFile a fp = do
-                      ans <- B.readFile fp
-                      a `shouldReturn` ans
-
 data Test = Test
 
 drawArr    :: [Line 2 Rational :+ a] -> B.ByteString
@@ -50,8 +45,7 @@ drawArr ls = let arr = constructArrangement (Identity Test) ls
 
 toSpec                       :: TestCase Rational -> Spec
 toSpec (TestCase ls outFile) = do
-                                 it "test drawing arrangement" $
-                                   (pure $ drawArr ls) `shouldBeFile` outFile
+    runOnFile "test drawing arrangement"  outFile (pure $ drawArr ls)
 
 -- toSingleSpec poly r q = it msg $ (q `inPolygon` poly) `shouldBe` r
 --   where
