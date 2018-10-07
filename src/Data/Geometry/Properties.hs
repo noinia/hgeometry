@@ -27,6 +27,8 @@ type family Dimension t :: Nat
 -- | A type family for types that have an associated numeric type.
 type family NumType t :: *
 
+type instance NumType [t] = NumType t
+
 -- | A simple data type expressing that there are no intersections
 data NoIntersection = NoIntersection deriving (Show,Read,Eq,Ord)
 

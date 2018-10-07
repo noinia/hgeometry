@@ -3,7 +3,6 @@ module Demo.MinDisk where
 
 import           Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
-import           Control.Applicative
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
@@ -11,16 +10,10 @@ import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ball
 import           Data.Geometry.Ipe
-import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
-import           Data.Geometry.PolyLine
 import qualified Data.LSeq as LSeq
-import           Data.Maybe
-import           Data.Semigroup
 import qualified Data.Traversable as Tr
-import           Data.Vinyl
 import           Options.Applicative
-import           System.Environment (getArgs)
 import           System.Random
 
 --------------------------------------------------------------------------------
@@ -39,12 +32,10 @@ options = info (helper <*> parser)
 
 --------------------------------------------------------------------------------
 
-diskResult :: Floating r => IpeOut (DiskResult p r) (IpeObject r)
-diskResult = IpeOut f
+diskResult :: Floating r => IpeOut (DiskResult p r) Group r
+diskResult (DiskResult d pts) = ipeGroup (iO' d  : (F.toList . fmap g $ pts))
   where
-    f (DiskResult d pts) = asIpeGroup (asIpeObject d mempty : (F.toList . fmap g $ pts))
-    g p = asIpeObject (p^.core) mempty
-
+    g p = iO' (p^.core)
 
 mainWith              :: Options -> IO ()
 mainWith (Options fp) = do
@@ -56,7 +47,7 @@ mainWith (Options fp) = do
         case map ext $ ipeP^..content.Tr.traverse._IpeUse.core.symbolPoint of
           pts@(_:_:_) -> do
                            let res = smallestEnclosingDisk gen pts
-                           printAsIpeSelection . asIpe diskResult $ res
+                           printAsIpeSelection . iO . diskResult $ res
           _           -> putStrLn "Not enough points!"
 
 

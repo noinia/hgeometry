@@ -361,14 +361,16 @@ dartData = lens getF setF
     getF     = V.imap (\i x -> (toEnum i, x^.dataVal)) . _rawDartData
     setF ps ds' = ps&rawDartData %~ mkDS' ds'
 
-    assignDart ds v (d,x) = let i = fromEnum d
-                                y = ds V.! i
-                            in MV.write v i (y&dataVal .~ x)
-
+    -- create a new dartData vector to assign the values to
     mkDS' ds' ds = V.create $ do
                      v <- MV.new (V.length ds)
                      mapM_ (assignDart ds v) ds'
                      pure v
+
+    assignDart ds v (d,x) = let i = fromEnum d
+                                y = ds V.! i
+                            in MV.write v i (y&dataVal .~ x)
+
 
 -- | Lens to the facedata of the faces themselves. The indices correspond to the faceIds
 faceData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e f' r)

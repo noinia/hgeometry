@@ -14,7 +14,7 @@ import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Proxy
-import           Data.LSeq (LSeq(..), ViewL(..), pattern (:<|))
+import           Data.LSeq (LSeq(..), pattern (:<|))
 import qualified Data.LSeq as LSeq
 import           Data.Util
 import qualified Data.Vector.Fixed as FV

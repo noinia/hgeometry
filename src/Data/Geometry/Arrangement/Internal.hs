@@ -37,6 +37,9 @@ data Arrangement s l v e f r = Arrangement {
   -- associated with any line
 makeLenses ''Arrangement
 
+type instance NumType   (Arrangement s l v e f r) = r
+type instance Dimension (Arrangement s l v e f r) = 2
+
 --------------------------------------------------------------------------------
 
 -- | Builds an arrangement of \(n\) lines

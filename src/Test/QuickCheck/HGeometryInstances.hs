@@ -8,6 +8,8 @@ import           Data.BinaryTree
 import           Data.Ext
 import           Data.Geometry hiding (vector)
 import           Data.Geometry.Box
+import           Data.PlanarGraph
+import qualified Data.PlanarGraph as PlanarGraph
 import           Data.Geometry.SubLine
 import           Data.OrdSeq (OrdSeq, fromListByOrd)
 import           Data.Proxy
@@ -87,3 +89,14 @@ instance (Arbitrary r, Arbitrary p, Arity d, Ord r, Ord p, Num r)
 
 instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) where
   arbitrary = LineSegment <$> arbitrary <*> arbitrary
+
+
+
+instance Arbitrary (Arc s) where
+  arbitrary = Arc <$> (arbitrary `suchThat` (>= 0))
+
+instance Arbitrary Direction where
+  arbitrary = (\b -> if b then PlanarGraph.Positive else Negative) <$> arbitrary
+
+instance Arbitrary (Dart s) where
+  arbitrary = Dart <$> arbitrary <*> arbitrary

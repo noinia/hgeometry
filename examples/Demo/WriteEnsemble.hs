@@ -3,17 +3,14 @@ module Demo.WriteEnsemble where
 import Control.Lens
 import Data.Data
 import Data.Ext
-import Control.Applicative
 import Data.Fixed
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Geometry.Ipe
 import Data.Geometry
 import Data.Geometry.PolyLine(fromPoints)
-import System.Environment
 import System.Directory
 import Data.List(isSuffixOf)
-import Data.Monoid
 import Data.Time.Calendar
 import Options.Applicative
 
@@ -54,7 +51,7 @@ mainWith (Options kind inPath outPath) = do
           _        -> asTempPt
     polies <- mapM (fmap (asPts f) . readFile' . ((inPath ++ "/") ++)) inFiles
     let polies' = map (fromPoints . take 100) . trim $ polies
-    writeIpeFile outPath . singlePageFromContent . map (flip asIpeObject mempty) $ polies'
+    writeIpeFile outPath . singlePageFromContent . map iO' $ polies'
 
 readFile'    :: String -> IO T.Text
 readFile' fp = putStrLn fp >> TIO.readFile fp

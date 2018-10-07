@@ -248,14 +248,14 @@ makePrisms ''IpeObject
 makeLenses ''Group
 
 class ToObject i where
-  ipeObject' :: i r -> IpeAttributes i r -> IpeObject r
+  mkIpeObject :: IpeObject' i r -> IpeObject r
 
-instance ToObject Group      where ipeObject' g a = IpeGroup     (g :+ a)
-instance ToObject Image      where ipeObject' p a = IpeImage     (p :+ a)
-instance ToObject TextLabel  where ipeObject' p a = IpeTextLabel (p :+ a)
-instance ToObject MiniPage   where ipeObject' p a = IpeMiniPage  (p :+ a)
-instance ToObject IpeSymbol  where ipeObject' s a = IpeUse       (s :+ a)
-instance ToObject Path       where ipeObject' p a = IpePath      (p :+ a)
+instance ToObject Group      where mkIpeObject = IpeGroup
+instance ToObject Image      where mkIpeObject = IpeImage
+instance ToObject TextLabel  where mkIpeObject = IpeTextLabel
+instance ToObject MiniPage   where mkIpeObject = IpeMiniPage
+instance ToObject IpeSymbol  where mkIpeObject = IpeUse
+instance ToObject Path       where mkIpeObject = IpePath
 
 instance Fractional r => IsTransformable (IpeObject r) where
   transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
@@ -265,8 +265,9 @@ instance Fractional r => IsTransformable (IpeObject r) where
   transformBy t (IpeUse i)       = IpeUse       $ i&core %~ transformBy t
   transformBy t (IpePath i)      = IpePath      $ i&core %~ transformBy t
 
-
-
+-- | Shorthand for constructing ipeObjects
+ipeObject'     :: ToObject i => i r -> IpeAttributes i r -> IpeObject r
+ipeObject' i a = mkIpeObject $ i :+ a
 
 commonAttributes :: Lens' (IpeObject r) (Attributes (AttrMapSym1 r) CommonAttributes)
 commonAttributes = lens (Attrs . g) (\x (Attrs a) -> s x a)

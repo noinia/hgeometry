@@ -61,7 +61,7 @@ mainWith (Options inPath outPath) = do
     tks   <- concatMap (_tracks . combineTracks) <$> mapM readGPXFile files
     let polies  = mapMaybe asPolyLine tks
         polies' = map (douglasPeucker 0.01 . scaleUniformlyBy 100) polies
-        pg = singlePageFromContent $ map (asIpeObject' mempty) polies'
+        pg = singlePageFromContent $ map (iO . defIO) polies'
     -- print pg
     writeIpeFile outPath pg
 

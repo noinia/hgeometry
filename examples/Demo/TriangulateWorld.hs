@@ -68,13 +68,13 @@ mainWith (Options inFile outFile) = do
                      . concatMap (F.toList.rawFacePolygons) $ subdivs
           ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
           segs    = map (^._2.core) . concatMap (F.toList . edgeSegments) $ subdivs
-          out     = [ asIpeObject pg a
-                    | pg :+ a <- polies
+          out     = [ iO' pg
+                    | pg <- polies
                     ] <>
-                    [ asIpeObject s mempty
+                    [ iO' s
                     | s <- segs
                     ] <>
-                    [ asIpeObject pg mempty
+                    [ iO' pg
                     | pg <- yMonotones ]
       mapM_ print . map (\pg -> pg^.core.to polygonVertices.to length) $ polies'
       writeIpeFile outFile . singlePageFromContent $ out

@@ -43,7 +43,7 @@ data Test = Test
 
 drawArr    :: [Line 2 Rational :+ a] -> B.ByteString
 drawArr ls = let arr = constructArrangement (Identity Test) ls
-                 out = [ asIpe drawArrangement arr ]
+                 out = [ iO $ drawArrangement arr ]
                  Just bs = toIpeXML . singlePageFromContent $ out
              in bs
 

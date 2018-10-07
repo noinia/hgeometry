@@ -40,6 +40,9 @@ data Triangulation p r = Triangulation { _vertexIds  :: M.Map (Point 2 r) Vertex
                          deriving (Show,Eq)
 makeLenses ''Triangulation
 
+type instance NumType   (Triangulation p r) = r
+type instance Dimension (Triangulation p r) = 2
+
 
 type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 
@@ -59,11 +62,11 @@ tEdges :: Triangulation p r -> [(VertexID,VertexID)]
 tEdges = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
-drawTriangulation :: IpeOut (Triangulation p r) (IpeObject r)
-drawTriangulation = IpeOut $ \tr ->
-    let es = map (uncurry ClosedLineSegment) . triangulationEdges $ tr
-    in asIpeGroup $ map (\e -> asIpeObjectWith ipeLineSegment e mempty) es
-
+drawTriangulation :: IpeOut (Triangulation p r) Group r
+drawTriangulation tr =
+  ipeGroup [ iO $ ipeLineSegment e
+           | e <- map (uncurry ClosedLineSegment) . triangulationEdges $ tr
+           ]
 
 --------------------------------------------------------------------------------
 

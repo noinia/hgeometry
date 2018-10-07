@@ -205,18 +205,18 @@ test' = TR.triangulate' (Id Test) testPoly5
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
 printMP = mapM_ printAsIpeSelection
-        . map (asIpeObject' mempty . (^.core) . snd)
+        . map (iO' . (^.core) . snd)
         . toList . rawFacePolygons $ monotonePs
 
 
 
 printP = mapM_ printAsIpeSelection
-       . map (asIpeObject' mempty . (^.core) . snd)
+       . map (iO' . (^.core) . snd)
        . toList . PG.rawFacePolygons $ test'
 
 
 printPPX = mapM_ printAsIpeSelection
-        . map (asIpeObject' mempty . (^.core) . snd)
+        . map (iO' . (^.core) . snd)
         . toList . rawFacePolygons
 
 printPP = printPPX test

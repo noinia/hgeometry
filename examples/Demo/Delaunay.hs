@@ -45,7 +45,7 @@ mainWith (Options inFile outFile) = do
                pts' = NonEmpty.fromList pts
                dt   = delaunayTriangulation $ pts'
                emst = euclideanMST pts'
-               out  = [asIpe drawTriangulation dt, asIpe drawTree' emst]
+               out  = [iO $ drawTriangulation dt, iO $ drawTree' emst]
            -- print $ length $ edges' dt
            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
            writeIpeFile outFile . singlePageFromContent $ out

@@ -38,9 +38,8 @@ euclideanMST pts = (\v -> g^.locationOf v :+ g^.dataOf v) <$> t
 data MSTW
 
 
-drawTree' :: IpeOut (Tree (Point 2 r :+ p)) (IpeObject r)
-drawTree' = IpeOut $
-  asIpeGroup . map (asIpeObject' mempty . uncurry ClosedLineSegment) . treeEdges
+drawTree' :: IpeOut (Tree (Point 2 r :+ p)) Group r
+drawTree' = ipeGroup . map (iO . defIO  . uncurry ClosedLineSegment) . treeEdges
 
 
 treeEdges              :: Tree a -> [(a,a)]
