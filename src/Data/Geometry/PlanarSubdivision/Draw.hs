@@ -35,7 +35,7 @@ drawPlanarSubdivision = drawPlanarSubdivisionWith fv fe ff
 
 -- | Draw everything using the defaults
 drawPlanarSubdivision'    :: forall s v e f r. IpeOut (PlanarSubdivision s v e f r) Group r
-drawPlanarSubdivision' ps = drawPlanarSubdivision'
+drawPlanarSubdivision' ps = drawPlanarSubdivision
   (ps&vertexData.traverse   .~ Just (mempty :: IpeAttributes IpeSymbol r)
      &dartData.traverse._2  .~ Just (mempty :: IpeAttributes Path      r)
      &faceData.traverse     .~ Just (mempty :: IpeAttributes Path      r))
