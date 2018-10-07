@@ -158,8 +158,8 @@ isPositive d = d^.direction == Positive
 
 instance Enum (Dart s) where
   toEnum x
-    | even x    = Dart (Arc $ x `div` 2)       Positive
-    | otherwise = Dart (Arc $ (x `div` 2) + 1) Negative
+    | even x    = Dart (Arc $ x `div` 2) Positive
+    | otherwise = Dart (Arc $ x `div` 2) Negative
   -- get the back edge by adding one
 
   fromEnum (Dart (Arc i) d) = case d of
