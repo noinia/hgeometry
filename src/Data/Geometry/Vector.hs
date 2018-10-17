@@ -100,3 +100,11 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
     g No      = Nothing
     g Maybe   = error "scalarMultiple': found a Maybe, which means the vectors either have length zero, or one of them is all Zero!"
     g (Yes x) = Just x
+
+-- somehow this goes wrong when u is a vector minInfinity maxInfinity and v has zero values.
+
+-- | Given vectors u and v, both not the zero vector,
+-- Get the scalar labmda s.t. v = lambda * u (if it exists)
+scalarMultiple'' u v = undefined
+
+-- exists_ lambda ui vi = lambda*ui == vi

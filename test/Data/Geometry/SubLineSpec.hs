@@ -30,13 +30,19 @@ spec = do
     `shouldBe` False
 
   it "Intersection test" $
-    let mySeg  = Val <$> ClosedLineSegment (ext origin) (ext $ Point2 (14 :: Rational) 0)
-        mySeg' = mySeg^._SubLine
-        myLine = fromLine $ lineThrough (Point2 0 0) (Point2 10 (0 :: Rational))
-    in (myLine `intersect` mySeg')
+    let mySeg :: LineSegment 2 () Rational
+        mySeg    = ClosedLineSegment (ext origin) (ext $ Point2 14 0)
+        myLine :: SubLine 2 () (UnBounded Rational) Rational
+        myLine   = fromLine $ lineThrough (Point2 0 0) (Point2 10 0)
+        myAnswer :: Interval () (UnBounded Rational)
+        myAnswer = ClosedInterval (ext $ Val 0) (ext . Val $ 7 % 5)
+    in (myLine `intersect` (mkSL mySeg))
        `shouldBe`
-       coRec (myLine&subRange .~ ClosedInterval (ext $ Val 0) (ext . Val $ 7 % 5))
+       coRec (myLine&subRange .~ myAnswer)
 
+
+mkSL  :: (Num r, Arity d) => LineSegment d () r -> SubLine d () (UnBounded r) r
+mkSL s = s^._SubLine.re _unBounded
 
 
 seg :: LineSegment 2 () Rational
@@ -46,5 +52,5 @@ seg = ClosedLineSegment (ext (Point2 1 1)) (ext (Point2 5 5))
 
 -- | Original def of onSubline
 onSubLineOrig                 :: (Ord r, Fractional r, Arity d)
-                          => Point d r -> SubLine d p r -> Bool
-onSubLineOrig p (SubLine l r) = toOffset p l `inInterval` r
+                          => Point d r -> SubLine d p r r -> Bool
+onSubLineOrig p (SubLine l r) = toOffset' p l `inInterval` r

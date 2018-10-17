@@ -1,19 +1,28 @@
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Triangle where
 
-import Control.Lens
-import Data.Bifunctor
-import Data.Ext
-import Data.Geometry.Ball (Disk, disk)
-import Data.Geometry.Boundary
-import Data.Geometry.HyperPlane
-import Data.Geometry.LineSegment
-import Data.Geometry.Point
-import Data.Geometry.Properties
-import Data.Geometry.Transformation
-import Data.Geometry.Vector
-import GHC.TypeLits
+import           Control.Lens
+import           Data.Bifunctor
+import           Data.Either (partitionEithers)
+import           Data.Ext
+import           Data.Geometry.Ball (Disk, disk)
+import           Data.Geometry.Boundary
+import           Data.Geometry.HyperPlane
+import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Properties
+import           Data.Geometry.Transformation
+import           Data.Geometry.Vector
+import qualified Data.Geometry.Vector as V
+import qualified Data.List as List
+import           Data.Maybe (mapMaybe)
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
+import           GHC.TypeLits
+
 
 --------------------------------------------------------------------------------
 
@@ -127,3 +136,80 @@ q `onTriangle` t = let Vector3 a b c = toBarricentric q t
 -- myQ = read "Point2 [(-5985) % 16,(-14625) % 1]"
 -- myTri :: Triangle 2 () Rational
 -- myTri = read "Triangle (Point2 [(-15) % 1,0 % 1] :+ ()) (Point2 [225 % 2,0 % 1] :+ ()) (Point2 [135 % 1,0 % 1] :+ ())"
+
+type instance IntersectionOf (Line 2 r) (Triangle 2 p r) =
+  [ NoIntersection, Point 2 r, LineSegment 2 () r ]
+
+instance (Fractional r, Ord r) => (Line 2 r) `IsIntersectableWith` (Triangle 2 p r) where
+   nonEmptyIntersection = defaultNonEmptyIntersection
+
+   l `intersect` (Triangle p q r) =
+     case first List.nub . partitionEithers . mapMaybe collect $ sides of
+       ([],[])   -> coRec NoIntersection
+       (_, [s])  -> coRec $ first (const ()) s
+       ([a],_)   -> coRec a
+       ([a,b],_) -> coRec $ ClosedLineSegment (ext a) (ext b)
+       (_,_)     -> error "intersecting a line with a triangle. Triangle is degenerate"
+     where
+       sides = [ClosedLineSegment p q, ClosedLineSegment q r, ClosedLineSegment r p]
+
+       collect   :: LineSegment 2 p r -> Maybe (Either (Point 2 r) (LineSegment 2 p r))
+       collect s = match (s `intersect` l) $
+                        (H $ \NoIntersection           -> Nothing)
+                     :& (H $ \(a :: Point 2 r)         -> Just $ Left a)
+                     :& (H $ \(e :: LineSegment 2 p r) -> Just $ Right e)
+                     :& RNil
+
+
+
+type instance IntersectionOf (Line 3 r) (Triangle 3 p r) =
+  [ NoIntersection, Point 3 r, LineSegment 3 () r ]
+
+instance (Fractional r, Ord r) => (Line 3 r) `IsIntersectableWith` (Triangle 3 p r) where
+   nonEmptyIntersection = defaultNonEmptyIntersection
+
+   l@(Line a v) `intersect` t@(Triangle (p :+ _) (q :+ _) (r :+ _)) =
+       match (l `intersect` h) $
+            (H $ \NoIntersection   -> coRec NoIntersection)
+         :& (H $ \i@(Point3 _ _ _) -> if onTriangle' i then coRec i else coRec NoIntersection)
+         :& (H $ \_                -> intersect2d)
+         :& RNil
+     where
+       h@(Plane _ n) = supportingPlane t
+
+       -- 2d triangle and the line in terms of 2d-coordinates wr.t. of a
+       -- coordinate system in the supporting plane of t. The origin of this
+       -- coordinate system corresponds to the second vertex of t (q)
+       t' = Triangle (ext $ project p) (ext origin) (ext $ project r)
+       l' = Line (project a) (project' v)
+
+       -- test if the point in terms of its 2d coords lies in side the projected triangle
+       onTriangle'                :: Point 3 r -> Bool
+       onTriangle' i = (project i) `onTriangle` t'
+
+       -- FIXME! these vectors may not be unit vectors. How do we deal with
+       -- that? (and does that really matter here?)
+       transf :: Transformation 3 r
+       transf = let u = p .-. q
+                in rotateTo (Vector3 u (n `cross` u) n) |.| translation ((-1) *^ (toVec q))
+       -- inverse of the transformation above.
+       invTrans :: Transformation 3 r
+       invTrans = inverseOf transf
+
+
+       project :: Point 3 r -> Point 2 r
+       project = projectPoint . transformBy transf
+       project' :: Vector 3 r -> Vector 2 r
+       project' = toVec . project . Point
+
+       lift :: Point 2 r -> Point 3 r
+       lift = Point . transformBy invTrans . flip V.snoc 0 . toVec
+         -- lift a 2d point back into plane coordinates
+
+       intersect2d :: Intersection (Line 3 r) (Triangle 3 p r)
+       intersect2d = match (l' `intersect` t') $
+            (H $ \NoIntersection    -> coRec NoIntersection)
+         :& (H $ \i@(Point2 _ _)    -> coRec $ lift i)
+         :& (H $ \(LineSegment s e) -> coRec $ LineSegment (s&unEndPoint.core %~ lift)
+                                                           (e&unEndPoint.core %~ lift))
+         :& RNil

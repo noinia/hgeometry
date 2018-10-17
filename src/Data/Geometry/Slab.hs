@@ -121,11 +121,11 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
 
 
 
-type instance IntersectionOf (SubLine 2 p r) (Slab o a r) =
-  [NoIntersection, SubLine 2 () r]
+type instance IntersectionOf (SubLine 2 p s r) (Slab o a r) =
+  [NoIntersection, SubLine 2 () s r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
-         SubLine 2 a r `IsIntersectableWith` (Slab o a r) where
+         SubLine 2 a r r `IsIntersectableWith` (Slab o a r) where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -139,8 +139,7 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
                                  :& RNil)
     :& RNil
     where
-      dropExtra sub = sub&subRange %~ bimap (const ()) id
-      singleton p = let x = ext $ toOffset p l in SubLine l (ClosedInterval x x)
+      singleton p = let x = ext $ toOffset' p l in SubLine l (ClosedInterval x x)
 
 
 type instance IntersectionOf (LineSegment 2 p r) (Slab o a r) =
@@ -158,5 +157,5 @@ instance (Fractional r, Ord r, HasBoundingLines o) =>
 
 
 
-test :: SubLine 2 () Double
-test = (ClosedLineSegment (ext origin) (ext origin))^._SubLine
+-- test :: SubLine 2 () Double Double
+-- test = (ClosedLineSegment (ext origin) (ext origin))^._SubLine

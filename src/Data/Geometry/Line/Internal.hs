@@ -29,6 +29,13 @@ makeLenses ''Line
 
 instance (Show r, Arity d) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
+
+-- -- TODO:
+-- instance (Read r, Arity d)   => Read (Line d r) where
+
+
+
+
 deriving instance (NFData r, Arity d) => NFData        (Line d r)
 deriving instance Arity d             => Functor       (Line d)
 deriving instance Arity d             => F.Foldable    (Line d)
@@ -94,6 +101,29 @@ p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
+
+
+-- | Get the point at the given position along line, where 0 corresponds to the
+-- anchorPoint of the line, and 1 to the point anchorPoint .+^ directionVector
+pointAt              :: (Num r, Arity d) => r -> Line d r -> Point d r
+pointAt a (Line p v) = p .+^ (a *^ v)
+
+
+-- | Given point p and a line (Line q v), Get the scalar lambda s.t.
+-- p = q + lambda v. If p does not lie on the line this returns a Nothing.
+toOffset              :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Maybe r
+toOffset p (Line q v) = scalarMultiple (p .-. q) v
+
+
+-- | Given point p *on* a line (Line q v), Get the scalar lambda s.t.
+-- p = q + lambda v. (So this is an unsafe version of 'toOffset')
+--
+-- pre: the input point p lies on the line l.
+toOffset'             :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
+toOffset' p = fromJust' . toOffset p
+  where
+    fromJust' (Just x) = x
+    fromJust' _        = error "toOffset: Nothing"
 
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.

@@ -11,9 +11,25 @@ import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Data.Proxy
 import Test.Hspec
+import Data.Ratio
+import Data.Vinyl.CoRec
 
 spec :: Spec
-spec = testCases "test/Data/Geometry/pointInTriangle.ipe"
+spec = do testCases "test/Data/Geometry/pointInTriangle.ipe"
+          describe "intersection tests" $ do
+            it "intersecting Line 2 with Triangle 2 " $ do
+              let t :: Triangle 2 () Rational
+                  t = Triangle (ext origin) (ext $ Point2 10 0) (ext $ Point2 10 10)
+                  hor :: Rational -> Line 2 Rational
+                  hor = horizontalLine
+              (hor 3 `intersect` t)
+                `shouldBe` (coRec $ ClosedLineSegment (ext $ Point2 10 (3 :: Rational))
+                                                      (ext $ Point2 3  (3 :: Rational)))
+              (hor 10 `intersect` t)
+                `shouldBe` (coRec $ Point2 10 (10 :: Rational))
+              (hor 11 `intersect` t)
+                `shouldBe` (coRec NoIntersection)
+
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile fp) >>= \case

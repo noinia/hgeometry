@@ -37,7 +37,6 @@ import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Ord (comparing)
-import           Data.UnBounded
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
@@ -91,22 +90,21 @@ instance HasEnd (LineSegment d p r) where
   end = unLineSeg.end
 
 
-_SubLine :: (Fractional r, Eq r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r)
+_SubLine :: (Num r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r r)
 _SubLine = iso segment2SubLine subLineToSegment
 {-# INLINE _SubLine #-}
 
-segment2SubLine    :: (Fractional r, Eq r, Arity d)
-                   => LineSegment d p r -> SubLine d p r
-segment2SubLine ss = SubLine l (Interval s e)
+segment2SubLine    :: (Num r, Arity d)
+                   => LineSegment d p r -> SubLine d p r r
+segment2SubLine ss = SubLine (Line p (q .-. p)) (Interval s e)
   where
-    l = supportingLine ss
-    f = flip toOffset l
-    (Interval p q)  = ss^.unLineSeg
+    p = ss^.start.core
+    q = ss^.end.core
+    (Interval a b)  = ss^.unLineSeg
+    s = a&unEndPoint.core .~ 0
+    e = b&unEndPoint.core .~ 1
 
-    s = p&unEndPoint.core %~ f
-    e = q&unEndPoint.core %~ f
-
-subLineToSegment    :: (Num r, Arity d) => SubLine d p r -> LineSegment d p r
+subLineToSegment    :: (Num r, Arity d) => SubLine d p r r -> LineSegment d p r
 subLineToSegment sl = let (Interval s' e') = (fixEndPoints sl)^.subRange
                           s = s'&unEndPoint %~ (^.extra)
                           e = e'&unEndPoint %~ (^.extra)
@@ -124,8 +122,8 @@ deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
 deriving instance Arity d                   => Functor (LineSegment d p)
 
 instance PointFunctor (LineSegment d p) where
-  pmap f ~(LineSegment s e) = LineSegment (s&unEndPoint %~ first f)
-                                          (e&unEndPoint %~ first f)
+  pmap f ~(LineSegment s e) = LineSegment (s&unEndPoint.core %~ f)
+                                          (e&unEndPoint.core %~ f)
 
 instance Arity d => IsBoxable (LineSegment d p r) where
   boundingBox l = boundingBox (l^.start.core) <> boundingBox (l^.end.core)
@@ -173,14 +171,12 @@ instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  ~s@(LineSegment p q) `intersect` l = let f  = bimap (fmap Val) (const ())
-                                           s' = LineSegment (p&unEndPoint %~ f)
-                                                            (q&unEndPoint %~ f)
-                                    in match ((s'^._SubLine) `intersect` (fromLine l)) $
-         (H   coRec)
-      :& (H $ coRec . fmap (_unUnBounded))
-      :& (H $ const (coRec s))
-      :& RNil
+  s `intersect` l = let ubSL = s^._SubLine.re _unBounded.to dropExtra
+                    in match (ubSL `intersect` (fromLine l)) $
+                            (H   coRec)
+                         :& (H $ coRec)
+                         :& (H $ const (coRec s))
+                         :& RNil
 
 -- * Functions on LineSegments
 

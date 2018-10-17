@@ -82,8 +82,8 @@ instance (Arbitrary r, Arbitrary p, Ord r, Ord p) => Arbitrary (Interval p r) wh
   arbitrary = GInterval <$> arbitrary
 
 
-instance (Arbitrary r, Arbitrary p, Arity d, Ord r, Ord p, Num r)
-         => Arbitrary (SubLine d p r) where
+instance (Arbitrary r, Arbitrary p, Arbitrary s, Arity d, Ord r, Ord s, Ord p, Num r)
+         => Arbitrary (SubLine d p s r) where
   arbitrary = SubLine <$> arbitrary <*> arbitrary
 
 

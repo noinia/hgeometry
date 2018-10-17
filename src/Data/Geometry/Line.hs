@@ -5,7 +5,8 @@
 module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
-import           Control.Lens ((^.), re, bimap)
+import           Control.Lens
+import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -44,12 +45,14 @@ instance (Ord r, Fractional r)
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   line' `intersect` (Boundary rect)  = case asA' segP of
-      [sl'] -> coRec . bimap id unVal $ sl'^.re _SubLine
-      []    -> case nub' . map (fmap unVal) $ asA' pointP of
+      [sl'] -> case fromUnbounded sl' of
+        Nothing   -> error "intersect: line x boundary rect; unbounded line? absurd"
+        Just sl'' -> coRec $ sl''^.re _SubLine
+      []    -> case nub' $ asA' pointP of
         [p]   -> coRec p
         [p,q] -> coRec (p,q)
         _     -> coRec NoIntersection
-      _     -> error "intersect; ine x boundary rect; absurd"
+      _     -> error "intersect; line x boundary rect; absurd"
     where
       (t,r,b,l) = sides' rect
       ints = map (\s -> sl `intersect` toSL s) [t,r,b,l]
@@ -58,18 +61,16 @@ instance (Ord r, Fractional r)
 
       sl = fromLine line'
       -- wrap a segment into an potentially unbounded subline
-      toSL s = bimap (const ()) Val $ s^._SubLine
+      toSL  :: LineSegment 2 p r -> SubLine 2 () (UnBounded r) r
+      toSL s = s^._SubLine.re _unBounded.to dropExtra
 
-      unVal (Val x) = x
-      unVal _       = error "intersect; line x boundary rect: unVal Unbounded"
-
-      asA'    :: (t ∈ IntersectionOf (SubLine 2 () (UnBounded r))
-                                     (SubLine 2 () (UnBounded r)))
+      asA'    :: (t ∈ IntersectionOf (SubLine 2 () (UnBounded r) r)
+                                     (SubLine 2 () (UnBounded r) r))
               => proxy t -> [t]
       asA' px = mapMaybe (asA px) ints
 
-      segP   = Proxy :: Proxy (SubLine 2 () (UnBounded r))
-      pointP = Proxy :: Proxy (Point 2      (UnBounded r))
+      segP   = Proxy :: Proxy (SubLine 2 () (UnBounded r) r)
+      pointP = Proxy :: Proxy (Point 2 r)
 
 
 type instance IntersectionOf (Line 2 r) (Rectangle p r) =

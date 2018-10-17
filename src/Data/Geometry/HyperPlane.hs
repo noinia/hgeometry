@@ -15,6 +15,7 @@ import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
+-- | Hyperplanes embedded in a \(d\) dimensional space.
 data HyperPlane (d :: Nat) (r :: *) = HyperPlane { _inPlane   :: !(Point d r)
                                                  , _normalVec :: !(Vector d r)
                                                  } deriving Generic
@@ -59,6 +60,8 @@ q `onHyperPlane` (HyperPlane p n) = n `dot` (q .-. p) == 0
 
 type Plane = HyperPlane 3
 
+pattern Plane     :: Point 3 r -> Vector 3 r -> Plane r
+pattern Plane p n = HyperPlane p n
 
 from3Points       :: Num r => Point 3 r -> Point 3 r -> Point 3 r -> HyperPlane 3 r
 from3Points p q r = let u = q .-. p

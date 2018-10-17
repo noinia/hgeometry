@@ -60,23 +60,18 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (HalfLine d r
 --------------------------------------------------------------------------------
 
 halfLineToSubLine                :: (Arity d, Num r)
-                                 => HalfLine d r -> SubLine d () (UnBounded r)
-halfLineToSubLine (HalfLine p v) = let l = fmap Val $ Line p v
+                                 => HalfLine d r -> SubLine d () (UnBounded r) r
+halfLineToSubLine (HalfLine p v) = let l = Line p v
                                    in SubLine l (Interval (Closed $ ext (Val 0))
                                                           (Open   $ ext MaxInfinity))
 
 
-fromSubLine               :: (Num r, Arity d) => SubLine d p (UnBounded r) -> Maybe (HalfLine d r)
-fromSubLine (SubLine l' i) = case (i^.start.core, i^.end.core) of
-                               (Val x, MaxInfinity) -> f x
-                               (MinInfinity, Val x) -> f x
-                               _                    -> Nothing
-  where
-    f x = (\l@(Line _ v) -> HalfLine (pointAt x l) v)
-       <$> T.mapM unBoundedToMaybe l'
-
-
-
+fromSubLine               :: (Num r, Arity d) => SubLine d p (UnBounded r) r
+                          -> Maybe (HalfLine d r)
+fromSubLine (SubLine l i) = case (i^.start.core, i^.end.core) of
+   (Val x, MaxInfinity) -> Just $ HalfLine (pointAt x l) (l^.direction)
+   (MinInfinity, Val x) -> Just $ HalfLine (pointAt x l) ((-1) *^ l^.direction)
+   _                    -> Nothing
 
 type instance IntersectionOf (HalfLine 2 r) (Line 2 r) = [ NoIntersection
                                                          , Point 2 r
