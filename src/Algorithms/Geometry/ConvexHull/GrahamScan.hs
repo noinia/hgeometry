@@ -10,7 +10,6 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Monoid
 
 
 -- | \(O(n \log n)\) time ConvexHull using Graham-Scan. The resulting polygon is

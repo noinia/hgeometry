@@ -55,6 +55,7 @@ modules =
 
   , "Data.Geometry.Point"
   , "Data.Geometry.Vector"
+  , "Data.Geometry.Transformation"
   , "Data.Geometry.Line"
   , "Data.Geometry.Line.Internal"
   , "Data.Geometry.Interval"
