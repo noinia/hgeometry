@@ -1,127 +1,112 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FunctionalDependencies  #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.ClosestPair.DivideAndConquer where
 
-import           Algorithms.Geometry.ClosestPair.Naive(Two(..), PP, mkPair, getVal)
-import           Control.Applicative
-import           Control.Lens((^.))
+import           Control.Lens
+import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Geometry(qdA)
 import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Data.LSeq (LSeq)
+import qualified Data.LSeq as LSeq
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NE
-import           Data.Proxy
-import           Data.Semigroup
-import qualified Data.Sequence as S
-import qualified Data.Traversable as Tr
-import qualified Data.Vector.Fixed as FV
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Ord (comparing)
+import           Data.Semigroup.Foldable(foldMap1)
+import           Data.UnBounded
+import           Data.Util
 
+--------------------------------------------------------------------------------
 
--- A VS represents a vector of d views on the same data. We use it to maintain
--- a set a sorted on d different keys.
-type VS d a = Vector d (S.Seq a)
+type CP q r = Top (SP (Two q) r) -- ^ the closest pair and its (squared) distance
 
+data CCP p r = CCP (NonEmpty (Point 2 r :+ p))   -- ^ pts ordered on increasing y-order
+                   (CP (Point 2 r :+ p) r) -- ^ the closest pair (if we know it yet)
+            deriving (Show,Eq)
 
--- -- | Split the VS using the i^th index, at a given position j. Returns a triple
--- -- (l,x,r) with:
--- -- all elements in l on positions < j (according to the i^th index)
--- -- al elements in r on positions >= j (according to the i^th index)
--- -- x = the element on the j^th position according to index i (i..e)
--- split        :: (i <=. d) => VS d a -> proxy i -> Int -> (a -> Bool)
+instance (Num r, Ord r) => Semigroup (CCP p r) where
+  (CCP ptsl cpl) <> (CCP ptsr cpr) = CCP (mergeSortedBy cmp ptsl ptsr)
+                                         (mergePairs (minBy getDist cpl cpr) ptsl ptsr)
+    where
+      -- compare on y first then on x
+      cmp     :: Point 2 r :+ p -> Point 2 r :+ p -> Ordering
+      cmp p q = comparing (^.core.yCoord) p q <> comparing (^.core.xCoord) p q
 
---                 (VS d a, a, VS d a)
--- split vs i p = (l,x,r)
---   where
---     l = filter' p
---     r = filter' p
---     p y =
---     (S.ViewL x _) = s
-
-
-
-filter'   :: Arity d => (a -> Bool) -> VS d a -> VS d a
-filter' p = fmap (S.filter p)
-
-
-half      :: (1 <=. d, i <=. d, Arity d)
-             => VS d (Point d r :+ p) -> proxy i ->
-             ( VS d (Point d r :+ p)
-             , Point d r :+ p
-             , VS d (Point d r :+ p)
-             )
-half vs i = (filter' pred vs, p, filter (not . pred) vs)
+-- | Classical divide and conquer algorithm to compute the closest pair among
+-- \(n\) points.
+--
+-- running time: \(O(n)\)
+closestPair :: ( Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
+closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . LSeq.toNonEmpty
+            . LSeq.unstableSortBy (comparing (^.core))
   where
-    h = size vs `div` 2
-    p = (elemAt i h vs)
-    pred q = (q^.core.coord i)  < (p^.core.coord i)
+    mkCCP (Elem p) = CCP (p :| []) Top
+    f = \case
+          CCP _ (ValT (SP cp _)) -> cp
+          CCP _ Top              -> error "closestPair: absurd."
 
 
-elemAt        :: (Arity d, i <=. d) => proxy i -> Int -> (VS d a) -> a
-elemAt i j vs = S.index j $ vs^.element i
-
-
-size    :: (1 <=. d, Arity d) => VS d a -> Int
-size vs = S.length $ vs^.element (C :: C 0)
-
-
-
--- | divide and conquer algo for 2 dimensional closest pair
--- Note that we need at least two elements
--- for there to be a closest pair.
-closestPair :: ( FV.Dim v ~ FV.S (FV.S n)
-               , FV.Vector v (Point 2 r :+ p)
-               , Ord r, Num r
-               ) => v (Point 2 r :+ p) -> Two (Point 2 r :+ p)
-closestPair = undefined
-  -- where
-
-
-
-closestPair'    :: (1 <=. d', Arity d')
-                => VS d (Point d r :+ p) -> Two (Point 2 r :+ p)
-closestPair' vs = undefined
+-- | Given an ordering and two nonempty sequences ordered according to that
+-- ordering, merge them
+mergeSortedBy           :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
+mergeSortedBy cmp ls rs = NonEmpty.fromList $ go (F.toList ls) (F.toList rs)
   where
-    (l,x,r) = half vs (C :: C 1)
+    go []         ys     = ys
+    go xs         []     = xs
+    go xs@(x:xs') ys@(y:ys') = case x `cmp` y of
+                                 LT -> x : go xs' ys
+                                 EQ -> x : go xs' ys
+                                 GT -> y : go xs  ys'
+
+
+mergePairs            :: forall p r. (Ord r, Num r)
+                      => CP (Point 2 r :+ p) r -- ^ current closest pair and its dist
+                      -> NonEmpty (Point 2 r :+ p) -- ^ pts on the left
+                      -> NonEmpty (Point 2 r :+ p) -- ^ pts on the right
+                      -> CP (Point 2 r :+ p) r
+mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
+  where
+
+    -- scan through the points on the right in increasing order.
+    go              :: CP (Point 2 r :+ p) r -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+                    -> CP (Point 2 r :+ p) r
+    go cp _  []     = cp
+    go cp ls (r:rs) = let ls'' = trim (getDist cp) ls r
+                          cp'' = run cp r ls'' -- try to find a new closer pair with r.
+                      in go cp'' ls'' rs   -- and then process the remaining points
+
+    -- ditch the points on the left that are too low anyway
+    trim               :: Top r -> [Point 2 r :+ q] -> Point 2 r :+ a
+                       -> [Point 2 r :+ q]
+    trim (ValT d) ls r = L.dropWhile (\l -> l^.core.yCoord < r^.core.yCoord - d) ls
+    trim _        ls _ = ls
+
+    -- try and find a new closest pair with r. If we get to points that are too far above
+    -- r we stop (since none of those points will be closer to r anyway)
+    run          :: CP (Point 2 r :+ p) r -> Point 2 r :+ p -> [Point 2 r :+ p]
+                 -> CP (Point 2 r :+ p) r
+    run cp'' r ls =
+      runWhile cp'' ls
+               (\cp l -> ValT (l^.core.yCoord - r^.core.yCoord) < (getDist cp))
+               (\cp l -> minBy getDist cp (ValT $ SP (Two l r) (dist l r)))
+
+    dist (p :+ _) (q :+ _) = squaredEuclideanDist p q
 
 
 
--- newtype Count = Count Int deriving (Show,Eq,Ord,Num,Integral,Real,Enum)
 
--- instance Semigroup Count where
---   a <> b = a + b
+-- | Given some function that decides when to keep things while maintaining some state.
+runWhile           :: s -> [a] -> (s -> a -> Bool) -> (s -> a -> s) -> s
+runWhile s' ys p f = go s' ys
+  where
+    go s []                 = s
+    go s (x:xs) | p s x     = go (f s x) xs  -- continue with new state
+                | otherwise = s -- stop, return the current state
 
--- instance Monoid Count where
---   mempty = 1
---   a `mappend` b = a <> b
+-- | returns the minimum element according to some function.
+minBy                   :: Ord b => (a -> b) -> a -> a -> a
+minBy f a b | f a < f b = a
+            | otherwise = b
 
--- data Lab a = Lab !(Max a) !Count
-
-
--- data Tree v a = Leaf a
---               | Node (Tree v a) v (Tree v a)
---               deriving (Show,Eq)
-
--- node     :: (Measure v a, Semigroup v) => Tree v a -> Tree v a -> Tree v a
--- node l r = Node l (measure l <> measure r) r
-
--- class Semigroup v => Measure v a | a -> v where
---   measure :: a -> v
-
--- instance Measure v a => Measure v (Tree v a) where
---   measure (Leaf a)     = measure a
---   measure (Node _ v _) = v
-
--- instance Measure v a => Semigroup (Tree v a) where
---   (<>) = node
-
-
--- traverse'  :: (Measure v b, Semigroup v, Applicative f) =>
---               (a -> f b) -> Tree u a -> f (Tree v b)
--- traverse' f (Leaf a)     = Leaf <$> f a
--- traverse' f (Node l _ r) = node <$> traverse' f l <*> traverse' f r
-
-
--- -- annotate :: BinLeafTree a -> Tree (Lab a) a
--- -- annotate =  traverse (\x -> Leaf $ Lab (Max x mempty))
+getDist :: CP a r -> Top r
+getDist = fmap (view _2)

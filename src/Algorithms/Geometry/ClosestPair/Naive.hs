@@ -2,17 +2,15 @@ module Algorithms.Geometry.ClosestPair.Naive where
 
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Geometry (qdA)
 import           Data.Geometry.Point
-import           Data.Geometry.Vector(Arity)
-import           Data.Geometry(qdA)
+import           Data.Geometry.Vector (Arity)
+import           Data.LSeq (LSeq)
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NE
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
-import qualified Data.Vector.Fixed as FV
+import           Data.Util
 
-
--- | Two a's
-data Two a = Two !a !a deriving (Show,Read,Eq,Ord)
 
 -- | A pair of points
 type PP d p r = ArgMin r (Two (Point d r :+ p))
@@ -27,10 +25,8 @@ mkPair pp@(p :+ _) qq@(q :+ _) = let dst = qdA p q
 -- | Naive algorithm to compute the closest pair in \(d\) dimensions. Runs in
 -- \(O(n^2)\) time (for any constant \(d\)). Note that we need at least two elements
 -- for there to be a closest pair.
-closestPair :: ( FV.Dim v ~ FV.S (FV.S n)
-               , FV.Vector v (Point d r :+ p)
-               , Ord r, Arity d, Num r
-               ) => v (Point d r :+ p) -> Two (Point d r :+ p)
+closestPair :: ( Ord r, Arity d, Num r
+               ) => LSeq 2 (Point d r :+ p) -> Two (Point d r :+ p)
 closestPair = getVal . getMin . sconcat . fmap (uncurry' mkPair) . pairs
   where
     uncurry' f (Two a b) = f a b
@@ -38,11 +34,8 @@ closestPair = getVal . getMin . sconcat . fmap (uncurry' mkPair) . pairs
 
 -- | Produce all lists from a vec of elements. Since the Vec contains at least two
 -- elements, the resulting list is non-empty
-pairs :: (FV.Dim v ~ FV.S (FV.S n), FV.Vector v a) => v a -> NE.NonEmpty (Two a)
-pairs = NE.fromList . concatMap f . L.inits . FV.toList
+pairs :: LSeq 2 a -> NonEmpty.NonEmpty (Two a)
+pairs = NonEmpty.fromList . concatMap f . L.inits . F.toList
   where
     f []     = []
     f (x:xs) = [Two x y | y <- xs]
-
-
-getVal (Arg _ x) = x

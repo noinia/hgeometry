@@ -31,6 +31,9 @@ pattern ValT x = GTop (Just x)
 pattern Top    :: Top a
 pattern Top    = GTop Nothing
 
+{-# COMPLETE ValT, Top #-}
+
+
 instance Ord1 Top where
   liftCompare _   Top       Top       = EQ
   liftCompare _   _         Top       = LT
@@ -59,6 +62,8 @@ pattern Bottom = GBottom Nothing
 
 pattern ValB   :: a -> Bottom a
 pattern ValB x = GBottom (Just x)
+
+{-# COMPLETE Bottom, ValB #-}
 
 instance Show a => Show (Bottom a) where
   show Bottom    = "Bottom"

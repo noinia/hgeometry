@@ -51,3 +51,6 @@ instance Bifunctor SP where
 
 -- | Strict pair with both items the same
 type Two a = SP a a
+
+pattern Two :: a -> a -> Two a
+pattern Two a b = (SP a b)

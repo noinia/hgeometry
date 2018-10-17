@@ -17,7 +17,7 @@ module Data.LSeq( LSeq
                 , mapWithIndex
                 , take
                 , drop
-                , unstableSortBy
+                , unstableSort, unstableSortBy
                 , head, last
                 , append
 
@@ -157,6 +157,9 @@ drop i = wrapUnsafe (S.drop i)
 
 unstableSortBy   :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 unstableSortBy f = wrapUnsafe (S.unstableSortBy f)
+
+unstableSort :: Ord a => LSeq n a -> LSeq n a
+unstableSort = wrapUnsafe (S.unstableSort)
 
 
 wrapUnsafe :: (S.Seq a -> S.Seq b) -> LSeq n a -> LSeq m b
