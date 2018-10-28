@@ -8,16 +8,19 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , scalarMultiple
                            -- reexports
                            , FV.replicate
-                           , FV.imap,
+                           , FV.imap
+                           , xComponent, yComponent, zComponent
                            ) where
 
 import           Control.Applicative (liftA2)
+import           Control.Lens(Lens')
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Vector.VectorFixed(C(..))
+import           Data.Geometry.Vector.VectorFixed (C(..))
 import           Data.Maybe
 import qualified Data.Vector.Fixed as FV
+import           GHC.TypeLits
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm)
 import           Linear.Vector as LV
@@ -108,3 +111,18 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 scalarMultiple'' u v = undefined
 
 -- exists_ lambda ui vi = lambda*ui == vi
+
+--------------------------------------------------------------------------------
+-- * Helper functions specific to two and three dimensional vectors
+
+xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
+xComponent = element (C :: C 0)
+{-# INLINABLE xComponent #-}
+
+yComponent :: (2 <= d, Arity d) => Lens' (Vector d r) r
+yComponent = element (C :: C 1)
+{-# INLINABLE yComponent #-}
+
+zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
+zComponent = element (C :: C 2)
+{-# INLINABLE zComponent #-}
