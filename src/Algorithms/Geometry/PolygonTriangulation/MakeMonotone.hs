@@ -208,7 +208,7 @@ tellIfMerge i v j = do SP u ut <- getHelper j
 
 -- | Get the helper of edge i, and its vertex type
 getHelper   :: Int -> Sweep p r (SP (Point 2 r :+ Int) VertexType)
-getHelper i = do Just ui    <- gets (^.helper.at i)
+getHelper i = do ui         <- gets (^?!helper.ix i)
                  STR u _ ut <- asks (^.ix' ui)
                  pure $ SP (u :+ ui) ut
 
@@ -221,7 +221,7 @@ lookupLE v s = let (l,m,_) = SS.splitOn (xCoordAt $ v^.yCoord) (v^.xCoord) s
 
 
 handleSplit              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()
-handleSplit i (v :+ adj) = do Just ej <- gets $ \ss -> ss^.statusStruct.to (lookupLE v)
+handleSplit i (v :+ adj) = do ej <- gets $ \ss -> ss^?!statusStruct.to (lookupLE v)._Just
                               let j = ej^.start.extra
                               SP u _ <- getHelper j
                               -- update the status struct:
@@ -243,7 +243,7 @@ handleMerge i (v :+ adj) = do let ePred = adj^._1.start.extra -- i-1
 -- | finds the edge j to the left of v_i, and connect v_i to it if the helper
 -- of j is a merge vertex
 connectToLeft     :: (Fractional r, Ord r) => Int -> Point 2 r -> Sweep p r ()
-connectToLeft i v = do Just ej <- gets $ \ss -> ss^.statusStruct.to (lookupLE v)
+connectToLeft i v = do ej <- gets $ \ss -> ss^?!statusStruct.to (lookupLE v)._Just
                        let j = ej^.start.extra
                        tellIfMerge i v j
                        modify $ \ss -> ss&helper %~ IntMap.insert j i
