@@ -22,7 +22,7 @@ import           Data.Util
 type CP q r = Top (SP (Two q) r) -- ^ the closest pair and its (squared) distance
 
 data CCP p r = CCP (NonEmpty (Point 2 r :+ p))   -- ^ pts ordered on increasing y-order
-                   (CP (Point 2 r :+ p) r) -- ^ the closest pair (if we know it yet)
+                   !(CP (Point 2 r :+ p) r) -- ^ the closest pair (if we know it yet)
             deriving (Show,Eq)
 
 instance (Num r, Ord r) => Semigroup (CCP p r) where
