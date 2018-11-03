@@ -92,6 +92,11 @@ class IpeWriteText t where
 class IpeWrite t where
   ipeWrite :: t -> Maybe (Node Text Text)
 
+instance IpeWrite t => IpeWrite [t] where
+  ipeWrite gs = case mapMaybe ipeWrite gs of
+                  [] -> Nothing
+                  ns -> (Just $ Element "group" [] ns)
+
 instance (IpeWrite l, IpeWrite r) => IpeWrite (Either l r) where
   ipeWrite = either ipeWrite ipeWrite
 
@@ -281,9 +286,7 @@ instance IpeWriteText r => IpeWrite (Path r) where
 
 
 instance (IpeWriteText r) => IpeWrite (Group r) where
-  ipeWrite (Group gs) = case mapMaybe ipeWrite gs of
-                          [] -> Nothing
-                          ns -> (Just $ Element "group" [] ns)
+  ipeWrite (Group gs) = ipeWrite gs
 
 
 instance ( AllSatisfy IpeAttrName rs

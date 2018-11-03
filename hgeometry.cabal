@@ -124,7 +124,7 @@ library
 
                     -- * Geometric Algorithms
                     Algorithms.Geometry.ConvexHull.GrahamScan
-                    Algorithms.Geometry.ConvexHull.DivideAndConqueror
+                    Algorithms.Geometry.ConvexHull.DivideAndConquer
 
                     Algorithms.Geometry.LowerEnvelope.DualCH
 
@@ -133,7 +133,7 @@ library
                     Algorithms.Geometry.SmallestEnclosingBall.Naive
 
                     Algorithms.Geometry.DelaunayTriangulation.Types
-                    Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror
+                    Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
                     Algorithms.Geometry.DelaunayTriangulation.Naive
 
                     Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
@@ -158,6 +158,9 @@ library
                     Algorithms.Geometry.LineSegmentIntersection.Types
 
                     Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval
+
+                    Algorithms.Geometry.ClosestPair.Naive
+                    Algorithms.Geometry.ClosestPair.DivideAndConquer
 
 
                     -- * Graph Algorithms
@@ -478,6 +481,7 @@ test-suite hspec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
+                 Algorithms.Geometry.ClosestPair.ClosestPairSpec
 
                  Util
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 
-import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror as DC
+import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer as DC
 import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
@@ -28,7 +28,7 @@ take' i = NonEmpty.fromList . NonEmpty.take i
 
 spec :: Spec
 spec = do
-  describe "Testing Divide and Conqueror Algorithm for Delaunay Triangulation" $ do
+  describe "Testing Divide and Conquer Algorithm for Delaunay Triangulation" $ do
     it "singleton " $ do
       dtEdges (take' 1 myPoints) `shouldBe` []
     toSpec (TestCase "myPoints" myPoints)
@@ -69,7 +69,7 @@ toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
 
 sameAsNaive       :: (Fractional r, Ord r, Show p, Show r)
                   => String -> NonEmpty.NonEmpty (Point 2 r :+ p) -> Spec
-sameAsNaive s pts = it ("Divide And Conqueror same answer as Naive on " ++ s) $
+sameAsNaive s pts = it ("Divide And Conquer same answer as Naive on " ++ s) $
                       (Naive.delaunayTriangulation pts
                        `sameEdges`
                        DC.delaunayTriangulation pts) `shouldBe` True

@@ -1,5 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror where
+module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types

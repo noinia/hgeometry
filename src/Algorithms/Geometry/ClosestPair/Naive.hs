@@ -6,10 +6,13 @@ import           Data.Geometry (qdA)
 import           Data.Geometry.Point
 import           Data.Geometry.Vector (Arity)
 import           Data.LSeq (LSeq)
-import qualified Data.List as L
+import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup
 import           Data.Util
+
+
+import qualified Data.LSeq as LSeq
 
 
 -- | A pair of points
@@ -35,7 +38,7 @@ closestPair = getVal . getMin . sconcat . fmap (uncurry' mkPair) . pairs
 -- | Produce all lists from a vec of elements. Since the Vec contains at least two
 -- elements, the resulting list is non-empty
 pairs :: LSeq 2 a -> NonEmpty.NonEmpty (Two a)
-pairs = NonEmpty.fromList . concatMap f . L.inits . F.toList
+pairs = NonEmpty.fromList . concatMap f . List.tails . F.toList
   where
     f []     = []
     f (x:xs) = [Two x y | y <- xs]

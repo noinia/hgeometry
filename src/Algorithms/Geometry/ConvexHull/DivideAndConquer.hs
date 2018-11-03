@@ -1,5 +1,4 @@
-module Algorithms.Geometry.ConvexHull.DivideAndConqueror( convexHull
-                                                        ) where
+module Algorithms.Geometry.ConvexHull.DivideAndConquer(convexHull) where
 
 import           Control.Lens ((^.))
 import           Data.BinaryTree
@@ -11,7 +10,7 @@ import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
 
--- | \(O(n \log n)\) time ConvexHull using divide and conqueror. The resulting polygon is
+-- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
 -- given in clockwise order.
 convexHull :: (Ord r, Num r)
            => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r

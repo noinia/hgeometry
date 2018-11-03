@@ -8,13 +8,14 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
-import qualified Data.List as L
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable(foldMap1)
 import           Data.UnBounded
 import           Data.Util
+
 
 --------------------------------------------------------------------------------
 
@@ -78,7 +79,7 @@ mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
     -- ditch the points on the left that are too low anyway
     trim               :: Top r -> [Point 2 r :+ q] -> Point 2 r :+ a
                        -> [Point 2 r :+ q]
-    trim (ValT d) ls r = L.dropWhile (\l -> l^.core.yCoord < r^.core.yCoord - d) ls
+    trim (ValT d) ls r = List.dropWhile (\l -> l^.core.yCoord < r^.core.yCoord - d) ls
     trim _        ls _ = ls
 
     -- try and find a new closest pair with r. If we get to points that are too far above

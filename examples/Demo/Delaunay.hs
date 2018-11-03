@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.Delaunay where
 
-import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConqueror
+import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Algorithms.Geometry.EuclideanMST.EuclideanMST
 import           Control.Lens
