@@ -1,12 +1,14 @@
 module Data.Util where
 
+import Control.DeepSeq
 import Control.Lens
+import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
 -- |  strict triple
 data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}
-               deriving (Show,Eq,Ord,Functor)
+               deriving (Show,Eq,Ord,Functor,Generic)
 
 instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (STR a b c) where
   (STR a b c) <> (STR d e f) = STR (a <> d) (b <> e) (c <> f)
@@ -16,6 +18,7 @@ instance (Semigroup a, Semigroup b, Semigroup c
   mempty = STR mempty mempty mempty
   mappend = (<>)
 
+instance (NFData a, NFData b, NFData c) => NFData (STR a b c)
 
 instance Field1 (STR a b c) (STR d b c) a d where
   _1 = lens fst' (\(STR _ b c) d -> STR d b c)
@@ -28,10 +31,8 @@ instance Field3 (STR a b c) (STR a b d) c d where
 
 
 
-
-
 -- | Strict pair
-data SP a b = SP !a !b deriving (Show,Eq,Ord,Functor)
+data SP a b = SP !a !b deriving (Show,Eq,Ord,Functor,Generic)
 
 instance (Semigroup a, Semigroup b) => Semigroup (SP a b) where
   (SP a b) <> (SP c d) = SP (a <> c) (b <> d)
@@ -39,6 +40,9 @@ instance (Semigroup a, Semigroup b) => Semigroup (SP a b) where
 instance (Semigroup a, Semigroup b, Monoid a, Monoid b) => Monoid (SP a b) where
   mempty = SP mempty mempty
   mappend = (<>)
+
+instance (NFData a, NFData b) => NFData (SP a b)
+
 
 instance Field1 (SP a b) (SP c b) a c where
   _1 = lens (\(SP a _) -> a) (\(SP _ b) c -> SP c b)

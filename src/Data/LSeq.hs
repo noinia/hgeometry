@@ -37,12 +37,14 @@ module Data.LSeq( LSeq
                 , forceLSeq
                 ) where
 
+import           Control.DeepSeq
 import           Control.Lens ((%~), (&), (<&>), (^?), bimap)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import qualified Data.Sequence as S
+import           GHC.Generics (Generic)
 import qualified Data.Traversable as Tr
 import           GHC.TypeLits
 import           Prelude hiding (drop,take,head,last)
@@ -58,7 +60,8 @@ import           Prelude hiding (drop,take,head,last)
 
 -- | LSeq n a certifies that the sequence has *at least* n items
 newtype LSeq (n :: Nat) a = LSeq { toSeq :: S.Seq a}
-                          deriving (Show,Read,Eq,Ord,Foldable,Functor,Traversable)
+                          deriving (Show,Read,Eq,Ord,Foldable,Functor,Traversable
+                                   ,Generic,NFData)
 
 instance Semigroup (LSeq n a) where
   (LSeq s) <> (LSeq s') = LSeq (s <> s')
@@ -66,6 +69,8 @@ instance Semigroup (LSeq n a) where
 instance Monoid (LSeq 0 a) where
   mempty = empty
   mappend = (<>)
+
+
 
 type instance Index   (LSeq n a) = Int
 type instance IxValue (LSeq n a) = a

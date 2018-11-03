@@ -1,6 +1,6 @@
 module Algorithms.Geometry.ConvexHull.Bench where
 
-import qualified Algorithms.Geometry.ConvexHull.DivideAndConqueror as DivideAndConqueror
+import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
 
 -- | copies of the convex hull algo with different point types
@@ -62,7 +62,7 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
                 , bench "grahamScan_Family"    $ nf GFam.convexHull       ptsFam
                 , bench "grahamScan_Fixed"     $ nf GFix.convexHull       ptsFix
 
-                , bench "Div&Conq"             $ nf DivideAndConqueror.convexHull pts
+                , bench "Div&Conq"             $ nf DivideAndConquer.convexHull pts
                 ]
       where
         ptsV2       = fmap (GV.fromP) pts
