@@ -313,7 +313,12 @@ dual :: Getter (PlanarGraph s w v e f) (PlanarGraph s (DualOf w) f e v)
 dual = to _dual
 
 
+-- FIXME: So I guess the two darts associated with an edge can store different
+-- data. This is useful. Make sure that works as expected.
+
 -- | lens to access the Dart Data
+--
+--
 dartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
                 (V.Vector (Dart s, e)) (V.Vector (Dart s, e'))
 dartData = lens darts (\g dD -> updateData id (const $ reorderEdgeData dD) id g)
@@ -686,7 +691,7 @@ instance HasDataOf (PlanarGraph s w v e f) (VertexId s w) where
 
 instance HasDataOf (PlanarGraph s w v e f) (Dart s) where
   type DataOf (PlanarGraph s w v e f) (Dart s) = e
-  dataOf d = rawDartData.singular (ix (fromEnum d))
+  dataOf d = rawDartData.singular (ix $ fromEnum d)
 
 instance HasDataOf (PlanarGraph s w v e f) (FaceId s w) where
   type DataOf (PlanarGraph s w v e f) (FaceId s w) = f
@@ -1043,7 +1048,7 @@ findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id
 --             ]
 
 
--- myGraph :: PlanarGraph Test Primal () String ()
+-- myGraph :: PlanarGraph TestG Primal () String ()
 -- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
 --                             , (Dart aC Positive, "c+")
 --                             , (Dart aB Positive, "b+")

@@ -2,6 +2,8 @@
 module Data.PlanarGraphSpec where
 
 
+import           Data.Bifunctor
+import qualified Data.ByteString.Char8 as B
 import qualified Data.Foldable as F
 import qualified Data.Map.Strict as SM
 import           Data.Permutation (toCycleRep)
@@ -10,11 +12,11 @@ import qualified Data.PlanarGraph as PlanarGraph
 import qualified Data.Set as S
 import           Data.Util
 import qualified Data.Vector as V
+import           Data.Yaml (prettyPrintParseException)
+import           Data.Yaml.Util
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.HGeometryInstances ()
-
-
 
 
 data TestG
@@ -45,6 +47,13 @@ spec = do
       property $ \(d :: Dart TestG) -> toEnum (fromEnum d) `shouldBe` d
     it "quickheck Dart: fromEnum (toEnum i) = i" $
       property $ \(NonNegative i) -> fromEnum ((toEnum i) :: Dart TestG) `shouldBe` i
+    it "encode yaml test" $ do
+      b <- B.readFile "test/Data/myGraph.yaml"
+      encodeYaml (fromAdjacencyLists testEdges) `shouldBe` b
+    it "decode yaml test" $ do
+      (first prettyPrintParseException <$> decodeYamlFile "test/Data/myGraph.yaml")
+      `shouldReturn`
+      (Right $ fromAdjacencyLists testEdges)
 
 testEdges :: [(Vertex,[Vertex])]
 testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
@@ -55,6 +64,11 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (4, [1,2,5])
             , (5, [3,4])
             ]
+
+-- testGraph = fromAdjacencyLists testEdges
+
+-- enccode = let g =
+--           in encodeYamlFile
 
 --------------------------------------------------------------------------------
 
