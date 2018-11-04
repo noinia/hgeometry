@@ -1,5 +1,15 @@
 {-# LANGUAGE TemplateHaskell  #-}
-module Graphics.Camera where
+module Graphics.Camera( Camera(Camera)
+                      , cameraPosition, rawCameraNormal, rawViewUp
+                      , viewPlaneDepth, nearDist, farDist, screenDimensions
+
+                      , cameraNormal, viewUp
+
+                      , cameraTransform, worldToView
+
+                      , toViewPort, perspectiveProjection, rotateCoordSystem
+                      , flipAxes
+                      ) where
 
 import Data.Ext
 import Control.Lens
@@ -23,10 +33,14 @@ data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
                        } deriving (Show,Eq,Ord)
 makeLenses ''Camera
 
-
+-- | Lens to get and set the Camera normal, makes sure that the vector remains
+-- normalized.
 cameraNormal :: Floating r => Lens' (Camera r) (Vector 3 r)
 cameraNormal = lens _rawCameraNormal (\c n -> c { _rawCameraNormal = signorm n} )
 
+
+-- | Lens to get and set the viewUp vector. Makes sure the vector remains
+-- normalized.
 viewUp :: Floating r => Lens' (Camera r) (Vector 3 r)
 viewUp = lens _rawViewUp (\c n -> c { _rawViewUp = signorm n})
 
@@ -74,9 +88,12 @@ rotateCoordSystem c = rotateTo $ Vector3 u v n
     v = n `cross` u
     n = (-1) *^ c^.rawCameraNormal -- we need the normal from the scene *into* the camera
 
+
+
+
 -- transformBy' (Transformation m) (Vector3 x y z) = m `mult` (Vector4 x y z (-z))
 
-
+-- | Flips the y and z axis.
 flipAxes :: Num r => Transformation 3 r
 flipAxes = Transformation . Matrix
              $ Vector4 (Vector4 1 0 0 0)
@@ -84,18 +101,16 @@ flipAxes = Transformation . Matrix
                        (Vector4 0 1 0 0)
                        (Vector4 0 0 0 1)
 
-
-
 --------------------------------------------------------------------------------
 
-myCamera :: Camera Double
+myCamera :: Camera Rational
 myCamera = Camera (Point3 50 0 50)
-                  (signorm $ Vector3 0 0 (-1))
+                  (Vector3 0 0 (-1))
                   (Vector3 0 1 0)
                   10
                   15
                   55
-                  (Vector2 80 60)
+                  (Vector2 800 600)
 
 
 myCamera1 :: Camera Double
@@ -116,7 +131,7 @@ testProjection c = map (transformBy t) [Vector3 30 30 (-10), Vector3 (30*50/10) 
     t = perspectiveProjection c
 
 
-myT :: Triangle 3 () Double
+myT :: Triangle 3 () Rational
 myT = Triangle (ext $ Point3 1  1  10)
                (ext $ Point3 20 1  10)
                (ext $ Point3 20 30 10)
