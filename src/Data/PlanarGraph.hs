@@ -10,6 +10,9 @@
 --
 -- Data type for representing planar graphs
 --
+--
+-- This represents the following graph:
+-- ![myGraph](docs/Data/PlanarGraph/testG.png)
 --------------------------------------------------------------------------------
 module Data.PlanarGraph( Arc(..)
                        , Direction(..), rev
@@ -106,9 +109,6 @@ import           Unsafe.Coerce (unsafeCoerce)
 --                             ]
 --                           ]
 -- :}
---
--- This represents the following graph:
--- ![myGraph](docs/Data/PlanarGraph/testG.png)
 
 --------------------------------------------------------------------------------
 
