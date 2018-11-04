@@ -16,7 +16,6 @@ import           Data.Semigroup.Foldable(foldMap1)
 import           Data.UnBounded
 import           Data.Util
 
-
 --------------------------------------------------------------------------------
 
 type CP q r = Top (SP (Two q) r) -- ^ the closest pair and its (squared) distance
@@ -79,8 +78,11 @@ mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
     -- ditch the points on the left that are too low anyway
     trim               :: Top r -> [Point 2 r :+ q] -> Point 2 r :+ a
                        -> [Point 2 r :+ q]
-    trim (ValT d) ls r = List.dropWhile (\l -> l^.core.yCoord < r^.core.yCoord - d) ls
+    trim (ValT d) ls r = List.dropWhile (\l -> sqVertDist l r > d) ls
     trim _        ls _ = ls
+
+    -- the squared vertical distance (in case r lies above l) or 0 otherwise
+    sqVertDist l r = let d = 0 `max` (r^.core.yCoord - l^.core.yCoord) in d*d
 
     -- try and find a new closest pair with r. If we get to points that are too far above
     -- r we stop (since none of those points will be closer to r anyway)
