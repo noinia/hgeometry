@@ -1,11 +1,15 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-|
-Module    : Data.Geometry.Point
-Description: \(d\)-dimensional points
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Point
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(d\)-dimensional points.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Point where
 
 import           Control.DeepSeq
@@ -26,7 +30,6 @@ import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
 import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
 
---------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- $setup

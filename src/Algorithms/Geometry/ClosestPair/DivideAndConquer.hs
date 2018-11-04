@@ -1,4 +1,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ClosestPair.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Classical \(O(n\log n)\) time divide and conquer algorithm to compute the
+-- closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ClosestPair.DivideAndConquer where
 
 import           Control.Lens
@@ -18,20 +29,6 @@ import           Data.Util
 
 --------------------------------------------------------------------------------
 
-type CP q r = Top (SP (Two q) r) -- ^ the closest pair and its (squared) distance
-
-data CCP p r = CCP (NonEmpty (Point 2 r :+ p))   -- ^ pts ordered on increasing y-order
-                   !(CP (Point 2 r :+ p) r) -- ^ the closest pair (if we know it yet)
-            deriving (Show,Eq)
-
-instance (Num r, Ord r) => Semigroup (CCP p r) where
-  (CCP ptsl cpl) <> (CCP ptsr cpr) = CCP (mergeSortedBy cmp ptsl ptsr)
-                                         (mergePairs (minBy getDist cpl cpr) ptsl ptsr)
-    where
-      -- compare on y first then on x
-      cmp     :: Point 2 r :+ p -> Point 2 r :+ p -> Ordering
-      cmp p q = comparing (^.core.yCoord) p q <> comparing (^.core.xCoord) p q
-
 -- | Classical divide and conquer algorithm to compute the closest pair among
 -- \(n\) points.
 --
@@ -46,6 +43,24 @@ closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . LSeq.toNonEmpty
           CCP _ Top              -> error "closestPair: absurd."
 
 
+-- | the closest pair and its (squared) distance
+type CP q r = Top (SP (Two q) r)
+
+-- | Type used in the closest pair computation. The fields represent the points
+-- ordered on increasing y-order and the closest pair (if we know it)
+data CCP p r = CCP (NonEmpty (Point 2 r :+ p))
+                   !(CP (Point 2 r :+ p) r)
+            deriving (Show,Eq)
+
+instance (Num r, Ord r) => Semigroup (CCP p r) where
+  (CCP ptsl cpl) <> (CCP ptsr cpr) = CCP (mergeSortedBy cmp ptsl ptsr)
+                                         (mergePairs (minBy getDist cpl cpr) ptsl ptsr)
+    where
+      -- compare on y first then on x
+      cmp     :: Point 2 r :+ p -> Point 2 r :+ p -> Ordering
+      cmp p q = comparing (^.core.yCoord) p q <> comparing (^.core.xCoord) p q
+
+
 -- | Given an ordering and two nonempty sequences ordered according to that
 -- ordering, merge them
 mergeSortedBy           :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
@@ -58,7 +73,7 @@ mergeSortedBy cmp ls rs = NonEmpty.fromList $ go (F.toList ls) (F.toList rs)
                                  EQ -> x : go xs' ys
                                  GT -> y : go xs  ys'
 
-
+-- | Function that does the actual merging work
 mergePairs            :: forall p r. (Ord r, Num r)
                       => CP (Point 2 r :+ p) r -- ^ current closest pair and its dist
                       -> NonEmpty (Point 2 r :+ p) -- ^ pts on the left
@@ -96,8 +111,6 @@ mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
     dist (p :+ _) (q :+ _) = squaredEuclideanDist p q
 
 
-
-
 -- | Given some function that decides when to keep things while maintaining some state.
 runWhile           :: s -> [a] -> (s -> a -> Bool) -> (s -> a -> s) -> s
 runWhile s' ys p f = go s' ys
@@ -111,5 +124,6 @@ minBy                   :: Ord b => (a -> b) -> a -> a -> a
 minBy f a b | f a < f b = a
             | otherwise = b
 
+-- | Get the distance of a (candidate) closest pair
 getDist :: CP a r -> Top r
 getDist = fmap (view _2)

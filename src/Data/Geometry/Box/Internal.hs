@@ -2,6 +2,16 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE InstanceSigs  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Box.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Orthogonal \(d\)-dimensiontal boxes (e.g. rectangles)
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Box.Internal where
 
 import           Control.DeepSeq
@@ -21,7 +31,6 @@ import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
-
 
 --------------------------------------------------------------------------------
 

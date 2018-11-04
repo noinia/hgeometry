@@ -1,11 +1,15 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-|
-Module    : Data.Geometry.Ball
-Description: \(d\)-dimensional Balls and Spheres
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ball
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(d\)-dimensional Balls and Spheres
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ball where
 
 import           Control.DeepSeq

@@ -1,9 +1,13 @@
-{-|
-Module    : Data.Geometry.Ipe
-Description: Reexports the functionality for reading and writing Ipe files.
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Reexports the functionality for reading and writing Ipe files.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe( module Data.Geometry.Ipe.Types
                         , module Data.Geometry.Ipe.Writer
                         , module Data.Geometry.Ipe.Reader

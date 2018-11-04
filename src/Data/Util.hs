@@ -1,10 +1,22 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Some basic types, mostly strict triples and pairs.
+--
+--------------------------------------------------------------------------------
 module Data.Util where
 
 import Control.DeepSeq
 import Control.Lens
 import GHC.Generics (Generic)
+import qualified Data.List as List
 
 --------------------------------------------------------------------------------
+-- * Strict Triples
 
 -- |  strict triple
 data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}
@@ -29,6 +41,14 @@ instance Field2 (STR a b c) (STR a d c) b d where
 instance Field3 (STR a b c) (STR a b d) c d where
   _3 = lens trd' (\(STR a b _) d -> STR a b d)
 
+-- | Generate All unique unordered triplets.
+--
+uniqueTriplets    :: [a] -> [STR a a a]
+uniqueTriplets xs = [ STR x y z | (x:ys) <- nonEmptyTails xs, SP y z <- uniquePairs ys]
+
+
+--------------------------------------------------------------------------------
+-- * Strict Pairs
 
 
 -- | Strict pair
@@ -53,8 +73,24 @@ instance Field2 (SP a b) (SP a c) b c where
 instance Bifunctor SP where
   bimap f g (SP a b) = SP (f a) (g b)
 
+--------------------------------------------------------------------------------
+-- | * Strict pair whose elements are of the same type.
+
 -- | Strict pair with both items the same
 type Two a = SP a a
 
 pattern Two :: a -> a -> Two a
-pattern Two a b = (SP a b)
+pattern Two a b = SP a b
+{-# COMPLETE Two #-}
+
+-- | Given a list xs, generate all unique (unordered) pairs.
+--
+--
+uniquePairs    :: [a] -> [Two a]
+uniquePairs xs = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
+
+--------------------------------------------------------------------------------
+
+-- | A version of List.tails in which we remove the emptylist
+nonEmptyTails :: [a] -> [[a]]
+nonEmptyTails = List.init . List.tails

@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.EuclideanMST.EuclideanMST
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(O(n\log n)\) time algorithm algorithm to compute the Euclidean minimum
+-- spanning tree of a set of \(n\) points in \(\mathbb{R}^2\).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.EuclideanMST.EuclideanMST where
 
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
@@ -11,7 +22,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph
 import           Data.Proxy
 import           Data.Tree
-
 
 --------------------------------------------------------------------------------
 

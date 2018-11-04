@@ -1,5 +1,15 @@
 {-# Language DeriveFunctor#-}
 {-# Language FunctionalDependencies #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.BinaryTree
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Several types of Binary trees.
+--
+--------------------------------------------------------------------------------
 module Data.BinaryTree where
 
 import           Control.DeepSeq
@@ -13,6 +23,8 @@ import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
+-- | Binary tree that stores its values (of type a) in the leaves. Internal
+-- nodes store something of type v.
 data BinLeafTree v a = Leaf !a
                      | Node (BinLeafTree v a) !v (BinLeafTree v a)
                      deriving (Show,Read,Eq,Ord,Functor,Generic)
@@ -145,7 +157,7 @@ drawTree = Tree.drawTree . fmap show . toRoseTree
 --------------------------------------------------------------------------------
 -- * Internal Node Tree
 
-
+-- | Binary tree in which we store the values of type a in internal nodes.
 data BinaryTree a = Nil
                   | Internal (BinaryTree a) !a (BinaryTree a)
                   deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable,Generic)
@@ -156,9 +168,9 @@ access                  :: BinaryTree a -> Maybe a
 access Nil              = Nothing
 access (Internal _ x _) = Just x
 
--- | Create a balanced binary tree
+-- | Create a balanced binary tree.
 --
--- \(O(n)\)
+-- running time: \(O(n)\)
 asBalancedBinTree :: [a] -> BinaryTree a
 asBalancedBinTree = mkTree . V.fromList
   where
@@ -169,7 +181,7 @@ asBalancedBinTree = mkTree . V.fromList
                             else Internal (mkTree $ V.slice 0 h v) x
                                           (mkTree $ V.slice (h+1) (n - h -1) v)
 
-
+-- | Fold function for folding over a binary tree.
 foldBinaryUp                      :: b -> (a -> b -> b -> b)
                                   -> BinaryTree a -> BinaryTree (a,b)
 foldBinaryUp _ _ Nil              = Nil
@@ -179,9 +191,11 @@ foldBinaryUp e f (Internal l x r) = let l' = foldBinaryUp e f l
                                         b  = f x (g l') (g r')
                                     in Internal l' (x,b) r'
 
+-- | Convert a @BinaryTree@ into a RoseTree
 toRoseTree'                  :: BinaryTree a -> Maybe (Tree.Tree a)
 toRoseTree' Nil              = Nothing
 toRoseTree' (Internal l v r) = Just $ Tree.Node v $ mapMaybe toRoseTree' [l,r]
 
+-- | Draw a binary tree.
 drawTree' :: Show a => BinaryTree a -> String
 drawTree' = maybe "Nil" (Tree.drawTree . fmap show) . toRoseTree'

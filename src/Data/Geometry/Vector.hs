@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Vector
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(d\)-dimensional vectors.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , module LV
                            , C(..)
@@ -104,13 +114,6 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
     g Maybe   = error "scalarMultiple': found a Maybe, which means the vectors either have length zero, or one of them is all Zero!"
     g (Yes x) = Just x
 
--- somehow this goes wrong when u is a vector minInfinity maxInfinity and v has zero values.
-
--- | Given vectors u and v, both not the zero vector,
--- Get the scalar labmda s.t. v = lambda * u (if it exists)
-scalarMultiple'' u v = undefined
-
--- exists_ lambda ui vi = lambda*ui == vi
 
 --------------------------------------------------------------------------------
 -- * Helper functions specific to two and three dimensional vectors

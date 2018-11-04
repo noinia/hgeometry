@@ -2,12 +2,17 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE DefaultSignatures #-}
-{-|
-Module    : Data.Geometry.Properties
-Description: Defines some generic geometric properties e.g. Dimensions, NumType, and Intersection types.
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Properties
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Defines some generic geometric properties e.g. Dimensions, NumType, and
+-- Intersection types.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Properties where
 
 import Data.Maybe (isNothing)

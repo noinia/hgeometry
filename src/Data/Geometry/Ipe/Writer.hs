@@ -1,6 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.Writer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Converting data types into IpeTypes
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Writer where
 
 import           Control.Lens ((^.), (^..), (.~), (&))
@@ -37,6 +46,7 @@ import           Data.Vinyl.TypeLevel
 import           System.IO (hPutStrLn,stderr)
 import           Text.XML.Expat.Format (format')
 import           Text.XML.Expat.Tree
+
 --------------------------------------------------------------------------------
 
 -- | Given a prism to convert something of type g into an ipe file, a file path,

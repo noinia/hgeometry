@@ -3,12 +3,16 @@
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-|
-Module    : Data.Geometry.Box
-Description: Orthogonal \(d\)-dimensiontal boxes (e.g. rectangles)
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Box
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Orthogonal \(d\)-dimensiontal boxes (e.g. rectangles)
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Box( module Data.Geometry.Box.Internal
                         , topSide, leftSide, bottomSide, rightSide
                         , sides, sides'

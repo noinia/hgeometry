@@ -1,6 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PlnarSubdivision
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type to represent a PlanarSubdivision
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
                                       -- , module Data.Geometry.PlanarSubdivision.Build
                                       , fromPolygon
@@ -19,6 +29,8 @@ import           Data.Bitraversable
 import qualified Data.Foldable as F
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+
+--------------------------------------------------------------------------------
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible

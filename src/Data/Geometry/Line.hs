@@ -2,11 +2,19 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UnicodeSyntax #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Line
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  \(d\)-dimensional lines.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Line( module Data.Geometry.Line.Internal
                          ) where
 
 import           Control.Lens
-import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box

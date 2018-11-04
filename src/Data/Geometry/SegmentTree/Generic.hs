@@ -1,4 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.SegmentTree.Generic
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Implementation of SegmentTrees
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.SegmentTree.Generic( NodeData(..), splitPoint, range, assoc
                                         , LeafData(..), atomicRange, leafAssoc
 

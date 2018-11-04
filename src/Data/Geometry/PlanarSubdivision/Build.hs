@@ -1,6 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PlnarSubdivision.Build
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Functions for Constructing a PlanarSubdivision
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision.Build where
 
 

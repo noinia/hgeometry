@@ -1,5 +1,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.Sweep
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper types and functions for implementing Sweep line algorithms.
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.Sweep where
 
 import qualified Data.Map as Map
@@ -8,13 +18,15 @@ import           Data.Proxy
 import           Data.Reflection
 import           Unsafe.Coerce
 
-
+--------------------------------------------------------------------------------
 
 newtype Tagged (s :: *) a = Tagged { unTag :: a} deriving (Show,Eq,Ord)
 
 tag   :: proxy s -> a -> Tagged s a
 tag _ = Tagged
 
+
+-- | Represent a computation that needs a particular time as input.
 newtype Timed s t a = Timed {atTime :: (Tagged s t) -> a }
 
 
@@ -24,6 +36,7 @@ instance (Reifies s t, Ord k) => Ord (Timed s t k) where
 instance (Reifies s t, Ord k) => Eq (Timed s t k) where
   a == b = a `compare` b == EQ
 
+-- | Comparison function for timed values
 compare_                       :: forall s t k. (Ord k, Reifies s t)
                                => Timed s t k -> Timed s t k
                                -> Ordering
@@ -31,8 +44,10 @@ compare_                       :: forall s t k. (Ord k, Reifies s t)
                                  in f (Tagged t) `compare` g (Tagged t)
 
 
-coerceTo :: proxy s -> f (Timed s' t k) v -> f (Timed s t k) v
+-- | Coerce timed values
+coerceTo   :: proxy s -> f (Timed s' t k) v -> f (Timed s t k) v
 coerceTo _ = unsafeCoerce
+
 
 unTagged :: f (Timed s t k) v -> f (Timed () t k) v
 unTagged = coerceTo (Proxy :: Proxy ())
@@ -46,10 +61,15 @@ runAt       :: forall s0 t k r f v. Ord k
             -> r
 runAt t m f = reify t $ \prx -> f (coerceTo prx m)
 
+
+--------------------------------------------------------------------------------
+
+
 getTime :: Timed s Int Int
 getTime = Timed unTag
 
-constT   :: proxy s -> Int -> Timed s Int Int
+
+constT     :: proxy s -> Int -> Timed s Int Int
 constT _ i = Timed (const i)
 
 

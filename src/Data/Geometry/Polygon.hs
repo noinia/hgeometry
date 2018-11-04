@@ -1,10 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-|
-Module    : Data.Geometry.Polygon
-Description: A Polygon data type and some basic functions to interact with them.
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Polygon
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Polygon data type and some basic functions to interact with them.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Polygon where
 
 import           Control.DeepSeq

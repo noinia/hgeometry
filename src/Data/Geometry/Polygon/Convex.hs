@@ -1,11 +1,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-|
-Module    : Data.Geometry.Polygon.Convex
-Description: Convex Polygons
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Polygon.Convex
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Convex Polygons
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , merge
                                    , lowerTangent, upperTangent
@@ -41,8 +45,10 @@ import qualified Data.Sequence as S
 
 -- import           Data.Geometry.Ipe
 -- import           Debug.Trace
+
 --------------------------------------------------------------------------------
 
+-- | Data Type representing a convex polygon
 newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
                           deriving (Show,Eq,NFData)
 makeLenses ''ConvexPolygon

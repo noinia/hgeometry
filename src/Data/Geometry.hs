@@ -1,9 +1,14 @@
-{-|
-Module    : Data.Geometry
-Description: Basic Geometry types
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Basic Geometry Types
+--
+--------------------------------------------------------------------------------
 module Data.Geometry( module Data.Geometry.Properties
                     , module Data.Geometry.Transformation
                     , module Data.Geometry.Point
@@ -26,3 +31,5 @@ import Data.Geometry.Properties
 import Data.Geometry.Transformation
 -- import Linear.Affine hiding (Point, Vector, origin)
 -- import Linear.Vector
+
+--------------------------------------------------------------------------------

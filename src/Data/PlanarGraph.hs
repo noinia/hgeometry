@@ -1,6 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.PlanarGraph
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Data type for representing planar graphs
+--
+--------------------------------------------------------------------------------
 module Data.PlanarGraph( Arc(..)
                        , Direction(..), rev
 
@@ -71,8 +80,6 @@ import           GHC.Generics (Generic)
 import           Unsafe.Coerce (unsafeCoerce)
 -- import           Data.Yaml.Util
 
-
---------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- $setup

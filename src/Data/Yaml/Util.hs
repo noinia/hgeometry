@@ -1,4 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Yaml.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Helper functions for working with yaml
+--
+--------------------------------------------------------------------------------
 module Data.Yaml.Util( encodeYaml, encodeYamlFile
                      , decodeYaml, decodeYamlFile
                      , printYaml

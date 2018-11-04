@@ -1,11 +1,14 @@
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE DeriveAnyClass  #-}
-{-|
-Module    : Data.Range
-Description: Generic Ranges (Intervals)
-Copyright : (c) Frank Staals
-License : See LICENCE file
--}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Range
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Generic Ranges (Intervals)
+--
+--------------------------------------------------------------------------------
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
@@ -27,7 +30,6 @@ import GHC.Generics (Generic)
 import Control.DeepSeq
 
 --------------------------------------------------------------------------------
-
 -- | Endpoints of a range may either be open or closed.
 data EndPoint a = Open   !a
                 | Closed !a

@@ -1,6 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.PlaneGraph
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type for planar graphs embedded in \(\mathbb{R}^2\).
+--
+--------------------------------------------------------------------------------
 module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , PlanarGraph
                       , VertexData(VertexData), vData, location, vtxDataToExt

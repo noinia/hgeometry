@@ -1,4 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.LSeq
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Wrapper around Data.Sequence with type level length annotation.
+--
+--------------------------------------------------------------------------------
 module Data.LSeq( LSeq
                 , toSeq
                 , empty

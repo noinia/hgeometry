@@ -2,6 +2,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PlnarSubdivision.Basic
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Basic data types to represent a PlanarSubdivision
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , VertexData(VertexData), PG.vData, PG.location
 

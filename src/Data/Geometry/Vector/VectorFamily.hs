@@ -1,5 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Vector.VectorFamily
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of \(d\)-dimensional vectors. The implementation
+-- automatically selects an optimized representation for small (up to size 4)
+-- vectors.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq

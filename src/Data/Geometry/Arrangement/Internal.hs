@@ -1,5 +1,15 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Arrangement.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type for representing an Arrangement of lines in \(\mathbb{R}^2\).
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Arrangement.Internal where
 
 import           Control.Lens
@@ -20,7 +30,6 @@ import           Data.Proxy
 import           Data.Sequence.Util
 import qualified Data.Vector as V
 import           Data.Vinyl.CoRec
-
 
 --------------------------------------------------------------------------------
 

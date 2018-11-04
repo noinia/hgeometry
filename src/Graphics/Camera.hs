@@ -1,4 +1,13 @@
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Graphics.Camera
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Data type to represent a camera and some functions for working with it.
+--
+--------------------------------------------------------------------------------
 module Graphics.Camera( Camera(Camera)
                       , cameraPosition, rawCameraNormal, rawViewUp
                       , viewPlaneDepth, nearDist, farDist, screenDimensions

@@ -1,6 +1,16 @@
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Test.QuickCheck.HGeometryInstances
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Arbitrary instances for most geometry types in HGeometry
+--
+--------------------------------------------------------------------------------
 module Test.QuickCheck.HGeometryInstances where
 
 import           Control.Lens

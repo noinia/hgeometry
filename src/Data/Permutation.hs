@@ -1,4 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Permutation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type for representing a Permutation
+--
+--------------------------------------------------------------------------------
 module Data.Permutation where
 
 import           Control.DeepSeq

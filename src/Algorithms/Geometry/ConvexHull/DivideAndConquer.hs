@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(O(n\log n)\) time divide and conquer algorithm to compute the convex hull
+-- of a set of \(n\) points in \(\mathbb{R}^2\).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.DivideAndConquer(convexHull) where
 
 import           Control.Lens ((^.))
@@ -9,6 +20,8 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
+
+--------------------------------------------------------------------------------
 
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
 -- given in clockwise order.
