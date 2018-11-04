@@ -2,7 +2,8 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
-                                      , fromPolygon, fromPolygons
+                                      -- , module Data.Geometry.PlanarSubdivision.Build
+                                      , fromPolygon
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
@@ -12,7 +13,12 @@ import           Data.Geometry.Polygon
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.PlaneGraph as PG
 import           Data.Proxy
-
+import           Data.Util
+import           Control.Lens
+import           Data.Bitraversable
+import qualified Data.Foldable as F
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible
@@ -43,17 +49,7 @@ fromPolygon _ (MultiPolygon vs hs) iD oD = PlanarSubdivision cs vd dd fd
 
 
 
--- | Given a list of *disjoint* polygons, construct a planarsubdivsion
--- representing them. This may create dummy vertices which have no vertex data,
--- hence the 'Maybe p' data type for the vertices.
---
--- running time: \(O(n\log n)\)
-fromPolygons           :: (Ord r, Fractional r)
-                       => proxy s
-                       -> NonEmpty (SimplePolygon p r :+ f)
-                       -> f -- ^ data outside the polygons
-                       -> PlanarSubdivision s (Maybe p) () f r
-fromPolygons px pgs oD = undefined
+
   -- subd&planeGraph.faceData .~ faceData'
   --                            &planeGraph.vertexData.traverse %~ getP
   -- where

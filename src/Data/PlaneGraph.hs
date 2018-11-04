@@ -14,6 +14,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , edges', edges
                       , faces', faces, internalFaces, faces''
                       , darts'
+                      , traverseVertices, traverseDarts, traverseFaces
 
                       , headOf, tailOf, twin, endPoints
 
@@ -419,6 +420,7 @@ boundaryVertices   :: FaceId' s -> PlaneGraph s v e f r
                    -> V.Vector (VertexId' s)
 boundaryVertices f = PG.boundaryVertices f . _graph
 
+
 --------------------------------------------------------------------------------
 -- * Access data
 
@@ -440,6 +442,57 @@ instance HasDataOf (PlaneGraph s v e f r) (Dart s) where
 instance HasDataOf (PlaneGraph s v e f r) (FaceId' s) where
   type DataOf (PlaneGraph s v e f r) (FaceId' s) = f
   dataOf f = graph.dataOf f
+
+
+-- | Traverse the vertices
+--
+-- (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
+-- Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+-- >>> traverseVertices (\i x -> print (i,x)) myGraph >> pure ()
+-- (VertexId 0,())
+-- (VertexId 1,())
+-- (VertexId 2,())
+-- (VertexId 3,())
+traverseVertices   :: Applicative m
+                   => (VertexId' s -> v -> m v')
+                   -> PlaneGraph s v e f r
+                   -> m (PlaneGraph s v' e f r)
+traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+
+-- | Traverses the darts
+--
+-- >>> traverseDarts (\d x -> print (d,x)) myGraph >> pure ()
+-- (Dart (Arc 0) +1,"a+")
+-- (Dart (Arc 0) -1,"a-")
+-- (Dart (Arc 1) +1,"b+")
+-- (Dart (Arc 1) -1,"b-")
+-- (Dart (Arc 2) +1,"c+")
+-- (Dart (Arc 2) -1,"c-")
+-- (Dart (Arc 3) +1,"d+")
+-- (Dart (Arc 3) -1,"d-")
+-- (Dart (Arc 4) +1,"e+")
+-- (Dart (Arc 4) -1,"e-")
+-- (Dart (Arc 5) +1,"g+")
+-- (Dart (Arc 5) -1,"g-")
+traverseDarts   :: Applicative m
+                => (Dart s -> e -> m e')
+                -> PlaneGraph s v e f r
+                -> m (PlaneGraph s v e' f r)
+traverseDarts f = traverseOf graph (PG.traverseDarts f)
+
+
+-- | Traverses the faces
+--
+-- >>> traverseFaces (\i x -> print (i,x)) myGraph >> pure ()
+-- (FaceId 0,())
+-- (FaceId 1,())
+-- (FaceId 2,())
+-- (FaceId 3,())
+traverseFaces   :: Applicative m
+                => (FaceId' s  -> f -> m f')
+                -> PlaneGraph s v e f r
+                -> m (PlaneGraph s v e f' r)
+traverseFaces f = traverseOf graph (PG.traverseFaces f)
 
 
 -- | Getter for the data at the endpoints of a dart

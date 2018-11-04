@@ -27,6 +27,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , edges', edges
                                             , faces', faces, internalFaces
                                             , darts'
+                                            -- , traverseVertices, traverseDarts, traverseFaces
 
                                             , headOf, tailOf, twin, endPoints
 
@@ -108,13 +109,17 @@ type family Wrap (s :: k) :: k where
   Wrap s = Wrap' s
 
 newtype ComponentId s = ComponentId { unCI :: Int }
-  deriving (Show,Eq,Ord,Generic,Bounded,Enum)
+  deriving (Show,Eq,Ord,Generic,Bounded,Enum,ToJSON,FromJSON)
 
 
 data Raw s ia a = Raw { _compId  :: !(ComponentId s)
                       , _idxVal  :: !ia
                       , _dataVal :: !a
-                      } deriving (Eq,Show,Functor,Foldable,Traversable)
+                      } deriving (Eq,Show,Functor,Foldable,Traversable,Generic)
+
+instance (FromJSON ia, FromJSON a) => FromJSON (Raw s ia a)
+instance (ToJSON ia, ToJSON a) => ToJSON (Raw s ia a) where
+  toEncoding = genericToEncoding defaultOptions
 
 -- | get the dataVal of a Raw
 dataVal :: Lens (Raw s ia a) (Raw s ia b) a b
@@ -147,7 +152,7 @@ data PlanarSubdivision s v e f r =
                     , _rawVertexData :: V.Vector (Raw s (VertexId' (Wrap s)) v)
                     , _rawDartData   :: V.Vector (Raw s (Dart      (Wrap s)) e)
                     , _rawFaceData   :: V.Vector (Raw s (FaceId'   (Wrap s)) f)
-                    } deriving (Show,Eq,Functor)
+                    } deriving (Show,Eq,Functor,Generic)
 makeLenses ''PlanarSubdivision
 
 
@@ -161,6 +166,12 @@ instance IsBoxable (PlanarSubdivision s v e f r) where
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f r)
                                        (Component s r)
 component ci = components.singular (ix $ unCI ci)
+
+-- instance (ToJSON v, ToJSON v, ToJSON e, ToJSON f, ToJSON r)
+--          => ToJSON (PlanarSubdivision s v e f r) where
+--   toEncoding = genericToEncoding defaultOptions
+
+
 
 --------------------------------------------------------------------------------
 
@@ -566,6 +577,31 @@ instance HasDataOf (PlanarSubdivision s v e f r) (FaceId' s) where
   dataOf f = faceDataOf f.fData
 
 
+-- -- | Traverse the vertices
+-- --
+-- traverseVertices   :: Applicative m
+--                    => (VertexId' s -> v -> m v')
+--                    -> PlanarSubdivision s v e f r
+--                    -> m (PlanarSubdivision s v' e f r)
+-- traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+
+-- -- | Traverses the darts
+-- --
+-- traverseDarts   :: Applicative m
+--                 => (Dart s -> e -> m e')
+--                 -> PlanarSubdivision s v e f r
+--                 -> m (PlaneGraph s v e' f r)
+-- traverseDarts f = traverseOf (dart) (PG.traverseDarts f)
+
+
+-- -- | Traverses the faces
+-- --
+-- traverseFaces   :: Applicative m
+--                 => (FaceId' s  -> f -> m f')
+--                 -> PlaneGraph s v e f r
+--                 -> m (PlaneGraph s v e f' r)
+-- traverseFaces f = traverseOf graph (PG.traverseFaces f)
+
 
 -- | Getter for the data at the endpoints of a dart
 --
@@ -630,7 +666,7 @@ rawFaceBoundary i ps = fromPoints pts :+ (ps^.dataOf i)
 -- | Constructs the boundary of the given face
 --
 -- \(O(k)\), where \(k\) is the complexity of the face
-rawFacePolygon :: FaceId' s -> PlanarSubdivision s v e f r
+rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
                     -> SomePolygon v r :+ f
 rawFacePolygon i ps = case F.toList $ holesOf i ps of
                         [] -> Left  res                               :+ x

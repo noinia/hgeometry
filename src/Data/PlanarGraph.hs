@@ -23,6 +23,7 @@ module Data.PlanarGraph( Arc(..)
 
                        , numVertices, numDarts, numEdges, numFaces
                        , darts', darts, edges', edges, vertices', vertices, faces', faces
+                       , traverseVertices, traverseDarts, traverseFaces
 
                        , tailOf, headOf, endPoints
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
@@ -238,6 +239,7 @@ instance (ToJSON v, ToJSON e, ToJSON f)
   toEncoding = pairs . mconcat . encodeJSON
 
 
+
 -- | Enclodes the planar graph as a JSON object.  note that every face is
 -- stored together with a dart bounding the face. (and so that the face lies to
 -- its right. Otherwise we cannot reconstruct the face data appropriately.
@@ -365,6 +367,55 @@ reorderEdgeData ds = V.create $ do
                                   forM_ (F.toList ds) $ \(d,x) ->
                                     MV.write v (fromEnum d) x
                                   pure v
+
+-- | Traverse the vertices
+--
+-- (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
+-- Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
+-- >>> traverseVertices (\i x -> print (i,x)) myGraph >> pure ()
+-- (VertexId 0,())
+-- (VertexId 1,())
+-- (VertexId 2,())
+-- (VertexId 3,())
+traverseVertices   :: Applicative m
+                   => (VertexId s w -> v -> m v')
+                   -> PlanarGraph s w v e f
+                   -> m (PlanarGraph s w v' e f)
+traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+
+-- | Traverses the darts
+--
+-- >>> traverseDarts (\d x -> print (d,x)) myGraph >> pure ()
+-- (Dart (Arc 0) +1,"a+")
+-- (Dart (Arc 0) -1,"a-")
+-- (Dart (Arc 1) +1,"b+")
+-- (Dart (Arc 1) -1,"b-")
+-- (Dart (Arc 2) +1,"c+")
+-- (Dart (Arc 2) -1,"c-")
+-- (Dart (Arc 3) +1,"d+")
+-- (Dart (Arc 3) -1,"d-")
+-- (Dart (Arc 4) +1,"e+")
+-- (Dart (Arc 4) -1,"e-")
+-- (Dart (Arc 5) +1,"g+")
+-- (Dart (Arc 5) -1,"g-")
+traverseDarts   :: Applicative m
+                => (Dart s -> e -> m e')
+                -> PlanarGraph s w v e f
+                -> m (PlanarGraph s w v e' f)
+traverseDarts f = itraverseOf (rawDartData.itraversed) (\i -> f (toEnum i))
+
+-- | Traverses the faces
+--
+-- >>> traverseFaces (\i x -> print (i,x)) myGraph >> pure ()
+-- (FaceId 0,())
+-- (FaceId 1,())
+-- (FaceId 2,())
+-- (FaceId 3,())
+traverseFaces   :: Applicative m
+                => (FaceId s w -> f -> m f')
+                -> PlanarGraph s w v e f
+                -> m (PlanarGraph s w v e f')
+traverseFaces f = itraverseOf (faceData.itraversed) (\i -> f (FaceId $ VertexId i))
 
 --------------------------------------------------------------------------------
 -- ** Constructing a Planar graph
@@ -747,7 +798,7 @@ computeDual' g = dualG
 
 -- | A face
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
-                   deriving (Eq,Ord,ToJSON,FromJSON)
+                   deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 
 type FaceId' s = FaceId s Primal
 
@@ -1033,39 +1084,39 @@ findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id
 
 --------------------------------------------------------------------------------
 
--- data TestG
+data Test
 
--- type Vertex = VertexId TestG Primal
+type Vertex = VertexId Test Primal
 
--- testEdges :: [(Vertex,[Vertex])]
--- testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
---             [ (0, [1])
---             , (1, [0,1,2,4])
---             , (2, [1,3,4])
---             , (3, [2,5])
---             , (4, [1,2,5])
---             , (5, [3,4])
---             ]
+testEdges :: [(Vertex,[Vertex])]
+testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+            [ (0, [1])
+            , (1, [0,1,2,4])
+            , (2, [1,3,4])
+            , (3, [2,5])
+            , (4, [1,2,5])
+            , (5, [3,4])
+            ]
 
 
--- myGraph :: PlanarGraph TestG Primal () String ()
--- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
---                             , (Dart aC Positive, "c+")
---                             , (Dart aB Positive, "b+")
---                             , (Dart aA Positive, "a+")
---                             ]
---                           , [ (Dart aE Negative, "e-")
---                             , (Dart aB Negative, "b-")
---                             , (Dart aD Negative, "d-")
---                             , (Dart aG Positive, "g+")
---                             ]
---                           , [ (Dart aE Positive, "e+")
---                             , (Dart aD Positive, "d+")
---                             , (Dart aC Negative, "c-")
---                             ]
---                           , [ (Dart aG Negative, "g-")
---                             ]
---                           ]
---   where
---     -- dart i s = Dart (Arc i) (read s)
---     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+myGraph :: PlanarGraph Test Primal () String ()
+myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+                            , (Dart aC Positive, "c+")
+                            , (Dart aB Positive, "b+")
+                            , (Dart aA Positive, "a+")
+                            ]
+                          , [ (Dart aE Negative, "e-")
+                            , (Dart aB Negative, "b-")
+                            , (Dart aD Negative, "d-")
+                            , (Dart aG Positive, "g+")
+                            ]
+                          , [ (Dart aE Positive, "e+")
+                            , (Dart aD Positive, "d+")
+                            , (Dart aC Negative, "c-")
+                            ]
+                          , [ (Dart aG Negative, "g-")
+                            ]
+                          ]
+  where
+    -- dart i s = Dart (Arc i) (read s)
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
