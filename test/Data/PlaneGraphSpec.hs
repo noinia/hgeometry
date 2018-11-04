@@ -3,6 +3,8 @@ module Data.PlaneGraphSpec where
 
 
 import           Control.Lens
+import           Data.Bifunctor
+import qualified Data.ByteString as B
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -10,16 +12,27 @@ import           Data.Geometry.Polygon
 import           Data.PlaneGraph
 import           Data.Util
 import qualified Data.Vector as V
+import           Data.Yaml (prettyPrintParseException)
+import           Data.Yaml.Util
 import           Test.Hspec
-
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "PlaneGraph tests" $ do
-         it "fromConnectedSegments, correct handling of high degree vertex" $
+         it "fromConnectedSegments, correct handling of high degree vertex" $ do
            draw test `shouldBe` mempty
-         it "fromConnectedSegments, correct handling of high degree vertex; test 2" $
            draw test2 `shouldBe` mempty
+         it "encode yaml test" $ do
+           b <- B.readFile "test/Data/myPlaneGraph.yaml"
+           encodeYaml myGraph `shouldBe` b
+         it "decode yaml test" $ do
+           (first prettyPrintParseException
+             <$> decodeYamlFile "test/Data/myPlaneGraph.yaml")
+           `shouldReturn`
+           (Right myGraph)
+  where
+    myGraph = fromConnectedSegments (Identity Test1) testSegs
+
 
 data Test1 = Test1
 
