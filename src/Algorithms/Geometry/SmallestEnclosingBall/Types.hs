@@ -1,5 +1,16 @@
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SmallestEnclosingBall.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Types to represent the smallest enclosing disk of a set of points in
+-- \(\mathbb{R}^2\)
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SmallestEnclosingBall.Types where
 
 import qualified Data.Foldable as F

@@ -6,9 +6,8 @@
 module Demo.GPXParser where
 
 
-import           Control.Applicative
+
 import           Control.Lens
-import           Control.Monad
 import qualified Data.ByteString.Lazy as B
 import           Data.Ext
 import           Data.Geometry.Point

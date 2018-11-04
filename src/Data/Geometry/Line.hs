@@ -8,7 +8,8 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
--- Description :  \(d\)-dimensional lines.
+--
+-- \(d\)-dimensional lines.
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.Line( module Data.Geometry.Line.Internal

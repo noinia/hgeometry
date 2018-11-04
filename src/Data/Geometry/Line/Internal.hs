@@ -2,6 +2,16 @@
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Line.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(d\)-dimensional lines.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Line.Internal where
 
 import           Control.DeepSeq

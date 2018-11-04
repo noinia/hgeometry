@@ -1,5 +1,16 @@
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- An randomized algorithm to compute the smallest enclosing disk of a set of
+-- \(n\) points in \(\mathbb{R}^2\). The expected running time is \(O(n)\).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction where
 
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
@@ -13,7 +24,7 @@ import           Data.Maybe (fromMaybe)
 import           System.Random
 import           System.Random.Shuffle (shuffle)
 
-
+--------------------------------------------------------------------------------
 
 -- | O(n) expected time algorithm to compute the smallest enclosing disk of a
 -- set of points. we need at least two points.

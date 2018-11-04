@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SmallestEnclosingBall.Naive
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Naive implementation to compute the smallest enclosing disk of a set of
+-- points in \(\mathbb{R}^2\)
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SmallestEnclosingBall.Naive where
 
 -- just for the types
@@ -6,10 +17,10 @@ import Data.Ext
 import Algorithms.Geometry.SmallestEnclosingBall.Types
 import Data.Geometry.Ball
 import Data.Geometry.Point
-import Data.List(minimumBy)
-import Data.Function(on)
-import Data.Maybe(fromMaybe)
-import Algorithms.Util
+import Data.List (minimumBy)
+import Data.Function (on)
+import Data.Maybe (fromMaybe)
+import Data.Util(STR(..),SP(..), uniquePairs, uniqueTriplets)
 
 --------------------------------------------------------------------------------
 
@@ -24,12 +35,12 @@ smallestEnclosingDisk pts@(_:_:_) = smallestEnclosingDisk' pts $
 smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
 pairs     :: Fractional r => [Point 2 r :+ p] -> [DiskResult p r]
-pairs pts = [DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)
+pairs pts = [ DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)
             | SP a b <- uniquePairs pts]
 
 triplets     :: (Ord r, Fractional r) => [Point 2 r :+ p] -> [DiskResult p r]
 triplets pts = [DiskResult (disk' a b c) (Three a b c)
-               | ST a b c <- uniqueTriplets pts]
+               | STR a b c <- uniqueTriplets pts]
 
 disk'       :: (Ord r, Fractional r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Disk () r

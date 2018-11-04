@@ -25,11 +25,11 @@ progress. Only a few algorithms have been implemented, some of which could use
 some improvements. Currently, HGeometry provides the following algorithms:
 
 * two \(O(n \log n)\) time algorithms for convex hull in
-  $\mathbb{R}^2$: the typical Graham scan, and a divide and conqueror algorithm,
+  $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
 * an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
 * an \(O(n \log n)\) time algorithm for computing the Delaunay triangulation
-(using divide and conqueror).
+(using divide and conquer).
 * an \(O(n \log n)\) time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation.
 * an \(O(\log^2 n)\) time algorithm to find extremal points and tangents on/to a
@@ -38,6 +38,8 @@ Tree (EMST), based on computing the Delaunay Triangulation.
 polygons.
 * An \(O(1/\varepsilon^dn\log n)\) time algorithm for constructing a Well-Separated pair
   decomposition.
+* The classic (optimal) \(O(n\log n)\) time divide and conquer algorithm to
+  compute the closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
 
 It also has some geometric data structures. In particular, HGeometry contans an
 implementation of

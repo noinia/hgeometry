@@ -7,7 +7,8 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
--- Description :  Data type for representing planar graphs
+--
+-- Data type for representing planar graphs
 --
 --------------------------------------------------------------------------------
 module Data.PlanarGraph( Arc(..)
@@ -105,7 +106,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 --                             ]
 --                           ]
 -- :}
-
+--
 -- This represents the following graph:
 -- ![myGraph](docs/Data/PlanarGraph/testG.png)
 
