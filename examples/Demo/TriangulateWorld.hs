@@ -37,20 +37,6 @@ options = info (helper <*> parser)
                          <> short 'o'
                         )
 
-
-
--- runExcept'   :: (Show e) => ExceptT e IO () -> IO ()
--- runExcept' m = runExceptT m >>= \case
---                 Left e   -> print e
---                 Right () -> pure ()
-
--- mainWith                          :: Options -> IO ()
--- mainWith (Options inFile outFile) = runExcept' $ do
---     (page :: IpePage Rational) <- readSinglePageFile inFile
---     let polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
---     let out = undefinedL
---     lift $  writeIpeFile outFile . singlePageFromContent $ out
-
 data PX = PX
 
 mainWith                          :: Options -> IO ()
@@ -68,14 +54,10 @@ mainWith (Options inFile outFile) = do
                      . concatMap (F.toList.rawFacePolygons) $ subdivs
           ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
           segs    = map (^._2.core) . concatMap (F.toList . edgeSegments) $ subdivs
-          out     = [ iO' pg
-                    | pg <- polies
-                    ] <>
-                    [ iO' s
-                    | s <- segs
-                    ] <>
-                    [ iO' pg
-                    | pg <- yMonotones ]
+          out     = mconcat [ [ iO' pg | pg <- polies ]
+                            , [ iO' s  | s  <- segs ]
+                            , [ iO' pg | pg <- yMonotones ]
+                            ]
       mapM_ print . map (\pg -> pg^.core.to polygonVertices.to length) $ polies'
       writeIpeFile outFile . singlePageFromContent $ out
 
@@ -104,3 +86,15 @@ mainWith (Options inFile outFile) = do
 --     where
 --       applyAts ats = id
 -- flattenGroups' o                            = [o]
+
+-- runExcept'   :: (Show e) => ExceptT e IO () -> IO ()
+-- runExcept' m = runExceptT m >>= \case
+--                 Left e   -> print e
+--                 Right () -> pure ()
+
+-- mainWith                          :: Options -> IO ()
+-- mainWith (Options inFile outFile) = runExcept' $ do
+--     (page :: IpePage Rational) <- readSinglePageFile inFile
+--     let polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
+--     let out = undefinedL
+--     lift $  writeIpeFile outFile . singlePageFromContent $ out
