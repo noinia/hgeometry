@@ -8,31 +8,35 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Data type for representing planar graphs
---
---
--- This represents the following graph:
--- ![myGraph](docs/Data/PlanarGraph/testG.png)
+-- Data type for representing connected planar graphs
 --------------------------------------------------------------------------------
-module Data.PlanarGraph( Arc(..)
+module Data.PlanarGraph( -- $setup
+                         -- * The Planar Graph type
+                         PlanarGraph
+                       , embedding, vertexData, dartData, faceData, rawDartData
+                       , edgeData
+
+                       , World(..)
+                       , DualOf
+
+                       -- * Representing edges: Arcs and Darts
+                       , Arc(..)
                        , Direction(..), rev
 
                        , Dart(..), arc, direction
                        , twin, isPositive
 
-                       , World(..)
-
-                       , DualOf
+                       -- * Vertices
 
                        , VertexId(..), VertexId'
 
-                       , PlanarGraph
-                       , embedding, vertexData, dartData, faceData, rawDartData
-                       , edgeData
+                       -- * Building a planar graph
 
                        , planarGraph, planarGraph', fromAdjacencyLists
                        , toAdjacencyLists
                        , buildFromJSON
+
+                       -- * Quering a planar graph
 
                        , numVertices, numDarts, numEdges, numFaces
                        , darts', darts, edges', edges, vertices', vertices, faces', faces
@@ -42,15 +46,20 @@ module Data.PlanarGraph( Arc(..)
                        , incidentEdges, incomingEdges, outgoingEdges, neighboursOf
                        , nextIncidentEdge, prevIncidentEdge
 
+                       -- * Associated Data
+
                        , HasDataOf(..), endPointDataOf, endPointData
 
                        , dual
+
+                       -- * Faces
 
                        , FaceId(..), FaceId'
                        , leftFace, rightFace
                        , boundaryDart, boundary, boundary', boundaryVertices
                        , nextEdge, prevEdge
 
+                       -- * Edge Oracle
 
                        , EdgeOracle
                        , edgeOracle, buildEdgeOracle
@@ -109,6 +118,12 @@ import           Unsafe.Coerce (unsafeCoerce)
 --                             ]
 --                           ]
 -- :}
+--
+--
+-- This represents the following graph. Note that the graph is undirected, the
+-- arrows are just to indicate what the Positive direction of the darts is.
+--
+-- ![myGraph](docs/Data/PlanarGraph/testG.png)
 
 --------------------------------------------------------------------------------
 
@@ -119,7 +134,8 @@ newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded,Generic,NFDa
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
 
-
+-- | Darts have a direction which is either Positive or Negative (shown as +1
+-- or -1, respectively).
 data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum,Generic)
 
 instance NFData Direction
@@ -184,10 +200,13 @@ allDarts = concatMap (\a -> [Dart a Positive, Dart a Negative]) [Arc 0..]
 -- | The world in which the graph lives
 data World = Primal | Dual deriving (Show,Eq)
 
+-- | We can take the dual of a world. For the Primal this gives us the Dual,
+-- for the Dual this gives us the Primal.
 type family DualOf (sp :: World) where
   DualOf Primal = Dual
   DualOf Dual   = Primal
 
+-- | The Dual of the Dual is the Primal.
 dualDualIdentity :: forall w. DualOf (DualOf w) :~: w
 dualDualIdentity = unsafeCoerce Refl
           -- manual proof:
@@ -201,6 +220,7 @@ newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
                                 deriving (Eq,Ord,Enum,ToJSON,FromJSON,Generic,NFData)
 -- VertexId's are in the range 0...|orbits|-1
 
+-- | Shorthand for vertices in the primal.
 type VertexId' s = VertexId s Primal
 
 unVertexId :: Getter (VertexId s w) Int
@@ -304,6 +324,8 @@ buildFromJSON vs es fs as = g&vertexData .~ reorder vs _unVertexId
 
 -- ** lenses and getters
 
+-- | Get the embedding, reprsented as a permutation of the darts, of this
+-- graph.
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
 
@@ -319,6 +341,7 @@ faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f')
                  (V.Vector f) (V.Vector f')
 faceData = lens _faceData (\g fD -> updateData id id (const fD) g)
 
+-- | Get the dual graph of this graph.
 dual :: Getter (PlanarGraph s w v e f) (PlanarGraph s (DualOf w) f e v)
 dual = to _dual
 
@@ -510,70 +533,6 @@ toAdjacencyLists    :: PlanarGraph s w v e f -> [(VertexId s w, V.Vector (Vertex
 toAdjacencyLists pg = map (\u -> (u,neighboursOf u pg)) . V.toList . vertices' $ pg
 -- TODO: something weird happens when we have self-loops here.
 
---     -- Go through all of the edges we find an edge (u,v), with u <= v,
---     -- assign an ArcId to this edge (and increment the next available arcId).
---     -- if u > v. Don't assign anything.
--- assignArcs                     :: (Ord v, Foldable f)
---                                    => (v, f v)
---                                    -> SP [(v, [v :+ Maybe Int])] Int
---                                    -> SP [(v, [v :+ Maybe Int])] Int
--- assignArcs (u,adjU) (SP acc i) = first (\adjU' -> (u,adjU'):acc)
---                                    . foldr (assignArcs' u) (SP [] i)
---                                    . F.toList $ adjU
-
---     -- Go through all edges that have u as one endpoint.
--- assignArcs'   :: Ord v => v -> v -> SP [v :+ Maybe Int] Int
---                                  -> SP [v :+ Maybe Int] Int
--- assignArcs' u v (SP acc i)
---       | u <= v    = SP ((v :+ Just i)  : acc) (i+1)
---       | otherwise = SP ((v :+ Nothing) : acc) i
-
-
-
-
-
-
-
--- -- - m: a Map, mapping edges, represented by a pair of vertexId's (u,v) with
--- --            u < v, to arcId's.
--- -- - a: the next available unused arcID
--- -- - x: the data value we are interested in computing
--- type STR' s b = STR (SM.Map (VertexId s Primal,VertexId s Primal) Int) Int b
-
--- -- | Construct a planar graph from a adjacency matrix. For every vertex, all
--- -- vertices should be given in counter clockwise order.
--- --
--- -- running time: \(O(n \log n)\).
--- fromAdjacencyLists      :: forall s.
---                            [(VertexId s Primal, C.CList (VertexId s Primal))]
---                         -> PlanarGraph s Primal () () ()
--- fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
---   where
---     n    = sum . fmap length $ adjM
---     perm = trd' . foldr toOrbit (STR mempty 0 mempty) $ adjM
-
-
---     -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this
---     -- vertex with its adjacent vertices into an Orbit
---     toOrbit                     :: (VertexId s Primal, C.CList (VertexId s Primal))
---                                 -> STR' s [[Dart s]]
---                                 -> STR' s [[Dart s]]
---     toOrbit (u,vs) (STR m a dss) =
---       let (STR m' a' ds') = foldr (toDart . (u,)) (STR m a mempty) . C.toList $ vs
---       in STR m' a' (ds':dss)
-
-
---     -- | Given an edge (u,v) and a triplet (m,a,ds) we construct a new dart
---     -- representing this edge.
---     toDart                    :: (VertexId s Primal,VertexId s Primal)
---                               -> STR' s [Dart s]
---                               -> STR' s [Dart s]
---     toDart (u,v) (STR m a ds) = let dir = if u < v then Positive else Negative
---                                     t'  = (min u v, max u v)
---                                in case SM.lookup t' m of
---       Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
---       Nothing -> STR (SM.insert t' a m) (a+1) (Dart (Arc a)  dir : ds)
-
 
 --------------------------------------------------------------------------------
 -- ** Convenience functions
@@ -662,10 +621,6 @@ edges :: PlanarGraph s w v e f -> V.Vector (Dart s, e)
 edges = V.filter (isPositive . fst) . darts
 
 
-
-
-
-
 -- | The tail of a dart, i.e. the vertex this dart is leaving from
 --
 -- running time: \(O(1)\)
@@ -683,8 +638,6 @@ headOf d = tailOf (twin d)
 -- running time: \(O(1)\)
 endPoints :: Dart s -> PlanarGraph s w v e f -> (VertexId s w, VertexId s w)
 endPoints d g = (tailOf d g, headOf d g)
-
-
 
 
 -- | All edges incident to vertex v, in counterclockwise order around v.
@@ -804,10 +757,11 @@ computeDual' g = dualG
                         g
 
 
--- | A face
+-- | The type to reprsent FaceId's
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
                    deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 
+-- | Shorthand for FaceId's in the primal.
 type FaceId' s = FaceId s Primal
 
 instance Show (FaceId s w) where
@@ -1092,39 +1046,39 @@ findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id
 
 --------------------------------------------------------------------------------
 
-data Test
+-- data Test
 
-type Vertex = VertexId Test Primal
+-- type Vertex = VertexId Test Primal
 
-testEdges :: [(Vertex,[Vertex])]
-testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
-            [ (0, [1])
-            , (1, [0,1,2,4])
-            , (2, [1,3,4])
-            , (3, [2,5])
-            , (4, [1,2,5])
-            , (5, [3,4])
-            ]
+-- testEdges :: [(Vertex,[Vertex])]
+-- testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+--             [ (0, [1])
+--             , (1, [0,1,2,4])
+--             , (2, [1,3,4])
+--             , (3, [2,5])
+--             , (4, [1,2,5])
+--             , (5, [3,4])
+--             ]
 
 
-myGraph :: PlanarGraph Test Primal () String ()
-myGraph = planarGraph [ [ (Dart aA Negative, "a-")
-                            , (Dart aC Positive, "c+")
-                            , (Dart aB Positive, "b+")
-                            , (Dart aA Positive, "a+")
-                            ]
-                          , [ (Dart aE Negative, "e-")
-                            , (Dart aB Negative, "b-")
-                            , (Dart aD Negative, "d-")
-                            , (Dart aG Positive, "g+")
-                            ]
-                          , [ (Dart aE Positive, "e+")
-                            , (Dart aD Positive, "d+")
-                            , (Dart aC Negative, "c-")
-                            ]
-                          , [ (Dart aG Negative, "g-")
-                            ]
-                          ]
-  where
-    -- dart i s = Dart (Arc i) (read s)
-    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
+-- myGraph :: PlanarGraph Test Primal () String ()
+-- myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+--                             , (Dart aC Positive, "c+")
+--                             , (Dart aB Positive, "b+")
+--                             , (Dart aA Positive, "a+")
+--                             ]
+--                           , [ (Dart aE Negative, "e-")
+--                             , (Dart aB Negative, "b-")
+--                             , (Dart aD Negative, "d-")
+--                             , (Dart aG Positive, "g+")
+--                             ]
+--                           , [ (Dart aE Positive, "e+")
+--                             , (Dart aD Positive, "d+")
+--                             , (Dart aC Negative, "c-")
+--                             ]
+--                           , [ (Dart aG Negative, "g-")
+--                             ]
+--                           ]
+--   where
+--     -- dart i s = Dart (Arc i) (read s)
+--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]

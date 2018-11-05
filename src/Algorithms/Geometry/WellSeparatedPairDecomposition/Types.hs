@@ -1,5 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.WellSeparatedPairDecomposition.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data types that can represent a well separated pair decomposition (wspd).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.WellSeparatedPairDecomposition.Types where
 
 import           Control.Lens hiding (Level)

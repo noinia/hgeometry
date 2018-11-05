@@ -6,7 +6,9 @@
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
--- Description :  Generic Ranges (Intervals)
+--
+-- Data type for representing Generic Ranges (Intervals) and functions that
+-- work with them.
 --
 --------------------------------------------------------------------------------
 module Data.Range( EndPoint(..)
@@ -30,6 +32,8 @@ import GHC.Generics (Generic)
 import Control.DeepSeq
 
 --------------------------------------------------------------------------------
+-- * Representing Endpoints of a Range
+
 -- | Endpoints of a range may either be open or closed.
 data EndPoint a = Open   !a
                 | Closed !a
@@ -62,6 +66,7 @@ isClosed = not . isOpen
 
 
 --------------------------------------------------------------------------------
+-- * The Range Data type
 
 -- | Data type for representing ranges.
 data Range a = Range { _lower :: !(EndPoint a)
@@ -87,8 +92,16 @@ pattern Range' l u <- ((\r -> (r^.lower.unEndPoint,r^.upper.unEndPoint) -> (l,u)
 {-# COMPLETE Range' #-}
 
 
+-- | Helper function to show a range in mathematical notation.
+--
+-- >>> prettyShow $ OpenRange 0 2
+-- "(0,2)"
+-- >>> prettyShow $ ClosedRange 0 2
+-- "[0,2]"
+-- >>> prettyShow $ Range (Open 0) (Closed 5)
+-- "(0,5]"
 prettyShow             :: Show a => Range a -> String
-prettyShow (Range l u) = concat [ lowerB, show (l^.unEndPoint), ", "
+prettyShow (Range l u) = concat [ lowerB, show (l^.unEndPoint), ","
                                 , show (u^.unEndPoint), upperB
                                 ]
   where
@@ -215,17 +228,17 @@ cmpUpper a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
 -- | Shift a range x units to the left
 --
 -- >>> prettyShow $ shiftLeft 10 (ClosedRange 10 20)
--- "[0, 10]"
+-- "[0,10]"
 -- >>> prettyShow $ shiftLeft 10 (OpenRange 15 25)
--- "(5, 15)"
+-- "(5,15)"
 shiftLeft   :: Num r => r -> Range r -> Range r
 shiftLeft x = shiftRight (-x)
 
 -- | Shifts the range to the right
 --
 -- >>> prettyShow $ shiftRight 10 (ClosedRange 10 20)
--- "[20, 30]"
+-- "[20,30]"
 -- >>> prettyShow $ shiftRight 10 (OpenRange 15 25)
--- "(25, 35)"
+-- "(25,35)"
 shiftRight   :: Num r => r -> Range r -> Range r
 shiftRight x = fmap (+x)

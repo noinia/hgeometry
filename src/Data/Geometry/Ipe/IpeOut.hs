@@ -1,5 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.IpeOut
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Functions that help drawing geometric values in ipe. An "IpeOut" is
+-- essenitally a function that converts a geometric type g into an IpeObject.
+--
+-- We also proivde a "HasDefaultIpeOut" typeclass that defines a default
+-- conversion function from a geometry type g to an ipe type.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.IpeOut where
 
 
@@ -32,16 +46,18 @@ import           Data.Vinyl.CoRec
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> :set -XOverloadedStrings
 -- >>> :{
 -- let myPolygon = fromPoints . map ext $ [origin, Point2 10 10, Point2 100 200]
 -- :}
 
 --------------------------------------------------------------------------------
--- | The IpeOut type and the default combinator to use it
+-- * The IpeOut type and the default combinator to use it
 
 type IpeOut g i r = g -> IpeObject' i r
 
 
+-- | Add attributes to an IpeObject'
 (!)       :: IpeObject' i r -> IpeAttributes i r -> IpeObject' i r
 (!) i ats = i&extra %~ (<> ats)
 
@@ -53,11 +69,12 @@ type IpeOut g i r = g -> IpeObject' i r
 --                      ! attr SLayer "alpha"
 --                      ! attr SLayer "beta"
 -- :}
---
+-- IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 -- >>> :{
--- iO $ ipeGroup [ iO ipePolygon myPolygon $ attr SFill (IpeColor "red")
+-- iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
 --               ] ! attr SLayer "alpha"
 -- :}
+-- IpeGroup (Group [IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 --
 iO :: ToObject i => IpeObject' i r -> IpeObject r
 iO = mkIpeObject
@@ -66,13 +83,13 @@ iO = mkIpeObject
 --
 --
 -- >>> :{
--- iO' myPolygon $  attr SFill (IpeColor "red")
---               <> attr SLayer "alpha"
---               <> attr SLayer "beta"
+-- iO'' myPolygon $  attr SFill (IpeColor "red")
+--                <> attr SLayer "alpha"
+--                <> attr SLayer "beta"
 -- :}
---
--- >>> iO' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
---
+-- IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- >>> iO'' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
+-- IpeGroup (Group [IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 iO''       :: ( HasDefaultIpeOut g, NumType g ~ r
              , DefaultIpeOut g ~ i, ToObject i
              ) => g -> IpeAttributes i r

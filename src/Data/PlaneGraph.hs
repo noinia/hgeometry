@@ -8,7 +8,9 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Data type for planar graphs embedded in \(\mathbb{R}^2\).
+-- Data type for planar graphs embedded in \(\mathbb{R}^2\). For functions that
+-- export faces and edges etc, we assume the graph has a (planar) straight line
+-- embedding.
 --
 --------------------------------------------------------------------------------
 module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph

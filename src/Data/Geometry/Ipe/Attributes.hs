@@ -3,6 +3,16 @@
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.Attributes
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Possible Attributes we can assign to items in an Ipe file
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Attributes where
 
 import Control.Lens hiding (rmap, Const)
@@ -14,6 +24,8 @@ import Data.Vinyl
 import Data.Vinyl.Functor
 import Data.Vinyl.TypeLevel
 import GHC.Exts
+import Text.Read(lexP, step, parens, prec, (+++)
+                , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
 
 --------------------------------------------------------------------------------
 
@@ -61,18 +73,43 @@ newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
                                    -- Labels in universe u to concrete types
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
 
-deriving instance Show (Apply f label) => Show (Attr f label)
-deriving instance Read (Apply f label) => Read (Attr f label)
+
+
 deriving instance Eq   (Apply f label) => Eq   (Attr f label)
 deriving instance Ord  (Apply f label) => Ord  (Attr f label)
 
 makeLenses ''Attr
 
+-- | Constructor for constructing an Attr given an actual value.
 pattern Attr   :: Apply f label -> Attr f label
 pattern Attr x = GAttr (Just x)
 
+-- | An Attribute that is not set
 pattern NoAttr :: Attr f label
 pattern NoAttr = GAttr Nothing
+{-# COMPLETE NoAttr, Attr #-}
+
+instance Show (Apply f label) => Show (Attr f label) where
+  showsPrec d NoAttr   = showParen (d > app_prec) $ showString "NoAttr"
+    where app_prec = 10
+  showsPrec d (Attr a) = showParen (d > up_prec) $
+                           showString "Attr " . showsPrec (up_prec+1) a
+    where up_prec  = 5
+
+instance Read (Apply f label) => Read (Attr f label) where
+  readPrec = parens $ (prec app_prec $ do
+                                         Ident "NoAttr" <- lexP
+                                         pure NoAttr)
+                  +++ (prec up_prec $ do
+                                         Ident "Attr" <- lexP
+                                         a <- step readPrec
+                                         pure $ Attr a)
+    where
+      app_prec = 10
+      up_prec = 5
+  readListPrec = readListPrecDefault
+
+
 
 -- | Give pref. to the *RIGHT*
 instance Semigroup (Attr f l) where
@@ -83,17 +120,13 @@ instance Monoid (Attr f l) where
   mempty  = NoAttr
   mappend = (<>)
 
-newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) =
-  Attrs { _unAttrs :: Rec (Attr f) ats }
+newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) = Attrs (Rec (Attr f) ats)
 
-makeLenses ''Attributes
-
-
--- type All' c i = RecAll (Attr (IpeObjectSymbolF i)) (IpeObjectAttrF i) c
-
--- deriving instance All' Show atsShow (Attributes f ats)
+unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
+unAttrs = lens (\(Attrs r) -> r) (const Attrs)
 
 deriving instance (RecAll (Attr f) ats Show) => Show (Attributes f ats)
+-- deriving instance (RecAll (Attr f) ats Read) => Read (Attributes f ats)
 
 instance (RecAll (Attr f) ats Eq)   => Eq   (Attributes f ats) where
   (Attrs a) == (Attrs b) = and . recordToList

@@ -3,6 +3,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type modeling the various elements in Ipe files.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Types where
 
 
@@ -198,8 +208,7 @@ genDefunSymbols [''AttrMap]
 
 
 -- | A group is essentially a list of IpeObjects.
-newtype Group r = Group { _groupItems :: [IpeObject r] }
-                  deriving (Show,Eq)
+newtype Group r = Group [IpeObject r] deriving (Show,Eq)
 
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
@@ -239,13 +248,16 @@ data IpeObject r =
 
 
 deriving instance (Show r) => Show (IpeObject r)
+-- deriving instance (Read r) => Read (IpeObject r)
 deriving instance (Eq r)   => Eq   (IpeObject r)
 
 type instance NumType   (IpeObject r) = r
 type instance Dimension (IpeObject r) = 2
 
 makePrisms ''IpeObject
-makeLenses ''Group
+
+groupItems :: Lens (Group r) (Group s) [IpeObject r] [IpeObject s]
+groupItems = lens (\(Group xs) -> xs) (const Group)
 
 class ToObject i where
   mkIpeObject :: IpeObject' i r -> IpeObject r

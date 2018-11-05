@@ -1,4 +1,13 @@
-{-# LANGUAGE LambdaCase  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Algorithm to construct a well separated pair decomposition (wspd).
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD where
 
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
@@ -16,7 +25,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.LSeq as LSeq
-import           Data.LSeq (LSeq(..),ViewL(..),ViewR(..),pattern (:<|),pattern (:|>))
+import           Data.LSeq (LSeq(..),toSeq,ViewL(..),ViewR(..),pattern (:<|),pattern (:|>))
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe

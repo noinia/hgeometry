@@ -1,4 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.FromIpe
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Functions that help reading geometric values from ipe images.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.FromIpe where
 
 import           Control.Lens hiding (Simple)
@@ -15,17 +25,14 @@ import           Data.List.NonEmpty (NonEmpty(..))
 
 --------------------------------------------------------------------------------
 -- $setup
+-- >>> import Data.Geometry.Ipe.Attributes
 -- >>> :{
--- import           Data.Geometry.Ipe.Attributes
---
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
 --              . PolyLine.fromPoints . map ext
 --              $ [ origin, point2 10 10, point2 200 100 ]
---
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor (Named "red"))
---
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}

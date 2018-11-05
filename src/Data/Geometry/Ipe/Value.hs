@@ -1,4 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.Value
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type for representing values in ipe.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Value where
 
 import GHC.Exts

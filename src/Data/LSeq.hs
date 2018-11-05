@@ -68,9 +68,12 @@ import           Prelude hiding (drop,take,head,last)
 
 
 -- | LSeq n a certifies that the sequence has *at least* n items
-newtype LSeq (n :: Nat) a = LSeq { toSeq :: S.Seq a}
+newtype LSeq (n :: Nat) a = LSeq (S.Seq a)
                           deriving (Show,Read,Eq,Ord,Foldable,Functor,Traversable
                                    ,Generic,NFData)
+
+toSeq          :: LSeq n a -> S.Seq a
+toSeq (LSeq s) = s
 
 instance Semigroup (LSeq n a) where
   (LSeq s) <> (LSeq s') = LSeq (s <> s')

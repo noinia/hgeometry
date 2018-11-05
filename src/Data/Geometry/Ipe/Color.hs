@@ -1,4 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ipe.Color
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Data type for representing colors in ipe as well as the colors available in
+-- the standard ipe stylesheet.
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Color where
 
 import           Data.Colour.SRGB (RGB(..))

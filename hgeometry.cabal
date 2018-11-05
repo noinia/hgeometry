@@ -36,6 +36,7 @@ data-files:          resources/basic.isy
                      test/Data/Geometry/arrangement.ipe.out.ipe
                      test/Data/myGraph.yaml
                      test/Data/myPlaneGraph.yaml
+
                      examples/BAPC2014/sample.in
                      examples/BAPC2014/sample.out
                      examples/BAPC2014/testdata.in
@@ -45,10 +46,15 @@ data-files:          resources/basic.isy
                      examples/BAPC2012/sampleG.in
                      examples/BAPC2012/sampleG.out
 
-                     docs/Data/PlanarGraph/testG.png
+                     -- in the future (cabal >=2.4) we can use
+                     -- examples/**/*.in
+                     -- examples/**/*.out
 
 extra-source-files:  README.md
                      changelog.md
+
+Extra-doc-files:     docs/Data/PlanarGraph/testG.png
+                     -- docs/**/*.png
 
 cabal-version:       2.0
 source-repository head
