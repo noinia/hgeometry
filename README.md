@@ -110,7 +110,7 @@ mainWith (Options inFile outFile) = do
            let pts  = syms&traverse.core %~ (^.symbolPoint)
                pts' = NonEmpty.fromList pts
                dt   = delaunayTriangulation $ pts'
-               out  = [asIpe drawTriangulation dt]
+               out  = [iO $ drawTriangulation dt]
            writeIpeFile outFile . singlePageFromContent $ out
 ```
 
