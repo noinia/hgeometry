@@ -3,8 +3,10 @@
 - Compatibility with GHC 8.6
 - Added \(O(n\log n)\) time closest pair algorithm.
 - Added arrangement data type
-- Bugfixes
+- Various Bugfixes
 - Added Camera data type with some world to screen transformations.
+- Additional read/show instances
+- Updated some of the show instances for Ipe related types.
 
 #### 0.7 ###
 
