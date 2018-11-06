@@ -17,7 +17,7 @@ our type parameter `r` represents the (numeric) type for the (real)-numbers):
 ```haskell
 newtype Point (d :: Nat) (r :: *) = Point { toVec :: Vector d r }
 ```
-- the vertices of a `PolyLine d p r` are stored in a `Data.Seq2` which enforces
+- the vertices of a `PolyLine d p r` are stored in a `Data.LSeq` which enforces
 that a polyline is a proper polyline, and thus has at least two vertices.
 
 Please note that aspect (2), implementing good algorithms, is much work in
