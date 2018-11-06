@@ -65,14 +65,15 @@ type IpeOut g i r = g -> IpeObject' i r
 --
 --
 -- >>> :{
--- iO $ defIO myPolygon ! attr SFill (IpeColor "blue")
---                      ! attr SLayer "alpha"
---                      ! attr SLayer "beta"
+--   iO $ defIO myPolygon ! attr SFill (IpeColor "blue")
+--                        ! attr SLayer "alpha"
+--                        ! attr SLayer "beta"
 -- :}
 -- IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+--
 -- >>> :{
--- iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
---               ] ! attr SLayer "alpha"
+--   iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
+--                 ] ! attr SLayer "alpha"
 -- :}
 -- IpeGroup (Group [IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 --
@@ -83,11 +84,12 @@ iO = mkIpeObject
 --
 --
 -- >>> :{
--- iO'' myPolygon $  attr SFill (IpeColor "red")
---                <> attr SLayer "alpha"
---                <> attr SLayer "beta"
+--   iO'' myPolygon $  attr SFill (IpeColor "red")
+--                  <> attr SLayer "alpha"
+--                  <> attr SLayer "beta"
 -- :}
 -- IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+--
 -- >>> iO'' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
 -- IpeGroup (Group [IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = LSeq (fromList [PolygonPath SimplePolygon CSeq [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [100,200] :+ ()]])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
 iO''       :: ( HasDefaultIpeOut g, NumType g ~ r

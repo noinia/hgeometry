@@ -25,14 +25,17 @@ import           Data.List.NonEmpty (NonEmpty(..))
 
 --------------------------------------------------------------------------------
 -- $setup
+-- >>> :set -XOverloadedStrings
 -- >>> import Data.Geometry.Ipe.Attributes
+-- >>> import Data.Geometry.Ipe.Color(IpeColor(..))
+-- >>> import Data.Geometry.Point
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
 --              . PolyLine.fromPoints . map ext
 --              $ [ origin, point2 10 10, point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
---     testPathAttrs = attr SStroke (IpeColor (Named "red"))
+--     testPathAttrs = attr SStroke (IpeColor "red")
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
@@ -51,7 +54,7 @@ _asLineSegment = prism' seg2path path2seg
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
 -- >>> testPath ^? _asPolyLine
--- Just (PolyLine {_points = Seq2 (Point2 [0,0] :+ ()) (fromList [Point2 [10,10] :+ ()]) (Point2 [200,100] :+ ())})
+-- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])})
 _asPolyLine :: Prism' (Path r) (PolyLine.PolyLine 2 () r)
 _asPolyLine = prism' poly2path path2poly
   where
@@ -99,12 +102,12 @@ pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
 
 
 
--- | use the first prism to select the ipe object to depicle with, and the second
+-- | Use the first prism to select the ipe object to depicle with, and the second
 -- how to select the geometry object from there on. Then we can select the geometry
 -- object, directly with its attributes here.
 --
 -- >>> testObject ^? _withAttrs _IpePath _asPolyLine
--- Just (PolyLine {_points = Seq2 (Point2 [0,0] :+ ()) (fromList [Point2 [10,10] :+ ()]) (Point2 [200,100] :+ ())} :+ Attrs {_unAttrs = {GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Just (IpeColor (Named "red"))}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}}})
+-- Just (PolyLine {_points = LSeq (fromList [Point2 [0,0] :+ (),Point2 [10,10] :+ (),Point2 [200,100] :+ ()])} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 _withAttrs       :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g
                  -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
 _withAttrs po pg = prism' g2o o2g

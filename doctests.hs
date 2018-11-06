@@ -65,5 +65,8 @@ modules =
   , "Data.Geometry.Ball"
   , "Data.Geometry.Box"
 
+  , "Data.Geometry.Ipe.IpeOut"
+  , "Data.Geometry.Ipe.FromIpe"
+
   -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
   ]
