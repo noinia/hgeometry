@@ -25,8 +25,7 @@ spec = do
         (show $ readXML useTxt
                 >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double))
         `shouldBe`
-        "Right (Attrs {_unAttrs = {GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Just (IpeColor (Named \"black\"))}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Nothing}, GAttr {_getAttr = Just (IpeSize (Named \"normal\"))}}})"
-
+        "Right (Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named \"black\"), NoAttr, NoAttr, Attr IpeSize (Named \"normal\")})"
     describe "IpeRead" $ do
       it "parses a Symbol" $
         fromIpeXML' useTxt
