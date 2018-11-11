@@ -20,15 +20,45 @@ import           Unsafe.Coerce
 
 --------------------------------------------------------------------------------
 
-newtype Tagged (s :: *) a = Tagged { unTag :: a} deriving (Show,Eq,Ord)
+-- $setup
+-- >>> type Time = Int
+--
 
+
+-- | Type a tagged with a type phantom type s.
+newtype Tagged (s :: *) a = Tagged { unTag :: a }
+  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+instance Applicative (Tagged s) where
+  pure = Tagged
+  (Tagged f) <*> (Tagged x) = Tagged $ f x
+
+instance Monad (Tagged s) where
+  return = pure
+  (Tagged m) >>= k = k m
+
+-- | Construct a tagged value.
 tag   :: proxy s -> a -> Tagged s a
 tag _ = Tagged
 
 
--- | Represent a computation that needs a particular time as input.
-newtype Timed s t a = Timed {atTime :: (Tagged s t) -> a }
+-- | Represent a computation that needs a particular time t as input, and
+-- produces an a.
+newtype Timed s t a = Timed { atTime :: (Tagged s t) -> a }
+                    deriving (Functor)
 
+instance Applicative (Timed s t) where
+  pure = Timed . const
+  (Timed f) <*> (Timed x) = Timed $ \t -> (f t) (x t)
+
+instance Monad (Timed s t) where
+  return = pure
+  -- Timed s t a -> (a -> Timed s t b)
+  (Timed m) >>= k = Timed $ \t -> let Timed f = k $ m t
+                                  in f t
+
+-- | Type alias for Timed computation that are 'untagged'
+type Timed' = Timed ()
 
 instance (Reifies s t, Ord k) => Ord (Timed s t k) where
   compare = compare_
@@ -49,7 +79,8 @@ coerceTo   :: proxy s -> f (Timed s' t k) v -> f (Timed s t k) v
 coerceTo _ = unsafeCoerce
 
 
-unTagged :: f (Timed s t k) v -> f (Timed () t k) v
+-- | Forget about the 's' tag.
+unTagged :: f (Timed s t k) v -> f (Timed' t k) v
 unTagged = coerceTo (Proxy :: Proxy ())
 
 
@@ -61,20 +92,62 @@ runAt       :: forall s0 t k r f v. Ord k
             -> r
 runAt t m f = reify t $ \prx -> f (coerceTo prx m)
 
+-- runAt'     :: t -> (forall s. Reifies s t => f (Timed s t a)) -> f a
+-- runAt' t k = reify t k
+
+-- | A computation that returns the current time.
+currentTime :: Timed s t t
+currentTime = Timed unTag
+
+-- | A timed value that always returns the same value (irrespective of time)
+constT   :: forall proxy (s :: *) t a. proxy s -> a -> Timed s t a
+constT _ = Timed . const
 
 --------------------------------------------------------------------------------
 
 
+
+
+
+
 getTime :: Timed s Int Int
-getTime = Timed unTag
+getTime = currentTime
 
 
-constT     :: proxy s -> Int -> Timed s Int Int
-constT _ i = Timed (const i)
+testComputation   :: forall (s:: *) t proxy. (Reifies s t, Ord t) => t -> proxy s -> Bool
+testComputation i = \prx -> currentTime < constT prx i
+
+testComputation2 i = (< i) <$> currentTime
 
 
-test1 i = reify 5 $ \prx -> getTime < constT prx i
+test1 i = reify 5 $ testComputation i
 
+
+-- testz :: Timed s Int [Int]
+-- testz = Map.fromList <$> sequence [ pure (10,, getTime ]
+
+
+
+
+test3 t = reify t $ \prx -> query $ testzz prx
+
+-- test3  :: Int -> Maybe String
+-- test3 t = reify t $ \(prx :: Proxy s) -> (testz ::Map (Timed s Int Int) String)
+
+testzz :: forall s. Reifies s Int => Proxy s -> Map (Timed s Int Int) String
+testzz _ = testz1
+
+testz1 :: forall s. (Reifies s Int) => Map (Timed s Int Int) String
+testz1 = testz
+
+testz :: (Reifies s t, Num t, Ord t) => Map (Timed s t t) String
+testz = Map.fromList [(pure 10,"ten"), (currentTime,"timed")]
+
+
+-- queryz     :: (Reifies s t, Num t, Ord t) => proxy s -> t -> String
+-- queryz _ t = Map.lookupGE (pure t) testz
+
+-- test5 t = reify t queryz
 
 
 
