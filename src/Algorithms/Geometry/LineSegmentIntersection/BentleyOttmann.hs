@@ -1,4 +1,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- The \(O((n+k)\log n)\) time line segment intersection algorithm by Bentley
+-- and Ottmann.
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
