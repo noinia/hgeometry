@@ -68,5 +68,5 @@ modules =
   , "Data.Geometry.Ipe.IpeOut"
   , "Data.Geometry.Ipe.FromIpe"
 
-  -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
+  , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
   ]
