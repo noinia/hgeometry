@@ -18,7 +18,7 @@ module Data.Range( EndPoint(..)
                  , prettyShow
                  , lower, upper
                  , pattern OpenRange, pattern ClosedRange, pattern Range'
-                 , inRange, width, clipLower, clipUpper, midPoint
+                 , inRange, width, clipLower, clipUpper, midPoint, clampTo
                  , isValid, covers
 
                  , shiftLeft, shiftRight
@@ -157,6 +157,26 @@ width i = i^.upper.unEndPoint - i^.lower.unEndPoint
 
 midPoint   :: Fractional r => Range r -> r
 midPoint r = let w = width r in r^.lower.unEndPoint + (w / 2)
+
+-- | Clamps a value to a range. I.e. if the value lies outside the range we
+-- report the closest value "in the range". Note that if an endpoint of the
+-- range is open we report that value anyway, so we return a value that is
+-- truely inside the range only if that side of the range is closed.
+--
+-- >>> clampTo (ClosedRange 0 10) 20
+-- 10
+-- >>> clampTo (ClosedRange 0 10) (-20)
+-- 0
+-- >>> clampTo (ClosedRange 0 10) 5
+-- 5
+-- >>> clampTo (OpenRange 0 10) 20
+-- 10
+-- >>> clampTo (OpenRange 0 10) (-20)
+-- 0
+-- >>> clampTo (OpenRange 0 10) 5
+-- 5
+clampTo                :: Ord r => Range r -> r -> r
+clampTo (Range' l u) x = (x `max` l) `min` u
 
 
 --------------------------------------------------------------------------------
