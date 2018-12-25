@@ -37,7 +37,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
                       , leftFace, rightFace
                       , nextEdge, prevEdge
-                      , boundary, boundary', boundaryVertices
+                      , boundary, boundary', boundaryDart, boundaryVertices
                       , outerFaceId, outerFaceDart
 
                       , vertexDataOf, locationOf, HasDataOf(..)
@@ -84,7 +84,6 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  )
 import           Data.Util
 import qualified Data.Vector as V
-import           Data.Version
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 import           GHC.Generics (Generic)
@@ -422,6 +421,10 @@ boundary f = PG.boundary f . _graph
 boundary'   :: Dart s -> PlaneGraph s v e f r -> V.Vector (Dart s)
 boundary' d = PG.boundary' d . _graph
 
+-- | Gets a dart bounding this face. I.e. a dart d such that the face lies to
+-- the right of the dart.
+boundaryDart   :: FaceId' s -> PlaneGraph s v e f r -> Dart s
+boundaryDart f = PG.boundaryDart f . _graph
 
 -- | The vertices bounding this face, for internal faces in clockwise order, for
 -- the outer face in counter clockwise order.
@@ -604,10 +607,6 @@ readPlaneGraph _ = undefined -- decodeYaml
 writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
                 => PlaneGraph s v e f r -> B.ByteString
 writePlaneGraph = undefined -- encodeYaml . Versioned planeGraphVersion
-
-
-planeGraphVersion :: Version
-planeGraphVersion = makeVersion [1,0]
 
 --------------------------------------------------------------------------------
 

@@ -57,3 +57,6 @@ instance ToJSON f   => ToJSON   (Face f) where
   toEncoding = genericToEncoding defaultOptions
 
 instance FromJSON f => FromJSON (Face f)
+
+
+--------------------------------------------------------------------------------

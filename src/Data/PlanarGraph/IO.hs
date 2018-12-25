@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -13,6 +14,7 @@ module Data.PlanarGraph.IO where
 
 import           Control.Lens
 import           Control.Monad (forM_)
+import           Data.Aeson
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Maybe (fromJust)
@@ -21,8 +23,22 @@ import           Data.PlanarGraph.Derived
 import           Data.PlanarGraph.Dual
 import           Data.PlanarGraph.EdgeOracle
 import           Data.PlanarGraph.JSON (Face(Face), Vtx(Vtx),Gr(Gr))
+import           Data.Proxy
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+
+import           Data.PlanarGraph.Dart
+
+--------------------------------------------------------------------------------
+
+instance (ToJSON v, ToJSON e, ToJSON f) => ToJSON (PlanarGraph s w v e f) where
+  toEncoding = toEncoding . toJSONRep
+  toJSON     = toJSON     . toJSONRep
+
+instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s Primal v e f) where
+  parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
+
+
 
 --------------------------------------------------------------------------------
 
@@ -53,6 +69,14 @@ toJSONRep g = Gr vs fs
     mkEdge u v@(VertexId vi) = (vi,fromJust $ findData u v)
 
 
+
+
+
+
+-- | Read a planar graph, given in JSON format into a planar graph. The adjacencylists
+-- should be in counter clockwise order.
+--
+-- running time: \(O(n)\)
 fromJSONRep                :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
 fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
                               &dartData   .~ ds
@@ -68,6 +92,7 @@ fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
                                    [(findEdge' (VertexId ui, VertexId vi),x) | (ui,x) <- us]
                                 ) as'
 
+    -- faces are right of oriented darts
     findFace ui vi = let d = findEdge' (VertexId ui, VertexId vi)
                      in rightFace d g
 
@@ -75,6 +100,7 @@ fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
     oracle = edgeOracle g
     findEdge' (u,v) = fromJust $ findDart u v oracle
 
+  -- TODO: Properly handle graphs with self-loops
 
 -- make sure we order the data values appropriately
 reorder     :: V.Vector (i :+ a) -> (i -> Int) -> V.Vector a
@@ -83,3 +109,46 @@ reorder v f = V.create $ do
                            forM_ v $ \(i :+ x) ->
                              MV.write v' (f i) x
                            pure v'
+
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
+data Test
+
+type Vertex = VertexId Test Primal
+
+testEdges :: [(Vertex,[Vertex])]
+testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
+            [ (0, [1])
+            , (1, [0,1,2,4])
+            , (2, [1,3,4])
+            , (3, [2,5])
+            , (4, [1,2,5])
+            , (5, [3,4])
+            ]
+
+
+myGraph :: PlanarGraph Test Primal () String ()
+myGraph = planarGraph [ [ (Dart aA Negative, "a-")
+                        , (Dart aC Positive, "c+")
+                        , (Dart aB Positive, "b+")
+                        , (Dart aA Positive, "a+")
+                        ]
+                      , [ (Dart aE Negative, "e-")
+                        , (Dart aB Negative, "b-")
+                        , (Dart aD Negative, "d-")
+                        , (Dart aG Positive, "g+")
+                        ]
+                      , [ (Dart aE Positive, "e+")
+                        , (Dart aD Positive, "d+")
+                        , (Dart aC Negative, "c-")
+                            ]
+                      , [ (Dart aG Negative, "g-")
+                        ]
+                      ]
+  where
+    -- dart i s = Dart (Arc i) (read s)
+    (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]
