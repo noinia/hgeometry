@@ -37,7 +37,7 @@ instance (FromJSON r, FromJSON v, FromJSON e) => FromJSON (Vtx v e r)
 
 --------------------------------------------------------------------------------
 
-myGraph :: Gr () () String Int
+myGraph :: Gr (Vtx () () Int) (Face String)
 myGraph = Gr [ Vtx 0 (Point2 0 0) [ (1,())
                                   , (5,())
                                   , (9,())

@@ -116,7 +116,7 @@ instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r =
     PlaneGraph { _graph :: PlanarGraph s Primal (VertexData r v) e f }
-      deriving (Show,Eq,ToJSON,FromJSON,Generic)
+      deriving (Show,Eq,Generic)
 makeLenses ''PlaneGraph
 
 type instance NumType   (PlaneGraph s v e f r) = r
@@ -598,12 +598,12 @@ rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
 readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
                  => proxy s -> B.ByteString
                  -> Either ParseException (PlaneGraph s v e f r)
-readPlaneGraph _ = decodeYaml
+readPlaneGraph _ = undefined -- decodeYaml
 
 -- | Writes a plane graph to a bytestring
 writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
                 => PlaneGraph s v e f r -> B.ByteString
-writePlaneGraph = encodeYaml . Versioned planeGraphVersion
+writePlaneGraph = undefined -- encodeYaml . Versioned planeGraphVersion
 
 
 planeGraphVersion :: Version

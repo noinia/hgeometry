@@ -8,10 +8,9 @@
 -- Data types that help encode/decode a PlanarGraph as a JSON/YAML file.
 --
 --------------------------------------------------------------------------------
-module Data.PlaneGraph.JSON where
+module Data.PlanarGraph.JSON where
 
 import Data.Aeson
-import Data.Geometry.Point
 import GHC.Generics (Generic)
 import Control.Lens(Bifunctor(..))
 

@@ -79,7 +79,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.PlanarGraph (isPositive, allDarts)
+import           Data.PlanarGraph.Dart(allDarts,isPositive)
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , Dart, VertexId(..), FaceId(..), twin
