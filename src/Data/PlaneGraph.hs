@@ -25,7 +25,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
                       , vertices', vertices
                       , edges', edges
                       , faces', faces, internalFaces, faces''
-                      , darts'
+                      , darts', darts
                       , traverseVertices, traverseDarts, traverseFaces
 
                       , headOf, tailOf, twin, endPoints
@@ -53,7 +53,7 @@ module Data.PlaneGraph( PlaneGraph(PlaneGraph), graph
 
 
                       , withEdgeDistances
-                      , writePlaneGraph, readPlaneGraph
+                      -- , writePlaneGraph, readPlaneGraph
                       ) where
 
 
@@ -82,11 +82,11 @@ import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
                                  , FaceId', VertexId'
                                  , HasDataOf(..)
                                  )
+-- import           Data.PlaneGraph.IO
 import           Data.Util
 import qualified Data.Vector as V
-import           Data.Yaml (ParseException)
-import           Data.Yaml.Util
 import           GHC.Generics (Generic)
+
 
 --------------------------------------------------------------------------------
 
@@ -241,6 +241,10 @@ vertices = PG.vertices . _graph
 -- | Enumerate all darts
 darts' :: PlaneGraph s v e f r  -> V.Vector (Dart s)
 darts' = PG.darts' . _graph
+
+-- | Get all darts together with their data
+darts :: PlaneGraph s v e f r  -> V.Vector (Dart s, e)
+darts = PG.darts . _graph
 
 -- | Enumerate all edges. We report only the Positive darts
 edges' :: PlaneGraph s v e f r  -> V.Vector (Dart s)
@@ -592,21 +596,6 @@ rawFacePolygon = rawFaceBoundary
 rawFacePolygons    :: PlaneGraph s v e f r
                    -> V.Vector (FaceId' s, SimplePolygon v r :+ f)
 rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
-
-
---------------------------------------------------------------------------------
--- * Reading and Writing the Plane Graph
-
--- | Reads a plane graph from a bytestring
-readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
-                 => proxy s -> B.ByteString
-                 -> Either ParseException (PlaneGraph s v e f r)
-readPlaneGraph _ = undefined -- decodeYaml
-
--- | Writes a plane graph to a bytestring
-writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
-                => PlaneGraph s v e f r -> B.ByteString
-writePlaneGraph = undefined -- encodeYaml . Versioned planeGraphVersion
 
 --------------------------------------------------------------------------------
 

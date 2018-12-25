@@ -152,6 +152,6 @@ findEdge  (VertexId u) (VertexId v) (EdgeOracle os) = find' u v <|> find' v u
 -- running time: \(O(1)\)
 findDart :: VertexId s w -> VertexId s w -> EdgeOracle s w (Dart s) -> Maybe (Dart s)
 findDart (VertexId u) (VertexId v) (EdgeOracle os) = find' twin u v <|> find' id v u
-    -- looks up j in the adjacencylist of i and applies f to the result
   where
+    -- looks up j in the adjacencylist of i and applies f to the result
     find' f j i = fmap (f . (^.extra)) . F.find (\(VertexId k :+ _) -> j == k) $ os V.! i

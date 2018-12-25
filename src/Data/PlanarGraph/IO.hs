@@ -28,15 +28,15 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
 import           Data.PlanarGraph.Dart
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 instance (ToJSON v, ToJSON e, ToJSON f) => ToJSON (PlanarGraph s w v e f) where
   toEncoding = toEncoding . toJSONRep
   toJSON     = toJSON     . toJSONRep
 
-instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s Primal v e f) where
-  parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
+-- instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s Primal v e f) where
+--   parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
 
 
 
@@ -77,7 +77,8 @@ toJSONRep g = Gr vs fs
 -- should be in counter clockwise order.
 --
 -- running time: \(O(n)\)
-fromJSONRep                :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+fromJSONRep                :: (Show f) =>
+  proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
 fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
                               &dartData   .~ ds
                               &faceData   .~ reorder fs (_unVertexId._unFaceId)
@@ -86,7 +87,9 @@ fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
     as = [ (VertexId vi, V.fromList [VertexId ui | (ui,_) <- us])
          | Vtx vi us _ <- as'
          ]
-    fs = V.fromList [ findFace ui vi :+ f | Face (ui,vi) f <- fs' ]
+    fs'' = V.fromList [ findFace ui vi :+ f | Face (ui,vi) f <- fs' ]
+    fs = traceShow ("FS: ", fs'') fs''
+
 
     ds = V.fromList $ concatMap (\(Vtx vi us _) ->
                                    [(findEdge' (VertexId ui, VertexId vi),x) | (ui,x) <- us]

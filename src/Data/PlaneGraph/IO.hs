@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.PlaneGraph.IO
@@ -13,18 +14,29 @@ module Data.PlaneGraph.IO where
 import           Control.Lens
 import           Data.Aeson
 import           Data.Bifunctor
-import qualified Data.Foldable as F
-import           Data.Maybe (fromJust)
-import           Data.PlanarGraph.Core (toAdjacencyLists,unVertexId)
-import           Data.PlanarGraph.EdgeOracle
 import qualified Data.PlanarGraph.IO as PGIO
 import qualified Data.PlanarGraph.JSON as PGJ
 import           Data.PlaneGraph
 import           Data.PlaneGraph.JSON (Face(Face), Vtx(Vtx),Gr(Gr))
 import           Data.Proxy
-import qualified Data.Vector as V
+import           Data.Yaml (ParseException)
+import           Data.Yaml.Util
 
 import Data.Geometry.Point
+
+-- --------------------------------------------------------------------------------
+-- -- * Reading and Writing the Plane Graph
+
+-- -- | Reads a plane graph from a bytestring
+-- readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+--                  => proxy s -> B.ByteString
+--                  -> Either ParseException (PlaneGraph s v e f r)
+-- readPlaneGraph _ = decodeYaml
+
+-- -- | Writes a plane graph to a bytestring
+-- writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
+--                 => PlaneGraph s v e f r -> B.ByteString
+-- writePlaneGraph = encodeYaml
 
 --------------------------------------------------------------------------------
 
@@ -32,9 +44,9 @@ instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlaneGraph s v e f 
   toEncoding = toEncoding . toJSONRep
   toJSON     = toJSON     . toJSONRep
 
-instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
-         => FromJSON (PlaneGraph s v e f r) where
-  parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
+-- instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+--          => FromJSON (PlaneGraph s v e f r) where
+--   parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
 
 --------------------------------------------------------------------------------
 
@@ -49,7 +61,8 @@ toJSONRep :: PlaneGraph s v e f r -> Gr (Vtx v e r) (Face f)
 toJSONRep = first (\(PGJ.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toJSONRep
          .  view graph
 
-fromJSONRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
+fromJSONRep    :: (Show f) =>
+  proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
 fromJSONRep px = PlaneGraph . PGIO.fromJSONRep px
                . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
 
