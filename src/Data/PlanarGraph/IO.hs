@@ -77,33 +77,39 @@ toJSONRep g = Gr vs fs
 -- should be in counter clockwise order.
 --
 -- running time: \(O(n)\)
-fromJSONRep                :: (Show f) =>
-  proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
-fromJSONRep _ (Gr as' fs') = g&vertexData .~ reorder vs _unVertexId
-                              &dartData   .~ ds
-                              &faceData   .~ reorder fs (_unVertexId._unFaceId)
+fromJSONRep                 :: (Show f)
+                             => proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+fromJSONRep px gr@(Gr as fs) = g&vertexData .~ reorder vs _unVertexId
+                                &dartData   .~ ds
+                                &faceData   .~ reorder fs' (_unVertexId._unFaceId)
   where
-    vs = V.fromList [ VertexId vi :+ v     | Vtx vi _ v <- as' ]
+    -- build the actual graph using the adjacencies
+    g = buildGraph px gr
+    -- build an edge oracle so that we can quickly lookup the dart corresponding to a
+    -- pair of vertices.
+    oracle = edgeOracle g
+    -- function to lookup a given dart
+    findEdge' u v = fromJust $ findDart u v oracle
+    -- faces are right of oriented darts
+    findFace ui vi = let d = findEdge' (VertexId ui) (VertexId vi) in rightFace d g
+
+    vs = V.fromList [ VertexId vi :+ v     | Vtx vi _ v <- as ]
+    fs'' = V.fromList [ findFace ui vi :+ f | Face (ui,vi) f <- fs ]
+    fs' = traceShow ("FS: ", fs'') fs''
+
+    ds = V.fromList $ concatMap (\(Vtx vi us _) ->
+                                   [(findEdge' (VertexId vi) (VertexId ui), x) | (ui,x) <- us]
+                                ) as
+
+  -- TODO: Properly handle graphs with self-loops
+
+-- | Builds the graph from the adjacency lists (but ignores all associated data)
+buildGraph              :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal () () ()
+buildGraph _ (Gr as' _) = fromAdjacencyLists as
+  where
     as = [ (VertexId vi, V.fromList [VertexId ui | (ui,_) <- us])
          | Vtx vi us _ <- as'
          ]
-    fs'' = V.fromList [ findFace ui vi :+ f | Face (ui,vi) f <- fs' ]
-    fs = traceShow ("FS: ", fs'') fs''
-
-
-    ds = V.fromList $ concatMap (\(Vtx vi us _) ->
-                                   [(findEdge' (VertexId ui, VertexId vi),x) | (ui,x) <- us]
-                                ) as'
-
-    -- faces are right of oriented darts
-    findFace ui vi = let d = findEdge' (VertexId ui, VertexId vi)
-                     in rightFace d g
-
-    g = fromAdjacencyLists as
-    oracle = edgeOracle g
-    findEdge' (u,v) = fromJust $ findDart u v oracle
-
-  -- TODO: Properly handle graphs with self-loops
 
 -- make sure we order the data values appropriately
 reorder     :: V.Vector (i :+ a) -> (i -> Int) -> V.Vector a
