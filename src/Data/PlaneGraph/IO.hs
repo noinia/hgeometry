@@ -31,6 +31,19 @@ import           Data.Yaml.Util
 
 import Data.PlanarGraph.EdgeOracle
 
+--------------------------------------------------------------------------------
+
+-- $setup
+-- >>> :{
+-- :}
+--
+--
+-- This represents the following graph. Note that the graph is undirected, the
+-- arrows are just to indicate what the Positive direction of the darts is.
+--
+-- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
+
+
 -- --------------------------------------------------------------------------------
 -- -- * Reading and Writing the Plane Graph
 
