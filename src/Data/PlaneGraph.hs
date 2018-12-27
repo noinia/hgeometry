@@ -567,7 +567,9 @@ edgeSegments ps = fmap withSegment . edges $ ps
                             seg   = ClosedLineSegment p q
                         in (d, seg :+ e)
 
--- | Given a dart and the graph constructs the line segment representing the dart
+-- | Given a dart and the graph constructs the line segment representing the
+-- dart. The segment \(\overline{uv})\) is has \(u\) as its tail and \(v\) as
+-- its head.
 --
 -- \(O(1)\)
 edgeSegment      :: Dart s -> PlaneGraph s v e f r -> LineSegment 2 v r :+ e
