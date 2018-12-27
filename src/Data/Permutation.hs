@@ -87,7 +87,7 @@ apply perm x = let (c,i) = lookupIdx perm x
 orbitFrom     :: Eq a => a -> (a -> a) -> [a]
 orbitFrom s p = s : (takeWhile (/= s) . tail $ iterate p s)
 
--- Given a vector with items in the permutation, and a permutation (by its
+-- | Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the
 -- permutation.
 cycleRep        :: (GV.Vector v a, Enum a, Eq a) => v a -> (a -> a) -> Permutation a

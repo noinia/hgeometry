@@ -11,18 +11,25 @@
 --------------------------------------------------------------------------------
 module Data.PlaneGraph.IO where
 
+import           Control.Monad (forM_)
 import           Control.Lens
 import           Data.Aeson
 import           Data.Bifunctor
+import           Data.Ext
+import           Data.Geometry.Point
+import qualified Data.List as List
 import qualified Data.PlanarGraph.IO as PGIO
 import qualified Data.PlanarGraph.JSON as PGJ
 import           Data.PlaneGraph
 import           Data.PlaneGraph.JSON (Face(Face), Vtx(Vtx),Gr(Gr))
 import           Data.Proxy
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 
-import Data.Geometry.Point
+
+import Data.PlanarGraph.EdgeOracle
 
 -- --------------------------------------------------------------------------------
 -- -- * Reading and Writing the Plane Graph
@@ -67,11 +74,71 @@ fromJSONRep px = PlaneGraph . PGIO.fromJSONRep px
                . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
 
 
+-- build' px = PGIO.buildGraph px . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
+
+
+--------------------------------------------------------------------------------
+
+-- | Orders the adjacencylists of a plane graph (with \(n\) vertices) (in json
+-- repr) so that they are all counter-clockwise around the vertices.
+--
+-- running time: \(O(n \log n)\)
+makeCCW            :: (Num r, Ord r) => Gr (Vtx v e r) f -> Gr (Vtx v e r) f
+makeCCW (Gr vs fs) = Gr (map sort' vs) fs
+  where
+    -- create an array that we can use to lookup the vertex locations in constant time.
+    location = V.create $ do
+                  a <- MV.new (length vs)
+                  forM_ vs $ \(Vtx i p _ _) ->
+                    MV.write a i $ ext p
+                  pure a
+    -- sort the adjacencies around every vertex v
+    sort' (Vtx v p ajs x) = Vtx v p (List.sortBy (around p) ajs) x
+    around p (a,_) (b,_) = ccwCmpAround (ext p) (location V.! a) (location V.! b)
 
 --------------------------------------------------------------------------------
 
 myGraph :: Gr (Vtx () () Int) (Face String)
-myGraph = Gr [ Vtx 0 (Point2 0 0) [ (1,())
+myGraph = makeCCW myGraph'
+
+triangle :: Gr (Vtx Int String Int) (Face String)
+triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+                                , (1,"0->1")
+                                ] 0
+           , Vtx 1 (Point2 2 2) [ (0,"1->0")
+                                , (2,"1->2")
+                                ] 1
+           , Vtx 2 (Point2 2 0) [ (0,"2->0")
+                                , (1,"2->1")
+                                ] 2
+           ]
+           [ Face (2,1) "OuterFace"
+           , Face (0,1) "A"
+           ]
+
+small :: Gr (Vtx Int String Int) (Face String)
+small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+                                , (1,"0->1")
+                                , (3,"0->3")
+                                ] 0
+           , Vtx 1 (Point2 2 2) [ (0,"1->0")
+                                , (2,"1->2")
+                                , (3,"1->3")
+                                ] 1
+           , Vtx 2 (Point2 2 0) [ (0,"2->0")
+                                , (1,"2->1")
+                                ] 2
+           , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
+                                   , (1,"3->1")
+                                   ] 3
+           ]
+           [ Face (2,1) "OuterFace"
+           , Face (0,1) "A"
+           , Face (1,0) "B"
+           ]
+
+myGraph' :: Gr (Vtx () () Int) (Face String)
+myGraph' = Gr [ Vtx 0 (Point2 0 0) [ (1,())
                                   , (5,())
                                   , (9,())
                                   , (2,())
@@ -131,7 +198,14 @@ myGraph = Gr [ Vtx 0 (Point2 0 0) [ (1,())
              , Face (0,5) "A"
              , Face (1,5) "B"
              , Face (4,13) "C"
-             , Face (12,13) "D"
+             , Face (13,12) "D"
              , Face (8,5) "E"
              , Face (9,6) "F"
              ]
+
+
+-- gg = build' (Proxy :: Proxy PGIO.Test) small :: PlanarGraph PGIO.Test Primal () () ()
+
+-- oracleX = edgeOracle gg
+
+-- Just d0 = findDart (VertexId 0) (VertexId 1) oracleX
