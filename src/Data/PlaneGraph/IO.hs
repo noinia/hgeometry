@@ -29,19 +29,42 @@ import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 
 
-import Data.PlanarGraph.EdgeOracle
+-- import Data.PlanarGraph.EdgeOracle
 
 --------------------------------------------------------------------------------
 
 -- $setup
 -- >>> :{
+-- data Test
+-- let small :: Gr (Vtx Int String Int) (Face String)
+--     small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+--                                     , (1,"0->1")
+--                                     , (3,"0->3")
+--                                     ] 0
+--                , Vtx 1 (Point2 2 2) [ (0,"1->0")
+--                                     , (2,"1->2")
+--                                     , (3,"1->3")
+--                                     ] 1
+--                , Vtx 2 (Point2 2 0) [ (0,"2->0")
+--                                     , (1,"2->1")
+--                                     ] 2
+--                , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
+--                                        , (1,"3->1")
+--                                        ] 3
+--                ]
+--                [ Face (2,1) "OuterFace"
+--                , Face (0,1) "A"
+--                , Face (1,0) "B"
+--                ]
+--
+--     smallG = fromJSONRep (Proxy :: Proxy ()) small
 -- :}
 --
 --
 -- This represents the following graph. Note that the graph is undirected, the
 -- arrows are just to indicate what the Positive direction of the darts is.
 --
--- ![myGraph](docs/Data/PlaneGraph/planegraph.png)
+-- ![myGraph](docs/Data/PlaneGraph/small.png)
 
 
 -- --------------------------------------------------------------------------------
@@ -64,9 +87,9 @@ instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlaneGraph s v e f 
   toEncoding = toEncoding . toJSONRep
   toJSON     = toJSON     . toJSONRep
 
--- instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
---          => FromJSON (PlaneGraph s v e f r) where
---   parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
+instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+         => FromJSON (PlaneGraph s v e f r) where
+  parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
 
 --------------------------------------------------------------------------------
 
@@ -81,14 +104,9 @@ toJSONRep :: PlaneGraph s v e f r -> Gr (Vtx v e r) (Face f)
 toJSONRep = first (\(PGJ.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toJSONRep
          .  view graph
 
-fromJSONRep    :: (Show f) =>
-  proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
+fromJSONRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
 fromJSONRep px = PlaneGraph . PGIO.fromJSONRep px
                . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
-
-
--- build' px = PGIO.buildGraph px . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
-
 
 --------------------------------------------------------------------------------
 
@@ -100,14 +118,14 @@ makeCCW            :: (Num r, Ord r) => Gr (Vtx v e r) f -> Gr (Vtx v e r) f
 makeCCW (Gr vs fs) = Gr (map sort' vs) fs
   where
     -- create an array that we can use to lookup the vertex locations in constant time.
-    location = V.create $ do
-                  a <- MV.new (length vs)
-                  forM_ vs $ \(Vtx i p _ _) ->
-                    MV.write a i $ ext p
-                  pure a
+    location' = V.create $ do
+                   a <- MV.new (length vs)
+                   forM_ vs $ \(Vtx i p _ _) ->
+                     MV.write a i $ ext p
+                   pure a
     -- sort the adjacencies around every vertex v
     sort' (Vtx v p ajs x) = Vtx v p (List.sortBy (around p) ajs) x
-    around p (a,_) (b,_) = ccwCmpAround (ext p) (location V.! a) (location V.! b)
+    around p (a,_) (b,_) = ccwCmpAround (ext p) (location' V.! a) (location' V.! b)
 
 --------------------------------------------------------------------------------
 
@@ -128,6 +146,8 @@ triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
            [ Face (2,1) "OuterFace"
            , Face (0,1) "A"
            ]
+
+smallG = fromJSONRep (Proxy :: Proxy ()) small
 
 small :: Gr (Vtx Int String Int) (Face String)
 small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")

@@ -1,5 +1,4 @@
 import Test.DocTest
-
 import Data.Monoid
 
 main = doctest $ ["-isrc" ] ++ ghcExts ++ files
@@ -51,6 +50,8 @@ modules =
   , "Data.CircularSeq"
   , "Data.LSeq"
   , "Data.PlanarGraph"
+  , "Data.PlanarGraph.Dart"
+  , "Data.PlanarGraph.Core"
   , "Data.Tree.Util"
 
   , "Data.Geometry.Point"

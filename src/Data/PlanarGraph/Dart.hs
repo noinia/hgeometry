@@ -14,6 +14,11 @@ import           Control.DeepSeq
 import           Control.Lens hiding ((.=))
 import           GHC.Generics (Generic)
 
+-- $setup
+-- >>> :{
+-- let dart i s = Dart (Arc i) (read s)
+-- :}
+
 --------------------------------------------------------------------------------
 
 -- | An Arc is a directed edge in a planar graph. The type s is used to tie
