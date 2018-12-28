@@ -40,6 +40,7 @@ import           Data.Vinyl.CoRec (asA)
 
 {- $setup
 >>> :{
+-- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () Rational
     simplePoly = SimplePolygon . C.fromList . map ext $ [ point2 0 0
                                                         , point2 10 0
