@@ -2,7 +2,8 @@ module Data.EdgeOracleSpec where
 
 import           Control.Arrow
 import           Data.Ext
-import           Data.PlanarGraph
+import           Data.PlanarGraph.EdgeOracle
+import           Data.PlanarGraph.Core
 import           Data.Semigroup
 import qualified Data.Set as S
 import           Test.Hspec

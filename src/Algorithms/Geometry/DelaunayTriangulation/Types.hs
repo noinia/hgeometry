@@ -97,6 +97,6 @@ toPlaneGraph    :: forall proxy s p r.
                    proxy s -> Triangulation p r -> PG.PlaneGraph s p () () r
 toPlaneGraph _ tr = PG.PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
-    g       = PG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
+    g       = PPG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
     f i adj = (VertexId i, VertexId <$> adj)
     vtxData = (\(loc :+ p) -> VertexData loc p) <$> tr^.positions

@@ -34,6 +34,8 @@ module Data.PlanarGraph( -- $setup
 
                        , planarGraph, planarGraph', fromAdjacencyLists
                        , toAdjacencyLists
+                       , fromAdjRep, toAdjRep
+
                        -- , buildFromJSON
 
                        -- * Quering a planar graph
@@ -65,7 +67,7 @@ module Data.PlanarGraph( -- $setup
 import           Data.PlanarGraph.Core
 import           Data.PlanarGraph.Dart
 import           Data.PlanarGraph.Dual
-import           Data.PlanarGraph.Derived
+import           Data.PlanarGraph.IO
 
 --------------------------------------------------------------------------------
 -- $setup

@@ -6,36 +6,33 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Converting from/to our JSON/Yaml representation of the plane graph
+-- Converting from/to Adjacency Representation of the plane graph
 --
 --------------------------------------------------------------------------------
 module Data.PlaneGraph.IO where
 
-import           Control.Monad (forM_)
 import           Control.Lens
+import           Control.Monad (forM_)
 import           Data.Aeson
 import           Data.Bifunctor
+import qualified Data.ByteString as B
 import           Data.Ext
 import           Data.Geometry.Point
 import qualified Data.List as List
+import qualified Data.PlanarGraph.AdjRep as PGA
 import qualified Data.PlanarGraph.IO as PGIO
-import qualified Data.PlanarGraph.JSON as PGJ
-import           Data.PlaneGraph
-import           Data.PlaneGraph.JSON (Face(Face), Vtx(Vtx),Gr(Gr))
+import           Data.PlaneGraph.Core
+import           Data.PlaneGraph.AdjRep (Face(Face), Vtx(Vtx),Gr(Gr))
 import           Data.Proxy
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Yaml (ParseException)
 import           Data.Yaml.Util
 
-
--- import Data.PlanarGraph.EdgeOracle
-
 --------------------------------------------------------------------------------
 
 -- $setup
 -- >>> :{
--- data Test
 -- let small :: Gr (Vtx Int String Int) (Face String)
 --     small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
 --                                     , (1,"0->1")
@@ -57,7 +54,8 @@ import           Data.Yaml.Util
 --                , Face (1,0) "B"
 --                ]
 --
---     smallG = fromJSONRep (Proxy :: Proxy ()) small
+--     smallG = fromAdjRep (Proxy :: Proxy ()) small
+--     dart i s = Dart (Arc i) (read s)
 -- :}
 --
 --
@@ -67,29 +65,29 @@ import           Data.Yaml.Util
 -- ![myGraph](docs/Data/PlaneGraph/small.png)
 
 
--- --------------------------------------------------------------------------------
--- -- * Reading and Writing the Plane Graph
+--------------------------------------------------------------------------------
+-- * Reading and Writing the Plane Graph
 
--- -- | Reads a plane graph from a bytestring
--- readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
---                  => proxy s -> B.ByteString
---                  -> Either ParseException (PlaneGraph s v e f r)
--- readPlaneGraph _ = decodeYaml
+-- | Reads a plane graph from a bytestring
+readPlaneGraph   :: (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
+                 => proxy s -> B.ByteString
+                 -> Either ParseException (PlaneGraph s v e f r)
+readPlaneGraph _ = decodeYaml
 
--- -- | Writes a plane graph to a bytestring
--- writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
---                 => PlaneGraph s v e f r -> B.ByteString
--- writePlaneGraph = encodeYaml
+-- | Writes a plane graph to a bytestring
+writePlaneGraph :: (ToJSON v, ToJSON e, ToJSON f, ToJSON r)
+                => PlaneGraph s v e f r -> B.ByteString
+writePlaneGraph = encodeYaml
 
 --------------------------------------------------------------------------------
 
 instance (ToJSON v, ToJSON e, ToJSON f, ToJSON r) => ToJSON (PlaneGraph s v e f r) where
-  toEncoding = toEncoding . toJSONRep
-  toJSON     = toJSON     . toJSONRep
+  toEncoding = toEncoding . toAdjRep
+  toJSON     = toJSON     . toAdjRep
 
 instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
          => FromJSON (PlaneGraph s v e f r) where
-  parseJSON v = fromJSONRep (Proxy :: Proxy s) <$> parseJSON v
+  parseJSON v = fromAdjRep (Proxy :: Proxy s) <$> parseJSON v
 
 --------------------------------------------------------------------------------
 
@@ -100,17 +98,17 @@ instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
 -- See 'toAdjacencyLists' for notes on how we handle self-loops.
 --
 -- running time: \(O(n)\)
-toJSONRep :: PlaneGraph s v e f r -> Gr (Vtx v e r) (Face f)
-toJSONRep = first (\(PGJ.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toJSONRep
+toAdjRep :: PlaneGraph s v e f r -> Gr (Vtx v e r) (Face f)
+toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdjRep
          .  view graph
 
-fromJSONRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
-fromJSONRep px = PlaneGraph . PGIO.fromJSONRep px
-               . first (\(Vtx v p aj x) -> PGJ.Vtx v aj $ VertexData p x)
+fromAdjRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
+fromAdjRep px = PlaneGraph . PGIO.fromAdjRep px
+              . first (\(Vtx v p aj x) -> PGA.Vtx v aj $ VertexData p x)
 
 --------------------------------------------------------------------------------
 
--- | Orders the adjacencylists of a plane graph (with \(n\) vertices) (in json
+-- | Orders the adjacencylists of a plane graph (with \(n\) vertices) (in Adj
 -- repr) so that they are all counter-clockwise around the vertices.
 --
 -- running time: \(O(n \log n)\)
@@ -128,117 +126,3 @@ makeCCW (Gr vs fs) = Gr (map sort' vs) fs
     around p (a,_) (b,_) = ccwCmpAround (ext p) (location' V.! a) (location' V.! b)
 
 --------------------------------------------------------------------------------
-
-myGraph :: Gr (Vtx () () Int) (Face String)
-myGraph = makeCCW myGraph'
-
-triangle :: Gr (Vtx Int String Int) (Face String)
-triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
-                                , (1,"0->1")
-                                ] 0
-           , Vtx 1 (Point2 2 2) [ (0,"1->0")
-                                , (2,"1->2")
-                                ] 1
-           , Vtx 2 (Point2 2 0) [ (0,"2->0")
-                                , (1,"2->1")
-                                ] 2
-           ]
-           [ Face (2,1) "OuterFace"
-           , Face (0,1) "A"
-           ]
-
-smallG = fromJSONRep (Proxy :: Proxy ()) small
-
-small :: Gr (Vtx Int String Int) (Face String)
-small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
-                                , (1,"0->1")
-                                , (3,"0->3")
-                                ] 0
-           , Vtx 1 (Point2 2 2) [ (0,"1->0")
-                                , (2,"1->2")
-                                , (3,"1->3")
-                                ] 1
-           , Vtx 2 (Point2 2 0) [ (0,"2->0")
-                                , (1,"2->1")
-                                ] 2
-           , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
-                                   , (1,"3->1")
-                                   ] 3
-           ]
-           [ Face (2,1) "OuterFace"
-           , Face (0,1) "A"
-           , Face (1,0) "B"
-           ]
-
-myGraph' :: Gr (Vtx () () Int) (Face String)
-myGraph' = Gr [ Vtx 0 (Point2 0 0) [ (1,())
-                                  , (5,())
-                                  , (9,())
-                                  , (2,())
-                                  ] ()
-             , Vtx 1 (Point2 4 4) [ (0,())
-                                  , (5,())
-                                  , (12,())
-                                  ] ()
-             , Vtx 2 (Point2 3 7) [ (3,())
-                                  , (0,())
-                                  ] ()
-             , Vtx 3 (Point2 0 5) [(4,())
-                                  , (2,())
-                                  ] ()
-             , Vtx 4 (Point2 3 8) [ (3,())
-                                  , (13,())
-                                  ] ()
-             , Vtx 5 (Point2 8 1) [ (1,())
-                                  , (0,())
-                                  , (6,())
-                                  , (8,())
-                                  ] ()
-             , Vtx 6 (Point2 6 (-1)) [ (5,())
-                                     , (9,())
-                                     ] ()
-             , Vtx 7 (Point2 9 (-1)) [ (8,())
-                                     , (11,())
-                                     ] ()
-             , Vtx 8 (Point2 12 1) [ (5,())
-                                   , (7,())
-                                   , (12,())
-                                   ] ()
-             , Vtx 9 (Point2 8 (-5)) [ (6,())
-                                     , (0,())
-                                     , (10,())
-                                     ] ()
-             , Vtx 10 (Point2 12 (-3)) [ (9,())
-                                       , (11,())
-                                       ] ()
-             , Vtx 11 (Point2 14 (-1)) [ (10,())
-                                       , (7,())
-                                       ] ()
-             , Vtx 12 (Point2 10 4) [ (8,())
-                                    , (14,())
-                                    , (1,())
-                                    , (13,())
-                                    ] ()
-             , Vtx 13 (Point2 9 6) [ (4,())
-                                   , (14,())
-                                   , (12,())
-                                   ] ()
-             , Vtx 14 (Point2 8 5) [ (13,())
-                                   , (12,())
-                                   ] ()
-             ]
-             [ Face (4,3) "OuterFace"
-             , Face (0,5) "A"
-             , Face (1,5) "B"
-             , Face (4,13) "C"
-             , Face (13,12) "D"
-             , Face (8,5) "E"
-             , Face (9,6) "F"
-             ]
-
-
--- gg = build' (Proxy :: Proxy PGIO.Test) small :: PlanarGraph PGIO.Test Primal () () ()
-
--- oracleX = edgeOracle gg
-
--- Just d0 = findDart (VertexId 0) (VertexId 1) oracleX

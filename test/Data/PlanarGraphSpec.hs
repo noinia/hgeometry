@@ -9,6 +9,7 @@ import qualified Data.Map.Strict as SM
 import           Data.Permutation (toCycleRep)
 import           Data.PlanarGraph
 import qualified Data.PlanarGraph as PlanarGraph
+import           Data.PlanarGraph.IO
 import qualified Data.Set as S
 import           Data.Util
 import qualified Data.Vector as V
@@ -18,7 +19,7 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.HGeometryInstances ()
 
-
+--------------------------------------------------------------------------------
 data TestG
 
 type Vertex = VertexId TestG Primal
@@ -48,10 +49,10 @@ spec = do
     it "quickheck Dart: fromEnum (toEnum i) = i" $
       property $ \(NonNegative i) -> fromEnum ((toEnum i) :: Dart TestG) `shouldBe` i
     it "encode yaml test" $ do
-      b <- B.readFile "test/Data/myGraph.yaml"
+      b <- B.readFile "test/Data/PlanarGraph/myGraph.yaml"
       encodeYaml (fromAdjacencyLists testEdges) `shouldBe` b
     it "decode yaml test" $ do
-      (first prettyPrintParseException <$> decodeYamlFile "test/Data/myGraph.yaml")
+      (first prettyPrintParseException <$> decodeYamlFile "test/Data/PlanarGraph/myGraph.yaml")
       `shouldReturn`
       (Right $ fromAdjacencyLists testEdges)
 

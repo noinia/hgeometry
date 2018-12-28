@@ -52,6 +52,7 @@ modules =
   , "Data.PlanarGraph"
   , "Data.PlanarGraph.Dart"
   , "Data.PlanarGraph.Core"
+  , "Data.PlaneGraph.IO"
   , "Data.Tree.Util"
 
   , "Data.Geometry.Point"
