@@ -22,7 +22,7 @@ import qualified Data.List as List
 import qualified Data.PlanarGraph.AdjRep as PGA
 import qualified Data.PlanarGraph.IO as PGIO
 import           Data.PlaneGraph.Core
-import           Data.PlaneGraph.AdjRep (Face(Face), Vtx(Vtx),Gr(Gr))
+import           Data.PlaneGraph.AdjRep (Face,Vtx(Vtx),Gr(Gr))
 import           Data.Proxy
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -32,8 +32,11 @@ import           Data.Yaml.Util
 --------------------------------------------------------------------------------
 
 -- $setup
+-- >>> import Data.PlanarGraph.Dart
+-- >>> import Data.PlanarGraph.AdjRep(Face(..))
 -- >>> :{
--- let small :: Gr (Vtx Int String Int) (Face String)
+-- let dart i s = Dart (Arc i) (read s)
+--     small :: Gr (Vtx Int String Int) (Face String)
 --     small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
 --                                     , (1,"0->1")
 --                                     , (3,"0->3")
@@ -53,9 +56,7 @@ import           Data.Yaml.Util
 --                , Face (0,1) "A"
 --                , Face (1,0) "B"
 --                ]
---
 --     smallG = fromAdjRep (Proxy :: Proxy ()) small
---     dart i s = Dart (Arc i) (read s)
 -- :}
 --
 --
@@ -63,7 +64,6 @@ import           Data.Yaml.Util
 -- arrows are just to indicate what the Positive direction of the darts is.
 --
 -- ![myGraph](docs/Data/PlaneGraph/small.png)
-
 
 --------------------------------------------------------------------------------
 -- * Reading and Writing the Plane Graph

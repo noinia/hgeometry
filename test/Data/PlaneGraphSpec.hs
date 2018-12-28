@@ -10,6 +10,9 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.PlaneGraph
+import           Data.PlaneGraph.IO(makeCCW)
+import           Data.PlaneGraph.AdjRep
+import           Data.Proxy
 import           Data.Util
 import qualified Data.Vector as V
 import           Data.Yaml (prettyPrintParseException)
