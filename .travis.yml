@@ -85,6 +85,7 @@ matrix:
 
   # You can keep a STACK_YAML file at any path location
   - env: BUILD=stack STACK_YAML=stack-ghc8.4.yaml
+  - env: BUILD=stack STACK_YAML=stack-ghc8.6.yaml
 
   # --------------------------------------------------------------------------
   # (Linux) cabal builds (BUILD=cabal, BUILD=cabal-new). Common envvars are:
@@ -135,9 +136,9 @@ matrix:
   # Builds that are allowed to fail
   # --------------------------------------------------------------------------
 
-  allow_failures:
-  # - env: BUILD=stack RESOLVER=nightly
-  - env: BUILD=cabal-new GHCVER=head
+  # allow_failures:
+  # # - env: BUILD=stack RESOLVER=nightly
+  # - env: BUILD=cabal-new GHCVER=head
   # - env: BUILD=stack RESOLVER=lts-11 HLINT_COMMANDS="hlint lint ."
 
 # ------------------------------------------------------------------------
