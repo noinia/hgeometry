@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UnicodeSyntax #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -21,10 +20,10 @@ import Data.Singletons
 import Data.Singletons.TH
 import Data.Text (Text)
 import Data.Vinyl
-import Data.Vinyl.Functor
 import Data.Vinyl.TypeLevel
+import Data.Vinyl.Functor
 import GHC.Exts
-import Text.Read(lexP, step, parens, prec, (+++)
+import Text.Read (lexP, step, parens, prec, (+++)
                 , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
 
 --------------------------------------------------------------------------------
@@ -125,13 +124,15 @@ newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) = Attrs (Rec (Attr f) ats)
 unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
 unAttrs = lens (\(Attrs r) -> r) (const Attrs)
 
-deriving instance (RecAll (Attr f) ats Show) => Show (Attributes f ats)
+deriving instance ( RMap ats, ReifyConstraint Show (Attr f) ats, RecordToList ats
+                  , RecAll (Attr f) ats Show) => Show (Attributes f ats)
 -- deriving instance (RecAll (Attr f) ats Read) => Read (Attributes f ats)
 
-instance (RecAll (Attr f) ats Eq)   => Eq   (Attributes f ats) where
+instance ( ReifyConstraint Eq (Attr f) ats, RecordToList ats
+         , RecAll (Attr f) ats Eq)   => Eq   (Attributes f ats) where
   (Attrs a) == (Attrs b) = and . recordToList
                          . zipRecsWith (\x (Compose (Dict y)) -> Const $ x == y) a
-                         . (reifyConstraint (Proxy :: Proxy Eq)) $ b
+                         . (reifyConstraint @Eq) $ b
 
 instance RecApplicative ats => Monoid (Attributes f ats) where
   mempty        = Attrs $ rpure mempty
@@ -147,8 +148,9 @@ zipRecsWith                       :: (forall a. f a -> g a -> h a)
 zipRecsWith _ RNil      _         = RNil
 zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
 
-attrLens   :: (at ∈ ats) => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
-attrLens p = unAttrs.rlens p.getAttr
+attrLens   :: forall at ats proxy f. (at ∈ ats)
+           => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
+attrLens _ = unAttrs.(rlens @at).getAttr
 
 lookupAttr   :: (at ∈ ats) => proxy at -> Attributes f ats -> Maybe (Apply f at)
 lookupAttr p = view (attrLens p)
@@ -320,7 +322,7 @@ normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
 -- | For the types representing attribute values we can get the name/key to use
 -- when serializing to ipe.
 class IpeAttrName (a :: AttributeUniverse) where
-  attrName :: Proxy a -> Text
+  attrName :: proxy a -> Text
 
 -- CommonAttributeUnivers
 instance IpeAttrName Layer           where attrName _ = "layer"

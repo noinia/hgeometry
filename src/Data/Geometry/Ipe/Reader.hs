@@ -240,6 +240,7 @@ zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs 
 -- (the type family mapping labels to types), and a list of labels (ats).
 ipeReadRec       :: forall f ats.
                  ( RecApplicative ats
+                 , ReifyConstraint IpeReadAttr (Attr f) ats
                  , RecAll (Attr f) ats IpeReadAttr
                  , AllSatisfy IpeAttrName ats
                  )
@@ -249,7 +250,7 @@ ipeReadRec       :: forall f ats.
 ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
   where
     r  = rpure (GAttr Nothing)
-    r' = reifyConstraint (Proxy :: Proxy IpeReadAttr) r
+    r' = reifyConstraint @IpeReadAttr r
 
 
     f                              :: forall at.
@@ -263,6 +264,7 @@ ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
 -- coordinate type r, read the IpeAttributes for i from the xml node.
 ipeReadAttrs     :: forall proxy proxy' i r f ats.
                  ( f ~ AttrMapSym1 r, ats ~ AttributesOf i
+                 , ReifyConstraint IpeReadAttr (Attr f) ats
                  , RecApplicative ats
                  , RecAll (Attr f) ats IpeReadAttr
                  , AllSatisfy IpeAttrName ats
@@ -293,7 +295,8 @@ ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy at
 -- we can properly read an ipe object using ipeReadObject
 ipeReadObject           :: ( IpeRead (i r)
                            , f ~ AttrMapSym1 r, ats ~ AttributesOf i
-                           ,  RecApplicative ats
+                           , RecApplicative ats
+                           , ReifyConstraint IpeReadAttr (Attr f) ats
                            , RecAll (Attr f) ats IpeReadAttr
                            , AllSatisfy IpeAttrName ats
                            )

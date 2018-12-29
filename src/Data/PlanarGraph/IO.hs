@@ -13,7 +13,6 @@
 module Data.PlanarGraph.IO where
 
 import           Control.Lens
-import           Control.Lens hiding ((.=))
 import           Control.Monad (forM_)
 import           Control.Monad.State.Strict
 import           Data.Aeson

@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Arrangement.Internal
@@ -26,7 +25,6 @@ import           Data.Geometry.Properties
 import qualified Data.List as List
 import           Data.Maybe
 import           Data.Ord (Down(..))
-import           Data.Proxy
 import           Data.Sequence.Util
 import qualified Data.Vector as V
 import           Data.Vinyl.CoRec
@@ -90,7 +88,7 @@ constructArrangementInBox' px rect ls =
                 & rawVertexData.traverse.dataVal .~ ()
     (segs,parts') = computeSegsAndParts rect ls
 
-computeSegsAndParts         :: (Ord r, Fractional r)
+computeSegsAndParts         :: forall r l. (Ord r, Fractional r)
                             => Rectangle () r
                             -> [Line 2 r :+ l]
                             -> ( [LineSegment 2 () r :+ Maybe l]
@@ -113,13 +111,13 @@ perLine b m ls = map (:+ m^.extra) . toSegments . rmDuplicates . List.sort $ vs 
   where
     rmDuplicates = map head . List.group
     vs  = mapMaybe (m `intersectionPoint`) ls
-    vs' = maybe [] (\(p,q) -> [p,q]) . asA (Proxy :: Proxy (Point 2 r, Point 2 r))
+    vs' = maybe [] (\(p,q) -> [p,q]) . asA @(Point 2 r, Point 2 r)
         $ (m^.core) `intersect` (Boundary b)
 
 
-intersectionPoint                   :: (Ord r, Fractional r)
+intersectionPoint                   :: forall r l. (Ord r, Fractional r)
                                     => Line 2 r :+ l -> Line 2 r :+ l -> Maybe (Point 2 r)
-intersectionPoint (l :+ _) (m :+ _) = asA (Proxy :: Proxy (Point 2 r)) $ l `intersect` m
+intersectionPoint (l :+ _) (m :+ _) = asA @(Point 2 r) $ l `intersect` m
 
 
 toSegments      :: Ord r => [Point 2 r] -> [LineSegment 2 () r]
@@ -245,10 +243,10 @@ traverseLine l arr = let md    = findStart l arr
                      in maybe [] (List.unfoldr (fmap dup . follow arr)) md
 
 -- | Find the starting point of the line  the arrangement
-findStart       :: (Ord r, Fractional r)
+findStart       :: forall s l v e f r. (Ord r, Fractional r)
                 => Line 2 r -> Arrangement s l v (Maybe e) f r -> Maybe (Dart s)
 findStart l arr = do
-    (p,_)   <- asA (Proxy :: Proxy (Point 2 r, Point 2 r)) $
+    (p,_)   <- asA @(Point 2 r, Point 2 r) $
                  l `intersect` (Boundary $ arr^.boundedArea)
     (_,v,_) <- findStartVertex p arr
     findStartDart (arr^.subdivision) v

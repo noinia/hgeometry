@@ -34,7 +34,6 @@ import           Data.Geometry.Vector
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
-import           Data.Proxy
 import           Data.Ratio
 import           Data.Singletons
 import           Data.Text (Text)
@@ -118,7 +117,9 @@ instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
 
 
 -- | Functon to write all attributes in a Rec
-ipeWriteAttrs           :: ( AllSatisfy IpeAttrName rs
+ipeWriteAttrs           :: ( RecordToList rs, RMap rs
+                           , ReifyConstraint IpeWriteText (Attr f) rs
+                           , AllSatisfy IpeAttrName rs
                            , RecAll (Attr f) rs IpeWriteText
                            ) => IA.Attributes f rs -> [(Text,Text)]
 ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNames  r)
@@ -127,9 +128,11 @@ ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNam
     f (Const n) (Const mv) = Const $ (n,) <$> mv
 
 -- | Writing the attribute values
-writeAttrValues :: RecAll f rs IpeWriteText => Rec f rs -> Rec (Const (Maybe Text)) rs
+writeAttrValues :: ( RMap rs, ReifyConstraint IpeWriteText f rs
+                   , RecAll f rs IpeWriteText)
+                => Rec f rs -> Rec (Const (Maybe Text)) rs
 writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
-                . reifyConstraint (Proxy :: Proxy IpeWriteText)
+                . reifyConstraint @IpeWriteText
 
 
 instance IpeWriteText Text where
@@ -300,6 +303,8 @@ instance (IpeWriteText r) => IpeWrite (Group r) where
 
 
 instance ( AllSatisfy IpeAttrName rs
+         , RecordToList rs, RMap rs
+         , ReifyConstraint IpeWriteText (Attr f) rs
          , RecAll (Attr f) rs IpeWriteText
          , IpeWrite g
          ) => IpeWrite (g :+ IA.Attributes f rs) where
@@ -344,10 +349,11 @@ instance (IpeWriteText r) => IpeWrite (IpeObject r) where
     ipeWrite (IpePath      p) = ipeWrite p
 
 
-ipeWriteRec :: RecAll f rs IpeWrite => Rec f rs -> [Node Text Text]
+ipeWriteRec :: (RecAll f rs IpeWrite, RMap rs, ReifyConstraint IpeWrite f rs, RecordToList rs)
+            => Rec f rs -> [Node Text Text]
 ipeWriteRec = catMaybes . recordToList
             . rmap (\(Compose (Dict x)) -> Const $ ipeWrite x)
-            . reifyConstraint (Proxy :: Proxy IpeWrite)
+            . reifyConstraint @IpeWrite
 
 
 -- instance IpeWriteText (GroupAttrElf rs r) => IpeWriteText (GroupAttribute r rs) where

@@ -37,7 +37,6 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Proxy
 import           Data.Text (Text)
 import           Data.Maybe (fromMaybe)
 import           Linear.Affine ((.+^))
@@ -140,7 +139,7 @@ instance (Fractional r, Ord r) => HasDefaultIpeOut (Line 2 r) where
       b :: Rectangle () r
       b = box (ext $ Point2 (-200) (-200)) (ext $ Point2 1200 1200)
       naive (Line p v) = ClosedLineSegment (ext p) (ext $ p .+^ v)
-      toSeg l = fromMaybe (naive l) . asA (Proxy :: Proxy (LineSegment 2 () r))
+      toSeg l = fromMaybe (naive l) . asA @(LineSegment 2 () r)
               $ l `intersect` b
 
 instance HasDefaultIpeOut (Polygon t p r) where

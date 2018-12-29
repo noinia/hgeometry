@@ -9,8 +9,9 @@ import Algorithms.Geometry.ConvexHull.GrahamScan
 import Data.List.NonEmpty(NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Geometry.Duality
-import Data.Proxy
 import Data.Vinyl.CoRec
+
+--------------------------------------------------------------------------------
 
 type Envelope a r = NonEmpty (Line 2 r :+ a)
 
@@ -46,4 +47,4 @@ vertices e = zipWith intersect' (NonEmpty.toList e) (NonEmpty.tail e)
 intersect'                     :: forall r a. (Ord r, Fractional r)
                                => Line 2 r :+ a -> Line 2 r :+ a -> Point 2 r :+ (a,a)
 intersect' (l :+ le) (r :+ re) = (:+ (le,re)) . fromJust
-                               . asA (Proxy :: Proxy (Point 2 r)) $ l `intersect` r
+                               . asA @(Point 2 r) $ l `intersect` r

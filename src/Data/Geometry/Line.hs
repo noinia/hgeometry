@@ -53,11 +53,11 @@ instance (Ord r, Fractional r)
          => (Line 2 r) `IsIntersectableWith` (Boundary (Rectangle p r)) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  line' `intersect` (Boundary rect)  = case asA' segP of
+  line' `intersect` (Boundary rect)  = case asAP segP of
       [sl'] -> case fromUnbounded sl' of
         Nothing   -> error "intersect: line x boundary rect; unbounded line? absurd"
         Just sl'' -> coRec $ sl''^.re _SubLine
-      []    -> case nub' $ asA' pointP of
+      []    -> case nub' $ asAP pointP of
         [p]   -> coRec p
         [p,q] -> coRec (p,q)
         _     -> coRec NoIntersection
@@ -73,10 +73,10 @@ instance (Ord r, Fractional r)
       toSL  :: LineSegment 2 p r -> SubLine 2 () (UnBounded r) r
       toSL s = s^._SubLine.re _unBounded.to dropExtra
 
-      asA'    :: (t ∈ IntersectionOf (SubLine 2 () (UnBounded r) r)
-                                     (SubLine 2 () (UnBounded r) r))
-              => proxy t -> [t]
-      asA' px = mapMaybe (asA px) ints
+      asAP  :: forall proxy t. (t ∈ IntersectionOf (SubLine 2 () (UnBounded r) r)
+                                                   (SubLine 2 () (UnBounded r) r))
+             => proxy t -> [t]
+      asAP _ = mapMaybe (asA @t) ints
 
       segP   = Proxy :: Proxy (SubLine 2 () (UnBounded r) r)
       pointP = Proxy :: Proxy (Point 2 r)

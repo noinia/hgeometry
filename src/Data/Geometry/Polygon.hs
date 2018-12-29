@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon
@@ -29,7 +28,6 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
-import           Data.Proxy
 import           Data.Semigroup(sconcat)
 import qualified Data.Sequence as Seq
 import           Data.Util
@@ -288,7 +286,7 @@ q `inPolygon` pg
 
     -- Given a line segment, compute the intersection point (if a point) with the
     -- line l
-    intersectionPoint = asA (Proxy :: Proxy (Point 2 r)) . (`intersect` l)
+    intersectionPoint = asA @(Point 2 r) . (`intersect` l)
 
     -- Count the number of intersections that the horizontal line through q
     -- maxes with the polygon, that are strictly to the left and strictly to

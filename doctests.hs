@@ -12,6 +12,8 @@ ghcExts = map ("-X" ++)
           , "ConstraintKinds"
           , "PolyKinds"
           , "RankNTypes"
+          , "TypeApplications"
+          , "ScopedTypeVariables"
 
           , "PatternSynonyms"
           , "ViewPatterns"

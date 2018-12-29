@@ -193,8 +193,8 @@ clipUpper     :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
 clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothing
 
 -- | Wether or not the first range completely covers the second one
-covers       :: (Ord a) => Range a -> Range a -> Bool
-a `covers` b = maybe False (== b) . asA (Identity a) $ a `intersect` b
+covers       :: forall a. Ord a => Range a -> Range a -> Bool
+x `covers` y = maybe False (== y) . asA @(Range a) $ x `intersect` y
 
 
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is

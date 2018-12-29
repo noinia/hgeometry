@@ -29,7 +29,6 @@ module Data.Geometry.LineSegment( LineSegment
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
-import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box.Internal

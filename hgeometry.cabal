@@ -256,7 +256,7 @@ library
               , semigroups       >= 0.18
               , singletons       >= 2.0
               , text             >= 1.1.1.0
-              , vinyl            >= 0.6        && < 0.9
+              , vinyl            >= 0.10
               , deepseq          >= 1.1
               , fingertree       >= 0.1
               , colour           >= 2.3.3
@@ -300,6 +300,8 @@ library
                     , ConstraintKinds
                     , PolyKinds
                     , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
 
                     , PatternSynonyms
                     , TupleSections
@@ -538,6 +540,9 @@ test-suite hspec
                     , ConstraintKinds
                     , PolyKinds
                     , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
 
                     , PatternSynonyms
                     , ViewPatterns
@@ -634,6 +639,8 @@ benchmark benchmarks
                     , ConstraintKinds
                     , PolyKinds
                     , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
 
                     , PatternSynonyms
                     , ViewPatterns

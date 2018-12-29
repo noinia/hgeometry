@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE InstanceSigs  #-}
 --------------------------------------------------------------------------------
@@ -24,7 +23,6 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
-import           Data.Proxy
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F
 import qualified Data.Vector.Fixed as FV
@@ -105,7 +103,7 @@ instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
   bx `intersect` bx' = f . sequence $ FV.zipWith intersect' (extent bx) (extent bx')
     where
       f = maybe (coRec NoIntersection) (coRec . fromExtent)
-      r `intersect'` s = asA (Proxy :: Proxy (R.Range r)) $ r `intersect` s
+      r `intersect'` s = asA @(R.Range r) $ r `intersect` s
 
 instance Arity d => Bifunctor (Box d) where
   bimap :: forall p q r s. (p -> q) -> (r -> s) -> Box d p r -> Box d q s

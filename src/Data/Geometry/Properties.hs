@@ -16,7 +16,6 @@
 module Data.Geometry.Properties where
 
 import Data.Maybe (isNothing)
-import Data.Proxy
 import Data.Vinyl.CoRec
 import Data.Vinyl.Core
 import Data.Vinyl.Functor
@@ -82,7 +81,7 @@ defaultNonEmptyIntersection :: forall g h proxy.
                             , RecApplicative (IntersectionOf g h)
                             )
                             => proxy g -> proxy h -> Intersection g h -> Bool
-defaultNonEmptyIntersection _ _ = isNothing . asA (Proxy :: Proxy NoIntersection)
+defaultNonEmptyIntersection _ _ = isNothing . asA @NoIntersection
 
 
 -- type IsAlwaysTrueFromEither a b = (VTL.RIndex b [a,b] ~ ((VTL.S VTL.Z)))
