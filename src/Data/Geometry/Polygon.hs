@@ -28,10 +28,13 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Triangle (Triangle(..), inTriangle)
 import           Data.Geometry.Vector
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           Data.Semigroup (sconcat)
+import           Data.Semigroup.Foldable
+import qualified Data.Semigroup.Foldable (toNonEmpty)
 import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
@@ -175,9 +178,9 @@ holeList (MultiPolygon _ hs) = hs
 -- they appear!
 polygonVertices                      :: Polygon t p r
                                      -> NonEmpty.NonEmpty (Point 2 r :+ p)
-polygonVertices (SimplePolygon vs)   = C.toNonEmpty vs
+polygonVertices (SimplePolygon vs)   = toNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
-  sconcat $ C.toNonEmpty vs NonEmpty.:| map polygonVertices hs
+  sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
 -- | Creates a simple polygon from the given list of vertices.
@@ -373,14 +376,35 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
     sum' = F.foldl' (^+^) zero
 
 
--- | Pick a  point that is inside the polygon
+-- | Pick a  point that is inside the polygon.
+--
+-- (note: if the polygon is degenerate; i.e. has <3 vertices, we report a
+-- vertex of the polygon instead.)
+--
+-- pre: the polygon is given in CCW order
 --
 -- running time: \(O(n)\)
 pickPoint    :: (Ord r, Fractional r) => Polygon p t r -> Point 2 r
-pickPoint pg = let LineSegment' (p :+ _) (q :+ _) = findDiagonal pg
-               in p .+^ (0.5 *^ q .-. p)
+pickPoint pg | isTriangle pg = centroid . SimplePolygon $ pg^.outerBoundary
+             | otherwise     = let LineSegment' (p :+ _) (q :+ _) = findDiagonal pg
+                               in p .+^ (0.5 *^ (q .-. p))
 
--- | Find a diagonal of the polygon
+-- | Test if the polygon is a triangle
+--
+-- running time: \(O(1)\)
+isTriangle :: Polygon p t r -> Bool
+isTriangle = \case
+    SimplePolygon vs   -> go vs
+    MultiPolygon vs [] -> go vs
+    MultiPolygon _  _  -> False
+  where
+    go vs = case toNonEmpty vs of
+              (_ :| [_,_]) -> True
+              _            -> False
+
+-- | Find a diagonal of the polygon.
+--
+-- pre: the polygon is given in CCW order
 --
 -- running time: \(O(n)\)
 findDiagonal    :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
@@ -419,6 +443,7 @@ safeMaximumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
 safeMaximumOn f = \case
   [] -> Nothing
   xs -> Just $ List.maximumBy (comparing f) xs
+
 
 -- | Test if the outer boundary of the polygon is in clockwise or counter
 -- clockwise order.
