@@ -10,7 +10,13 @@
 -- closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.ClosestPair.DivideAndConquer where
+module Algorithms.Geometry.ClosestPair.DivideAndConquer( closestPair
+                                                       , CP
+                                                       , CCP(..)
+                                                       , mergePairs
+                                                       , mergeSortedBy
+                                                       )
+where
 
 import           Control.Lens
 import           Data.BinaryTree
@@ -81,7 +87,6 @@ mergePairs            :: forall p r. (Ord r, Num r)
                       -> CP (Point 2 r :+ p) r
 mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
   where
-
     -- scan through the points on the right in increasing order.
     go              :: CP (Point 2 r :+ p) r -> [Point 2 r :+ p] -> [Point 2 r :+ p]
                     -> CP (Point 2 r :+ p) r
@@ -90,24 +95,28 @@ mergePairs cp' ls' rs' = go cp' (NonEmpty.toList ls') (NonEmpty.toList rs')
                           cp'' = run cp r ls'' -- try to find a new closer pair with r.
                       in go cp'' ls'' rs   -- and then process the remaining points
 
-    -- ditch the points on the left that are too low anyway
-    trim               :: Top r -> [Point 2 r :+ q] -> Point 2 r :+ a
-                       -> [Point 2 r :+ q]
-    trim (ValT d) ls r = List.dropWhile (\l -> sqVertDist l r > d) ls
-    trim _        ls _ = ls
+-- | ditch the points on the left that are too low anyway
+trim               :: (Ord r, Num r)
+                   => Top r -> [Point 2 r :+ q] -> Point 2 r :+ a
+                   -> [Point 2 r :+ q]
+trim (ValT d) ls r = List.dropWhile (\l -> sqVertDist l r > d) ls
+trim _        ls _ = ls
 
-    -- the squared vertical distance (in case r lies above l) or 0 otherwise
-    sqVertDist l r = let d = 0 `max` (r^.core.yCoord - l^.core.yCoord) in d*d
+-- | the squared vertical distance (in case r lies above l) or 0 otherwise
+sqVertDist    :: (Ord r, Num r) => Point 2 r :+ p -> Point 2 r :+ q -> r
+sqVertDist l r = let d = 0 `max` (r^.core.yCoord - l^.core.yCoord) in d*d
 
-    -- try and find a new closest pair with r. If we get to points that are too far above
-    -- r we stop (since none of those points will be closer to r anyway)
-    run          :: CP (Point 2 r :+ p) r -> Point 2 r :+ p -> [Point 2 r :+ p]
-                 -> CP (Point 2 r :+ p) r
-    run cp'' r ls =
+-- | try and find a new closest pair with r. If we get to points that are too
+-- far above r we stop (since none of those points will be closer to r anyway)
+run          :: (Ord r, Num r)
+             => CP (Point 2 r :+ p) r -> Point 2 r :+ p -> [Point 2 r :+ p]
+             -> CP (Point 2 r :+ p) r
+run cp'' r ls =
       runWhile cp'' ls
-               (\cp l -> ValT (l^.core.yCoord - r^.core.yCoord) < (getDist cp))
+               (\cp l -> (ValT $ sqVertDist r l) < getDist cp) -- r and l inverted
+                                                               -- by design
                (\cp l -> minBy getDist cp (ValT $ SP (Two l r) (dist l r)))
-
+  where
     dist (p :+ _) (q :+ _) = squaredEuclideanDist p q
 
 
@@ -127,3 +136,27 @@ minBy f a b | f a < f b = a
 -- | Get the distance of a (candidate) closest pair
 getDist :: CP a r -> Top r
 getDist = fmap (view _2)
+
+
+
+
+
+-- test4 = [Point2 (479109173120836 % 8353334321025) (5100576283797 % 96072829279) :+ ()
+--         ,Point2 (58405408826671 % 1010204299645) (416491493323834 % 7859181827347) :+ ()
+--         ,Point2 (497723773632392 % 8797511756605) (484251118551575 % 9452820868018) :+ ()
+--         ,Point2 (71823625388220 % 1256943286753) (211467894699900 % 3952412568913) :+ ()
+--         ]
+
+
+-- myTree = asBalancedBinLeafTree . LSeq.toNonEmpty . LSeq.promise . LSeq.unstableSortBy (comparing (^.core)). LSeq.fromList $ test4
+-- myTree2 = let mkCCP (Elem p) = CCP (p :| []) Top in mkCCP <$> myTree
+
+
+
+-- ans2p = Point2 (479109173120836 % 8353334321025) (5100576283797 % 96072829279)
+-- ans2q = Point2 (71823625388220 % 1256943286753) (211467894699900 % 3952412568913)
+
+
+
+-- temp =Two (test4 !! 1) (test4 !! 0)
+-- tempX = ValT (SP temp $ squaredEuclideanDist (temp^._1.core) (temp^._2.core))
