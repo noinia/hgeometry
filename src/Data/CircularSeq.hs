@@ -4,8 +4,6 @@ module Data.CircularSeq( CSeq
                        , fromNonEmpty
                        , fromList
 
-                       , toNonEmpty
-
                        , focus
                        , index, adjust
                        , item
@@ -38,7 +36,7 @@ import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (listToMaybe)
-import           Data.Semigroup.Foldable hiding (toNonEmpty)
+import           Data.Semigroup.Foldable
 import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
 import qualified Data.Sequence as S
 import qualified Data.Traversable as T
@@ -219,9 +217,6 @@ fromNonEmpty (x NonEmpty.:| xs) = withFocus x $ S.fromList xs
 fromList        :: [a] -> CSeq a
 fromList (x:xs) = withFocus x $ S.fromList xs
 fromList []     = error "fromList: Empty list"
-
-toNonEmpty :: CSeq a -> NonEmpty.NonEmpty a
-toNonEmpty = NonEmpty.fromList . F.toList
 
 -- | Rotates i elements to the right.
 --

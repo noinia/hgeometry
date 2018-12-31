@@ -25,13 +25,20 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Geometry.Triangle (Triangle(..), inTriangle)
 import           Data.Geometry.Vector
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe)
-import           Data.Semigroup(sconcat)
+import           Data.Maybe (mapMaybe, catMaybes)
+import           Data.Ord (comparing)
+import           Data.Semigroup (sconcat)
+import           Data.Semigroup.Foldable
+import qualified Data.Semigroup.Foldable (toNonEmpty)
 import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
+
 
 --------------------------------------------------------------------------------
 -- * Polygons
@@ -171,9 +178,9 @@ holeList (MultiPolygon _ hs) = hs
 -- they appear!
 polygonVertices                      :: Polygon t p r
                                      -> NonEmpty.NonEmpty (Point 2 r :+ p)
-polygonVertices (SimplePolygon vs)   = C.toNonEmpty vs
+polygonVertices (SimplePolygon vs)   = toNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
-  sconcat $ C.toNonEmpty vs NonEmpty.:| map polygonVertices hs
+  sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
 -- | Creates a simple polygon from the given list of vertices.
@@ -367,6 +374,75 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
          | LineSegment' (p :+ _) (q :+ _) <- F.toList $ outerBoundaryEdges poly  ]
 
     sum' = F.foldl' (^+^) zero
+
+
+-- | Pick a  point that is inside the polygon.
+--
+-- (note: if the polygon is degenerate; i.e. has <3 vertices, we report a
+-- vertex of the polygon instead.)
+--
+-- pre: the polygon is given in CCW order
+--
+-- running time: \(O(n)\)
+pickPoint    :: (Ord r, Fractional r) => Polygon p t r -> Point 2 r
+pickPoint pg | isTriangle pg = centroid . SimplePolygon $ pg^.outerBoundary
+             | otherwise     = let LineSegment' (p :+ _) (q :+ _) = findDiagonal pg
+                               in p .+^ (0.5 *^ (q .-. p))
+
+-- | Test if the polygon is a triangle
+--
+-- running time: \(O(1)\)
+isTriangle :: Polygon p t r -> Bool
+isTriangle = \case
+    SimplePolygon vs   -> go vs
+    MultiPolygon vs [] -> go vs
+    MultiPolygon _  _  -> False
+  where
+    go vs = case toNonEmpty vs of
+              (_ :| [_,_]) -> True
+              _            -> False
+
+-- | Find a diagonal of the polygon.
+--
+-- pre: the polygon is given in CCW order
+--
+-- running time: \(O(n)\)
+findDiagonal    :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
+findDiagonal pg = head . catMaybes . F.toList $ diags
+     -- note that a diagonal is guaranteed to exist, so the usage of head is safe.
+  where
+    vs      = pg^.outerBoundary
+    diags   = C.zip3LWith f (C.rotateL vs) vs (C.rotateR vs)
+    f u v w = case ccw (u^.core) (v^.core) (w^.core) of
+                CCW      -> Just $ findDiag u v w
+                            -- v is a convex vertex, so find a diagonal
+                            -- (either uw) or from v to a point inside the
+                            -- triangle
+                CW       -> Nothing -- v is a reflex vertex
+                CoLinear -> Nothing -- colinear vertex!?
+
+    -- we test if uw is a diagonal by figuring out if there is a vertex
+    -- strictly inside the triangle t. If there is no such vertex then uw must
+    -- be a diagonal (i.e. uw intersects the polygon boundary iff there is a
+    -- vtx inside t).  If there are vertices inside the triangle, we find the
+    -- one z furthest from the line(segment) uw. It then follows that vz is a
+    -- diagonal. Indeed this is pretty much the argument used to prove that any
+    -- polygon can be triangulated. See BKOS Chapter 3 for details.
+    findDiag u v w = let t  = Triangle u v w
+                         uw = ClosedLineSegment u w
+                     in maybe uw (ClosedLineSegment v)
+                      . safeMaximumOn (distTo $ supportingLine uw)
+                      . filter (\(z :+ _) -> z `inTriangle` t == Inside)
+                      . F.toList . polygonVertices
+                      $ pg
+
+    distTo l (z :+ _) = sqDistanceTo z l
+
+
+safeMaximumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
+safeMaximumOn f = \case
+  [] -> Nothing
+  xs -> Just $ List.maximumBy (comparing f) xs
 
 
 -- | Test if the outer boundary of the polygon is in clockwise or counter
