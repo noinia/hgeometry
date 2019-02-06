@@ -1,28 +1,25 @@
 module System.Random.Shuffle(shuffle) where
 
 import           Control.Monad
+import           Control.Monad.Random.Class
 import qualified Data.Foldable as F
+import           Data.Util
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as MV
 import           System.Random
 
-import qualified Data.Vector.Mutable as MV
-import qualified Data.Vector         as V
+-- | Fisher–Yates shuffle, which shuffles a list/foldable uniformly at random.
+--
+-- running time: \(O(n)\).
+shuffle :: (Foldable f, MonadRandom m) => f a -> m (V.Vector a)
+shuffle = withLength . V.fromList . F.toList
+  where
+    withLength v = let n = V.length v in flip withRands v <$> rands (n - 1)
+    withRands rs = V.modify $ \v ->
+                     forM_ rs $ \(SP i j) -> MV.swap v i j
 
-
-
--- | Fisher–Yates shuffle, which shuffles in O(n) time.
-shuffle     :: (F.Foldable f, RandomGen g) => g -> f a -> [a]
-shuffle gen = V.toList . V.modify (\v ->
-                do
-                  let n = MV.length v
-                  forM_ (rands gen $ n - 1) $ \(SP i j) -> MV.swap v i j
-              ) . V.fromList . F.toList
-
--- | Strict pair
-data SP a b = SP !a !a
 
 -- | Generate a list of indices in decreasing order, coupled with a random
 -- value in the range [0,i].
-rands     :: RandomGen g => g -> Int -> [SP Int Int]
-rands g i
-      | i <= 0    = []
-      | otherwise = let (j,g') = randomR (0,i) g in SP i j : rands g' (i-1)
+rands   :: MonadRandom m => Int -> m [SP Int Int]
+rands n = mapM (\i -> SP i <$> getRandomR (0,i)) [n,(n-1)..1]

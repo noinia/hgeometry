@@ -15,7 +15,9 @@ module Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstructi
 
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens
+import           Control.Monad.Random.Class
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ball
 import qualified Data.List as L
@@ -29,14 +31,13 @@ import           System.Random.Shuffle (shuffle)
 -- | O(n) expected time algorithm to compute the smallest enclosing disk of a
 -- set of points. we need at least two points.
 -- implemented using randomized incremental construction
-smallestEnclosingDisk           :: (Ord r, Fractional r, RandomGen g)
-                                => g
-                                -> [Point 2 r :+ p]
-                                -> DiskResult p r
+smallestEnclosingDisk           :: (Ord r, Fractional r, MonadRandom m)
+                                => [Point 2 r :+ p]
+                                -> m (DiskResult p r)
 
-smallestEnclosingDisk g pts@(_:_:_) = let (p:q:pts') = shuffle g pts
-                                      in smallestEnclosingDisk' p q pts'
-smallestEnclosingDisk _ _           = error "smallestEnclosingDisk: Too few points"
+smallestEnclosingDisk pts@(_:_:_) = ((\(p:q:pts') -> smallestEnclosingDisk' p q pts')
+                                    . F.toList) <$> shuffle pts
+smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
 -- | Smallest enclosing disk.
 smallestEnclosingDisk'     :: (Ord r, Fractional r)

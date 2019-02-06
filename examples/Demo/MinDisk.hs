@@ -4,6 +4,7 @@ module Demo.MinDisk where
 import           Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens
+import           Control.Monad.Random.Strict
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -40,13 +41,12 @@ diskResult (DiskResult d pts) = ipeGroup (iO' d  : (F.toList . fmap g $ pts))
 mainWith              :: Options -> IO ()
 mainWith (Options fp) = do
     ep <- readSinglePageFile fp
-    gen <- getStdGen
     case ep of
       Left err                       -> print err
       Right (ipeP :: IpePage Double) ->
         case map ext $ ipeP^..content.Tr.traverse._IpeUse.core.symbolPoint of
           pts@(_:_:_) -> do
-                           let res = smallestEnclosingDisk gen pts
+                           res <- evalRandIO $ smallestEnclosingDisk pts
                            printAsIpeSelection . iO . diskResult $ res
           _           -> putStrLn "Not enough points!"
 
@@ -62,4 +62,4 @@ minDisk' :: RandomGen g => g -> PolyLine 2 () Double -> DiskResult () Double
 minDisk' = minDisk
 
 minDisk    :: (Ord r, Fractional r, RandomGen g) => g -> PolyLine 2 () r -> DiskResult () r
-minDisk gen pl = smallestEnclosingDisk gen (F.toList $ pl^.points)
+minDisk gen pl = flip evalRand gen $ smallestEnclosingDisk (F.toList $ pl^.points)
