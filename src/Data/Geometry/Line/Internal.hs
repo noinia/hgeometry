@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveAnyClass  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -70,12 +69,14 @@ verticalLine x = Line (point2 x 0) (Vector2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (Vector2 1 0)
 
--- | Given a line l with anchor point p, get the line perpendicular to l that also goes through p.
+-- | Given a line l with anchor point p and vector v, get the line
+-- perpendicular to l that also goes through p. The resulting line m is
+-- oriented such that v points into the left halfplane of m.
+--
+-- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
+-- Line (Point2 [3,4]) (Vector2 [-2,-1])
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
-
-
-
 
 
 -- | Test if two lines are identical, meaning; if they have exactly the same

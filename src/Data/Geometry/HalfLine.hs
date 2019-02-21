@@ -22,9 +22,9 @@ import           GHC.Generics (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
--- * d-dimensional Half-Lines
+-- * \(d\)-dimensional Half-Lines
 
--- | d-dimensional Half-Lines
+-- | \(d\)-dimensional Half-Lines
 data HalfLine d r = HalfLine { _startPoint        :: Point  d r
                              , _halfLineDirection :: Vector d r
                              } deriving Generic
