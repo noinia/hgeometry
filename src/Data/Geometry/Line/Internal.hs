@@ -78,6 +78,9 @@ horizontalLine y = Line (point2 0 y) (Vector2 1 0)
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 
+-- | Test if a vector is perpendicular to the line.
+isPerpendicularTo :: (Num r, Eq r) => Vector 2 r -> Line 2 r -> Bool
+v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.

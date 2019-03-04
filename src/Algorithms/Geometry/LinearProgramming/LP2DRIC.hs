@@ -65,7 +65,6 @@ deriving instance (Arity d, Eq r)     => Eq      (LPState d r)
 
 --------------------------------------------------------------------------------
 
-
 -- | collect all intersection points on the boundary l of h. If we return a Nothing there
 -- is no solution. Just [] indicates that somehow this halfplane is contained in all other
 -- halfplanes.
@@ -85,8 +84,11 @@ collectOn o h = sequence . mapMaybe collect . map (l `intersect`)
       :& (H $ \_              -> Nothing)
       :& RNil
 
-
--- | Find new minimum in direction o on the boundary of halfspace h (if it exists)
+-- | Let l be the boundary of h, and assume that we know that the new point in
+-- the common intersection must lie on h, try to find this point. In
+-- partiuclar, we find the 'minimum' point in the s^.direction vector. The
+-- funtion returns Nothing if no such point exists, i.e. if there is no point
+-- on l that is contained in all halfspaces.
 minimumOn     :: (Ord r, Fractional r) => LPState 2 r -> HalfSpace 2 r -> Maybe (Point 2 r)
 minimumOn s h = fmap (F.minimumBy cmp) . collectOn (s^.obj) h $ s^.seen
   where
@@ -112,9 +114,34 @@ step s h | (s^.current) `intersects` h = Just $ s&seen     %~ (h:)
 
 -- TODO: Fix this
 
-initialize          :: Vector 2 r -> [HalfSpace d r]
+
+
+findWith o h []
+  | o `isPerpendicularTo` (h^.boundingPlane._asLine) = Single $ h^.boundingPlane.inPlane
+  | otherwise                                        = UnBounded
+findWith o h (h':hs) = match (h^.boundingPlane._asLine) `intersect` h' $
+      (H $ \Nothing -> if (h'^.boundingPlane._asLine) `intersects` h
+                      then findWith o h' -- no solution on h ; h is redundant
+                      else insert h' $ findWith o h hs)  -- add h'
+   :& (H $ \hl -> undefined)
+   :& (H $ \_ -> undefined)
+   :& RNil
+
+
+
+
+
+initialize          :: (Ord r, Fractional r)
+                    => Vector 2 r -> [HalfSpace d r]
                     -> GLPolution (LPState d r, [HalfSpace d r])
-initialize o (h:hs) = undefined
+initialize _ []     = NoSolution
+initialize o (h:hs) = findWith o h hs
+
+
+-- -- | Given a vector v and a halfplane h, return the extremal point in direction
+-- -- v that lies in h.
+-- findBest v h =
+
 
   -- ( LPState o [h,h2] undefined
 --                         (h^.boundingPlane `intersect` h2^.boundingPlane)
