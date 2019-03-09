@@ -75,6 +75,12 @@ leftOf l = (rightOf l)&boundingPlane.normalVec %~ ((-1) *^)
 rightOf   :: Num r => Line 2 r -> HalfPlane r
 rightOf l = HalfSpace $ l^.re _asLine
 
+above :: Num r => Line 2 r -> HalfPlane r
+above = leftOf
+
+below :: Num r => Line 2 r -> HalfPlane r
+below = rightOf
+
 --------------------------------------------------------------------------------
 
 -- type HalfPlane r = GHalfSpace (Line 2 r)

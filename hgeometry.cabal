@@ -110,6 +110,7 @@ library
                     Data.Geometry.HalfLine
                     Data.Geometry.PolyLine
                     Data.Geometry.HyperPlane
+                    Data.Geometry.HalfSpace
                     Data.Geometry.Triangle
                     -- Data.Geometry.Plane
                     Data.Geometry.Slab
@@ -175,6 +176,8 @@ library
 
                     Algorithms.Geometry.ClosestPair.Naive
                     Algorithms.Geometry.ClosestPair.DivideAndConquer
+
+                    Algorithms.Geometry.LinearProgramming.LP2DRIC
 
 
                     -- * Graph Algorithms
@@ -499,6 +502,7 @@ test-suite hspec
                  Data.Geometry.PlanarSubdivisionSpec
                  Data.Geometry.TriangleSpec
                  Data.Geometry.ArrangementSpec
+                 Data.Geometry.HalfSpaceSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
@@ -510,6 +514,9 @@ test-suite hspec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
                  Algorithms.Geometry.ClosestPair.ClosestPairSpec
+
+                 Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec
+
 
                  Util
 
@@ -534,7 +541,7 @@ test-suite hspec
                       , filepath
                       , directory
                       , yaml
-
+                      , MonadRandom
 
   default-extensions: TypeFamilies
                     , GADTs
