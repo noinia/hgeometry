@@ -1,23 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
 
-import Util
+import           Util
 
-import Control.Monad(when)
-import System.Random(mkStdGen)
-import Control.Lens
-import Data.Ext
-import Data.Maybe
-import Data.Proxy
-import Test.Hspec
-import Data.Geometry
-import Data.Geometry.Ball(fromDiameter, disk, Disk)
-import Data.Geometry.Ipe
-
-import Algorithms.Geometry.SmallestEnclosingBall.Types
-import qualified Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction as RIC
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
+import qualified Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction as RIC
+import           Algorithms.Geometry.SmallestEnclosingBall.Types
+import           Control.Lens
+import           Control.Monad (when)
+import           Control.Monad.Random.Strict(evalRand)
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Ball (fromDiameter, disk, Disk)
+import           Data.Geometry.Ipe
+import           Data.Maybe
+import           Data.Proxy
+import           System.Random (mkStdGen)
+import           Test.Hspec
 
 
 spec :: Spec
@@ -40,12 +39,14 @@ toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
 toSpec (TestCase pts sol) =
     describe ("testing point set with solution " ++ show sol) $ do
       it "comparing with naive solution" $
-        ((RIC.smallestEnclosingDisk (mkStdGen 2123) pts)^.enclosingDisk)
+        (flip evalRand (mkStdGen 2123) $
+          view enclosingDisk <$> RIC.smallestEnclosingDisk pts)
         `shouldBe`
         ((Naive.smallestEnclosingDisk pts)^.enclosingDisk)
       when (isJust sol) $
         it "manal solution" $
-          ((RIC.smallestEnclosingDisk (mkStdGen 5) pts)^.enclosingDisk)
+          (flip evalRand (mkStdGen 5) $
+            view enclosingDisk <$> RIC.smallestEnclosingDisk pts)
           `shouldBe`
           (diskOf $ fromJust sol)
 

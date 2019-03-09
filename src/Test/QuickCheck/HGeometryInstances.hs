@@ -21,8 +21,6 @@ import           Data.Geometry.Box
 import           Data.PlanarGraph
 import qualified Data.PlanarGraph as PlanarGraph
 import           Data.Geometry.SubLine
-import           Data.Geometry.HalfSpace
-import           Data.Geometry.HyperPlane
 import           Data.OrdSeq (OrdSeq, fromListByOrd)
 import           Data.Proxy
 import qualified Data.LSeq as LSeq
@@ -67,14 +65,6 @@ instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
   arbitrary = do p <- arbitrary
                  q <- suchThat arbitrary (/= p)
                  return $ lineThrough p q
-
-instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (HyperPlane d r) where
-  arbitrary = HyperPlane <$> arbitrary
-                         <*> suchThat arbitrary (\n -> n /= pure 0)
-
-instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (HalfSpace d r) where
-  arbitrary = HalfSpace <$> arbitrary
-
 
 instance (Arbitrary r, Arity d, Ord r) => Arbitrary (Box d () r) where
   arbitrary = (\p (q :: Point d r) -> boundingBoxList' [p,q]) <$> arbitrary <*> arbitrary
