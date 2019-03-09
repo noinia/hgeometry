@@ -111,10 +111,12 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
-
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
+
+
+
 
 
 -- | Get the point at the given position along line, where 0 corresponds to the
