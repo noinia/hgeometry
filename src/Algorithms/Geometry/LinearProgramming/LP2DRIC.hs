@@ -16,14 +16,15 @@ import           Control.Lens
 import           Control.Monad (foldM)
 import           Control.Monad.Random.Class
 import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
 import           Data.Geometry.HalfLine
 import           Data.Geometry.HalfSpace
-import           Data.Geometry.Boundary
 import           Data.Geometry.HyperPlane
 import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
@@ -64,25 +65,64 @@ deriving instance (Arity d, Eq r)     => Eq      (LPState d r)
 
 --------------------------------------------------------------------------------
 
--- | collect all intersection points on the boundary l of h. If we return a Nothing there
+-- | collect all intersecting halflines on the boundary l of h. If we return a Nothing there
 -- is no solution. Just [] indicates that somehow this halfspace h is contained in all other
 -- halfspaces.
 collectOn     :: (Ord r, Fractional r)
-              => Vector 2 r
-              -> HalfSpace 2 r
+              => HalfSpace 2 r
               -> [HalfSpace 2 r]
               -> Maybe [HalfLine 2 r]
-collectOn _ h = sequence . mapMaybe collect . map (l `intersect`)
+collectOn h = sequence . mapMaybe collect . map (l `intersect`)
   where
     l = h^.boundingPlane._asLine
 
-    collect   :: Intersection (Line 2 r) (HalfSpace 2 r) -> Maybe (Maybe (Point 2 r))
+    collect   :: Intersection (Line 2 r) (HalfSpace 2 r) -> Maybe (Maybe (HalfLine 2 r))
     collect r = match r $
          (H $ \NoIntersection -> Just Nothing)
       :& (H $ \hl             -> Just $ Just hl)
       :& (H $ \_              -> Nothing)
       :& RNil
 
+
+-- | Given a vector v and two points a and b, determine which is smaller in direction v.
+cmpHalfPlane       :: (Ord r, Num r, Arity d)
+                   => Vector d r -> Point d r -> Point d r -> Ordering
+cmpHalfPlane v a b = case a `inHalfSpace` (HalfSpace $ HyperPlane b $ v) of
+                       Inside     -> GT
+                       OnBoundary -> EQ
+                       Outside    -> LT
+
+-- | Computes the common intersection of a nonempty list of halfines that are
+-- all colinear with the given line l.
+--
+-- We return either zero points, if there is no common intersection, one point,
+-- if the halflines have only one point in common, or two points; the boundary
+-- points of the range in which all halflines intersect.
+commonIntersection                :: (Ord r, Num r, Arity d)
+                                  => Line d r
+                                  -> NonEmpty.NonEmpty (HalfLine d r)
+                                  -> [Point d r]
+commonIntersection (Line _ v) hls = case (nh,ph) of
+     (Nothing,Nothing) -> error "absurd; this case cannot occur"
+     (Nothing, Just p) -> [p]
+     (Just n, Nothing) -> [n]
+     (Just n, Just p)  -> case cmpHalfPlane v n p of
+                            LT -> []
+                            EQ -> [p]
+                            GT -> [p,n]
+  where
+    f = map (^.startPoint)
+    (pos,neg) = bimap f f
+              . NonEmpty.partition (\hl -> hl^.halfLineDirection == v) $ hls
+    ph = maximumBy' (cmpHalfPlane v) pos
+    nh = maximumBy' (flip $ cmpHalfPlane v) neg
+
+
+-- | maximum of a list using a given comparison ; if the list is empty returns Nothing
+maximumBy'     :: (a -> a -> Ordering) -> [a] -> Maybe a
+maximumBy' cmp = \case
+  [] -> Nothing
+  xs -> Just $ F.maximumBy cmp xs
 
 
 -- | Let l be the boundary of h, and assume that we know that the new point in
@@ -91,15 +131,14 @@ collectOn _ h = sequence . mapMaybe collect . map (l `intersect`)
 -- funtion returns Nothing if no such point exists, i.e. if there is no point
 -- on l that is contained in all halfspaces.
 minimumOn     :: (Ord r, Fractional r) => LPState 2 r -> HalfSpace 2 r -> Maybe (Point 2 r)
-minimumOn s h = fmap (F.minimumBy cmp) . collectOn (s^.obj) h $ s^.seen
-  where
-    -- a is smaller (i.e. better) than b if it occurs in the halfspace defined
-    -- by the objective vector through point b.
-    cmp a b = case a `inHalfSpace` (HalfSpace $ HyperPlane b $ s^.obj) of
-                Inside     -> LT
-                OnBoundary -> EQ
-                Outside    -> GT
-  -- TODO: FIx the minimumOn function, this is kind of nonsense
+minimumOn s h = do hls  <- collectOn h $ s^.seen
+                   hls' <- NonEmpty.nonEmpty hls
+                   let l          = h^.boundingPlane._asLine
+                       candidates = commonIntersection l hls'
+                   maximumBy' (cmpHalfPlane (s^.obj)) candidates
+  -- if collectOn returns a Just [] it means there is a point in the common intersection,
+  -- however it does not lie on the boundary of h. This violates our input assumption
+  -- thus if this would happen we can safely return a Nothing
 
 
 -- | What we do when we get a new halfplane h
