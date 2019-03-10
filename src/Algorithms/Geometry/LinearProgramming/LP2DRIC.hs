@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -12,6 +11,7 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LinearProgramming.LP2DRIC where
 
+import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.Lens
 import           Control.Monad (foldM)
 import           Control.Monad.Random.Class
@@ -30,26 +30,33 @@ import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           System.Random.Shuffle
 
-
 --------------------------------------------------------------------------------
 
--- | Data type representing the solution to a linear program
-data GLPolution p = NoSolution
-                  | Single !p
-                  | UnBounded
-                  deriving (Show,Eq,Functor)
+-- | Solve a linear program
+solveLinearProgram :: MonadRandom m => LinearProgram 2 r -> m (LPSolution 2 r)
+solveLinearProgram = undefined
 
 
-type LPSolution d r = GLPolution (Point d r)
+-- | Solvess a bounded linear program in 2d. There are at least two constraints
+-- m1,m2 that bound the solution; they are assumed to be the first two contraints.
+--
+-- Returns Nothing if there is sno solution.
+--
+--
+-- \(O(n)\) expected time
+--
+--
+solveBoundedLinearProgram                      :: (MonadRandom m, Ord r, Fractional r)
+                                               => LinearProgram 2 r -> m (Maybe (Point 2 r))
+solveBoundedLinearProgram (LinearProgram c (m1:m2:hs)) =
+  solveBoundedLinearProgram'  . LinearProgram c . ([m1,m2] ++) . F.toList <$> shuffle hs
+  -- (solveBoundedLinearProgram' . LinearProgram o . F.toList) <$> shuffle cs
 
-data LinearProgram d r = LinearProgram { _objective   :: !(Vector d r)
-                                       , _constraints :: [HalfSpace d r]
-                                       }
-makeLenses ''LinearProgram
 
-deriving instance Arity d             => Functor (LinearProgram d)
-deriving instance (Arity d, Show r)   => Show    (LinearProgram d r)
-deriving instance (Arity d, Eq r)     => Eq      (LinearProgram d r)
+solveBoundedLinearProgram'    :: (Ord r, Fractional r)
+                              => LinearProgram 2 r -> Maybe (Point 2 r)
+solveBoundedLinearProgram' lp = let (s,hs) = initialize lp
+                                in (^.current) <$> foldM step s hs
 
 --------------------------------------------------------------------------------
 
@@ -58,10 +65,28 @@ data LPState d r = LPState { _obj     :: !(Vector d r)
                            , _seen    :: [HalfSpace d r]
                            , _current :: !(Point d r)
                            }
-makeLenses ''LPState
 
 deriving instance (Arity d, Show r)   => Show    (LPState d r)
 deriving instance (Arity d, Eq r)     => Eq      (LPState d r)
+
+obj     :: Lens' (LPState d r) (Vector d r)
+obj     = lens _obj     (\(LPState _ s p) o -> LPState o s p)
+seen    :: Lens' (LPState d r) [HalfSpace d r]
+seen    = lens _seen    (\(LPState o _ p) s -> LPState o s p)
+current :: Lens' (LPState d r) (Point d r)
+current = lens _current (\(LPState o s _) p -> LPState o s p)
+
+
+
+
+-- | What we do when we get a new halfplane h
+step                                   :: (Fractional r, Ord r)
+                                       => LPState 2 r -> HalfSpace 2 r
+                                       -> Maybe (LPState 2 r)
+step s h | (s^.current) `intersects` h = Just $ s&seen     %~ (h:)
+         | otherwise                   = (\p -> s&seen     %~ (h:)
+                                                 &current .~ p)
+                                        <$> minimumOn s h
 
 --------------------------------------------------------------------------------
 
@@ -141,16 +166,6 @@ minimumOn s h = do hls  <- collectOn h $ s^.seen
   -- thus if this would happen we can safely return a Nothing
 
 
--- | What we do when we get a new halfplane h
-step                                   :: (Fractional r, Ord r)
-                                       => LPState 2 r -> HalfSpace 2 r
-                                       -> Maybe (LPState 2 r)
-step s h | (s^.current) `intersects` h = Just $ s&seen     %~ (h:)
-         | otherwise                   = (\p -> s&seen     %~ (h:)
-                                                 &current .~ p)
-                                        <$> minimumOn s h
-
-
 
 
 --------------------------------------------------------------------------------
@@ -163,34 +178,6 @@ initialize (LinearProgram c (m1:m2:hs)) = (LPState c [m1,m2] p, hs)
     Just p = asA @(Point 2 r)
            $ (m1^.boundingPlane._asLine) `intersect` (m2^.boundingPlane._asLine)
 
---------------------------------------------------------------------------------
-
--- | Solve a linear program
-solveLinearProgram :: MonadRandom m => LinearProgram 2 r -> m (LPSolution 2 r)
-solveLinearProgram = undefined
-
-
--- | Solvess a bounded linear program in 2d. There are at least two constraints
--- m1,m2 that bound the solution; they are assumed to be the first two contraints.
---
--- Returns Nothing if there is sno solution.
---
---
--- \(O(n)\) expected time
---
---
-solveBoundedLinearProgram                      :: (MonadRandom m, Ord r, Fractional r)
-                                               => LinearProgram 2 r -> m (Maybe (Point 2 r))
-solveBoundedLinearProgram (LinearProgram c (m1:m2:hs)) =
-  solveBoundedLinearProgram'  . LinearProgram c . ([m1,m2] ++) . F.toList <$> shuffle hs
-  -- (solveBoundedLinearProgram' . LinearProgram o . F.toList) <$> shuffle cs
-
-
-
-solveBoundedLinearProgram'    :: (Ord r, Fractional r)
-                              => LinearProgram 2 r -> Maybe (Point 2 r)
-solveBoundedLinearProgram' lp = let (s,hs) = initialize lp
-                                in (^.current) <$> foldM step s hs
 
 
 --------------------------------------------------------------------------------
