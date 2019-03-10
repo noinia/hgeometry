@@ -25,7 +25,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.LSeq as LSeq
-import           Data.LSeq (LSeq(..),toSeq,ViewL(..),ViewR(..),pattern (:<|),pattern (:|>))
+import           Data.LSeq (LSeq,toSeq,ViewL(..),ViewR(..),pattern (:<|))
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
