@@ -26,6 +26,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
+import           Data.Util
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           System.Random.Shuffle
@@ -77,16 +78,14 @@ current :: Lens' (LPState d r) (Point d r)
 current = lens _current (\(LPState o s _) p -> LPState o s p)
 
 
-
-
--- | What we do when we get a new halfplane h
+-- | What we do when we get a new halfspace h
 step                                   :: (Fractional r, Ord r)
                                        => LPState 2 r -> HalfSpace 2 r
                                        -> Maybe (LPState 2 r)
 step s h | (s^.current) `intersects` h = Just $ s&seen     %~ (h:)
          | otherwise                   = (\p -> s&seen     %~ (h:)
                                                  &current .~ p)
-                                        <$> minimumOn s h
+                                        <$> maximumOn s (h^.boundingPlane._asLine)
 
 --------------------------------------------------------------------------------
 
@@ -94,13 +93,11 @@ step s h | (s^.current) `intersects` h = Just $ s&seen     %~ (h:)
 -- is no solution. Just [] indicates that somehow this halfspace h is contained in all other
 -- halfspaces.
 collectOn     :: (Ord r, Fractional r)
-              => HalfSpace 2 r
+              => Line 2 r
               -> [HalfSpace 2 r]
               -> Maybe [HalfLine 2 r]
-collectOn h = sequence . mapMaybe collect . map (l `intersect`)
+collectOn l = sequence . mapMaybe collect . map (l `intersect`)
   where
-    l = h^.boundingPlane._asLine
-
     collect   :: Intersection (Line 2 r) (HalfSpace 2 r) -> Maybe (Maybe (HalfLine 2 r))
     collect r = match r $
          (H $ \NoIntersection -> Just Nothing)
@@ -150,22 +147,33 @@ maximumBy' cmp = \case
   xs -> Just $ F.maximumBy cmp xs
 
 
+-- | One dimensional linear programming on lines embedded in \(\mathbb{R}^d\).
+--
+-- Given an objective vector c, a line l, and a collection of half-lines hls that are all
+-- sublines of l (i.e. halfspaces *on* l), compute if there is a point inside
+-- all these halflines. If so, we actually return the one that maximizes c.
+--
+-- running time: \(O(n)\)
+oneDLinearProgramming         :: (Ord r, Num r, Arity d)
+                              => Vector d r -> Line d r -> [HalfLine d r] -> Maybe (Point d r)
+oneDLinearProgramming c l hls = do
+                                  hls' <- NonEmpty.nonEmpty hls
+                                  let candidates = commonIntersection l hls'
+                                  maximumBy' (cmpHalfPlane c) candidates
+
 -- | Let l be the boundary of h, and assume that we know that the new point in
 -- the common intersection must lie on h, try to find this point. In
--- partiuclar, we find the 'minimum' point in the s^.direction vector. The
+-- partiuclar, we find the 'maximum' point in the s^.direction vector. The
 -- funtion returns Nothing if no such point exists, i.e. if there is no point
 -- on l that is contained in all halfspaces.
-minimumOn     :: (Ord r, Fractional r) => LPState 2 r -> HalfSpace 2 r -> Maybe (Point 2 r)
-minimumOn s h = do hls  <- collectOn h $ s^.seen
-                   hls' <- NonEmpty.nonEmpty hls
-                   let l          = h^.boundingPlane._asLine
-                       candidates = commonIntersection l hls'
-                   maximumBy' (cmpHalfPlane (s^.obj)) candidates
+--
+-- Note that this is essentially one dinsional LP
+maximumOn     :: (Ord r, Fractional r) => LPState 2 r -> Line 2 r -> Maybe (Point 2 r)
+maximumOn s l = do hls  <- collectOn l $ s^.seen
+                   oneDLinearProgramming (s^.obj) l hls
   -- if collectOn returns a Just [] it means there is a point in the common intersection,
   -- however it does not lie on the boundary of h. This violates our input assumption
   -- thus if this would happen we can safely return a Nothing
-
-
 
 
 --------------------------------------------------------------------------------
@@ -182,8 +190,58 @@ initialize (LinearProgram c (m1:m2:hs)) = (LPState c [m1,m2] p, hs)
 
 --------------------------------------------------------------------------------
 
+-- | Let \(n(h)\) denote the normal of the line bounding a halfspace \(h\).
+--
+-- This function tries to Find an "unbounded direction" \(d\). If such a
+-- direction \(d\) exits the LP is unbounded, and we can produce evidence of
+-- this in the form of a half-line in direction \(d\).
+--
+-- More formally, we are looking for a direction \(d\) so that
+-- - \(c \cdot d > 0\), and
+-- - \(d \cdot n(h) \geq 0\), wherefor every half space \(h\).
+--
+findD                      :: (Ord r, Fractional r)
+                           => LinearProgram 2 r -> Maybe (Vector 2 r)
+findD (LinearProgram c hs) = do hls <- collectOn nl hs'
+                                d   <- toVec <$> oneDLinearProgramming v nl hls
+                                       -- the direction v here does not really matter
+                                if c `dot` d > 0 then pure d
+                                                 else Nothing
+  where
+    -- we interpret the points on nl as directions w.r.t the origin
+    nl@(Line _ v@(Vector2 vx vy)) = perpendicularTo (Line (origin .+^ c) c)
+    hs' = map toHL hs
+
+    -- every halfspace creates an allowed set of directions, modelled by a
+    -- half-line on nl
+    toHL h = let n              = h^.boundingPlane.normalVec
+             in undefined
 
 
+-- | Either finds an unbounded Haflline, or evidence the two halfspaces that provide
+-- evidence that no solution exists
+findUnBoundedHalfLine :: LinearProgram 2 r -> Either (Two (HalfSpace 2 r)) (HalfLine 2 r)
+findUnBoundedHalfLine = undefined -- use findD then find the starting point
+
+
+
+
+
+
+
+
+    -- ok; we can normalize the "y-coord" of our d-vector by taking the
+    -- length of vector c. (I should probably square the c to avoid having to take square roots.)
+
+  -- but how about the "x-coord"; we need to express that as the "lambda coord" along nl
+
+
+
+-- ok so the global plan is: Find a vector d
+
+
+
+--------------------------------------------------------------------------------
 
 -- TODO: Fix this
 
