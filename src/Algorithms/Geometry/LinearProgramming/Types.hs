@@ -14,20 +14,20 @@ module Algorithms.Geometry.LinearProgramming.Types where
 
 import           Control.Lens
 import           Data.Geometry.HalfSpace
+import           Data.Geometry.HalfLine
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
 -- | Data type representing the solution to a linear program
-data GLPolution p = NoSolution
-                  | Single !p
-                  | UnBounded
-                  deriving (Show,Eq,Functor)
+data LPSolution d r = NoSolution
+                    | Single !(Point d r)
+                    | UnBounded (HalfLine d r)
+makePrisms ''LPSolution
 
-
-
-type LPSolution d r = GLPolution (Point d r)
+deriving instance (Arity d, Show r)   => Show    (LPSolution d r)
+deriving instance (Arity d, Eq r)     => Eq      (LPSolution d r)
 
 data LinearProgram d r = LinearProgram { _objective   :: !(Vector d r)
                                        , _constraints :: [HalfSpace d r]
