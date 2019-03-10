@@ -38,7 +38,6 @@ import           Data.Maybe (mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           Data.Semigroup (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Semigroup.Foldable (toNonEmpty)
 import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)

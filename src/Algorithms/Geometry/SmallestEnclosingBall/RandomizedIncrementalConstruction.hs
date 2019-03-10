@@ -23,7 +23,6 @@ import           Data.Geometry.Ball
 import qualified Data.List as L
 import           Data.List.NonEmpty
 import           Data.Maybe (fromMaybe)
-import           System.Random
 import           System.Random.Shuffle (shuffle)
 
 --------------------------------------------------------------------------------
