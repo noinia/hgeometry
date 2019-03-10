@@ -15,6 +15,7 @@ import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.Lens
 import           Control.Monad (foldM)
 import           Control.Monad.Random.Class
+import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.HalfLine
@@ -114,30 +115,44 @@ cmpHalfPlane v a b = case a `inHalfSpace` (HalfSpace $ HyperPlane b $ v) of
                        OnBoundary -> EQ
                        Outside    -> LT
 
+type OneOrTwo a = Either a (Two a)
+
+flatten :: OneOrTwo a -> [a]
+flatten = either (:[]) (\(Two a b) -> [a,b])
+
 -- | Computes the common intersection of a nonempty list of halfines that are
 -- all colinear with the given line l.
 --
--- We return either zero points, if there is no common intersection, one point,
--- if the halflines have only one point in common, or two points; the boundary
--- points of the range in which all halflines intersect.
+-- We return either the two halflines that prove that there is no counter
+-- example or we return one or two points that form form the boundary points of
+-- the range in which all halflines intersect.
 commonIntersection                :: (Ord r, Num r, Arity d)
+                                  => Line d r
+                                  -> NonEmpty.NonEmpty (HalfLine d r :+ a)
+                                  -> Either (Two ((HalfLine d r :+ a)))
+                                            (OneOrTwo (Point d r :+ a))
+commonIntersection (Line _ v) hls = case (nh,ph) of
+     (Nothing,Nothing) -> error "absurd; this case cannot occur"
+     (Nothing, Just p) -> Right . Left . extract $ p
+     (Just n, Nothing) -> Right . Left . extract $ n
+     (Just n, Just p)  -> case cmpHalfPlane' v n p of
+                            LT -> Left $ Two n p
+                            EQ -> Right . Left . extract $ p
+                            GT -> Right . Right $ Two (extract p) (extract n)
+  where
+    extract = over core (^.startPoint)
+    (pos,neg) = NonEmpty.partition (\hl -> hl^.core.halfLineDirection == v) $ hls
+    ph = maximumBy' (cmpHalfPlane' v) pos
+    nh = maximumBy' (flip $ cmpHalfPlane' v) neg
+
+    cmpHalfPlane' vv a b = cmpHalfPlane vv (a^.core.startPoint) (b^.core.startPoint)
+
+commonIntersection'               :: (Ord r, Num r, Arity d)
                                   => Line d r
                                   -> NonEmpty.NonEmpty (HalfLine d r)
                                   -> [Point d r]
-commonIntersection (Line _ v) hls = case (nh,ph) of
-     (Nothing,Nothing) -> error "absurd; this case cannot occur"
-     (Nothing, Just p) -> [p]
-     (Just n, Nothing) -> [n]
-     (Just n, Just p)  -> case cmpHalfPlane v n p of
-                            LT -> []
-                            EQ -> [p]
-                            GT -> [p,n]
-  where
-    f = map (^.startPoint)
-    (pos,neg) = bimap f f
-              . NonEmpty.partition (\hl -> hl^.halfLineDirection == v) $ hls
-    ph = maximumBy' (cmpHalfPlane v) pos
-    nh = maximumBy' (flip $ cmpHalfPlane v) neg
+commonIntersection' l hls = either (const []) (map (^.core) . flatten)
+                          $ commonIntersection l (ext <$> hls)
 
 
 -- | maximum of a list using a given comparison ; if the list is empty returns Nothing
@@ -157,9 +172,10 @@ maximumBy' cmp = \case
 oneDLinearProgramming         :: (Ord r, Num r, Arity d)
                               => Vector d r -> Line d r -> [HalfLine d r] -> Maybe (Point d r)
 oneDLinearProgramming c l hls = do
-                                  hls' <- NonEmpty.nonEmpty hls
-                                  let candidates = commonIntersection l hls'
+                                  hls'       <- NonEmpty.nonEmpty hls
+                                  let candidates = commonIntersection' l hls'
                                   maximumBy' (cmpHalfPlane c) candidates
+
 
 -- | Let l be the boundary of h, and assume that we know that the new point in
 -- the common intersection must lie on h, try to find this point. In
@@ -209,7 +225,7 @@ findD (LinearProgram c hs) = do hls <- collectOn nl hs'
                                                  else Nothing
   where
     -- we interpret the points on nl as directions w.r.t the origin
-    nl@(Line _ v@(Vector2 vx vy)) = perpendicularTo (Line (origin .+^ c) c)
+    nl@(Line _ v) = perpendicularTo (Line (origin .+^ c) c)
     hs' = map toHL hs
 
     -- every halfspace creates an allowed set of directions, modelled by a
