@@ -10,8 +10,11 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon where
 
+import           Algorithms.Geometry.LinearProgramming.LP2DRIC
+import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.DeepSeq
 import           Control.Lens hiding (Simple)
+import           Control.Monad.Random.Class
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -21,6 +24,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line
+import           Data.Geometry.HalfSpace(rightOf)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
@@ -117,6 +121,14 @@ instance IsBoxable (Polygon t p r) where
 
 type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
   '[Seq.Seq (Either (Point 2 r) (LineSegment 2 () r))]
+
+type instance IntersectionOf (Point 2 r) (Polygon t p r) = [NoIntersection, Point 2 r]
+
+instance (Fractional r, Ord r) => (Point 2 r) `IsIntersectableWith` (Polygon t p r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  q `intersects` pg = q `inPolygon` pg /= Outside
+  q `intersect` pg | q `intersects` pg = coRec q
+                   | otherwise         = coRec NoIntersection
 
 -- instance IsIntersectableWith (Line 2 r) (Boundary (Polygon t p r)) where
 --   nonEmptyIntersection _ _ (CoRec xs) = null xs
@@ -503,3 +515,20 @@ extremesLinear u p = let vs = p^.outerBoundary
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (\a r -> (a,r)) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
+
+--------------------------------------------------------------------------------
+
+-- | Test if a Simple polygon is star-shaped. Returns a point in the kernel
+-- (i.e. from which the entire polygon is visible), if it exists.
+--
+--
+-- \(O(n)\) expected time
+isStarShaped    :: (MonadRandom m, Ord r, Fractional r)
+                => SimplePolygon p r -> m (Maybe (Point 2 r))
+isStarShaped (toClockwiseOrder -> pg) =
+    solveBoundedLinearProgram $ LinearProgram c (F.toList hs)
+  where
+    c  = pg^.outerVertex 1.core.vector
+    -- the first vertex is the intersection point of the two supporting lines
+    -- bounding it, so the first two edges bound the shape in this sirection
+    hs = fmap (rightOf . supportingLine) . outerBoundaryEdges $ pg
