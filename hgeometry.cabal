@@ -30,6 +30,7 @@ data-files:          resources/basic.isy
                      test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
                      test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
                      test/Algorithms/Geometry/LinearProgramming/manual.ipe
+                     test/Algorithms/Geometry/RedBlueSeparator/manual.ipe
                      test/Data/Geometry/pointInPolygon.ipe
                      test/Data/Geometry/pointInTriangle.ipe
                      test/Data/Geometry/Polygon/star_shaped.ipe
@@ -182,6 +183,7 @@ library
                     Algorithms.Geometry.LinearProgramming.Types
                     Algorithms.Geometry.LinearProgramming.LP2DRIC
 
+                    Algorithms.Geometry.RedBlueSeparator.RIC
 
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
@@ -350,20 +352,32 @@ executable hgeometry-viewer
                  , random
                  , vector
                  , colour
-                 , cairo-canvas           >= 0.1.0.0
-                 -- , sdl2                   >= 2.2.0
-                 , gi-gtk                 >= 3.0.15
-                 , reactive-banana-gi-gtk >= 0.2.0.0
-                 , cairo                  >= 0.13.3.1
-                 -- , gi-glib
-                 , gi-cairo
-                 , gi-gdk
-                 -- , gi-gdkpixbuf
-                 , gi-gtk
                  , transformers
                  , linear
-                 , haskell-gi-base
-                 , reactive-banana        >= 1.1.0.1
+                 , miso           >= 0.21.2.0
+                 , jsaddle        >= 0.9.5
+                 , jsaddle-warp   >= 0.9.5
+                 , jsaddle-dom    >= 0.9.2
+                 , wai
+                 , wai-app-static
+                 , warp
+                 , websockets
+
+
+
+
+                 -- , cairo-canvas           >= 0.1.0.0
+                 -- -- , sdl2                   >= 2.2.0
+                 -- , gi-gtk                 >= 3.0.15
+                 -- , reactive-banana-gi-gtk >= 0.2.0.0
+                 -- , cairo                  >= 0.13.3.1
+                 -- -- , gi-glib
+                 -- , gi-cairo
+                 -- , gi-gdk
+                 -- -- , gi-gdkpixbuf
+                 -- , gi-gtk
+                 -- , haskell-gi-base
+                 -- , reactive-banana        >= 1.1.0.1
 
 
 
@@ -520,6 +534,7 @@ test-suite hspec
                  Algorithms.Geometry.ClosestPair.ClosestPairSpec
 
                  Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec
+                 Algorithms.Geometry.RedBlueSeparator.RICSpec
 
 
                  Util

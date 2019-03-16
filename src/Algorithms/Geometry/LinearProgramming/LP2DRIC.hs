@@ -39,20 +39,28 @@ solveLinearProgram :: MonadRandom m => LinearProgram 2 r -> m (LPSolution 2 r)
 solveLinearProgram = undefined
 
 
--- | Solvess a bounded linear program in 2d. There are at least two constraints
--- m1,m2 that bound the solution; they are assumed to be the first two contraints.
+-- | Solves a bounded linear program in 2d. Returns Nothing if there is no
+-- solution.
 --
--- Returns Nothing if there is sno solution.
+-- pre: The linear program is bounded, meaning that *the first two constraints*
+-- m1,m2 make sure th the there is no arbitrarily large/good
+-- solution. I..e. these halfspaces bound the solution in the c direction.
 --
+-- (note that if there is only one constraint, m1, the assumption that the LP
+-- is bounded means that the contraint must be perpendicular to the objective
+-- direction. Hence, any point on the bounding plane is a solution, and they
+-- are all equally good.)
 --
 -- \(O(n)\) expected time
 --
 --
 solveBoundedLinearProgram                      :: (MonadRandom m, Ord r, Fractional r)
                                                => LinearProgram 2 r -> m (Maybe (Point 2 r))
-solveBoundedLinearProgram (LinearProgram c (m1:m2:hs)) =
-  solveBoundedLinearProgram'  . LinearProgram c . ([m1,m2] ++) . F.toList <$> shuffle hs
-  -- (solveBoundedLinearProgram' . LinearProgram o . F.toList) <$> shuffle cs
+solveBoundedLinearProgram (LinearProgram c hs') = case hs' of
+    []         -> pure Nothing
+    [m1]       -> pure $ Just (m1^.boundingPlane.inPlane)
+    (m1:m2:hs) -> solveBoundedLinearProgram' . LinearProgram c . ([m1,m2] ++) . F.toList
+                  <$> shuffle hs
 
 
 solveBoundedLinearProgram'    :: (Ord r, Fractional r)
