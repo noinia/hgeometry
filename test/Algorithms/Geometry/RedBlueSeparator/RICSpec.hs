@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Algorithms.Geometry.RedBlueSeparator.RICSpec where
 
 import           Algorithms.Geometry.RedBlueSeparator.RIC
@@ -6,12 +7,13 @@ import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
+import           Data.Geometry.Ipe.Color
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           System.Random (mkStdGen)
 import           Test.Hspec
-import           Util
+-- import           Util
 
 --------------------------------------------------------------------------------
 
@@ -25,18 +27,16 @@ testCases fp = (runIO $ readInput fp) >>= \case
     Right tcs -> mapM_ toSpec tcs
 
 
-data TestCase r = TestCase { _redSet    :: NonEmpty (Point 2 r)
-                           , _blueSet   :: NonEmpty (Point 2 r)
+data TestCase r = TestCase { _redSet    :: NonEmpty (Point 2 r :+ ())
+                           , _blueSet   :: NonEmpty (Point 2 r :+ ())
                            , _seperable :: Bool
                            }
                   deriving (Show,Eq)
 
 toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
-toSpec (TestCase reds blues sol) = describe "Red Blue Separator tests"
-      when (isJust sol) $
-        it "manal solution" $
+toSpec (TestCase reds blues sol) = it "Red Blue Separator tests" $ do
           (flip evalRand (mkStdGen 5) $
-            isJust <$> separatingLine reds blues pts)
+            isJust <$> separatingLine reds blues)
           `shouldBe`
           sol
 
@@ -57,5 +57,5 @@ readInput fp = fmap (fmap f . view pages) <$> readIpeFile fp
         reds  = g (named "red") syms
 
         g c = NonEmpty.fromList
-          . map (^.core.symbolPoint)
+            . map (\p -> ext $ p^.core.symbolPoint)
             . filter (\p -> p^.extra.attrLens SStroke == Just c)
