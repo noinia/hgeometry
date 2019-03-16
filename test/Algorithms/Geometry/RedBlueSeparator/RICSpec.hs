@@ -6,6 +6,7 @@ import           Control.Lens
 import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
 import           Data.Geometry
+import           Data.Geometry.Line
 import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Color
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -37,11 +38,17 @@ data TestCase r = TestCase { _redSet    :: NonEmpty (Point 2 r :+ ())
 -- | reports the points ont hte other side as p
 differentSide     :: (Ord r, Num r)
                   => Point 2 r -> Line 2 r -> [Point 2 r] -> [Point 2 r]
-differentSide p l = let s = p `onSide` l in filter (\q -> not $ q `onSide`l == s)
+differentSide p l = let s = p `onSide` l
+                    in filter (\q -> not $ (q `onSide` l) `elem` [s,On])
 
 allSameSide             :: (Ord r, Num r)
                         => NonEmpty (Point 2 r :+ extra) -> Line 2 r -> [Point 2 r]
-allSameSide (p :| ps) l = differentSide (p^.core) l ((^.core) <$> ps)
+allSameSide pts l = case f pts of
+                         []     -> [] -- all on the line
+                         (p:ps) ->  differentSide p l ps
+  where
+    f = NonEmpty.filter (\p -> p `onSide` l /= On) . fmap (^.core)
+
 
 -- -- | Returns the list of points on the wrong side; so the result should be empty
 -- separates :: NonEmpty (Point 2 r :+ ()) -> NonEmpty (Point 2 r :+ ()) ->
@@ -49,17 +56,28 @@ allSameSide (p :| ps) l = differentSide (p^.core) l ((^.core) <$> ps)
 -- separates reds@(r:|_) blues@(b:|_) l = filter (differentSideAs r l)  reds
 --                                      <>  filter (differentSideAs r l)  reds
 
+-- | Make sure reds and blues are on opposite sides
+onDifferentSides              :: (Ord r, Num r)
+                              => NonEmpty (Point 2 r :+ extra)
+                              -> NonEmpty (Point 2 r :+ extra) -> Line 2 r
+                              -> [Point 2 r]
+onDifferentSides reds blues l = case (f reds, f blues) of
+                                  (r:_, b:_) | r `onSide` l == b `onSide` l -> [r,b]
+                                  _                                         -> []
+  where
+    f = NonEmpty.filter (\p -> p `onSide` l /= On) . fmap (^.core)
 
+-- | Reports points that are on the wrong side
 separates                                    :: (Ord r, Num r)
                                              => NonEmpty (Point 2 r :+ extra1)
-                                             -> NonEmpty (Point 2 r :+ extra2)
+                                             -> NonEmpty (Point 2 r :+ extra1)
                                              -> Maybe (Line 2 r)
                                              -> ([Point 2 r], [Point 2 r], [Point 2 r])
-separates reds@((r:+_):|_) blues@((b:+_):|_) = \case
+separates reds blues = \case
   Nothing -> ([],[],[])
   Just l -> ( allSameSide reds l
             , allSameSide blues l
-            , if r `onSide` l /= b `onSide` l then [] else [r,b]
+            , onDifferentSides reds blues l
             )
 
 toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
