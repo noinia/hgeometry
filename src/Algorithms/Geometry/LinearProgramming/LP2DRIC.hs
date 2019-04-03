@@ -9,7 +9,14 @@
 -- 2D Linear programming in expected linear time.
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.LinearProgramming.LP2DRIC where
+module Algorithms.Geometry.LinearProgramming.LP2DRIC( solveBoundedLinearProgram
+                                                    , solveBoundedLinearProgram'
+
+                                                    , maximumOn
+                                                    , oneDLinearProgramming
+                                                    , commonIntersection
+                                                    , cmpHalfPlane
+                                                    ) where
 
 import           Algorithms.Geometry.LinearProgramming.Types
 import           Control.Lens
@@ -63,6 +70,9 @@ solveBoundedLinearProgram (LinearProgram c hs') = case hs' of
                   <$> shuffle hs
 
 
+-- | Solves a bounded linear program (like 'solveBoundedLinearProgram')
+-- assuming that the first two constraints [m1,m2] make sure the solutions is
+-- bounded, and the other constraints already have been shuffled.
 solveBoundedLinearProgram'    :: (Ord r, Fractional r)
                               => LinearProgram 2 r -> Maybe (Point 2 r)
 solveBoundedLinearProgram' lp = let (s,hs) = initialize lp

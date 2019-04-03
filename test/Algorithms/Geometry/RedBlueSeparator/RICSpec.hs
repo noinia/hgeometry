@@ -6,7 +6,6 @@ import           Control.Lens
 import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
 import           Data.Geometry
-import           Data.Geometry.Line
 import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Color
 import           Data.List.NonEmpty (NonEmpty(..))
