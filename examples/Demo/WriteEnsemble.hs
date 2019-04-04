@@ -44,14 +44,14 @@ main :: IO ()
 main = execParser options >>= mainWith
 
 mainWith                               :: Options -> IO ()
-mainWith (Options kind inPath outPath) = do
-    inFiles <- filter (".dat" `isSuffixOf`) <$> getDirectoryContents inPath
-    let f = case kind of
+mainWith (Options k inpath outpath) = do
+    inFiles <- filter (".dat" `isSuffixOf`) <$> getDirectoryContents inpath
+    let f = case k of
           "precip" -> asPrecipPt
           _        -> asTempPt
-    polies <- mapM (fmap (asPts f) . readFile' . ((inPath ++ "/") ++)) inFiles
+    polies <- mapM (fmap (asPts f) . readFile' . ((inpath ++ "/") ++)) inFiles
     let polies' = map (fromPoints . take 100) . trim $ polies
-    writeIpeFile outPath . singlePageFromContent . map iO' $ polies'
+    writeIpeFile outpath . singlePageFromContent . map iO' $ polies'
 
 readFile'    :: String -> IO T.Text
 readFile' fp = putStrLn fp >> TIO.readFile fp
@@ -91,3 +91,4 @@ asPrecipPt [t,v] = let (y,t') = T.splitAt 4 t
                        (m,d)  = T.splitAt 2 t'
                        day    = fromGregorian (read' y) (read' m) (read' d)
                    in point2 (fromIntegral $ (toModifiedJulianDay day)) (10 * read' v) :+ day
+asPrecipPt _ = error "asPrecipPt: Pattern match(es) are non-exhaustive"

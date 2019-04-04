@@ -2,7 +2,6 @@
 module Data.Geometry.Ipe.ReaderSpec where
 
 import Test.Hspec
-import Data.Ext
 import Data.Geometry
 import Data.Geometry.Ipe
 import Data.ByteString(ByteString)
@@ -43,7 +42,8 @@ spec = do
     useSym = Symbol (point2 320 736) "mark/disk(sx)"
 --     symAttrs =
 
-    translatedUse = "<use matrix=\"1 0 0 1 4.44908 -4.21815\" name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
+    -- translatedUse :: String
+    -- translatedUse = "<use matrix=\"1 0 0 1 4.44908 -4.21815\" name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
 
 
 

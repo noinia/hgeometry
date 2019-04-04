@@ -153,7 +153,7 @@ instance (ToJSON r, ToJSON v) => ToJSON (VertexData r v) where
 
 -- | Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f r =
-    PlaneGraph { _graph :: PlanarGraph s Primal (VertexData r v) e f }
+    PlaneGraph { _graph :: PlanarGraph s 'Primal (VertexData r v) e f }
       deriving (Show,Eq,Generic)
 makeLenses ''PlaneGraph
 
@@ -191,7 +191,7 @@ fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
 -- | Constructs a planar from the given vertices
 fromVertices      :: proxy s
                   -> C.CSeq (Point 2 r :+ p)
-                  -> PlanarGraph s Primal (VertexData r p) () ()
+                  -> PlanarGraph s 'Primal (VertexData r p) () ()
 fromVertices _ vs = g&PG.vertexData .~ vData'
   where
     n = length vs

@@ -67,8 +67,8 @@ data World = Primal | Dual deriving (Show,Eq)
 -- | We can take the dual of a world. For the Primal this gives us the Dual,
 -- for the Dual this gives us the Primal.
 type family DualOf (sp :: World) where
-  DualOf Primal = Dual
-  DualOf Dual   = Primal
+  DualOf 'Primal = 'Dual
+  DualOf 'Dual   = 'Primal
 
 -- | The Dual of the Dual is the Primal.
 dualDualIdentity :: forall w. DualOf (DualOf w) :~: w
@@ -88,7 +88,7 @@ newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
 -- VertexId's are in the range 0...|orbits|-1
 
 -- | Shorthand for vertices in the primal.
-type VertexId' s = VertexId s Primal
+type VertexId' s = VertexId s 'Primal
 
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
@@ -104,7 +104,7 @@ newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
                    deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 
 -- | Shorthand for FaceId's in the primal.
-type FaceId' s = FaceId s Primal
+type FaceId' s = FaceId s 'Primal
 
 instance Show (FaceId s w) where
   show (FaceId (VertexId i)) = "FaceId " ++ show i
@@ -293,7 +293,7 @@ planarGraph' perm = pg
 -- vertex.
 --
 -- running time: \(O(n)\).
-planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal () e ()
+planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s 'Primal () e ()
 planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds

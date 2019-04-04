@@ -5,11 +5,7 @@ import           Control.Lens
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
-import qualified Data.Set as Set
-import           Data.Vinyl
 import           Test.Hspec
 import           Util
 

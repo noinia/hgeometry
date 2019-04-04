@@ -18,12 +18,12 @@ import           Test.Hspec
 
 --------------------------------------------------------------------------------
 
-byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
+byStrokeColour :: ('Stroke ∈ ats, Ord (Apply f 'Stroke))
                => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
 byStrokeColour = map (map fst) . L.groupBy ((==) `on` snd) . L.sortOn snd
                . map (\x -> (x,lookup' x))
   where
-    lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats
+    lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy 'Stroke) ats
 
 -- | Computes all elements on which the two lists differ
 difference :: Eq a => [a] -> [a] -> [a]

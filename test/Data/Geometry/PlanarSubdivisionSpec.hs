@@ -1,9 +1,9 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 module Data.Geometry.PlanarSubdivisionSpec where
 
-
+import           Algorithms.Geometry.PolygonTriangulation.Types (PolygonEdgeType)
+import           Data.Geometry.PlanarSubdivision.Basic (Wrap')
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
-import           Data.Bifunctor (second)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
 import           Data.Geometry
@@ -17,20 +17,13 @@ import           Test.Hspec
 import qualified Data.Vector as V
 import qualified Data.List as L
 
-import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
 import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
 
 import           Control.Lens hiding (holesOf)
 import           Data.Either (lefts)
 import           Data.Geometry.Ipe
-import           Data.Geometry.PlanarSubdivision.Draw
 import           Data.Maybe (fromJust)
-import           Data.PlaneGraph.Draw
 
-import Data.Geometry.LineSegment
-import Data.Geometry.Interval
-import Data.Range
-import Data.Ratio
 
 data Test = Test
 data Id a = Id a
@@ -38,7 +31,9 @@ data Id a = Id a
 
 
 
+simplePg :: PlanarSubdivision Test () () PolygonFaceData Double
 simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
+simplePg' :: Polygon 'Simple () Double
 simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
                                                              , Point2 128 688
                                                              , Point2 176 672
@@ -53,8 +48,8 @@ triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
 triangle = (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
          $ trianglePG
 
+trianglePG :: SimplePolygon () Rational
 trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
-
 
 toNonEmpty :: Foldable f => f a -> NonEmpty.NonEmpty a
 toNonEmpty = NonEmpty.fromList . toList
@@ -194,36 +189,72 @@ testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 352 384
                                                              ]
 
 
+testPolyP :: PlanarSubdivision Test () () PolygonFaceData Rational
 testPolyP  = fromSimplePolygon (Id Test) testPoly5 Inside Outside
+testPolygPlaneG :: PlaneGraph
+                     (Wrap' Test)
+                     (VertexId' Test)
+                     (Dart Test)
+                     (FaceData (Dart Test) (FaceId' Test))
+                     Rational
 testPolygPlaneG = fromJust $ testPolyP^?components.ix 0
 
+monotonePs :: PlanarSubdivision
+                Test
+                ()
+                PolygonEdgeType
+                PolygonFaceData
+                Rational
 monotonePs = MM.makeMonotone (Id Test) testPoly5
+monotonePlaneG :: PlaneGraph
+                    (Wrap' Test)
+                    (VertexId' Test)
+                    (Dart Test)
+                    (FaceData (Dart Test) (FaceId' Test))
+                    Rational
 monotonePlaneG = fromJust $ monotonePs^?components.ix 0
 
+test :: PlanarSubdivision
+          Test
+          ()
+          PolygonEdgeType
+          PolygonFaceData
+          Rational
 test = TR.triangulate (Id Test) testPoly5
+test' :: PlaneGraph
+           Test
+           ()
+           PolygonEdgeType
+           PolygonFaceData
+           Rational
 test' = TR.triangulate' (Id Test) testPoly5
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
+printMP :: IO ()
 printMP = mapM_ printAsIpeSelection
         . map (iO' . (^.core) . snd)
         . toList . rawFacePolygons $ monotonePs
 
-
-
+printP :: IO ()
 printP = mapM_ printAsIpeSelection
        . map (iO' . (^.core) . snd)
        . toList . PG.rawFacePolygons $ test'
 
 
+printPPX :: forall k (s :: k) v e extra.
+            PlanarSubdivision s v e extra Rational -> IO ()
 printPPX = mapM_ printAsIpeSelection
         . map (iO' . (^.core) . snd)
         . toList . rawFacePolygons
 
+printPP :: IO ()
 printPP = printPPX test
 
+parts' :: [PlanarSubdivision Test () () PolygonFaceData Rational]
 parts' = map (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
        . lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
 
+parts'' :: [Polygon 'Simple () Rational]
 parts'' = lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
 
 
@@ -249,23 +280,30 @@ noEmptyFacesSpec = describe "fromConnectedSegments, correct handling of high deg
   where
     draw' = draw . fromConnectedSegments (Identity Test1)
 
-readFromIpeFile    :: FilePath -> IO [LineSegment 2 () Rational :+ _]
+readFromIpeFile    :: FilePath -> IO [LineSegment 2 () Rational :+ Attributes' Rational (AttributesOf Path)]
 readFromIpeFile fp = do Right page <- readSinglePageFile fp
                         pure $
                            page^..content.traverse._withAttrs _IpePath _asLineSegment
 
 data Test1 = Test1
 
+testX :: IO ()
 testX = do segs <- readFromIpeFile "test/Data/Geometry/connectedsegments_simple2.ipe"
            let ps = fromConnectedSegments (Identity Test1) segs
            print $ draw ps
 
 
+draw :: forall k (s :: k) p e extra r.
+        PlanarSubdivision s p e extra r
+        -> V.Vector
+             (FaceId' s,
+              Either (Polygon 'Simple p r) (Polygon 'Multi p r) :+ extra)
 draw = V.filter isEmpty . rawFacePolygons
   where
     isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
     isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
 
+testSegs :: [LineSegment 2 () Double :+ ()]
 testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (origin, Point2 10 10)
                    , (origin, Point2 12 10)
@@ -276,13 +314,14 @@ testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    , (Point2 12 10, Point2 20 5)
                    ]
 
+testSegs2 :: [LineSegment 2 () Double :+ ()]
 testSegs2 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (Point2 160 192, Point2 80 112)
                    , (Point2 80 112, Point2 192 96)
                    , (Point2 192 96, Point2 160 192)
                    ]
 
-
+testSegs3 :: [LineSegment 2 () Double :+ ()]
 testSegs3 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (origin, Point2 10 0)
                    , (Point2 10 0, Point2 10 10)

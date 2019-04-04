@@ -4,15 +4,12 @@ module Data.Geometry.TriangleSpec where
 import Data.Traversable(traverse)
 import Data.Ext
 import Control.Lens
-import Control.Applicative
 import Data.Geometry
 import Data.Geometry.Triangle
 import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Data.Proxy
 import Test.Hspec
-import Data.Ratio
-import Data.Vinyl.CoRec
 
 spec :: Spec
 spec = do testCases "test/Data/Geometry/pointInTriangle.ipe"
@@ -52,6 +49,8 @@ data TestCase r = TestCase { _triangle   :: Triangle 2 () r
                   deriving (Show)
 
 
+toSingleSpec :: (Show r, Ord r, Fractional r) =>
+                Triangle 2 p r -> PointLocationResult -> Point 2 r -> SpecWith ()
 toSingleSpec poly r q = it msg $ (q `inTriangle` poly) `shouldBe` r
   where
     msg = "Point in triangle test with " ++ show q
@@ -99,7 +98,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
         -- crosses are outside the polygon
         isOutsidePt s = s^.symbolName == "mark/cross(sx)"
 
-        colorP = Proxy :: Proxy Stroke
+        colorP = Proxy :: Proxy 'Stroke
 
 
 

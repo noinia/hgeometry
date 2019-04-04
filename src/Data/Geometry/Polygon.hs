@@ -34,7 +34,6 @@ import           Data.Maybe (mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           Data.Semigroup (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Semigroup.Foldable (toNonEmpty)
 import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
@@ -60,8 +59,8 @@ data PolygonType = Simple | Multi
 
 
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: C.CSeq (Point 2 r :+ p)                          -> Polygon 'Simple p r
+  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon 'Simple p r] -> Polygon 'Multi  p r
 
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
@@ -83,12 +82,12 @@ bitraverseVertices     :: (Applicative f, Traversable t) => (p -> f q) -> (r -> 
                   -> t (Point 2 r :+ p) -> f (t (Point 2 s :+ q))
 bitraverseVertices f g = traverse (bitraverse (traverse g) f)
 
-type SimplePolygon = Polygon Simple
+type SimplePolygon = Polygon 'Simple
 
-type MultiPolygon  = Polygon Multi
+type MultiPolygon  = Polygon 'Multi
 
 -- | Either a simple or multipolygon
-type SomePolygon p r = Either (Polygon Simple p r) (Polygon Multi p r)
+type SomePolygon p r = Either (Polygon 'Simple p r) (Polygon 'Multi p r)
 
 type instance Dimension (SomePolygon p r) = 2
 type instance NumType   (SomePolygon p r) = r
@@ -147,13 +146,13 @@ outerBoundary = lens g s
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
 
-polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
+polygonHoles :: forall p r. Lens' (Polygon 'Multi p r) [Polygon 'Simple p r]
 polygonHoles = lens g s
   where
-    g                     :: Polygon Multi p r -> [Polygon Simple p r]
+    g                     :: Polygon 'Multi p r -> [Polygon 'Simple p r]
     g (MultiPolygon _ hs) = hs
-    s                     :: Polygon Multi p r -> [Polygon Simple p r]
-                          -> Polygon Multi p r
+    s                     :: Polygon 'Multi p r -> [Polygon 'Simple p r]
+                          -> Polygon 'Multi p r
     s (MultiPolygon vs _) = MultiPolygon vs
 
 
@@ -169,7 +168,7 @@ outerBoundaryEdge i p = let u = p^.outerVertex i
 
 
 -- | Get all holes in a polygon
-holeList                     :: Polygon t p r -> [Polygon Simple p r]
+holeList                     :: Polygon t p r -> [Polygon 'Simple p r]
 holeList (SimplePolygon _)   = []
 holeList (MultiPolygon _ hs) = hs
 

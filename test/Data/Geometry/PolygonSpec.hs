@@ -4,12 +4,12 @@ module Data.Geometry.PolygonSpec where
 import Data.Traversable(traverse)
 import Data.Ext
 import Control.Lens
-import Control.Applicative
 import Data.Geometry
 import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Data.Proxy
 import Test.Hspec
+import Test.Hspec.Core.Spec (SpecM)
 
 spec :: Spec
 spec = testCases "test/Data/Geometry/pointInPolygon.ipe"
@@ -36,11 +36,16 @@ data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                   deriving (Show)
 
 
+toSingleSpec :: (Show r, Fractional r, Ord r) =>
+                Polygon t p r -> PointLocationResult -> Point 2 r -> SpecWith ()
 toSingleSpec poly r q = it msg $ (q `inPolygon` poly) `shouldBe` r
   where
     msg = "Point in polygon test with " ++ show q
 
 
+toSpec :: (Show r, Fractional r, Ord r) =>
+          TestCase r
+          -> SpecM () ()
 toSpec (TestCase poly is bs os) = do
                                     describe "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
@@ -79,7 +84,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
         -- crosses are outside the polygon
         isOutsidePt s = s^.symbolName == "mark/cross(sx)"
 
-        colorP = Proxy :: Proxy Stroke
+        colorP = Proxy :: Proxy 'Stroke
 
 
 

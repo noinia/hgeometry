@@ -2,8 +2,8 @@
 module Data.PlaneGraphSpec where
 
 
+import           Data.List.NonEmpty (NonEmpty)
 import           Control.Lens
-import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Ext
 import           Data.Geometry.LineSegment
@@ -13,9 +13,7 @@ import           Data.PlaneGraph
 import           Data.PlaneGraph.IO(makeCCW)
 import           Data.PlaneGraph.AdjRep
 import           Data.Proxy
-import           Data.Util
 import qualified Data.Vector as V
-import           Data.Yaml (prettyPrintParseException)
 import           Data.Yaml.Util
 import           Test.Hspec
 
@@ -28,15 +26,15 @@ spec = describe "PlaneGraph tests" $ do
            draw test2 `shouldBe` mempty
          it "encode yaml test" $ do
            b <- B.readFile "test/Data/PlaneGraph/myPlaneGraph.yaml"
-           encodeYaml myGraph `shouldBe` b
+           encodeYaml g `shouldBe` b
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "test/Data/myPlaneGraph.yaml")
          --   `shouldReturn`
-         --   (Right myGraph)
+         --   (Right g)
         -- the result is the same up to renumbering it seems. That is fine.
   where
-    myGraph = fromConnectedSegments (Identity Test1) testSegs
+    g = fromConnectedSegments (Identity Test1) testSegs
 
 
 data Test1 = Test1
@@ -46,10 +44,10 @@ draw = V.filter isEmpty . rawFacePolygons
   where
     isEmpty (_,p :+ _) = (< 3) . length . polygonVertices $ p
 
-test :: PlaneGraph Test1 _ () () Integer
+test :: PlaneGraph Test1 (NonEmpty ()) () () Integer
 test = fromConnectedSegments (Identity Test1) testSegs
 
-test2 :: PlaneGraph Test1 _ () () Integer
+test2 :: PlaneGraph Test1 (NonEmpty ()) () () Integer
 test2 = fromConnectedSegments (Identity Test1) testSegs2
 
 -- |
@@ -94,6 +92,7 @@ triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
            , Face (0,1) "A"
            ]
 
+smallG :: PlaneGraph () Int String String Int
 smallG = fromAdjRep (Proxy :: Proxy ()) small
 
 small :: Gr (Vtx Int String Int) (Face String)
@@ -119,6 +118,7 @@ small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
 
 
 data Test
+myGraphG :: PlaneGraph Test () () String Int
 myGraphG = fromAdjRep (Proxy :: Proxy Test) myGraph
 
 myGraph :: Gr (Vtx () () Int) (Face String)

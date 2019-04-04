@@ -43,15 +43,15 @@ class Invertible n r where
 instance Fractional r => Invertible 2 r where
   -- >>> inverse' $ Matrix $ Vector2 (Vector2 1 2) (Vector2 3 4.0)
   -- Matrix Vector2 [Vector2 [-2.0,1.0],Vector2 [1.5,-0.5]]
-  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv22 . unsafeCoerce $ m
+  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv22 @Double . unsafeCoerce $ m
 
 instance Fractional r => Invertible 3 r where
   -- >>> inverse' $ Matrix $ Vector3 (Vector3 1 2 4) (Vector3 4 2 2) (Vector3 1 1 1.0)
   -- Matrix Vector3 [Vector3 [0.0,0.5,-1.0],Vector3 [-0.5,-0.75,3.5],Vector3 [0.5,0.25,-1.5]]
-  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv33 . unsafeCoerce $ m
+  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv33 @Double . unsafeCoerce $ m
 
 instance Fractional r => Invertible 4 r where
-  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv44 . unsafeCoerce $ m
+  inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv44 @Double . unsafeCoerce $ m
 
 --------------------------------------------------------------------------------
 -- * Transformations

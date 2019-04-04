@@ -50,10 +50,10 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 
 > showValue :: Half -> String
 > showValue (Half i) = concat [ show $ i `div` 2
->                             , if odd i then ".5" else ""
+>                             , if myOdd i then ".5" else ""
 >                             ]
 >   where
->     odd x = x `mod` 2 /= 0
+>     myOdd x = x `mod` 2 /= 0
 
 
 > type Area = Half
@@ -131,11 +131,11 @@ To make sure `allChains` runs in $O(n^2)$ time we build an Array representing
 our convex hull vertices. All individiual chains are then views of this underlying array:
 
 > chains          :: Array Int a -> Int -> Int -> (Array Int a, Array Int a)
-> chains a pi qi = (ixSubMap (1,qi-pi-1) fu a, ixSubMap (1,r + pi - 1) fv a)
+> chains a pi' qi = (ixSubMap (1,qi-pi'-1) fu a, ixSubMap (1,r + pi' - 1) fv a)
 >   where
 >     n    = rangeSize . bounds $ a
 >     r    = n - qi
->     fu i = pi + i
+>     fu i = pi' + i
 >     fv i = if i <= r then qi + i
 >                      else i - r
 
@@ -208,7 +208,7 @@ Ternary Search
 > ternarySearchArray f (Unimodal a)
 >   | rangeSize (bounds a) == 0 = error "empty array"
 >   | otherwise                 = let (l,u) = bounds a
->                                     i     = ternarySearch (\i -> f $ a ! i) (pred l) (succ u)
+>                                     i     = ternarySearch (\i' -> f $ a ! i') (pred l) (succ u)
 >                                 in a ! i
 
 Given a function $f$, a lowerbound $\ell$, and a n upperbound $u$ find the
@@ -249,7 +249,8 @@ Input & Output
 > main = interact armybase
 
 
-> show' (p,q,(a,b)) = (p,q,elems a, elems b)
+> showA :: (Ix i1, Ix i2) => (a1, b, (Array i1 a2, Array i2 a3)) -> (a1, b, [a2], [a3])
+> showA (p,q,(a,b)) = (p,q,elems a, elems b)
 
 Array Stuff
 -----------
@@ -263,7 +264,7 @@ Array Stuff
 >   fmap f (Array b g a) = Array b g (fmap f a)
 
 > instance (Show i, Show a, A.Ix i) => Show (Array i a) where
->   show a@(Array bs g _) = concat [ "Array "
+>   show a@(Array bs _ _) = concat [ "Array "
 >                                  , show bs
 >                                  , " "
 >                                  , show $ assocs a
@@ -283,7 +284,7 @@ Array Stuff
 > assocs (Array _ g a) = (\(k,v) -> (g k, v)) <$> A.assocs a
 
 > ixSubMap :: Ix i => (i,i) -> (i -> i) -> Array i a -> Array i a
-> ixSubMap bs f (Array obs g a) = Array bs (g . f) a
+> ixSubMap bs f (Array _ g a) = Array bs (g . f) a
 
 
 

@@ -11,9 +11,9 @@ spec :: Spec
 spec = do
   describe "Add vector to point" $ do
     it "2d" $
-      origin .+^ Vector2 1 2 `shouldBe` Point2 1 2
+      origin .+^ Vector2 1 2 `shouldBe` (Point2 1 2 :: Point 2 Int)
     it "3d" $
-      origin .+^ Vector3 1 2 3 `shouldBe` Point3 1 2 3
+      origin .+^ Vector3 1 2 3 `shouldBe` (Point3 1 2 3 :: Point 3 Int)
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
       sortArround (ext origin) (map ext [ point2 (-3) (-3)
@@ -28,7 +28,7 @@ spec = do
                                         , point2 5    5
                                         , point2 2    2
                                         , point2 26   (-2)
-                                        , point2 0    (-5)
+                                        , point2 0    (-5) :: Point 2 Int
                                         ])
       `shouldBe` map ext [ point2 20   0
                          , point2 10   1
@@ -47,13 +47,13 @@ spec = do
     it "degenerate points on horizontal line" $
       sortArround (ext origin) (map ext [ point2 2    0
                                         , point2 (-1) 0
-                                        , point2 10   0
+                                        , point2 10   0 :: Point 2 Int
                                         ])
       `shouldBe` map ext [ point2 2 0, point2 10 0, point2 (-1) 0 ]
     it "degenerate points on vertical line" $
       sortArround (ext origin) (map ext [ point2 0 2
                                         , point2 0 (-1)
-                                        , point2 0 10
+                                        , point2 0 10 :: Point 2 Int
                                         ])
       `shouldBe` map ext [ point2 0 2, point2 0 10, point2 0 (-1) ]
 
@@ -73,7 +73,7 @@ spec = do
                              , point2 0    (-5)
                              , point2 0    (-6)
                              , point2 6    (-4)
-                             , point2 26   (-2)
+                             , point2 26   (-2) :: Point 2 Int
                              ])
       `shouldBe`
         (C.fromList $ map ext [ point2 20   0

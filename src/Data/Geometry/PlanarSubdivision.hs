@@ -17,18 +17,8 @@ module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.B
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
-import           Data.Ext
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.PlaneGraph as PG
-import           Data.Proxy
-import           Data.Util
-import           Control.Lens
-import           Data.Bitraversable
-import qualified Data.Foldable as F
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
@@ -45,14 +35,14 @@ fromPolygon                              :: forall proxy t p f r s.
                                          -> f -- ^ data outside the polygon
                                          -> PlanarSubdivision s p () f r
 fromPolygon p pg@(SimplePolygon _) iD oD = fromSimplePolygon p pg iD oD
-fromPolygon _ (MultiPolygon vs hs) iD oD = PlanarSubdivision cs vd dd fd
+fromPolygon _ (MultiPolygon _ _)   _  _  = PlanarSubdivision cs vd dd fd
   where
-    wp = Proxy :: Proxy (Wrap s)
+    -- wp = Proxy :: Proxy (Wrap s)
 
-    -- the components
-    cs = undefined
-    cs' = PG.fromSimplePolygon wp (SimplePolygon vs) iD oD
-        : map (\h -> PG.fromSimplePolygon wp h oD iD) hs
+    -- -- the components
+    cs = error "cs is undefined in function fromPolygon"
+    -- cs' = PG.fromSimplePolygon wp (SimplePolygon vs) iD oD
+    --     : map (\h -> PG.fromSimplePolygon wp h oD iD) hs
 
     vd = undefined
     dd = undefined
@@ -92,10 +82,10 @@ fromPolygon _ (MultiPolygon vs hs) iD oD = PlanarSubdivision cs vd dd fd
 
 data HoleData f p = Outer !f | Hole !f !p deriving (Show,Eq)
 
-holeData            :: HoleData f p -> f
-holeData (Outer f)  = f
-holeData (Hole f _) = f
+-- holeData            :: HoleData f p -> f
+-- holeData (Outer f)  = f
+-- holeData (Hole f _) = f
 
-getP            :: HoleData f p -> Maybe p
-getP (Outer _)  = Nothing
-getP (Hole _ p) = Just p
+-- getP            :: HoleData f p -> Maybe p
+-- getP (Outer _)  = Nothing
+-- getP (Hole _ p) = Just p

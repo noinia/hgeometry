@@ -6,7 +6,6 @@ import           Algorithms.Geometry.Diameter
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
 import           Control.Lens
-import           Control.Monad ((<=<))
 import           Data.BinaryTree
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
@@ -21,10 +20,8 @@ import           Data.Data
 import           Data.Semigroup
 import qualified Data.Set as Set
 import           GHC.TypeLits
-import           Options.Applicative hiding ((<>))
+import           Options.Applicative
 
-
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -154,11 +151,13 @@ readInput = fmap parseInput . B.readFile
 test :: FilePath -> IO [Point 2 Double :+ C.ByteString]
 test = readInput
 
+testTree :: FilePath -> IO [(Point 2 Double :+ C.ByteString, Point 2 Double :+ C.ByteString)]
 testTree = fmap f .test
   where
     f pts = uncovered pts (4 / 0.05) (fairSplitTree $ NonEmpty.fromList pts)
 
 -- compareBoth     :: r -> FilePath -> IO (r, r, Bool)
+compareBoth :: Double -> FilePath -> IO (Double, Double, Bool)
 compareBoth eps = fmap f . test
   where
     f pts = let exact  = pairwiseDist pts
@@ -166,11 +165,13 @@ compareBoth eps = fmap f . test
             in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
 
 
-compareBoth1 eps pts = let exact  = pairwiseDist pts
-                           approx = approxPairwiseDistance eps pts
-                       in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
+-- very long type signiture and not sure how to declare type well
+-- compareBoth1 eps pts = let exact  = pairwiseDist pts
+--                            approx = approxPairwiseDistance eps pts
+--                        in (exact, approx, (1-eps)*exact <= approx && approx <= (1+eps)*exact)
 
 
+mainWith :: Options -> IO ()
 mainWith (Options f) = compareBoth 0.05 f >>= print
 
 
@@ -186,6 +187,7 @@ uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
     allPairs = Set.fromList [ (p,q) | p <- pts, q <- pts, p < q ]
     covered  = Set.unions [ mkSet as bs | (as,bs) <- wellSeparatedPairs s t]
 
+mkSet :: (Ord b, Foldable t1, Foldable t2) => t1 b -> t2 b -> Set.Set (b, b)
 mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList bs]
 
 -- | Naively check if a WSP pair is actually well separated with respect to
@@ -198,11 +200,11 @@ isWellSeparated s (as,bs) =
   where
     d = (/2) . maximum . map (diameterNaive . F.toList) $ [as,bs]
 
-
-nonWellSeparated s = map (\(a,b,c) -> (a,b))
-                   . filter (\(a,b,c) -> not c)
-                   . map (\p@(a,b) -> (a,b,isWellSeparated s p))
-                   . wellSeparatedPairs s . fairSplitTree . NonEmpty.fromList
+-- very long type signiture and not sure how to declare type well
+-- nonWellSeparated s = map (\(a,b,_) -> (a,b))
+--                    . filter (\(_,_,c) -> not c)
+--                    . map (\p@(a,b) -> (a,b,isWellSeparated s p))
+--                    . wellSeparatedPairs s . fairSplitTree . NonEmpty.fromList
 
 
 points1 :: [Point 2 Double :+ ()]

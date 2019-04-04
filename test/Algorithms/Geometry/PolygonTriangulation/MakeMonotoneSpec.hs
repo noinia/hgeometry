@@ -44,7 +44,9 @@ geomBookPoly = fromPoints [ point2 20 20 :+ 1
                           , point2 12 15 :+ 14
                           , point2 15 12 :+ 15
                           ]
+geomBookVertexTypes :: NonEmpty.NonEmpty VertexType
 geomBookVertexTypes = NonEmpty.fromList [Start,Merge,Start,Merge,Start,Regular,Regular,Merge,Start,Regular,End,Split,End,Split,End]
+geomBookDiagonals :: Set.Set (Int, Int)
 geomBookDiagonals = Set.fromList [(4,6),(2,8),(8,14),(10,12)]
 
 

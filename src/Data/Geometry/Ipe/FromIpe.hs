@@ -64,7 +64,7 @@ _asPolyLine = prism' poly2path path2poly
     -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
-_asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
+_asSimplePolygon :: Prism' (Path r) (Polygon 'Simple () r)
 _asSimplePolygon = prism' polygonToPath path2poly
   where
     path2poly p = pathToPolygon p >>= either pure (const Nothing)

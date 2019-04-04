@@ -11,7 +11,6 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
 import           Linear.Affine (distanceA)
 
 {-
@@ -102,9 +101,9 @@ escape (Input l h ds) = case convexHull . NonEmpty.fromList $
     ConvexPolygon poly -> case C.findRotateTo (\p -> p^.extra == Luke) $
                                  poly^.outerBoundary of
       Nothing -> Impossible
-      Just h  -> (distanceToHatch $ C.leftElements h)
+      Just h'  -> (distanceToHatch $ C.leftElements h')
                  `min`
-                 (distanceToHatch $ C.rightElements h)
+                 (distanceToHatch $ C.rightElements h')
 
 
 toHatch    :: [p :+ Kind] -> Maybe [p :+ Kind]
@@ -138,6 +137,7 @@ readInput (ls:hs:ns:rest) = let n            = read ns
                                      (readPoint hs)
                                      (map readPoint daltons)
                                : readInput ys
+readInput _ = error "readInput: Pattern match(es) are non-exhaustive"
 
 
 gunslinger :: String -> String

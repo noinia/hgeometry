@@ -40,9 +40,12 @@ data Ball d p r = Ball { _center        :: !(Point d r :+ p)
                        } deriving Generic
 makeLenses ''Ball
 
+two :: Int
+two = 2
+
 -- | A lens to get/set the radius of a Ball
 radius :: Floating r => Lens' (Ball d p r) r
-radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^2))
+radius = lens (sqrt . _squaredRadius) (\(Ball c _) r -> Ball c (r^two))
 
 
 deriving instance (Show r, Show p, Arity d)     => Show (Ball d p r)
@@ -169,7 +172,7 @@ from3Points :: Fractional r
 from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
     Circle (ext c) (squaredEuclideanDist c p)
   where
-    f  x y = x^2 + y^2
+    f  x y = x^two + y^two
     fx x y = V3 (f x y) y       1
     fy x y = V3 x       (f x y) 1
 
@@ -211,13 +214,13 @@ instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) wh
       q' alpha = q alpha .+^ toVec c
 
       -- let q lambda be the intersection point. We solve the following equation
-      -- solving the equation (q_x)^2 + (q_y)^2 = r^2 then yields the equation
-      -- L^2(vx^2 + vy^2) + L2(px*vx + py*vy) + px^2 + py^2 = 0
+      -- solving the equation (q_x)^two + (q_y)^two = r^two then yields the equation
+      -- L^two(vx^two + vy^two) + L2(px*vx + py*vy) + px^two + py^two = 0
       -- where L = \lambda
-      aa                   = vx^2 + vy^2
+      aa                   = vx^two + vy^two
       bb                   = 2 * (px * vx + py * vy)
-      cc                   = px^2 + py^2 - r^2
-      discr                = bb^2 - 4*aa*cc
+      cc                   = px^two + py^two - r^two
+      discr                = bb^two - 4*aa*cc
       discr'               = sqrt discr
       -- This thus gives us the following value(s) for lambda
       lambda (|+-|)        = (-bb |+-| discr') / (2*aa)

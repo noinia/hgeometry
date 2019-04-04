@@ -168,26 +168,26 @@ makePrisms ''Operation
 -- have a value of type 'Matrix 3 3 r'.
 type family AttrMap (r :: *) (l :: AttributeUniverse) :: * where
   AttrMap r 'Layer          = LayerName
-  AttrMap r AT.Matrix       = Matrix 3 3 r
-  AttrMap r Pin             = PinType
-  AttrMap r Transformations = TransformationTypes
+  AttrMap r 'AT.Matrix       = Matrix 3 3 r
+  AttrMap r 'Pin             = PinType
+  AttrMap r 'Transformations = TransformationTypes
 
-  AttrMap r Stroke = IpeColor r
-  AttrMap r Pen    = IpePen r
-  AttrMap r Fill   = IpeColor r
-  AttrMap r Size   = IpeSize r
+  AttrMap r 'Stroke = IpeColor r
+  AttrMap r 'Pen    = IpePen r
+  AttrMap r 'Fill   = IpeColor r
+  AttrMap r 'Size   = IpeSize r
 
-  AttrMap r Dash     = IpeDash r
-  AttrMap r LineCap  = Int
-  AttrMap r LineJoin = Int
-  AttrMap r FillRule = FillType
-  AttrMap r Arrow    = IpeArrow r
-  AttrMap r RArrow   = IpeArrow r
-  AttrMap r Opacity  = IpeOpacity
-  AttrMap r Tiling   = IpeTiling
-  AttrMap r Gradient = IpeGradient
+  AttrMap r 'Dash     = IpeDash r
+  AttrMap r 'LineCap  = Int
+  AttrMap r 'LineJoin = Int
+  AttrMap r 'FillRule = FillType
+  AttrMap r 'Arrow    = IpeArrow r
+  AttrMap r 'RArrow   = IpeArrow r
+  AttrMap r 'Opacity  = IpeOpacity
+  AttrMap r 'Tiling   = IpeTiling
+  AttrMap r 'Gradient = IpeGradient
 
-  AttrMap r Clip = Path r -- strictly we event want this to be a closed path I guess
+  AttrMap r 'Clip = Path r -- strictly we event want this to be a closed path I guess
 
 genDefunSymbols [''AttrMap]
 
@@ -389,12 +389,12 @@ singlePageFromContent = singlePageFile . fromContent
 
 -- | Takes and applies the ipe Matrix attribute of this item.
 applyMatrix'              :: ( IsTransformable (i r)
-                             , AT.Matrix ∈ AttributesOf i
+                             , 'AT.Matrix ∈ AttributesOf i
                              , Dimension (i r) ~ 2, r ~ NumType (i r))
                           => IpeObject' i r -> IpeObject' i r
 applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ ats') mm
   where
-    (mm,ats') = takeAttr (Proxy :: Proxy AT.Matrix) ats
+    (mm,ats') = takeAttr (Proxy :: Proxy 'AT.Matrix) ats
 
 -- | Applies the matrix to an ipe object if it has one.
 applyMatrix                  :: Fractional r => IpeObject r -> IpeObject r

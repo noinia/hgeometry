@@ -273,7 +273,7 @@ findStartVertex p arr = do
     (t,r,b,l) = sides'' $ arr^.boundedArea
     sides'' = map4 (\(ClosedLineSegment a c) -> LineSegment (Closed a) (Open c)) . sides
 
-    findSide q = fmap fst . List.find (onSegment q . snd) $ zip [1..] [t,r,b,l]
+    findSide q = fmap fst . List.find (onSegment q . snd) $ zip [1 :: Int ..] [t,r,b,l]
 
     pred' ss (q,_,_) = let Just j = findSide q
                            x      = before (ss,p) (j,q)

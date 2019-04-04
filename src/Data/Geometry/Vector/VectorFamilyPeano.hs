@@ -23,27 +23,27 @@ import           Linear.Vector
 --------------------------------------------------------------------------------
 -- * Natural number stuff
 
-type One = S Z
-type Two = S One
-type Three = S Two
-type Four = S Three
-type Many d = S (S (S (S (S d))))
+type One = 'S 'Z
+type Two = 'S One
+type Three = 'S Two
+type Four = 'S Three
+type Many d = 'S ('S ('S ('S ('S d))))
 
 
 type family FromPeano (d :: PeanoNum) :: Nat where
-  FromPeano Z     = 0
-  FromPeano (S d) = 1 + FromPeano d
+  FromPeano 'Z     = 0
+  FromPeano ('S d) = 1 + FromPeano d
 
 
 data SingPeano (d :: PeanoNum) where
-  SZ :: SingPeano Z
-  SS :: !(SingPeano d) -> SingPeano (S d)
+  SZ :: SingPeano 'Z
+  SS :: !(SingPeano d) -> SingPeano ('S d)
 
 class ImplicitPeano (d :: PeanoNum) where
   implicitPeano :: SingPeano d
-instance ImplicitPeano Z where
+instance ImplicitPeano 'Z where
   implicitPeano = SZ
-instance ImplicitPeano d => ImplicitPeano (S d) where
+instance ImplicitPeano d => ImplicitPeano ('S d) where
   implicitPeano = SS implicitPeano
 
 --------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ newtype VectorFamily (d :: PeanoNum) (r :: *) =
 
 -- | Mapping between the implementation type, and the actual implementation.
 type family VectorFamilyF (d :: PeanoNum) :: * -> * where
-  VectorFamilyF Z        = Const ()
+  VectorFamilyF 'Z        = Const ()
   VectorFamilyF One      = Identity
   VectorFamilyF Two      = L2.V2
   VectorFamilyF Three    = L3.V3
@@ -201,7 +201,7 @@ element' = case (implicitPeano :: SingPeano d) of
                (SS (SS (SS (SS (SS _))))) -> elemD
 {-# INLINE element' #-}
 
-elem0   :: Int -> Traversal' (VectorFamily Z r) r
+elem0   :: Int -> Traversal' (VectorFamily 'Z r) r
 elem0 _ = \_ v -> pure v
 {-# INLINE elem0 #-}
 -- zero length vectors don't store any elements
@@ -277,11 +277,11 @@ vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
 vectorFromListUnsafe = V.fromList
 
 -- | Get the head and tail of a vector
-destruct   :: (ImplicitArity d, ImplicitArity (S d))
-           => VectorFamily (S d) r -> (r, VectorFamily d r)
+destruct   :: (ImplicitArity d, ImplicitArity ('S d))
+           => VectorFamily ('S d) r -> (r, VectorFamily d r)
 destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
   -- FIXME: this implementaion of tail is not particularly nice
 
-snoc     :: (ImplicitArity d, ImplicitArity (S d), (1 + FromPeano d) ~ (FromPeano d + 1))
-         => VectorFamily d r -> r -> VectorFamily (S d) r
+snoc     :: (ImplicitArity d, ImplicitArity ('S d), (1 + FromPeano d) ~ (FromPeano d + 1))
+         => VectorFamily d r -> r -> VectorFamily ('S d) r
 snoc = flip V.snoc

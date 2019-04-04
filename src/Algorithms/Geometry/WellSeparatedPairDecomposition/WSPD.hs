@@ -25,7 +25,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.LSeq as LSeq
-import           Data.LSeq (LSeq(..),toSeq,ViewL(..),ViewR(..),pattern (:<|),pattern (:|>))
+import           Data.LSeq (toSeq, pattern (:<|))
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
@@ -36,8 +36,6 @@ import qualified Data.Sequence as S
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           GHC.TypeLits
-
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -177,6 +175,7 @@ distributePoints' k levels pts
     level p = maybe (k-1) _unLevel $ levels V.! (p^.extra.core)
     append v i p = MV.read v i >>= MV.write v i . (S.|> p)
 
+fromSeqUnsafe :: S.Seq a -> LSeq.LSeq n a
 fromSeqUnsafe = LSeq.promise . LSeq.fromSeq
 
 -- | Given a sequence of points, whose index is increasing in the first
@@ -266,9 +265,12 @@ compactEnds' (l0 :<| s0) = fmap fromSeqUnsafe . goL $ l0 S.<| toSeq s0
     goL s@(S.viewl -> l S.:< s') = hasLevel l >>= \case
                                      False -> goR s
                                      True  -> goL s'
+    goL _ = error "compactEnds' goL: Pattern match(es) are non-exhaustive"
+
     goR s@(S.viewr -> s' S.:> r) = hasLevel r >>= \case
                                      False -> pure s
                                      True  -> goR s'
+    goR _ = error "compactEnds' goR: Pattern match(es) are non-exhaustive"
 
 
 -- | Given the points, ordered by their j^th coordinate, split the point set

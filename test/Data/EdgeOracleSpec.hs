@@ -4,7 +4,6 @@ import           Control.Arrow
 import           Data.Ext
 import           Data.PlanarGraph.EdgeOracle
 import           Data.PlanarGraph.Core
-import           Data.Semigroup
 import qualified Data.Set as S
 import           Test.Hspec
 
@@ -12,7 +11,7 @@ import           Test.Hspec
 
 data TestG
 
-type Vertex = VertexId TestG Primal
+type Vertex = VertexId TestG 'Primal
 
 
 testEdges :: [(Vertex,[Vertex])]
@@ -25,7 +24,7 @@ testEdges = map (\(i,vs) -> (VertexId i, map VertexId vs))
             , (5, [3,4])
             ]
 
-buildEdgeOracle'  :: [(Vertex,[Vertex])] -> EdgeOracle TestG Primal ()
+buildEdgeOracle'  :: [(Vertex,[Vertex])] -> EdgeOracle TestG 'Primal ()
 buildEdgeOracle' = buildEdgeOracle . map (second $ fmap ext)
 
 -- | Flattens an adjacencylist representation into a set of edges

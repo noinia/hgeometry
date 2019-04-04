@@ -3,7 +3,6 @@ module Demo.TriangulateWorld where
 
 import Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
 import Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate)
-import Algorithms.Geometry.PolygonTriangulation.MakeMonotone (makeMonotone)
 import Data.Maybe(mapMaybe)
 import Control.Lens
 import Data.Data
@@ -11,7 +10,6 @@ import Data.Ext
 import Data.Geometry.Ipe
 import Data.Geometry.Polygon
 import Data.Geometry.PlanarSubdivision
-import Data.Semigroup
 import Options.Applicative
 import qualified Data.Foldable as F
 
@@ -52,7 +50,7 @@ mainWith (Options inFile outFile) = do
           subdivs = map (\(pg :+ _) -> triangulate (Identity PX) pg) polies'
           yMonotones = tail . mapMaybe (^?_2.core._Left)
                      . concatMap (F.toList.rawFacePolygons) $ subdivs
-          ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
+          -- ofs = map (\s -> rawFaceBoundary (outerFaceId s) s) subdivs
           segs    = map (^._2.core) . concatMap (F.toList . edgeSegments) $ subdivs
           out     = mconcat [ [ iO' pg | pg <- polies ]
                             , [ iO' s  | s  <- segs ]

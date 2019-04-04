@@ -1,12 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.OrdSeqSpec where
 
+import Test.QuickCheck.HGeometryInstances () -- orphan instance import
 import qualified Data.Foldable as F
 import qualified Data.List as List
 import           Data.OrdSeq (OrdSeq)
 import qualified Data.OrdSeq as OrdSeq
-import           Data.Semigroup
-import           Test.QuickCheck.HGeometryInstances
 import           Test.Hspec
 import           Test.QuickCheck
 

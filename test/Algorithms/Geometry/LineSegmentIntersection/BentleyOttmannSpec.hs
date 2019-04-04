@@ -3,25 +3,15 @@ module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 import           Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
-import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Proxy
-import           Data.Semigroup
-import qualified Data.Set as Set
 import           Test.Hspec
-import           Test.QuickCheck
-import           Util
 
-import           Debug.Trace
 
 spec :: Spec
 spec = do
@@ -32,6 +22,7 @@ spec = do
   describe "Self Intersecting Polygon Tests" $ do
     siTestCases (testPath <> "selfIntersections.ipe")
 
+testPath :: FilePath
 testPath = "test/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
@@ -64,6 +55,7 @@ toSpec (TestCase segs) = describe ("testing segments ") $ do
                             sameAsNaive segs
 
 -- | Test if we have the same intersection points
+samePointsAsNaive :: (Show r, Ord r, Fractional r) => [LineSegment 2 p r] -> SpecWith ()
 samePointsAsNaive segs = it "Same points as Naive" $ do
   (Map.keys $ Sweep.intersections segs) `shouldBe` (Map.keys $ Naive.intersections segs)
 
@@ -96,7 +88,7 @@ readSiInput fp = fmap f <$> readSinglePageFile fp
       where
         polies = page^..content.to flattenGroups.traverse
                ._withAttrs _IpePath _asSimplePolygon
-        isRed ats = lookupAttr (Proxy :: Proxy Stroke) ats == Just (IpeColor (Named "red"))
+        isRed ats = lookupAttr (Proxy :: Proxy 'Stroke) ats == Just (IpeColor (Named "red"))
 
 
 siToSpec                   :: SelfIntersectionTestCase Rational -> Spec

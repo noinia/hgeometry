@@ -36,7 +36,7 @@ instance (ToJSON v, ToJSON e, ToJSON f) => ToJSON (PlanarGraph s w v e f) where
   toEncoding = toEncoding . toAdjRep
   toJSON     = toJSON     . toAdjRep
 
-instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s Primal v e f) where
+instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s 'Primal v e f) where
   parseJSON v = fromAdjRep (Proxy :: Proxy s) <$> parseJSON v
 
 --------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ toAdjRep g = Gr vs fs
 -- should be in counter clockwise order.
 --
 -- running time: \(O(n)\)
-fromAdjRep                  :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal v e f
+fromAdjRep                  :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s 'Primal v e f
 fromAdjRep px gr@(Gr as fs) = g&vertexData .~ reorder vs' _unVertexId
                                &dartData   .~ ds
                                &faceData   .~ reorder fs' (_unVertexId._unFaceId)
@@ -97,7 +97,7 @@ fromAdjRep px gr@(Gr as fs) = g&vertexData .~ reorder vs' _unVertexId
   -- TODO: Properly handle graphs with self-loops
 
 -- | Builds the graph from the adjacency lists (but ignores all associated data)
-buildGraph              :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s Primal () () ()
+buildGraph              :: proxy s -> Gr (Vtx v e) (Face f) -> PlanarGraph s 'Primal () () ()
 buildGraph _ (Gr as' _) = fromAdjacencyLists as
   where
     as = [ (VertexId vi, V.fromList [VertexId ui | (ui,_) <- us])

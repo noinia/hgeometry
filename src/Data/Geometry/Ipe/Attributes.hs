@@ -46,7 +46,7 @@ data AttributeUniverse = -- common
 genSingletons [ ''AttributeUniverse ]
 
 
-type CommonAttributes = [ Layer, Matrix, Pin, Transformations ]
+type CommonAttributes = ['Layer, 'Matrix, 'Pin, 'Transformations]
 
 
 type TextLabelAttributes = CommonAttributes
@@ -56,11 +56,11 @@ type ImageAttributes     = CommonAttributes
 
 
 type SymbolAttributes = CommonAttributes ++
-                          [Stroke, Fill, Pen, Size]
+                          ['Stroke, 'Fill, 'Pen, 'Size]
 
 type PathAttributes = CommonAttributes ++
-                      [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
-                      , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
+                      [ 'Stroke, 'Fill, 'Dash, 'Pen, 'LineCap, 'LineJoin
+                      , 'FillRule, 'Arrow, 'RArrow, 'Opacity, 'Tiling, 'Gradient
                       ]
 
 type GroupAttributes = CommonAttributes ++ '[ 'Clip]
@@ -325,30 +325,30 @@ class IpeAttrName (a :: AttributeUniverse) where
   attrName :: proxy a -> Text
 
 -- CommonAttributeUnivers
-instance IpeAttrName Layer           where attrName _ = "layer"
-instance IpeAttrName Matrix          where attrName _ = "matrix"
-instance IpeAttrName Pin             where attrName _ = "pin"
-instance IpeAttrName Transformations where attrName _ = "transformations"
+instance IpeAttrName 'Layer           where attrName _ = "layer"
+instance IpeAttrName 'Matrix          where attrName _ = "matrix"
+instance IpeAttrName 'Pin             where attrName _ = "pin"
+instance IpeAttrName 'Transformations where attrName _ = "transformations"
 
 -- IpeSymbolAttributeUniversre
-instance IpeAttrName Stroke       where attrName _ = "stroke"
-instance IpeAttrName Fill         where attrName _ = "fill"
-instance IpeAttrName Pen          where attrName _ = "pen"
-instance IpeAttrName Size         where attrName _ = "size"
+instance IpeAttrName 'Stroke       where attrName _ = "stroke"
+instance IpeAttrName 'Fill         where attrName _ = "fill"
+instance IpeAttrName 'Pen          where attrName _ = "pen"
+instance IpeAttrName 'Size         where attrName _ = "size"
 
 -- PathAttributeUniverse
-instance IpeAttrName Dash       where attrName _ = "dash"
-instance IpeAttrName LineCap    where attrName _ = "cap"
-instance IpeAttrName LineJoin   where attrName _ = "join"
-instance IpeAttrName FillRule   where attrName _ = "fillrule"
-instance IpeAttrName Arrow      where attrName _ = "arrow"
-instance IpeAttrName RArrow     where attrName _ = "rarrow"
-instance IpeAttrName Opacity    where attrName _ = "opacity"
-instance IpeAttrName Tiling     where attrName _ = "tiling"
-instance IpeAttrName Gradient   where attrName _ = "gradient"
+instance IpeAttrName 'Dash       where attrName _ = "dash"
+instance IpeAttrName 'LineCap    where attrName _ = "cap"
+instance IpeAttrName 'LineJoin   where attrName _ = "join"
+instance IpeAttrName 'FillRule   where attrName _ = "fillrule"
+instance IpeAttrName 'Arrow      where attrName _ = "arrow"
+instance IpeAttrName 'RArrow     where attrName _ = "rarrow"
+instance IpeAttrName 'Opacity    where attrName _ = "opacity"
+instance IpeAttrName 'Tiling     where attrName _ = "tiling"
+instance IpeAttrName 'Gradient   where attrName _ = "gradient"
 
 -- GroupAttributeUniverse
-instance IpeAttrName Clip     where attrName _ = "clip"
+instance IpeAttrName 'Clip     where attrName _ = "clip"
 
 
 -- | Function that states that all elements in xs satisfy a given constraint c

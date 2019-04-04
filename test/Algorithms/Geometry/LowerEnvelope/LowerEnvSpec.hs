@@ -2,20 +2,19 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.LowerEnvelope.LowerEnvSpec where
 
+import           Data.Vinyl (RecElem, Rec)
+import           Data.Vinyl.TypeLevel (RIndex)
+import qualified Data.Singletons
 import qualified Algorithms.Geometry.LowerEnvelope.DualCH as DualCH
 import           Control.Lens
 import           Data.Eq.Approximate
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.Geometry.Line
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
-import           Data.Ratio
-import           Data.Semigroup
-import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 import           Test.Hspec
 import           Util
@@ -32,9 +31,7 @@ testCases fp = (runIO $ readInput fp) >>= \case
     Right tcs -> mapM_ toSpec tcs
 
 
-type Approx r = AbsolutelyApproximateValue (Proxy 3) r
-
-
+type Approx r = AbsolutelyApproximateValue (ToleranceProxy 3) r
 
 data TestCase r = TestCase { _lines    :: NonEmpty (Line 2 r :+ ())
                            , _color    :: Maybe (IpeColor r)
@@ -62,8 +59,9 @@ readInput fp = fmap f <$> readSinglePageFile fp
                        ]
 
 
-
-lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats
+lookup' :: RecElem Rec 'Stroke 'Stroke ats ats (RIndex 'Stroke ats)
+        => (core :+ Attributes f ats) -> Maybe (Data.Singletons.Apply f 'Stroke)
+lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy 'Stroke) ats
 
 
 toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
@@ -72,6 +70,7 @@ toSpec (TestCase ls c sol) = it ("testing the " <> show c <> " set") $
    . DualCH.vertices . DualCH.lowerEnvelope $ ls) `shouldBe` sol
 
 
+approx :: Point 2 value -> Point 2 (AbsolutelyApproximateValue absolute_tolerance value)
 approx = fmap AbsolutelyApproximateValue
 
 -- shouldApprox       :: forall f r. ( Functor f, Eq (f (Approx r))
@@ -86,17 +85,19 @@ approx = fmap AbsolutelyApproximateValue
 --     b' = AbsolutelyApproximateValue <$> b
 
 
+newtype ToleranceProxy a = ToleranceProxy (Proxy a)
+  deriving (Show, Eq)
 
-instance KnownNat n => AbsoluteTolerance (Proxy n) where
+instance KnownNat n => AbsoluteTolerance (ToleranceProxy n) where
   absoluteToleranceOf = toleranceFromKnownNat . getAbsoluteTolerance
 
 toleranceFromKnownNat   :: (Fractional r, KnownNat n) => proxy n -> r
 toleranceFromKnownNat p = recip . fromInteger $ (10 :: Integer) ^ (natVal p)
 
-instance KnownNat n => RelativeTolerance (Proxy n) where
+instance KnownNat n => RelativeTolerance (ToleranceProxy n) where
   relativeToleranceOf = toleranceFromKnownNat . getRelativeTolerance
 
-instance KnownNat n => ZeroTolerance (Proxy n) where
+instance KnownNat n => ZeroTolerance (ToleranceProxy n) where
   zeroToleranceOf = toleranceFromKnownNat . getZeroTolerance
 
 --     where

@@ -17,7 +17,7 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , FaceData(FaceData), holes, fData
 
                                             , PlanarSubdivision(PlanarSubdivision)
-                                            , Wrap
+                                            , Wrap, Wrap'
 
                                             , Component, ComponentId
 

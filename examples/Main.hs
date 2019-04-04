@@ -1,7 +1,5 @@
 module Main where
 
-import Data.Monoid
-import Control.Applicative
 import Options.Applicative
 import Data.Data
 

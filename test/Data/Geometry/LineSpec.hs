@@ -1,14 +1,10 @@
 module Data.Geometry.LineSpec where
 
 import Data.Ext
-import Control.Lens
 import Data.Geometry
 import Data.Geometry.Box
-import Data.Vinyl.CoRec
 import Test.Hspec
 import Data.Ratio
-
-
 
 
 spec :: Spec

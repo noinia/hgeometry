@@ -12,12 +12,9 @@ import qualified Data.ByteString.Lazy as B
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Maybe
-import           Data.Semigroup
 import           Data.Time.Clock
 import           Data.Time.Format
 import           Text.XML.Expat.Tree
-
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -43,6 +40,7 @@ newtype Activity = Activity { _tracks :: [Track]} deriving (Show,Eq)
 makeLenses ''Activity
 
 
+combineTracks :: Activity -> Activity
 combineTracks (Activity ts) = Activity [Track $ concatMap _trackPoints ts]
 
 
@@ -57,18 +55,15 @@ class ReadGPX t where
 
 instance ReadGPX Activity where
   parseGPX x = case selectPath ["gpx"] x of
-    [x@(Element _ _ chs)] -> Just . Activity . mapMaybe parseGPX . chsWith "trk" $ x
-
-
+    [y@(Element _ _ _)] -> Just . Activity . mapMaybe parseGPX . chsWith "trk" $ y
     --                      concatMap (selectPath [""Track"]) $ chs
-    -- _                 -> Nothing
+    _                 -> Nothing
 
 
 
 instance ReadGPX Track where
   parseGPX x@(Element "trk" _ _) = Just . Track . mapMaybe parseGPX . concatMap (chsWith "trkpt") . chsWith "trkseg" $ x
-
-
+  parseGPX _ = error "ReadGPX.parseGPX for Track: Pattern match(es) are non-exhaustive"
 
 
 instance ReadGPX TrackPoint where
@@ -79,8 +74,10 @@ instance ReadGPX TrackPoint where
 
       lat = read <$> lookup "lat" ats
       lon = read <$> lookup "lon" ats
+  parseGPX _ = error "ReadGPX.parseGPX for TrackPoint: Pattern match(es) are non-exhaustive"
 
 
+extract :: NodeG [] tag c -> c
 extract = (\(Text s) -> s) . head . eChildren
 
 readTime' :: String -> UTCTime

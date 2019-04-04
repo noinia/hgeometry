@@ -29,11 +29,11 @@ newtype Slab (o :: Orthogonal) a r = Slab { _unSlab :: Interval a r }
 makeLenses ''Slab
 
 -- | Smart consturctor for creating a horizontal slab
-horizontalSlab     :: (r :+ a) -> (r :+ a) -> Slab Horizontal a r
+horizontalSlab     :: (r :+ a) -> (r :+ a) -> Slab 'Horizontal a r
 horizontalSlab l h = Slab $ ClosedInterval l h
 
 -- | Smart consturctor for creating a vertical slab
-verticalSlab :: (r :+ a) -> (r :+ a) -> Slab Vertical a r
+verticalSlab :: (r :+ a) -> (r :+ a) -> Slab 'Vertical a r
 verticalSlab l r = Slab $ ClosedInterval l r
 
 instance Functor (Slab o a) where
@@ -52,7 +52,7 @@ instance Bifunctor (Slab o) where
 
 type instance IntersectionOf (Slab o a r)          (Slab o a r) =
   [NoIntersection, Slab o a r]
-type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical a r) =
+type instance IntersectionOf (Slab 'Horizontal a r) (Slab 'Vertical a r) =
   '[Rectangle (a,a) r]
 
 
@@ -64,7 +64,7 @@ instance Ord r => (Slab o a r) `IsIntersectableWith` (Slab o a r) where
      :& (H $ \i''            -> coRec (Slab i'' :: Slab o a r))
      :& RNil
 
-instance (Slab Horizontal a r) `IsIntersectableWith` (Slab Vertical a r) where
+instance (Slab 'Horizontal a r) `IsIntersectableWith` (Slab 'Vertical a r) where
   nonEmptyIntersection _ _ _ = True
 
   (Slab h) `intersect` (Slab v) = coRec $ box low high
@@ -82,13 +82,13 @@ class HasBoundingLines (o :: Orthogonal) where
   inSlab :: Ord r => Point 2 r -> Slab o a r -> Bool
 
 
-instance HasBoundingLines Horizontal where
+instance HasBoundingLines 'Horizontal where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ horizontalLine
 
   p `inSlab` (Slab i) = (p^.yCoord) `inInterval` i
 
 
-instance HasBoundingLines Vertical where
+instance HasBoundingLines 'Vertical where
   boundingLines (Slab i) = (i^.start, i^.end)&both.core %~ verticalLine
 
   p `inSlab` (Slab i) = (p^.xCoord) `inInterval` i

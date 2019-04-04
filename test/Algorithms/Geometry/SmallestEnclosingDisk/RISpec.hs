@@ -9,7 +9,6 @@ import System.Random(mkStdGen)
 import Control.Lens
 import Data.Ext
 import Data.Maybe
-import Data.Proxy
 import Test.Hspec
 import Data.Geometry
 import Data.Geometry.Ball(fromDiameter, disk, Disk)

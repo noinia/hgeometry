@@ -3,7 +3,7 @@ module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec where
 import           Algorithms.Geometry.Diameter
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
-import           Control.Lens
+import           Control.Lens hiding (levels)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
@@ -12,7 +12,6 @@ import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           Test.Hspec
-import           Util
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -28,14 +27,9 @@ reIndexTest = describe "ReIndex tests" $ do
       reIndexPoints input `shouldBe` output
   where
     input = Vector2 (ptSeq [ origin :+ 1, point2 1 1 :+ 100, point2 5 5 :+ 101 ])
-                    (ptSeq [ point2 1 1 :+ 100, point2 5 5 :+ 101, origin :+ 1 ])
+                    (ptSeq [ point2 (1 :: Int) 1 :+ 100, point2 5 5 :+ 101, origin :+ 1 ])
     output = Vector2 (ptSeq [ origin :+ 0, point2 1 1 :+ 1, point2 5 5 :+ 2 ])
                      (ptSeq [ point2 1 1 :+ 1, point2 5 5 :+ 2, origin :+ 0 ])
-
-
-
-
-
 
 distributePointsTest :: Spec
 distributePointsTest = describe "DistributePoints tests" $ do
@@ -48,7 +42,7 @@ distributePointsTest = describe "DistributePoints tests" $ do
     levels = V.fromList [Just $ Level 0 (Just 2),Just $ Level 1 (Just 1), Nothing]
     input  = ptSeq [ origin :+ 0, point2 1 1 :+ 1, point2 2 2 :+ 2]
     output = V.fromList [ ptSeq [origin :+ 0]
-                        , ptSeq [point2 1 1 :+ 1]
+                        , ptSeq [point2 (1 :: Int) 1 :+ 1]
                         , ptSeq [point2 2 2 :+ 2]
                         ]
     output' = fmap (\pts -> Vector2 pts pts) output
@@ -60,6 +54,7 @@ distributePointsTest = describe "DistributePoints tests" $ do
 
 --     f =  LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
+ptSeq :: [core :+ a] -> LSeq.LSeq 1 (core :+ (a :+ ()))
 ptSeq = LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
 -- coversAll
@@ -89,5 +84,5 @@ isWellSeparated s (as,bs) =
     r = (/2) . maximum . map (diameterNaive . F.toList) $ [as,bs]
 
 
-
+allCoveredTest :: String -> SpecWith a -> SpecWith a
 allCoveredTest = describe

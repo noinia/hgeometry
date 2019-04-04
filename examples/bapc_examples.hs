@@ -1,17 +1,13 @@
 module Main where
 
-
-import qualified BAPC2012.Gunslinger
 import qualified BAPC2014.Armybase
 
-
-
-import           Control.Applicative
 import           Control.Monad(unless)
 import           System.Exit
 
 type Algorithm = String -> String
 
+examplesPrefixPath :: String
 examplesPrefixPath = "examples/"
 
 
@@ -21,7 +17,7 @@ data BAPCTest = BAPC { name      :: String
                      , files     :: [(FilePath,FilePath)]
                      }
 
-
+bapcTests :: [BAPCTest]
 bapcTests = [ BAPC "Armybase" "BAPC2014" BAPC2014.Armybase.armybase
                    [ ("sample.in",   "sample.out")
                    , ("testdata.in", "testdata.out")

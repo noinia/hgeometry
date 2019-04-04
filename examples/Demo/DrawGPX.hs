@@ -5,8 +5,8 @@
 {-# LANGUAGE TypeOperators #-}
 module Demo.DrawGPX where
 
+import           Data.String (IsString)
 import           Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
-import           Control.Applicative
 import           Control.Lens
 import           Data.Data
 import           Data.Ext
@@ -14,11 +14,8 @@ import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.PolyLine
-import           Data.Geometry.Vector
 import           Data.List (isSuffixOf)
 import           Data.Maybe
-import           Data.Semigroup
-import qualified Data.Sequence as S
 import qualified Data.Text as T
 import           Data.Time.Calendar
 import           Data.Time.Clock
@@ -142,20 +139,26 @@ asPolyLine = fmap fromPoints . f . map toPt . _trackPoints
 toPt :: TrackPoint -> Point 2 Double :+ Time
 toPt (TP (pos :+ t)) = point2 (pos^.longitude) (pos^.latitude) :+ t
 
+ssFactor :: Int
 ssFactor = 1
 
+worldWidth :: Int
 worldWidth  = 1000
+worldHeight :: Int
 worldHeight = 1000
+world :: (Int, Int)
 world = (worldWidth,worldHeight)
 
 -- colors = [ "red" , "purple" , "blue" , "green" , "orange"  ]
 
+strokeByMonth :: IsString a => PolyLine d1 UTCTime r1 -> (PolyLine d1 () r1, [(a, T.Text)])
 strokeByMonth p = stroke p c
   where
     dt = p^.points.to F.toList.to head.extra
     (_,m,_) = toGregorian $ utctDay dt
     c = colors !! (m -1)
 
+stroke :: IsString a => PolyLine d1 p1 r1 -> b -> (PolyLine d1 () r1, [(a, b)])
 stroke p c = (p&points.traverse.extra .~ (),[("stroke",c)])
 
 
@@ -177,8 +180,8 @@ subsampleTrack k = over trackPoints (subsample k)
 mercatoProject                    :: (Double,Double)
                                   -> Position
                                   -> Point 2 Double
-mercatoProject (width,height) pos = point2 x y
+mercatoProject (w,h) pos = point2 x y
   where
-    x    =                (width / 360)    * pos^.longitude
-    y    = (height / 2) - (width / (2*pi)) * (log . tan $ (pi / 4) + (latR / 2))
+    x    =                (w / 360)    * pos^.longitude
+    y    = (h / 2) - (w / (2*pi)) * (log . tan $ (pi / 4) + (latR / 2))
     latR = -1 * pos^.latitude * pi / 180

@@ -2,7 +2,6 @@
 module Data.Geometry.Polygon.Convex.ConvexSpec where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
-import           Control.Applicative
 import           Control.Arrow ((&&&))
 import           Control.Lens
 import           Data.Ext
@@ -43,6 +42,7 @@ toSingleSpec poly u = it msg $
     `shouldBe` True
   where
     allEq (p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
+    allEq _ = error "allEq (p:ps) Pattern match(es) are non-exhaustive"
     msg = "Extremes test with direction " ++ show u
 
 -- | generates 360 vectors "equally" spaced/angled
@@ -50,7 +50,7 @@ directions :: Num r => [Vector 2 r]
 directions = map (fmap toRat . uncurry Vector2 . (cos &&& sin) . toRad) ([0..359] :: [Double])
   where
     toRad i = i * (pi / 180)
-    toRat x = fromIntegral . round $ 100000 * x
+    toRat x = fromIntegral @Integer . round $ 100000 * x
 
 toSpec                 :: (Num r, Ord r, Show r) => TestCase r -> SpecWith ()
 toSpec (TestCase poly) = do

@@ -73,10 +73,8 @@ constT     :: proxy s -> Int -> Timed s Int Int
 constT _ i = Timed (const i)
 
 
+test1 :: Int -> Bool
 test1 i = reify 5 $ \prx -> getTime < constT prx i
-
-
-
 
 
 test2M   :: Reifies s Int => proxy s -> Map (Timed s Int Int) String
