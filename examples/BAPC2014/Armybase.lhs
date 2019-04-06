@@ -52,9 +52,6 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 > showValue (Half i) = concat [ show $ i `div` 2
 >                             , if odd i then ".5" else ""
 >                             ]
->   where
->     odd x = x `mod` 2 /= 0
-
 
 > type Area = Half
 
