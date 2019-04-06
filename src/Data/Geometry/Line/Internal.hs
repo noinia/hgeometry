@@ -25,7 +25,7 @@ import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
-
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -54,6 +54,10 @@ deriving instance Arity d             => T.Traversable (Line d)
 instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
   l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
 
+instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
+  arbitrary = do p <- arbitrary
+                 q <- suchThat arbitrary (/= p)
+                 return $ lineThrough p q
 
 type instance Dimension (Line d r) = d
 type instance NumType   (Line d r) = r

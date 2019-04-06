@@ -15,7 +15,7 @@ import qualified Data.Traversable as T
 import           Data.UnBounded
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-
+import           Test.QuickCheck
 
 import           Data.Ratio
 
@@ -38,6 +38,9 @@ deriving instance Arity d                   => Functor (SubLine d p s)
 deriving instance Arity d                   => F.Foldable (SubLine d p s)
 deriving instance Arity d                   => T.Traversable (SubLine d p s)
 
+instance (Arbitrary r, Arbitrary p, Arbitrary s, Arity d, Ord r, Ord s, Ord p, Num r)
+         => Arbitrary (SubLine d p s r) where
+  arbitrary = SubLine <$> arbitrary <*> arbitrary
 
 -- | Annotate the subRange with the actual ending points
 fixEndPoints    :: (Num r, Arity d) => SubLine d p r r -> SubLine d (Point d r :+ p) r r

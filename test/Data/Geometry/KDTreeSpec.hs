@@ -9,7 +9,6 @@ import           Data.Geometry.KDTree
 import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import           GHC.TypeLits
-import           Test.QuickCheck.HGeometryInstances()
 import           Test.Hspec
 import           Test.QuickCheck
 

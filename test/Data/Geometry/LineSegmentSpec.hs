@@ -5,7 +5,6 @@ import Data.Ext
 import Data.Geometry
 import Data.Vinyl.CoRec
 import Test.Hspec
-import Test.QuickCheck.HGeometryInstances ()
 
 spec :: Spec
 spec =

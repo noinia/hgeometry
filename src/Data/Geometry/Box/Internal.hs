@@ -29,6 +29,7 @@ import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           Test.QuickCheck(Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
@@ -112,6 +113,7 @@ instance Arity d => Bifunctor (Box d) where
       g' :: Functor g => g (Point d r) -> g (Point d s)
       g' = fmap (fmap g)
 
+
 -- -- In principle this should also just work for Boxes in higher dimensions. It is just
 -- -- that we need a better way to compute their corners
 -- instance (Num r, Ord r) => (Rectangle p r) `IsIntersectableWith` (Rectangle p r) where
@@ -151,6 +153,9 @@ instance (Fractional r, Arity d, Arity (d + 1))
   -- unexpected results.
   transformBy = transformPointFunctor
 
+
+instance (Arbitrary r, Arity d, Ord r) => Arbitrary (Box d () r) where
+  arbitrary = (\p (q :: Point d r) -> boundingBoxList' [p,q]) <$> arbitrary <*> arbitrary
 
 type instance Dimension (Box d p r) = d
 type instance NumType   (Box d p r) = r

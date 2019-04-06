@@ -6,6 +6,7 @@ import qualified Data.FingerTree as FT
 import           Data.FingerTree hiding (null, viewl, viewr)
 import qualified Data.Foldable as F
 import           Data.Maybe
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +50,9 @@ instance Foldable OrdSeq where
   length    = length . _asFingerTree
   minimum   = fromJust . lookupMin
   maximum   = fromJust . lookupMax
+
+instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
+  arbitrary = fromListByOrd <$> arbitrary
 
 instance Measured (Key a) (Elem a) where
   measure (Elem x) = Key x

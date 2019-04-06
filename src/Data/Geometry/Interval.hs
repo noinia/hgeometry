@@ -29,12 +29,13 @@ import qualified Data.Traversable as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
 newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
-                     deriving (Eq,Generic)
+                     deriving (Eq,Generic,Arbitrary)
 makeLenses ''Interval
 
 deriving instance (NFData a, NFData r) => NFData (Interval a r)

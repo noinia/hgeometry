@@ -24,12 +24,13 @@ module Data.Range( EndPoint(..)
                  , shiftLeft, shiftRight
                  ) where
 
+import Control.DeepSeq
 import Control.Lens
 import Data.Geometry.Properties
 import Data.Vinyl.CoRec
-import Text.Printf(printf)
 import GHC.Generics (Generic)
-import Control.DeepSeq
+import Test.QuickCheck
+import Text.Printf (printf)
 
 --------------------------------------------------------------------------------
 -- * Representing Endpoints of a Range
@@ -45,6 +46,11 @@ instance Ord a => Ord (EndPoint a) where
     where
       f (Open x)   = (x,False)
       f (Closed x) = (x,True)
+
+instance Arbitrary r => Arbitrary (EndPoint r) where
+  arbitrary = frequency [ (1, Open   <$> arbitrary)
+                        , (9, Closed <$> arbitrary)
+                        ]
 
 _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
@@ -90,6 +96,15 @@ pattern ClosedRange l u = Range (Closed l) (Closed u)
 pattern Range'     :: a -> a -> Range a
 pattern Range' l u <- ((\r -> (r^.lower.unEndPoint,r^.upper.unEndPoint) -> (l,u)))
 {-# COMPLETE Range' #-}
+
+instance (Arbitrary r, Ord r) => Arbitrary (Range r) where
+  arbitrary = do
+                l <- arbitrary
+                r <- suchThat arbitrary (p l)
+                return $ Range l r
+   where
+     p (Open l)   r = l <  r^.unEndPoint
+     p (Closed l) r = l <= r^.unEndPoint
 
 
 -- | Helper function to show a range in mathematical notation.

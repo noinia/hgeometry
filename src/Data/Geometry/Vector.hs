@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances  #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Vector
@@ -34,11 +36,16 @@ import           GHC.TypeLits
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm)
 import           Linear.Vector as LV
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 type instance Dimension (Vector d r) = d
 type instance NumType (Vector d r) =r
+
+instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
+  arbitrary = vectorFromListUnsafe <$> infiniteList
+
 
 -- | Test if v is a scalar multiple of u.
 --
