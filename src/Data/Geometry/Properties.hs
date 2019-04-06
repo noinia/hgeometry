@@ -21,7 +21,7 @@ import Data.Vinyl.Core
 import Data.Vinyl.Functor
 import Data.Vinyl.Lens
 import GHC.TypeLits
-
+import Data.Ext
 -------------------------------------------------------------------------------
 
 -- | A type family for types that are associated with a dimension. The
@@ -32,6 +32,11 @@ type family Dimension t :: Nat
 type family NumType t :: *
 
 type instance NumType [t] = NumType t
+
+
+type instance NumType   (core :+ ext) = NumType   core
+type instance Dimension (core :+ ext) = Dimension core
+
 
 -- | A simple data type expressing that there are no intersections
 data NoIntersection = NoIntersection deriving (Show,Read,Eq,Ord)
