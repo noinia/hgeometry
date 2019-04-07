@@ -52,8 +52,8 @@ HGeometry also includes a datastructure/data type for planar graphs. In
 particular, it has a `EdgeOracle` data structure, that can be built in \(O(n)\)
 time that can test if the graph contains an edge in constant time.
 
-Numeric Types
--------------
+Avoiding Numerical Issues
+-------------------------
 
 All geometry types are parameterized by a numerical type `r`. It is well known
 that Floating-point arithmetic and Geometric algorithms don't go well together;
@@ -62,8 +62,9 @@ results. Hence, I *strongly* advise against using `Double` or `Float` for these
 types. In several algorithms it is sufficient if the type `r` is
 `Fractional`. Hence, you can use an exact number type such as `Rational`.
 
-A Note on the Ext (:+) data type
----------------------------------
+
+Dealing with Associated Data
+----------------------------
 
 In many applications we do not just have geometric data, e.g. `Point d r`s or
 `Polygon r`s, but instead, these types have some additional properties, like a
