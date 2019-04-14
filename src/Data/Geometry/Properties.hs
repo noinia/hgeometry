@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE DefaultSignatures #-}

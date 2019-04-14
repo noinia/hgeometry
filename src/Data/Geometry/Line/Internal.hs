@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveAnyClass  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -74,13 +73,18 @@ verticalLine x = Line (point2 x 0) (Vector2 0 1)
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (point2 0 y) (Vector2 1 0)
 
--- | Given a line l with anchor point p, get the line perpendicular to l that also goes through p.
+-- | Given a line l with anchor point p and vector v, get the line
+-- perpendicular to l that also goes through p. The resulting line m is
+-- oriented such that v points into the left halfplane of m.
+--
+-- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
+-- Line (Point2 [3,4]) (Vector2 [-2,-1])
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 
-
-
-
+-- | Test if a vector is perpendicular to the line.
+isPerpendicularTo :: (Num r, Eq r) => Vector 2 r -> Line 2 r -> Bool
+v `isPerpendicularTo` (Line _ u) = v `dot` u == 0
 
 -- | Test if two lines are identical, meaning; if they have exactly the same
 -- anchor point and directional vector.
@@ -111,10 +115,12 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
 
-
 -- | Specific 2d version of testing if apoint lies on a line.
 onLine2 :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 p `onLine2` (Line q v) = ccw p q (q .+^ v) == CoLinear
+
+
+
 
 
 -- | Get the point at the given position along line, where 0 corresponds to the

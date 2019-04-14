@@ -37,12 +37,29 @@ import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
+
 -- | Lines are transformable, via line segments
 instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) where
   transformBy t = supportingLine . transformPointFunctor t . toLineSegment'
     where
       toLineSegment' :: (Num r, Arity d) => Line d r -> LineSegment d () r
       toLineSegment' = toLineSegment
+
+type instance IntersectionOf (Point d r) (Line d r) = [NoIntersection, Point d r]
+
+
+instance (Eq r, Fractional r, Arity d) => (Point d r) `IsIntersectableWith` (Line d r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  intersects = onLine
+  p `intersect` l | p `intersects` l = coRec p
+                  | otherwise        = coRec NoIntersection
+
+instance {-# OVERLAPPING #-} (Ord r, Num r)
+        => (Point 2 r) `IsIntersectableWith` (Line 2 r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  intersects = onLine2
+  p `intersect` l | p `intersects` l = coRec p
+                  | otherwise        = coRec NoIntersection
 
 
 type instance IntersectionOf (Line 2 r) (Boundary (Rectangle p r)) =

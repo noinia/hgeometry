@@ -41,7 +41,7 @@ import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
 type instance Dimension (Vector d r) = d
-type instance NumType (Vector d r) =r
+type instance NumType (Vector d r) = r
 
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
@@ -66,6 +66,8 @@ instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
 isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
                          => Vector d r -> Vector d r -> Bool
 u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
+{-# SPECIALIZE
+    isScalarMultipleOf :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Bool  #-}
 
 -- | Get the scalar labmda s.t. v = lambda * u (if it exists)
 scalarMultiple     :: (Eq r, Fractional r, Arity d)
@@ -73,6 +75,8 @@ scalarMultiple     :: (Eq r, Fractional r, Arity d)
 scalarMultiple u v
       | allZero u || allZero v = Just 0
       | otherwise              = scalarMultiple' u v
+{-# SPECIALIZE
+    scalarMultiple :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}
 
 
 -- -- | Helper function for computing the scalar multiple. The result is a pair
@@ -90,6 +94,7 @@ scalarMultiple u v
 
 allZero :: (Arity d, Eq r, Num r) => Vector d r -> Bool
 allZero = F.all (== 0)
+{-# SPECIALIZE allZero :: (Eq r, Num r) => Vector 2 r -> Bool #-}
 
 
 data ScalarMultiple r = No | Maybe | Yes r deriving (Eq,Show)
@@ -120,6 +125,8 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
     g No      = Nothing
     g Maybe   = error "scalarMultiple': found a Maybe, which means the vectors either have length zero, or one of them is all Zero!"
     g (Yes x) = Just x
+{-# SPECIALIZE
+    scalarMultiple' :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}
 
 
 --------------------------------------------------------------------------------
