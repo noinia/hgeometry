@@ -1,5 +1,15 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.SubLine
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- SubLine; a part of a line
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.SubLine where
 
 import           Control.Lens
@@ -15,7 +25,7 @@ import qualified Data.Traversable as T
 import           Data.UnBounded
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           Test.QuickCheck
+import           Test.QuickCheck(Arbitrary(..))
 
 import           Data.Ratio
 

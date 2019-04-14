@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  System.Random.Shuffle
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implements Fishyer-Yates shuffle.
+--
+--------------------------------------------------------------------------------
 module System.Random.Shuffle(shuffle) where
 
 import           Control.Monad
@@ -6,7 +16,8 @@ import qualified Data.Foldable as F
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
-import           System.Random
+
+--------------------------------------------------------------------------------
 
 -- | Fisher–Yates shuffle, which shuffles a list/foldable uniformly at random.
 --

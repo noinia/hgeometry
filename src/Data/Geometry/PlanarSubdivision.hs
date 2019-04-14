@@ -17,18 +17,10 @@ module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.B
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
-import           Data.Ext
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.PlaneGraph as PG
 import           Data.Proxy
-import           Data.Util
-import           Control.Lens
-import           Data.Bitraversable
-import qualified Data.Foldable as F
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
