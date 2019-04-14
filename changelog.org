@@ -1,4 +1,18 @@
-#### 0.8 ###
+#+STARTUP: showeverything
+
+* Changelog
+
+** 0.9 (unreleased)
+
+- Implemented 2D Linear Programming using randomized incremental
+  construction (in \(O(n)\) expected time). This allows us to solve
+  the following problems
+  - testing starshapedness of simple polygons in expected linear time
+  - testing if we can separate a set of red and a set of blue points
+    in expected linear time.
+- Data types for halfspaces
+
+** 0.8
 
 - Compatibility with GHC 8.6
 - Added \(O(n\log n)\) time closest pair algorithm.
@@ -8,7 +22,8 @@
 - Additional read/show instances
 - Updated some of the show instances for Ipe related types.
 
-#### 0.7 ###
+** 0.7
+
 
 - Compatibility with GHC 8.0-8.4
 - Implemented more Algorithms and Data Structures. This includes
@@ -22,7 +37,7 @@
   speedups on several small benchmarks.
 - bugfixes.
 
-#### 0.6 ###
+** 0.6
 
 - Implemented more Algorithms and Data Structures. This includes
   * Bentley-Ottmannn line-segment intersection,
@@ -40,13 +55,13 @@
   connected by an edge in $O(1)$ time.
 - Dropped support for GHC 7.8
 
-#### 0.5 ###
+** 0.5
 
 - Implemented several algorithms, including Delaunay Triangulation, EMST, and
 Douglas Peucker.
 - Revamped the data types for Intersections
 
-#### 0.4 ###
+** 0.
 
 - Major rewrite from scratch, providing much stronger type-level
   guarantees. Incompatible with older versions.
@@ -54,17 +69,17 @@ Douglas Peucker.
 - HGeometry now includes some very experimental and preliminary support for
   reading and writing Ipe7 files.
 
-#### 0.2 & 0.3 ###
+** 0.2 & 0.3
 
 - Internal releases.
 
-### 0.1.1 ###
+** 0.1.1
 
 - Fixed a bug in point on n the line segment test
 - Generalized the types of inCircle, inDisc, onCircle, onDisc etc. We now need
   only that the type representing precision model implements the typeclass
   `Num` instead of `Floating'.
 
-### 0.1 ###
+** 0.1
 
 - Initial release.
