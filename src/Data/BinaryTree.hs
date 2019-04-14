@@ -20,6 +20,7 @@ import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
@@ -56,6 +57,13 @@ instance Traversable (BinLeafTree v) where
 
 instance Measured v a => Semigroup (BinLeafTree v a) where
   l <> r = node l r
+
+instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
+  arbitrary = sized f
+    where f n | n <= 0    = Leaf <$> arbitrary
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Node <$> f l <*> arbitrary <*> f (n-l-1)
 
 -- | Create a balanced tree, i.e. a tree of height \(O(\log n)\) with the
 -- elements in the leaves.
@@ -162,6 +170,13 @@ data BinaryTree a = Nil
                   | Internal (BinaryTree a) !a (BinaryTree a)
                   deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable,Generic)
 instance NFData a => NFData (BinaryTree a)
+
+instance Arbitrary a => Arbitrary (BinaryTree a) where
+  arbitrary = sized f
+    where f n | n <= 0    = pure Nil
+              | otherwise = do
+                              l <- choose (0,n-1)
+                              Internal <$> f l <*> arbitrary <*> f (n-l-1)
 
 -- | Get the element stored at the root, if it exists
 access                  :: BinaryTree a -> Maybe a

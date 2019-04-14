@@ -52,11 +52,13 @@ import           Control.Lens.At (Ixed(..), Index, IxValue)
 import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
+import           Data.Proxy
 import qualified Data.Sequence as S
-import           GHC.Generics (Generic)
 import qualified Data.Traversable as Tr
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           Prelude hiding (drop,take,head,last)
+import           Test.QuickCheck(Arbitrary(..),vector)
 
 --------------------------------------------------------------------------------
 
@@ -82,6 +84,10 @@ instance Monoid (LSeq 0 a) where
   mempty = empty
   mappend = (<>)
 
+instance (KnownNat n, Arbitrary a) => Arbitrary (LSeq n a) where
+  arbitrary = (\s s' -> promise . fromList $ s <> s')
+            <$> vector (fromInteger . natVal $ (Proxy :: Proxy n))
+            <*> arbitrary
 
 
 type instance Index   (LSeq n a) = Int

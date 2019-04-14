@@ -22,10 +22,10 @@ import Data.Bifoldable
 import Data.Bifunctor.Apply
 import Data.Bitraversable
 import Data.Functor.Apply (liftF2)
-import Data.Geometry.Properties
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
 import GHC.Generics (Generic)
+import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
@@ -34,8 +34,6 @@ import GHC.Generics (Generic)
 data core :+ extra = core :+ extra deriving (Show,Read,Eq,Ord,Bounded,Generic,NFData)
 infixr 1 :+
 
-type instance NumType   (core :+ ext) = NumType   core
-type instance Dimension (core :+ ext) = Dimension core
 
 instance Bifunctor (:+) where
   bimap f g (c :+ e) = f c :+ g e
@@ -72,6 +70,9 @@ instance (FromJSON core, FromJSON extra) => FromJSON (core :+ extra) where
   -- parseJSON = fmap (\(c,e) -> c :+ e) . parseJSON
   parseJSON (Object v) = (:+) <$> v .: "core" <*> v .: "extra"
   parseJSON invalid    = typeMismatch "Ext (:+)" invalid
+
+instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
+  arbitrary = (:+) <$> arbitrary <*> arbitrary
 
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c

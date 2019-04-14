@@ -6,7 +6,6 @@ import qualified Data.List as List
 import           Data.OrdSeq (OrdSeq)
 import qualified Data.OrdSeq as OrdSeq
 import           Data.Semigroup
-import           Test.QuickCheck.HGeometryInstances
 import           Test.Hspec
 import           Test.QuickCheck
 

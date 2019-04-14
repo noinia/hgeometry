@@ -122,9 +122,9 @@ fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
     pts = nub' . NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
     nub' = fmap NonEmpty.head . NonEmpty.group1
 
--- | lists all intervals
-toList :: SegmentTree v r -> [i]
-toList = undefined
+-- -- | lists all intervals
+-- toList :: SegmentTree v r -> [i]
+-- toList = undefined
 
 --------------------------------------------------------------------------------
 -- * Searching
@@ -209,7 +209,7 @@ delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
           => i -> SegmentTree v r -> SegmentTree v r
 delete i (SegmentTree t) = SegmentTree $ delete' t
   where
-    (Range a b) = toRange i
+    (Range _ b) = toRange i
 
     delete' (Leaf ld) = Leaf $ ld&leafAssoc %~ deleteAssoc i
     delete' (Node l nd@(_splitPoint -> m) r)

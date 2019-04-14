@@ -29,6 +29,7 @@ import           GHC.TypeLits
 import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
 import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
+import           Test.QuickCheck(Arbitrary)
 
 
 --------------------------------------------------------------------------------
@@ -62,12 +63,13 @@ readPt = do let d = natVal (Proxy :: Proxy d)
               Just p -> pure p
               _      -> pfail
 
-deriving instance (Eq r, Arity d)     => Eq (Point d r)
-deriving instance (Ord r, Arity d)    => Ord (Point d r)
-deriving instance Arity d             => Functor (Point d)
-deriving instance Arity d             => Foldable (Point d)
-deriving instance Arity d             => Traversable (Point d)
-deriving instance (Arity d, NFData r) => NFData (Point d r)
+deriving instance (Eq r, Arity d)        => Eq (Point d r)
+deriving instance (Ord r, Arity d)       => Ord (Point d r)
+deriving instance Arity d                => Functor (Point d)
+deriving instance Arity d                => Foldable (Point d)
+deriving instance Arity d                => Traversable (Point d)
+deriving instance (Arity d, NFData r)    => NFData (Point d r)
+deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d

@@ -43,6 +43,7 @@ import           Data.Ord (comparing)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
@@ -56,6 +57,7 @@ import           GHC.TypeLits
 newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 
 makeLenses ''LineSegment
+
 
 -- | Pattern that essentially models the line segment as a:
 --
@@ -92,6 +94,8 @@ instance HasEnd (LineSegment d p r) where
   type EndExtra (LineSegment d p r) = p
   end = unLineSeg.end
 
+instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) where
+  arbitrary = LineSegment <$> arbitrary <*> arbitrary
 
 _SubLine :: (Num r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r r)
 _SubLine = iso segment2SubLine subLineToSegment

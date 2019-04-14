@@ -13,7 +13,6 @@ import qualified Data.Geometry.SegmentTree as SegTree
 import qualified Data.List.NonEmpty as NonEmpty
 import           Debug.Trace
 import           Test.QuickCheck
-import           Test.QuickCheck.HGeometryInstances ()
 
 --------------------------------------------------------------------------------
 

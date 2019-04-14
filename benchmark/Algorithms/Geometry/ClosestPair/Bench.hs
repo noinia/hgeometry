@@ -10,7 +10,6 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Proxy
 import           Test.QuickCheck
-import           Test.QuickCheck.HGeometryInstances ()
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
 

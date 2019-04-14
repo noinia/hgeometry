@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveAnyClass #-}
 module Data.Geometry.IntervalTree( NodeData(..)
                                  , splitPoint, intervalsLeft, intervalsRight
                                  , IntervalTree(..), unIntervalTree
@@ -28,16 +27,18 @@ import           GHC.Generics (Generic)
 data NodeData i r = NodeData { _splitPoint     :: !r
                              , _intervalsLeft  :: !(M.Map (L r) [i])
                              , _intervalsRight :: !(M.Map (R r) [i])
-                             } deriving (Show,Eq,Ord,Generic,NFData)
+                             } deriving (Show,Eq,Ord,Generic)
 makeLenses ''NodeData
 
-
+instance (NFData i, NFData r) => NFData (NodeData i r)
 
 -- | IntervalTree type, storing intervals of type i
 newtype IntervalTree i r =
   IntervalTree { _unIntervalTree :: BinaryTree (NodeData i r) }
-  deriving (Show,Eq,Generic,NFData)
+  deriving (Show,Eq,Generic)
 makeLenses ''IntervalTree
+
+instance (NFData i, NFData r) => NFData (IntervalTree i r)
 
 -- | Given an ordered list of points, create an interval tree
 --
@@ -148,8 +149,8 @@ instance IntervalLike (Interval p r) where
 
 --------------------------------------------------------------------------------
 
-test'' = fromIntervals test
-test  = [Interval (Open (97 :+ ())) (Closed (228 :+ ())) ,Interval (Open (18 :+ ())) (Open (79 :+ ())),Interval (Closed (126 :+ ())) (Open (167 :+ ())),Interval (Closed (105 :+ ())) (Closed (158 :+ ())),Interval (Closed (126 :+ ())) (Closed (211 :+ ())),Interval (Closed (111 :+ ())) (Open (194 :+ ())),Interval (Closed (120 :+ ())) (Open (302 :+ ())),Interval (Closed (92 :+ ())) (Closed (140 :+ ()))]
+-- test'' = fromIntervals test
+-- test  = [Interval (Open (97 :+ ())) (Closed (228 :+ ())) ,Interval (Open (18 :+ ())) (Open (79 :+ ())),Interval (Closed (126 :+ ())) (Open (167 :+ ())),Interval (Closed (105 :+ ())) (Closed (158 :+ ())),Interval (Closed (126 :+ ())) (Closed (211 :+ ())),Interval (Closed (111 :+ ())) (Open (194 :+ ())),Interval (Closed (120 :+ ())) (Open (302 :+ ())),Interval (Closed (92 :+ ())) (Closed (140 :+ ()))]
 
 -- test = fromIntervals [ closedInterval 0 10
 --                      , closedInterval 5 15

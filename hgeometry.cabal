@@ -75,11 +75,6 @@ flag examples
   default:     False
   manual:      True
 
-flag with-quickcheck
-  description: Include QuickCheck instances
-  default:     True
-  manual:      False
-
 flag interactive
   description: Build  interactive parts
   default:     False
@@ -272,6 +267,9 @@ library
               , colour           >= 2.3.3
               , reflection       >= 2.1
               , MonadRandom      >= 0.5
+              , QuickCheck              >= 2.5
+              , quickcheck-instances    >= 0.3
+
 
               -- , validation       >= 0.4
 
@@ -291,10 +289,7 @@ library
               , random
               , template-haskell
 
-  if flag(with-quickcheck)
-    build-depends: QuickCheck              >= 2.5
-                 , quickcheck-instances    >= 0.3
-    exposed-modules: Test.QuickCheck.HGeometryInstances
+
 
 
   hs-source-dirs: src

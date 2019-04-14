@@ -17,7 +17,6 @@ import           Data.Yaml (prettyPrintParseException)
 import           Data.Yaml.Util
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.QuickCheck.HGeometryInstances ()
 
 --------------------------------------------------------------------------------
 data TestG

@@ -10,9 +10,10 @@
 --------------------------------------------------------------------------------
 module Data.PlanarGraph.Dart where
 
-import           Control.DeepSeq
-import           Control.Lens hiding ((.=))
-import           GHC.Generics (Generic)
+import Control.DeepSeq
+import Control.Lens hiding ((.=))
+import GHC.Generics (Generic)
+import Test.QuickCheck (Arbitrary(..),suchThat)
 
 -- $setup
 -- >>> :{
@@ -28,6 +29,10 @@ newtype Arc s = Arc { _unArc :: Int } deriving (Eq,Ord,Enum,Bounded,Generic,NFDa
 instance Show (Arc s) where
   show (Arc i) = "Arc " ++ show i
 
+instance Arbitrary (Arc s) where
+  arbitrary = Arc <$> (arbitrary `suchThat` (>= 0))
+
+
 -- | Darts have a direction which is either Positive or Negative (shown as +1
 -- or -1, respectively).
 data Direction = Negative | Positive deriving (Eq,Ord,Bounded,Enum,Generic)
@@ -42,6 +47,9 @@ instance Read Direction where
   readsPrec _ "-1" = [(Negative,"")]
   readsPrec _ "+1" = [(Positive,"")]
   readsPrec _ _    = []
+
+instance Arbitrary Direction where
+  arbitrary = (\b -> if b then Positive else Negative) <$> arbitrary
 
 -- | Reverse the direcion
 rev          :: Direction -> Direction
@@ -60,6 +68,9 @@ instance NFData (Dart s)
 
 instance Show (Dart s) where
   show (Dart a d) = "Dart (" ++ show a ++ ") " ++ show d
+
+instance Arbitrary (Dart s) where
+  arbitrary = Dart <$> arbitrary <*> arbitrary
 
 -- | Get the twin of this dart (edge)
 --

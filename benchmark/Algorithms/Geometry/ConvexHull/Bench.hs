@@ -21,7 +21,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy
 import           Test.QuickCheck
-import           Test.QuickCheck.HGeometryInstances ()
 
 --------------------------------------------------------------------------------
 
