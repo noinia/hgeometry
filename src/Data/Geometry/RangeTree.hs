@@ -35,22 +35,20 @@ newtype RangeTree v q r =
 
 -- | Creates a range tree
 createTree   :: ( Ord r
-                , Functor f
-                , Measured v (f p)
+                , Measured v p
+                , Semigroup p
                 )
-             => (NonEmpty p -> f p)
-             -> NonEmpty (r :+ p)
-             -> RangeTree v (f p) r
-createTree g = createTree'
-             . fmap (\pts -> let x =  pts^.to NonEmpty.head.core
-                             in x :+ g ((^.extra) <$> pts))
-             . NonEmpty.groupAllWith1 (^.core) -- sort and group on r value
-
+             => NonEmpty (r :+ p)
+             -> RangeTree v p r
+createTree = createTree'
+           . fmap (\pts -> let x =  pts^.to NonEmpty.head.core
+                           in x :+ (sconcat . fmap (^.extra) $ pts))
+           . NonEmpty.groupAllWith1 (^.core) -- sort and group on r value
 
 -- | pre: input is sorted and grouped by x-coord
-createTree'     :: (Ord r, Functor f, Measured v (f p))
-                => NonEmpty (r :+ f p)
-                -> RangeTree v (f p) r
+createTree'     :: (Ord r, Measured v p)
+                => NonEmpty (r :+ p)
+                -> RangeTree v p r
 createTree' pts = RangeTree t
   where
     t = view _1
@@ -113,6 +111,8 @@ rangeOf' (NodeData (Min mi) (Max ma) _) = ClosedRange mi ma
 
 --------------------------------------------------------------------------------
 
+-- FIXME: We only support closed ranges at the moment
+
 
 newtype Report p = Report { reportList :: [p] }
   deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
@@ -120,9 +120,36 @@ newtype Report p = Report { reportList :: [p] }
 instance Measured (Report p) (Report p) where
   measure = id
 
+createReportingTree :: Ord r => NonEmpty (r :+ [p]) -> RangeTree (Report p) (Report p) r
+createReportingTree = createTree . fmap (&extra %~ Report)
 
-createReportingTree :: Ord r => NonEmpty (r :+ p) -> RangeTree (Report p) (Report p) r
-createReportingTree = createTree (Report . NonEmpty.toList)
-
-report    :: (Ord r) => Range r -> RangeTree (Report p) (Report p) r -> [p]
+report    :: (Ord r) => Range r -> RangeTree (Report p) q r -> [p]
 report qr = reportList . search qr
+
+
+----------------------------------------
+
+newtype Count = Count { getCount :: Int }
+  deriving (Show,Eq,Ord)
+
+instance Semigroup Count where
+  (Count a) <> (Count b) = Count $ a + b
+
+instance Monoid Count where
+  mempty = Count 0
+
+newtype CountOf p = CountOf [p]
+  deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
+
+
+instance Measured Count (CountOf p) where
+  measure (CountOf xs) = Count $ length xs
+
+
+createCountingTree :: Ord r => NonEmpty (r :+ [p]) -> RangeTree Count (CountOf p) r
+createCountingTree = createTree . fmap (&extra %~ CountOf)
+
+-- | Perform a counting query
+--
+count    :: Ord r => Range r -> RangeTree Count p r -> Int
+count qr = getCount . search qr
