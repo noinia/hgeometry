@@ -15,6 +15,7 @@ module Algorithms.Geometry.ClosestPair.DivideAndConquer( closestPair
                                                        , CCP(..)
                                                        , mergePairs
                                                        , mergeSortedBy
+                                                       , mergeSortedListsBy
                                                        )
 where
 
@@ -70,7 +71,14 @@ instance (Num r, Ord r) => Semigroup (CCP p r) where
 -- | Given an ordering and two nonempty sequences ordered according to that
 -- ordering, merge them
 mergeSortedBy           :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
-mergeSortedBy cmp ls rs = NonEmpty.fromList $ go (F.toList ls) (F.toList rs)
+mergeSortedBy cmp ls rs = NonEmpty.fromList
+                        $ mergeSortedListsBy cmp (F.toList ls) (F.toList rs)
+
+
+-- | Given an ordering and two nonempty sequences ordered according to that
+-- ordering, merge them
+mergeSortedListsBy     :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+mergeSortedListsBy cmp = go
   where
     go []         ys     = ys
     go xs         []     = xs

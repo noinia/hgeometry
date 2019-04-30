@@ -13,6 +13,7 @@
 module Data.BinaryTree where
 
 import           Control.DeepSeq
+import           Data.Bifunctor.Apply
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
@@ -39,6 +40,11 @@ class Semigroup v => Measured v a | a -> v where
 node     :: Measured v a => BinLeafTree v a -> BinLeafTree v a -> BinLeafTree v a
 node l r = Node l (measure l <> measure r) r
 
+
+instance Bifunctor BinLeafTree where
+  bimap f g = \case
+    Leaf x     -> Leaf $ g x
+    Node l k r -> Node (bimap f g l) (f k) (bimap f g r)
 
 instance Measured v a => Measured v (BinLeafTree v a) where
   measure (Leaf x)     = measure x

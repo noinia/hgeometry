@@ -133,6 +133,8 @@ library
                     Data.Geometry.Arrangement.Internal
                     Data.Geometry.Arrangement.Draw
 
+                    Data.Geometry.PrioritySearchTree
+
                     -- * Algorithms
 
                     -- * Geometric Algorithms
@@ -407,8 +409,7 @@ executable hgeometry-viewer
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
-
-
+                    , TypeApplications
 
 
 executable hgeometry-examples
@@ -469,6 +470,7 @@ executable hgeometry-examples
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+                    , TypeApplications
 
 
 
@@ -515,6 +517,7 @@ test-suite hspec
                  Data.Geometry.TriangleSpec
                  Data.Geometry.ArrangementSpec
                  Data.Geometry.HalfSpaceSpec
+                 Data.Geometry.PrioritySearchTreeSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
