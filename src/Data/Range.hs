@@ -139,6 +139,11 @@ prettyShow (Range l u) = concat [ lowerB, show (l^.unEndPoint), ","
 -- False
 -- >>> 10 `inRange` (ClosedRange 0 1)
 -- False
+--
+-- This one is kind of weird
+--
+-- >>> 0 `inRange` Range (Closed 0) (Open 0)
+-- False
 inRange                 :: Ord a => a -> Range a -> Bool
 x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unEndPoint)) of
     (_, GT) -> False
@@ -146,7 +151,7 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
     (LT,LT) -> True
     (LT,EQ) -> include u -- depends on only u
     (EQ,LT) -> include l -- depends on only l
-    (EQ,EQ) -> include l || include u -- depends on l and u
+    (EQ,EQ) -> include l && include u -- depends on l and u
   where
     include = isClosed
 
