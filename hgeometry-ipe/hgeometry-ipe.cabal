@@ -1,0 +1,210 @@
+name:                hgeometry-ipe
+version:             0.8.0.0
+synopsis:            Reading and Writing ipe7 files.
+description:
+   Reading and Writing ipe7 files.
+homepage:            https://fstaals.net/software/hgeometry
+license:             BSD3
+license-file:        LICENSE
+author:              Frank Staals
+maintainer:          frank@fstaals.net
+-- copyright:
+
+tested-with:         GHC >= 8.2
+
+category:            Geometry
+build-type:          Simple
+
+data-files:          resources/basic.isy
+                     -- in the future (cabal >=2.4) we can use
+                     -- examples/**/*.in
+                     -- examples/**/*.out
+
+extra-source-files:  README.md
+                     changelog.org
+
+Extra-doc-files:
+                     -- docs/**/*.png
+
+cabal-version:       2.0
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+
+library
+  ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+
+  exposed-modules:
+                    -- * Drawing Graps and Planar Subdivisions
+                    Data.Geometry.PlanarSubdivision.Draw
+                    Data.Geometry.Arrangement.Draw
+                    Data.Geometry.Triangulation.Draw
+                    Data.Tree.Draw
+
+                    -- * Ipe Types
+                    Data.Geometry.Ipe
+                    Data.Geometry.Ipe.Literal
+                    Data.Geometry.Ipe.Value
+                    Data.Geometry.Ipe.Color
+                    Data.Geometry.Ipe.Attributes
+                    Data.Geometry.Ipe.Types
+                    Data.Geometry.Ipe.Writer
+                    Data.Geometry.Ipe.Reader
+                    Data.Geometry.Ipe.PathParser
+                    Data.Geometry.Ipe.IpeOut
+                    Data.Geometry.Ipe.FromIpe
+
+                    -- * Embedded Planar Graphs
+                    Data.PlaneGraph.Draw
+
+  other-modules:
+                    Data.Geometry.Ipe.ParserPrimitives
+
+
+  -- other-extensions:
+  build-depends:
+                base             >= 4.11      &&     < 5
+              , bifunctors       >= 4.1
+              , bytestring       >= 0.10
+              , containers       >= 0.5.5
+              , dlist            >= 0.7
+              , lens             >= 4.2
+              , linear           >= 1.10
+              , semigroupoids    >= 5
+              , semigroups       >= 0.18
+              , singletons       >= 2.0
+              , text             >= 1.1.1.0
+              , vinyl            >= 0.10
+              , deepseq          >= 1.1
+              , fingertree       >= 0.1
+              , colour           >= 2.3.3
+              , reflection       >= 2.1
+              , MonadRandom      >= 0.5
+              , QuickCheck              >= 2.5
+              , quickcheck-instances    >= 0.3
+
+              , hgeometry-combinatorial >= 0.8.0.0
+              , hgeometry               >= 0.8.0.0
+
+              -- , validation       >= 0.4
+
+              , parsec           >= 3
+                -- , tranformers      > 0.3
+
+              , vector           >= 0.11
+              , fixed-vector     >= 1.0
+              , data-clist       >= 0.0.7.2
+
+              , hexpat           >= 0.20.9
+              , aeson            >= 1.0
+              , yaml             >= 0.8
+
+
+              , mtl
+              , random
+              , template-haskell
+
+
+  hs-source-dirs: src
+                  -- examples/demo
+
+  default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+                    , PatternSynonyms
+                    , TupleSections
+                    , LambdaCase
+                    , ViewPatterns
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+                    , DeriveGeneric
+                    , AutoDeriveTypeable
+
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
+test-suite hspec
+  type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
+  hs-source-dirs:       test
+  main-is:              Spec.hs
+  ghc-options:   -fno-warn-unticked-promoted-constructors
+                 -fno-warn-partial-type-signatures
+                 -fno-warn-missing-signatures
+
+  build-tool-depends: hspec-discover:hspec-discover
+
+
+  other-modules: Data.Geometry.Ipe.ReaderSpec
+
+  build-depends:        base
+                      , hspec                >= 2.1
+                      , QuickCheck           >= 2.5
+                      , quickcheck-instances    >= 0.3
+                      , approximate-equality >= 1.1.0.2
+                      , hgeometry
+                      , hgeometry-combinatorial
+                      , hgeometry-ipe
+                      , lens
+                      , data-clist
+                      , linear
+                      , bytestring
+                      , vinyl
+                      , semigroups
+                      , vector
+                      , containers
+                      , random
+                      , singletons
+                      , colour
+                      , filepath
+                      , directory
+                      , yaml
+                      , MonadRandom
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+
+                    , PatternSynonyms
+                    , ViewPatterns
+                    , LambdaCase
+                    , TupleSections
+
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , AutoDeriveTypeable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+                    , OverloadedStrings

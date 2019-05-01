@@ -17,7 +17,6 @@ import           Algorithms.Graph.MST
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry
-import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.PlaneGraph
 import           Data.Proxy
@@ -46,11 +45,3 @@ euclideanMST pts = (\v -> g^.locationOf v :+ g^.dataOf v) <$> t
 
 
 data MSTW
-
-
-drawTree' :: IpeOut (Tree (Point 2 r :+ p)) Group r
-drawTree' = ipeGroup . map (iO . defIO  . uncurry ClosedLineSegment) . treeEdges
-
-
-treeEdges              :: Tree a -> [(a,a)]
-treeEdges (Node v chs) = map ((v,) . rootLabel) chs ++ concatMap treeEdges chs

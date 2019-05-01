@@ -22,8 +22,7 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-data-files:          resources/basic.isy
-                     test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
+data-files:          test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
                      test/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
                      test/Algorithms/Geometry/LowerEnvelope/manual.ipe
                      test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
@@ -37,7 +36,6 @@ data-files:          resources/basic.isy
                      test/Data/Geometry/Polygon/Convex/convexTests.ipe
                      test/Data/Geometry/arrangement.ipe
                      test/Data/Geometry/arrangement.ipe.out.ipe
-                     test/Data/PlanarGraph/myGraph.yaml
                      test/Data/PlaneGraph/myPlaneGraph.yaml
                      test/Data/PlaneGraph/small.yaml
                      test/Data/PlaneGraph/testsegs.png
@@ -60,8 +58,7 @@ data-files:          resources/basic.isy
 extra-source-files:  README.md
                      changelog.org
 
-Extra-doc-files:     docs/Data/PlanarGraph/testG.png
-                     docs/Data/PlaneGraph/planegraph.png
+Extra-doc-files:
                      -- docs/**/*.png
 
 cabal-version:       2.0
@@ -127,11 +124,9 @@ library
 
                     Data.Geometry.PlanarSubdivision
                     Data.Geometry.PlanarSubdivision.Basic
-                    Data.Geometry.PlanarSubdivision.Draw
 
                     Data.Geometry.Arrangement
                     Data.Geometry.Arrangement.Internal
-                    Data.Geometry.Arrangement.Draw
 
                     Data.Geometry.RangeTree
                     Data.Geometry.PrioritySearchTree
@@ -183,70 +178,16 @@ library
 
                     Algorithms.Geometry.RedBlueSeparator.RIC
 
-                    -- * Graph Algorithms
-                    Algorithms.Graph.DFS
-                    Algorithms.Graph.MST
-
-                    -- * Ipe Types
-                    Data.Geometry.Ipe
-                    Data.Geometry.Ipe.Literal
-                    Data.Geometry.Ipe.Value
-                    Data.Geometry.Ipe.Color
-                    Data.Geometry.Ipe.Attributes
-                    Data.Geometry.Ipe.Types
-                    Data.Geometry.Ipe.Writer
-                    Data.Geometry.Ipe.Reader
-                    Data.Geometry.Ipe.PathParser
-                    Data.Geometry.Ipe.IpeOut
-                    Data.Geometry.Ipe.FromIpe
-
-                    -- * General Data Types
-                    Data.UnBounded
-                    Data.Range
-                    Data.Ext
-                    Data.LSeq
-                    Data.CircularSeq
-                    Data.Sequence.Util
-                    Data.BinaryTree
-                    Data.BinaryTree.Zipper
-
-                    Data.CircularList.Util
-                    Data.BalBST
-                    Data.OrdSeq
-                    Data.SlowSeq
-                    Data.Tree.Util
-                    Data.Util
-
-                    -- * Planar Graphs
-                    Data.Permutation
-                    Data.PlanarGraph
-                    Data.PlanarGraph.AdjRep
-                    Data.PlanarGraph.IO
-                    Data.PlanarGraph.Dart
-                    Data.PlanarGraph.Core
-                    Data.PlanarGraph.Dual
-                    Data.PlanarGraph.EdgeOracle
-
+                    -- * Embedded Planar Graphs
                     Data.PlaneGraph
                     Data.PlaneGraph.Core
-                    Data.PlaneGraph.Draw
                     Data.PlaneGraph.AdjRep
                     Data.PlaneGraph.IO
 
                     -- * Graphics stuff
                     Graphics.Camera
 
-                    -- * Other
-                    System.Random.Shuffle
-                    Control.Monad.State.Persistent
-                    Data.Yaml.Util
-
-
-
   other-modules:
-                   Data.Geometry.Ipe.ParserPrimitives
-
-
 
 
   -- other-extensions:
@@ -256,41 +197,32 @@ library
               , bytestring       >= 0.10
               , containers       >= 0.5.5
               , dlist            >= 0.7
-              , contravariant    >= 1.4
-              , profunctors      >= 5.2.1
               , lens             >= 4.2
-              , linear           >= 1.10
               , semigroupoids    >= 5
               , semigroups       >= 0.18
               , singletons       >= 2.0
-              , text             >= 1.1.1.0
+              , linear           >= 1.10
+              , fixed-vector     >= 1.0
               , vinyl            >= 0.10
               , deepseq          >= 1.1
               , fingertree       >= 0.1
-              , colour           >= 2.3.3
-              , reflection       >= 2.1
               , MonadRandom      >= 0.5
               , QuickCheck              >= 2.5
               , quickcheck-instances    >= 0.3
 
-
-              -- , validation       >= 0.4
-
-              , parsec           >= 3
-                -- , tranformers      > 0.3
+              , hgeometry-combinatorial >= 0.8.0.0
 
               , vector           >= 0.11
-              , fixed-vector     >= 1.0
               , data-clist       >= 0.0.7.2
 
-              , hexpat           >= 0.20.9
               , aeson            >= 1.0
               , yaml             >= 0.8
 
-
               , mtl
-              , random
               , template-haskell
+
+              , reflection       >= 2.1
+              , text             >= 1.1.1.0
 
 
 
@@ -337,6 +269,7 @@ executable hgeometry-viewer
   if flag(interactive)
     build-depends: base
                  , hgeometry
+                 , hgeometry-combinatorial
                  , lens
                  , containers
                  , vinyl
@@ -360,23 +293,6 @@ executable hgeometry-viewer
                  , wai-app-static
                  , warp
                  , websockets
-
-
-
-
-                 -- , cairo-canvas           >= 0.1.0.0
-                 -- -- , sdl2                   >= 2.2.0
-                 -- , gi-gtk                 >= 3.0.15
-                 -- , reactive-banana-gi-gtk >= 0.2.0.0
-                 -- , cairo                  >= 0.13.3.1
-                 -- -- , gi-glib
-                 -- , gi-cairo
-                 -- , gi-gdk
-                 -- -- , gi-gdkpixbuf
-                 -- , gi-gtk
-                 -- , haskell-gi-base
-                 -- , reactive-banana        >= 1.1.0.1
-
 
 
   hs-source-dirs: interactive
@@ -421,6 +337,7 @@ executable hgeometry-examples
   if flag(examples)
     build-depends: base
                  , hgeometry
+                 , hgeometry-combinatorial
                  , lens
                  , containers
                  , vinyl
@@ -473,8 +390,6 @@ executable hgeometry-examples
                     , MultiParamTypeClasses
                     , TypeApplications
 
-
-
 test-suite doctests
   type:          exitcode-stdio-1.0
   ghc-options:   -threaded
@@ -497,12 +412,7 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
 
 
-  other-modules: Data.RangeSpec
-                 Data.EdgeOracleSpec
-                 Data.PlanarGraphSpec
-                 Data.PlaneGraphSpec
-                 Data.OrdSeqSpec
-                 Data.Geometry.Ipe.ReaderSpec
+  other-modules: Data.PlaneGraphSpec
                  Data.Geometry.PolygonSpec
                  Data.Geometry.LineSegmentSpec
                  Data.Geometry.PointSpec
@@ -546,6 +456,8 @@ test-suite hspec
                       , quickcheck-instances    >= 0.3
                       , approximate-equality >= 1.1.0.2
                       , hgeometry
+                      , hgeometry-combinatorial
+                      , hgeometry-ipe            >= 0.8.0.0
                       , lens
                       , data-clist
                       , linear
@@ -556,7 +468,6 @@ test-suite hspec
                       , containers
                       , random
                       , singletons
-                      , colour
                       , filepath
                       , directory
                       , yaml
@@ -599,11 +510,11 @@ test-suite bapc_examples
   main-is:       bapc_examples.hs
   hs-source-dirs: examples
   build-depends: base
-               , doctest    >= 0.8
                , array      >= 0.5
                , hgeometry
+               , hgeometry-combinatorial
+               , hgeometry-ipe            >= 0.8.0.0
                , lens
-               , data-clist
                , linear
                , semigroups
 
@@ -651,6 +562,8 @@ benchmark benchmarks
               , deepseq
               , deepseq-generics
               , hgeometry
+              , hgeometry-combinatorial
+              , hgeometry-ipe            >= 0.8.0.0
               , lens
               , QuickCheck
               , bytestring

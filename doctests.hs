@@ -1,8 +1,9 @@
 import Test.DocTest
-import Data.Monoid
 
+main :: IO ()
 main = doctest $ ["-isrc" ] ++ ghcExts ++ files
 
+ghcExts :: [String]
 ghcExts = map ("-X" ++)
           [ "TypeFamilies"
           , "GADTs"
@@ -34,8 +35,10 @@ ghcExts = map ("-X" ++)
           , "FlexibleContexts"
           ]
 
+files :: [String]
 files = map toFile modules
 
+toFile :: String -> String
 toFile = (\s -> "src/" <> s <> ".hs") . replace '.' '/'
 
 replace     :: Eq a => a -> a -> [a] -> [a]
@@ -45,17 +48,9 @@ replace a b = go
     go (c:cs) | c == a    = b:go cs
               | otherwise = c:go cs
 
+modules :: [String]
 modules =
-  [ "Data.Range"
-  , "Data.CircularList.Util"
-  , "Data.Permutation"
-  , "Data.CircularSeq"
-  , "Data.LSeq"
-  , "Data.PlanarGraph"
-  , "Data.PlanarGraph.Dart"
-  , "Data.PlanarGraph.Core"
-  , "Data.PlaneGraph.IO"
-  , "Data.Tree.Util"
+  [ "Data.PlaneGraph.IO"
 
   , "Data.Geometry.Point"
   , "Data.Geometry.Vector"

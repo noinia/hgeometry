@@ -111,9 +111,6 @@ rangeOf' (NodeData (Min mi) (Max ma) _) = ClosedRange mi ma
 
 --------------------------------------------------------------------------------
 
--- FIXME: We only support closed ranges at the moment
-
-
 newtype Report p = Report { reportList :: [p] }
   deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
 

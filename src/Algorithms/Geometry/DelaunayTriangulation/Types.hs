@@ -1,12 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.DelaunayTriangulation.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Defines some geometric types used in the delaunay triangulation
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.DelaunayTriangulation.Types where
 
 import           Control.Lens
 import qualified Data.CircularList as C
 import           Data.Ext
 import           Data.Geometry
-import           Data.Geometry.Ipe
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
@@ -61,12 +70,6 @@ triangulationEdges t = let pts = _positions t
 tEdges :: Triangulation p r -> [(VertexID,VertexID)]
 tEdges = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
-
-drawTriangulation :: IpeOut (Triangulation p r) Group r
-drawTriangulation tr =
-  ipeGroup [ iO $ ipeLineSegment e
-           | e <- map (uncurry ClosedLineSegment) . triangulationEdges $ tr
-           ]
 
 --------------------------------------------------------------------------------
 
