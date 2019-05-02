@@ -1,8 +1,8 @@
 name:                hgeometry-examples
 version:             0.8.0.0
-synopsis:            Examples of Geometric Algorithms implemented using HGeometry
+synopsis:            Examples for HGeometry
 description:
-    Examples for HGeometry
+    Examples of Geometric Algorithms implemented using HGeometry
 
 homepage:            https://fstaals.net/software/hgeometry
 license:             BSD3
@@ -43,7 +43,7 @@ source-repository head
 executable hgeometry-examples
   main-is: Main.hs
 
-  build-depends: base
+  build-depends: base                    >= 4.11      &&     < 5
                , hgeometry               >= 0.8.0.0
                , hgeometry-combinatorial
                , hgeometry-ipe
@@ -51,7 +51,7 @@ executable hgeometry-examples
                , containers
                , vinyl
                , semigroups
-               , optparse-applicative   >= 0.13.0.0
+               , optparse-applicative    >= 0.13.0.0
                , text
                , hexpat
                , bytestring
@@ -102,10 +102,10 @@ executable hgeometry-examples
 test-suite bapc_examples
   type:          exitcode-stdio-1.0
   ghc-options:   -O2 -fno-warn-unticked-promoted-constructors
-  main-is:       bapc_examples.hs
-  hs-source-dirs: src
+  main-is:       bapc.hs
+  hs-source-dirs: test src
   build-depends: base
-               , array      >= 0.5
+               , array                    >= 0.5
                , hgeometry
                , hgeometry-combinatorial
                , hgeometry-ipe            >= 0.8.0.0
