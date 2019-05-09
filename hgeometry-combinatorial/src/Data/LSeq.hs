@@ -14,7 +14,6 @@ module Data.LSeq( LSeq
                 , fromList
                 , fromNonEmpty
                 , fromSeq
-                , toNonEmpty
 
                 , (<|), (|>)
                 , (><)
@@ -53,6 +52,7 @@ import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Proxy
+import           Data.Semigroup.Foldable
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 import           GHC.Generics (Generic)
@@ -96,6 +96,8 @@ instance Ixed (LSeq n a) where
   ix i f s@(LSeq xs)
     | 0 <= i && i < S.length xs = f (S.index xs i) <&> \x -> LSeq $ S.update i x xs
     | otherwise                 = pure s
+
+instance (1 <= n) => Foldable1 (LSeq n)
 
 empty :: LSeq 0 a
 empty = LSeq S.empty
@@ -144,10 +146,6 @@ forceLSeq n = promise . go (fromInteger $ natVal n)
         l   = S.length . S.take n' . toSeq $ s
         msg = "forceLSeq: too few elements. expected " <> show n' <> " but found " <> show l
 
-
-
-toNonEmpty :: LSeq (1 + n) a -> NonEmpty.NonEmpty a
-toNonEmpty = NonEmpty.fromList . F.toList
 
 -- | appends two sequences.
 --

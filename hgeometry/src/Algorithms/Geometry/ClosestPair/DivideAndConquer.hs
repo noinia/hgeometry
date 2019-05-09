@@ -30,7 +30,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable(foldMap1)
+import           Data.Semigroup.Foldable(foldMap1, toNonEmpty)
 import           Data.UnBounded
 import           Data.Util
 
@@ -41,7 +41,7 @@ import           Data.Util
 --
 -- running time: \(O(n)\)
 closestPair :: ( Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
-closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . LSeq.toNonEmpty
+closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . toNonEmpty
             . LSeq.unstableSortBy (comparing (^.core))
   where
     mkCCP (Elem p) = CCP (p :| []) Top
