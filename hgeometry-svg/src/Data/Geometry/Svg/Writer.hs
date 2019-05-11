@@ -1,6 +1,17 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Svg.Writer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :
+--
+-- Write geometry to svg
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Svg.Writer where
 
 import           Control.Lens hiding (rmap, Const(..))

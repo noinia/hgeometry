@@ -13,14 +13,21 @@
 -- top-left.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Svg.MathCoordinateSystem where
+module Data.Geometry.Svg.MathCoordinateSystem( Canvas(Canvas)
+                                             , center, dimensions, zoomLevel
+                                             , createCanvas
+                                             , renderCanvas, text_
+                                             , realWorldCoordinates
+
+                                             , toAValue, toPValue, showP
+                                             ) where
 
 import           Control.Lens hiding (view, element)
+import           Data.Fixed
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.Text (Text)
-import           Data.Fixed
 import           Prelude hiding ((!!))
 import           Text.Blaze.Internal (Attributable(..))
 import           Text.Blaze.Svg11 ((!))
@@ -104,6 +111,14 @@ text_ (Point2 x y) ats t = Svg.g ! A.transform (mconcat [ "translate("
                                                 ])
                               $ Svg.text_ !! ats
                                           $ Svg.text t
+
+--------------------------------------------------------------------------------
+
+-- | Computes the mouse position in terms of real world coordinates.
+-- pre: the coordinates given lie on the canvas
+realWorldCoordinates                 :: Num r => Canvas r -> Point 2 Int -> Point 2 r
+realWorldCoordinates cv (Point2 x y) = fromIntegral
+                      <$> Point2 x ((cv^.dimensions.element (C @ 1)) - y)
 
 --------------------------------------------------------------------------------
 
