@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module Data.Geometry.Interactive.Canvas( module Data.Geometry.Interactive.StaticCanvas
-                                       , ICanvas(ICanvas)
-                                       , canvas, mousePosition, mouseCoordinates
+module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.StaticCanvas
+                                        , ICanvas(ICanvas), blankCanvas
+                                        , canvas, mousePosition, mouseCoordinates
 
-                                       , CanvasAction(..)
-                                       , update
-                                       , view
-                                       ) where
+                                        , CanvasAction(..)
+                                        , update
+                                        , view
+                                        ) where
 
 import           Control.Lens hiding (view, element)
 import           Data.Ext
@@ -31,6 +31,13 @@ makeLenses ''ICanvas
 
 mouseCoordinates :: Num r => Getter (ICanvas r) (Maybe (Point 2 r))
 mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosition
+
+
+-- | Createas an interactive lbank canvas
+blankCanvas     :: Num r => Int -> Int -> ICanvas r
+blankCanvas w h = ICanvas (createCanvas w h) Nothing
+
+
 
 -- * Controller
 

@@ -1,27 +1,21 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module Svg where
+module App.Viewer where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)
 import           Data.Ext
-import           Data.Geometry.Interactive.Canvas hiding (update, view)
-import qualified Data.Geometry.Interactive.Canvas as ICanvas
+import           Data.Geometry.Interactive.ICanvas hiding (update, view)
+import qualified Data.Geometry.Interactive.ICanvas as ICanvas
 
 import           Data.Geometry.Interactive.Writer
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Vector
-import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
-import           Data.Maybe (maybeToList)
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
-import           Miso.Subscription.MouseExtra
-import qualified Miso.Svg.Event as Event
-import           Miso.String (MisoString, ToMisoString, ms)
+import           Miso.String (ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
 
@@ -42,10 +36,7 @@ type Model = CHModel Rational
 ----------------------------------------
 
 initialModel :: Model
-initialModel = CHModel blankCanvas [] Nothing 1 Nothing
-
-blankCanvas :: Num r => ICanvas r
-blankCanvas = ICanvas (createCanvas 1024 576) Nothing
+initialModel = CHModel (blankCanvas 1024  576) [] Nothing 1 Nothing
 
 --------------------------------------------------------------------------------
 
@@ -74,39 +65,40 @@ updateModel m = \case
           np = maybe [] (\p -> [p :+ m^.nextNum]) $ m^.iCanvas.mouseCoordinates
 
 
+recomputeHull :: (Ord r, Num r) => CHModel r -> CHModel r
 recomputeHull m = m&hull .~ fmap convexHull (NonEmpty.nonEmpty $ m^.points)
 
 --------------------------------------------------------------------------------
 
 viewModel       :: Model -> View Action
-viewModel model = div_ [ ]
-                       [ ICanvas.view (model^.iCanvas)
-                                      [ onClick AddPoint
-                                      , id_ "mySvg"
-                                      ]
-                                      canvasBody
-                       , div_ [ onClick AddPoint ]
-                              [text . ms $ model^.nextNum ]
-                       , div_ []
-                              [text . ms . show $ model^.iCanvas.mouseCoordinates ]
-                       , div_ []
-                              [text . ms . show $ model^.points ]
-                       , div_ []
-                              [ div_ [] ["selected: "]
-                              , text . ms . show $ model^.selected
-                              ]
-                       ]
+viewModel m = div_ [ ]
+                   [ ICanvas.view (m^.iCanvas)
+                                  [ onClick AddPoint
+                                  , id_ "mySvg"
+                                  ]
+                                  canvasBody
+                   , div_ [ onClick AddPoint ]
+                          [text . ms $ m^.nextNum ]
+                   , div_ []
+                          [text . ms . show $ m^.iCanvas.mouseCoordinates ]
+                   , div_ []
+                          [text . ms . show $ m^.points ]
+                   , div_ []
+                          [ div_ [] ["selected: "]
+                          , text . ms . show $ m^.selected
+                          ]
+                   ]
   where
     canvasBody = [ draw pg [ stroke_ "red"
                            , fill_   "rgba(255, 0, 0, 0.6)"
-                           ] | Just pg <- [model^.hull]]
+                           ] | Just pg <- [m^.hull]]
               <> [ g_ [] [ draw p [ fill_ "black"
                                   , onClick $ Select p'
                                   ]
                          , textAt p [] (ms i)
                          ]
-                 | p'@(p :+ i) <- model^.points ]
-              <> [ draw p [ fill_ "blue" ]  | Just p <- [model^.iCanvas.mouseCoordinates] ]
+                 | p'@(p :+ i) <- m^.points ]
+              <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.iCanvas.mouseCoordinates] ]
 
 --------------------------------------------------------------------------------
 
