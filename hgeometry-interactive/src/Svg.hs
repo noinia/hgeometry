@@ -5,7 +5,9 @@ module Svg where
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)
 import           Data.Ext
-import           Data.Geometry.Interactive.StaticCanvas
+import           Data.Geometry.Interactive.Canvas hiding (update, view)
+import qualified Data.Geometry.Interactive.Canvas as ICanvas
+
 import           Data.Geometry.Interactive.Writer
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
@@ -17,6 +19,7 @@ import qualified Data.Map as Map
 import           Data.Maybe (maybeToList)
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
+import           Miso.Subscription.MouseExtra
 import qualified Miso.Svg.Event as Event
 import           Miso.String (MisoString, ToMisoString, ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
@@ -26,11 +29,10 @@ import           Miso.Svg hiding (height_, id_, style_, width_)
 
 type Idx = Int
 
-data CHModel r = CHModel { _iCanvas  :: Canvas r
+data CHModel r = CHModel { _iCanvas  :: ICanvas r
                          , _points   :: [Point 2 r :+ Int]
                          , _hull     :: Maybe (ConvexPolygon Int r)
                          , _nextNum  :: Int
-                         , _mousePos :: Maybe (Point 2 r)
                          , _selected :: Maybe (Point 2 r :+ Int)
                          } deriving (Show,Eq)
 makeLenses ''CHModel
@@ -40,50 +42,53 @@ type Model = CHModel Rational
 ----------------------------------------
 
 initialModel :: Model
-initialModel = CHModel blankCanvas [] Nothing 1 (Just origin) Nothing
+initialModel = CHModel blankCanvas [] Nothing 1 Nothing
 
-blankCanvas :: Num r => Canvas r
-blankCanvas = createCanvas 1024 576
+blankCanvas :: Num r => ICanvas r
+blankCanvas = ICanvas (createCanvas 1024 576) Nothing
 
 --------------------------------------------------------------------------------
 
 type Action = GAction Rational
 
 data GAction r = Id
-               | HandleMouse (Int,Int)
+               | CanvasAction CanvasAction
                | AddPoint
                | Select (Point 2 r :+ Int)
                deriving (Show,Eq)
 
 
-updateModel                       :: Action -> Model -> Effect Action Model
-updateModel Id                  m = noEff m
-updateModel (HandleMouse (x,y)) m = noEff m'
+updateModel   :: Model -> Action -> Effect Action Model
+updateModel m = \case
+    Id                          -> noEff m
+    CanvasAction ca             -> do
+                                     c' <- ICanvas.update (m^.iCanvas) ca
+                                     pure $ m&iCanvas .~ c'
+    AddPoint                    -> addPoint
+    Select p                    -> noEff $ m&selected .~ Just p
   where
-    m' = m&mousePos .~ Just (realWorldCoordinates (m^.iCanvas) $ Point2 x y)
-updateModel AddPoint            m = noEff $ recomputeHull m'
-  where
-    m' = m&points  %~ (np <>)
-          &nextNum %~ (+1)
-    np = maybe [] (\p -> [p :+ m^.nextNum]) $ m^.mousePos
-updateModel (Select p)          m = noEff $ m&selected .~ Just p
+    addPoint = noEff $ recomputeHull m'
+       where
+          m' = m&points  %~ (np <>)
+                &nextNum %~ (+1)
+          np = maybe [] (\p -> [p :+ m^.nextNum]) $ m^.iCanvas.mouseCoordinates
 
 
 recomputeHull m = m&hull .~ fmap convexHull (NonEmpty.nonEmpty $ m^.points)
 
 --------------------------------------------------------------------------------
 
-
 viewModel       :: Model -> View Action
 viewModel model = div_ [ ]
-                       [ staticCanvas_ (model^.iCanvas)
-                                       [ onClick AddPoint
-                                       ]
-                                       canvasBody
+                       [ ICanvas.view (model^.iCanvas)
+                                      [ onClick AddPoint
+                                      , id_ "mySvg"
+                                      ]
+                                      canvasBody
                        , div_ [ onClick AddPoint ]
                               [text . ms $ model^.nextNum ]
                        , div_ []
-                              [text . ms . show $ model^.mousePos ]
+                              [text . ms . show $ model^.iCanvas.mouseCoordinates ]
                        , div_ []
                               [text . ms . show $ model^.points ]
                        , div_ []
@@ -101,7 +106,7 @@ viewModel model = div_ [ ]
                          , textAt p [] (ms i)
                          ]
                  | p'@(p :+ i) <- model^.points ]
-              <> [ draw p [ fill_ "blue" ]  | Just p <- [model^.mousePos] ]
+              <> [ draw p [ fill_ "blue" ]  | Just p <- [model^.iCanvas.mouseCoordinates] ]
 
 --------------------------------------------------------------------------------
 
@@ -112,9 +117,12 @@ main = JSaddle.run 8080 $ mainJSM
 mainJSM :: JSM ()
 mainJSM = do
     let myApp = App { model         = initialModel
-                    , update        = updateModel
+                    , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = [ mouseSub HandleMouse ]
+                    , subs          = [ --relativeMouseSub "mySvg" (CanvasAction . GetMouseState)
+                                        mouseSub (CanvasAction . GetMouseState)
+                                      , arrowsSub (CanvasAction . GetArrowsState)
+                                      ]
                     , events        = Map.insert "touchstart" False
                                     . Map.insert "touchmove" False
                                     . Map.insert "mousemove" False
