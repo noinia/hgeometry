@@ -133,14 +133,14 @@ colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) colors'
 
 
 
-asPolyLine :: Track -> Maybe (PolyLine 2 UTCTime Double)
+asPolyLine :: Track -> Maybe (PolyLine 2 Time Rational)
 asPolyLine = fmap fromPoints . f . map toPt . _trackPoints
   where
     f xs@(_:_:_) = Just xs
     f _          = Nothing
 
-toPt :: TrackPoint -> Point 2 Double :+ Time
-toPt (TP (pos :+ t)) = point2 (pos^.longitude) (pos^.latitude) :+ t
+toPt :: TrackPoint -> Point 2 Rational :+ Time
+toPt (TP (pos :+ t)) = Point2 (pos^.longitude) (pos^.latitude) :+ t
 
 ssFactor = 1
 
@@ -179,6 +179,9 @@ mercatoProject                    :: (Double,Double)
                                   -> Point 2 Double
 mercatoProject (width,height) pos = point2 x y
   where
-    x    =                (width / 360)    * pos^.longitude
+    lon = realToFrac $ pos^.longitude
+    lat = realToFrac $ pos^.latitude
+
+    x    =                (width / 360)    * lon
     y    = (height / 2) - (width / (2*pi)) * (log . tan $ (pi / 4) + (latR / 2))
-    latR = -1 * pos^.latitude * pi / 180
+    latR = -1 * lat * pi / 180

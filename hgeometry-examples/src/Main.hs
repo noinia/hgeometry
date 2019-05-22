@@ -8,6 +8,7 @@ import Data.Data
 --------------------------------------------------------------------------------
 
 import qualified Demo.DrawGPX as DrawGPX
+import qualified Demo.ExtractGPX as ExtractGPX
 import qualified Demo.WriteEnsemble as EnsembleWriter
 import qualified Demo.MinDisk as MinDisk
 import qualified Demo.Delaunay as Delaunay
@@ -21,6 +22,7 @@ import qualified Demo.TriangulateWorld as TriangulateWorld
 
 data Options = BAPC                      BAPCOptions
              | DrawGPX                   DrawGPX.Options
+             | ExtractGPX                ExtractGPX.Options
              | EnsembleWriter            EnsembleWriter.Options
              | MinDisk                   MinDisk.Options
              | Delaunay                  Delaunay.Options
@@ -31,6 +33,7 @@ data Options = BAPC                      BAPCOptions
 parser :: Parser Options
 parser = subparser (
        command' DrawGPX                        DrawGPX.options
+    <> command' ExtractGPX                     ExtractGPX.options
     <> command' EnsembleWriter                 EnsembleWriter.options
     <> command' MinDisk                        MinDisk.options
     <> command' Delaunay                       Delaunay.options
@@ -43,6 +46,7 @@ mainWith       :: Options -> IO ()
 mainWith opts' = case opts' of
   BAPC _                              -> putStrLn "not yet"
   DrawGPX opts                        -> DrawGPX.mainWith opts
+  ExtractGPX opts                     -> ExtractGPX.mainWith opts
   EnsembleWriter opts                 -> EnsembleWriter.mainWith opts
   MinDisk opts                        -> MinDisk.mainWith opts
   Delaunay opts                       -> Delaunay.mainWith opts

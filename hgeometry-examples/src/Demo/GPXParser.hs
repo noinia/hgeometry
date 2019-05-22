@@ -16,20 +16,22 @@ import           Data.Semigroup
 import           Data.Time.Clock
 import           Data.Time.Format
 import           Text.XML.Expat.Tree
-
+import qualified Data.Text as Text
 import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
-type Time = UTCTime
+-- type Time = UTCTime
+type Time = Text.Text
 
-newtype Position = Position {_unP :: Point 2 Double}  deriving (Show,Eq)
+
+newtype Position = Position {_unP :: Point 2 Rational}  deriving (Show,Eq)
 makeLenses ''Position
 
-latitude :: Lens' Position Double
+latitude :: Lens' Position Rational
 latitude = unP.xCoord
 
-longitude :: Lens' Position Double
+longitude :: Lens' Position Rational
 longitude = unP.yCoord
 
 
@@ -77,14 +79,19 @@ instance ReadGPX TrackPoint where
       pos  = (\l l' -> Position $ point2 l l') <$> lat <*> lon
       time = fmap (readTime' . extract) . listToMaybe . chsWith "time" $ x
 
-      lat = read <$> lookup "lat" ats
-      lon = read <$> lookup "lon" ats
+      read' = realToFrac . read @Double
+
+      lat = read' <$> lookup "lat" ats
+      lon = read' <$> lookup "lon" ats
 
 
 extract = (\(Text s) -> s) . head . eChildren
 
-readTime' :: String -> UTCTime
-readTime' = parseTimeOrError True defaultTimeLocale "%0C%y-%m-%dT%TZ"
+-- readTime' :: String -> UTCTime
+-- readTime' = parseTimeOrError True defaultTimeLocale "%0Y-%m-%dT%TZ"
+
+readTime' :: String -> Time
+readTime' = Text.pack
 
 -- instance ReadGPX Position where
 --   parseGPX x@(Element "Position" _ _) = (\l l' -> Position $ point2 l l') <$> lat <*> lon
