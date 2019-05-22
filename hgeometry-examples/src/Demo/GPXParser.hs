@@ -55,7 +55,7 @@ readGPXFile fp = (r . fst . parse defaultParseOptions) <$> B.readFile fp
     r = fromJust . parseGPX
 
 class ReadGPX t where
-  parseGPX :: Node String String -> Maybe t
+  parseGPX :: Node (Text.Text) (Text.Text) -> Maybe t
 
 instance ReadGPX Activity where
   parseGPX x = case selectPath ["gpx"] x of
@@ -79,7 +79,7 @@ instance ReadGPX TrackPoint where
       pos  = (\l l' -> Position $ point2 l l') <$> lat <*> lon
       time = fmap (readTime' . extract) . listToMaybe . chsWith "time" $ x
 
-      read' = realToFrac . read @Double
+      read' = realToFrac . read @Double . Text.unpack
 
       lat = read' <$> lookup "lat" ats
       lon = read' <$> lookup "lon" ats
@@ -90,8 +90,8 @@ extract = (\(Text s) -> s) . head . eChildren
 -- readTime' :: String -> UTCTime
 -- readTime' = parseTimeOrError True defaultTimeLocale "%0Y-%m-%dT%TZ"
 
-readTime' :: String -> Time
-readTime' = Text.pack
+readTime' :: Text.Text -> Time
+readTime' = id
 
 -- instance ReadGPX Position where
 --   parseGPX x@(Element "Position" _ _) = (\l l' -> Position $ point2 l l') <$> lat <*> lon
@@ -101,16 +101,16 @@ readTime' = Text.pack
 --       lat = f "LatitudeDegrees"
 --       lon = f "LongitudeDegrees"
 
-selectPath :: [String] -> Node String String -> [Node String String]
+selectPath :: [Text.Text] -> Node Text.Text Text.Text -> [Node Text.Text Text.Text]
 selectPath []  _ = []
 selectPath [n] x | hasName n x = [x]
                  | otherwise   = []
 selectPath (n:p) x | hasName n x = concatMap (selectPath p) $ eChildren x
                    | otherwise   = []
 
-chsWith   :: String -> Node String String -> [Node String String]
+chsWith   :: Text.Text -> Node Text.Text Text.Text -> [Node Text.Text Text.Text]
 chsWith n = filter (hasName n) . eChildren
 
-hasName   :: String -> Node String String -> Bool
+hasName   :: Text.Text -> Node Text.Text Text.Text -> Bool
 hasName _ (Text _) = False
 hasName n (Element n' _ _) = n == n'
