@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TupleSections              #-}
 module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.StaticCanvas
                                         , ICanvas(ICanvas), blankCanvas
-                                        , canvas, mousePosition, mouseCoordinates
+                                        , canvas, mousePosition
+                                        , mouseCoordinates
 
                                         , CanvasAction(..)
                                         , update
@@ -10,15 +12,14 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
                                         ) where
 
 import           Control.Lens hiding (view, element)
-import           Data.Ext
 import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
+import           Data.Aeson.Types
 import           Miso hiding (update, view)
-import           Miso.String (MisoString, ToMisoString, ms)
-import qualified Miso.Svg as Svg
+import qualified Data.Map as Map
 
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- * Model
@@ -42,28 +43,51 @@ blankCanvas w h = ICanvas (createCanvas w h) Nothing
 -- * Controller
 
 
-data CanvasAction = GetMouseState (Int,Int)
-                  | GetArrowsState Arrows
-                  | Scroll
+data CanvasAction = MouseMove (Int,Int)
+                  | MouseLeave
+                  | ArrowPress Arrows
                   deriving (Show,Eq)
 
 
 update   :: Num r => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
 update m = \case
-    GetMouseState (x,y)         -> let p  = Point2 x y -- fix this part
-                                   in noEff $ m&mousePosition .~ Just p
-    GetArrowsState (Arrows x y) -> let v   = ((*2) . fromIntegral) <$> Vector2 x y
-                                   in noEff $ m&canvas.center %~ (.+^ v)
-
-
+    MouseMove (x,y)         -> let p  = Point2 x y
+                               in noEff $ m&mousePosition .~ Just p
+    MouseLeave              -> noEff $ m&mousePosition .~ Nothing
+    ArrowPress (Arrows x y) -> let v   = ((*2) . fromIntegral) <$> Vector2 x y
+                               in noEff $ m&canvas.center %~ (.+^ v)
 
 
 -- * View
 
-view   :: (RealFrac r, ToSvgCoordinate r)
-       => ICanvas r -> [Attribute action] -> [View action] -> View action
-view m = staticCanvas_ (m^.canvas)
+view            :: (RealFrac r, ToSvgCoordinate r)
+                => (CanvasAction -> action)
+                -> ICanvas r
+                -> [Attribute action] -> [View action] -> View action
+view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseMove  (f . MouseMove)
+                                             , onMouseLeave (f MouseLeave)
+                                             , style_ (Map.fromList [("margin-left", "100px")])
+                                             ] <> ats) vs
 
+
+onMouseMove   :: ((Int,Int) -> action) -> Attribute action
+onMouseMove f = on "mousemove" dec f
+  where
+    dec  :: Decoder (Int,Int)
+    dec  = Decoder decF (DecodeTarget mempty)
+    decF = withObject "event" $ \o -> g <$> o .: "clientX" <*> o .: "clientY"
+      where
+        g x y = traceShowId (x,y)
+
+
+
+
+
+
+
+    -- decodeAt =
+    -- decoder =
+    --    KeyCode <$> (o .: "keyCode" <|> o .: "which" <|> o .: "charCode")
 
 
 -- view            :: ICanvas r -> View action

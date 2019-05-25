@@ -15,6 +15,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
+-- import           Miso.Subscription.MouseExtra
 import           Miso.String (ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
@@ -72,7 +73,8 @@ recomputeHull m = m&hull .~ fmap convexHull (NonEmpty.nonEmpty $ m^.points)
 
 viewModel       :: Model -> View Action
 viewModel m = div_ [ ]
-                   [ ICanvas.view (m^.iCanvas)
+                   [ ICanvas.view CanvasAction
+                                  (m^.iCanvas)
                                       [ onClick AddPoint
                                       , id_ "mySvg"
                                       ]
@@ -83,10 +85,10 @@ viewModel m = div_ [ ]
                           [text . ms . show $ m^.iCanvas.mouseCoordinates ]
                    , div_ []
                           [text . ms . show $ m^.points ]
-                    , div_ []
-                           [ div_ [] ["selected: "]
-                           , text . ms . show $ m^.selected
-                           ]
+                   , div_ []
+                          [ div_ [] ["selected: "]
+                          , text . ms . show $ m^.selected
+                          ]
                     ]
   where
     canvasBody = [ draw pg [ stroke_ "red"
@@ -111,9 +113,9 @@ mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = [ --relativeMouseSub "mySvg" (CanvasAction . GetMouseState)
-                                        mouseSub (CanvasAction . GetMouseState)
-                                      , arrowsSub (CanvasAction . GetArrowsState)
+                    , subs          = [--  mouseSub (CanvasAction . GetMouseState)
+                                      -- ,
+                                        arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False
                                     . Map.insert "touchmove" False
