@@ -157,6 +157,7 @@ install: true
 
 script:
   - |
+    cd hgeometry-test
     # If a custom stack-yaml is specified, replace the default with that
     if test -e "$STACK_YAML"; then rm -f stack.yaml && ln -sv $STACK_YAML stack.yaml; else true; fi
     unset STACK_YAML

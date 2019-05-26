@@ -46,22 +46,6 @@ replace a b = go
               | otherwise = c:go cs
 
 modules =
-  [ "Data.PlaneGraph.IO"
-
-  , "Data.Geometry.Point"
-  , "Data.Geometry.Vector"
-  , "Data.Geometry.Transformation"
-  , "Data.Geometry.Line"
-  , "Data.Geometry.Line.Internal"
-  , "Data.Geometry.Interval"
-  , "Data.Geometry.LineSegment"
-  , "Data.Geometry.PolyLine"
-  , "Data.Geometry.Polygon"
-  , "Data.Geometry.Ball"
-  , "Data.Geometry.Box"
-
-  , "Data.Geometry.Ipe.IpeOut"
+  [ "Data.Geometry.Ipe.IpeOut"
   , "Data.Geometry.Ipe.FromIpe"
-
-  -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
   ]

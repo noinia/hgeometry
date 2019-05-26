@@ -13,7 +13,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do testCases "test/Data/Geometry/pointInPolygon.ipe"
-          testCases "examples/resources/world.ipe"
+          testCases "../hgeometry-examples/data/world.ipe"
           toSpec testPoly
           toSpec testPoly2
 
