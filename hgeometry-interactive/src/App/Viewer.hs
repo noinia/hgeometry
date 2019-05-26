@@ -72,7 +72,8 @@ recomputeHull m = m&hull .~ fmap convexHull (NonEmpty.nonEmpty $ m^.points)
 
 viewModel       :: Model -> View Action
 viewModel m = div_ [ ]
-                   [ ICanvas.view (m^.iCanvas)
+                   [ ICanvas.view CanvasAction
+                                  (m^.iCanvas)
                                   [ onClick AddPoint
                                   , id_ "mySvg"
                                   ]
@@ -112,8 +113,8 @@ mainJSM = do
                     , update        = flip updateModel
                     , view          = viewModel
                     , subs          = [ --relativeMouseSub "mySvg" (CanvasAction . GetMouseState)
-                                        mouseSub (CanvasAction . GetMouseState)
-                                      , arrowsSub (CanvasAction . GetArrowsState)
+                                        mouseSub (CanvasAction . MouseMove)
+                                      , arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False
                                     . Map.insert "touchmove" False
