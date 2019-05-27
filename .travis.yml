@@ -18,21 +18,13 @@ matrix:
 
   # Stack
   - ghc: 8.4.2
-  - env:
-      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc-8.4.yaml"
-      - PACKAGEDIR="hgeometry-combinatorial"
-      - PACKAGEDIR="hgeometry-ipe"
-      - PACKAGEDIR="hgeometry-svg"
-      - PACKAGEDIR="hgeometry-examples"
+    env:
+      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.4.yaml"
       - PACKAGEDIR="hgeometry-test"
 
   - ghc: 8.6.3
-  - env:
-      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc-8.6.yaml"
-      - PACKAGEDIR="hgeometry-combinatorial"
-      - PACKAGEDIR="hgeometry-ipe"
-      - PACKAGEDIR="hgeometry-svg"
-      - PACKAGEDIR="hgeometry-examples"
+    env:
+      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.6.yaml"
       - PACKAGEDIR="hgeometry-test"
 
 install:
