@@ -1,13 +1,67 @@
+sudo: true
 language: haskell
-ghc:
-  - "8.2"
-  - "8.4"
-  - "8.6"
-env:
-  - PACKAGEDIR="hgeometry-combinatorial"
-  - PACKAGEDIR="hgeometry-ipe"
-  - PACKAGEDIR="hgeometry-svg"
-  - PACKAGEDIR="hgeometry-test"
-  - PACKAGEDIR="hgeometry-examples"
-  - PACKAGEDIR="hgeometry"
-before_install: cd ${PACKAGEDIR}
+
+cabal: "2.4"
+
+cache:
+  directories:
+  - "$HOME/.cabal/store"
+  - "$HOME/.stack"
+  - "$TRAVIS_BUILD_DIR/.stack-work"
+
+matrix:
+  include:
+
+  # Cabal
+  # - ghc: 8.4.4
+  # - ghc: 8.6.3
+
+  # Stack
+  - ghc: 8.4.2
+  - env:
+      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc-8.4.yaml"
+      - PACKAGEDIR="hgeometry-combinatorial"
+      - PACKAGEDIR="hgeometry-ipe"
+      - PACKAGEDIR="hgeometry-svg"
+      - PACKAGEDIR="hgeometry-examples"
+      - PACKAGEDIR="hgeometry-test"
+
+  - ghc: 8.6.3
+  - env:
+      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc-8.6.yaml"
+      - PACKAGEDIR="hgeometry-combinatorial"
+      - PACKAGEDIR="hgeometry-ipe"
+      - PACKAGEDIR="hgeometry-svg"
+      - PACKAGEDIR="hgeometry-examples"
+      - PACKAGEDIR="hgeometry-test"
+
+install:
+  - |
+    if [ -z "$STACK_YAML" ]; then
+      ghc --version
+      cabal --version
+      cabal new-update
+      cabal new-build --enable-tests --enable-benchmarks
+    else
+      # install stack
+      curl -sSL https://get.haskellstack.org/ | sh
+
+      # build project with stack
+      stack --version
+      cd ${PACKAGEDIR}
+      stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
+    fi
+
+script:
+  - |
+    if [ -z "$STACK_YAML" ]; then
+      cabal new-test --enable-tests
+    else
+      cd ${PACKAGEDIR}
+      stack test --system-ghc
+    fi
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
