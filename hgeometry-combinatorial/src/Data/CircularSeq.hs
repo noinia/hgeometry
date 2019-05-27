@@ -30,12 +30,13 @@ module Data.CircularSeq( CSeq
                        , isShiftOf
                        ) where
 
+import           Algorithms.StringSearch.KMP(isSubStringOf)
 import           Control.DeepSeq
 import           Control.Lens (lens, Lens', bimap)
 import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (listToMaybe)
+import           Data.Maybe (listToMaybe, isJust)
 import           Data.Semigroup.Foldable
 import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
 import qualified Data.Sequence as S
@@ -153,6 +154,14 @@ cseq l x r
     rn = length r
     ln = length l
 
+-- smart constructor that automatically balances the sequence.
+-- pre: at least one of the two seq's is NonEmpty
+--
+cseq'     :: Seq a -> Seq a -> CSeq a
+cseq' l r = case S.viewl r of
+              (x :< r') -> cseq l x r'
+              EmptyL    -> let (x :< l') = S.viewl l in cseq l' x r
+
 -- | Builds a balanced seq with the element as the focus.
 withFocus     :: a -> Seq a -> CSeq a
 withFocus x s = let (l,r) = resplit s in CSeq l x r
@@ -230,11 +239,8 @@ fromList []     = error "fromList: Empty list"
 -- CSeq [2,3,4,5,1]
 -- >>> rotateNR 4 $ fromList [1..5]
 -- CSeq [5,1,2,3,4]
-rotateNR     :: Int -> CSeq a -> CSeq a
-rotateNR i s = let (l, r')  = S.splitAt i $ rightElements s
-                   (x :< r) = S.viewl r'
-               in cseq l x r
-
+rotateNR   :: Int -> CSeq a -> CSeq a
+rotateNR i = uncurry cseq' . S.splitAt i . rightElements
 
 -- | Rotates i elements to the left.
 --
@@ -255,8 +261,9 @@ rotateNR i s = let (l, r')  = S.splitAt i $ rightElements s
 rotateNL     :: Int -> CSeq a -> CSeq a
 rotateNL i s = let (x :< xs) = S.viewl $ rightElements s
                    (l',r)    = S.splitAt (length s - i) $ xs |> x
-                   (l :> y)  = S.viewr l'
-               in cseq l y r
+               in case S.viewr l' of
+                    l :> y   -> cseq l y r
+                    S.EmptyR -> let (y :< r') = S.viewl r in cseq l' y r'
 
 
 -- | Reversres the direction of the CSeq
@@ -364,8 +371,13 @@ splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
                       . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
 
 -- | Test if the circular list is a cyclic shift of the second list.
--- Running time: O(n), where n is the size of the smallest list
+--
+-- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of
+-- the lists.
 isShiftOf         :: Eq a => CSeq a -> CSeq a -> Bool
-xs `isShiftOf` ys = let rest = tail . F.toList . leftElements
-                    in maybe False (\xs' -> rest xs' == rest ys) $
-                       rotateTo (focus ys) xs
+xs `isShiftOf` ys = let m = length xs
+                        n = length ys
+                        twice zs = let zs' = once zs in zs' <> zs'
+                        once     = leftElements
+                    in isJust $ if m >= n then once ys `isSubStringOf` twice xs
+                                          else once xs `isSubStringOf` twice ys

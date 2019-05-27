@@ -5,7 +5,6 @@ import qualified Data.Foldable as F
 import qualified Data.List as List
 import           Data.OrdSeq (OrdSeq)
 import qualified Data.OrdSeq as OrdSeq
-import           Data.Semigroup
 import           Test.Hspec
 import           Test.QuickCheck
 

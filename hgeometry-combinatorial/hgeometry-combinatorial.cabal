@@ -44,6 +44,9 @@ library
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
 
+
+                    Algorithms.StringSearch.KMP
+
                     -- * General Data Types
                     Data.UnBounded
                     Data.Intersection
@@ -165,10 +168,13 @@ test-suite hspec
 
   build-tool-depends: hspec-discover:hspec-discover
 
-  other-modules: Data.RangeSpec
+  other-modules: Algorithms.StringSearch.KMPSpec
+                 Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
                  Data.OrdSeqSpec
+                 Data.CircularSeqSpec
+
 
   build-depends:        base
                       , hspec                   >= 2.1
