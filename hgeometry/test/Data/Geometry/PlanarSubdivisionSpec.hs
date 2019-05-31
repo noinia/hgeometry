@@ -3,39 +3,36 @@ module Data.Geometry.PlanarSubdivisionSpec where
 
 
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
+import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
+import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
+import           Control.Lens hiding (holesOf)
 import           Data.Bifunctor (second)
+import           Data.Either (lefts)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
 import           Data.Geometry
+import           Data.Geometry.Interval
+import           Data.Geometry.Ipe
+import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.Geometry.PlanarSubdivision as PS
+import           Data.Geometry.PlanarSubdivision.Draw
 import           Data.Geometry.Polygon
+import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.PlanarGraph (FaceId(..),VertexId(..))
 import qualified Data.PlaneGraph as PG
-import           Test.Hspec
-import qualified Data.Vector as V
-import qualified Data.List as L
-
-import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
-import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
-
-import           Control.Lens hiding (holesOf)
-import           Data.Either (lefts)
-import           Data.Geometry.Ipe
-import           Data.Geometry.PlanarSubdivision.Draw
-import           Data.Maybe (fromJust)
 import           Data.PlaneGraph.Draw
+import           Data.Range
+import           Data.Ratio
+import qualified Data.Vector as V
+import           Test.Hspec
 
-import Data.Geometry.LineSegment
-import Data.Geometry.Interval
-import Data.Range
-import Data.Ratio
+--------------------------------------------------------------------------------
 
 data Test = Test
 data Id a = Id a
-
-
 
 
 simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
@@ -204,27 +201,27 @@ test = TR.triangulate (Id Test) testPoly5
 test' = TR.triangulate' (Id Test) testPoly5
 -- test = asIpe drawPlaneGraph testPolygPlaneG mempty
 
-printMP = mapM_ printAsIpeSelection
-        . map (iO' . (^.core) . snd)
-        . toList . rawFacePolygons $ monotonePs
+-- printMP = mapM_ printAsIpeSelection
+--         . map (iO' . (^.core) . snd)
+--         . toList . rawFacePolygons $ monotonePs
 
 
 
-printP = mapM_ printAsIpeSelection
-       . map (iO' . (^.core) . snd)
-       . toList . PG.rawFacePolygons $ test'
+-- printP = mapM_ printAsIpeSelection
+--        . map (iO' . (^.core) . snd)
+--        . toList . PG.rawFacePolygons $ test'
 
 
-printPPX = mapM_ printAsIpeSelection
-        . map (iO' . (^.core) . snd)
-        . toList . rawFacePolygons
+-- printPPX = mapM_ printAsIpeSelection
+--         . map (iO' . (^.core) . snd)
+--         . toList . rawFacePolygons
 
-printPP = printPPX test
+-- printPP = printPPX test
 
-parts' = map (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
-       . lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
+-- parts' = map (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
+--        . lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
 
-parts'' = lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
+-- parts'' = lefts . map ((^.core) . snd) . toList . rawFacePolygons $ monotonePs
 
 
 --------------------------------------------------------------------------------
