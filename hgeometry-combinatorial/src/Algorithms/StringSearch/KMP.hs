@@ -16,11 +16,13 @@ module Algorithms.StringSearch.KMP( isSubStringOf
                                   ) where
 
 import           Control.Monad.ST
-import qualified Data.Foldable as F
 import qualified Data.Vector as V
 import           Data.Vector.Generic ((!))
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
+import qualified VectorBuilder.Builder as Builder
+import qualified VectorBuilder.Vector as Builder
+
 
 --------------------------------------------------------------------------------
 
@@ -43,7 +45,9 @@ buildFailureFunction p = UV.create $ do
 --
 -- running time: \(O(n+m)\), where p has length \(m\) and t has length \(n\).
 isSubStringOf       :: (Eq a, Foldable p, Foldable t) => p a -> t a -> Maybe Int
-p `isSubStringOf` t = kmpMatch (V.fromList . F.toList $ p) (V.fromList . F.toList $ t)
+p `isSubStringOf` t = kmpMatch (Builder.build . Builder.foldable $ p)
+                               (Builder.build . Builder.foldable $ t)
+
 
 -- | Test if the first argument, the pattern p, occurs as a consecutive subsequence in t.
 --

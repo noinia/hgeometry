@@ -30,7 +30,7 @@ module Data.CircularSeq( CSeq
                        , isShiftOf
                        ) where
 
-import           Algorithms.StringSearch.KMP(isSubStringOf)
+import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
 import           Control.Lens (lens, Lens', bimap)
 import qualified Data.Foldable as F
@@ -43,6 +43,8 @@ import qualified Data.Sequence as S
 import qualified Data.Traversable as T
 import           Data.Tuple (swap)
 import           GHC.Generics (Generic)
+import           Test.QuickCheck(Arbitrary(..))
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -75,17 +77,15 @@ instance T.Traversable CSeq where
 
 instance Foldable1 CSeq
 
-
 instance F.Foldable CSeq where
   foldMap = T.foldMapDefault
   length (CSeq l _ r) = 1 + S.length l + S.length r
 
-
-
-
 instance Functor CSeq where
   fmap = T.fmapDefault
 
+instance Arbitrary a => Arbitrary (CSeq a) where
+  arbitrary = CSeq <$> arbitrary <*> arbitrary <*> arbitrary
 
 singleton   :: a -> CSeq a
 singleton x = CSeq S.empty x S.empty
@@ -370,14 +370,15 @@ splitIncr _   []       = ([],[])
 splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
                       . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
 
--- | Test if the circular list is a cyclic shift of the second list.
+-- | Test if the circular list is a cyclic shift of the second
+-- list. We have that
+--
+-- prop> (xs `isShiftOf` ys) == (xs `elem` allRotations (ys :: CSeq Int))
 --
 -- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of
 -- the lists.
 isShiftOf         :: Eq a => CSeq a -> CSeq a -> Bool
-xs `isShiftOf` ys = let m = length xs
-                        n = length ys
-                        twice zs = let zs' = once zs in zs' <> zs'
-                        once     = leftElements
-                    in isJust $ if m >= n then once ys `isSubStringOf` twice xs
-                                          else once xs `isSubStringOf` twice ys
+xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
+                        once        = leftElements
+                        check as bs = isJust $ once as `isSubStringOf` twice bs
+                    in length xs == length ys && check xs ys
