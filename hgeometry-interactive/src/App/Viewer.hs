@@ -16,6 +16,7 @@ import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
 import           Miso.String (ms)
+import           Miso.Subscription.MouseExtra
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
 
@@ -112,8 +113,8 @@ mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = [ --relativeMouseSub "mySvg" (CanvasAction . GetMouseState)
-                                        mouseSub (CanvasAction . MouseMove)
+                    , subs          = [ relativeMouseSub "mySvg" (CanvasAction . MouseMove)
+                                        -- mouseSub (CanvasAction . MouseMove)
                                       , arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False

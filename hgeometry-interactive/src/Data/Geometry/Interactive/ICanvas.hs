@@ -14,6 +14,7 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
 import           Control.Lens hiding (view, element)
 import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Aeson.Types
 import           Miso hiding (update, view)
@@ -24,8 +25,9 @@ import Debug.Trace
 
 -- * Model
 
-data ICanvas r = ICanvas { _canvas        :: Canvas r
-                         , _mousePosition :: Maybe (Point 2 Int)
+data ICanvas r = ICanvas { _canvas           :: Canvas r
+                         , _canvasClientRect :: Maybe (Rectangle () r)
+                         , _mousePosition    :: Maybe (Point 2 Int)
                          } deriving (Show,Eq)
 makeLenses ''ICanvas
 
@@ -36,7 +38,7 @@ mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosit
 
 -- | Createas an interactive lbank canvas
 blankCanvas     :: Num r => Int -> Int -> ICanvas r
-blankCanvas w h = ICanvas (createCanvas w h) Nothing
+blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing
 
 
 
@@ -66,7 +68,7 @@ view            :: (RealFrac r, ToSvgCoordinate r)
                 -> [Attribute action] -> [View action] -> View action
 view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseMove  (f . MouseMove)
                                              , onMouseLeave (f MouseLeave)
-                                             , style_ (Map.fromList [("margin-left", "100px")])
+                                             -- , style_ (Map.fromList [("margin-left", "100px")])
                                              ] <> ats) vs
 
 
