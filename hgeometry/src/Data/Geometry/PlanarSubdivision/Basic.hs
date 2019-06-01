@@ -28,7 +28,8 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             , fromConnectedSegments
                                             , fromPlaneGraph, fromPlaneGraph'
 
-                                            , numVertices, numEdges, numFaces, numDarts
+                                            , numComponents, numVertices
+                                            , numEdges, numFaces, numDarts
                                             , dual
 
                                             , components, component
@@ -69,18 +70,18 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
                                             ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
-import           Data.Aeson
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.LineSegment
+import           Data.Geometry.PlanarSubdivision.Raw
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.PlanarGraph.Dart(allDarts,isPositive)
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.PlanarGraph.Dart (allDarts,isPositive)
 import qualified Data.PlaneGraph as PG
 import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
                                 , Dart, VertexId(..), FaceId(..), twin
@@ -96,60 +97,7 @@ import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
--- | The Face data consists of the data itself and a list of holes
-data FaceData h f = FaceData { _holes :: (Seq.Seq h)
-                             , _fData :: !f
-                             } deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
-makeLenses ''FaceData
-
-instance Bifunctor FaceData where
-  bimap f g (FaceData hs x) = FaceData (fmap f hs) (g x)
-
-
-instance (FromJSON h, FromJSON f) => FromJSON (FaceData h f)
-instance (ToJSON h, ToJSON f)     => ToJSON (FaceData h f) where
-  toEncoding = genericToEncoding defaultOptions
-
-
 --------------------------------------------------------------------------------
-
-
-data Wrap' s
-type family Wrap (s :: k) :: k where
-  Wrap s = Wrap' s
-
-newtype ComponentId s = ComponentId { unCI :: Int }
-  deriving (Show,Eq,Ord,Generic,Bounded,Enum,ToJSON,FromJSON)
-
-
-data Raw s ia a = Raw { _compId  :: !(ComponentId s)
-                      , _idxVal  :: !ia
-                      , _dataVal :: !a
-                      } deriving (Eq,Show,Functor,Foldable,Traversable,Generic)
-
-instance (FromJSON ia, FromJSON a) => FromJSON (Raw s ia a)
-instance (ToJSON ia, ToJSON a) => ToJSON (Raw s ia a) where
-  toEncoding = genericToEncoding defaultOptions
-
--- | get the dataVal of a Raw
-dataVal :: Lens (Raw s ia a) (Raw s ia b) a b
-dataVal = lens (\(Raw _ _ x) -> x) (\(Raw c i _) y -> Raw c i y)
-
-
-data RawFace s f = RawFace { _faceComp :: Either (ComponentId s, FaceId' (Wrap s))
-                                                 (Seq.Seq (Dart s))
-                           -- a face may correspond to a single inner
-                           -- face and several outer faces.  if the
-                           -- face does correspond to a single inner
-                           -- face (a Left constructor) we can find the corresponding outerfaces
-                           -- through faceDataVal.holes
-                           -- the face represents the (global outerface) of several components
-                           -- (and no inner face), we just store a list of darts, one per
-                           -- component that it is the outerface of
-                           , _faceDataVal :: FaceData (Dart s) f
-                           } deriving (Eq,Show,Functor,Foldable,Traversable,Generic)
-makeLenses ''RawFace
-
 --------------------------------------------------------------------------------
 
 -- | A connected component.
@@ -215,9 +163,9 @@ fromPlaneGraph'        :: forall s v e f r. PlaneGraph s v e f r -> Dart s
 fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
   where
     c = ComponentId 0
-    vd = V.imap    (\i v   -> Raw c (VertexId i) v)                    $ g^.PG.vertexData
-    ed = V.zipWith (\d dd  -> Raw c d            dd) allDarts''        $ g^.PG.rawDartData
-    fd = V.imap (\i f      -> RawFace (mkFaceComp i) (mkFaceData i f)) $ g^.PG.faceData
+    vd = V.imap    (\i v   -> Raw c (VertexId i) v)                   $ g^.PG.vertexData
+    ed = V.zipWith (\d dd  -> Raw c d dd) allDarts''                  $ g^.PG.rawDartData
+    fd = V.imap (\i f      -> RawFace (mkFaceIdx i) (mkFaceData i f)) $ g^.PG.faceData
 
     g' :: PlaneGraph s (VertexId' s) (Dart s) (FaceId' s) r
     g' = g&PG.faceData    %~ V.imap (\i _ -> mkFaceId i)
@@ -230,9 +178,9 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     -- make sure the outerFaceId is 0
     oF@(FaceId (VertexId of')) = PG.leftFace ofD g
 
-    mkFaceComp i | i == 0    = Right (Seq.singleton ofD)
-                 | i == of'  = Left (c,mkFaceId 0)
-                 | otherwise = Left (c,mkFaceId i)
+    mkFaceIdx i | i == 0    = Nothing
+                | i == of'  = Just (c,mkFaceId 0)
+                | otherwise = Just (c,mkFaceId i)
 
     -- at index i we are storing the outerface
     mkFaceData                 :: Int -> f -> FaceData (Dart s) f
@@ -298,6 +246,13 @@ data PolygonFaceData = Inside | Outside deriving (Show,Read,Eq)
 
 --------------------------------------------------------------------------------
 -- * Basic Graph information
+
+-- | Get the number of vertices
+--
+-- >>> numVertices myGraph
+-- 1
+numComponents :: PlanarSubdivision s v e f r  -> Int
+numComponents = V.length . _components
 
 -- | Get the number of vertices
 --
@@ -514,9 +469,9 @@ outerBoundaryDarts f ps = V.concatMap single . V.fromList . NonEmpty.toList $ as
 -- | Get the local face and component from a given face.
 asLocalF                          :: FaceId' s -> PlanarSubdivision s v e f r
                                   -> NonEmpty (ComponentId s, FaceId' (Wrap s), Component s r)
-asLocalF (FaceId (VertexId f)) ps = case ps^?!rawFaceData.ix f.faceComp of
-                                      Left (ci,f') -> (ci,f',ps^.component ci) :| []
-                                      Right ss     -> toLocalF <$> NonEmpty.fromList (F.toList ss)
+asLocalF (FaceId (VertexId f)) ps = case ps^?!rawFaceData.ix f of
+      RawFace (Just (ci,f')) _        -> (ci,f',ps^.component ci) :| []
+      RawFace Nothing (FaceData hs _) -> toLocalF <$> NonEmpty.fromList (F.toList hs)
   where
     toLocalF d = let (ci,d',c) = asLocalD d ps in (ci,PG.leftFace d' c,c)
 
@@ -531,11 +486,14 @@ boundaryVertices f ps = (\d -> headOf d ps) <$> outerBoundaryDarts f ps
 
 
 -- | Lists the holes in this face, given as a list of darts to arbitrary darts
--- on those faces.
+-- on those faces. The returned darts are on the outside of the hole, i.e. they are
+-- incident to the given input face:
+--
+-- prop> all (\d -> leftFace d ps == fi) $ holesOf fi ps
 --
 -- running time: \(O(k)\), where \(k\) is the number of darts returned.
-holesOf      :: FaceId' s -> PlanarSubdivision s v e f r -> Seq.Seq (Dart s)
-holesOf f ps = ps^.faceDataOf f.holes
+holesOf       :: FaceId' s -> PlanarSubdivision s v e f r -> Seq.Seq (Dart s)
+holesOf fi ps = ps^.faceDataOf fi.holes
 
 
 --------------------------------------------------------------------------------

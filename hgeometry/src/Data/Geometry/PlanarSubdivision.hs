@@ -12,17 +12,40 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
+                                      , fromSimplePolygons
                                       -- , module Data.Geometry.PlanarSubdivision.Build
                                       , fromPolygon
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
+import           Data.Ext
+import           Data.Semigroup.Foldable
 import           Data.Geometry.PlanarSubdivision.Basic
+import           Data.Geometry.PlanarSubdivision.Merge
+import           Data.BinaryTree(asBalancedBinLeafTree, foldUp, Elem(..))
 import           Data.Geometry.Polygon
 import qualified Data.PlaneGraph as PG
 import           Data.Proxy
 
+
+import Data.Geometry.Point
+import qualified Data.List.NonEmpty as NonEmpty
+
 --------------------------------------------------------------------------------
+
+-- Constructs a planar subdivision from a collection of \(k\) disjoint
+-- simple polygons of total complexity \(O(n)\).
+--
+-- runningtime: \(O(n\log k)\)
+fromSimplePolygons       :: (Foldable1 t, Ord r, Fractional r)
+                         => proxy s
+                         -> f -- ^ outer face data
+                         -> t (SimplePolygon p r :+ f) -- ^ the disjoint simple polygons
+                         -> PlanarSubdivision s p () f r
+fromSimplePolygons px oD = foldUp (\l _ r -> merge l r)
+                                  (\(Elem (pg :+ iD)) -> fromSimplePolygon px pg iD oD)
+                         . asBalancedBinLeafTree
+                         . toNonEmpty
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible
@@ -91,3 +114,31 @@ holeData (Hole f _) = f
 getP            :: HoleData f p -> Maybe p
 getP (Outer _)  = Nothing
 getP (Hole _ p) = Just p
+
+--------------------------------------------------------------------------------
+
+data Test = Test
+data Id a = Id a
+
+
+simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
+simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
+                                                             , Point2 128 688
+                                                             , Point2 176 672
+                                                             , Point2 256 672
+                                                             , Point2 272 608
+                                                             , Point2 384 656
+                                                             , Point2 336 768
+                                                             , Point2 272 720
+                                                             ]
+
+triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
+triangle = (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
+         $ trianglePG
+
+trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
+
+
+mySubDiv = fromSimplePolygons (Id Test)
+                              0
+                              (NonEmpty.fromList [simplePg' :+ 1, trianglePG :+ 2])

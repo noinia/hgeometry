@@ -1,33 +1,44 @@
-module Data.Geometry.PlanarSubdivision.Merge where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PlnarSubdivision.Merge
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+-- Description :  Functions for merging two planar subdivisions
+--
+--------------------------------------------------------------------------------
+module Data.Geometry.PlanarSubdivision.Merge( merge
+                                            , mergeWith
+                                            ) where
 
 import           Control.Lens
-import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Raw
-import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.PlanarGraph.Dart
 import qualified Data.PlaneGraph as PG
-import           Data.PlaneGraph( PlaneGraph, PlanarGraph, dual
-                                , Dart, VertexId(..), FaceId(..), twin
-                                , World(..)
+import           Data.PlaneGraph( Dart, VertexId(..), FaceId(..)
                                 , VertexId', FaceId'
-                                , VertexData, location, vData
-                                , HasDataOf(..)
                                 )
-import           Data.Proxy
-import qualified Data.Sequence as Seq
-import           Data.Util
 import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
+--------------------------------------------------------------------------------
 
--- | Merge a pair of *disjoint* planar subdivisions!
+-- | Merge a pair of *disjoint* planar subdivisions, unifying their
+-- outer face. For the outerface data it simply takes the data of the
+-- first subdivision.
+--
+-- runningtime: \(O(n)\)
+merge :: PlanarSubdivision s v e f r
+      -> PlanarSubdivision s v e f r
+      -> PlanarSubdivision s v e f r
 merge = mergeWith const
 
--- | Merge a pair of *disjoint* planar subdivisions!
--- the functions specifies what to do with the outer face.
-mergeWith         :: (f -> f -> f)
+-- | Merge a pair of *disjoint* planar subdivisions. In particular,
+-- this function unifies the structure assuming that the two
+-- subdivisions share the outer face.
+--
+-- runningtime: \(O(n)\)
+mergeWith         :: (f -> f -> f) -- ^  how to merge the data of the outer face
                   -> PlanarSubdivision s v e f r
                   -> PlanarSubdivision s v e f r
                   -> PlanarSubdivision s v e f r
@@ -41,19 +52,21 @@ mergeWith f p1 p2 = PlanarSubdivision cs vd rd rf
     rd = p1^.rawDartData <> p2'^.rawDartData
     rf = mergeFaceData f (p1^.rawFaceData) (p2'^.rawFaceData)
 
-mergeFaceData f vs1 vs2 = let ts = V.tail vs1 <> V.tail vs2
-                              h  = mergeOuterFaces f (V.head vs1) (V.head vs2)
-                          in V.cons h ts
+mergeFaceData           :: (f -> f -> f)
+                        -> V.Vector (RawFace s f)
+                        -> V.Vector (RawFace s f)
+                        -> V.Vector (RawFace s f)
+mergeFaceData f vs1 vs2 = V.cons h ts
 
-mergeOuterFaces f (FaceData hs1 x1)  (FaceData hs2 x2) = FaceData (hs1 <> hs2) (f x1 x2)
+  where
+    ts = V.tail vs1 <> V.tail vs2
+    h  = let FaceData hs1 x1 = vs1^.to V.head.faceDataVal
+             FaceData hs2 x2 = vs2^.to V.head.faceDataVal
+         in RawFace Nothing $ FaceData (hs1 <> hs2) (f x1 x2)
 
-
--- | applies a function to the first value of a vector
-onHead     :: (a -> a) -> V.Vector a -> V.Vector a
-onHead f v = v&ix 0 %~ f
-
-
-    -- TODO: We still have to do something about the outer face I think.
+-- -- | applies a function to the first value of a vector
+-- onHead     :: (a -> a) -> V.Vector a -> V.Vector a
+-- onHead f v = v&ix 0 %~ f
 
 -- | Shift the indices in a planar subdiv by the given numbers
 -- (componentId;vertexId,darts,faceIds). Note that the result is not really a
@@ -64,24 +77,26 @@ shift                                             :: forall s v e f r.
                                                   -> PlanarSubdivision s v e f r
 shift nc nv nd nf (PlanarSubdivision cs vd rd rf) = PlanarSubdivision cs' vd' rd' rf'
   where
-    cs' = (\pg -> pg&PG.vertexData.traverse  %~ fv
-                    &PG.rawDartData.traverse %~ fd
-                    &PG.faceData.traverse    %~ ff
+    cs' = (\pg -> pg&PG.vertexData.traverse  %~ incV
+                    &PG.rawDartData.traverse %~ incD
+                    &PG.faceData.traverse    %~ incFi
           ) <$> cs
-    vd' = (\(Raw ci i x) -> Raw (fc ci) i x) <$> vd
-    rd' = (\(Raw ci i x) -> Raw (fc ci) i x) <$> rd
-    rf' = (\(Raw ci i x) -> Raw (fc ci) i x) <$> rf
+    vd' = (\(Raw ci i x)      -> Raw (incC ci) i x)                    <$> vd
+    rd' = (\(Raw ci i x)      -> Raw (incC ci) i x)                    <$> rd
+    rf' = (\(RawFace fidx fd) -> RawFace (incFIdx <$> fidx) (incF fd)) <$> rf
 
-    fc                 :: ComponentId s -> ComponentId s
-    fc (ComponentId i) = ComponentId $ i + nc
+    incC                 :: forall s'. ComponentId s' -> ComponentId s'
+    incC (ComponentId i) = ComponentId $ i + nc
 
-    fv              :: VertexId' s -> VertexId' s
-    fv (VertexId i) = VertexId $ i + nv
+    incV              :: VertexId' s -> VertexId' s
+    incV (VertexId i) = VertexId $ i + nv
 
-    fd                  :: Dart s -> Dart s
-    fd (Dart (Arc a) p) = Dart (Arc $ a + nd) p
+    incD                  :: Dart s -> Dart s
+    incD (Dart (Arc a) p) = Dart (Arc $ a + nd) p
 
-    ff (FaceData hs fi) = FaceData (fd <$> hs) (ffi fi)
+    incFIdx (ci,fi) = (incC ci, incFi fi)
 
-    ffi                       :: FaceId' s -> FaceId' s
-    ffi (FaceId (VertexId i)) = FaceId . VertexId $ i + nf
+    incF (FaceData hs f) = FaceData (incD <$> hs) f
+
+    incFi                       :: forall s'. FaceId' s' -> FaceId' s'
+    incFi (FaceId (VertexId i)) = FaceId . VertexId $ i + nf
