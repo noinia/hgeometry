@@ -32,7 +32,7 @@ data ICanvas r = ICanvas { _canvas           :: Canvas r
 makeLenses ''ICanvas
 
 
-mouseCoordinates :: Num r => Getter (ICanvas r) (Maybe (Point 2 r))
+mouseCoordinates :: Fractional r => Getter (ICanvas r) (Maybe (Point 2 r))
 mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosition
 
 
@@ -66,22 +66,9 @@ view            :: (RealFrac r, ToSvgCoordinate r)
                 => (CanvasAction -> action)
                 -> ICanvas r
                 -> [Attribute action] -> [View action] -> View action
-view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseMove  (f . MouseMove)
-                                             , onMouseLeave (f MouseLeave)
+view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseLeave (f MouseLeave)
                                              -- , style_ (Map.fromList [("margin-left", "100px")])
                                              ] <> ats) vs
-
-
-onMouseMove   :: ((Int,Int) -> action) -> Attribute action
-onMouseMove f = on "mousemove" dec f
-  where
-    dec  :: Decoder (Int,Int)
-    dec  = Decoder decF (DecodeTarget mempty)
-    decF = withObject "event" $ \o -> g <$> o .: "clientX" <*> o .: "clientY"
-      where
-        g x y = traceShowId (x,y)
-
-
 
 
 
