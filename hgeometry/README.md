@@ -40,6 +40,8 @@ polygons.
   decomposition.
 * The classic (optimal) \(O(n\log n)\) time divide and conquer algorithm to
   compute the closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
+* An \(O(nm)\) time algorithm to compute the discrete Fr\'echet
+  distance of two sequences of points (curves).
 
 It also has some geometric data structures. In particular, HGeometry contans an
 implementation of
