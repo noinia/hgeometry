@@ -16,6 +16,7 @@ import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
 import           Miso.String (ms)
+import           Miso.Subscription.MouseExtra
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
 
@@ -23,11 +24,19 @@ import           Miso.Svg hiding (height_, id_, style_, width_)
 
 type Idx = Int
 
+data Screen = Screen
+
+-- data PSModel r = PSModel { _iCanvas  :: ICanvas r
+--                          , _subdiv   :: PlanarSubdivision Screen () () () r
+--                          }
+
+
 data CHModel r = CHModel { _iCanvas  :: ICanvas r
                          , _points   :: [Point 2 r :+ Int]
                          , _hull     :: Maybe (ConvexPolygon Int r)
                          , _nextNum  :: Int
                          , _selected :: Maybe (Point 2 r :+ Int)
+                         , _mousePositionX :: Maybe (Point 2 Int)
                          } deriving (Show,Eq)
 makeLenses ''CHModel
 
@@ -36,7 +45,7 @@ type Model = CHModel Rational
 ----------------------------------------
 
 initialModel :: Model
-initialModel = CHModel (blankCanvas 1024  576) [] Nothing 1 Nothing
+initialModel = CHModel (blankCanvas 500  576) [] Nothing 1 Nothing Nothing
 
 --------------------------------------------------------------------------------
 
@@ -44,6 +53,7 @@ type Action = GAction Rational
 
 data GAction r = Id
                | CanvasAction CanvasAction
+               | Mouse (Int,Int)
                | AddPoint
                | Select (Point 2 r :+ Int)
                deriving (Show,Eq)
@@ -57,6 +67,8 @@ updateModel m = \case
                                      pure $ m&iCanvas .~ c'
     AddPoint                    -> addPoint
     Select p                    -> noEff $ m&selected .~ Just p
+    Mouse (x,y)         -> let p  = Point2 x y
+                           in noEff $ m&mousePositionX .~ Just p
   where
     addPoint = noEff $ recomputeHull m'
        where
@@ -88,11 +100,25 @@ viewModel m = div_ [ ]
                           [ div_ [] ["selected: "]
                           , text . ms . show $ m^.selected
                           ]
+
+                   , svg_ [ width_ "500"
+                          , height_ "500"
+                          , id_ "svgz"
+                          ]
+                          [ draw p [ fill_ "blue" ]  | Just p <- [m^.mousePositionX]
+                          ]
+
                    ]
   where
     canvasBody = [ draw pg [ stroke_ "red"
                            , fill_   "rgba(255, 0, 0, 0.6)"
                            ] | Just pg <- [m^.hull]]
+              <> [rect_ [ fill_ "red"
+                        , x_ "0"
+                        , y_ "0"
+                        , width_ "100"
+                        , height_ "100"
+                        ] []]
               <> [ g_ [] [ draw p [ fill_ "black"
                                   , onClick $ Select p'
                                   ]
@@ -112,8 +138,9 @@ mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = [ --relativeMouseSub "mySvg" (CanvasAction . GetMouseState)
-                                        mouseSub (CanvasAction . MouseMove)
+                    , subs          = [ relativeMouseSub "mySvg" (CanvasAction . MouseMove)
+                                      , relativeMouseSub "svgz" Mouse
+                                        -- mouseSub (CanvasAction . MouseMove)
                                       , arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False

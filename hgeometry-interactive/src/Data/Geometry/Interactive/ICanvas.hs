@@ -14,6 +14,7 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
 import           Control.Lens hiding (view, element)
 import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
+import           Data.Geometry.Box
 import           Data.Geometry.Vector
 import           Data.Aeson.Types
 import           Miso hiding (update, view)
@@ -24,19 +25,20 @@ import Debug.Trace
 
 -- * Model
 
-data ICanvas r = ICanvas { _canvas        :: Canvas r
-                         , _mousePosition :: Maybe (Point 2 Int)
+data ICanvas r = ICanvas { _canvas           :: Canvas r
+                         , _canvasClientRect :: Maybe (Rectangle () r)
+                         , _mousePosition    :: Maybe (Point 2 Int)
                          } deriving (Show,Eq)
 makeLenses ''ICanvas
 
 
-mouseCoordinates :: Num r => Getter (ICanvas r) (Maybe (Point 2 r))
+mouseCoordinates :: Fractional r => Getter (ICanvas r) (Maybe (Point 2 r))
 mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosition
 
 
 -- | Createas an interactive lbank canvas
 blankCanvas     :: Num r => Int -> Int -> ICanvas r
-blankCanvas w h = ICanvas (createCanvas w h) Nothing
+blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing
 
 
 
@@ -64,22 +66,9 @@ view            :: (RealFrac r, ToSvgCoordinate r)
                 => (CanvasAction -> action)
                 -> ICanvas r
                 -> [Attribute action] -> [View action] -> View action
-view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseMove  (f . MouseMove)
-                                             , onMouseLeave (f MouseLeave)
-                                             , style_ (Map.fromList [("margin-left", "100px")])
+view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseLeave (f MouseLeave)
+                                             -- , style_ (Map.fromList [("margin-left", "100px")])
                                              ] <> ats) vs
-
-
-onMouseMove   :: ((Int,Int) -> action) -> Attribute action
-onMouseMove f = on "mousemove" dec f
-  where
-    dec  :: Decoder (Int,Int)
-    dec  = Decoder decF (DecodeTarget mempty)
-    decF = withObject "event" $ \o -> g <$> o .: "clientX" <*> o .: "clientY"
-      where
-        g x y = traceShowId (x,y)
-
-
 
 
 

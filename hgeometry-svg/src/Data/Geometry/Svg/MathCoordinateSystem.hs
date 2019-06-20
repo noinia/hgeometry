@@ -28,6 +28,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.Text (Text)
+import           Data.Util (SP(..))
 import           Prelude hiding ((!!))
 import           Text.Blaze.Internal (Attributable(..))
 import           Text.Blaze.Svg11 ((!))
@@ -81,17 +82,26 @@ renderCanvas cv ats vs = Svg.svg ! A.width   (toPValue w)
                                                    ! A.viewbox innerVB
                                                    $ vs
   where
-    dims@(Vector2 w h) = cv^.dimensions
-    Point2 cx cy       = round <$> cv^.center
+    Vector2 w h = cv^.dimensions
 
-    Vector2 vw vh = round  <$> (1 / cv^.zoomLevel) *^ (fromIntegral <$> dims)
+    SP (Point2 lx ly) (Vector2 vw vh) = bimap (fmap round) (fmap round) $ viewRectangle cv
+
 
     toVB = mconcat @Svg.AttributeValue . List.intersperse " " . map toPValue
     outerVB = toVB [0, (-1) * h, w, h]
-      -- role of the outer viewBox is to flip the coordinate system s.t. the origin
-      -- is in the bottom left rather than the top-left
+            -- the role of the outer viewBox is to flip the coordinate
+            -- system s.t. the origin is in the bottom left rather
+            -- than the top-left
+    innerVB = toVB [lx, ly, vw, vh]
 
-    innerVB = toVB [(cx - (vw `div` 2)), (cy - (vh `div` 2)), vw, vh]
+-- | Computes the view rectangle of the canvas; given by the lower left point and
+-- the dimensions (in real coordinates).
+viewRectangle    :: Fractional r => Canvas r -> SP (Point 2 r) (Vector 2 r)
+viewRectangle cv = SP (Point2 (cx - (vw / 2)) (cy - (vh / 2)))
+                      dims
+  where
+    Point2 cx cy         = cv^.center
+    dims@(Vector2 vw vh) = (1 / cv^.zoomLevel) *^ (fromIntegral <$> cv^.dimensions)
 
 infixl 9 !!
 (!!) :: Attributable t => t -> [Svg.Attribute] -> t
@@ -116,9 +126,18 @@ text_ (Point2 x y) ats t = Svg.g ! A.transform (mconcat [ "translate("
 
 -- | Computes the mouse position in terms of real world coordinates.
 -- pre: the coordinates given lie on the canvas
-realWorldCoordinates                 :: Num r => Canvas r -> Point 2 Int -> Point 2 r
-realWorldCoordinates cv (Point2 x y) = fromIntegral
-                      <$> Point2 x ((cv^.dimensions.element (C @ 1)) - y)
+realWorldCoordinates                 :: Fractional r => Canvas r -> Point 2 Int -> Point 2 r
+realWorldCoordinates cv (Point2 x y) =
+    applyViewBox cv $ Point2 x ((cv^.dimensions.element (C @ 1)) - y)
+                      -- position relative to the outer viewbox
+
+-- | Applies the viewbox transformation
+applyViewBox      :: Fractional r => Canvas r -> Point 2 Int -> Point 2 r
+applyViewBox cv p = Point2 (lx + (x/w) * vw) (ly + (y/h)*vh)
+  where
+    (Vector2 w h) = fromIntegral <$> cv^.dimensions
+    SP (Point2 lx ly) (Vector2 vw vh) = viewRectangle cv
+    Point2 x y = fromIntegral <$> p
 
 --------------------------------------------------------------------------------
 
