@@ -4,11 +4,16 @@ HGeometry
 [![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
 [![Hackage](https://img.shields.io/hackage/v/hgeometry.svg)](https://hackage.haskell.org/package/hgeometry)
 
-HGeometry provides some basic geometry types, and geometric algorithms and data
-structures for them. The main two focusses are: (1) Strong type safety, and (2)
-implementations of geometric algorithms and data structures with good
-asymptotic running time guarantees. Design choices showing these aspects are
-for example:
+HGeometry is a library for computing with geometric objects in
+Haskell. It defines basic geometric types and primitives, and it
+implements some geometric data structures and algorithms. The main two
+focusses are:
+
+- 1. Strong type safety, and
+- 2. implementations of geometric algorithms and data structures that
+have good asymptotic running time guarantees.
+
+Design choices showing these aspects are for example:
 
 - we provide a data type `Point d r` parameterized by a
 type-level natural number `d`, representing d-dimensional points (in all cases
@@ -20,9 +25,36 @@ newtype Point (d :: Nat) (r :: *) = Point { toVec :: Vector d r }
 - the vertices of a `PolyLine d p r` are stored in a `Data.LSeq` which enforces
 that a polyline is a proper polyline, and thus has at least two vertices.
 
-Please note that aspect (2), implementing good algorithms, is much work in
+Please note that aspect two, implementing good algorithms, is much work in
 progress. Only a few algorithms have been implemented, some of which could use
-some improvements. Currently, HGeometry provides the following algorithms:
+some improvements.
+
+HGeometry Packages
+------------------
+
+HGeometry is split into a few smaller packages. In particular:
+
+- hgeometry-combinatorial : defines some non-geometric
+  (i.e. combinatorial) data types, data structures, and algorithms.
+- hgeometry-ipe : defines functions for working with [ipe](http://ipe.otfried.org) files.
+- hgeometry-svg : defines functions for working with svg files.
+- hgeometry-interactive : defines functions for building an
+  interactive viewer using [miso](https://haskell-miso.org).
+- hgeometry : defines the actual geometric data types, data
+  structures, and algorithms.
+
+In addition there is a [hgeometry-examples](hgeometry-examples)
+package that defines some example applications, and a hgometry-test
+package that contains all testcases. The latter is to work around a
+bug in cabal.
+
+Available Geometric Algorithms
+------------------------------
+
+Apart from some basic geometric primitives such as intersecting
+line segments, testing if a point lies in a polygon etc, HGeometry
+implements some more advanced geometric algorithms. In particuar, the
+following algorithms are currently available:
 
 * two \(O(n \log n)\) time algorithms for convex hull in
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
@@ -40,20 +72,29 @@ polygons.
   decomposition.
 * The classic (optimal) \(O(n\log n)\) time divide and conquer algorithm to
   compute the closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
+* An \(O(nm)\) time algorithm to compute the discrete Fr\'echet
+  distance of two sequences of points (curves) of length \(n\) and
+  \(m\), respectively.
 
-It also has some geometric data structures. In particular, HGeometry contans an
-implementation of
+Available Geometric Data Structures
+-----------------------------------
+
+HGeometry also contains an implementation of some geometric data
+structures. In particular,
 
 * A one dimensional Segment Tree. The base tree is static.
 * A one dimensional Interval Tree. The base tree is static.
 * A KD-Tree. The base tree is static.
 
-HGeometry also includes a datastructure/data type for planar graphs. In
-particular, it has a `EdgeOracle` data structure, that can be built in \(O(n)\)
-time that can test if the graph contains an edge in constant time.
+There is also support for working with planar subdivisions. As a
+result, [hgeometry-combinatorial] also includes a data structure for
+working with planar graphs. In particular, it has an `EdgeOracle` data
+structure, that can be built in \(O(n)\) time that can test if the
+planar graph contains an edge in constant time.
 
-Numeric Types
--------------
+
+Avoiding Floating-point issues
+-------------------------------
 
 All geometry types are parameterized by a numerical type `r`. It is well known
 that Floating-point arithmetic and Geometric algorithms don't go well together;
@@ -62,8 +103,9 @@ results. Hence, I *strongly* advise against using `Double` or `Float` for these
 types. In several algorithms it is sufficient if the type `r` is
 `Fractional`. Hence, you can use an exact number type such as `Rational`.
 
-A Note on the Ext (:+) data type
----------------------------------
+
+Working with additional data
+----------------------------
 
 In many applications we do not just have geometric data, e.g. `Point d r`s or
 `Polygon r`s, but instead, these types have some additional properties, like a
@@ -75,43 +117,16 @@ etc. The typical Haskell approach would be to construct type-classes such as
 themselves, and thus we would like all the help that the type-system/compiler
 can give us. Hence, we choose to work with concrete types.
 
-To still allow for some extensibility our types will use the Ext (:+) type. For
-example, our `Polygon` data type, has an extra type parameter `p` that allows
-the vertices of the polygon to cary some extra information of type `p` (for
-example a color, a size, or whatever).
+To still allow for some extensibility our types will use the Ext (:+)
+type, as defined in the hgeometry-combinatorial package. For example,
+our `Polygon` data type, has an extra type parameter `p` that allows
+the vertices of the polygon to cary some extra information of type `p`
+(for example a color, a size, or whatever).
 
 ```haskell
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 ```
-
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.
-
-Reading and Writing Ipe files
------------------------------
-
-Apart from geometric types, HGeometry provides some interface for reading and
-writing Ipe (http://ipe.otfried.org). However, this is all very work in
-progress. Hence, the API is experimental and may change at any time! Here is an
-example showing reading a set of points from an Ipe file, computing the
-DelaunayTriangulation, and writing the result again to an output file
-
-```haskell
-mainWith                          :: Options -> IO ()
-mainWith (Options inFile outFile) = do
-    ePage <- readSinglePageFile inFile
-    case ePage of
-      Left err                         -> print err
-      Right (page :: IpePage Rational) -> case page^..content.traverse._IpeUse of
-        []         -> putStrLn "No points found"
-        syms@(_:_) -> do
-           let pts  = syms&traverse.core %~ (^.symbolPoint)
-               pts' = NonEmpty.fromList pts
-               dt   = delaunayTriangulation $ pts'
-               out  = [iO $ drawTriangulation dt]
-           writeIpeFile outFile . singlePageFromContent $ out
-```
-
-See the examples directory for more examples.
