@@ -24,8 +24,6 @@ import           Data.Geometry.HalfSpace
 import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable
 import           Data.Util

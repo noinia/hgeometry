@@ -6,7 +6,6 @@ import           Control.Lens ((^.))
 import           Control.Monad.ST (ST,runST)
 import           Data.Ext
 import           Data.Geometry.Point
-import           Data.Util (SP(..))
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import qualified VectorBuilder.Builder as Builder

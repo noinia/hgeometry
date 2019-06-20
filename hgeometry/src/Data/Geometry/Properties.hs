@@ -63,7 +63,7 @@ type instance NumType (Range a) = a
 -- fromEither' (Left x)  = coRec x
 -- fromEither' (Right x) = coRec x
 
-type family Union g h :: *
+-- type family Union g h :: *
 
-class IsUnionableWith g h where
-  union :: g -> h -> Union g h
+-- class IsUnionableWith g h where
+--   union :: g -> h -> Union g h
