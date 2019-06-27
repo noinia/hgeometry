@@ -117,5 +117,5 @@ onWheel = on "wheel" (Decoder dec dt)
   where
     dt = DecodeTarget mempty
     dec = withObject "event" $ \o -> (f <$> (o .: "deltaY"))
-    f   :: Int -> ZoomDirection
+    f   :: Double -> ZoomDirection
     f x = if x < 0 then ZoomIn else ZoomOut
