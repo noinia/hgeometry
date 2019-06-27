@@ -128,6 +128,14 @@ infoAreaBody m = [ div_ []
                         [ div_ [] ["selected: "]
                         , text . ms . show $ m^.selected
                         ]
+                 , div_ []
+                        [ div_ [] ["panstatus: "]
+                        , text . ms . show $ m^.iCanvas.panStatus
+                        ]
+                 , div_ []
+                        [ div_ [] ["zoomlevel: "]
+                        , text . ms . show $ m^.iCanvas.canvas.zoomLevel
+                        ]
                  ]
 
 
@@ -155,8 +163,9 @@ mainJSM = do
                                       , arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False
-                                    . Map.insert "touchmove" False
-                                    . Map.insert "mousemove" False
+                                    . Map.insert "touchmove"  False
+                                    . Map.insert "mousemove"  False
+                                    . Map.insert "wheel"      False
                                     $ defaultEvents
                     , initialAction = Id
                     , mountPoint    = Nothing
