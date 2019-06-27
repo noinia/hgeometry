@@ -3,7 +3,7 @@
 {-# LANGUAGE TupleSections              #-}
 module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.StaticCanvas
                                         , ICanvas(ICanvas), blankCanvas
-                                        , canvas, mousePosition
+                                        , canvas, mousePosition, panStatus
                                         , mouseCoordinates
 
                                         , CanvasAction(..)
@@ -11,23 +11,35 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
                                         , view
                                         ) where
 
-import           Control.Lens hiding (view, element)
+import           Control.Lens hiding (view, element, rmap, Zoom)
+import           Data.Aeson.Types
+import           Data.Geometry.Box
 import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
-import           Data.Geometry.Box
 import           Data.Geometry.Vector
-import           Data.Aeson.Types
-import           Miso hiding (update, view)
+import           Data.Intersection (coRec)
 import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
+import           Data.Proxy
+import           Data.Range
+import           Miso hiding (update, view)
 
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
-
 -- * Model
+
+data ZoomDirection = ZoomIn | ZoomOut deriving (Show,Read,Eq)
+
+data PanStatus r = NoPan
+                 | PanFrom (Point 2 Int) -- ^ point from which we are panning
+                           (Point 2 r) -- ^ center point of the viewport at that time
+                 deriving (Show,Eq)
 
 data ICanvas r = ICanvas { _canvas           :: Canvas r
                          , _canvasClientRect :: Maybe (Rectangle () r)
                          , _mousePosition    :: Maybe (Point 2 Int)
+                         , _panStatus        :: PanStatus r
+                           -- ^ point where we started panning from
                          } deriving (Show,Eq)
 makeLenses ''ICanvas
 
@@ -38,7 +50,7 @@ mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosit
 
 -- | Createas an interactive lbank canvas
 blankCanvas     :: Num r => Int -> Int -> ICanvas r
-blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing
+blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing NoPan
 
 
 
@@ -48,59 +60,62 @@ blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing
 data CanvasAction = MouseMove (Int,Int)
                   | MouseLeave
                   | ArrowPress Arrows
+                  | StartPan
+                  | StopPan
+                  | Zoom ZoomDirection
                   deriving (Show,Eq)
 
-
-update   :: Num r => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
+update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
 update m = \case
     MouseMove (x,y)         -> let p  = Point2 x y
                                in noEff $ m&mousePosition .~ Just p
+                                           &canvas.center %~ applyPan (m^.panStatus) p
     MouseLeave              -> noEff $ m&mousePosition .~ Nothing
     ArrowPress (Arrows x y) -> let v   = ((*2) . fromIntegral) <$> Vector2 x y
                                in noEff $ m&canvas.center %~ (.+^ v)
+    StartPan                -> let c  = m^.canvas.center
+                                   ps = case m^.mousePosition of
+                                          Nothing -> NoPan
+                                          Just p  -> PanFrom p c
+                               in noEff $ m&panStatus .~ ps
+    StopPan                 -> noEff $ m&panStatus .~ NoPan
+    Zoom dir                -> noEff $ m&canvas.zoomLevel %~ applyZoom dir
+
+applyZoom       :: (Fractional r, Ord r) => ZoomDirection -> r -> r
+applyZoom dir z = let delta = case dir of
+                                ZoomIn  -> 0.1
+                                ZoomOut -> (-1)*0.1
+                  in clampTo rng (z + delta)
+  where
+    rng = ClosedRange 0.5 10
+
+applyPan         :: Num r
+                 => PanStatus r
+                 -> Point 2 Int -- ^ current mouse position
+                 -> Point 2 r   -- ^ current center
+                 -> Point 2 r
+applyPan ps p c = case ps of
+  NoPan        -> c
+  PanFrom q oc -> let Vector2 vx vy = fromIntegral <$> (p .-. q) in oc .+^  Vector2 ((-1)*vx) vy
 
 
 -- * View
 
-view            :: (RealFrac r, ToSvgCoordinate r)
+view            :: ( RealFrac r, ToSvgCoordinate r)
                 => (CanvasAction -> action)
                 -> ICanvas r
                 -> [Attribute action] -> [View action] -> View action
-view f m ats vs = staticCanvas_ (m^.canvas) ([ onMouseLeave (f MouseLeave)
-                                             -- , style_ (Map.fromList [("margin-left", "100px")])
-                                             ] <> ats) vs
+view f m ats vs = staticCanvas_ (m^.canvas)
+                                ([ onMouseLeave $ f MouseLeave
+                                 , onMouseDown  $ f StartPan
+                                 , onMouseUp    $ f StopPan
+                                 , onWheel      $ f . Zoom
+                                 ] <> ats) vs
 
-
-
-
-
-    -- decodeAt =
-    -- decoder =
-    --    KeyCode <$> (o .: "keyCode" <|> o .: "which" <|> o .: "charCode")
-
-
--- view            :: ICanvas r -> View action
--- view cv = div_ [ ] [
---       renderCanvas cv
---                               [
---                               ]
---                               [ ellipse_ [ cx_ "512", cy_ "288", rx_ "50", ry_ "50"
---                                          , fill_ "red"
---                                          , onClick $ DoStuff "woei"
---                                          ] []
---                               -- , rect_ [width_"100000", height_ "2000" , x_ "-1000", y_ "-1000"
---                               --         , fill_ "blue"
---                               --         ] []
---                               , textAt_ @Int (100,20) [] [text "Woei!"]
---                               ]
---    ]
---     -- svg'_ [
---     --       ]
---     --       [ ellipse_ [ cx_ $ ms x
---     --                  , cy_ $ ms y
---     --                  , style_ svgStyle
---     --                  , rx_ "100"
---     --                  , ry_ "100"
---     --                  ] [ ]
---     --       , text'_ (x,y) [] [text $ ms $ show (x,y) ]
---     --       ]
+onWheel :: (ZoomDirection -> action) -> Attribute action
+onWheel = on "wheel" (Decoder dec dt)
+  where
+    dt = DecodeTarget mempty
+    dec = withObject "event" $ \o -> (f <$> (o .: "deltaY"))
+    f   :: Int -> ZoomDirection
+    f x = if x < 0 then ZoomIn else ZoomOut
