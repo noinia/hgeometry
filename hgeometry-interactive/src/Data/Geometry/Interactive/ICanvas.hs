@@ -36,7 +36,6 @@ data PanStatus r = NoPan
                  deriving (Show,Eq)
 
 data ICanvas r = ICanvas { _canvas           :: Canvas r
-                         , _canvasClientRect :: Maybe (Rectangle () r)
                          , _mousePosition    :: Maybe (Point 2 Int)
                          , _panStatus        :: PanStatus r
                            -- ^ point where we started panning from
@@ -50,20 +49,27 @@ mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosit
 
 -- | Createas an interactive lbank canvas
 blankCanvas     :: Num r => Int -> Int -> ICanvas r
-blankCanvas w h = ICanvas (createCanvas w h) Nothing Nothing NoPan
+blankCanvas w h = ICanvas (createCanvas w h) Nothing NoPan
 
 
-
+--------------------------------------------------------------------------------
 -- * Controller
+
+data Capabilities = Zoomable
+                  | Pannable
+                  deriving (Show,Eq)
+
+
 
 
 data CanvasAction = MouseMove (Int,Int)
                   | MouseLeave
                   | ArrowPress Arrows
-                  | StartPan
-                  | StopPan
-                  | Zoom ZoomDirection
+                  | Pan PanAction
+                  | Zoom ZoomAction
                   deriving (Show,Eq)
+
+
 
 update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
 update m = \case
@@ -73,13 +79,24 @@ update m = \case
     MouseLeave              -> noEff $ m&mousePosition .~ Nothing
     ArrowPress (Arrows x y) -> let v   = ((*2) . fromIntegral) <$> Vector2 x y
                                in noEff $ m&canvas.center %~ (.+^ v)
-    StartPan                -> let c  = m^.canvas.center
-                                   ps = case m^.mousePosition of
-                                          Nothing -> NoPan
-                                          Just p  -> PanFrom p c
-                               in noEff $ m&panStatus .~ ps
-    StopPan                 -> noEff $ m&panStatus .~ NoPan
-    Zoom dir                -> noEff $ m&canvas.zoomLevel %~ applyZoom dir
+    Pan pa                  -> updatePan m pa
+    Zoom za                 -> updateZoom m za
+
+
+----------------------------------------
+-- ** Zooming
+
+newtype ZoomAction = ZoomAction ZoomDirection deriving (Show,Eq)
+
+updateZoom      :: (Fractional r, Ord r)
+                => ICanvas r -> ZoomAction -> Effect action (ICanvas r)
+updateZoom m za = m&canvas.zoomLevel %%~ flip updateZoom' za
+
+updateZoom'   :: (Fractional r, Ord r)
+             => r -> ZoomAction -> Effect action r
+updateZoom' z = \case
+    ZoomAction dir                -> noEff $ applyZoom dir z
+
 
 applyZoom       :: (Fractional r, Ord r) => ZoomDirection -> r -> r
 applyZoom dir z = let delta = case dir of
@@ -88,6 +105,28 @@ applyZoom dir z = let delta = case dir of
                   in clampTo rng (z + delta)
   where
     rng = ClosedRange 0.5 10
+
+----------------------------------------
+-- ** Panning
+
+data PanAction = StartPan
+               | StopPan
+               deriving (Show,Eq)
+
+updatePan      :: Num r => ICanvas r -> PanAction -> Effect action (ICanvas r)
+updatePan m pa = m&panStatus %%~ \_ -> updatePan' (m^.mousePosition) (m^.canvas.center) pa
+
+updatePan'        :: Num r
+                  => Maybe (Point 2 Int) -- ^ current mouse position
+                  -> Point 2 r           -- ^ current center of the viewport
+                  -> PanAction
+                  -> Effect action (PanStatus r)
+updatePan' mp c = noEff . \case
+    StartPan                -> case mp of
+                                 Nothing -> NoPan
+                                 Just p  -> PanFrom p c
+    StopPan                 -> NoPan
+
 
 applyPan         :: Num r
                  => PanStatus r
@@ -99,6 +138,7 @@ applyPan ps p c = case ps of
   PanFrom q oc -> let Vector2 vx vy = fromIntegral <$> (p .-. q) in oc .+^  Vector2 ((-1)*vx) vy
 
 
+--------------------------------------------------------------------------------
 -- * View
 
 view            :: ( RealFrac r, ToSvgCoordinate r)
@@ -107,9 +147,9 @@ view            :: ( RealFrac r, ToSvgCoordinate r)
                 -> [Attribute action] -> [View action] -> View action
 view f m ats vs = staticCanvas_ (m^.canvas)
                                 ([ onMouseLeave $ f MouseLeave
-                                 , onMouseDown  $ f StartPan
-                                 , onMouseUp    $ f StopPan
-                                 , onWheel      $ f . Zoom
+                                 , onMouseDown  $ f (Pan StartPan)
+                                 , onMouseUp    $ f (Pan StopPan)
+                                 , onWheel      $ f . Zoom . ZoomAction
                                  ] <> ats) vs
 
 onWheel :: (ZoomDirection -> action) -> Attribute action
