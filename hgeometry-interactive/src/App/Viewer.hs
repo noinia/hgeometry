@@ -88,7 +88,7 @@ viewModel m = div_ [ class_ "container"
                           [ div_ [ class_ "column is-9 has-background-link" ]
                                  [ ICanvas.view CanvasAction
                                                (m^.iCanvas)
-                                               [ --onClick AddPoint
+                                               [ -- onClick AddPoint
                                                  id_ "mySvg"
                                                , class_ "has-background-white"
                                                ]
@@ -117,7 +117,7 @@ canvasBody m = [ draw pg [ stroke_ "red"
                           , textAt p [] (ms i)
                           ]
                   | p'@(p :+ i) <- m^.points ]
-               <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.iCanvas.mouseCoordinates] ]
+               -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.iCanvas.mouseCoordinates] ]
 
 infoAreaBody   :: Model -> [View Action]
 infoAreaBody m = [ div_ []

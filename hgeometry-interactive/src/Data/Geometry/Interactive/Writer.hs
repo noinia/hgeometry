@@ -12,6 +12,7 @@ import           Data.Geometry.Ball
 import           Data.Geometry.PolyLine
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
+import qualified Data.Geometry.Ipe as Ipe
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Vector
 import qualified Data.List as List
@@ -86,6 +87,9 @@ instance (ToMisoString r, Floating r) => Drawable (Disk p r) where
   draw = cDisk
 
 
+instance ToMisoString r => Drawable (Ipe.IpeObject r) where
+  draw = cIpeObject
+
 --------------------------------------------------------------------------------
 -- * Functions to draw geometric objects
 
@@ -116,7 +120,7 @@ toPointsString =
 
 
 
-cCircle              :: (ToMisoString r, Floating r)
+cCircle              :: ToMisoString r
                      => Circle p r -> [Attribute action] -> View action
 cCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
                                         , ry_ . ms $ r
@@ -127,3 +131,48 @@ cCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
 cDisk            :: (ToMisoString r, Floating r)
                  => Disk p r -> [Attribute action] -> View action
 cDisk (Disk c r) = cCircle (Circle c r)
+
+
+--------------------------------------------------------------------------------
+-- * Functions to draw ipe objects
+
+cIpeObject :: ToMisoString r => Ipe.IpeObject r -> [Attribute action] -> View action
+cIpeObject = \case
+    Ipe.IpeGroup g     -> withIpeAttrs cIpeGroup g
+    Ipe.IpeImage i     -> withIpeAttrs cIpeImage i
+    Ipe.IpeTextLabel t -> withIpeAttrs cIpeTextLabel t
+    Ipe.IpeMiniPage m  -> withIpeAttrs cIpeMiniPage m
+    Ipe.IpeUse u       -> withIpeAttrs cIpeUse u
+    Ipe.IpePath p      -> withIpeAttrs cIpePath p
+
+withIpeAttrs                   :: (i -> [Attribute action] -> View action)
+                               -> (i :+ a) -> [Attribute action] -> View action
+withIpeAttrs f (i :+ iAts) ats = f i (fromIAts iAts <> ats)
+  where
+    fromIAts _ = []
+
+cIpeGroup                    :: ToMisoString r => Ipe.Group r -> [Attribute action] -> View action
+cIpeGroup (Ipe.Group os) ats = g_ ats (map (flip cIpeObject []) os)
+
+cIpeImage = undefined
+cIpeTextLabel = undefined
+cIpeMiniPage = undefined
+
+cIpeUse                   :: ToMisoString r => Ipe.IpeSymbol r -> [Attribute action] -> View action
+cIpeUse (Ipe.Symbol p _ ) = withAts ellipse_ [ rx_ r
+                                             , ry_ r
+                                             , cx_ . ms $ p^.xCoord
+                                             , cy_ . ms $ p^.yCoord
+                                             ]
+  where
+    r = "5"
+
+
+cIpePath                  :: ToMisoString r => Ipe.Path r -> [Attribute action] -> View action
+cIpePath (Ipe.Path s) ats = g_ ats (map (flip cIpePathSegment []) . F.toList $ s)
+
+cIpePathSegment :: ToMisoString r => Ipe.PathSegment r -> [Attribute action] -> View action
+cIpePathSegment = \case
+    Ipe.PolyLineSegment pl -> cPolyLine pl
+    Ipe.PolygonPath  pg    -> cPolygon pg
+    _                      -> error "toValue: not implemented yet"
