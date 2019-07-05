@@ -1,34 +1,23 @@
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE UndecidableInstances       #-}
+{-# LANGUAGE OverloadedStrings          #-}
 module Data.Geometry.Interactive.Writer where
 
 import           Control.Lens hiding (Const,rmap)
-import qualified Data.ByteString as B
-import           Data.Colour.SRGB (RGB(..))
 import           Data.Ext
-import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.Geometry.Ball
-import           Data.Geometry.Interactive.StaticCanvas
+import           Data.Geometry.Interactive.OrphanInstances()
 import qualified Data.Geometry.Ipe as Ipe
 import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Value
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Transformation (Matrix)
-import           Data.Geometry.Vector
-import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.Map as Map
 import           Data.Maybe (catMaybes)
 import           Data.Proxy
 import qualified Data.Semigroup.Foldable as F1
-import           Data.Singletons (Apply)
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
@@ -55,18 +44,6 @@ withAts'                  :: ([Attribute action] -> [View action] -> View action
                           -> [View action]
                           -> View action
 withAts' f ats1 ats2 body = f (ats1 <> ats2) body
-
-
---------------------------------------------------------------------------------
-
-instance HasResolution p => ToMisoString (Fixed p) where
-  toMisoString = toMisoString . showFixed True
-  fromMisoString = read . fromMisoString
-
-instance ToMisoString Rational where
-  toMisoString = toMisoString @Pico . realToFrac
-  fromMisoString = realToFrac . fromMisoString @Pico
-
 
 --------------------------------------------------------------------------------
 -- * Default implementations for drawing geometric objects
@@ -209,60 +186,6 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 --------------------------------------------------------------------------------
 -- * Dealing with attributes
 
-instance ToMisoString (Apply f at) => ToMisoString (IA.Attr f at) where
-  toMisoString att = maybe "" toMisoString $ IA._getAttr att
-  fromMisoString = IA.Attr . fromMisoString
-
-instance ToMisoString r => ToMisoString (IA.IpePen r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (IA.IpeSize r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (IA.IpeArrow r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (IA.IpeDash r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (Matrix 3 3 r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString IA.FillType where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString IA.PinType where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString IA.TransformationTypes where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (IpeColor r) where
-  toMisoString (IpeColor c) = case c of
-      Named t  -> toMisoString t
-      Valued v -> toMisoString v
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (RGB r) where
-  toMisoString (RGB r g b) = mconcat . List.intersperse " " . map toMisoString $ [r,g,b]
-  fromMisoString = undefined
-
-instance ToMisoString r => ToMisoString (Ipe.Path r) where
-  toMisoString _ = mempty
-  fromMisoString = undefined
-    -- FIXME: This does not actually show the path
-
-instance ToMisoString Ipe.LayerName where
-  toMisoString (Ipe.LayerName t) = toMisoString t
-  fromMisoString = Ipe.LayerName . fromMisoString
 
 
 --------------------------------------------------------------------------------
