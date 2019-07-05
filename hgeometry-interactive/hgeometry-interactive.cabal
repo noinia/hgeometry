@@ -50,6 +50,8 @@ library
                   App.ConvexHull
                   App.Viewer
                   App.IpeViewer
+                  App.3DViewer
+                  App.SubDivisionViewer
 
   -- other-modules:
 
@@ -62,11 +64,13 @@ library
                , hgeometry-svg
                , hgeometry-ipe
                , hgeometry                >= 0.8.0.0
+               , singletons               >= 2.5
                , lens
                , aeson                    >= 1.4
                , containers
                , vinyl
                , semigroups
+               , semigroupoids            >= 5.3
                , optparse-applicative     >= 0.13.0.0
                , text
                , hexpat

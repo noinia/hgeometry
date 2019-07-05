@@ -97,7 +97,7 @@ instance Real r => ToMarkup (IpeObject r) where
       -- so make sure we do that as well
 
 instance ( ToMarkup g
-         ,AllConstrained IpeToSvgAttr rs
+         , AllConstrained IpeToSvgAttr rs
          , ReifyConstraint ToValue (IA.Attr f) rs
          , RMap rs, RecordToList rs
          , RecAll (IA.Attr f) rs ToValue
