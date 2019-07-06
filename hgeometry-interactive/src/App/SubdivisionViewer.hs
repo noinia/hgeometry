@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module App.Viewer where
+module App.SubdivisionViewer where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)
@@ -9,7 +9,9 @@ import           Data.Geometry.Interactive.ICanvas hiding (update, view)
 import qualified Data.Geometry.Interactive.ICanvas as ICanvas
 
 import           Data.Geometry.Interactive.Writer
-import           Data.Geometry.Ipe(IpePage, IpeObject, content, readSinglePageFile)
+import           Data.Geometry.Ipe(IpePage, IpeObject, content, readSinglePageFile, _IpePath)
+import           Data.Geometry.Ipe.FromIpe(_withAttrs, _asSimplePolygon)
+import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
@@ -28,12 +30,12 @@ type Idx = Int
 data Screen = Screen
 
 -- data PSModel r = PSModel { _iCanvas  :: ICanvas r
---                          , _subdiv   :: PlanarSubdivision Screen () () () r
+--                          , _subdiv   ::
 --                          }
 
 
 data Model' r = Model { _iCanvas  :: ICanvas r
-                      , _ipePage  :: Maybe (IpePage r)
+                      , _ipePage  :: Maybe (PlanarSubdivision Screen () () () r)
                       , _selected :: Maybe (IpeObject r)
                       } deriving (Show,Eq)
 makeLenses ''Model'
@@ -45,9 +47,9 @@ type Model = Model' Rational
 loadInitialModel    :: FilePath -> IO Model
 loadInitialModel fp = mkModel <$> readSinglePageFile fp
   where
-    mkModel ep = mkModel' $ case ep of
-        Left _  -> Nothing
-        Right p -> Just p
+    mkModel ep = mkModel' $ case ep^.._Right.content.traverse._withAttrs _IpePath _asSimplePolygon of
+        []             -> Nothing
+        ((p :+ ats):_) -> Just $ fromPolygon (Identity Screen) p () ()
     mkModel' mp = Model (blankCanvas 980 800) mp Nothing
 
 --------------------------------------------------------------------------------

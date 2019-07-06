@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module App.Viewer where
+module App.IpeViewer where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)

@@ -20,12 +20,12 @@ matrix:
   - ghc: 8.4.2
     env:
       - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.4.yaml"
-      - PACKAGEDIR="hgeometry-test"
+      - SUBPACKAGE="hgeometry-test"
 
   - ghc: 8.6.3
     env:
       - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.6.yaml"
-      - PACKAGEDIR="hgeometry-test"
+      - SUBPACKAGE="hgeometry-test"
 
 install:
   - |
@@ -40,8 +40,7 @@ install:
 
       # build project with stack
       stack --version
-      cd ${PACKAGEDIR}
-      stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
+      stack build --system-ghc --test --bench --no-run-tests  --no-run-benchmarks ${SUBPACKAGE}
     fi
 
 script:
@@ -49,8 +48,7 @@ script:
     if [ -z "$STACK_YAML" ]; then
       cabal new-test --enable-tests
     else
-      cd ${PACKAGEDIR}
-      stack test --system-ghc
+      stack test --system-ghc ${SUBPACKAGE}
     fi
 
 notifications:
