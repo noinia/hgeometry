@@ -11,6 +11,9 @@ import qualified Data.Geometry.Interactive.ICanvas as ICanvas
 import           Data.Geometry.Interactive.Writer
 import           Data.Geometry.Ipe(IpePage, IpeObject, content, readSinglePageFile, _IpePath)
 import           Data.Geometry.Ipe.FromIpe(_withAttrs, _asSimplePolygon)
+import           Data.Geometry.Ipe.Color
+import           Data.Geometry.Ipe.Value
+import           Data.Geometry.Ipe.Attributes(Sing(..), attrLens)
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex
@@ -29,14 +32,18 @@ type Idx = Int
 
 data Screen = Screen
 
--- data PSModel r = PSModel { _iCanvas  :: ICanvas r
---                          , _subdiv   ::
---                          }
+data Selectable = Vtx (VertexId' Screen)
+                | Edg (Dart Screen)
+                | Fce (FaceId' Screen)
+                deriving (Show,Eq)
 
-
-data Model' r = Model { _iCanvas  :: ICanvas r
-                      , _ipePage  :: Maybe (PlanarSubdivision Screen () () () r)
-                      , _selected :: Maybe (IpeObject r)
+data Model' r = Model { _iCanvas     :: ICanvas r
+                      , _subdivision :: Maybe (PlanarSubdivision Screen
+                                                                 ()
+                                                                 (Maybe (IpeColor r))
+                                                                 (Maybe (IpeColor r))
+                                                                 r)
+                      , _selected    :: Maybe Selectable
                       } deriving (Show,Eq)
 makeLenses ''Model'
 
@@ -49,7 +56,9 @@ loadInitialModel fp = mkModel <$> readSinglePageFile fp
   where
     mkModel ep = mkModel' $ case ep^.._Right.content.traverse._withAttrs _IpePath _asSimplePolygon of
         []             -> Nothing
-        ((p :+ ats):_) -> Just $ fromPolygon (Identity Screen) p () ()
+        ((p :+ ats):_) -> let ps = fromPolygon (Identity Screen) p (ats^.attrLens SFill)
+                                                                   (Just red)
+                          in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
     mkModel' mp = Model (blankCanvas 980 800) mp Nothing
 
 --------------------------------------------------------------------------------
@@ -58,14 +67,14 @@ type Action = GAction Rational
 
 data GAction r = Id
                | CanvasAction CanvasAction
-               | Select (IpeObject r)
+               | Select Selectable
                deriving (Show,Eq)
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                          -> noEff m
     CanvasAction ca             -> m&iCanvas %%~ flip ICanvas.update ca
-    Select p                    -> noEff $ m&selected .~ Just p
+    Select i                    -> noEff $ m&selected .~ Just i
 
 --------------------------------------------------------------------------------
 
@@ -92,19 +101,18 @@ viewModel m = div_ [ class_ "container"
                    ]
 
 canvasBody   :: Model -> [View Action]
-canvasBody m = [ rect_ [ fill_ "red"
-                         , x_ "0"
-                         , y_ "0"
-                         , width_ "100"
-                         , height_ "100"
-                         ] [] ]
-               <> [ draw o [onClick $ Select o ]
-                  | o <- m^.ipePage._Just.content
-                  ]
-               -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.iCanvas.mouseCoordinates] ]
-
-
-
+canvasBody m = maybe [] drawPS $ m^.subdivision
+  where
+    drawPS ps = [ dPlanarSubdivisionWith dv de df ps []
+                ]
+    dv (i,vd) = Just $ draw (vd^.location) [ onClick $ Select (Vtx i)]
+    de (i,e)  = Just $ draw (e^.core) [ onClick $ Select (Edg i)
+                                      , stroke_ . msW "green" $ e^.extra
+                                      ]
+    df (i,f)  = Just $ draw (f^.core) [ onClick $ Select (Fce i)
+                                      , fill_ . msW "blue" $ f^.extra
+                                      ]
+    msW t = maybe t ms
 
 
 infoAreaBody   :: Model -> [View Action]
