@@ -35,7 +35,7 @@ install:
       ghc --version
       cabal --version
       cabal new-update
-      cabal new-build --enable-tests --enable-benchmarks
+      cabal new-build --enable-tests --enable-benchmarks ${SUBPACKAGE}
     else
       # install stack
       curl -sSL https://get.haskellstack.org/ | sh
