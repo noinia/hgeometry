@@ -48,7 +48,7 @@ install:
 script:
   - |
     if [ -z "$STACK_YAML" ]; then
-      cabal new-test --enable-tests
+      cabal new-test --enable-tests ${SUBPACKAGE}
     else
       stack test --system-ghc ${SUBPACKAGE}
     fi
