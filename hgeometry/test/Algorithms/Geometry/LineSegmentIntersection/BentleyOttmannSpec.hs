@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
 import           Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)

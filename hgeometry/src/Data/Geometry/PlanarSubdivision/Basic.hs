@@ -194,8 +194,12 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
                 | i == of'  = 0
                 | otherwise = i
 
--- | Construct a planar subdivision from a simple polygon
+-- | Construct a plane graph from a simple polygon. It is assumed that the
+-- polygon is given in counterclockwise order.
 --
+-- the interior of the polygon will have faceId 0
+--
+-- pre: the input polygon is given in counterclockwise order
 -- running time: \(O(n)\).
 fromSimplePolygon            :: (Ord r, Fractional r)
                              => proxy s
@@ -334,8 +338,7 @@ faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
 
 -- | Enumerates all faces with their face data exlcluding  the outer face
-internalFaces    :: (Ord r, Fractional r)
-                 => PlanarSubdivision s v e f r
+internalFaces    :: PlanarSubdivision s v e f r
                  -> V.Vector (FaceId' s, FaceData (Dart s) f)
 internalFaces ps = let i = outerFaceId ps
                    in V.filter (\(j,_) -> i /= j) $ faces ps
@@ -649,10 +652,10 @@ rawFacePolygon i ps = case F.toList $ holesOf i ps of
     res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
     toHole d = (rawFaceBoundary (leftFace d ps) ps)^.core
 
--- | Lists all faces of the planar subdivision.
+-- | Lists all *internal* faces of the planar subdivision.
 rawFacePolygons    :: PlanarSubdivision s v e f r
                    -> V.Vector (FaceId' s, SomePolygon v r :+ f)
-rawFacePolygons ps = fmap (\i -> (i,rawFacePolygon i ps)) . faces' $ ps
+rawFacePolygons ps = fmap (\(i,_) -> (i,rawFacePolygon i ps)) . internalFaces $ ps
 
 
 

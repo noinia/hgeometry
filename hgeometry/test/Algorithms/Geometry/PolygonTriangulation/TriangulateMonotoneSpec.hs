@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec where
 
 import           Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone

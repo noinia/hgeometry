@@ -29,6 +29,8 @@ spec = describe "PlaneGraph tests" $ do
          it "encode yaml test" $ do
            b <- B.readFile "test/Data/PlaneGraph/myPlaneGraph.yaml"
            encodeYaml myGraph `shouldBe` b
+         it "from simple polygon; inside and outside correct" $
+           outerFaceId simplePgGraph `shouldBe` (FaceId (VertexId 1))
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
          --     <$> decodeYamlFile "test/Data/myPlaneGraph.yaml")
@@ -189,3 +191,14 @@ myGraph' = Gr [ Vtx 0 (Point2 0 0) [ (1,())
              , Face (8,5) "E"
              , Face (9,6) "F"
              ]
+
+data InOrOut = In | Out deriving (Show,Eq)
+
+simplePgGraph :: Num r => PlaneGraph Test1 () () InOrOut r
+simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
+  where
+    pg = fromPoints . map ext $ [ Point2 144 160
+                                , Point2 64 96
+                                , Point2 128 32
+                                , Point2 208 96
+                                ]

@@ -53,8 +53,8 @@ fromSimplePolygons px oD = foldUp (\l _ r -> merge l r)
 --
 -- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a polygon
 -- with holes.
-fromPolygon                              :: forall proxy t p f r s.
-                                            (Ord r, Fractional r) => proxy s
+fromPolygon                              :: forall proxy t p f r s. (Ord r, Fractional r)
+                                         => proxy s
                                          -> Polygon t p r
                                          -> f -- ^ data inside
                                          -> f -- ^ data outside the polygon
