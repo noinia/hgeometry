@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  Data.Geometry.PlnarSubdivision
+-- Module      :  Data.Geometry.PlanarSubdivision
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -12,50 +12,65 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.PlanarSubdivision( module Data.Geometry.PlanarSubdivision.Basic
-                                      , fromSimplePolygons
-                                      -- , module Data.Geometry.PlanarSubdivision.Build
+                                      , fromPolygons, fromPolygons'
                                       , fromPolygon
                                       ) where
 
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 import           Data.Ext
 import           Data.Semigroup.Foldable
+import qualified Data.Vector as V
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Merge
-import           Data.BinaryTree(asBalancedBinLeafTree, foldUp, Elem(..))
 import           Data.Geometry.Polygon
 import qualified Data.PlaneGraph as PG
 import           Data.Proxy
 
 
-import Data.Geometry.Point
-import qualified Data.List.NonEmpty as NonEmpty
+-- import Data.Geometry.Point
+-- import qualified Data.List.NonEmpty as NonEmpty
 
 
-import Debug.Trace
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
--- Constructs a planar subdivision from a collection of \(k\) disjoint
--- simple polygons of total complexity \(O(n)\).
+-- | Constructs a planar subdivision from a collection of \(k\)
+-- disjoint polygons of total complexity \(O(n)\).
 --
--- runningtime: \(O(n\log k)\)
-fromSimplePolygons       :: (Foldable1 t, Ord r, Fractional r)
-                         => proxy s
-                         -> f -- ^ outer face data
-                         -> t (SimplePolygon p r :+ f) -- ^ the disjoint simple polygons
-                         -> PlanarSubdivision s p () f r
-fromSimplePolygons px oD = foldUp (\l _ r -> merge l r)
-                                  (\(Elem (pg :+ iD)) -> fromSimplePolygon px pg iD oD)
-                         . asBalancedBinLeafTree
-                         . toNonEmpty
+-- pre: The boundary of the polygons is given in counterclockwise orientation
+--
+-- runningtime: \(O(n\log n\log k)\) in case of polygons with holes,
+-- and \(O(n\log k)\) in case of simple polygons.
+fromPolygons       :: (Foldable1 c, Ord r, Fractional r)
+                   => proxy s
+                   -> f -- ^ outer face data
+                   -> c (Polygon t p r :+ f) -- ^ the disjoint polygons
+                   -> PlanarSubdivision s p () f r
+fromPolygons px oD = mergeAllWith const
+                   . fmap (\(pg :+ iD) -> fromPolygon px pg iD oD) . toNonEmpty
+
+-- | Version of 'fromPolygons' that accepts 'SomePolygon's as input.
+fromPolygons'      :: forall proxy c s p r f. (Foldable1 c, Ord r, Fractional r)
+                   => proxy s
+                   -> f -- ^ outer face data
+                   -> c (SomePolygon p r :+ f) -- ^ the disjoint polygons
+                   -> PlanarSubdivision s p () f r
+fromPolygons' px oD =
+    mergeAllWith const . fmap (\(pg :+ iD) -> either (build iD) (build iD) pg) . toNonEmpty
+  where
+    build       :: f -> Polygon t p r -> PlanarSubdivision s p () f r
+    build iD pg = fromPolygon px pg iD oD
 
 -- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision
 -- models only connected planar subdivisions, this may add dummy/invisible
 -- edges.
 --
--- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a polygon
--- with holes.
+-- pre: The outer boundary of the polygons is given in counterclockwise orientation
+--
+-- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a
+-- polygon with holes.
 fromPolygon                              :: forall proxy t p f r s. (Ord r, Fractional r)
                                          => proxy s
                                          -> Polygon t p r
@@ -63,18 +78,16 @@ fromPolygon                              :: forall proxy t p f r s. (Ord r, Frac
                                          -> f -- ^ data outside the polygon
                                          -> PlanarSubdivision s p () f r
 fromPolygon p pg@(SimplePolygon _) iD oD = fromSimplePolygon p pg iD oD
-fromPolygon _ (MultiPolygon vs hs) iD oD = PlanarSubdivision cs vd dd fd
+fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
+    Nothing  -> outerPG
+    Just hs' -> let hs'' = (\pg -> fromSimplePolygon wp (toCounterClockWiseOrder pg) oD iD) <$> hs'
+                in embedAsHolesIn hs'' (\_ x -> x) i outerPG
   where
     wp = Proxy :: Proxy (Wrap s)
 
-    -- the components
-    cs = undefined
-    cs' = PG.fromSimplePolygon wp (SimplePolygon vs) iD oD
-        : map (\h -> PG.fromSimplePolygon wp h oD iD) hs
+    outerPG = fromSimplePolygon p (SimplePolygon vs) iD oD
+    i = V.last $ faces' outerPG
 
-    vd = undefined
-    dd = undefined
-    fd = undefined
 
 
 
@@ -120,28 +133,28 @@ getP (Hole _ p) = Just p
 
 --------------------------------------------------------------------------------
 
-data Test = Test
-data Id a = Id a
+-- data Test = Test
+-- data Id a = Id a
 
 
-simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
-simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
-                                                             , Point2 128 688
-                                                             , Point2 176 672
-                                                             , Point2 256 672
-                                                             , Point2 272 608
-                                                             , Point2 384 656
-                                                             , Point2 336 768
-                                                             , Point2 272 720
-                                                             ]
+-- simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
+-- simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
+--                                                              , Point2 128 688
+--                                                              , Point2 176 672
+--                                                              , Point2 256 672
+--                                                              , Point2 272 608
+--                                                              , Point2 384 656
+--                                                              , Point2 336 768
+--                                                              , Point2 272 720
+--                                                              ]
 
-triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
-triangle = (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
-         $ trianglePG
+-- triangle :: PlanarSubdivision Test () () PolygonFaceData Rational
+-- triangle = (\pg -> fromSimplePolygon (Id Test) pg Inside Outside)
+--          $ trianglePG
 
-trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
+-- trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]
 
 
-mySubDiv = fromSimplePolygons (Id Test)
-                              0
-                              (NonEmpty.fromList [simplePg' :+ 1, trianglePG :+ 2])
+-- mySubDiv = fromSimplePolygons (Id Test)
+--                               0
+--                               (NonEmpty.fromList [simplePg' :+ 1, trianglePG :+ 2])

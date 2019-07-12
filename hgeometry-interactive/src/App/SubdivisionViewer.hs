@@ -12,7 +12,7 @@ import           Data.Geometry.Interactive.ICanvas hiding (update, view)
 
 import           Data.Geometry.Interactive.Writer
 import           Data.Geometry.Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
-import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon)
+import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.Value
 import           Data.Geometry.Ipe.Attributes (Sing(..), attrLens)
@@ -64,20 +64,40 @@ loadInitialModel fp = mkModel . buildPS <$> readSinglePageFile fp
   where
     mkModel mp = Model (blankCanvas 980 800) mp Nothing
 
-    -- buildPS ep = case ep^.._Right.content.traverse._withAttrs _IpePath _asSomePolygon of
-    --     []             -> Nothing
-    --     ((p :+ ats):_) -> let ps = either build build p (ats^.attrLens SFill) (Just red)
-    --                       in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
+----------------------------------------
+-- * From Multiple simple polygons
 
 buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
 buildPS ep = build <$> NonEmpty.nonEmpty (fmap f polies)
   where
-    polies = ep^.._Right.content.traverse._withAttrs _IpePath _asSimplePolygon
-    f (p :+ ats) = toCounterClockWiseOrder p :+ (ats^.attrLens SFill)
+    polies = ep^.._Right.content.traverse._withAttrs _IpePath _asSomePolygon
+    f (p :+ ats) = bimap toCounterClockWiseOrder toCounterClockWiseOrder p :+ ats^.attrLens SFill
 
-    build pgs = let ps = fromSimplePolygons (Identity Screen) (Just $ named "red") pgs
+    build pgs = let ps = fromPolygons' (Identity Screen) (Just $ named "red") pgs
                 in ps&dartData.traverse._2 .~ Just (named "black")
 
+----------------------------------------
+-- * From a single Multipolygon
+
+-- buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
+-- buildPS ep = case ep^.._Right.content.traverse._withAttrs _IpePath _asMultiPolygon of
+--     []             -> Nothing
+--     ((p :+ ats):_) -> let ps = build p (ats^.attrLens SFill) (Just red)
+--                       in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
+--   where
+--     build   :: (Ord r, Fractional r)
+--             => Polygon t () r -> f -> f
+--             -> PlanarSubdivision Screen () () f r
+--     build p = fromPolygon (Identity Screen) (toCounterClockWiseOrder p)
+
+----------------------------------------
+-- * From a single SimplePolygon
+
+-- buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
+-- buildPS ep = case ep^.._Right.content.traverse._withAttrs _IpePath _asMultiPolygon of
+--     []             -> Nothing
+--     ((p :+ ats):_) -> let ps = either build build p (ats^.attrLens SFill) (Just red)
+--                       in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
 
     -- build   :: (Ord r, Fractional r)
     --         => Polygon t () r -> f -> f
@@ -235,7 +255,7 @@ iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/a
 
 -- main :: IO ()
 main = do
-         initialModel <- loadInitialModel "hgeometry-interactive/resources/test.ipe"
+         initialModel <- loadInitialModel "hgeometry-interactive/resources/testmulti.ipe"
          -- let Just ps = initialModel^.subdivision
          -- return ps
 

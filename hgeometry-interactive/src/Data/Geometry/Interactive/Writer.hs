@@ -158,7 +158,8 @@ dPlanarSubdivisionWith                 :: DrawF (VertexId' s, VertexData r v)   
                                        -> PlanarSubdivision s v e f r
                                        -> [Attribute action]
                                        -> View action
-dPlanarSubdivisionWith fv fe ff ps ats = g_ ats (vs <> es <> fs)
+dPlanarSubdivisionWith fv fe ff ps ats = g_ ats (fs <> es <> vs)
+    -- draw faces at the bottom, then edges, and finally the vertices
   where
     vs = mapMaybe fv . F.toList . vertices        $ ps
     es = mapMaybe fe . F.toList . edgeSegments    $ ps

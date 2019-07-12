@@ -55,12 +55,13 @@ module Data.Geometry.PlanarSubdivision.Basic( VertexId', FaceId'
 
                                             , endPointsOf, endPointData
 
+                                            , faceDataOf
+
                                             , edgeSegment, edgeSegments
                                             , rawFacePolygon, rawFaceBoundary
                                             , rawFacePolygons
 
                                             , VertexId(..), FaceId(..), Dart, World(..)
-
 
                                             , rawVertexData, rawDartData, rawFaceData
                                             , vertexData, dartData, faceData
