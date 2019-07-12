@@ -168,7 +168,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     fd = V.imap (\i f      -> RawFace (mkFaceIdx i) (mkFaceData i f)) $ g^.PG.faceData
 
     g' :: PlaneGraph s (VertexId' s) (Dart s) (FaceId' s) r
-    g' = g&PG.faceData    %~ V.imap (\i _ -> mkFaceId i)
+    g' = g&PG.faceData    %~ V.imap (\i _ -> mkFaceId $ flipID i)
           &PG.vertexData  %~ V.imap (\i _ -> VertexId i)
           &PG.rawDartData .~ allDarts''
 
@@ -179,7 +179,6 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     oF@(FaceId (VertexId of')) = PG.leftFace ofD g
 
     mkFaceIdx i | i == 0    = Nothing
-                | i == of'  = Just (c,mkFaceId 0)
                 | otherwise = Just (c,mkFaceId i)
 
     -- at index i we are storing the outerface
@@ -189,10 +188,11 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
                    | otherwise = FaceData mempty              f
 
     mkFaceId :: forall s'. Int -> FaceId' s'
-    mkFaceId = FaceId . VertexId . mkFaceId'
-    mkFaceId' i | i == 0    = of'
-                | i == of'  = 0
-                | otherwise = i
+    mkFaceId = FaceId . VertexId
+
+    flipID i | i == 0    = of'
+             | i == of'  = 0
+             | otherwise = i
 
 -- | Construct a plane graph from a simple polygon. It is assumed that the
 -- polygon is given in counterclockwise order.
@@ -340,9 +340,8 @@ faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 -- | Enumerates all faces with their face data exlcluding  the outer face
 internalFaces    :: PlanarSubdivision s v e f r
                  -> V.Vector (FaceId' s, FaceData (Dart s) f)
-internalFaces ps = let i = outerFaceId ps
-                   in V.filter (\(j,_) -> i /= j) $ faces ps
-
+internalFaces ps = V.tail $ faces ps
+  -- this uses that the outerfaceId is 0, and thus it is the first face in the vector.
 
 -- | lens to access the Dart Data
 dartData :: Lens (PlanarSubdivision s v e f r) (PlanarSubdivision s v e' f r)

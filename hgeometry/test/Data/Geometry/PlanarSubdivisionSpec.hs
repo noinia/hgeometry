@@ -35,7 +35,11 @@ data Test = Test
 data Id a = Id a
 
 
+
+simplePg  :: PlanarSubdivision Test () () PolygonFaceData Rational
 simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside
+
+simplePg' :: SimplePolygon () Rational
 simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736
                                                              , Point2 128 688
                                                              , Point2 176 672
@@ -69,6 +73,7 @@ spec = do
     testSpec testPoly2
     testSpec testPoly3
     testSpec testPoly4
+    testSpec simplePg'
 
     -- describe "incidentDarts" $ do
     --   forM_ (darts' triangle) $ \d ->
@@ -128,13 +133,15 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
 testSpec    :: (Ord r, Eq p, Fractional r, Show r, Show p)
             => SimplePolygon p r -> Spec
 testSpec pg = do
-  sameAsConnectedPG (PG.fromSimplePolygon (Id Test) pg Inside Outside)
-                    (PS.fromSimplePolygon (Id Test) pg Inside Outside)
+  let ps = PS.fromSimplePolygon (Id Test) pg Inside Outside
+  sameAsConnectedPG (PG.fromSimplePolygon (Id Test) pg Inside Outside) ps
   -- sameAsConnectedPG (TM.triangulate' (Id Test) pg)
   --                   (TM.triangulate  (Id Test) pg)
-  sameAsConnectedPG (TR.triangulate' (Id Test) pg)
-                    (TR.triangulate  (Id Test) pg)
-
+  sameAsConnectedPG (TR.triangulate' (Id Test) pg) (TR.triangulate  (Id Test) pg)
+  it "correct outerface" $ do
+    let i = outerFaceId ps
+        x = ps^.dataOf i
+    x `shouldBe` Outside
 
 
 testPoly :: SimplePolygon () Rational
