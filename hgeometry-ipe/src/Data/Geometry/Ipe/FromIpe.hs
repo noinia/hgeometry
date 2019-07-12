@@ -65,9 +65,7 @@ _asPolyLine = prism' poly2path path2poly
 
 -- | Convert to a simple polygon
 _asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
-_asSimplePolygon = prism' polygonToPath path2poly
-  where
-    path2poly p = pathToPolygon p >>= either pure (const Nothing)
+_asSimplePolygon = _asSomePolygon._Left
 
 -- | Convert to a triangle
 _asTriangle :: Prism' (Path r) (Triangle 2 () r)
@@ -81,12 +79,18 @@ _asTriangle = prism' triToPath path2tri
                               _            -> Nothing
                     _    -> Nothing
 
-
 -- | Convert to a multipolygon
 _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
-_asMultiPolygon = prism' polygonToPath path2poly
+_asMultiPolygon = _asSomePolygon._Right
+
+-- _asPolygon :: Prism' (Path r) (forall t. Polygon t () r)
+-- _asPolygon = prism' polygonToPath (fmap (either id id) . pathToPolygon)
+
+_asSomePolygon :: Prism' (Path r) (SomePolygon () r)
+_asSomePolygon = prism' embed pathToPolygon
   where
-    path2poly p = pathToPolygon p >>= either (const Nothing) pure
+    embed     = either polygonToPath polygonToPath
+
 
 polygonToPath                      :: Polygon t () r -> Path r
 polygonToPath pg@(SimplePolygon _) = Path . fromSingleton . PolygonPath $ pg

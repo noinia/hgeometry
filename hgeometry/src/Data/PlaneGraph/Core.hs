@@ -622,7 +622,9 @@ outerFaceId ps = leftFace (outerFaceDart ps) ps
 outerFaceDart    :: (Ord r, Fractional r) => PlaneGraph s v e f r -> Dart s
 outerFaceDart ps = d
   where
-    (v,_)  = V.minimumBy (comparing (^._2.location.xCoord)) . vertices $ ps
+    (v,_)  = V.minimumBy (comparing (^._2.location)) . vertices $ ps
+           -- compare lexicographically; i.e. if same x-coord prefer the one with the
+           -- smallest y-coord
     d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
            .  fmap (\d' -> d' :+ (edgeSegment d' ps)^.core.to supportingLine)
            $ incidentEdges v ps
@@ -630,7 +632,7 @@ outerFaceDart ps = d
     -- basically: find the leftmost vertex, find the incident edge with the largest slope
     -- and take the face left of that edge. This is the outerface.
     -- note that this requires that the edges are straight line segments
-    --
+
 
 --------------------------------------------------------------------------------
 -- * Reporting Geometries

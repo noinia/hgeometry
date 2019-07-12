@@ -31,6 +31,9 @@ import           Data.Proxy
 import Data.Geometry.Point
 import qualified Data.List.NonEmpty as NonEmpty
 
+
+import Debug.Trace
+
 --------------------------------------------------------------------------------
 
 -- Constructs a planar subdivision from a collection of \(k\) disjoint
