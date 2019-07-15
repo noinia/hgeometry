@@ -143,12 +143,26 @@ dDisk (Disk c r) = dCircle (Circle c r)
 -- instance (ToMisoString r, Drawable v, Drawable  => Drawable (PlanarSubdivision s v e f r)
 
 
-
 dPlanarSubdivision        :: PlanarSubdivision s (Maybe (View action))
                                                  (Maybe (View action))
                                                  (Maybe (View action)) r
                           -> [Attribute action] -> View action
 dPlanarSubdivision = dPlanarSubdivisionWith (^._2.vData) (^._2.extra) (^._2.extra)
+
+
+-- | Draws only the values for which we have a Just attribute
+dPlanarSubdivision' :: (ToMisoString r)
+                    => PlanarSubdivision s (Maybe (Ipe.IpeAttributes Ipe.IpeSymbol r))
+                                           (Maybe (Ipe.IpeAttributes Ipe.Path r))
+                                           (Maybe (Ipe.IpeAttributes Ipe.Path r)) r
+                    -> [Attribute action]
+                    -> View action
+dPlanarSubdivision' = dPlanarSubdivisionWith fv fe ff
+  where
+    fv (_,v) = (\ats -> draw (v^.location) (svgWriteAttrs ats)) <$> v^.vData
+    fe (_,e) = (\ats -> draw (e^.core)     (svgWriteAttrs ats)) <$> e^.extra
+    ff (_,f) = (\ats -> draw (f^.core)     (svgWriteAttrs ats)) <$> f^.extra
+
 
 type DrawF a action = a -> Maybe (View action)
 

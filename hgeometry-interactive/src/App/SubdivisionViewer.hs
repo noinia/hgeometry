@@ -4,7 +4,6 @@
 module App.SubdivisionViewer where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
-import           Control.Concurrent
 import           Control.Lens hiding (view, element)
 import           Control.Monad.IO.Class
 import           Data.Ext
@@ -24,7 +23,6 @@ import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
--- import qualified Language.Javascript.JSaddle.WebKitGTK as JSaddleWebkit
 import           Miso
 import           Miso.Component.Menu
 import           Miso.String (MisoString, ToMisoString(..), ms)
@@ -34,7 +32,8 @@ import           Miso.Html.Event(on)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
 
-import qualified Graphics.UI.Webviewhs as WHS
+import Miso.Bulma.Generic
+import Miso.Bulma.Panel
 
 --------------------------------------------------------------------------------
 
@@ -85,38 +84,6 @@ buildPS ep = build <$> NonEmpty.nonEmpty (fmap f polies)
     build pgs = let ps = fromPolygons' (Identity Screen) (Just $ named "red") pgs
                 in ps&dartData.traverse._2 .~ Just (named "black")
 
-----------------------------------------
--- * From a single Multipolygon
-
--- buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
--- buildPS ep = case ep^.._Right.content.traverse._withAttrs _IpePath _asMultiPolygon of
---     []             -> Nothing
---     ((p :+ ats):_) -> let ps = build p (ats^.attrLens SFill) (Just red)
---                       in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
---   where
---     build   :: (Ord r, Fractional r)
---             => Polygon t () r -> f -> f
---             -> PlanarSubdivision Screen () () f r
---     build p = fromPolygon (Identity Screen) (toCounterClockWiseOrder p)
-
-----------------------------------------
--- * From a single SimplePolygon
-
--- buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
--- buildPS ep = case ep^.._Right.content.traverse._withAttrs _IpePath _asMultiPolygon of
---     []             -> Nothing
---     ((p :+ ats):_) -> let ps = either build build p (ats^.attrLens SFill) (Just red)
---                       in Just $ ps&dartData.traverse._2 .~ (ats^.attrLens SStroke)
-
-    -- build   :: (Ord r, Fractional r)
-    --         => Polygon t () r -> f -> f
-    --         -> PlanarSubdivision Screen () () f r
-    -- build p = fromPolygon (Identity Screen) (toCounterClockWiseOrder p)
-
-
-
-
-
 --------------------------------------------------------------------------------
 
 type Action = GAction Rational
@@ -159,16 +126,16 @@ viewModel m = div_ [ class_ "container"
                    ]
                    [ useBulmaRemote
                    , menu mData
-                   , input_ [ type_ "file", id_ "open-file"
-                            , onUpload OpenFile
-                            ]
-                   , div_ [ class_ "columns has-background-grey-lighter"]
+                   -- , input_ [ type_ "file", id_ "open-file"
+                   --          , onUpload OpenFile
+                   --          ]
+                   , div_ [ class_ "has-background-grey-lighter columns"]
                           [ div_ [ class_ "column"
                                  , style_ $ Map.fromList [("padding-top", "20px")]
                                  ]
                                  leftBody
                           , div_ [ class_ "column is-one-third" ]
-                                 rightBody
+                                  rightBody
                           ]
                    ]
   where
@@ -180,10 +147,11 @@ viewModel m = div_ [ class_ "container"
                 ]
 
     rightBody = [ div_ [ id_ "infoArea"
-                       , class_ "panel container"
+                       , class_ "panel"
                        ]
                        (infoAreaBody m)
                 ]
+
 
 canvasBody   :: Model -> [View Action]
 canvasBody m = maybe [] drawPS $ m^.subdivision
@@ -199,28 +167,23 @@ canvasBody m = maybe [] drawPS $ m^.subdivision
                                       ]
     msW t = maybe t ms
 
-icon    :: MisoString -> View action
-icon cs = i_ [ class_ cs, textProp "aria-hidden" "true"] []
 
 
 showMaybe :: Show a => Maybe a -> MisoString
 showMaybe = maybe "Nothing" (ms . show)
 
+
+
 infoAreaBody   :: Model -> [View Action]
-infoAreaBody m = [ div_ [ class_ "panel-block"]
-                        [ span_ [ class_ "panel-icon"]
-                                [ icon "fas fa-mouse-pointer"]
-                        , text . showMaybe $ m^.iCanvas.mouseCoordinates
-                        ]
-                 , div_ [ class_ "panel-block" ]
-                        [ span_ [ class_ "panel-icon"]
-                                [ icon "fas fa-microscope"]
-                        , viewSelected'
-                        ]
-                 , div_ [ class_ "panel-block" ]
-                        [ div_ [] ["zoomlevel: "]
-                        , text . ms . show $ m^.iCanvas.canvas.zoomLevel
-                        ]
+infoAreaBody m = [ panelBlock [ panelIcon "fas fa-mouse-pointer"
+                              , text . showMaybe $ m^.iCanvas.mouseCoordinates
+                              ]
+                 , panelBlock [ panelIcon "fas fa-microscope"
+                              , viewSelected'
+                              ]
+                 , panelBlock [ div_ [] ["zoomlevel: "]
+                              , text . ms . show $ m^.iCanvas.canvas.zoomLevel
+                              ]
                  ]
   where
     viewSelected' = case m^.subdivision of
@@ -278,21 +241,6 @@ viewSelected ps = \case
 --------------------------------------------------------------------------------
 
 
-useBulmaRemote :: View action
-useBulmaRemote = div_ [] [bulmaLink,iconLink]
-
-bulmaLink :: View action
-bulmaLink = link_ [ rel_ "stylesheet"
-                   , href_ "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css"
-                   , textProp "integrity" "sha256-vK3UTo/8wHbaUn+dTQD0X6dzidqc5l7gczvH+Bnowwk="
-                   , textProp "crossorigin" "anonymous"
-                   ]
-
-iconLink :: View action
-iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
-                        , defer_ "true"
-                        ] []
-
 
 --------------------------------------------------------------------------------
 
@@ -326,16 +274,3 @@ mainJSM = do
                     , mountPoint    = Nothing
                     }
     startApp myApp
-
-
-main2 :: IO ()
-main2 = do
-  WHS.createWindowAndBlock
-    WHS.WindowParams
-      { WHS.windowParamsTitle      = "Test"
-      , WHS.windowParamsUri        = "http://localhost:8080"
-      , WHS.windowParamsWidth      = 1600
-      , WHS.windowParamsHeight     = 1000
-      , WHS.windowParamsResizable  = False
-      , WHS.windowParamsDebuggable = True
-      }
