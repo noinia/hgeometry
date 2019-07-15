@@ -9,22 +9,20 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
                                         , CanvasAction(..)
                                         , update
                                         , view
+
+                                        , iCanvasSubs
                                         ) where
 
 import           Control.Lens hiding (view, element, rmap, Zoom)
 import           Data.Aeson.Types
-import           Data.Geometry.Box
 import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
-import           Data.Intersection (coRec)
-import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe)
-import           Data.Proxy
 import           Data.Range
 import           Miso hiding (update, view)
+import           Miso.String(MisoString)
+import           Miso.Subscription.MouseExtra
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * Model
 
@@ -141,6 +139,12 @@ applyPan ps p c = case ps of
 --------------------------------------------------------------------------------
 -- * View
 
+-- iCanvas :: ( RealFrac r, ToSvgCoordinate r)
+--                 => (CanvasAction -> action)
+--                 -> ICanvas r
+--                 -> [Attribute action] -> [View action] -> View action
+-- iCanvas = view
+
 view            :: ( RealFrac r, ToSvgCoordinate r)
                 => (CanvasAction -> action)
                 -> ICanvas r
@@ -159,3 +163,16 @@ onWheel = on "wheel" (Decoder dec dt)
     dec = withObject "event" $ \o -> (f <$> (o .: "deltaY"))
     f   :: Double -> ZoomDirection
     f x = if x < 0 then ZoomIn else ZoomOut
+
+
+--------------------------------------------------------------------------------
+-- * Subscriptions
+
+-- | Subscription needed for the iCanvas. In particular, captures the
+-- mouse position and the arrows
+iCanvasSubs     :: MisoString -- ^ The id of the iCanvas
+                -> (CanvasAction -> action)
+                -> [Sub action]
+iCanvasSubs i f = [ relativeMouseSub i (f . MouseMove)
+                  , arrowsSub          (f . ArrowPress)
+                  ]

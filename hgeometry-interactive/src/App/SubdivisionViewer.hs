@@ -1,9 +1,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE PartialTypeSignatures      #-}
 module App.SubdivisionViewer where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan
+
 import           Control.Lens hiding (view, element)
 import           Control.Monad.IO.Class
 import           Data.Ext
@@ -11,29 +10,20 @@ import qualified Data.Geometry.Interactive.ICanvas as ICanvas
 import           Data.Geometry.Interactive.ICanvas hiding (update, view)
 
 import           Data.Geometry.Interactive.Writer
-import           Data.Geometry.Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
-import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
-import           Data.Geometry.Ipe.Color
-import           Data.Geometry.Ipe.Value
+import           Data.Geometry.Ipe (IpePage, content, readSinglePageFile, _IpePath)
 import           Data.Geometry.Ipe.Attributes (Sing(..), attrLens)
+import           Data.Geometry.Ipe.Color
+import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon)
 import           Data.Geometry.PlanarSubdivision
-import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
-import           Miso.Component.Menu
-import           Miso.String (MisoString, ToMisoString(..), ms)
-import           Miso.Subscription.MouseExtra
-import           Miso.Event.Decoder(valueDecoder)
-import           Miso.Html.Event(on)
+import           Miso.Bulma.Generic
+import           Miso.Bulma.Panel
+import           Miso.String (MisoString, ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
--- import           Touch
-
-import Miso.Bulma.Generic
-import Miso.Bulma.Panel
 
 --------------------------------------------------------------------------------
 
@@ -106,26 +96,31 @@ updateModel m = \case
 
 --------------------------------------------------------------------------------
 
-mData :: Menu Action
-mData = Menu [ MenuItem "File" Nothing
-               [ MenuChild "Open"
-                     $ Just (OpenFile "hgeometry-interactive/resources/testmulti.ipe")]
-             , MenuItem "Edit" Nothing
-               [MenuChild "Child 1" Nothing]
-             ]
+-- mData :: Menu Action
+-- mData = Menu [ MenuItem "File" Nothing
+--                [ MenuChild "Open"
+--                      $ Just (OpenFile "hgeometry-interactive/resources/testmulti.ipe")]
+--              , MenuItem "Edit" Nothing
+--                [MenuChild "Child 1" Nothing]
+--              ]
 
 
-onUpload :: (FilePath -> action) -> Attribute action
-onUpload = on "change" valueDecoder'
-  where
-    Decoder f t = valueDecoder
-    valueDecoder' = Decoder (fmap fromMisoString . f) t
+-- onUpload :: (FilePath -> action) -> Attribute action
+-- onUpload = on "change" valueDecoder'
+--   where
+--     Decoder f t = valueDecoder
+--     valueDecoder' = Decoder (fmap fromMisoString . f) t
+
+
+
+
+
 
 viewModel       :: Model -> View Action
 viewModel m = div_ [ class_ "container"
                    ]
                    [ useBulmaRemote
-                   , menu mData
+                   -- , menu mData
                    -- , input_ [ type_ "file", id_ "open-file"
                    --          , onUpload OpenFile
                    --          ]
@@ -245,6 +240,7 @@ viewSelected ps = \case
 --------------------------------------------------------------------------------
 
 -- main :: IO ()
+main :: IO ()
 main = do
          -- initialModel <- loadInitialModel "hgeometry-interactive/resources/testmulti.ipe"
          -- let Just ps = initialModel^.subdivision
@@ -260,11 +256,7 @@ mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
-                    , subs          = [ relativeMouseSub "mySvg" (CanvasAction . MouseMove)
-                                      -- , relativeMouseSub "svgz" Mouse
-                                        -- mouseSub (CanvasAction . MouseMove)
-                                      , arrowsSub (CanvasAction . ArrowPress)
-                                      ]
+                    , subs          = iCanvasSubs "mySvg" CanvasAction
                     , events        = Map.insert "touchstart" False
                                     . Map.insert "touchmove"  False
                                     . Map.insert "mousemove"  False
