@@ -40,10 +40,8 @@ type ToSvgCoordinate = ToMisoString
 -- | Draws the actual canvas
 staticCanvas_           :: (RealFrac r, ToSvgCoordinate r)
                        =>  Canvas r -> [Attribute action] -> [View action] -> View action
-staticCanvas_ cv ats vs = div_ [ style_ $ Map.fromList [ ("border-style", "solid")
-                                                       , ("margin", "0")
+staticCanvas_ cv ats vs = div_ [ style_ $ Map.fromList [ ("margin", "0")
                                                        , ("padding", "0")
-                                                       , ("display", "inline-block")
                                                        , ("height",  ms h <> "px")
                                                        ]
                                ]

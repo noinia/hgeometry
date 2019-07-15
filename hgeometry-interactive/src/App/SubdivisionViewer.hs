@@ -6,6 +6,7 @@ module App.SubdivisionViewer where
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Concurrent
 import           Control.Lens hiding (view, element)
+import           Control.Monad.IO.Class
 import           Data.Ext
 import qualified Data.Geometry.Interactive.ICanvas as ICanvas
 import           Data.Geometry.Interactive.ICanvas hiding (update, view)
@@ -25,8 +26,11 @@ import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 -- import qualified Language.Javascript.JSaddle.WebKitGTK as JSaddleWebkit
 import           Miso
-import           Miso.String (MisoString, ToMisoString, ms)
+import           Miso.Component.Menu
+import           Miso.String (MisoString, ToMisoString(..), ms)
 import           Miso.Subscription.MouseExtra
+import           Miso.Event.Decoder(valueDecoder)
+import           Miso.Html.Event(on)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 -- import           Touch
 
@@ -58,11 +62,16 @@ type Model = Model' Rational
 
 ----------------------------------------
 
+initialModel :: Model
+initialModel = Model (blankCanvas 980 800) Nothing Nothing
 
-loadInitialModel    :: FilePath -> IO Model
-loadInitialModel fp = mkModel . buildPS <$> readSinglePageFile fp
-  where
-    mkModel mp = Model (blankCanvas 980 800) mp Nothing
+-- loadInitialModel    :: FilePath -> IO Model
+-- loadInitialModel fp = mkModel <$> loadFromFile fp
+--   where
+--     mkModel mp =
+
+loadFromFile    :: FilePath -> IO (Maybe (SubDiv Rational))
+loadFromFile fp = buildPS <$> readSinglePageFile fp
 
 ----------------------------------------
 -- * From Multiple simple polygons
@@ -115,23 +124,48 @@ type Action = GAction Rational
 data GAction r = Id
                | CanvasAction CanvasAction
                | Select Selectable
+               | LoadSubdiv (Maybe (SubDiv Rational))
+               | OpenFile FilePath
                deriving (Show,Eq)
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
-    Id                          -> noEff m
-    CanvasAction ca             -> m&iCanvas %%~ flip ICanvas.update ca
-    Select i                    -> noEff $ m&selected .~ Just i
+    Id               -> noEff m
+    CanvasAction ca  -> m&iCanvas %%~ flip ICanvas.update ca
+    Select i         -> noEff $ m&selected .~ Just i
+    LoadSubdiv mps   -> noEff $ m&subdivision .~ mps
+    OpenFile fp      -> m <# do mps <- liftIO $ loadFromFile fp
+                                pure $ LoadSubdiv mps
 
 --------------------------------------------------------------------------------
 
+mData :: Menu Action
+mData = Menu [ MenuItem "File" Nothing
+               [ MenuChild "Open"
+                     $ Just (OpenFile "hgeometry-interactive/resources/testmulti.ipe")]
+             , MenuItem "Edit" Nothing
+               [MenuChild "Child 1" Nothing]
+             ]
+
+
+onUpload :: (FilePath -> action) -> Attribute action
+onUpload = on "change" valueDecoder'
+  where
+    Decoder f t = valueDecoder
+    valueDecoder' = Decoder (fmap fromMisoString . f) t
+
 viewModel       :: Model -> View Action
-viewModel m = div_ [ class_ "container has-background-grey-lighter"
-                   , style_ $ Map.fromList [("margin-top", "20px")]
+viewModel m = div_ [ class_ "container"
                    ]
                    [ useBulmaRemote
-                   , div_ [ class_ "columns"]
-                          [ div_ [ class_ "column" ]
+                   , menu mData
+                   , input_ [ type_ "file", id_ "open-file"
+                            , onUpload OpenFile
+                            ]
+                   , div_ [ class_ "columns has-background-grey-lighter"]
+                          [ div_ [ class_ "column"
+                                 , style_ $ Map.fromList [("padding-top", "20px")]
+                                 ]
                                  leftBody
                           , div_ [ class_ "column is-one-third" ]
                                  rightBody
@@ -209,6 +243,7 @@ viewSelected ps = \case
                                    , type_ "text"
                                    , readonly_ True
                                    , disabled_ True
+
                                    , value_ . ms . show $ i
                                    ]
                            ]
@@ -235,6 +270,14 @@ viewSelected ps = \case
 
 
 
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
 useBulmaRemote :: View action
 useBulmaRemote = div_ [] [bulmaLink,iconLink]
 
@@ -255,17 +298,17 @@ iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/a
 
 -- main :: IO ()
 main = do
-         initialModel <- loadInitialModel "hgeometry-interactive/resources/testmulti.ipe"
+         -- initialModel <- loadInitialModel "hgeometry-interactive/resources/testmulti.ipe"
          -- let Just ps = initialModel^.subdivision
          -- return ps
 
          -- forkIO $ (
-         JSaddle.run 8080 $ mainJSM initialModel
+         JSaddle.run 8080 mainJSM
          --   )
          -- main2
 
-mainJSM              :: Model -> JSM ()
-mainJSM initialModel = do
+mainJSM :: JSM ()
+mainJSM = do
     let myApp = App { model         = initialModel
                     , update        = flip updateModel
                     , view          = viewModel
