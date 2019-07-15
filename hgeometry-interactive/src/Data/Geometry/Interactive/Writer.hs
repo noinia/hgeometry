@@ -12,6 +12,8 @@ import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
+import           Data.Geometry.Vector
+import           Data.Geometry.Box
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
@@ -22,7 +24,7 @@ import qualified Data.Semigroup.Foldable as F1
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           Miso
+import           Miso hiding (width_,height_)
 import           Miso.String (MisoString, ToMisoString(..), ms)
 import qualified Miso.String.Util as MisoString
 import           Miso.Svg
@@ -63,6 +65,9 @@ instance (Drawable l, Drawable r) => Drawable (Either l r) where
 instance ToMisoString r => Drawable (Point 2 r) where
   draw = dPoint
 
+instance (ToMisoString r, Num r) => Drawable (Rectangle p r) where
+  draw = dRectangle
+
 instance ToMisoString r => Drawable (LineSegment 2 p r) where
   draw = dLineSegment
 
@@ -92,6 +97,10 @@ dPoint (Point2 x y) = withAts ellipse_ [ cx_ $ ms x, cy_ $ ms y
                                        , rx_ "5", ry_ "5"
                                        ]
 
+dRectangle   :: (ToMisoString r, Num r) => Rectangle p r -> [Attribute action] -> View action
+dRectangle b = let Point2 x y  = ms <$> b^.to minPoint.core
+                   Vector2 w h = ms <$> b^.to size
+               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"]
 
 dPolygon :: ToMisoString r
          => Polygon t p r -> [Attribute action] -> View action

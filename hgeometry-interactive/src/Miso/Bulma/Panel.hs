@@ -2,11 +2,13 @@
 module Miso.Bulma.Panel where
 
 import           Miso
-import           Miso.String (MisoString, ToMisoString(..), ms)
+import           Miso.String (MisoString)
 import           Miso.Bulma.Generic
 
-
 --------------------------------------------------------------------------------
+
+panel :: [View action] -> View action
+panel = div_ [class_ "panel is-full"]
 
 panelBlock :: [View action] -> View action
 panelBlock = div_ [class_ "panel-block"]
