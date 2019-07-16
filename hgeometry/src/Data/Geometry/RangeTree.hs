@@ -2,32 +2,30 @@
 module Data.Geometry.RangeTree where
 
 import           Control.Lens
-import           Data.BinaryTree
+import           Data.BinaryTree(Measured(..))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
-import           Data.Geometry.Properties
 import qualified Data.Geometry.RangeTree.Generic as GRT
 import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range
-import           Data.Semigroup
 import           Data.Semigroup.Foldable
-import qualified Data.Set as Set
-import           Data.Util
 import           GHC.TypeLits
 
 
 --------------------------------------------------------------------------------
 
-type RangeTree1D d v p r =  GRT.RangeTree (v (Point d r :+ p)) (Leaf1 d v p r) r
 
-newtype GLeaf1 c e = Leaf1 [c :+ e]
-  deriving (Show,Eq,Ord,Semigroup,Monoid)
+type RangeTree1D d v p r =  GRT.RangeTree (v (Point d r :+ p)) (Leaf 1 d v p r) r
 
+newtype Leaf i d v p r = Leaf [Point d r :+ p]
+                       deriving (Semigroup,Monoid)
 
-type Leaf1 d v p r = GLeaf1 (Point d r) p
+deriving instance (Show r, Show p, Arity d) => Show (Leaf i d v p r)
+deriving instance (Eq r, Eq p, Arity d)     => Eq (Leaf i d v p r)
+deriving instance (Ord r, Ord p, Arity d)   => Ord (Leaf i d v p r)
 
 --------------------------------------------------------------------------------
 
@@ -37,13 +35,13 @@ class MeasuredRT v where
 --------------------------------------------------------------------------------
 
 instance (MeasuredRT v, Semigroup (v (Point d r :+ p))
-         ) => Measured (v (Point d r :+ p)) (Leaf1 d v p r) where
-  measure (Leaf1 pts) = measureRT pts
+         ) => Measured (v (Point d r :+ p)) (Leaf 1 d v p r) where
+  measure (Leaf pts) = measureRT pts
 
 
-create1DTree :: (Ord r, Measured (v (Point d r :+ p)) (Leaf1 d v p r))
+create1DTree :: (Ord r, Measured (v (Point d r :+ p)) (Leaf 1 d v p r))
              => NonEmpty (r :+ (Point d r :+ p)) -> RangeTree1D d v p r
-create1DTree = GRT.createTree . fmap (&extra %~ Leaf1 . (:[]))
+create1DTree = GRT.createTree . fmap (&extra %~ Leaf . (:[]))
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +53,7 @@ deriving instance (Eq (v (Point d r :+ p)),   Eq r,   Eq p,   Arity d) => Eq   (
 
 -- | Creates an associated DS from a pre-sorted list of points
 createAssoc' :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)))
-            => [r :+ Leaf1 d v p r] -> Assoc2 d v p r
+            => [r :+ Leaf 1 d v p r] -> Assoc2 d v p r
 createAssoc' = Assoc . fmap GRT.createTree' . NonEmpty.nonEmpty
 
 createAssoc :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)))
@@ -88,20 +86,16 @@ merge = go
 
 
 
-type RangeTree2D d v p r = GRT.RangeTree (Assoc2 d v p r) (Leaf2 d v p r) r
-
-newtype GLeaf2 c e = Leaf2 (GLeaf1 c e) deriving (Show,Eq,Ord,Semigroup,Monoid)
-
-type Leaf2 d v p r = GLeaf2 (Point d r) p
+type RangeTree2D d v p r = GRT.RangeTree (Assoc2 d v p r) (Leaf 2 d v p r) r
 
 instance ( MeasuredRT v, Semigroup (v (Point d r :+ p)), 2 <= d, Arity d, Ord r
-         ) => Measured (Assoc2 d v p r) (Leaf2 d v p r) where
-  measure (Leaf2 (Leaf1 pts)) = createAssoc . map (\p -> p^.core.yCoord :+ p) $ pts
+         ) => Measured (Assoc2 d v p r) (Leaf 2 d v p r) where
+  measure (Leaf pts) = createAssoc . map (\p -> p^.core.yCoord :+ p) $ pts
 
 
 create2DTree :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)), Arity d, 2 <= d, 1 <= d)
              => NonEmpty (Point d r :+ p) -> RangeTree2D d v p r
-create2DTree = GRT.createTree . fmap (\p -> (p^.core.xCoord) :+ Leaf2 (Leaf1 [p]))
+create2DTree = GRT.createTree . fmap (\p -> (p^.core.xCoord) :+ Leaf [p])
 
 search   :: (Ord r, Monoid (v (Point d r :+ p)))
          => Vector 2 (Range r) -> RangeTree2D d v p r -> v (Point d r :+ p)
