@@ -16,6 +16,9 @@ import           Data.Geometry.Ipe.Attributes (Sing(..), attrLens)
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon)
 import           Data.Geometry.Point
+import           Data.Geometry.RangeTree
+
+
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (maybeToList)
@@ -30,15 +33,6 @@ import           Miso.Svg hiding (height_, id_, style_, width_)
 
 --------------------------------------------------------------------------------
 
-type Idx = Int
-
-data Screen = Screen
-
--- data Selectable = Vtx (VertexId' Screen)
---                 | Edg (Dart Screen)
---                 | Fce (FaceId' Screen)
---                 deriving (Show,Eq)
-
 type QueryResult = Int
 
 data Mode = ViewMode | EditMode deriving (Show,Eq)
@@ -52,6 +46,7 @@ makePrisms ''Selection
 data Model' r = Model { _iCanvas   :: ICanvas r
                       , _mode      :: Mode
                       , _points    :: [Point 2 r]
+                      , _tree      :: Maybe (RangeTree2D 2 Count () r)
                       , _selection :: Maybe (Selection r)
                       , _selected  :: Maybe QueryResult
                       } deriving (Show,Eq)
@@ -61,7 +56,7 @@ type Model = Model' Rational
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model (blankCanvas 980 800) ViewMode [] Nothing Nothing
+initialModel = Model (blankCanvas 980 800) ViewMode [] Nothing Nothing Nothing
 
 
 --------------------------------------------------------------------------------
@@ -97,15 +92,26 @@ updateModel m = \case
       EditMode       -> m <# pure AddPoint
       ViewMode       -> m <# pure SelectionAction
 
-    AddPoint         -> let q = m^.iCanvas.mouseCoordinates
-                        in noEff $ m&points %~ (maybeToList q <>)
+    AddPoint         -> let q   = m^.iCanvas.mouseCoordinates
+                            pts = maybeToList q <> m^.points
+                        in noEff $ m&points .~ pts
+                                    &tree   .~ (Just . buildTree $ pts)
 
     RunQuery         -> case m^?selection._Just._Complete of
                           Nothing -> noEff $ m&selected .~ Nothing
-                          Just r  -> noEff $ m&selected .~ Just (runQuery r $ m^.points)
+                          Just r  -> noEff $ m&selected .~ Just (runQuery r $ m^.tree)
 
-runQuery   :: (Ord r) => Rectangle p r -> [Point 2 r] -> Int
-runQuery r = length . filter (`inBox` r)
+buildTree :: [Point 2 Rational] -> RangeTree2D 2 Count () Rational
+buildTree = create2DTree . NonEmpty.fromList . map ext
+
+
+-- runQuery   :: (Ord r) => Rectangle p r -> [Point 2 r] -> Int
+-- runQuery r = length . filter (`inBox` r)
+
+runQuery   :: Ord r => Rectangle p r -> Maybe (RangeTree2D 2 Count q r) -> Int
+runQuery r = let qr = extent r
+             in maybe 0 (getCount . search qr)
+
 
 updateSelection    :: (Ord r)
                    => Point 2 r
@@ -181,6 +187,9 @@ infoAreaBody m = [ panelBlock [ panelIcon "fas fa-mouse-pointer"
                               ]
                  , panelBlock [ div_ [] ["Points: "]
                               , text . ms . show $ m^.points
+                              ]
+                 , panelBlock [ div_ [] ["Tree "]
+                              , text . ms . show $ m^.tree
                               ]
                  , panelBlock [ div_ [] ["Selection: "]
                               , text . ms . show $ m^.selection

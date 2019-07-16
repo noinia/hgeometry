@@ -49,9 +49,8 @@ create1DTree = GRT.createTree . fmap (&extra %~ Leaf1 . (:[]))
 
 newtype Assoc2 d v p r = Assoc { getAssoc :: Maybe (RangeTree1D d v p r) }
 
-
-
 deriving instance (Show (v (Point d r :+ p)), Show r, Show p, Arity d) => Show (Assoc2 d v p r)
+deriving instance (Eq (v (Point d r :+ p)),   Eq r,   Eq p,   Arity d) => Eq   (Assoc2 d v p r)
 
 
 -- | Creates an associated DS from a pre-sorted list of points
@@ -134,10 +133,16 @@ instance MeasuredRT GRT.Report where
   measureRT = GRT.Report
 --------------------------------------------------------------------------------
 
-newtype Count a = Count Int
+newtype Count a = Count { getCount :: Int } deriving (Show,Read,Eq,Ord)
 
 instance MeasuredRT Count where
   measureRT = Count . length
+
+instance Monoid (Count a) where
+  mempty = Count 0
+
+instance Semigroup (Count a) where
+  (Count l) <> (Count r) = Count $ l + r
 
 --------------------------------------------------------------------------------
 
