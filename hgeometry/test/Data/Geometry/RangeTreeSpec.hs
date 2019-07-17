@@ -5,7 +5,7 @@ import           Control.Monad (forM_)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.PrioritySearchTreeSpec (Unique(..))
-import           Data.Geometry.RangeTree
+import           Data.Geometry.RangeTree.Generic
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range

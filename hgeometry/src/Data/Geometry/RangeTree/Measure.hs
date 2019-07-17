@@ -1,14 +1,23 @@
 module Data.Geometry.RangeTree.Measure where
 
-import qualified Data.Geometry.RangeTree.Generic as GRT
+import           Data.BinaryTree(Measured(..))
+
+--------------------------------------------------------------------------------
 
 class MeasuredRT v where
   measureRT :: [a] -> v a
 
-
 --------------------------------------------------------------------------------
-instance MeasuredRT GRT.Report where
-  measureRT = GRT.Report
+
+newtype Report p = Report { reportList :: [p] }
+  deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
+
+instance Measured (Report p) (Report p) where
+  measure = id
+
+instance MeasuredRT Report where
+  measureRT = Report
+
 --------------------------------------------------------------------------------
 
 newtype Count a = Count { getCount :: Int } deriving (Show,Read,Eq,Ord)

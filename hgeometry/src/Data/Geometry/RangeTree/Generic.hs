@@ -5,6 +5,7 @@ import           Data.BinaryTree
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import           Data.Geometry.RangeTree.Measure
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range
@@ -123,11 +124,6 @@ rangeOf' (NodeData (Min mi) (Max ma) _) = ClosedRange mi ma
 
 --------------------------------------------------------------------------------
 
-newtype Report p = Report { reportList :: [p] }
-  deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
-
-instance Measured (Report p) (Report p) where
-  measure = id
 
 createReportingTree :: Ord r => NonEmpty (r :+ [p]) -> RangeTree (Report p) (Report p) r
 createReportingTree = createTree . fmap (&extra %~ Report)
@@ -138,27 +134,16 @@ report qr = reportList . search qr
 
 ----------------------------------------
 
-newtype Count = Count { getCount :: Int }
-  deriving (Show,Eq,Ord)
-
-instance Semigroup Count where
-  (Count a) <> (Count b) = Count $ a + b
-
-instance Monoid Count where
-  mempty = Count 0
-
 newtype CountOf p = CountOf [p]
   deriving (Show,Eq,Ord,Functor,Foldable,Semigroup,Monoid)
 
-
-instance Measured Count (CountOf p) where
+instance Measured (Count p) (CountOf p) where
   measure (CountOf xs) = Count $ length xs
 
-
-createCountingTree :: Ord r => NonEmpty (r :+ [p]) -> RangeTree Count (CountOf p) r
+createCountingTree :: Ord r => NonEmpty (r :+ [p]) -> RangeTree (Count p) (CountOf p) r
 createCountingTree = createTree . fmap (&extra %~ CountOf)
 
 -- | Perform a counting query
 --
-count    :: Ord r => Range r -> RangeTree Count p r -> Int
+count    :: Ord r => Range r -> RangeTree (Count p) q r -> Int
 count qr = getCount . search qr
