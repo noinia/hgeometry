@@ -34,7 +34,7 @@ import           Miso.Svg hiding (height_, id_, style_, width_)
 
 --------------------------------------------------------------------------------
 
-type QueryResult = Int
+type QueryResult = String
 
 data Mode = ViewMode | EditMode deriving (Show,Eq)
 
@@ -47,7 +47,7 @@ makePrisms ''Selection
 data Model' r = Model { _iCanvas   :: ICanvas r
                       , _mode      :: Mode
                       , _points    :: [Point 2 r]
-                      , _tree      :: Maybe (RangeTree 2 Count () r)
+                      , _tree      :: Maybe (RangeTree 2 (Count :*: Report) () r)
                       , _selection :: Maybe (Selection r)
                       , _selected  :: Maybe QueryResult
                       } deriving (Show,Eq)
@@ -102,16 +102,16 @@ updateModel m = \case
                           Nothing -> noEff $ m&selected .~ Nothing
                           Just r  -> noEff $ m&selected .~ Just (runQuery r $ m^.tree)
 
-buildTree :: [Point 2 Rational] -> RangeTree 2 Count () Rational
+buildTree :: [Point 2 Rational] -> RangeTree 2 (Count :*: Report) () Rational
 buildTree = createRangeTree2 . NonEmpty.fromList . map ext
 
 
 -- runQuery   :: (Ord r) => Rectangle p r -> [Point 2 r] -> Int
 -- runQuery r = length . filter (`inBox` r)
 
-runQuery   :: Ord r => Rectangle p r -> Maybe (RangeTree 2 Count q r) -> Int
+runQuery   :: (Ord r, Show r, Show q) => Rectangle p r -> Maybe (RangeTree 2 (Count :*: Report) q r) -> String
 runQuery r = let qr = extent r
-             in maybe 0 (getCount . search qr)
+             in maybe "" (show . search qr)
 
 
 updateSelection    :: (Ord r)
