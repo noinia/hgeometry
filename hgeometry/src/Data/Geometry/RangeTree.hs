@@ -6,6 +6,7 @@ import           Data.BinaryTree (Measured(..))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
+import           Data.Geometry.RangeTree.Measure
 import qualified Data.Geometry.RangeTree.Generic as GRT
 import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -77,11 +78,6 @@ deriving instance (Ord r, Ord p, Arity d)   => Ord (Leaf i d v p r)
 
 --------------------------------------------------------------------------------
 
-class MeasuredRT v where
-  measureRT :: [a] -> v a
-
---------------------------------------------------------------------------------
-
 instance (MeasuredRT v, Semigroup (v (Point d r :+ p))
          ) => Measured (v (Point d r :+ p)) (Leaf (S Z) d v p r) where
   measure (Leaf pts) = measureRT pts
@@ -141,51 +137,3 @@ search' (Vector2 xr yr) = concatMap (queryAssoc yr) . GRT.search' xr
 
 queryAssoc   :: Ord r => Range r -> Assoc2 d v p r -> [v (Point d r :+ p)]
 queryAssoc r = maybe [] (GRT.search' r) . getAssoc
-
-
--- newtype RangeTree (d :: Nat) v p r = RangeTree (GRT.RangeTree v p r)
-
-
-
--- newtype Assoc v = Assoc v
-
-
-
--- newtype Leaf = LeafD () r
-
--- newtype AssocD v = AssocD (RangeTree (d - 1) v p r)
-
-
---------------------------------------------------------------------------------
-instance MeasuredRT GRT.Report where
-  measureRT = GRT.Report
---------------------------------------------------------------------------------
-
-newtype Count a = Count { getCount :: Int } deriving (Show,Read,Eq,Ord)
-
-instance MeasuredRT Count where
-  measureRT = Count . length
-
-instance Monoid (Count a) where
-  mempty = Count 0
-
-instance Semigroup (Count a) where
-  (Count l) <> (Count r) = Count $ l + r
-
---------------------------------------------------------------------------------
-
-data And l r a = And (l a) (r a) deriving (Show,Eq,Ord)
-
-type (:*:) l r = And l r
-
-instance (MeasuredRT l, MeasuredRT r) => MeasuredRT (l :*: r) where
-  measureRT xs = And (measureRT xs) (measureRT xs)
-
-instance (Semigroup (l a), Semigroup (r a)) => Semigroup ((l :*: r) a) where
-  (And l r) <> (And l' r') = And (l <> l') (r <> r')
-
-
--- newtype All (ls :: [* -> *]) a = All (Map ls a)
-
--- type family Map (ls :: [* -> *]) (a :: *) where
---   Map '[]
