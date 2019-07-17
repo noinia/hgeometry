@@ -1,18 +1,19 @@
 module Demo.WriteEnsemble where
 
-import Control.Lens
-import Data.Data
-import Data.Ext
-import Data.Fixed
+import           Control.Lens
+import           Data.Data
+import           Data.Ext
+import           Data.Fixed
+import           Data.Geometry
+import           Data.Geometry.Ipe
+import           Data.Geometry.PolyLine (fromPoints)
+import qualified Data.List as List
+import           Data.List (isSuffixOf)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import Data.Geometry.Ipe
-import Data.Geometry
-import Data.Geometry.PolyLine(fromPoints)
-import System.Directory
-import Data.List(isSuffixOf)
-import Data.Time.Calendar
-import Options.Applicative
+import           Data.Time.Calendar
+import           Options.Applicative
+import           System.Directory
 
 
 --------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ readFile'    :: String -> IO T.Text
 readFile' fp = putStrLn fp >> TIO.readFile fp
 
 maxStartDay :: [[core :+ Day]] -> Day
-maxStartDay = maximum . map ((^.extra) . head)
+maxStartDay = maximum . map ((^.extra) . List.head)
 
 -- | Find the last starting day in the file, and trim all the lists s.t. they
 -- all start at or after this day.

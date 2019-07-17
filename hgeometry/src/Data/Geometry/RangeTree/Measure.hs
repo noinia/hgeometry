@@ -4,8 +4,8 @@ import           Data.BinaryTree(Measured(..))
 
 --------------------------------------------------------------------------------
 
-class MeasuredRT v where
-  measureRT :: [a] -> v a
+class LabeledMeasure v where
+  labeledMeasure :: [a] -> v a
 
 --------------------------------------------------------------------------------
 
@@ -15,15 +15,15 @@ newtype Report p = Report { reportList :: [p] }
 instance Measured (Report p) (Report p) where
   measure = id
 
-instance MeasuredRT Report where
-  measureRT = Report
+instance LabeledMeasure Report where
+  labeledMeasure = Report
 
 --------------------------------------------------------------------------------
 
 newtype Count a = Count { getCount :: Int } deriving (Show,Read,Eq,Ord)
 
-instance MeasuredRT Count where
-  measureRT = Count . length
+instance LabeledMeasure Count where
+  labeledMeasure = Count . length
 
 instance Monoid (Count a) where
   mempty = Count 0
@@ -37,8 +37,8 @@ data And l r a = And (l a) (r a) deriving (Show,Eq,Ord)
 
 type (:*:) l r = And l r
 
-instance (MeasuredRT l, MeasuredRT r) => MeasuredRT (l :*: r) where
-  measureRT xs = And (measureRT xs) (measureRT xs)
+instance (LabeledMeasure l, LabeledMeasure r) => LabeledMeasure (l :*: r) where
+  labeledMeasure xs = And (labeledMeasure xs) (labeledMeasure xs)
 
 instance (Semigroup (l a), Semigroup (r a)) => Semigroup ((l :*: r) a) where
   (And l r) <> (And l' r') = And (l <> l') (r <> r')

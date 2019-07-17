@@ -419,7 +419,7 @@ isTriangle = \case
 --
 -- running time: \(O(n)\)
 findDiagonal    :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
-findDiagonal pg = head . catMaybes . F.toList $ diags
+findDiagonal pg = List.head . catMaybes . F.toList $ diags
      -- note that a diagonal is guaranteed to exist, so the usage of head is safe.
   where
     vs      = pg^.outerBoundary

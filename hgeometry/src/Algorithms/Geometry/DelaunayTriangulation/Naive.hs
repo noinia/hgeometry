@@ -65,7 +65,7 @@ sortAround' (_,ptsV) u vs = reverse . map (^.extra) $ sortArround (f u) (map f v
 
 -- | Given a list of faces, construct a list of edges
 extractEdges :: [(VertexID,VertexID,VertexID)] -> [(VertexID,VertexID)]
-extractEdges = map head . L.group . L.sort
+extractEdges = map L.head . L.group . L.sort
                . concatMap (\(p,q,r) -> [(p,q), (q,r), (p,r)])
                -- we encounter every edge twice. To get rid of the duplicates
                -- we sort, group, and take the head of the lists

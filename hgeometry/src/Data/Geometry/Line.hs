@@ -83,7 +83,7 @@ instance (Ord r, Fractional r)
       (t,r,b,l) = sides' rect
       ints = map (\s -> sl `intersect` toSL s) [t,r,b,l]
 
-      nub' = map head . L.group . L.sort
+      nub' = map L.head . L.group . L.sort
 
       sl = fromLine line'
       -- wrap a segment into an potentially unbounded subline

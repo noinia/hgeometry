@@ -1,139 +1,137 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.RangeTree where
 
-import           Control.Lens
+import           Control.Lens hiding (element)
 import           Data.BinaryTree (Measured(..))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
-import           Data.Geometry.RangeTree.Measure
 import qualified Data.Geometry.RangeTree.Generic as GRT
+import           Data.Geometry.RangeTree.Measure
 import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Proxy
 import           Data.Range
 import           Data.Semigroup.Foldable
 import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
 import           GHC.TypeLits
-
+import           Prelude hiding (last,init,head)
 
 --------------------------------------------------------------------------------
 
-newtype RangeTree d v p r = RangeTree (RT (Peano d) d v p r)
-                          -- deriving (Show,Eq)
+type RangeTree d = RT d d
 
+newtype RT i d v p r =
+  RangeTree { _unRangeTree :: GRT.RangeTree (Assoc i d v p r) (Leaf i d v p r) r }
 
+deriving instance (Show r, Show (Assoc i d v p r), Show (Leaf i d v p r)) => Show (RT i d v p r)
+deriving instance (Eq r,   Eq   (Assoc i d v p r), Eq   (Leaf i d v p r)) => Eq   (RT i d v p r)
 
-type RT i d v p r = GRT.RangeTree (Assoc i d v p r) (Leaf i d v p r) r
-
-
-type family Assoc (i :: PeanoNum) d v p r where
-  Assoc (S Z)     d v p r = v (Point d r :+ p)
-  Assoc (S (S i)) d v p r = Assoc' (S i) d v p r
-
-newtype Assoc' i d v p r = Assoc' { getAssoc :: Maybe (RT i d v p r) }
-
-
-
-instance Semigroup (Assoc' i d v p r) => Monoid (Assoc' i d v p r) where
-  mempty = Assoc' Nothing
-
-instance ( Ord r, Arity d, MeasuredRT v, Semigroup (v (Point d r :+ p))
-         ) => Semigroup (Assoc' (S Z) d v p r) where
-  (Assoc' l) <> (Assoc' r) = createAssoc' $ merge (toList l) (toList r)
-    where
-      toList = maybe [] (F.toList . GRT.toAscList)
-
-merge :: (Ord r, Semigroup ps) => [r :+ ps] -> [r :+ ps] -> [r :+ ps]
-merge = go
-  where
-    go []         bs = bs
-    go as         [] = as
-    go as@(a:as') bs@(b:bs') = case (a^.core) `compare` (b^.core) of
-       LT -> a : go as' bs
-       GT -> b : go as  bs'
-       EQ -> (a^.core :+ (a^.extra) <> (b^.extra)) : go as' bs'
-
-
-
--- deriving instance (Show (v (Point d r :+ p)), Show r, Show p, Arity d) => Show (Assoc' 1 d v p r)
--- deriving instance (Eq (v (Point d r :+ p)),   Eq r,   Eq p,   Arity d) => Eq   (Assoc' 1 d v p r)
-
--- deriving instance (Show (Assoc' (i-1) d v p r)) => Show (Assoc' i d v p r)
--- deriving instance (Eq (v (Point d r :+ p)),   Eq r,   Eq p,   Arity d) => Eq   (Assoc' i d v p r)
-
-
-
-
-
-
-type RangeTree1D d v p r =  GRT.RangeTree (v (Point d r :+ p)) (Leaf (S Z) d v p r) r
-
-newtype Leaf (i :: PeanoNum) d v p r = Leaf [Point d r :+ p]
-                                     deriving (Semigroup,Monoid)
+newtype Leaf i d v p r = Leaf { _getPts :: [Point d r :+ p]} deriving (Semigroup,Monoid)
 
 deriving instance (Show r, Show p, Arity d) => Show (Leaf i d v p r)
-deriving instance (Eq r, Eq p, Arity d)     => Eq (Leaf i d v p r)
-deriving instance (Ord r, Ord p, Arity d)   => Ord (Leaf i d v p r)
+deriving instance (Eq r, Eq p,     Arity d) => Eq   (Leaf i d v p r)
+
+
+type family AssocT i d v p r where
+  AssocT 1 d v p r = v (Point d r :+ p)
+  AssocT 2 d v p r = Maybe (RT 1 d v p r)
+
+newtype Assoc i d v p r = Assoc { unAssoc :: AssocT i d v p r }
+
+deriving instance Show (AssocT i d v p r) => Show (Assoc i d v p r)
+deriving instance Eq   (AssocT i d v p r) => Eq   (Assoc i d v p r)
+
+
+type RTMeasure v d p r = (LabeledMeasure v, Semigroup (v (Point d r :+ p)))
+
+instance RTMeasure v d p r => Semigroup (Assoc 1 d v p r) where
+  (Assoc l) <> (Assoc r) = Assoc $ l <> r
+
+instance (RTMeasure v d p r, Ord r, 1 <= d, Arity d) => Semigroup (Assoc 2 d v p r) where
+  (Assoc l) <> (Assoc r) = Assoc . createRangeTree'' $ toList l <> toList r
+    where
+      toList = maybe [] (F.toList . toAscList)
+      createRangeTree'' = fmap createRangeTree1 . NonEmpty.nonEmpty
+
+
+
+instance (RTMeasure v d p r, Ord r, 1 <= d, Arity d) => Monoid (Assoc 2 d v p r) where
+  mempty = Assoc Nothing
+
+----------------------------------------
+
+instance ( RTMeasure v d p r
+         ) => Measured (Assoc 1 d v p r) (Leaf 1 d v p r) where
+  measure (Leaf pts) = Assoc . labeledMeasure $ pts
+
+instance ( RTMeasure v d p r, Ord r, 1 <= d, Arity d
+         ) => Measured (Assoc 2 d v p r) (Leaf 2 d v p r) where
+  measure (Leaf pts) = Assoc . createRangeTree'' $ pts
+    where
+      createRangeTree'' = fmap createRangeTree1 . NonEmpty.nonEmpty
+
+----------------------------------------
+
+createRangeTree' :: (Ord r, RTMeasure v d p r
+                   -- , Arity d, Arity (d+1), d ~ (d' + 1), Arity d'
+                   -- , Measured (Assoc d v p r) (Leaf d v p r)
+                   )
+                 => [Point d r :+ p] -> Maybe (RT i d v p r)
+createRangeTree' = fmap createRangeTree . NonEmpty.nonEmpty
+
+
+createRangeTree :: (Ord r, RTMeasure v d p r
+                   -- , Arity d, Arity (d+1), d ~ (d' + 1), Arity d'
+                   -- , Measured (Assoc d v p r) (Leaf d v p r)
+                   )
+                => NonEmpty (Point d r :+ p) -> RT i d v p r
+createRangeTree = undefined
+-- RangeTree . GRT.createTree
+--                 . fmap (\p -> last (p^.core.vector) :+ Leaf [p])
+
 
 --------------------------------------------------------------------------------
 
-instance (MeasuredRT v, Semigroup (v (Point d r :+ p))
-         ) => Measured (v (Point d r :+ p)) (Leaf (S Z) d v p r) where
-  measure (Leaf pts) = measureRT pts
+-- | Gets all points in the range tree
+toAscList :: RT i d v p r -> [Point d r :+ p]
+toAscList = concatMap (^.extra.to _getPts) . F.toList . GRT.toAscList . _unRangeTree
 
-instance (MeasuredRT v, Semigroup (v (Point d r :+ p))
-         , 2 <= d, Arity d, Ord r
-         ) => Measured (Assoc' (S Z) d v p r) (Leaf (S (S Z)) d v p r) where
-  measure (Leaf pts) = createAssoc . map (\p -> p^.core.yCoord :+ p) $ pts
-
-
-create1DTree :: (Ord r, Measured (v (Point d r :+ p)) (Leaf (S Z) d v p r))
-             => NonEmpty (r :+ (Point d r :+ p))
-             -> RT (S Z) d v p r
-create1DTree = GRT.createTree . fmap (&extra %~ Leaf . (:[]))
 
 --------------------------------------------------------------------------------
 
-type Assoc2 d v p r = Assoc' (S Z) d v p r
+createRangeTree1 :: (Ord r, RTMeasure v d p r, 1 <= d, Arity d)
+                 => NonEmpty (Point d r :+ p) -> RT 1 d v p r
+createRangeTree1 = RangeTree . GRT.createTree
+                . fmap (\p -> head (p^.core.vector) :+ Leaf [p])
 
--- newtype Assoc2 d v p r = Assoc { getAssoc :: Maybe (RangeTree1D d v p r) }
+createRangeTree2 :: forall v d r p. (Ord r, RTMeasure v d p r, Arity d, 2 <= d
+                                    , 1 <= d -- this one is kind of silly
+                 ) => NonEmpty (Point d r :+ p) -> RT 2 d v p r
+createRangeTree2 = RangeTree . GRT.createTree
+                 . fmap (\p -> p^.core.coord (Proxy :: Proxy 2) :+ Leaf [p])
 
--- deriving instance (Show (v (Point d r :+ p)), Show r, Show p, Arity d) => Show (Assoc2 d v p r)
--- deriving instance (Eq (v (Point d r :+ p)),   Eq r,   Eq p,   Arity d) => Eq   (Assoc2 d v p r)
-
-
--- | Creates an associated DS from a pre-sorted list of points
-createAssoc' :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)))
-             => [r :+ Leaf (S Z) d v p r] -> Assoc' (S Z) d v p r
-createAssoc' = Assoc' . fmap GRT.createTree' . NonEmpty.nonEmpty
-
-createAssoc :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)))
-            => [r :+ (Point d r :+ p)] -> Assoc2 d v p r
-createAssoc = Assoc' . fmap create1DTree . NonEmpty.nonEmpty
+--------------------------------------------------------------------------------
+-- * Querying
 
 
-
-
-
-type RangeTree2D d v p r = GRT.RangeTree (Assoc2 d v p r) (Leaf (S (S Z)) d v p r) r
-
--- instance ( MeasuredRT v, Semigroup (v (Point d r :+ p)), 2 <= d, Arity d, Ord r
---          ) => Measured (Assoc2 d v p r) (Leaf 2 d v p r) where
---   measure (Leaf pts) = createAssoc . map (\p -> p^.core.yCoord :+ p) $ pts
-
-
-create2DTree :: (Ord r, MeasuredRT v, Semigroup (v (Point d r :+ p)), Arity d, 2 <= d, 1 <= d)
-             => NonEmpty (Point d r :+ p) -> RangeTree2D d v p r
-create2DTree = GRT.createTree . fmap (\p -> (p^.core.xCoord) :+ Leaf [p])
-
-search   :: (Ord r, Monoid (v (Point d r :+ p)))
-         => Vector 2 (Range r) -> RangeTree2D d v p r -> v (Point d r :+ p)
+search   :: ( Ord r, Monoid (v (Point d r :+ p)), Query i d)
+         => Vector d (Range r) -> RT i d v p r -> v (Point d r :+ p)
 search r = mconcat . search' r
 
-search'                 :: Ord r
-                        => Vector 2 (Range r) -> RangeTree2D d v p r -> [v (Point d r :+ p)]
-search' (Vector2 xr yr) = concatMap (queryAssoc yr) . GRT.search' xr
 
-queryAssoc   :: Ord r => Range r -> Assoc2 d v p r -> [v (Point d r :+ p)]
-queryAssoc r = maybe [] (GRT.search' r) . getAssoc
+class (i <= d, Arity d) => Query i d where
+  search' :: Ord r => Vector d (Range r) -> RT i d v p r -> [v (Point d r :+ p)]
+
+instance (1 <= d, Arity d) => Query 1 d where
+  search' qr = map unAssoc . GRT.search' r . _unRangeTree
+    where
+      r = qr^.element (Proxy :: Proxy 0)
+
+instance ( 1 <= d, i <= d, Query (i-1) d, Arity d
+         , i ~ 2
+         ) => Query 2 d where
+  search' qr = concatMap (maybe [] (search' qr) . unAssoc) . GRT.search' r . _unRangeTree
+    where
+      r = qr^.element (Proxy :: Proxy (i-1))

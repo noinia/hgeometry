@@ -111,7 +111,7 @@ readExcludedRegion = fromPoints . map readPt . T.lines
 
 clipExcludedRegions      :: [SimplePolygon () R] -> Track -> [Track]
 clipExcludedRegions regs = map (Track . map fst)
-                         . filter (not . snd . head)
+                         . filter (not . snd . List.head)
                          . List.groupBy ((==) `on` snd)
                          . map (\tp@(TP (Position p :+ _)) ->
                                    (tp, any (p `insidePolygon`) regs))

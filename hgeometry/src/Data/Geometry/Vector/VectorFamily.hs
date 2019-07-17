@@ -140,8 +140,11 @@ vectorFromListUnsafe = V.fromList
 
 destruct   :: (Arity d, Arity (d + 1))
            => Vector (d + 1) r -> (r, Vector d r)
-destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+destruct v = (L.head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
   -- FIXME: this implementaion of tail is not particularly nice
+
+head   :: (Arity d, 1 <= d) => Vector d r -> r
+head = view $ element (C :: C 0)
 
 --------------------------------------------------------------------------------
 -- * Indexing vectors

@@ -16,6 +16,7 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Vector
 import           Data.List (isSuffixOf)
+import qualified Data.List as List
 import           Data.Maybe
 import           Data.Semigroup
 import qualified Data.Sequence as S
@@ -152,7 +153,7 @@ world = (worldWidth,worldHeight)
 
 strokeByMonth p = stroke p c
   where
-    dt = p^.points.to F.toList.to head.extra
+    dt = p^.points.singular (ix 0).extra
     (_,m,_) = toGregorian $ utctDay dt
     c = colors !! (m -1)
 
@@ -164,7 +165,7 @@ groupsOf _ [] = []
 groupsOf k xs = let (ys,xss) = splitAt k xs in ys : groupsOf k xss
 
 subsample   :: Int -> [a] -> [a]
-subsample k = map head . groupsOf k
+subsample k = map List.head . groupsOf k
 
 subsampleTrack   :: Int -> Track -> Track
 subsampleTrack k = over trackPoints (subsample k)

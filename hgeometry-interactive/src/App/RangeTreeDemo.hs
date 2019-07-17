@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module App.SubdivisionViewer where
+module App.RangeTreeDemo where
 
 
 import           Control.Lens hiding (view, element)
@@ -17,6 +17,7 @@ import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon)
 import           Data.Geometry.Point
 import           Data.Geometry.RangeTree
+import           Data.Geometry.RangeTree.Measure
 
 
 import qualified Data.List.NonEmpty as NonEmpty
@@ -46,7 +47,7 @@ makePrisms ''Selection
 data Model' r = Model { _iCanvas   :: ICanvas r
                       , _mode      :: Mode
                       , _points    :: [Point 2 r]
-                      , _tree      :: Maybe (RangeTree2D 2 Count () r)
+                      , _tree      :: Maybe (RangeTree 2 Count () r)
                       , _selection :: Maybe (Selection r)
                       , _selected  :: Maybe QueryResult
                       } deriving (Show,Eq)
@@ -101,14 +102,14 @@ updateModel m = \case
                           Nothing -> noEff $ m&selected .~ Nothing
                           Just r  -> noEff $ m&selected .~ Just (runQuery r $ m^.tree)
 
-buildTree :: [Point 2 Rational] -> RangeTree2D 2 Count () Rational
-buildTree = create2DTree . NonEmpty.fromList . map ext
+buildTree :: [Point 2 Rational] -> RangeTree 2 Count () Rational
+buildTree = createRangeTree2 . NonEmpty.fromList . map ext
 
 
 -- runQuery   :: (Ord r) => Rectangle p r -> [Point 2 r] -> Int
 -- runQuery r = length . filter (`inBox` r)
 
-runQuery   :: Ord r => Rectangle p r -> Maybe (RangeTree2D 2 Count q r) -> Int
+runQuery   :: Ord r => Rectangle p r -> Maybe (RangeTree 2 Count q r) -> Int
 runQuery r = let qr = extent r
              in maybe 0 (getCount . search qr)
 
