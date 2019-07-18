@@ -100,15 +100,15 @@ mkBottom z (lx, ly) (rx, ry) c = [ triangle' (Point3 lx ly z)
 
 
 
-xSide :: [Triangle 3 p r :+ c] -> [Triangle 3 p r :+ c]
-xSide = map (\(t :+ c) -> pmap toX t :+ c)
-  where
-    toX (Point3 x y z) = Point3 z y x
+-- xSide :: [Triangle 3 p r :+ c] -> [Triangle 3 p r :+ c]
+-- xSide = map (\(t :+ c) -> pmap toX t :+ c)
+--   where
+--     toX (Point3 x y z) = Point3 z y x
 
-ySide :: [Triangle 3 p r :+ c] -> [Triangle 3 p r :+ c]
-ySide = map (\(t :+ c) -> pmap toY t :+ c)
-  where
-    toY (Point3 x y z) = Point3 x z y
+-- ySide :: [Triangle 3 p r :+ c] -> [Triangle 3 p r :+ c]
+-- ySide = map (\(t :+ c) -> pmap toY t :+ c)
+--   where
+--     toY (Point3 x y z) = Point3 x z y
 
 
 myT :: Triangle 3 () Rational
@@ -116,15 +116,35 @@ myT = Triangle (ext $ Point3 1  1  10)
                (ext $ Point3 20 1  10)
                (ext $ Point3 20 30 10)
 
+
+-- FIXME 20 causes zero error
+topSide z = [ triangle' (Point3 0   0 z)
+                        (Point3 17  0 z)
+                        (Point3 17 17 z) :+ purple
+            , triangle' (Point3 0   0 z)
+                        (Point3 0  17 z)
+                        (Point3 17 17 z) :+ purple
+            ]
+
+leftSide x = [ triangle' (Point3 x 0   0)
+                         (Point3 x 17  0)
+                         (Point3 x 17 17) :+ navy
+             , triangle' (Point3 x 0   0)
+                         (Point3 x 0  17)
+                         (Point3 x 17 17) :+ navy
+             ]
+
+cube = topSide 17 <> topSide 0 <> leftSide 0 <> leftSide 23
+
 myScene :: Scene Rational
-myScene = [ myT :+ red
-          , triangle' origin
-                      (Point3 0 40 (-10))
-                      (Point3 0 0  (-10)) :+ blue
-          , triangle' (Point3 0 0 (-50))
-                      (Point3 0 40 (-10))
-                      (Point3 0 0  (-10)) :+ green
-          ]
+myScene = [ myT :+ seagreen
+          -- , triangle' origin
+          --             (Point3 0 40 (-10))
+          --             (Point3 0 0  (-10)) :+ purple
+          -- , triangle' (Point3 0 0 (-50))
+          --             (Point3 0 40 (-10))
+          --             (Point3 0 0  (-10)) :+ navy
+          ] <> cube
         ++ axes
         -- ++ cube
 
@@ -143,14 +163,15 @@ axes = [ triangle' origin
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model (blankCanvas 980 800)
+initialModel = Model (blankCanvas 980 800 & capabilities .~ mempty
+                     )
                      (Just myScene)
                      myCamera
                      (Just $ renderAll myCamera myScene)
                      Nothing
 
 myCamera :: Camera Rational
-myCamera = Camera (Point3 50 0 20)
+myCamera = Camera (Point3 (-30) (-20) 20)
                   (Vector3 0 0 (-1))
                   (Vector3 0 1 0)
                   10
@@ -174,6 +195,7 @@ type Action = GAction Rational
 data GAction r = Id
                | CanvasAction CanvasAction
                | Select Selectable
+               | GetArrows Arrows
                -- | LoadSubdiv (Maybe (SubDiv Rational))
                -- | OpenFile FilePath
                deriving (Show,Eq)
@@ -184,12 +206,20 @@ updateModel m = \case
     CanvasAction ca  -> m&iCanvas %%~ flip ICanvas.update ca
     Select i         -> (m&selected .~ Just i) <# do liftIO $ print i
                                                      pure Id
+    GetArrows arr    -> noEff . reRender $ m&camera %~ shiftCamera arr
+
+
+reRender   :: Model -> Model
+reRender m = m&myArr .~ (renderAll (m^.camera) <$> m^.scene)
+
     -- LoadSubdiv mps   -> noEff $ m&subdivision .~ mps
     -- OpenFile fp      -> m <# do mps <- liftIO $ loadFromFile fp
     --                             pure $ LoadSubdiv mps
 
--- shiftCamera     :: Num r => ArrowKey -> Camera r -> Camera r
--- shiftCamera k c = c&cameraPosition %~ (.+^ 2 *^ toDirection k)
+shiftCamera                :: Num r => Arrows -> Camera r -> Camera r
+shiftCamera (Arrows x y) c = c&cameraPosition %~ (.+^ 5 *^ v)
+  where
+    v = fromIntegral <$> Vector3 x y 0
 
 --------------------------------------------------------------------------------
 
@@ -258,9 +288,12 @@ drawColoredArrangement arr = dPlanarSubdivisionWith dv de df subdiv
     subdiv = (arr^.subdivision)&vertexData.traverse     .~ black
                                &dartData.traverse._2    .~ black
 
-    dv (i,vd) = Just $ draw (vd^.location) [ onClick $ Select (Vtx i)]
-    de (i,e)  = Just $ draw (e^.core) [ onClick $ Select (Edg i)
-                                      , stroke_  . ms $ e^.extra
+    dv (i,vd) = Nothing -- Just $ draw (vd^.location) [ onClick $ Select (Vtx i)]
+    -- de _      = Nothing
+    de (i,e)  = Just $ draw (e^.core) [ -- onClick $ Select (Edg i)
+                                      -- ,
+                                        stroke_  . ms $ e^.extra
+                                      , opacity_ "0.5"
                                       ]
     df (i,f)  = Just $ draw (f^.core) [ -- onClick $ Select (Fce i)
                                       -- ,
@@ -439,6 +472,7 @@ mainJSM = do
                     , subs          = [ relativeMouseSub "mySvg" (CanvasAction . MouseMove)
                                       -- , relativeMouseSub "svgz" Mouse
                                         -- mouseSub (CanvasAction . MouseMove)
+                                      , arrowsSub GetArrows
                                       , arrowsSub (CanvasAction . ArrowPress)
                                       ]
                     , events        = Map.insert "touchstart" False
