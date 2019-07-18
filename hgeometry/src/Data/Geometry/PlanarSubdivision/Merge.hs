@@ -63,6 +63,9 @@ embedAsHoleIn ph' f i ps = mergeWith' mergeFaces ps ph
     -- coerce the worlds to be the same
     ph :: PlanarSubdivision s v e f r
     ph = unsafeCoerce ph'
+      -- We are coercing the 'h' into an 's' here. Since these
+      -- parameters are phantom types the representation of the data
+      -- is the same, and hence the unsafeCoerce should be safe here.
 
     mergeFaces fs1 fs2 = update fs1 i (V.head fs2) <> V.tail fs2
 

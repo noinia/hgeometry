@@ -28,7 +28,16 @@ import Data.Geometry.Transformation
 
 --------------------------------------------------------------------------------
 
--- | defines a basic camera
+-- | A basic camera data type. The fields stored are:
+--
+-- * the camera position,
+-- * the raw camera normal, i.e. a unit vecotr into the center of the screen,
+-- * the raw view up vector indicating which side points "upwards" in the scene,
+-- * the viewplane depth (i.e. the distance from the camera position to the plane on which we project),
+-- * the near distance (everything closer than this is clipped),
+-- * the far distance (everything further away than this is clipped), and
+-- * the screen dimensions.
+--
 data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
                        , _rawCameraNormal  :: !(Vector 3 r)
                          -- ^ unit vector from camera into center of the screen
@@ -39,7 +48,14 @@ data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
                        , _farDist          :: !r
                        , _screenDimensions :: !(Vector 2 r)
                        } deriving (Show,Eq,Ord)
+
+----------------------------------------
+-- * Field Accessor Lenses
+
 makeLenses ''Camera
+
+--------------------------------------------------------------------------------
+-- * Accessor Lenses
 
 -- | Lens to get and set the Camera normal, makes sure that the vector remains
 -- normalized.
@@ -51,6 +67,10 @@ cameraNormal = lens _rawCameraNormal (\c n -> c { _rawCameraNormal = signorm n} 
 -- normalized.
 viewUp :: Floating r => Lens' (Camera r) (Vector 3 r)
 viewUp = lens _rawViewUp (\c n -> c { _rawViewUp = signorm n})
+
+
+--------------------------------------------------------------------------------
+-- * Camera Transformation functions
 
 
 -- | Full transformation that renders the figure
