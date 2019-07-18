@@ -19,83 +19,27 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import           Data.Geometry.Arrangement
+import           Data.Geometry.Box
 import           Data.Geometry.HyperPlane
 import           Data.Geometry.Line
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
-import           Data.Geometry.Box
 import           Data.Geometry.Polygon (centroid)
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Proxy
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.UnBounded
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           Data.Vinyl.CoRec
 
-import           Data.Geometry.Arrangement.Draw
-import           Data.Geometry.Ipe
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Polygon
 import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
 type PriQ a = [a]
-
--- let arr = renderAll c s
---           Render.ipeOut drawColoredArrangement $ arr
-
--- renderAll = arr&subdivision.faceData %~ fmap mkColor
---   where
---     arr = HiddenSurfaceRemoval.render (Identity Screen) (c^.cameraPosition) ts
---     ts = traceShowId $ renderScene' c s
---     mkColor = fmap (^.extra.extra)
-
-testz            :: forall proxy s r v q f. (Ord r, Fractional r
-                                           , Show r, Show v, Show q, Show f, IpeWriteText r
-                                           )
-                 => proxy s
-                -> Point 3 r -- ^ the viewpoint
-                -> Rectangle () r
-                -> [Tri v q f r]
-                -> Arrangement s
-                               (NonEmpty (Tri v q f r)) ()
-                               (Maybe (NonEmpty (Tri v q f r))) () r
-                -- [Line 2 r :+ Tri v q f r]
-testz px _ sc ts = constructArrangementInBox px sc $ collectLines ts
-
--- draw1 :: IO ()
--- draw1 = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
---   where
---     out = map (\(l:+_) -> iO $ defIO l) $ collectLines scene
-
-draw' :: IO ()
-draw' = writeIpeFile "/tmp/debug.ipe" . singlePageFromContent $ out
-  where
-    mkColor = fmap (^.extra.extra)
-    test'' = test&subdivision.faceData %~ fmap mkColor
-    out = [iO $ drawColoredArrangement test'']
-    -- out = traceShow fas $ [asIpe drawArrangement arr' ]
-    -- arr = testz (Proxy :: Proxy Test) origin screen scene
-    -- screen = box (ext origin) (ext $ Point2 600 800)
-    -- arr' = traceShow (V.filter isEmpty . rawFacePolygons $ arr^.subdivision) arr
-    -- fas = naiveAssignment origin arr scene
-
-
-    -- isEmpty (_,Left  p :+ _) = (< 3) . length . polygonVertices $ p
-    -- isEmpty (_,Right p :+ _) = (< 3) . length . polygonVertices $ p
-
--- collect xs = [ head ys
---              | (x:+_) <- xs, let ys = filter (\(y:+_) -> y == x) xs, length ys > 1
---              ]
-
--- ordNub :: Ord a => [a :+ b] -> [a :+ b]
--- ordNub = List.groupBy (comparing (^.core)) . List.sortOn (^.core)
-
 
 -- | group the elements that have the same core value.
 --
@@ -139,7 +83,7 @@ dropDegenerate = filter (not . isDegenerateTriangle . (^.core))
 -- faces: the triangle defining this face (if any).
 --
 render           :: forall proxy s r v q f. (Ord r, Fractional r
-                                           , Show r, Show v, Show q, Show f, IpeWriteText r
+                                           , Show r, Show v, Show q, Show f
                                            )
                  => proxy s
                  -> Point 3 r -- ^ the viewpoint
@@ -223,9 +167,9 @@ compareDepthOrder' vp q a = compareDepthOrder vp (liftToR3 q a) a
 
 
 -- | computes the intersection point between l and the supporting plane of t
-intersectionPoint     :: (Ord r, Fractional r)
+intersectionPoint     :: forall p r. (Ord r, Fractional r)
                       => Line 3 r -> Triangle 3 p r -> Maybe (Point 3 r)
-intersectionPoint l t = asA (Proxy :: Proxy (Point 3 r)) $ l `intersect` supportingPlane t
+intersectionPoint l t = asA @(Point 3 r) $ l `intersect` supportingPlane t
 
 -- | Given a mapping function, pairs of keys and values, and a length n,
 -- construct a vector that such that for every pair (k,v) the vector stores
@@ -287,6 +231,7 @@ naiveAssignment vp arr ts = f <$> faces' ps
   -- observe that since we explicitly filter the triangles to contain c, we can indeed
   -- safely use compareDepthOrder'
 
+onTriangle' :: (Show r, Show p, Ord r, Fractional r) => Point 2 r -> Triangle 2 p r -> Bool
 onTriangle' q t = traceShow ("onTriangle': ",q,t) $ q `onTriangle` t
 --
 -- >>> minimumBy' compare []
@@ -349,57 +294,3 @@ minimumBy' cmp = topToMaybe  . List.minimumBy (liftCompare cmp)
 --------------------------------------------------------------------------------
 
 data Test
-
-
-test ::
-  Arrangement
-    Test
-    (NonEmpty (Tri () () (IpeColor Rational) Rational))
-    ()
-    (Maybe EdgeSide)
-    (Maybe (Tri () () (IpeColor Rational) Rational))
-    Rational
-test = render (Proxy :: Proxy Test) vp screen scene
-  where
-    -- vp = origin
-    vp = Point3 50 0 50
-
-    screen = box (ext origin) (ext $ Point2 600 800)
-
-
--- scene  :: [Tri () () (IpeColor Rational) Rational]
-
-scene  :: (Fractional r, RealFrac r, Ord r, Show r, IpeWriteText r,  Read r)
-      => [Tri () () (IpeColor r) r]
-scene = fmap (fmap' realToFrac) scene'
-
-fmap' :: (a -> b) ->  Tri v q f a -> Tri v q f b
-fmap' f (t2 :+ (t3 :+ x)) = fmap f t2 :+ (fmap f t3 :+ x)
-
-
--- scene' :: [Tri () () (IpeColor Rational) Double]
-scene' :: (Fractional r, RealFrac r, Ord r, Show r, Read r, IpeWriteText r) => [Tri () () (IpeColor r) Double]
-scene' = read "[ Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named \"red\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named \"blue\"))        ,Triangle (Point2 [-7.5,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named \"green\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [112.5,-0.0] :+ ()) (Point2 [135.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named \"red\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,125.0] :+ ()) (Point2 [-15.0,150.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named \"green\"))        ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-750.0,-150.0] :+ ()) (Point2 [-750.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named \"blue\"))]"
-
-
--- scene'' :: [Tri () () (IpeColor Rational) Double]
--- scene'' = read "[Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named "red")),Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "blue")),Triangle (Point2 [-7.5,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "green")),Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [112.5,-0.0] :+ ()) (Point2 [135.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named "red")),Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,125.0] :+ ()) (Point2 [-15.0,150.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named "green")),Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-750.0,-150.0] :+ ()) (Point2 [-750.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named "blue"))]"
-
--- scene = [ Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named "red"))
---         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "blue"))
---         ,Triangle (Point2 [-7.5,-0.0] :+ ()) (Point2 [-12.5,10.0] :+ ()) (Point2 [-12.5,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "green"))
---         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [112.5,-0.0] :+ ()) (Point2 [135.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named "red"))
---         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-12.5,125.0] :+ ()) (Point2 [-15.0,150.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named "green"))
---         ,Triangle (Point2 [-15.0,-0.0] :+ ()) (Point2 [-750.0,-150.0] :+ ()) (Point2 [-750.0,-0.0] :+ ()) :+ (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named "blue"))]
-
-
--- scene = [ Triangle (Point2 [-18.375,0.375] :+ ()) (Point2 [-11.25,0.375] :+ ()) (Point2 [-11.25,11.25] :+ ()) :+ (
-
-
--- Triangle (Point3 [1.0,1.0,10.0] :+ ()) (Point3 [20.0,1.0,10.0] :+ ()) (Point3 [20.0,30.0,10.0] :+ ()) :+ IpeColor (Named "red"))
-
--- (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "blue"))
--- (Triangle (Point3 [0.0,0.0,-50.0] :+ ()) (Point3 [0.0,40.0,-10.0] :+ ()) (Point3 [0.0,0.0,-10.0] :+ ()) :+ IpeColor (Named "green"))
--- (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [500.0,0.0,-10.0] :+ ()) (Point3 [500.0,0.0,0.0] :+ ()) :+ IpeColor (Named "red"))
--- (Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,500.0,-10.0] :+ ()) (Point3 [0.0,500.0,0.0] :+ ()) :+ IpeColor (Named "green"))
--- Triangle (Point3 [0.0,0.0,0.0] :+ ()) (Point3 [0.0,-10.0,49.0] :+ ()) (Point3 [0.0,0.0,49.0] :+ ()) :+ IpeColor (Named "blue"))]
