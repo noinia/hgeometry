@@ -5,12 +5,16 @@ module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.Stati
                                         , ICanvas(ICanvas), blankCanvas
                                         , canvas, mousePosition, panStatus
                                         , mouseCoordinates
+                                        , capabilities
+                                        , hasCapability
 
                                         , CanvasAction(..)
                                         , update
                                         , view
 
                                         , iCanvasSubs
+
+                                        , Capability(..)
                                         ) where
 
 import           Control.Lens hiding (view, element, rmap, Zoom)
@@ -19,8 +23,10 @@ import           Data.Geometry.Interactive.StaticCanvas
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import           Data.Range
+import qualified Data.Set as Set
+import           Data.Set (Set)
 import           Miso hiding (update, view)
-import           Miso.String(MisoString)
+import           Miso.String (MisoString)
 import           Miso.Subscription.MouseExtra
 
 --------------------------------------------------------------------------------
@@ -33,29 +39,32 @@ data PanStatus r = NoPan
                            (Point 2 r) -- ^ center point of the viewport at that time
                  deriving (Show,Eq)
 
+data Capability = Zoomable
+                | Pannable
+                deriving (Show,Eq,Ord,Enum,Bounded)
+
 data ICanvas r = ICanvas { _canvas           :: Canvas r
                          , _mousePosition    :: Maybe (Point 2 Int)
                          , _panStatus        :: PanStatus r
                            -- ^ point where we started panning from
+                         , _capabilities     :: Set Capability
                          } deriving (Show,Eq)
 makeLenses ''ICanvas
 
+hasCapability   :: Capability -> ICanvas r -> Bool
+hasCapability c = Set.member c . _capabilities
 
 mouseCoordinates :: Fractional r => Getter (ICanvas r) (Maybe (Point 2 r))
 mouseCoordinates = to $ \m -> realWorldCoordinates (m^.canvas) <$> m^.mousePosition
 
-
 -- | Createas an interactive lbank canvas
 blankCanvas     :: Num r => Int -> Int -> ICanvas r
-blankCanvas w h = ICanvas (createCanvas w h) Nothing NoPan
+blankCanvas w h = ICanvas (createCanvas w h) Nothing NoPan (Set.fromList [minBound..maxBound])
 
 
 --------------------------------------------------------------------------------
 -- * Controller
 
-data Capabilities = Zoomable
-                  | Pannable
-                  deriving (Show,Eq)
 
 
 
@@ -150,11 +159,31 @@ view            :: ( RealFrac r, ToSvgCoordinate r)
                 -> ICanvas r
                 -> [Attribute action] -> [View action] -> View action
 view f m ats vs = staticCanvas_ (m^.canvas)
-                                ([ onMouseLeave $ f MouseLeave
-                                 , onMouseDown  $ f (Pan StartPan)
-                                 , onMouseUp    $ f (Pan StopPan)
-                                 , onWheel      $ f . Zoom . ZoomAction
-                                 ] <> ats) vs
+                                (mconcat [
+                                  [ onMouseLeave $ f MouseLeave
+                                  ]
+                                , mouseDown, mouseUp, wheel, ats
+                                ]) vs
+  where
+    mouseDown = withCapability Pannable m [onMouseDown  $ f (Pan StartPan)]
+    mouseUp   = withCapability Pannable m [onMouseUp    $ f (Pan StopPan) ]
+
+    wheel     = withCapability Zoomable m [onWheel      $ f . Zoom . ZoomAction]
+
+
+withCapability                            :: Capability -> ICanvas r -> [a] -> [a]
+withCapability c m as | hasCapability c m = as
+                      | otherwise         = []
+
+
+-- whenCap c =
+
+    -- acts = mconcat [ mouseLeave
+    --                , mouseDown
+
+    --                ]
+    --   mouseLeave <> mouseDown <>
+
 
 onWheel :: (ZoomDirection -> action) -> Attribute action
 onWheel = on "wheel" (Decoder dec dt)
