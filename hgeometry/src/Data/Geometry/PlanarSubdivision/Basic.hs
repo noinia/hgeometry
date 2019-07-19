@@ -75,7 +75,7 @@ import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
-import           Data.Geometry.LineSegment
+import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.PlanarSubdivision.Raw
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon

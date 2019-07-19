@@ -48,6 +48,8 @@ import           Data.Geometry.Box (Rectangle,box)
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
 import           Graphics.Camera
+import           Graphics.Render
+
 --------------------------------------------------------------------------------
 
 type Idx = Int
@@ -343,8 +345,8 @@ infoAreaBody m = [ div_ [ class_ "panel-block"]
                         , viewSelected'
                         ]
                  , div_ [ class_ "panel-block" ]
-                        [ div_ [] ["zoomlevel: "]
-                        , text . ms . show $ m^.iCanvas.canvas.zoomLevel
+                        [ div_ [] ["camera: "]
+                        , text . ms . show $ m^.camera
                         ]
                  ]
   where
@@ -414,21 +416,17 @@ renderAll c s = arr&subdivision.faceData %~ fmap mkColor
     rect :: Rectangle () r
     rect = box (ext origin) (ext . Point $ c^.screenDimensions)
 
-render                  :: Fractional r => Triangle 3 _ r -> Triangle 2 _ r
-render (Triangle p q r) = Triangle (p&core %~ projectPoint)
-                                   (q&core %~ projectPoint)
-                                   (r&core %~ projectPoint)
 
 
 renderScene     :: Fractional r => Camera r -> Scene r
                 -> [Triangle 2 () r :+ IpeColor r]
-renderScene c s = over core (render . transformBy t) <$> s
+renderScene c s = over core (renderTriangle t) <$> s
   where
     !t = cameraTransform c
 
 renderScene'     :: Fractional r => Camera r -> Scene r
                  -> [Triangle 2 () r :+ (Triangle 3 () r :+ IpeColor r)]
-renderScene' c s = (\t3 -> (render . transformBy t $ t3^.core) :+ t3) <$> s
+renderScene' c s = (\t3 -> (renderTriangle t $ t3^.core) :+ t3) <$> s
   where
     !t = cameraTransform c
 

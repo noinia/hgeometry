@@ -66,7 +66,7 @@ import           Data.Function (on)
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Line (cmpSlope, supportingLine)
-import           Data.Geometry.LineSegment
+import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties

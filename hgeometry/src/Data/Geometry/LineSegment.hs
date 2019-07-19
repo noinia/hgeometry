@@ -14,6 +14,7 @@ module Data.Geometry.LineSegment( LineSegment
                                 , pattern LineSegment
                                 , pattern LineSegment'
                                 , pattern ClosedLineSegment
+                                , endPoints
 
                                 , _SubLine
                                 , module Data.Geometry.Interval
@@ -96,6 +97,15 @@ instance HasEnd (LineSegment d p r) where
 
 instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) where
   arbitrary = LineSegment <$> arbitrary <*> arbitrary
+
+-- | Traversal to access the endpoints. Note that this traversal
+-- allows you to change more or less everything, even the dimension
+-- and the numeric type used, but it preservers if the segment is open
+-- or closed.
+endPoints :: Traversal (LineSegment d p r) (LineSegment d' q s)
+                       (Point d r :+ p)    (Point d' s :+ q)
+endPoints = \f (LineSegment p q) -> LineSegment <$> traverse f p
+                                                <*> traverse f q
 
 _SubLine :: (Num r, Arity d) => Iso' (LineSegment d p r) (SubLine d p r r)
 _SubLine = iso segment2SubLine subLineToSegment
