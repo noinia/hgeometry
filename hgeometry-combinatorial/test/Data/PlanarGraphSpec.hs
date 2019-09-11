@@ -109,7 +109,7 @@ fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
     toDart                    :: (VertexId s Primal,VertexId s Primal)
                               -> STR' s [Dart s]
                               -> STR' s [Dart s]
-    toDart (u,v) (STR m a ds) = let dir = if u < v then PlanarGraph.Positive else Negative
+    toDart (u,v) (STR m a ds) = let dir = if u < v then PlanarGraph.Positive else PlanarGraph.Negative
                                     t'  = (min u v, max u v)
                                in case SM.lookup t' m of
       Just a' -> STR m                  a     (Dart (Arc a') dir : ds)
