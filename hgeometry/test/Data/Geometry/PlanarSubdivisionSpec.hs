@@ -10,10 +10,10 @@ import           Data.Bifunctor (second)
 import           Data.Either (lefts)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Data.Geometry
 import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
-import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.Geometry.PlanarSubdivision as PS
 import           Data.Geometry.PlanarSubdivision.Draw
