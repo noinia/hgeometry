@@ -29,6 +29,7 @@ module Data.Geometry.LineSegment( LineSegment
                                 ) where
 
 import           Control.Arrow ((&&&))
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -97,6 +98,9 @@ instance HasEnd (LineSegment d p r) where
 
 instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) where
   arbitrary = LineSegment <$> arbitrary <*> arbitrary
+
+deriving instance (Arity d, NFData r, NFData p) => NFData (LineSegment d p r)
+
 
 -- | Traversal to access the endpoints. Note that this traversal
 -- allows you to change more or less everything, even the dimension

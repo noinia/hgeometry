@@ -1,16 +1,18 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Algorithms.Geometry.LineSegmentIntersection.Types where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import qualified Data.List as L
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.List as L
 import qualified Data.Map as Map
+import           GHC.Generics
 
 --------------------------------------------------------------------------------
 
@@ -24,7 +26,7 @@ type Set' l =
 
 data Associated p r = Associated { _endPointOf        :: Set' (LineSegment 2 p r)
                                  , _interiorTo        :: Set' (LineSegment 2 p r)
-                                 } deriving (Show)
+                                 } deriving (Show, Generic)
 
 
 instance (Eq p, Eq r) => Eq (Associated p r) where
@@ -35,6 +37,11 @@ instance (Eq p, Eq r) => Eq (Associated p r) where
 
       g = L.nub . NonEmpty.toList
       sameElements (g -> xs) (g -> ys) = L.null $ (xs L.\\ ys) ++ (ys L.\\ xs)
+
+
+instance (NFData p, NFData r) => NFData (Associated p r)
+
+
 
 
 associated       :: Ord r

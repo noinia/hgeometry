@@ -53,6 +53,9 @@ benchmark benchmarks
                  -- WSPDBench
                  Algorithms.Geometry.ClosestPair.Bench
 
+                 Algorithms.Geometry.LineSegmentIntersection.Bench
+                 Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld
+
   build-depends:
                 base
               , criterion >= 1.1.4.0
@@ -69,6 +72,8 @@ benchmark benchmarks
               , bytestring
               , containers
               , optparse-applicative
+              , vinyl
+
 
   ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors
 
