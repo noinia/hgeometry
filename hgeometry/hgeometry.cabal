@@ -136,7 +136,7 @@ library
 
                     Algorithms.Geometry.Diameter
 
-                    Algorithms.Geometry.Sweep
+                    -- Algorithms.Geometry.Sweep
 
                     Algorithms.Geometry.PolygonTriangulation.Types
                     Algorithms.Geometry.PolygonTriangulation.Triangulate
@@ -148,7 +148,7 @@ library
                     Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
                     Algorithms.Geometry.LineSegmentIntersection.Types
 
-                    -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval
+                    Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval
 
                     Algorithms.Geometry.ClosestPair.Naive
                     Algorithms.Geometry.ClosestPair.DivideAndConquer
@@ -168,46 +168,44 @@ library
 
                     -- * Graphics stuff
                     Graphics.Camera
+                    Graphics.Render
 
   other-modules:
 
 
   -- other-extensions:
   build-depends:
-                base             >= 4.11      &&     < 5
-              , bifunctors       >= 4.1
-              , bytestring       >= 0.10
-              , containers       >= 0.5.5
-              , dlist            >= 0.7
-              , lens             >= 4.2
-              , semigroupoids    >= 5
-              , semigroups       >= 0.18
-              , singletons       >= 2.0
-              , linear           >= 1.10
-              , fixed-vector     >= 1.0
-              , vector-builder   >= 0.3.7
-              , vinyl            >= 0.10
-              , deepseq          >= 1.1
-              , fingertree       >= 0.1
-              , MonadRandom      >= 0.5
-              , QuickCheck              >= 2.5
-              , quickcheck-instances    >= 0.3
-
+                base                    >= 4.11      &&     < 5
               , hgeometry-combinatorial >= 0.8.0.0
 
-              , vector           >= 0.11
-              , data-clist       >= 0.0.7.2
+              , bifunctors              >= 4.1
+              , bytestring              >= 0.10
+              , containers              >= 0.5.9
+              , dlist                   >= 0.7
+              , lens                    >= 4.2
+              , semigroupoids           >= 5
+              , semigroups              >= 0.18
+              , singletons              >= 2.0
+              , linear                  >= 1.10
+              , fixed-vector            >= 1.0
+              , vector-builder          >= 0.3.7
+              , vinyl                   >= 0.10
+              , deepseq                 >= 1.1
+              , fingertree              >= 0.1
+              , MonadRandom             >= 0.5
+              , QuickCheck              >= 2.5
+              , quickcheck-instances    >= 0.3
+              , reflection              >= 2.1
 
-              , aeson            >= 1.0
-              , yaml             >= 0.8
+              , vector                  >= 0.11
+              , data-clist              >= 0.1.2.3
+              , text                    >= 1.1.1.0
+
+              , aeson                   >= 1.0
+              , yaml                    >= 0.8
 
               , mtl
               , template-haskell
-
-              , reflection       >= 2.1
-              , text             >= 1.1.1.0
-
-
 
 
   hs-source-dirs: src
