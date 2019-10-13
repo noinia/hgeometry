@@ -41,8 +41,9 @@ withOrd cmp v = reify (OrdDict cmp) (runO . asProxyOf v)
 -- more general computation in that produces a 'f a' (depending on s).
 --
 -- running time: \(O(1)\)
-liftOrd1 :: f (O s a) -> O s (f a)
-liftOrd1 = unsafeCoerce
+extractOrd1 :: f (O s a) -> O s (f a)
+extractOrd1 = unsafeCoerce
+
 
 -- | Introduce dynamic order in a container 'f'.
 --
@@ -50,13 +51,19 @@ liftOrd1 = unsafeCoerce
 introOrd1 :: f a -> f (O s a)
 introOrd1 = unsafeCoerce
 
+-- | Lifts a function that works on a container 'f' of
+-- orderable-things into one that works on dynamically ordered ones.
+liftOrd1   :: (f (O s a) -> f (O s a))
+           -> f a -> O s (f a)
+liftOrd1 f = extractOrd1 . f . introOrd1
+
 
 -- | Lifts a container f whose keys (of type k) depend on 's' into a
 -- more general computation in that produces a 'f k v' (depending on s).
 --
 -- running time: \(O(1)\)
-liftOrd2 :: f (O s k) v -> O s (f k v)
-liftOrd2 = unsafeCoerce
+extractOrd2 :: f (O s k) v -> O s (f k v)
+extractOrd2 = unsafeCoerce
 
 -- | Introduce dynamic order in a container 'f' that has keys of type
 -- k.
