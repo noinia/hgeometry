@@ -12,160 +12,60 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.Sweep where
 
-import qualified Data.Map as Map
+import           Data.Coerce
 import           Data.Map (Map)
+import qualified Data.Map as Map
 import           Data.Proxy
 import           Data.Reflection
 import           Unsafe.Coerce
 
---------------------------------------------------------------------------------
-
-newtype Tagged (s :: *) a = Tagged { unTag :: a} deriving (Show,Eq,Ord)
-
-tag   :: proxy s -> a -> Tagged s a
-tag _ = Tagged
-
-
--- | Represent a computation that needs a particular time as input.
-newtype Timed s t a = Timed {atTime :: (Tagged s t) -> a }
-
-
-instance (Reifies s t, Ord k) => Ord (Timed s t k) where
-  compare = compare_
-
-instance (Reifies s t, Ord k) => Eq (Timed s t k) where
-  a == b = a `compare` b == EQ
-
--- | Comparison function for timed values
-compare_                       :: forall s t k. (Ord k, Reifies s t)
-                               => Timed s t k -> Timed s t k
-                               -> Ordering
-(Timed f) `compare_` (Timed g) = let t = reflect (Proxy :: Proxy s)
-                                 in f (Tagged t) `compare` g (Tagged t)
-
-
--- | Coerce timed values
-coerceTo   :: proxy s -> f (Timed s' t k) v -> f (Timed s t k) v
-coerceTo _ = unsafeCoerce
-
-
-unTagged :: f (Timed s t k) v -> f (Timed () t k) v
-unTagged = coerceTo (Proxy :: Proxy ())
-
-
--- | Runs a computation at a given time.
-runAt       :: forall s0 t k r f v. Ord k
-            => t
-            -> f (Timed s0 t k) v
-            -> (forall s. Reifies s t => f (Timed s t k) v -> r)
-            -> r
-runAt t m f = reify t $ \prx -> f (coerceTo prx m)
-
+import Data.Ext
+import Data.Geometry.LineSegment
+import Data.Geometry.Point
 
 --------------------------------------------------------------------------------
 
 
-getTime :: Timed s Int Int
-getTime = Timed unTag
+newtype Safe a s = Safe a
+
+newtype Timed t a = Timed (t -> a)
 
 
-constT     :: proxy s -> Int -> Timed s Int Int
-constT _ i = Timed (const i)
+instance (Ord a, Reifies s t) => Ord (Safe (Timed t a) s) where
+  p@(Safe (Timed l)) `compare` (Safe (Timed r)) = let t = reflect p
+                                                  in l t `compare` r t
+
+type StatusStructure p r = Map (Timed r r)
+                               (LineSegment 2 p r)
 
 
-test1 i = reify 5 $ \prx -> getTime < constT prx i
+-- wrap
 
 
-
-
-
-test2M   :: Reifies s Int => proxy s -> Map (Timed s Int Int) String
-test2M p = Map.fromList [ (constT p 10, "ten")
-                        , (getTime, "timed")
-                        ]
-
-
-query :: forall s v. Ord (Timed s Int Int)
-      => Map (Timed s Int Int) v -> Maybe v
-query = fmap snd . Map.lookupGE (constT (Proxy :: Proxy s) 4)
-
-
-test2   :: Int -> Maybe String
-test2 t = runAt t m query
+build :: ( Fractional r, Ord r
+         , Reifies s r
+         ) => Map (Timed r r) (LineSegment 2 () r)
+build = reify 0 $ \ps -> Map.fromList [ (xAt s1, s1)
+                                      , (xAt s2, s2)
+                                      ]
   where
-    m :: Map (Timed () Int Int) String
-    m = reify 0 $ \p -> unTagged $ test2M p
+    xAt s = Timed $ flip xCoordAt s
+
+    s1 = ClosedLineSegment (ext $ Point2 0 0)  (ext $ Point2 100 0    )
+    s2 = ClosedLineSegment (ext $ Point2 0 10) (ext $ Point2 100 (-10))
 
 
 
-
-
--- test2 = reify 0 $ \p0 ->
---                     let m = unTagged $ test2M p0
---                     in runAt 10 m Map.lookup
-
-
-
--- newtype Key s a b = Key { getKey :: a -> b }
-
--- instance (Eq b, Reifies s a) => Eq (Key s a b) where
---   (Key f) == (Key g) = let x = reflect (Proxy :: Proxy s)
---                        in f x == g x
-
--- instance (Ord b, Reifies s a) => Ord (Key s a b) where
---   Key f `compare` Key g = let x = reflect (Proxy :: Proxy s)
---                           in f x `compare` g x
-
-
--- -- | Query the sweep
--- queryAt       :: a
---               -> (forall (s :: *). Reifies s a => Map (Key s a b) v -> res)
---               -> Map (a -> b) v -> res
--- queryAt x f m = reify x (\p -> f . coerceKeys p $ m)
-
--- updateAt      :: a
---               -> (forall (s :: *). Reifies s a =>
---                    Map (Key s a b) v -> Map (Key s a b) v')
---               -> Map (a -> b) v
---               -> Map (a -> b) v'
--- updateAt x f m = reify x (\p -> uncoerceKeys . f . coerceKeys p $ m)
-
-
--- combineAt            :: a
---                      -> (forall (s :: *). Reifies s a =>
---                            Map (Key s a b) v -> Map (Key s a b) v
---                            -> Map (Key s a b) v)
---                      -> Map (a -> b) v
---                      -> Map (a -> b) v
---                      -> Map (a -> b) v
--- combineAt x uF m1 m2 = reify x (\p -> uncoerceKeys $
---                                         coerceKeys p m1 `uF` coerceKeys p m2)
-
-
--- splitLookupAt       :: Ord b
---                     => a
---                     -> (a -> b)
---                     -> Map (a -> b) v
---                     -> (Map (a -> b) v, Maybe v, Map (a -> b) v)
--- splitLookupAt x k m = reify x (\p -> let (l,mv,r) = Map.splitLookup (Key k)
---                                                   $ coerceKeys p m
---                                    in (uncoerceKeys l, mv, uncoerceKeys r))
-
-
--- --------------------------------------------------------------------------------
-
--- coerceKeys   :: proxy s -> Map (a -> b) v -> Map (Key s a b) v
--- coerceKeys _ = unsafeCoerce
-
--- uncoerceKeys :: Map (Key s a b) v -> Map (a -> b) v
--- uncoerceKeys = unsafeCoerce
-
-
--- --------------------------------------------------------------------------------
-
-
--- data Node a = Node2 a a
---             | Node3 a a a
-
--- data FT a = Single a
---           | Deep (FT (Node a)) a (FT (Node a))
+-- | Given a y coord and a line segment that intersects the horizontal line
+-- through y, compute the x-coordinate of this intersection point.
+--
+-- note that we will pretend that the line segment is closed, even if it is not
+xCoordAt             :: (Fractional r, Ord r) => r -> LineSegment 2 p r -> r
+xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
+      | py == qy     = px `max` qx  -- s is horizontal, and since it by the
+                                    -- precondition it intersects the sweep
+                                    -- line, we return the x-coord of the
+                                    -- rightmost endpoint.
+      | otherwise    = px + alpha * (qx - px)
+  where
+    alpha = (y - py) / (qy - py)

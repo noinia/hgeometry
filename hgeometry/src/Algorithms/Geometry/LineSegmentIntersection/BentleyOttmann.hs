@@ -27,7 +27,8 @@ import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
 import           Data.OrdSeq (Compare)
-import qualified Data.OrdSeq as SS -- status struct
+import qualified Data.Set as SS -- status struct
+import qualified Data.Set.Util as SS -- status struct
 import qualified Data.Set as EQ -- event queue
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
@@ -39,7 +40,7 @@ import           Data.Vinyl.CoRec
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
 intersections    :: (Ord r, Fractional r)
                  => [LineSegment 2 p r] -> Intersections p r
-intersections ss = merge $ sweep pts mempty
+intersections ss = merge $ sweep pts SS.empty
   where
     pts = EQ.fromAscList . groupStarts . L.sort . concatMap asEventPts $ ss
 
@@ -138,7 +139,7 @@ xCoordAt y (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _))
 -- * The Main Sweep
 
 type EventQueue      p r = EQ.Set (Event p r)
-type StatusStructure p r = SS.OrdSeq (LineSegment 2 p r)
+type StatusStructure p r = SS.Set (LineSegment 2 p r)
 
 -- | Run the sweep handling all events
 sweep       :: (Ord r, Fractional r)
@@ -168,20 +169,20 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
                  _       -> []
 
     -- new status structure
-    ss' = before <> newSegs <> after
+    ss' = before `SS.join` newSegs `SS.join` after
     newSegs = toStatusStruct p $ starts ++ contains
 
     -- the new eeventqueue
     eq' = foldr EQ.insert eq es
     -- the new events:
     es | F.null newSegs  = maybeToList $ app (findNewEvent p) sl sr
-       | otherwise       = let s'  = fst <$> SS.minView newSegs
-                               s'' = fst <$> SS.maxView newSegs
+       | otherwise       = let s'  = SS.lookupMin newSegs
+                               s'' = SS.lookupMax newSegs
                            in catMaybes [ app (findNewEvent p) sl  s'
                                         , app (findNewEvent p) s'' sr
                                         ]
-    sl = fst <$> SS.maxView before
-    sr = fst <$> SS.minView after
+    sl = SS.lookupMax before
+    sr = SS.lookupMin after
 
     app f x y = do { x' <- x ; y' <- y ; f x' y'}
 
@@ -190,17 +191,18 @@ handle e@(eventPoint -> p) eq ss = toReport <> sweep eq' ss'
 extractContains      :: (Fractional r, Ord r)
                      => Point 2 r -> StatusStructure p r
                      -> (StatusStructure p r, [LineSegment 2 p r], StatusStructure p r)
-extractContains p ss = (before, F.toList $ mid1 <> mid2, after)
+extractContains p ss = (before, F.toList mid1 <> F.toList mid2, after)
   where
     (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
     -- Make sure to also select the horizontal segments containing p
-    (mid2, after) = SS.splitMonotonic (\s -> not $ p `onSegment` s) after'
+    (mid2, after) = SS.spanAntitone (\s -> p `onSegment` s) after'
+
 
 -- | Given a point and the linesegements that contain it. Create a piece of
 -- status structure for it.
 toStatusStruct      :: (Fractional r, Ord r)
                     => Point 2 r -> [LineSegment 2 p r] -> StatusStructure p r
-toStatusStruct p xs = ss <> hors
+toStatusStruct p xs = ss `SS.join` hors
   -- ss { SS.nav = ordAtNav $ p^.yCoord } `SS.join` hors
   where
     (hors',rest) = L.partition isHorizontal xs

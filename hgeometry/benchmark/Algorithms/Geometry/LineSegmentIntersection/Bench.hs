@@ -25,7 +25,7 @@ main = defaultMainWith cfg [ benchmark ]
 
 benchmark :: Benchmark
 benchmark = bgroup "linesegmentIntersectionBench"
-    [ env (genPts (Proxy :: Proxy Rational) 10000) benchBuild
+    [ env (genPts (Proxy :: Proxy Rational) 100) benchBuild
     ]
 
 --------------------------------------------------------------------------------

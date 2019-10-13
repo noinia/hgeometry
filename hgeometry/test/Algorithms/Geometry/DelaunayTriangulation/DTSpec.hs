@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
 
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer as DC
