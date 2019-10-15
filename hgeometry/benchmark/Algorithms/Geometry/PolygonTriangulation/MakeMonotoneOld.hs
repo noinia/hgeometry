@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.PolygonTriangulation.MakeMonotone where
+module Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld where
 
 import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xCoordAt
                                                                             , ordAt)
@@ -22,8 +22,8 @@ import           Data.Geometry.Polygon
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing, Down(..))
-import qualified Data.Set as SS
-import qualified Data.Set.Util as SS
+import           Data.OrdSeq (OrdSeq)
+import qualified Data.OrdSeq as SS
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -95,7 +95,7 @@ p `cmpSweep` q =
 
 type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
 
-data StatusStruct r = SS { _statusStruct :: !(SS.Set (LineSegment 2 Int r))
+data StatusStruct r = SS { _statusStruct :: !(SS.OrdSeq (LineSegment 2 Int r))
                          , _helper       :: !(IntMap.IntMap Int)
                          -- ^ for every e_i, the id of the helper vertex
                          } deriving (Show)
@@ -129,7 +129,7 @@ computeDiagonals p' = map f . sweep
                      MV.write v i (STR pt p vt)
                    return v
 
-    initialSS = SS SS.empty mempty
+    initialSS = SS mempty mempty
 
     sweep  es = flip runReader vertexInfo $ evalStateT (sweep' es) initialSS
     sweep' es = DList.toList <$> execWriterT (sweep'' es)
@@ -177,11 +177,11 @@ handle e = let i = getIdx e in getEventType e >>= \case
 
 
 insertAt   :: (Ord r, Fractional r) => Point 2 r -> LineSegment 2 q r
-           -> SS.Set (LineSegment 2 q r) -> SS.Set (LineSegment 2 q r)
+           -> OrdSeq (LineSegment 2 q r) -> OrdSeq (LineSegment 2 q r)
 insertAt v = SS.insertBy (ordAt $ v^.yCoord)
 
 deleteAt   :: (Fractional r, Ord r) => Point 2 r -> LineSegment 2 p r
-           -> SS.Set (LineSegment 2 p r) -> SS.Set (LineSegment 2 p r)
+           -> OrdSeq (LineSegment 2 p r) -> OrdSeq (LineSegment 2 p r)
 deleteAt v = SS.deleteAllBy (ordAt $ v^.yCoord)
 
 
@@ -214,10 +214,10 @@ getHelper i = do ui         <- gets (^?!helper.ix i)
 
 
 lookupLE     :: (Ord r, Fractional r)
-             => Point 2 r -> SS.Set (LineSegment 2 Int r)
+             => Point 2 r -> OrdSeq (LineSegment 2 Int r)
              -> Maybe (LineSegment 2 Int r)
 lookupLE v s = let (l,m,_) = SS.splitOn (xCoordAt $ v^.yCoord) (v^.xCoord) s
-               in SS.lookupMax (l `SS.join` m)
+               in SS.lookupMax (l <> m)
 
 
 handleSplit              :: (Fractional r, Ord r) => Int -> Event r -> Sweep p r ()

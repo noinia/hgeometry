@@ -56,6 +56,10 @@ benchmark benchmarks
                  Algorithms.Geometry.LineSegmentIntersection.Bench
                  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld
 
+                 Algorithms.Geometry.PolygonTriangulation.Bench
+                 Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld
+
+
   build-depends:
                 base
               , criterion >= 1.1.4.0
@@ -73,6 +77,9 @@ benchmark benchmarks
               , containers
               , optparse-applicative
               , vinyl
+              , vector
+              , dlist
+              , mtl
 
 
   ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors

@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Algorithms.Geometry.WeightedClosestPair.Sweep where
 
 import           Algorithms.Geometry.WeightedClosestPair.Naive (sqWDist)
@@ -10,6 +11,8 @@ import           Data.Maybe (maybeToList)
 import           Data.UnBounded
 import           Data.Util
 
+
+import GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
@@ -135,3 +138,25 @@ findInSS lookupF intersectsSweepLine y = go
                       | otherwise             -> go $ Map.delete (p^.center.core.yCoord) m
                                                  -- disk no longer intersects the sweep line
                                                  -- kill it
+
+
+data Peano = Z | S Peano
+
+type family ToPeano n where
+  ToPeano 0 = Z
+  ToPeano n = ToPeano (n - 1)
+
+type Foo (n :: Nat) = FooP (ToPeano n)
+
+data family FooP (n :: Peano) :: *
+
+newtype instance FooP Z = MyZeroFoo Int
+newtype instance FooP (S Z) = MyOneFoo Char
+newtype instance FooP (S (S n)) = MyFoo Bool
+
+
+instance Show (FooP Z) where
+  show = undefined
+
+instance Show (FooP n) => Show (FooP (S (S n))) where
+  show (MyFoo b) = show b
