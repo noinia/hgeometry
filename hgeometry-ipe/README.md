@@ -4,6 +4,7 @@ HGeometry-ipe
 This package provides an API for reading and writing Ipe
 (http://ipe.otfried.org) files. This is all very work in
 progress. Hence, the API is experimental and may change at any time!
+
 Here is an example showing reading a set of points from an Ipe file,
 computing the DelaunayTriangulation, and writing the result again to
 an output file
@@ -24,4 +25,4 @@ mainWith (Options inFile outFile) = do
            writeIpeFile outFile . singlePageFromContent $ out
 ```
 
-See the examples directory for more examples.
+See the [hgeometry-examples](https://github.com/noinia/hgeometry/tree/master/hgeometry-examples) package for more examples.
