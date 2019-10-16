@@ -1,4 +1,4 @@
 HGeometry-combinatorial
 =======================
 
-The combinatorial types for the [https://hackage.haskell.org/package/hgeometry](HGeometry) package.
+The combinatorial types for the [HGeometry](https://hackage.haskell.org/package/hgeometry) package.
