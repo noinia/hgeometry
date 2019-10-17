@@ -153,7 +153,7 @@ mergeWith' mergeFaces p1 p2 = PlanarSubdivision cs vd rd rf
         -- we have to shift the number of the *Arcs*. Since every dart
         -- consists of two arcs, we have to shift by numDarts / 2
         -- Furthermore, we take numFaces - 1 since we want the first
-        -- *internal* face of p2 (the one with FaceId 1) to correspond with the first free
+        -- /internal/ face of p2 (the one with FaceId 1) to correspond with the first free
         -- position (at index numFaces)
 
     cs = p1^.components <> p2'^.components
