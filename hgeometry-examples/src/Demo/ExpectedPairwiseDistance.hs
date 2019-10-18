@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.ExpectedPairwiseDistance where
 
-import           Algorithms.Geometry.Diameter
+import           Algorithms.Geometry.Diameter.Naive
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
 import           Control.Lens
@@ -196,7 +196,7 @@ isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a ->
 isWellSeparated s (as,bs) =
     and [ euclideanDist (a^.core) (b^.core) >= s*d | a <- F.toList as, b <- F.toList bs ]
   where
-    d = (/2) . maximum . map (diameterNaive . F.toList) $ [as,bs]
+    d = (/2) . maximum . map (diameter . F.toList) $ [as,bs]
 
 
 nonWellSeparated s = map (\(a,b,c) -> (a,b))
