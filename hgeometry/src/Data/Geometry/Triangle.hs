@@ -26,6 +26,7 @@ import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
+-- | Triangles in \(d\)-dimensional space.
 data Triangle d p r = Triangle (Point d r :+ p)
                                (Point d r :+ p)
                                (Point d r :+ p)
@@ -47,10 +48,11 @@ instance PointFunctor (Triangle d p) where
 instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Triangle d p r) where
   transformBy = transformPointFunctor
 
-
 -- | convenience function to construct a triangle without associated data.
-triangle'       :: Point d r -> Point d r -> Point d r -> Triangle d () r
-triangle' p q r = Triangle (ext p) (ext q) (ext r)
+pattern Triangle' :: Point d r -> Point d r -> Point d r -> Triangle d () r
+pattern Triangle' p q r <- Triangle (p :+ ()) (q :+ ()) (r :+ ())
+  where
+    Triangle' p q r = Triangle (ext p) (ext q) (ext r)
 
 
 sideSegments                  :: Triangle d p r -> [LineSegment d p r]
