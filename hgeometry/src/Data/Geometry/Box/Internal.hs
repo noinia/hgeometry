@@ -25,6 +25,7 @@ import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F
+import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
@@ -270,9 +271,9 @@ boundingBoxList = F.foldMap1 boundingBox
 
 
 -- | Unsafe version of boundingBoxList, that does not check if the list is non-empty
-boundingBoxList' :: (IsBoxable g, Ord (NumType g), Arity (Dimension g))
-                 => [g] -> Box (Dimension g) () (NumType g)
-boundingBoxList' = boundingBoxList . NE.fromList
+boundingBoxList' :: (IsBoxable g, Foldable c, Ord (NumType g), Arity (Dimension g))
+                 => c g -> Box (Dimension g) () (NumType g)
+boundingBoxList' = boundingBoxList . NE.fromList . F.toList
 
 ----------------------------------------
 
