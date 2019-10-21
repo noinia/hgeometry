@@ -91,9 +91,8 @@ instance (FromJSON v, FromJSON e, FromJSON f, FromJSON r)
 
 --------------------------------------------------------------------------------
 
--- | Transforms the planar graph into a format taht can be easily converted
--- into JSON format. For every vertex, the adjacent vertices are given in
--- counter clockwise order.
+-- | Transforms the plane graph into adjacency lists. For every
+-- vertex, the adjacent vertices are given in counter clockwise order.
 --
 -- See 'toAdjacencyLists' for notes on how we handle self-loops.
 --
@@ -102,6 +101,11 @@ toAdjRep :: PlaneGraph s v e f r -> Gr (Vtx v e r) (Face f)
 toAdjRep = first (\(PGA.Vtx v aj (VertexData p x)) -> Vtx v p aj x) . PGIO.toAdjRep
          .  view graph
 
+-- | Given the AdjacencyList representation of a plane graph,
+-- construct the plane graph representing it. All the adjacencylists
+-- should be in counter clockwise order.
+--
+-- running time: \(O(n)\)
 fromAdjRep    :: proxy s -> Gr (Vtx v e r) (Face f) -> PlaneGraph s v e f r
 fromAdjRep px = PlaneGraph . PGIO.fromAdjRep px
               . first (\(Vtx v p aj x) -> PGA.Vtx v aj $ VertexData p x)

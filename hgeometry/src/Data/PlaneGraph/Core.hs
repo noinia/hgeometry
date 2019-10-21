@@ -270,6 +270,7 @@ vertices'   :: PlaneGraph s v e f r  -> V.Vector (VertexId' s)
 vertices' = PG.vertices' . _graph
 
 -- | Enumerate all vertices, together with their vertex data
+--
 -- >>> mapM_ print $ vertices smallG
 -- (VertexId 0,VertexData {_location = Point2 [0,0], _vData = 0})
 -- (VertexId 1,VertexData {_location = Point2 [2,2], _vData = 1})
