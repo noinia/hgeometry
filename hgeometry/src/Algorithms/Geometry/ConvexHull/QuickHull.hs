@@ -1,0 +1,71 @@
+module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
+
+import           Control.Lens ((^.),(&),(.~))
+import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.Line
+import           Data.Geometry.Point
+import           Data.Geometry.Polygon
+import           Data.Geometry.Polygon.Convex (ConvexPolygon(..))
+import           Data.Geometry.Triangle
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Ord (comparing)
+import           Data.Util
+
+--------------------------------------------------------------------------------
+
+-- | ConvexHull using Quickhull. The resulting polygon is given in
+-- clockwise order.
+--
+-- running time: \(O(n^2)\)
+convexHull            :: (Ord r, Fractional r, Show r, Show p)
+                      => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
+convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
+convexHull ps        = ConvexPolygon . fromPoints
+                     $ [l] <> hull l r above <> [r] <> (reverse $ hull l r below)
+  where
+    STR l r mids  = findExtremes ps
+    m             = lineThrough (l^.core) (r^.core)
+    (above,below) = List.partition (\(p :+ _) -> p `liesAbove` m) mids
+
+-- | Finds the leftmost and rightmost point in the list
+findExtremes            :: Ord r
+                        => NonEmpty (Point 2 r :+ q)
+                        -> STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+findExtremes (p :| pts) = foldr f (STR p p []) pts
+  where
+    f q (STR l r ms) = case (incXdecY q l, incXdecY q r) of
+                         (LT,_)  -> STR q r (addIfNot r l ms)
+                         (EQ,_)  -> STR l r ms -- ditch q; it is the same as l
+                         (GT,GT) -> STR l q (addIfNot l r ms)
+                         (GT,EQ) -> STR l r ms -- ditch q; it is the same as r
+                         (GT,LT) -> STR l r (q:ms)
+
+    addIfNot y x xs | (x^.core) /= (y^.core) = x:xs
+                    | otherwise              = xs
+
+
+
+
+incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
+  compare px qx <> compare qy py
+
+-- | include neigher left or right
+--
+hull         :: (Fractional r, Ord r)
+             => Point 2 r :+ p -> Point 2 r :+ p -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+hull _ _ []  = []
+hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
+  where
+    m       = lineThrough (l^.core) (r^.core)
+    mid     = F.maximumBy (comparing dist) pts
+
+    dist (p :+ _) = p `sqDistanceTo` m
+    t       = Triangle l mid r
+    -- line through mid perpendicular to m
+    perp    = (perpendicularTo m) & anchorPoint .~ (mid^.core)
+
+    (rs,ls) = List.partition (\(p :+ _) -> p `liesAbove` perp)
+            . filter (\(p :+ _) -> not $ p `onTriangle` t) $ pts
