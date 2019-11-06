@@ -2,6 +2,8 @@ module Algorithms.Geometry.ConvexHull.ConvexHullSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
+import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
+import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
 import           Control.Lens
 import           Data.CircularSeq (isShiftOf)
 import           Data.Ext
@@ -24,12 +26,25 @@ import           Debug.Trace
 spec :: Spec
 spec = do
     describe "ConvexHull Algorithms" $ do
-      modifyMaxSize (const 1000) . modifyMaxSuccess (const 1000) $
+      modifyMaxSize (const 1000) . modifyMaxSuccess (const 1000) $ do
         it "GrahamScan and DivideAnd Conquer are the same" $
           property $ \pts ->
             (PG $ GrahamScan.convexHull pts)
             ==
             (PG $ DivideAndConquer.convexHull pts)
+
+        it "GrahamScan and QuickHull are the same" $
+          property $ \pts ->
+            (PG $ GrahamScan.convexHull pts)
+            ==
+            (PG $ QuickHull.convexHull pts)
+
+        it "GrahamScan and JarvisMarch are the same" $
+          property $ \pts ->
+            (PG $ GrahamScan.convexHull pts)
+            ==
+            (PG $ JarvisMarch.convexHull pts)
+
 
 newtype PG = PG (ConvexPolygon () Rational) deriving (Show)
 

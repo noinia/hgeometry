@@ -37,8 +37,8 @@ data TestCase r = TestCase { _redSet    :: NonEmpty (Point 2 r :+ ())
 -- | reports the points ont hte other side as p
 differentSide     :: (Ord r, Num r)
                   => Point 2 r -> Line 2 r -> [Point 2 r] -> [Point 2 r]
-differentSide p l = let s = p `onSide` l
-                    in filter (\q -> not $ (q `onSide` l) `elem` [s,On])
+differentSide p l = let s = p `onSideUpDown` l
+                    in filter (\q -> not $ (q `onSideUpDown` l) `elem` [s,On])
 
 allSameSide             :: (Ord r, Num r)
                         => NonEmpty (Point 2 r :+ extra) -> Line 2 r -> [Point 2 r]
@@ -46,7 +46,7 @@ allSameSide pts l = case f pts of
                          []     -> [] -- all on the line
                          (p:ps) ->  differentSide p l ps
   where
-    f = NonEmpty.filter (\p -> p `onSide` l /= On) . fmap (^.core)
+    f = NonEmpty.filter (\p -> p `onSideUpDown` l /= On) . fmap (^.core)
 
 
 -- -- | Returns the list of points on the wrong side; so the result should be empty
@@ -61,10 +61,10 @@ onDifferentSides              :: (Ord r, Num r)
                               -> NonEmpty (Point 2 r :+ extra) -> Line 2 r
                               -> [Point 2 r]
 onDifferentSides reds blues l = case (f reds, f blues) of
-                                  (r:_, b:_) | r `onSide` l == b `onSide` l -> [r,b]
-                                  _                                         -> []
+                                  (r:_, b:_) | r `onSideUpDown` l == b `onSideUpDown` l -> [r,b]
+                                  _                                                     -> []
   where
-    f = NonEmpty.filter (\p -> p `onSide` l /= On) . fmap (^.core)
+    f = NonEmpty.filter (\p -> p `onSideUpDown` l /= On) . fmap (^.core)
 
 -- | Reports points that are on the wrong side
 separates                                    :: (Ord r, Num r)

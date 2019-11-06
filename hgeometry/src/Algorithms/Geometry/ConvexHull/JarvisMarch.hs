@@ -8,6 +8,8 @@ import           Data.List.NonEmpty (NonEmpty(..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util
 
+import Data.Ratio
+
 --------------------------------------------------------------------------------
 
 -- | Compute the convexhull using JarvisMarch. The resulting polygon
@@ -38,6 +40,9 @@ next       :: (Ord r, Num r) => Point 2 r :+ p -> NonEmpty (Point 2 r :+ p)
 next p pts = let SP q qts = maxViewBy (ccwCmpAround p) pts
              in SP q (p :| qts)
 
+  --FIXME: we should order w.r.t. the previous edge of the CH, not wrt
+  --the positive x-axis (which is what ccwCmparound does by default).
+
 -- | Extracts the minimum value
 minViewBy     :: (a -> a -> Ordering) -> NonEmpty a -> SP a [a]
 minViewBy cmp = maxViewBy (flip cmp)
@@ -57,3 +62,14 @@ maxViewBy cmp (y :| ys) = foldr f (SP y []) ys
 incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
+
+mPoint2 [x,y] = Point2 x y
+
+testPoints = NonEmpty.fromList
+  [ mPoint2 [4328144040405 % 9191237772517,(-656816939883) % 366010053794] :+ 1
+  , mPoint2 [5431993630863 % 5644338691895,1429203164490 % 3260120057419] :+ 2
+  , mPoint2 [(-1790656476600) % 1442188070887,(-3336687564687) % 2544102927449] :+ 3
+  ]
+
+toDouble          :: Point 2 Rational :+ a -> Point 2 Double :+ a
+toDouble (p :+ x) = (realToFrac <$> p) :+ x

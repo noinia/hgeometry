@@ -13,6 +13,8 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           Data.Util
 
+import Data.Ratio
+import qualified Data.List.NonEmpty as NonEmpty
 --------------------------------------------------------------------------------
 
 -- | ConvexHull using Quickhull. The resulting polygon is given in
@@ -67,5 +69,19 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
     -- line through mid perpendicular to m
     perp    = (perpendicularTo m) & anchorPoint .~ (mid^.core)
 
-    (rs,ls) = List.partition (\(p :+ _) -> p `liesAbove` perp)
+    (ls,rs) = List.partition (\(p :+ _) -> p `onSide` perp == LeftSide)
             . filter (\(p :+ _) -> not $ p `onTriangle` t) $ pts
+
+
+mPoint2 [x,y] = Point2 x y
+
+testPoints = NonEmpty.fromList
+  [ mPoint2 [22536303956634 % 7570647828779,(-5816376064439) % 1228319866920] :+ 1
+  , mPoint2 [(-3136920648983) % 824638230353,(-14583744643665) % 9604445576558] :+ 2
+  , mPoint2 [(-11653462784667) % 6525086575987,(-598434515815) % 1364557986096] :+ 3
+  , mPoint2 [(-7841595901661) % 3282967141364,(-207167076115) % 482378191549] :+ 4
+  ]
+
+
+toDouble          :: Point 2 Rational :+ a -> Point 2 Double :+ a
+toDouble (p :+ x) = (realToFrac <$> p) :+ x
