@@ -11,15 +11,14 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.DivideAndConquer(convexHull) where
 
+import           Algorithms.DivideAndConquer
 import           Control.Lens ((^.))
-import           Data.BinaryTree
 import           Data.Ext
 import           Data.Function (on)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable
 
 --------------------------------------------------------------------------------
 
@@ -28,8 +27,7 @@ import           Data.Semigroup.Foldable
 convexHull :: (Ord r, Num r)
            => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
 convexHull = unMerge
-           . foldMap1 (Merge . ConvexPolygon . fromPoints . (:[]) . _unElem)
-           . asBalancedBinLeafTree
+           . divideAndConquer1 (Merge . ConvexPolygon . fromPoints . (:[]))
            . NonEmpty.sortBy (compare `on` (^.core))
 
 newtype Merge r p = Merge { unMerge :: ConvexPolygon p r }
