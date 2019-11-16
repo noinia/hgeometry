@@ -41,7 +41,7 @@ import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
 type instance Dimension (Vector d r) = d
-type instance NumType (Vector d r) = r
+type instance NumType   (Vector d r) = r
 
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
