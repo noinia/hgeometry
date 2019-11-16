@@ -25,14 +25,16 @@ import qualified Data.Vector as V
 type UnboundedVoronoiEdges s e r = V.Vector (VertexId' s, HalfLine 2 r :+ e)
 
 
-data VertexType v = BoundingBoxVertex | VoronoiVertex v deriving (Show,Eq,Ord)
+data VertexType v = BoundingBoxVertex | VoronoiVertex !v deriving (Show,Eq,Ord)
+
+data SiteData f r = SiteData !(Point 2 r) !f deriving (Show,Eq)
 
 
-data VoronoiDiagram s v e f r =
-  VoronoiDiagram { _boundedDiagram         :: PlanarSubdivision s (VertexType v) e f r
-                 , _boundedArea            :: Rectangle () r
-                 , _unboundedIntersections :: UnboundedVoronoiEdges s e r
-                 } deriving (Show,Eq)
+data VoronoiDiagram s v e f r = VoronoiDiagram {
+      _boundedDiagram         :: !(PlanarSubdivision s (VertexType v) e (SiteData f r) r)
+    , _boundedArea            :: !(Rectangle () r)
+    , _unboundedIntersections :: !(UnboundedVoronoiEdges s e r)
+    } deriving (Show,Eq)
 
 
 
@@ -90,10 +92,8 @@ unboundedEdgeFrom v p q = HalfLine v (midPoint p q .-. v)
   where
     midPoint a b = a .+^ ((b^.vector) ^/ 2)
 
-
-
-
-
+-- | Computes the location of a Voronoi vertex
+--
 toVDVertex        :: (Fractional r, Eq r)
                   => PlaneGraph s v e f r -> FaceId' s
                   -> Maybe (Point 2 r)

@@ -12,10 +12,10 @@
 --------------------------------------------------------------------------------
 module Data.BinaryTree where
 
+import           Algorithms.DivideAndConquer
 import           Control.DeepSeq
 import           Data.Bifunctor.Apply
-import           Data.List.NonEmpty (NonEmpty(..),(<|))
-import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty)
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
@@ -76,14 +76,7 @@ instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
 --
 -- \(O(n)\) time.
 asBalancedBinLeafTree :: NonEmpty a -> BinLeafTree Size (Elem a)
-asBalancedBinLeafTree = repeatedly merge . fmap (Leaf . Elem)
-  where
-    repeatedly _ (t :| []) = t
-    repeatedly f ts        = repeatedly f $ f ts
-
-    merge ts@(_ :| [])  = ts
-    merge (l :| r : []) = node l r :| []
-    merge (l :| r : ts) = node l r <| (merge $ NonEmpty.fromList ts)
+asBalancedBinLeafTree = divideAndConquer1 (Leaf . Elem)
 -- -- the implementation below produces slightly less high trees, but runs in
 -- -- \(O(n \log n)\) time, as on every level it traverses the list passed down.
 -- asBalancedBinLeafTree ys = asBLT (length ys') ys' where ys' = toList ys
