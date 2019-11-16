@@ -19,8 +19,8 @@ module Algorithms.Geometry.ClosestPair.DivideAndConquer( closestPair
                                                        )
 where
 
+import           Algorithms.DivideAndConquer
 import           Control.Lens
-import           Data.BinaryTree
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
@@ -30,7 +30,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable(foldMap1, toNonEmpty)
+import           Data.Semigroup.Foldable (toNonEmpty)
 import           Data.UnBounded
 import           Data.Util
 
@@ -41,10 +41,10 @@ import           Data.Util
 --
 -- running time: \(O(n)\)
 closestPair :: ( Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
-closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . toNonEmpty
+closestPair = f . divideAndConquer1 mkCCP . toNonEmpty
             . LSeq.unstableSortBy (comparing (^.core))
   where
-    mkCCP (Elem p) = CCP (p :| []) Top
+    mkCCP p = CCP (p :| []) Top
     f = \case
           CCP _ (ValT (SP cp _)) -> cp
           CCP _ Top              -> error "closestPair: absurd."

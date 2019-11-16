@@ -15,10 +15,13 @@ module Data.Geometry.PlanarSubdivision.Merge( merge
                                             , embedAsHolesIn
                                             ) where
 
+import           Algorithms.DivideAndConquer
 import           Control.Lens hiding (holes)
-import           Data.BinaryTree (asBalancedBinLeafTree, foldUp, Elem(..))
+import           Data.Ext
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Raw
+import           Data.Geometry.Point
+import           Data.Geometry.Polygon
 import           Data.PlanarGraph.Dart
 import           Data.PlaneGraph ( Dart, VertexId(..), FaceId(..)
                                 , VertexId', FaceId'
@@ -26,14 +29,7 @@ import           Data.PlaneGraph ( Dart, VertexId(..), FaceId(..)
 import qualified Data.PlaneGraph as PG
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
-
--- import Data.Coerce
-import           Unsafe.Coerce(unsafeCoerce)
-
-
-import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
+import           Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 -- * Embedding one subdivision in another one
@@ -118,7 +114,7 @@ mergeAllWith   :: Foldable1 t
                => (f -> f -> f)
                -> t (PlanarSubdivision s v e f r)
                -> PlanarSubdivision s v e f r
-mergeAllWith f = foldUp (\l _ r -> mergeWith f l r) _unElem . asBalancedBinLeafTree . toNonEmpty
+mergeAllWith f = divideAndConquer1With (mergeWith f) id . toNonEmpty
 
 -- | Merge a pair of *disjoint* planar subdivisions, unifying their
 -- outer face. For the outerface data it simply takes the data of the
