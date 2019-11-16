@@ -216,7 +216,7 @@ widthIn _ = view (V.element (C :: C (i - 1))) . size
 -- Just 3
 -- >>> widthIn' 10 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
 -- Nothing
-widthIn'   :: (Arity d, KnownNat d, Num r) => Int -> Box d p r -> Maybe r
+widthIn'   :: (Arity d, Num r) => Int -> Box d p r -> Maybe r
 widthIn' i = preview (V.element' (i-1)) . size
 
 

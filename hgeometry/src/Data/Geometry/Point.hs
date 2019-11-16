@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Point
@@ -299,7 +300,7 @@ data Quadrant = TopRight | TopLeft | BottomLeft | BottomRight
 -- | Quadrants around point c; quadrants are closed on their "previous"
 -- boundary (i..e the boundary with the previous quadrant in the CCW order),
 -- open on next boundary. The origin itself is assigned the topRight quadrant
-quadrantWith                   :: (Ord r, 1 <= d, 2 <= d, Arity d)
+quadrantWith                   :: (Ord r, 2 <= d, Arity d)
                                => Point d r :+ q -> Point d r :+ p -> Quadrant
 quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                       , (c^.yCoord) `compare` (p^.yCoord) ) of
@@ -314,7 +315,7 @@ quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                    (LT, GT) -> BottomRight
 
 -- | Quadrants with respect to the origin
-quadrant :: (Ord r, Num r, 1 <= d, 2 <= d, Arity d) => Point d r :+ p -> Quadrant
+quadrant :: (Ord r, Num r, 2 <= d, Arity d) => Point d r :+ p -> Quadrant
 quadrant = quadrantWith (ext origin)
 
 -- | Given a center point c, and a set of points, partition the points into
@@ -322,7 +323,7 @@ quadrant = quadrantWith (ext origin)
 -- reported in the order topLeft, topRight, bottomLeft, bottomRight. The points
 -- are in the same order as they were in the original input lists.
 -- Points with the same x-or y coordinate as p, are "rounded" to above.
-partitionIntoQuadrants       :: (Ord r, 1 <= d, 2 <= d, Arity d)
+partitionIntoQuadrants       :: (Ord r, 2 <= d, Arity d)
                              => Point d r :+ q
                              -> [Point d r :+ p]
                              -> ( [Point d r :+ p], [Point d r :+ p]
