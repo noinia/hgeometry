@@ -1,6 +1,10 @@
 module Algorithms.DivideAndConquer( divideAndConquer
                                   , divideAndConquer1
                                   , divideAndConquer1With
+
+                                  , mergeSorted, mergeSortedLists
+                                  , mergeSortedBy
+                                  , mergeSortedListsBy
                                   ) where
 
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
@@ -36,3 +40,32 @@ divideAndConquer1With (<.>) g = repeatedly merge . fmap g
     merge ts@(_ :| [])  = ts
     merge (l :| r : []) = l <.> r :| []
     merge (l :| r : ts) = l <.> r <| (merge $ NonEmpty.fromList ts)
+
+
+--------------------------------------------------------------------------------
+-- * Merging NonEmpties/Sorted lists
+
+mergeSorted :: Ord a => NonEmpty a -> NonEmpty a -> NonEmpty a
+mergeSorted = mergeSortedBy compare
+
+mergeSortedLists :: Ord a => [a] -> [a] -> [a]
+mergeSortedLists = mergeSortedListsBy compare
+
+-- | Given an ordering and two nonempty sequences ordered according to that
+-- ordering, merge them
+mergeSortedBy           :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
+mergeSortedBy cmp ls rs = NonEmpty.fromList
+                        $ mergeSortedListsBy cmp (NonEmpty.toList ls) (NonEmpty.toList rs)
+
+
+-- | Given an ordering and two nonempty sequences ordered according to that
+-- ordering, merge them
+mergeSortedListsBy     :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+mergeSortedListsBy cmp = go
+  where
+    go []         ys     = ys
+    go xs         []     = xs
+    go xs@(x:xs') ys@(y:ys') = case x `cmp` y of
+                                 LT -> x : go xs' ys
+                                 EQ -> x : go xs' ys
+                                 GT -> y : go xs  ys'

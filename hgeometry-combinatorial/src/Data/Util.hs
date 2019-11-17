@@ -47,6 +47,9 @@ uniqueTriplets    :: [a] -> [STR a a a]
 uniqueTriplets xs = [ STR x y z | (x:ys) <- nonEmptyTails xs, SP y z <- uniquePairs ys]
 
 
+
+
+
 --------------------------------------------------------------------------------
 -- * Strict Pairs
 
@@ -88,6 +91,14 @@ pattern Two a b = SP a b
 --
 uniquePairs    :: [a] -> [Two a]
 uniquePairs xs = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
+
+--------------------------------------------------------------------------------
+-- | Strict Triple with all items the same
+type Three a = STR a a a
+
+pattern Three :: a -> a -> a -> Three a
+pattern Three a b c = STR a b c
+{-# COMPLETE Three #-}
 
 --------------------------------------------------------------------------------
 
