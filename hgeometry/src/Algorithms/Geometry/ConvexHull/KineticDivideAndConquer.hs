@@ -34,10 +34,10 @@ data Env p r = Env { _pts    :: V.Vector (Point 3 r)
                    }
 
 
-convexHull :: (Ord r, Num r) => [Point 3 r :+ p] -> ConvexHull 3 p r
+convexHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
 convexHull = maybe mempty convexHull' . NonEmpty.nonEmpty
 
-convexHull'      :: (Ord r, Num r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+convexHull'      :: (Ord r, Fractional r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 convexHull' pts' = output
                  . flip runReader pts
                  . runMerge
@@ -80,29 +80,32 @@ data EventKind = InsertAfter  !Vertex !Vertex -- ^ old then new
 
 
 
-
-
-
-data MergeStatus r = MergeStatus { initialHull :: NonEmpty Vertex
-                                 , events      :: [Event r]
-                                 }
+data MergeStatus s r = MergeStatus { initialHull :: LList s
+                                   , events      :: [Event r]
+                                   }
 
 type Merger r = Reader (V.Vector (Point 3 r))
 
 newtype Merge r = M { runMerge :: Merger r (MergeStatus r)
                     }
 
-instance (Ord r, Num r) => Semigroup (Merge r) where
+instance (Ord r, Fractional r) => Semigroup (Merge r) where
   (M l) <> (M r) = M $ do MergeStatus lh le <- l
                           MergeStatus rh re <- r
                           STR h u v <- joinHullsAt (t le re) lh rh
-                          es        <- runSimulation h le re
+                          runSimulation h le re
                           pure $ MergeStatus h es
     where
       t le re = head' le `min` head' re
       head' = \case
         []    -> 0 -- if there are no events, pick any time we like
         (x:_) -> eventTime x
+
+
+
+
+joinHuls ls rs = do
+
 
 
 mkM   :: Vertex -> Merge r
@@ -171,9 +174,11 @@ walkAt t keep ls0 = go ls0
 
 
 
-runSimulation         :: NonEmpty Vertex -> [Event r] -> [Event r] -> Merger r [Event r]
+runSimulation         :: (Ord r, Fractional r)
+                      => NonEmpty Vertex -> [Event r] -> [Event r] -> Merger r [Event r]
 runSimulation h le re = undefined
-
+-- FIXME: I think we will need to simulate the old events as well, so that means
+-- we need fast O(1) access into the old list
 
 
 -- | First event involving the bridge, if any. Also returns the new bridge pair
