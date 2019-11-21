@@ -171,3 +171,14 @@ xor                :: Bool -> Bool -> Bool
 True   `xor`  True = False
 False  `xor` False = False
 _      `xor` _     = True
+
+
+
+
+isRightOf           :: (Num r, Ord r)
+                    => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
+a `isRightOf` (b,c) = ccw' b c a == CW
+
+isLeftOf            :: (Num r, Ord r)
+                    => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
+a `isLeftOf` (b,c) = ccw' b c a == CCW

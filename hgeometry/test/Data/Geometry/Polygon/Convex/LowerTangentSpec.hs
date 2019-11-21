@@ -1,7 +1,7 @@
 module Data.Geometry.Polygon.Convex.LowerTangentSpec where
 
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull, lowerHull)
+import           Algorithms.Geometry.ConvexHull.GrahamScan (lowerHull, upperHull)
 import           Control.Applicative
 import           Control.Arrow ((&&&))
 import           Control.Lens
@@ -22,11 +22,16 @@ import           Data.Util
 import           Test.Hspec
 import           Test.QuickCheck (Arbitrary(..), property, suchThat)
 import           Test.QuickCheck.Instances ()
+import Data.Ratio
+
 
 spec :: Spec
 spec = do it "LowerTangents the same" $
             property $ \lp rp -> let (lh,rh) = mkLowerTangentSets lp rp
                                  in lowerTangent lh rh == LowerT.lowerTangent lh rh
+          it "UpperTangents the same" $
+            property $ \lp rp -> let (lh,rh) = mkUpperTangentSets lp rp
+                                 in upperTangent lh rh == LowerT.upperTangent lh rh
 
 mkLowerTangentSets       :: (r ~ Word)
                          => NonEmpty (Point 2 r :+ ()) -> NonEmpty (Point 2 r :+ ())
@@ -34,5 +39,14 @@ mkLowerTangentSets       :: (r ~ Word)
 mkLowerTangentSets lp rp = (lowerHull' lp, lowerHull' rp')
   where
     lowerHull' = ConvexPolygon . fromPoints . F.toList . lowerHull
+    rp' = (\p -> p&core.xCoord %~ (+ w)) <$> rp
+    w = maximum . fmap (^.core.xCoord) $ lp
+
+mkUpperTangentSets       :: (r ~ Word)
+                         => NonEmpty (Point 2 r :+ ()) -> NonEmpty (Point 2 r :+ ())
+                         -> (ConvexPolygon () r, ConvexPolygon () r)
+mkUpperTangentSets lp rp = (upperHull' lp, upperHull' rp')
+  where
+    upperHull' = ConvexPolygon . fromPoints . F.toList . upperHull
     rp' = (\p -> p&core.xCoord %~ (+ w)) <$> rp
     w = maximum . fmap (^.core.xCoord) $ lp

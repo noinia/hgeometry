@@ -1,5 +1,6 @@
-module Data.Geometry.Polygon.Convex.LowerTangent(lowerTangent) where
-
+module Data.Geometry.Polygon.Convex.LowerTangent( lowerTangent
+                                                , upperTangent
+                                                ) where
 
 import           Control.Lens hiding ((:<), (:>))
 import           Data.CircularSeq (focus,CSeq)
@@ -47,6 +48,38 @@ lowerTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz''
                                                                      (focus y)
 
 
+
+-- | Compute the upper tangent of the two polgyons
+--
+--   pre: - polygons lp and rp have at least 1 vertex
+--        - lp and rp are disjoint, and there is a vertical line separating
+--          the two polygons.
+--        - The vertices of the polygons are given in clockwise order
+--
+-- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
+upperTangent                                       :: (Num r, Ord r)
+                                                   => ConvexPolygon p r
+                                                   -> ConvexPolygon p r
+                                                   -> LineSegment 2 p r
+upperTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz'
+  where
+    xx = rightMost l
+    yy = leftMost r
+
+    zz  = succ' yy
+    zz' = pred' xx
+
+    rotate x y z z'
+      | focus z  `isLeftOf` (focus x, focus y) = rotate x  z (succ' z) z'
+                                                    -- rotate the right polygon CW
+      | focus z' `isLeftOf` (focus x, focus y) = rotate z' y z        (pred' z')
+                                                    -- rotate the left polygon CCW
+      | otherwise                              = ClosedLineSegment (focus x)
+                                                                   (focus y)
+
+--------------------------------------------------------------------------------
+-- * Helper Stuff
+
 succ' :: CSeq a -> CSeq a
 succ' = C.rotateR
 
@@ -68,6 +101,10 @@ getVertices = view (simplePolygon.outerBoundary)
 isRightOf           :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
 a `isRightOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CW
+
+isLeftOf            :: (Num r, Ord r)
+                    => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
+a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
 
 rotateTo'   :: Eq a => (a :+ b) -> CSeq (a :+ b) -> CSeq (a :+ b)
 rotateTo' x = fromJust . C.findRotateTo (coreEq x)

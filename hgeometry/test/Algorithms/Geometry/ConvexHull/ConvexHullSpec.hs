@@ -19,7 +19,7 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances()
-import           Util
+-- import           Util
 
 import           Debug.Trace
 
@@ -29,21 +29,15 @@ spec = do
       modifyMaxSize (const 1000) . modifyMaxSuccess (const 1000) $ do
         it "GrahamScan and DivideAnd Conquer are the same" $
           property $ \pts ->
-            (PG $ GrahamScan.convexHull pts)
-            ==
-            (PG $ DivideAndConquer.convexHull pts)
+            (PG $ GrahamScan.convexHull pts) == (PG $ DivideAndConquer.convexHull pts)
 
         it "GrahamScan and QuickHull are the same" $
           property $ \pts ->
-            (PG $ GrahamScan.convexHull pts)
-            ==
-            (PG $ QuickHull.convexHull pts)
+            (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
-        it "GrahamScan and JarvisMarch are the same" $
-          property $ \pts ->
-            (PG $ GrahamScan.convexHull pts)
-            ==
-            (PG $ JarvisMarch.convexHull pts)
+        -- it "GrahamScan and JarvisMarch are the same" $
+        --   property $ \pts ->
+        --     (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
 
 newtype PG = PG (ConvexPolygon () Rational) deriving (Show)

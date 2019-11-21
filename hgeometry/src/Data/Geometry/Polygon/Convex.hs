@@ -13,9 +13,7 @@
 module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , merge
                                    , lowerTangent, lowerTangent'
-                                   , upperTangent
-
-                                   , isLeftOf, isRightOf
+                                   , upperTangent, upperTangent'
 
                                    , extremes
                                    , maxInDirection
@@ -28,7 +26,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
 
 import           Control.DeepSeq
 import           Control.Lens hiding ((:<), (:>))
-import           Data.CircularSeq (focus,CSeq)
+import           Data.CircularSeq (CSeq)
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -226,11 +224,12 @@ merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
 rotateTo'   :: Eq a => (a :+ b) -> CSeq (a :+ b) -> CSeq (a :+ b)
 rotateTo' x = fromJust . C.findRotateTo (coreEq x)
 
-
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
 
 
+--------------------------------------------------------------------------------
+-- * Computing Tangents
 
 -- | Compute the lower tangent of the two polgyons
 --
@@ -247,8 +246,8 @@ lowerTangent       :: (Num r, Ord r)
 lowerTangent lp rp = ClosedLineSegment l r
   where
     mkH f = NonEmpty.fromList . F.toList . f . getVertices
-    lh = mkH (C.leftElements  . rightMost) lp
-    rh = mkH (C.rightElements . leftMost)  rp
+    lh = mkH (C.rightElements . rightMost) lp
+    rh = mkH (C.leftElements  . leftMost)  rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Compute the lower tangent of the two convex chains lp and rp
@@ -256,7 +255,8 @@ lowerTangent lp rp = ClosedLineSegment l r
 --   pre: - the chains lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line
 --          having lp on the left and rp on the right.
---        - The vertices of the chains are given in clockwise order
+--        - The vertices in the left-chain are given in clockwise order, (right to left)
+--        - The vertices in the right chain are given in counterclockwise order (left-to-right)
 --
 -- The result returned is the two endpoints l and r of the tangents,
 -- and the remainders lc and rc of the chains (i.e.)  such that the lower hull
@@ -278,14 +278,6 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
                              | otherwise       = Two (l :+ ls) (r :+ rs)
 
 
-
-
-succ' :: CSeq a -> CSeq a
-succ' = C.rotateR
-
-pred' :: CSeq a -> CSeq a
-pred' = C.rotateL
-
 -- | Compute the upper tangent of the two polgyons
 --
 --   pre: - polygons lp and rp have at least 1 vertex
@@ -294,33 +286,43 @@ pred' = C.rotateL
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-upperTangent                                       :: (Num r, Ord r)
-                                                   => ConvexPolygon p r
-                                                   -> ConvexPolygon p r
-                                                   -> LineSegment 2 p r
-upperTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz'
+upperTangent       :: (Num r, Ord r)
+                   => ConvexPolygon p r
+                   -> ConvexPolygon p r
+                   -> LineSegment 2 p r
+upperTangent lp rp = ClosedLineSegment l r
   where
-    xx = rightMost l
-    yy = leftMost r
+    mkH f = NonEmpty.fromList . F.toList . f . getVertices
+    lh = mkH (C.leftElements  . rightMost) lp
+    rh = mkH (C.rightElements . leftMost)  rp
+    (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
 
-    zz  = succ' yy
-    zz' = pred' xx
+-- | Compute the upper tangent of the two convex chains lp and rp
+--
+--   pre: - the chains lp and rp have at least 1 vertex
+--        - lp and rp are disjoint, and there is a vertical line
+--          having lp on the left and rp on the right.
+--        - The vertices in the left-chain are given in clockwise order, (right to left)
+--        - The vertices in the right chain are given in counterclockwise order (left-to-right)
+--
+-- The result returned is the two endpoints l and r of the tangents,
+-- and the remainders lc and rc of the chains (i.e.)  such that the upper hull
+-- of both chains is: (reverse lc) ++ [l,h] ++ rc
+--
+-- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
+-- respectively
+upperTangent'       :: (Ord r, Num r, Foldable1 f)
+                    => f (Point 2 r :+ p) -> f (Point 2 r :+ p)
+                    -> Two ((Point 2 r :+ p) :+ [Point 2 r :+ p])
+upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
+  where
+    ne = NonEmpty.fromList
+    isLeft' []    _ _ = False
+    isLeft' (x:_) l r = ccw' l r x == CCW
 
-    rotate x y z z'
-      | focus z  `isLeftOf` (focus x, focus y) = rotate x  z (succ' z) z'
-                                                    -- rotate the right polygon CW
-      | focus z' `isLeftOf` (focus x, focus y) = rotate z' y z        (pred' z')
-                                                    -- rotate the left polygon CCW
-      | otherwise                              = ClosedLineSegment (focus x)
-                                                                   (focus y)
-
-isRightOf           :: (Num r, Ord r)
-                    => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
-a `isRightOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CW
-
-isLeftOf            :: (Num r, Ord r)
-                    => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
-a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
+    go lh@(l:|ls) rh@(r:|rs) | isLeft' rs l r = go lh      (ne rs)
+                             | isLeft' ls l r = go (ne ls) rh
+                             | otherwise      = Two (l :+ ls) (r :+ rs)
 
 --------------------------------------------------------------------------------
 
