@@ -2,10 +2,14 @@ module Data.Geometry.PointSpec where
 
 import Data.Ext
 import Data.Geometry.Point
+import Data.Geometry.Point.CmpAround
 import Data.Geometry.Vector
+import Test.QuickCheck
+import Test.QuickCheck.Instances()
 import Test.Hspec
 import qualified Data.CircularList as C
 
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = do
@@ -14,6 +18,12 @@ spec = do
       origin .+^ Vector2 1 2 `shouldBe` Point2 1 2
     it "3d" $
       origin .+^ Vector3 1 2 3 `shouldBe` Point3 1 2 3
+
+  describe "cmpAroundWith tests" $ do
+    it "same as by quarant " $
+      property $ \(c :: Point 2 Int :+ ()) (p :: Point 2 Int :+ ()) (q :: Point 2 Int :+ ()) ->
+        ccwCmpAround c p q == ccwCmpAroundByQuadrant c p q
+
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
       sortArround (ext origin) (map ext [ point2 (-3) (-3)

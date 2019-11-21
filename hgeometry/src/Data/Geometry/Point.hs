@@ -24,13 +24,14 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import qualified Data.List as L
+import           Data.Ord (comparing)
 import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           Test.QuickCheck (Arbitrary)
 import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
 import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
-import           Test.QuickCheck(Arbitrary)
 
 
 --------------------------------------------------------------------------------
@@ -290,7 +291,7 @@ ccw' p q r = ccw (p^.core) (q^.core) (r^.core)
 -- running time: O(n log n)
 sortArround   :: (Ord r, Num r)
                => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
-sortArround c = L.sortBy (ccwCmpAround c)
+sortArround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 
 
 -- | Quadrants of two dimensional points. in CCW order
@@ -337,37 +338,94 @@ partitionIntoQuadrants c pts = (topL, topR, bottomL, bottomR)
 
     on l q       = q^.core.l < c^.core.l
 
+
+
+-- | Given a zero vector, compute the ccw ordering around c with this vector as zero
+-- direction.
+ccwCmpAroundWith                              :: (Ord r, Num r)
+                                              => Vector 2 r
+                                              -> Point 2 r :+ a
+                                              -> Point 2 r :+ b -> Point 2 r :+ c
+                                              -> Ordering
+ccwCmpAroundWith z@(Vector2 zx zy) (c :+ _) (q :+ _) (r :+ _) =
+    case (ccw c a q, ccw c a r) of
+      (CCW,CCW)      -> cmp
+      (CCW,CW)       -> LT
+      (CCW,CoLinear) | onZero r  -> GT
+                     | otherwise -> LT
+
+      (CW, CCW)      -> GT
+      (CW, CW)       -> cmp
+      (CW, CoLinear) -> GT
+
+      (CoLinear, CCW) | onZero q  -> LT
+                      | otherwise -> GT
+
+      (CoLinear, CW)      -> LT
+      (CoLinear,CoLinear) -> case (onZero q, onZero r) of
+                               (True, True)   -> EQ
+                               (False, False) -> EQ
+                               (True, False)  -> LT
+                               (False, True)  -> GT
+  where
+    a = c .+^ z
+    b = c .+^ Vector2 (-zy) zx
+    -- b is on a perpendicular vector to z
+
+    -- test if the point lies on the ray defined by z, starting in c
+    onZero d = case ccw c b d of
+                 CCW      -> True
+                 CW       -> False
+                 CoLinear -> True -- this shouldh appen only when you ask for c itself
+
+    cmp = case ccw c q r of
+            CCW      -> GT
+            CW       -> LT
+            CoLinear -> EQ
+
+-- | See ccwCmpAroundWith, this version compares in clockwise order.
+cwCmpAroundWith     :: (Ord r, Num r)
+                    => Vector 2 r
+                    -> Point 2 r :+ a
+                    -> Point 2 r :+ b -> Point 2 r :+ c
+                    -> Ordering
+cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
+
+
+
+-- | Compare by distance to the first argument
+cmpByDistanceTo              :: (Ord r, Num r, Arity d)
+                             => Point d r :+ c -> Point d r :+ p -> Point d r :+ q -> Ordering
+cmpByDistanceTo (c :+ _) p q = comparing (squaredEuclideanDist c) (p^.core) (q^.core)
+
+
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
--- Points nearer to the center come before
--- points further away.
-ccwCmpAround       :: (Num r, Ord r)
-                   => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-ccwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
-                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-                         CCW      -> LT
-                         CW       -> GT
-                         CoLinear -> qdA (c^.core) (q^.core)
-                                     `compare`
-                                     qdA (c^.core) (r^.core)
-                       x -> x -- if the quadrant differs, use the order
-                              -- specified by the quadrant.
+ccwCmpAround :: (Num r, Ord r)
+             => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
+  -- case (quadrantWith c q `compare` quadrantWith c r) of
+  --                      EQ -> case ccw (c^.core) (q^.core) (r^.core) of
+  --                        CCW      -> LT
+  --                        CW       -> GT
+  --                        CoLinear -> EQ
+  --                      x -> x -- if the quadrant differs, use the order
+  --                             -- specified by the quadrant.
 
 -- | Clockwise ordering of the points around c. Points are ordered with
--- respect to the positive x-axis. Points nearer to the center come before
--- points further away.
-cwCmpAround       :: (Num r, Ord r)
-                  => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-cwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
-                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-                         CCW      -> GT
-                         CW       -> LT
-                         CoLinear -> qdA (c^.core) (q^.core)
-                                     `compare`
-                                     qdA (c^.core) (r^.core)
-                       LT -> GT
-                       GT -> LT -- if the quadrant differs, use the order
-                                -- specified by the quadrant.
+-- respect to the positive x-axis.
+cwCmpAround :: (Num r, Ord r)
+            => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+cwCmpAround = cwCmpAroundWith (Vector2 1 0)
+
+  -- case (quadrantWith c q `compare` quadrantWith c r) of
+  --                      EQ -> case ccw (c^.core) (q^.core) (r^.core) of
+  --                        CCW      -> GT
+  --                        CW       -> LT
+  --                        CoLinear -> EQ
+  --                      LT -> GT
+  --                      GT -> LT -- if the quadrant differs, use the order
+  --                               -- specified by the quadrant.
 
 
 
@@ -379,7 +437,7 @@ cwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
 insertIntoCyclicOrder   :: (Ord r, Num r)
                         => Point 2 r :+ q -> Point 2 r :+ p
                         -> C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
-insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c)
+insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c <> cmpByDistanceTo c)
 
 
 -- | Squared Euclidean distance between two points

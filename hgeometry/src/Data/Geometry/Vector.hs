@@ -47,7 +47,7 @@ instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
 
 
--- | Test if v is a scalar multiple of u.
+-- | 'isScalarmultipleof u v' test if v is a scalar multiple of u.
 --
 -- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 10 10
 -- True
@@ -69,7 +69,7 @@ u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
 {-# SPECIALIZE
     isScalarMultipleOf :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Bool  #-}
 
--- | Get the scalar labmda s.t. v = lambda * u (if it exists)
+-- | scalarMultiple u v computes the scalar labmda s.t. v = lambda * u (if it exists)
 scalarMultiple     :: (Eq r, Fractional r, Arity d)
                    => Vector d r -> Vector d r -> Maybe r
 scalarMultiple u v
