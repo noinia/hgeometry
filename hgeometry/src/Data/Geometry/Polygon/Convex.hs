@@ -12,7 +12,9 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    , merge
-                                   , lowerTangent, upperTangent
+                                   , lowerTangent, lowerTangent'
+                                   , upperTangent
+
                                    , isLeftOf, isRightOf
 
                                    , extremes
@@ -30,7 +32,7 @@ import           Data.CircularSeq (focus,CSeq)
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Function (on, )
+import           Data.Function (on)
 import           Data.Geometry.Box (IsBoxable(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -38,10 +40,14 @@ import           Data.Geometry.Polygon (fromPoints, SimplePolygon, cmpExtreme, o
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
+import           Data.Semigroup.Foldable (Foldable1(..))
 import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))
 import qualified Data.Sequence as S
+import           Data.Util
 
 -- import           Data.Geometry.Ipe
 -- import           Debug.Trace
@@ -234,26 +240,45 @@ coreEq = (==) `on` (^.core)
 --        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-lowerTangent                                       :: (Num r, Ord r)
-                                                   => ConvexPolygon p r
-                                                   -> ConvexPolygon p r
-                                                   -> LineSegment 2 p r
-lowerTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz''
+lowerTangent       :: (Num r, Ord r)
+                   => ConvexPolygon p r
+                   -> ConvexPolygon p r
+                   -> LineSegment 2 p r
+lowerTangent lp rp = ClosedLineSegment l r
   where
-    xx = rightMost l
-    yy = leftMost r
+    mkH f = NonEmpty.fromList . F.toList . f . getVertices
+    lh = mkH (C.leftElements  . rightMost) lp
+    rh = mkH (C.rightElements . leftMost)  rp
+    (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
-    zz   = pred' yy
-    zz'' = succ' xx
+-- | Compute the lower tangent of the two convex chains lp and rp
+--
+--   pre: - the chains lp and rp have at least 1 vertex
+--        - lp and rp are disjoint, and there is a vertical line
+--          having lp on the left and rp on the right.
+--        - The vertices of the chains are given in clockwise order
+--
+-- The result returned is the two endpoints l and r of the tangents,
+-- and the remainders lc and rc of the chains (i.e.)  such that the lower hull
+-- of both chains is: (reverse lc) ++ [l,h] ++ rc
+--
+-- Running time: \(O(n+m)\), where n and m are the sizes of the two chains
+-- respectively
+lowerTangent'       :: (Ord r, Num r, Foldable1 f)
+                    => f (Point 2 r :+ p) -> f (Point 2 r :+ p)
+                    -> Two ((Point 2 r :+ p) :+ [Point 2 r :+ p])
+lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
+  where
+    ne = NonEmpty.fromList
+    isRight' []    _ _ = False
+    isRight' (x:_) l r = ccw' l r x == CW
+
+    go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
+                             | isRight' ls l r = go (ne ls) rh
+                             | otherwise       = Two (l :+ ls) (r :+ rs)
 
 
-    rotate x y z z''
-      | focus z   `isRightOf` (focus x, focus y) = rotate x   z (pred' z) z''
-                                                      -- rotate the right polygon CCW
-      | focus z'' `isRightOf` (focus x, focus y) = rotate z'' y z         (succ' z'')
-                                                      -- rotate the left polygon CW
-      | otherwise                                = ClosedLineSegment (focus x)
-                                                                     (focus y)
+
 
 succ' :: CSeq a -> CSeq a
 succ' = C.rotateR
