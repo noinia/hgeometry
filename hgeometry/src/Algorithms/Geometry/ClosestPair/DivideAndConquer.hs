@@ -20,7 +20,6 @@ where
 import           Algorithms.DivideAndConquer
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
