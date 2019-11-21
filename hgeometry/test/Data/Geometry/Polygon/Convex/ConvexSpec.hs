@@ -13,7 +13,6 @@ import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon (extremesLinear, fromPoints)
 import           Data.Geometry.Polygon.Convex
-import qualified Data.Geometry.Polygon.Convex.LowerTangent as LowerT
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
@@ -24,37 +23,9 @@ import           Test.Hspec
 import           Test.QuickCheck (Arbitrary(..), property, suchThat)
 import           Test.QuickCheck.Instances ()
 
--- getVertices :: ConvexPolygon p r -> C.CSeq (Point 2 r :+ p)
--- getVertices = view (simplePolygon.outerBoundary)
-
--- -- | Rotate to the rightmost point (rightmost and topmost in case of ties)
--- rightMost    :: Ord r => C.CSeq (Point 2 r :+ p) -> C.CSeq (Point 2 r :+ p)
--- rightMost xs = let m = F.maximumBy (comparing (^.core)) xs in rotateTo' m xs
-
--- -- | Rotate to the leftmost point (and bottommost in case of ties)
--- leftMost    :: Ord r => C.CSeq (Point 2 r :+ p) -> C.CSeq (Point 2 r :+ p)
--- leftMost xs = let m = F.minimumBy (comparing (^.core)) xs in rotateTo' m xs
-
--- rotateTo'   :: Eq a => (a :+ b) -> C.CSeq (a :+ b) -> C.CSeq (a :+ b)
--- rotateTo' x = fromJust . C.findRotateTo (coreEq x)
---   where
---     coreEq = (==) `on` (^.core)
-
-mkLowerTangentSets       :: (r ~ Int)
-                         => NonEmpty (Point 2 r :+ ()) -> NonEmpty (Point 2 r :+ ())
-                         -> (ConvexPolygon () r, ConvexPolygon () r)
-mkLowerTangentSets lp rp = (lowerHull' lp, lowerHull' rp')
-  where
-    lowerHull' = ConvexPolygon . fromPoints . F.toList . lowerHull
-    rp' = (\p -> p&core.xCoord %~ (+ w)) <$> rp
-    w = maximum . fmap (^.core.xCoord) $ lp
 
 spec :: Spec
-spec = do testCases "test/Data/Geometry/Polygon/Convex/convexTests.ipe"
-          it "LowerTangents the same" $
-            property $ \lp rp -> let (lh,rh) = mkLowerTangentSets lp rp
-                                 in lowerTangent lh rh == LowerT.lowerTangent lh rh
-
+spec = testCases "test/Data/Geometry/Polygon/Convex/convexTests.ipe"
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile fp) >>= \case
