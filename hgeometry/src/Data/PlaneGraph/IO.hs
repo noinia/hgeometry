@@ -128,5 +128,8 @@ makeCCW (Gr vs fs) = Gr (map sort' vs) fs
     -- sort the adjacencies around every vertex v
     sort' (Vtx v p ajs x) = Vtx v p (List.sortBy (around p) ajs) x
     around p (a,_) (b,_) = ccwCmpAround (ext p) (location' V.! a) (location' V.! b)
+                           -- note: since the graph is planar, there should not be
+                           -- any pairs of points for which ccwCmpAround returns EQ
+                           -- hence, no need to pick a secondary comparison
 
 --------------------------------------------------------------------------------

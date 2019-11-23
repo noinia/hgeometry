@@ -20,9 +20,17 @@ spec = do
       origin .+^ Vector3 1 2 3 `shouldBe` Point3 1 2 3
 
   describe "cmpAroundWith tests" $ do
-    it "same as by quarant " $
+    it "ccw same as by quarant " $
       property $ \(c :: Point 2 Int :+ ()) (p :: Point 2 Int :+ ()) (q :: Point 2 Int :+ ()) ->
         ccwCmpAround c p q == ccwCmpAroundByQuadrant c p q
+    it "cw same as by quarant " $
+      property $ \(c :: Point 2 Int :+ ()) (p :: Point 2 Int :+ ()) (q :: Point 2 Int :+ ()) ->
+        cwCmpAround c p q == cwCmpAroundByQuadrant c p q
+
+    it "cw same as by quarant with distance " $ do
+      let cwCmpAroundWithDist c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
+      property $ \(c :: Point 2 Int :+ ()) (p :: Point 2 Int :+ ()) (q :: Point 2 Int :+ ()) ->
+        cwCmpAroundWithDist c p q == cwCmpAroundByQuadrantWithDist c p q
 
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $

@@ -232,7 +232,8 @@ insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
                       . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
-    insert'' bi ai = CU.insertOrdBy (cwCmpAround (ptMap V.! ai) `on` (ptMap V.!)) bi
+    insert'' bi ai = CU.insertOrdBy (cwCmpAround' (ptMap V.! ai) `on` (ptMap V.!)) bi
+    cwCmpAround' c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
 
 
 -- | Deletes an edge

@@ -374,13 +374,13 @@ ccwCmpAroundWith z@(Vector2 zx zy) (c :+ _) (q :+ _) (r :+ _) =
 
     -- test if the point lies on the ray defined by z, starting in c
     onZero d = case ccw c b d of
-                 CCW      -> True
-                 CW       -> False
+                 CCW      -> False
+                 CW       -> True
                  CoLinear -> True -- this shouldh appen only when you ask for c itself
 
     cmp = case ccw c q r of
-            CCW      -> GT
-            CW       -> LT
+            CCW      -> LT
+            CW       -> GT
             CoLinear -> EQ
 
 -- | See ccwCmpAroundWith, this version compares in clockwise order.
