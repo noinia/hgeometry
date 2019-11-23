@@ -340,12 +340,15 @@ partitionIntoQuadrants c pts = (topL, topR, bottomL, bottomR)
 
 
 
--- | Given a zero vector, compute the ccw ordering around c with this vector as zero
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the ccw ordering of p and q around c with this vector as zero
 -- direction.
+--
+-- pre: the points p,q /= c
 ccwCmpAroundWith                              :: (Ord r, Num r)
                                               => Vector 2 r
-                                              -> Point 2 r :+ a
-                                              -> Point 2 r :+ b -> Point 2 r :+ c
+                                              -> Point 2 r :+ c
+                                              -> Point 2 r :+ a -> Point 2 r :+ b
                                               -> Ordering
 ccwCmpAroundWith z@(Vector2 zx zy) (c :+ _) (q :+ _) (r :+ _) =
     case (ccw c a q, ccw c a r) of
@@ -383,7 +386,11 @@ ccwCmpAroundWith z@(Vector2 zx zy) (c :+ _) (q :+ _) (r :+ _) =
             CW       -> GT
             CoLinear -> EQ
 
--- | See ccwCmpAroundWith, this version compares in clockwise order.
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the cw ordering of p and q around c with this vector as zero
+-- direction.
+--
+-- pre: the points p,q /= c
 cwCmpAroundWith     :: (Ord r, Num r)
                     => Vector 2 r
                     -> Point 2 r :+ a
