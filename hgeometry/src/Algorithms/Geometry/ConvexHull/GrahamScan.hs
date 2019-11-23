@@ -22,10 +22,11 @@ convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            lh  = NonEmpty.tail . hull' $ reverse ps'
                        in ConvexPolygon . fromPoints . reverse $ lh ++ uh
 
+-- | Computes the upper hull. The upper hull is given from left to right.
 upperHull  :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
-upperHull = hull id
+upperHull = NonEmpty.reverse . hull id
 
-
+-- | Computes the upper hull. The upper hull is given from left to right
 lowerHull :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
 lowerHull = hull reverse
 
