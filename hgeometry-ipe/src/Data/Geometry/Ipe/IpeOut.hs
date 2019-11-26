@@ -159,6 +159,10 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
   defIO = ipeDisk
 
+instance Num r => HasDefaultIpeOut (Rectangle p r) where
+  type DefaultIpeOut (Rectangle p r) = Path
+  defIO = ipeRectangle
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
@@ -200,6 +204,12 @@ ipePolygon (first (const ()) -> pg) = case pg of
                (SimplePolygon _)  -> pg^.re _asSimplePolygon :+ mempty
                (MultiPolygon _ _) -> pg^.re _asMultiPolygon  :+ mempty
 
+
+-- | Draw a Rectangle
+ipeRectangle   :: Num r => IpeOut (Rectangle p r) Path r
+ipeRectangle r = ipePolygon $ fromPoints [tl,tr,br,bl]
+  where
+    (tl, tr, br, bl) = corners r
 
 --------------------------------------------------------------------------------
 -- * Group Converters
