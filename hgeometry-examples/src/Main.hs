@@ -14,6 +14,7 @@ import qualified Demo.MinDisk as MinDisk
 import qualified Demo.Delaunay as Delaunay
 import qualified Demo.ExpectedPairwiseDistance as ExpPWD
 import qualified Demo.TriangulateWorld as TriangulateWorld
+import qualified Demo.FloatingPoint as FloatingPoint
 
 
 
@@ -28,6 +29,7 @@ data Options = BAPC                      BAPCOptions
              | Delaunay                  Delaunay.Options
              | ExpectedPairwiseDistance  ExpPWD.Options
              | TriangulateWorld          TriangulateWorld.Options
+             | FloatingPoint             FloatingPoint.Options
              deriving Data
 
 parser :: Parser Options
@@ -39,6 +41,7 @@ parser = subparser (
     <> command' Delaunay                       Delaunay.options
     <> command' ExpectedPairwiseDistance       ExpPWD.options
     <> command' TriangulateWorld               TriangulateWorld.options
+    <> command' FloatingPoint                  FloatingPoint.options
     )
 
 
@@ -52,6 +55,7 @@ mainWith opts' = case opts' of
   Delaunay opts                       -> Delaunay.mainWith opts
   ExpectedPairwiseDistance opts       -> ExpPWD.mainWith opts
   TriangulateWorld opts               -> TriangulateWorld.mainWith opts
+  FloatingPoint opts                  -> FloatingPoint.mainWith opts
 
 --------------------------------------------------------------------------------
 
