@@ -50,11 +50,11 @@ import           Data.Vinyl.CoRec (asA)
 >>> :{
 -- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () Rational
-    simplePoly = SimplePolygon . C.fromList . map ext $ [ point2 0 0
-                                                        , point2 10 0
-                                                        , point2 10 10
-                                                        , point2 5 15
-                                                        , point2 1 11
+    simplePoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
+                                                        , Point2 10 0
+                                                        , Point2 10 10
+                                                        , Point2 5 15
+                                                        , Point2 1 11
                                                         ]
 :} -}
 
@@ -250,19 +250,19 @@ toEdges vs = C.zipLWith (\p q -> LineSegment (Closed p) (Open q)) vs (C.rotateR 
 
 -- | Test if q lies on the boundary of the polygon. Running time: O(n)
 --
--- >>> point2 1 1 `onBoundary` simplePoly
+-- >>> Point2 1 1 `onBoundary` simplePoly
 -- False
--- >>> point2 0 0 `onBoundary` simplePoly
+-- >>> Point2 0 0 `onBoundary` simplePoly
 -- True
--- >>> point2 10 0 `onBoundary` simplePoly
+-- >>> Point2 10 0 `onBoundary` simplePoly
 -- True
--- >>> point2 5 13 `onBoundary` simplePoly
+-- >>> Point2 5 13 `onBoundary` simplePoly
 -- False
--- >>> point2 5 10 `onBoundary` simplePoly
+-- >>> Point2 5 10 `onBoundary` simplePoly
 -- False
--- >>> point2 10 5 `onBoundary` simplePoly
+-- >>> Point2 10 5 `onBoundary` simplePoly
 -- True
--- >>> point2 20 5 `onBoundary` simplePoly
+-- >>> Point2 20 5 `onBoundary` simplePoly
 -- False
 --
 -- TODO: testcases multipolygon
@@ -275,19 +275,19 @@ q `onBoundary` pg = any (q `onSegment`) es
 -- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.
 -- Running time: O(n).
 --
--- >>> point2 1 1 `inPolygon` simplePoly
+-- >>> Point2 1 1 `inPolygon` simplePoly
 -- Inside
--- >>> point2 0 0 `inPolygon` simplePoly
+-- >>> Point2 0 0 `inPolygon` simplePoly
 -- OnBoundary
--- >>> point2 10 0 `inPolygon` simplePoly
+-- >>> Point2 10 0 `inPolygon` simplePoly
 -- OnBoundary
--- >>> point2 5 13 `inPolygon` simplePoly
+-- >>> Point2 5 13 `inPolygon` simplePoly
 -- Inside
--- >>> point2 5 10 `inPolygon` simplePoly
+-- >>> Point2 5 10 `inPolygon` simplePoly
 -- Inside
--- >>> point2 10 5 `inPolygon` simplePoly
+-- >>> Point2 10 5 `inPolygon` simplePoly
 -- OnBoundary
--- >>> point2 20 5 `inPolygon` simplePoly
+-- >>> Point2 20 5 `inPolygon` simplePoly
 -- Outside
 --
 -- TODO: Add some testcases with multiPolygons
@@ -345,20 +345,20 @@ insidePolygon        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> B
 q `insidePolygon` pg = q `inPolygon` pg == Inside
 
 
--- testQ = map (`inPolygon` testPoly) [ point2 1 1    -- Inside
---                                    , point2 0 0    -- OnBoundary
---                                    , point2 5 14   -- Inside
---                                    , point2 5 10   -- Inside
---                                    , point2 10 5   -- OnBoundary
---                                    , point2 20 5   -- Outside
+-- testQ = map (`inPolygon` testPoly) [ Point2 1 1    -- Inside
+--                                    , Point2 0 0    -- OnBoundary
+--                                    , Point2 5 14   -- Inside
+--                                    , Point2 5 10   -- Inside
+--                                    , Point2 10 5   -- OnBoundary
+--                                    , Point2 20 5   -- Outside
 --                                    ]
 
 -- testPoly :: SimplePolygon () Rational
--- testPoly = SimplePolygon . C.fromList . map ext $ [ point2 0 0
---                                                   , point2 10 0
---                                                   , point2 10 10
---                                                   , point2 5 15
---                                                   , point2 1 11
+-- testPoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
+--                                                   , Point2 10 0
+--                                                   , Point2 10 10
+--                                                   , Point2 5 15
+--                                                   , Point2 1 11
 --                                                   ]
 
 -- | Compute the area of a polygon

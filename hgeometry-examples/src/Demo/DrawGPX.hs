@@ -100,13 +100,13 @@ colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) colors'
 
 -- readCoords    :: FilePath -> IO (PolyLine 2 () Double)
 -- readCoords fp = fromPoints .
---                 map ((\[x,y] -> point2 x y :+ ()) . map read . words) . lines
+--                 map ((\[x,y] -> Point2 x y :+ ()) . map read . words) . lines
 --              <$> readFile fp
 
 -- readCoords'    :: FilePath -> IO [PolyLine 2 () Double]
 -- readCoords' fp = mapMaybe (fmap fromPoints . g . f)  .  group' . lines <$> readFile fp
 --   where
---     f = map ((\[x,y] -> point2 x y :+ ()) . map read . words)
+--     f = map ((\[x,y] -> Point2 x y :+ ()) . map read . words)
 --     g xs@(_:_:_) = Just xs
 --     g _          = Nothing
 
@@ -178,7 +178,7 @@ subsampleTrack k = over trackPoints (subsample k)
 mercatoProject                    :: (Double,Double)
                                   -> Position
                                   -> Point 2 Double
-mercatoProject (width,height) pos = point2 x y
+mercatoProject (width,height) pos = Point2 x y
   where
     lon = realToFrac $ pos^.longitude
     lat = realToFrac $ pos^.latitude

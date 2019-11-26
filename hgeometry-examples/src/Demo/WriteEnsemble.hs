@@ -84,11 +84,11 @@ asTempPt    :: [T.Text] -> Point 2 Milli :+ Day
 asTempPt ts = let [y,m,d] = map read' $ Prelude.init ts
                   v       = read' $ last ts
                   day     = fromGregorian y (fromInteger m) (fromInteger d)
-              in point2 (fromIntegral $ (toModifiedJulianDay day)) (10 * v) :+ day
+              in Point2 (fromIntegral $ (toModifiedJulianDay day)) (10 * v) :+ day
 
 -- | read a line of the form: yyyymmdd value
 asPrecipPt       :: [T.Text] -> Point 2 Milli :+ Day
 asPrecipPt [t,v] = let (y,t') = T.splitAt 4 t
                        (m,d)  = T.splitAt 2 t'
                        day    = fromGregorian (read' y) (read' m) (read' d)
-                   in point2 (fromIntegral $ (toModifiedJulianDay day)) (10 * read' v) :+ day
+                   in Point2 (fromIntegral $ (toModifiedJulianDay day)) (10 * read' v) :+ day

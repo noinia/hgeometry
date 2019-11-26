@@ -68,10 +68,10 @@ lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
 lineThrough p q = Line p (q .-. p)
 
 verticalLine   :: Num r => r -> Line 2 r
-verticalLine x = Line (point2 x 0) (Vector2 0 1)
+verticalLine x = Line (Point2 x 0) (Vector2 0 1)
 
 horizontalLine   :: Num r => r -> Line 2 r
-horizontalLine y = Line (point2 0 y) (Vector2 1 0)
+horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 
 -- | Given a line l with anchor point p and vector v, get the line
 -- perpendicular to l that also goes through p. The resulting line m is
@@ -94,9 +94,9 @@ isIdenticalTo                         :: (Eq r, Arity d) => Line d r -> Line d r
 
 -- | Test if the two lines are parallel.
 --
--- >>> lineThrough origin (point2 1 0) `isParallelTo` lineThrough (point2 1 1) (point2 2 1)
+-- >>> lineThrough origin (Point2 1 0) `isParallelTo` lineThrough (Point2 1 1) (Point2 2 1)
 -- True
--- >>> lineThrough origin (point2 1 0) `isParallelTo` lineThrough (point2 1 1) (point2 2 2)
+-- >>> lineThrough origin (Point2 1 0) `isParallelTo` lineThrough (Point2 1 1) (Point2 2 2)
 -- False
 isParallelTo                         :: (Eq r, Fractional r, Arity d)
                                      => Line d r -> Line d r -> Bool
@@ -106,11 +106,11 @@ isParallelTo                         :: (Eq r, Fractional r, Arity d)
 
 -- | Test if point p lies on line l
 --
--- >>> origin `onLine` lineThrough origin (point2 1 0)
+-- >>> origin `onLine` lineThrough origin (Point2 1 0)
 -- True
--- >>> point2 10 10 `onLine` lineThrough origin (point2 2 2)
+-- >>> Point2 10 10 `onLine` lineThrough origin (Point2 2 2)
 -- True
--- >>> point2 10 5 `onLine` lineThrough origin (point2 2 2)
+-- >>> Point2 10 5 `onLine` lineThrough origin (Point2 2 2)
 -- False
 onLine                :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> Bool
 p `onLine` (Line q v) = p == q || (p .-. q) `isScalarMultipleOf` v
@@ -203,7 +203,7 @@ instance HasSupportingLine (Line d r) where
 
 -- | Create a line from the linear function ax + b
 fromLinearFunction     :: Num r => r -> r -> Line 2 r
-fromLinearFunction a b = Line (point2 0 b) (Vector2 1 a)
+fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical
@@ -221,13 +221,13 @@ data SideTestUpDown = Below | On | Above deriving (Show,Read,Eq,Ord)
 -- | Given a point q and a line l, compute to which side of l q lies. For
 -- vertical lines the left side of the line is interpeted as below.
 --
--- >>> point2 10 10 `onSideUpDown` (lineThrough origin $ point2 10 5)
+-- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 10 5)
 -- Above
--- >>> point2 10 10 `onSideUpDown` (lineThrough origin $ point2 (-10) 5)
+-- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 (-10) 5)
 -- Above
--- >>> point2 5 5 `onSideUpDown` (verticalLine 10)
+-- >>> Point2 5 5 `onSideUpDown` (verticalLine 10)
 -- Below
--- >>> point2 5 5 `onSideUpDown` (lineThrough origin $ point2 (-3) (-3))
+-- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
 -- On
 onSideUpDown                :: (Ord r, Num r) => Point 2 r -> Line 2 r -> SideTestUpDown
 q `onSideUpDown` (Line p v) = let r    =  p .+^ v
@@ -245,13 +245,13 @@ data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)
 -- | Given a point q and a line l, compute to which side of l q lies. For
 -- vertical lines the left side of the line is interpeted as below.
 --
--- >>> point2 10 10 `onSide` (lineThrough origin $ point2 10 5)
+-- >>> Point2 10 10 `onSide` (lineThrough origin $ Point2 10 5)
 -- LeftSide
--- >>> point2 10 10 `onSide` (lineThrough origin $ point2 (-10) 5)
+-- >>> Point2 10 10 `onSide` (lineThrough origin $ Point2 (-10) 5)
 -- RightSide
--- >>> point2 5 5 `onSide` (verticalLine 10)
+-- >>> Point2 5 5 `onSide` (verticalLine 10)
 -- LeftSide
--- >>> point2 5 5 `onSide` (lineThrough origin $ point2 (-3) (-3))
+-- >>> Point2 5 5 `onSide` (lineThrough origin $ Point2 (-3) (-3))
 -- OnLine
 onSide                :: (Ord r, Num r) => Point 2 r -> Line 2 r -> SideTest
 q `onSide` (Line p v) = let r    =  p .+^ v

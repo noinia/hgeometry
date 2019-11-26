@@ -168,9 +168,7 @@ projectPoint = Point . prefix . toVec
 --
 -- if we want.
 pattern Point2       :: r -> r -> Point 2 r
-pattern Point2 x y   <- (_point2 -> (x,y))
-  where
-    Point2 x y = point2 x y
+pattern Point2 x y = Point (Vector2 x y)
 {-# COMPLETE Point2 #-}
 
 -- | Similarly, we can write:
@@ -183,41 +181,8 @@ pattern Point2 x y   <- (_point2 -> (x,y))
 -- :}
 -- 3
 pattern Point3       :: r -> r -> r -> Point 3 r
-pattern Point3 x y z <- (_point3 -> (x,y,z))
-  where
-    Point3 x y z = point3 x y z
+pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}
-
--- | Construct a 2 dimensional point
---
--- >>> point2 1 2
--- Point2 [1,2]
-point2     :: r -> r -> Point 2 r
-point2 x y = Point $ Vector2 x y
-
--- | Destruct a 2 dimensional point
---
--- >>> _point2 $ point2 1 2
--- (1,2)
-_point2 :: Point 2 r -> (r,r)
-_point2 = (\(Vector2 x y) -> (x,y)) . toVec
-
-
-
--- | Construct a 3 dimensional point
---
--- >>> point3 1 2 3
--- Point3 [1,2,3]
-point3       :: r -> r -> r -> Point 3 r
-point3 x y z = Point $ Vector3 x y z
-
--- | Destruct a 3 dimensional point
---
--- >>> _point3 $ point3 1 2 3
--- (1,2,3)
-_point3 :: Point 3 r -> (r,r,r)
-_point3 = (\(Vector3 x y z) -> (x,y,z)) . toVec
-
 
 -- | Shorthand to access the first coordinate C 1
 --
@@ -411,29 +376,12 @@ cmpByDistanceTo (c :+ _) p q = comparing (squaredEuclideanDist c) (p^.core) (q^.
 ccwCmpAround :: (Num r, Ord r)
              => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
-  -- case (quadrantWith c q `compare` quadrantWith c r) of
-  --                      EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-  --                        CCW      -> LT
-  --                        CW       -> GT
-  --                        CoLinear -> EQ
-  --                      x -> x -- if the quadrant differs, use the order
-  --                             -- specified by the quadrant.
 
 -- | Clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
 cwCmpAround :: (Num r, Ord r)
             => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 cwCmpAround = cwCmpAroundWith (Vector2 1 0)
-
-  -- case (quadrantWith c q `compare` quadrantWith c r) of
-  --                      EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-  --                        CCW      -> GT
-  --                        CW       -> LT
-  --                        CoLinear -> EQ
-  --                      LT -> GT
-  --                      GT -> LT -- if the quadrant differs, use the order
-  --                               -- specified by the quadrant.
-
 
 
 -- | Given a center c, a new point p, and a list of points ps, sorted in

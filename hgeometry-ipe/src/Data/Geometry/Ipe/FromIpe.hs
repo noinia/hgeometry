@@ -33,7 +33,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
 --              . PolyLine.fromPoints . map ext
---              $ [ origin, point2 10 10, point2 200 100 ]
+--              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor "red")
 --     testObject :: IpeObject Int

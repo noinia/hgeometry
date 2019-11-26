@@ -203,22 +203,22 @@ instance (Ord r, Fractional r) =>
 
 -- | Test if a point lies on a line segment.
 --
--- >>> (point2 1 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (Point2 1 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
--- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (Point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (point2 5 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (Point2 5 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (point2 (-1) 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (Point2 (-1) 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 3 3 :+ ()))
+-- >>> (Point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ()))
 -- True
 --
 -- Note that the segments are assumed to be closed. So the end points lie on the segment.
 --
--- >>> (point2 2 0) `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> (Point2 2 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
--- >>> origin `onSegment` (ClosedLineSegment (origin :+ ()) (point2 2 0 :+ ()))
+-- >>> origin `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
 --
 --
@@ -277,7 +277,7 @@ flipSegment s = let p = s^.start
                 in (s&start .~ q)&end .~ p
 
 -- testSeg :: LineSegment 2 () Rational
--- testSeg = LineSegment (Open $ ext origin)  (Closed $ ext (point2 10 0))
+-- testSeg = LineSegment (Open $ ext origin)  (Closed $ ext (Point2 10 0))
 
 -- horL' :: Line 2 Rational
 -- horL' = horizontalLine 0

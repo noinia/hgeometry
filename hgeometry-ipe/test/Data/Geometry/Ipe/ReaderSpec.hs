@@ -40,7 +40,7 @@ spec = do
 
   where
     useTxt = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
-    useSym = Symbol (point2 320 736) "mark/disk(sx)"
+    useSym = Symbol (Point2 320 736) "mark/disk(sx)"
 --     symAttrs =
 
     translatedUse = "<use matrix=\"1 0 0 1 4.44908 -4.21815\" name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
@@ -48,8 +48,8 @@ spec = do
 
 
 
-    ops = [ MoveTo $ point2 128 (656 :: Double)
-          , LineTo $ point2 224 768
-          , LineTo $ point2 304 624
-          , LineTo $ point2 432 752
+    ops = [ MoveTo $ Point2 128 (656 :: Double)
+          , LineTo $ Point2 224 768
+          , LineTo $ Point2 304 624
+          , LineTo $ Point2 432 752
           ]

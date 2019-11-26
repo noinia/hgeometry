@@ -69,8 +69,8 @@ instance (Slab Horizontal a r) `IsIntersectableWith` (Slab Vertical a r) where
 
   (Slab h) `intersect` (Slab v) = coRec $ box low high
     where
-      low  = point2 (v^.start.core) (h^.start.core) :+ (v^.start.extra, h^.start.extra)
-      high = point2 (v^.end.core)   (h^.end.core)   :+ (v^.end.extra,   h^.end.extra)
+      low  = Point2 (v^.start.core) (h^.start.core) :+ (v^.start.extra, h^.start.extra)
+      high = Point2 (v^.end.core)   (h^.end.core)   :+ (v^.end.extra,   h^.end.extra)
 
 
 

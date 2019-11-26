@@ -225,14 +225,14 @@ widthIn' i = preview (V.element' (i-1)) . size
 
 type Rectangle = Box 2
 
--- >>> width (boundingBoxList' [origin, point2 1 2] :: Rectangle () Int)
+-- >>> width (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 1
 -- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0
 width :: Num r => Rectangle p r -> r
 width = widthIn (C :: C 1)
 
--- >>> height (boundingBoxList' [origin, point2 1 2] :: Rectangle () Int)
+-- >>> height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 2
 -- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
 -- 0

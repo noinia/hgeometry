@@ -76,7 +76,7 @@ instance ReadGPX Track where
 instance ReadGPX TrackPoint where
   parseGPX x@(Element "trkpt" ats _) = (\p t -> TP $ p :+ t) <$> pos <*> time
     where
-      pos  = (\l l' -> Position $ point2 l l') <$> lat <*> lon
+      pos  = (\l l' -> Position $ Point2 l l') <$> lat <*> lon
       time = fmap (readTime' . extract) . listToMaybe . chsWith "time" $ x
 
       read' = realToFrac . read @Double . Text.unpack
@@ -94,7 +94,7 @@ readTime' :: Text.Text -> Time
 readTime' = id
 
 -- instance ReadGPX Position where
---   parseGPX x@(Element "Position" _ _) = (\l l' -> Position $ point2 l l') <$> lat <*> lon
+--   parseGPX x@(Element "Position" _ _) = (\l l' -> Position $ Point2 l l') <$> lat <*> lon
 
 --     where
 --       f n = listToMaybe . map (read . extract) . (chsWith n) $ x

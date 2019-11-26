@@ -129,7 +129,7 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
 
 
 pPoint :: Coordinate r => Parser (Point 2 r)
-pPoint = point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
+pPoint = Point2 <$> pCoordinate <* pWhiteSpace <*> pCoordinate
 
 
 pCoordinate :: Coordinate r => Parser r

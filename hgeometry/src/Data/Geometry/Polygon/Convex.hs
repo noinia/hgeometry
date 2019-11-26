@@ -92,7 +92,7 @@ instance IsBoxable (ConvexPolygon p r) where
 --            -- print $ toPlaneGraph (Proxy :: Proxy DT) dt
 --            -- writeIpeFile outFile . singlePageFromContent $ out
 --            -- mapM_ (print . extremesNaive (v2 1 0)) polies
---            pure $ map (flip rightTangent (point2 80 528)) polies
+--            pure $ map (flip rightTangent (Point2 80 528)) polies
 
 
 
@@ -390,13 +390,13 @@ getVertices = view (simplePolygon.outerBoundary)
 --               in if p cur nxt then go xs' else xs
 
 -- test1 :: Num r => ConvexPolygon () r
--- test1 = ConvexPolygon . fromPoints . map ext . reverse $ [origin, point2 1 4, point2 5 6, point2 10 3]
+-- test1 = ConvexPolygon . fromPoints . map ext . reverse $ [origin, Point2 1 4, Point2 5 6, Point2 10 3]
 
 -- test2 :: Num r => ConvexPolygon () r
--- test2 = ConvexPolygon . fromPoints . map ext . reverse $ [point2 11 6, point2 10 10, point2 15 18, point2 12 5]
+-- test2 = ConvexPolygon . fromPoints . map ext . reverse $ [Point2 11 6, Point2 10 10, Point2 15 18, Point2 12 5]
 
 -- testA :: Num r => ConvexPolygon () r
--- testA = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 1, point2 2 2]
+-- testA = ConvexPolygon . fromPoints . map ext $ [origin, Point2 5 1, Point2 2 2]
 
 -- testB :: Num r => ConvexPolygon () r
--- testB = ConvexPolygon . fromPoints . map ext $ [origin, point2 5 3, point2 (-2) 2, point2 (-2) 1]
+-- testB = ConvexPolygon . fromPoints . map ext $ [origin, Point2 5 3, Point2 (-2) 2, Point2 (-2) 1]

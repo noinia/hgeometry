@@ -28,21 +28,21 @@ sort'       :: Ord a => (a,a) -> (a,a)
 sort' (x,y) = (min x y, max x y)
 
 geomBookPoly :: SimplePolygon Int Rational
-geomBookPoly = fromPoints [ point2 20 20 :+ 1
-                          , point2 18 19 :+ 2
-                          , point2 16 25 :+ 3
-                          , point2 13 23 :+ 4
-                          , point2 10 24 :+ 5
-                          , point2 6  22 :+ 6
-                          , point2 8  21 :+ 7
-                          , point2 7  18 :+ 8
-                          , point2 2  19 :+ 9
-                          , point2 1  10 :+ 10
-                          , point2 3  5  :+ 11
-                          , point2 11 7  :+ 12
-                          , point2 15 1  :+ 13
-                          , point2 12 15 :+ 14
-                          , point2 15 12 :+ 15
+geomBookPoly = fromPoints [ Point2 20 20 :+ 1
+                          , Point2 18 19 :+ 2
+                          , Point2 16 25 :+ 3
+                          , Point2 13 23 :+ 4
+                          , Point2 10 24 :+ 5
+                          , Point2 6  22 :+ 6
+                          , Point2 8  21 :+ 7
+                          , Point2 7  18 :+ 8
+                          , Point2 2  19 :+ 9
+                          , Point2 1  10 :+ 10
+                          , Point2 3  5  :+ 11
+                          , Point2 11 7  :+ 12
+                          , Point2 15 1  :+ 13
+                          , Point2 12 15 :+ 14
+                          , Point2 15 12 :+ 15
                           ]
 geomBookVertexTypes = NonEmpty.fromList [Start,Merge,Start,Merge,Start,Regular,Regular,Merge,Start,Regular,End,Split,End,Split,End]
 geomBookDiagonals = Set.fromList [(4,6),(2,8),(8,14),(10,12)]

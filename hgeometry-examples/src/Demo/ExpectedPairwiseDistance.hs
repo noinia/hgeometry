@@ -206,4 +206,4 @@ nonWellSeparated s = map (\(a,b,c) -> (a,b))
 
 
 points1 :: [Point 2 Double :+ ()]
-points1 = ext <$> [point2 0 0, point2 1 1, point2 2 10, point2 3 11, point2 5 5, point2 10 0]
+points1 = ext <$> [Point2 0 0, Point2 1 1, Point2 2 10, Point2 3 11, Point2 5 5, Point2 10 0]

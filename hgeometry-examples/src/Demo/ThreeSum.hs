@@ -36,9 +36,9 @@ instance HasDefaultIpeOut GeomBase where
 geomBase                      :: ThreeSum' -> GeomBase
 geomBase (ThreeSum' as bs cs) = GeomBase aps bps cps
   where
-    aps = map (\a -> point2 (fromInteger a)     0) as
-    bps = map (\b -> point2 (fromInteger b)     2) bs
-    cps = map (\c -> point2 (fromInteger c / 2) 1) cs
+    aps = map (\a -> Point2 (fromInteger a)     0) as
+    bps = map (\b -> Point2 (fromInteger b)     2) bs
+    cps = map (\c -> Point2 (fromInteger c / 2) 1) cs
 
 
 
@@ -75,7 +75,7 @@ separator1 (GeomBase as bs cs) = Separator1 als bls cls
     seg l r = ClosedLineSegment (only $ shiftR l) (only $ shiftL r)
 
     segs      :: Double -> [Point 2 Double] -> [LineSegment 2 () Double]
-    segs y xs = let ys = point2 minInfty y : (sort' xs) ++ [point2 maxInfty y]
+    segs y xs = let ys = Point2 minInfty y : (sort' xs) ++ [Point2 maxInfty y]
                 in zipWith seg ys (tail ys)
 
     als = segs 0 as
@@ -111,7 +111,7 @@ separator1 (GeomBase as bs cs) = Separator1 als bls cls
 -- dualStrip (ClosedLineSegment (l :+ _) (r :+ _)) = Strip (dualLine . fl $ l)
 --                                                         (dualLine . fl $ r)
 --   where
---     fl p = point2 (p^.yCoord) (- p^.xCoord)
+--     fl p = Point2 (p^.yCoord) (- p^.xCoord)
 
 -- stripsCoverBox :: Separator1 -> StripsCoverBox
 -- stripsCoverBox (Separator1 as bs cs) = StripsCoverBox strips rect
@@ -119,7 +119,7 @@ separator1 (GeomBase as bs cs) = Separator1 als bls cls
 
 --     strips = map dualStrip (as ++ bs ++ cs)
 --     -- this is a bit of hack, but that should not matter too much.
---     r      = boundingBoxList [point2 minInfty minInfty, point2 maxInfty maxInfty]
+--     r      = boundingBoxList [Point2 minInfty minInfty, Point2 maxInfty maxInfty]
 
 
 

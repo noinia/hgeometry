@@ -10,7 +10,7 @@ spec :: Spec
 spec = do
   describe "Box" $ do
     it "intersect tests" $
-      ((boundingBoxList' $ [point2 (-4) (-3), point2 (-4) (10 :: Int)])
+      ((boundingBoxList' $ [Point2 (-4) (-3), Point2 (-4) (10 :: Int)])
        `intersects`
-       (boundingBoxList' $ [point2 (-5) 1, point2 (-4) (0 :: Int)]))
+       (boundingBoxList' $ [Point2 (-5) 1, Point2 (-4) (0 :: Int)]))
       `shouldBe` True

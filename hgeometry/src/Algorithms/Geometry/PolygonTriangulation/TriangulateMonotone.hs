@@ -145,11 +145,11 @@ splitPolygon pg = bimap (f L) (f R)
 
 --------------------------------------------------------------------------------
 
--- testPolygon = fromPoints . map ext $ [ point2 10 10
---                                      , point2 5 20
---                                      , point2 3 14
---                                      , point2 1 1
---                                      , point2 8 8 ]
+-- testPolygon = fromPoints . map ext $ [ Point2 10 10
+--                                      , Point2 5 20
+--                                      , Point2 3 14
+--                                      , Point2 1 1
+--                                      , Point2 8 8 ]
 
 
 

@@ -127,7 +127,7 @@ distanceToHatch = maybe Impossible (Possible . distanceAlong) . toHatch . F.toLi
 
 
 readPoint   :: String -> Point 2 Int
-readPoint s = let [x,y] = map read . words $ s in point2 x y
+readPoint s = let [x,y] = map read . words $ s in Point2 x y
 
 
 readInput                 :: [String] -> [Input]

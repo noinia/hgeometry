@@ -84,11 +84,11 @@ p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
 
 -- | Test if a point lies strictly inside a ball
 --
--- >>> (point2 0.5 0.0) `insideBall` unitBall
+-- >>> (Point2 0.5 0.0) `insideBall` unitBall
 -- True
--- >>> (point2 1 0) `insideBall` unitBall
+-- >>> (Point2 1 0) `insideBall` unitBall
 -- False
--- >>> (point2 2 0) `insideBall` unitBall
+-- >>> (Point2 2 0) `insideBall` unitBall
 -- False
 insideBall       :: (Arity d, Ord r, Num r)
                  => Point d r -> Ball d p r -> Bool
@@ -104,9 +104,9 @@ p `inClosedBall` b = p `inBall` b /= Outside
 
 -- | Test if a point lies on the boundary of a ball.
 --
--- >>> (point2 1 0) `onBall` unitBall
+-- >>> (Point2 1 0) `onBall` unitBall
 -- True
--- >>> (point3 1 1 0) `onBall` unitBall
+-- >>> (Point3 1 1 0) `onBall` unitBall
 -- False
 onBall       :: (Arity d, Ord r, Num r)
              => Point d r -> Ball d p r -> Bool
@@ -145,7 +145,7 @@ pattern Circle c r = Sphere c r
 -- | Given three points, get the disk through the three points. If the three
 -- input points are colinear we return Nothing
 --
--- >>> disk (point2 0 10) (point2 10 0) (point2 (-10) 0)
+-- >>> disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
 -- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
@@ -177,7 +177,7 @@ from3Points (p@(Point2 px py) :+ _) (Point2 qx qy :+ _) (Point2 sx sy :+ _) =
     ynom   = det33 $ V3 (fy px py) (fy qx qy) (fy sx sy)
 
     denom  = (2 *) . det33 $ V3 (V3 px py 1) (V3 qx qy 1) (V3 sx sy 1)
-    c      = point2 (xnom / denom) (ynom / denom)
+    c      = Point2 (xnom / denom) (ynom / denom)
 
 
 

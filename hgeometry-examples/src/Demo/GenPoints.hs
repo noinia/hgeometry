@@ -38,4 +38,4 @@ mainWith (Options n outFile) = do
 
 
 randomPoint :: IO (Point 2 Double)
-randomPoint = point2 <$> randomRIO (0,pageWidth) <*> randomRIO (0,pageHeight)
+randomPoint = Point2 <$> randomRIO (0,pageWidth) <*> randomRIO (0,pageHeight)

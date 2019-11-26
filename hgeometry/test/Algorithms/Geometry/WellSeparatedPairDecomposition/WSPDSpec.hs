@@ -27,10 +27,10 @@ reIndexTest = describe "ReIndex tests" $ do
     it "simple input reordering " $ do
       reIndexPoints input `shouldBe` output
   where
-    input = Vector2 (ptSeq [ origin :+ 1, point2 1 1 :+ 100, point2 5 5 :+ 101 ])
-                    (ptSeq [ point2 1 1 :+ 100, point2 5 5 :+ 101, origin :+ 1 ])
-    output = Vector2 (ptSeq [ origin :+ 0, point2 1 1 :+ 1, point2 5 5 :+ 2 ])
-                     (ptSeq [ point2 1 1 :+ 1, point2 5 5 :+ 2, origin :+ 0 ])
+    input = Vector2 (ptSeq [ origin :+ 1, Point2 1 1 :+ 100, Point2 5 5 :+ 101 ])
+                    (ptSeq [ Point2 1 1 :+ 100, Point2 5 5 :+ 101, origin :+ 1 ])
+    output = Vector2 (ptSeq [ origin :+ 0, Point2 1 1 :+ 1, Point2 5 5 :+ 2 ])
+                     (ptSeq [ Point2 1 1 :+ 1, Point2 5 5 :+ 2, origin :+ 0 ])
 
 
 
@@ -46,17 +46,17 @@ distributePointsTest = describe "DistributePoints tests" $ do
 
   where
     levels = V.fromList [Just $ Level 0 (Just 2),Just $ Level 1 (Just 1), Nothing]
-    input  = ptSeq [ origin :+ 0, point2 1 1 :+ 1, point2 2 2 :+ 2]
+    input  = ptSeq [ origin :+ 0, Point2 1 1 :+ 1, Point2 2 2 :+ 2]
     output = V.fromList [ ptSeq [origin :+ 0]
-                        , ptSeq [point2 1 1 :+ 1]
-                        , ptSeq [point2 2 2 :+ 2]
+                        , ptSeq [Point2 1 1 :+ 1]
+                        , ptSeq [Point2 2 2 :+ 2]
                         ]
     output' = fmap (\pts -> Vector2 pts pts) output
 
-    --     input = v2 (f [ origin :+ 1, point2 1 1 :+ 100, point2 5 5 :+ 101 ])
---                (f [ point2 1 1 :+ 100, point2 5 5 :+ 101, origin :+ 1 ])
---     output = v2 (f [ origin :+ 0, point2 1 1 :+ 1, point2 5 5 :+ 2 ])
---                 (f [ point2 1 1 :+ 1, point2 5 5 :+ 2, origin :+ 0 ])
+    --     input = v2 (f [ origin :+ 1, Point2 1 1 :+ 100, Point2 5 5 :+ 101 ])
+--                (f [ Point2 1 1 :+ 100, Point2 5 5 :+ 101, origin :+ 1 ])
+--     output = v2 (f [ origin :+ 0, Point2 1 1 :+ 1, Point2 5 5 :+ 2 ])
+--                 (f [ Point2 1 1 :+ 1, Point2 5 5 :+ 2, origin :+ 0 ])
 
 --     f =  LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
@@ -65,7 +65,7 @@ ptSeq = LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 -- coversAll
 
 points1 :: NonEmpty.NonEmpty (Point 2 Double :+ ())
-points1 = ext <$> NonEmpty.fromList [point2 0 0, point2 1 1, point2 2 100, point2 3 101]
+points1 = ext <$> NonEmpty.fromList [Point2 0 0, Point2 1 1, Point2 2 100, Point2 3 101]
 
 
 -- | Computes all pairs of points that are uncovered by the WSPD with separation s
