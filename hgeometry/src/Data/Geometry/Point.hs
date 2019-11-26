@@ -101,7 +101,7 @@ origin = Point $ pure 0
 
 -- | Lens to access the vector corresponding to this point.
 --
--- >>> (point3 1 2 3) ^. vector
+-- >>> (Point3 1 2 3) ^. vector
 -- Vector3 [1,2,3]
 -- >>> origin & vector .~ Vector3 1 2 3
 -- Point3 [1,2,3]
@@ -113,7 +113,7 @@ vector = lens toVec (const Point)
 -- sense that no bounds are checked. Consider using `coord` instead.
 --
 --
--- >>> point3 1 2 3 ^. unsafeCoord 2
+-- >>> Point3 1 2 3 ^. unsafeCoord 2
 -- 2
 unsafeCoord   :: Arity d => Int -> Lens' (Point d r) r
 unsafeCoord i = vector . singular (ix (i-1))
@@ -121,11 +121,11 @@ unsafeCoord i = vector . singular (ix (i-1))
 
 -- | Get the coordinate in a given dimension
 --
--- >>> point3 1 2 3 ^. coord (C :: C 2)
+-- >>> Point3 1 2 3 ^. coord (C :: C 2)
 -- 2
--- >>> point3 1 2 3 & coord (C :: C 1) .~ 10
+-- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
 -- Point3 [10,2,3]
--- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
+-- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
 -- Point3 [1,2,4]
 coord   :: forall proxy i d r. (1 <= i, i <= d, ((i - 1) + 1) ~ i
                                , Arity (i - 1), Arity d
@@ -162,7 +162,7 @@ projectPoint = Point . prefix . toVec
 --   let
 --     f              :: Point 2 r -> r
 --     f (Point2 x y) = x
---   in f (point2 1 2)
+--   in f (Point2 1 2)
 -- :}
 -- 1
 --
@@ -186,9 +186,9 @@ pattern Point3 x y z = (Point (Vector3 x y z))
 
 -- | Shorthand to access the first coordinate C 1
 --
--- >>> point3 1 2 3 ^. xCoord
+-- >>> Point3 1 2 3 ^. xCoord
 -- 1
--- >>> point2 1 2 & xCoord .~ 10
+-- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 [10,2]
 xCoord :: (1 <= d, Arity d) => Lens' (Point d r) r
 xCoord = coord (C :: C 1)
@@ -196,9 +196,9 @@ xCoord = coord (C :: C 1)
 
 -- | Shorthand to access the second coordinate C 2
 --
--- >>> point2 1 2 ^. yCoord
+-- >>> Point2 1 2 ^. yCoord
 -- 2
--- >>> point3 1 2 3 & yCoord %~ (+1)
+-- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 [1,3,3]
 yCoord :: (2 <= d, Arity d) => Lens' (Point d r) r
 yCoord = coord (C :: C 2)
@@ -206,9 +206,9 @@ yCoord = coord (C :: C 2)
 
 -- | Shorthand to access the third coordinate C 3
 --
--- >>> point3 1 2 3 ^. zCoord
+-- >>> Point3 1 2 3 ^. zCoord
 -- 3
--- >>> point3 1 2 3 & zCoord %~ (+1)
+-- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 [1,2,4]
 zCoord :: (3 <= d, Arity d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
