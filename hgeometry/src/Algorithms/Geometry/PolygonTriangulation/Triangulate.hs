@@ -63,6 +63,7 @@ computeDiagonals' pg' = (pg, monotoneDiags <> extraDiags)
                   . F.toList . edgeSegments $ monotoneP
     extraDiags    = concatMap (TM.computeDiagonals . toCounterClockWiseOrder')
                   . lefts . map (^._2.core)
+                  . filter (\mp -> mp^._2.extra == Inside) -- triangulate only the insides
                   -- . filter (\f -> f^._1 /= outerFaceId')
                   . F.toList . rawFacePolygons $ monotoneP
 

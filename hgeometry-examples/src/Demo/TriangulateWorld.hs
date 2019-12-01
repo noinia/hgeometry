@@ -47,7 +47,7 @@ mainWith (Options inFile outFile) = do
       Right (page :: IpePage Rational) -> runPage page
   where
     runPage page = do
-      let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asSimplePolygon
+      let polies  = page^..content.to flattenGroups.traverse._withAttrs _IpePath _asMultiPolygon
           polies' = filter (not . hasSelfIntersections . (^.core)) polies
           subdivs = map (\(pg :+ _) -> triangulate (Identity PX) pg) polies'
           yMonotones = tail . mapMaybe (^?_2.core._Left)
