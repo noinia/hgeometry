@@ -223,7 +223,7 @@ fromConnectedSegments _ ss = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxD
 
     sing x = x NonEmpty.:| []
 
-    vts    = map (\(p,sp) -> (p,map (^.extra) . sortArround (ext p) <$> sp))
+    vts    = map (\(p,sp) -> (p,map (^.extra) . sortAround (ext p) <$> sp))
            . M.assocs $ pts
     -- vertex Data
     vxData = V.fromList . map (\(p,sp) -> VertexData p (sp^._1)) $ vts

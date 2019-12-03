@@ -34,19 +34,19 @@ spec = do
 
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
-      sortArround (ext origin) (map ext [ Point2 (-3) (-3)
-                                        , Point2 (-1) (-5)
-                                        , Point2 5    5
-                                        , Point2 6    (-4)
-                                        , Point2 (-5) 3
-                                        , Point2 10   1
-                                        , Point2 20   0
-                                        , Point2 0    (-6)
-                                        , Point2 5    7
-                                        , Point2 5    5
-                                        , Point2 2    2
-                                        , Point2 26   (-2)
-                                        , Point2 0    (-5)
+      sortAround (ext origin) (map ext [ Point2 (-3) (-3)
+                                       , Point2 (-1) (-5)
+                                       , Point2 5    5
+                                       , Point2 6    (-4)
+                                       , Point2 (-5) 3
+                                       , Point2 10   1
+                                       , Point2 20   0
+                                       , Point2 0    (-6)
+                                       , Point2 5    7
+                                       , Point2 5    5
+                                       , Point2 2    2
+                                       , Point2 26   (-2)
+                                       , Point2 0    (-5)
                                         ])
       `shouldBe` map ext [ Point2 20   0
                          , Point2 10   1
@@ -63,16 +63,16 @@ spec = do
                          , Point2 26   (-2)
                          ]
     it "degenerate points on horizontal line" $
-      sortArround (ext origin) (map ext [ Point2 2    0
-                                        , Point2 (-1) 0
-                                        , Point2 10   0
-                                        ])
+      sortAround (ext origin) (map ext [ Point2 2    0
+                                       , Point2 (-1) 0
+                                       , Point2 10   0
+                                       ])
       `shouldBe` map ext [ Point2 2 0, Point2 10 0, Point2 (-1) 0 ]
     it "degenerate points on vertical line" $
-      sortArround (ext origin) (map ext [ Point2 0 2
-                                        , Point2 0 (-1)
-                                        , Point2 0 10
-                                        ])
+      sortAround (ext origin) (map ext [ Point2 0 2
+                                       , Point2 0 (-1)
+                                       , Point2 0 10
+                                       ])
       `shouldBe` map ext [ Point2 0 2, Point2 0 10, Point2 0 (-1) ]
 
 

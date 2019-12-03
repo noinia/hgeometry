@@ -11,7 +11,31 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point where
+module Data.Geometry.Point( Point(..)
+                          , origin, vector
+                          , pointFromList
+
+                          , coord , unsafeCoord
+
+                          , projectPoint
+
+                          , pattern Point2
+                          , pattern Point3
+                          , xCoord, yCoord, zCoord
+
+                          , PointFunctor(..)
+
+                          , CCW(..), ccw, ccw'
+
+                          , ccwCmpAround, cwCmpAround, ccwCmpAroundWith, cwCmpAroundWith
+                          , sortAround, insertIntoCyclicOrder
+
+                          , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
+
+                          , cmpByDistanceTo
+
+                          , squaredEuclideanDist, euclideanDist
+                          ) where
 
 import           Control.DeepSeq
 import           Control.Lens
@@ -254,9 +278,9 @@ ccw' p q r = ccw (p^.core) (q^.core) (r^.core)
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.
 -- running time: O(n log n)
-sortArround   :: (Ord r, Num r)
-               => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
-sortArround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
+sortAround   :: (Ord r, Num r)
+             => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 
 
 -- | Quadrants of two dimensional points. in CCW order
