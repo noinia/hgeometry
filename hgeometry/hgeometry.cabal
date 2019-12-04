@@ -44,7 +44,7 @@ data-files:          test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
 extra-source-files:  README.md
                      changelog.org
 
-Extra-doc-files:
+Extra-doc-files:     docs/Data/PlaneGraph/small.png
                      -- docs/**/*.png
 
 cabal-version:       2.0
@@ -173,7 +173,9 @@ library
                     Graphics.Render
 
   other-modules:
-
+                    -- * Implementation Internals of Polygons
+                    Data.Geometry.Polygon.Core
+                    Data.Geometry.Polygon.Extremes
 
   -- other-extensions:
   build-depends:

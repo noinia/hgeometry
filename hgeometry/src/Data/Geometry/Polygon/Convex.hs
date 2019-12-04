@@ -34,7 +34,8 @@ import           Data.Function (on)
 import           Data.Geometry.Box (IsBoxable(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon (fromPoints, SimplePolygon, cmpExtreme, outerBoundary)
+import           Data.Geometry.Polygon.Core (fromPoints, SimplePolygon, outerBoundary)
+import           Data.Geometry.Polygon.Extremes(cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
