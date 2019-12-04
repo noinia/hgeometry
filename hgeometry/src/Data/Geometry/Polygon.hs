@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon( PolygonType(..)
                             , Polygon(..)
+                            , _SimplePolygon, _MultiPolygon
                             , SimplePolygon, MultiPolygon, SomePolygon
 
                             , fromPoints
@@ -32,7 +33,10 @@ module Data.Geometry.Polygon( PolygonType(..)
 
                             , isTriangle, isStarShaped
 
-                            , isCounterClockwise, toCounterClockWiseOrder, toClockwiseOrder
+                            , isCounterClockwise
+                            , toCounterClockWiseOrder, toCounterClockWiseOrder'
+                            , toClockwiseOrder, toClockwiseOrder'
+                            , reverseOuterBoundary
 
                             , findDiagonal
 

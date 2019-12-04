@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.PolygonTriangulation.MakeMonotone where
+module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
+                                                            , computeDiagonals
+                                                            ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xCoordAt
                                                                             , ordAt)
@@ -38,7 +40,7 @@ data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
 
 -- | assigns a vertex type to each vertex
 --
--- pre: the polygon is given in CCW order
+-- pre: Both the outer boundary and the inner boundary of the polygon are given in CCW order.
 --
 -- running time: \(O(n)\).
 classifyVertices                     :: (Num r, Ord r)
@@ -119,7 +121,7 @@ computeDiagonals p' = map f . sweep
     f = first (\i -> vertexInfo^.ix' i._2)
 
     pg :: Polygon t (SP Int (p :+ VertexType)) r
-    pg = numberVertices . classifyVertices . toCounterClockWiseOrder $ p'
+    pg = numberVertices . holesToCW . classifyVertices . toCCW $ p'
     vertexInfo :: V.Vector (STR (Point 2 r) p VertexType)
     vertexInfo = let vs = polygonVertices pg
                      n  = F.length vs
@@ -137,11 +139,22 @@ computeDiagonals p' = map f . sweep
     sweep'' :: NonEmpty.NonEmpty (Event r) -> Sweep p r ()
     sweep'' = mapM_ handle
 
+    -- make everything counterclockwise
+    toCCW p = (toCounterClockWiseOrder' p)&polygonHoles'.traverse %~ toCounterClockWiseOrder'
+    -- make the holes clockwise:
+    holesToCW p = p&polygonHoles'.traverse %~ toClockwiseOrder'
+
+
+
 -- | Computes a set of diagionals that decompose the polygon into y-monotone
 -- pieces.
 --
+-- pre: the polygon boundary is given in counterClockwise order.
+--
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r)
+makeMonotone      :: (Fractional r, Ord r
+                     -- , Show p, Show r
+                     )
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 makeMonotone px pg = let (e:es) = listEdges pg

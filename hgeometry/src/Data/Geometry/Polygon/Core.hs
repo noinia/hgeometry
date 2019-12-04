@@ -11,7 +11,9 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Core( PolygonType(..)
                                  , Polygon(..)
+                                 , _SimplePolygon, _MultiPolygon
                                  , SimplePolygon, MultiPolygon, SomePolygon
+
 
                                  , fromPoints
 
@@ -32,7 +34,10 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
 
                                  , isTriangle
 
-                                 , isCounterClockwise, toCounterClockWiseOrder, toClockwiseOrder
+                                 , isCounterClockwise
+                                 , toCounterClockWiseOrder, toCounterClockWiseOrder'
+                                 , toClockwiseOrder, toClockwiseOrder'
+                                 , reverseOuterBoundary
 
                                  , findDiagonal
 
@@ -505,21 +510,40 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
                    . fromPoints . F.toList . (^.outerBoundary)
 
 
--- | Orient the boundary of the polygon to clockwise order
+-- | Make sure that every edge has the polygon's interior on its
+-- right, by orienting the outer boundary into clockwise order, and
+-- the inner borders (i.e. any holes, if they exist) into
+-- counter-clockwise order.
+--
+-- running time: \(O(n)\)
+-- | Orient the outer boundary of the polygon to clockwise order
 toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
-toClockwiseOrder p = (toClockwiseOrder' p)&polygonHoles'.traverse %~ toClockwiseOrder'
-  where
-    toClockwiseOrder' pg
+toClockwiseOrder p = (toClockwiseOrder' p)&polygonHoles'.traverse %~ toCounterClockWiseOrder'
+
+-- | Orient the outer boundary into clockwise order. Leaves any holes
+-- as they are.
+--
+toClockwiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder' pg
       | isCounterClockwise pg = reverseOuterBoundary pg
       | otherwise             = pg
 
--- | Orient the boundary to counter clockwise order
+-- | Make sure that every edge has the polygon's interior on its left,
+-- by orienting the outer boundary into counter-clockwise order, and
+-- the inner borders (i.e. any holes, if they exist) into clockwise order.
+--
+-- running time: \(O(n)\)
 toCounterClockWiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
-toCounterClockWiseOrder p = (toCCW' p)&polygonHoles'.traverse %~ toCCW'
-  where
-    toCCW' pg
-      | not $ isCounterClockwise pg = reverseOuterBoundary pg
-      | otherwise                   = pg
+toCounterClockWiseOrder p =
+  (toCounterClockWiseOrder' p)&polygonHoles'.traverse %~ toClockwiseOrder'
+
+-- | Orient the outer boundary into counter-clockwise order. Leaves
+-- any holes as they are.
+--
+toCounterClockWiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder' p
+      | not $ isCounterClockwise p = reverseOuterBoundary p
+      | otherwise                  = p
 
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
 reverseOuterBoundary p = p&outerBoundary %~ C.reverseDirection
