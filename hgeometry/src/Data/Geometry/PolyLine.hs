@@ -4,6 +4,7 @@
 module Data.Geometry.PolyLine where
 
 import           Control.Lens
+import           Data.Aeson
 import           Data.Bifunctor
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -16,13 +17,14 @@ import           Data.Geometry.Vector
 import           Data.LSeq (LSeq, pattern (:<|))
 import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE
+import           GHC.Generics(Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)
 
 -- | A Poly line in R^d has at least 2 vertices
-newtype PolyLine d p r = PolyLine { _points :: LSeq 2 (Point d r :+ p) }
+newtype PolyLine d p r = PolyLine { _points :: LSeq 2 (Point d r :+ p) } deriving (Generic)
 makeLenses ''PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
@@ -50,6 +52,9 @@ instance PointFunctor (PolyLine d p) where
 instance Arity d => Bifunctor (PolyLine d) where
   bimap f g (PolyLine pts) = PolyLine $ fmap (bimap (fmap g) f) pts
 
+instance (ToJSON p, ToJSON r, Arity d) => ToJSON (PolyLine d p r) where
+    toEncoding = genericToEncoding defaultOptions
+instance (FromJSON p, FromJSON r, Arity d, KnownNat d) => FromJSON (PolyLine d p r)
 
 -- | pre: The input list contains at least two points
 fromPoints :: [Point d r :+ p] -> PolyLine d p r
