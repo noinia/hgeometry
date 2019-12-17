@@ -1,10 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving  #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE DeriveFunctor  #-}
 module Data.Geometry.Transformation where
 
 import           Control.Lens (lens,Lens',set)
@@ -130,8 +124,6 @@ uniformScaling = scaling . pure
 
 --------------------------------------------------------------------------------
 -- * Functions that execute transformations
-
--- type AlwaysTrueTransformation d = (Arity (1 + d), AlwaysTrueSnoc d, Arity d, Index' (1+d-1) (1+d))
 
 translateBy :: ( IsTransformable g, Num (NumType g)
                , Arity (Dimension g), Arity (Dimension g + 1)

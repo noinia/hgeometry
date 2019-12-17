@@ -4,7 +4,7 @@ module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
 import           Util
 
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
-import qualified Algorithms.Geometry.SmallestEnclosingBall.RandomizedIncrementalConstruction as RIC
+import qualified Algorithms.Geometry.SmallestEnclosingBall.RIC as RIC
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens
 import           Control.Monad (when)

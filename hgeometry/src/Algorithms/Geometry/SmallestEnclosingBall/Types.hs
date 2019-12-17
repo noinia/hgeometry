@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -41,5 +40,5 @@ fromList _       = Left "Wrong number of elements"
 --    and the points defining it
 data DiskResult p r = DiskResult { _enclosingDisk  :: Disk () r
                                  , _definingPoints :: TwoOrThree (Point 2 r :+ p)
-                                 }
+                                 } deriving (Show,Eq)
 makeLenses ''DiskResult

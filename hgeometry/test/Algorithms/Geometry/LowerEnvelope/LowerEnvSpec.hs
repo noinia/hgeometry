@@ -9,6 +9,7 @@ import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.Line
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
@@ -57,7 +58,8 @@ readInput fp = fmap f <$> readSinglePageFile fp
         segs = page^..content.traverse._withAttrs _IpePath _asLineSegment
         pts  = page^..content.traverse._IpeUse
 
-        solutionOf c = [ AbsolutelyApproximateValue <$> p^.core.symbolPoint
+        solutionOf c = List.sort $
+                       [ AbsolutelyApproximateValue <$> p^.core.symbolPoint
                        | p <- pts, lookup' p == c
                        ]
 

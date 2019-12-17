@@ -40,6 +40,9 @@ library
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
   exposed-modules:
+                    -- * Algorithmic Strategies
+                    Algorithms.DivideAndConquer
+
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
@@ -175,6 +178,7 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
 
   other-modules: Algorithms.StringSearch.KMPSpec
+                 Algorithms.DivideAndConquerSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec

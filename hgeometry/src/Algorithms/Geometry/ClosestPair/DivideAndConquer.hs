@@ -14,15 +14,12 @@ module Algorithms.Geometry.ClosestPair.DivideAndConquer( closestPair
                                                        , CP
                                                        , CCP(..)
                                                        , mergePairs
-                                                       , mergeSortedBy
-                                                       , mergeSortedListsBy
                                                        )
 where
 
+import           Algorithms.DivideAndConquer
 import           Control.Lens
-import           Data.BinaryTree
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
@@ -30,7 +27,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable(foldMap1, toNonEmpty)
+import           Data.Semigroup.Foldable (toNonEmpty)
 import           Data.UnBounded
 import           Data.Util
 
@@ -41,10 +38,10 @@ import           Data.Util
 --
 -- running time: \(O(n)\)
 closestPair :: ( Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
-closestPair = f . foldMap1 mkCCP . asBalancedBinLeafTree . toNonEmpty
+closestPair = f . divideAndConquer1 mkCCP . toNonEmpty
             . LSeq.unstableSortBy (comparing (^.core))
   where
-    mkCCP (Elem p) = CCP (p :| []) Top
+    mkCCP p = CCP (p :| []) Top
     f = \case
           CCP _ (ValT (SP cp _)) -> cp
           CCP _ Top              -> error "closestPair: absurd."
@@ -68,24 +65,6 @@ instance (Num r, Ord r) => Semigroup (CCP p r) where
       cmp p q = comparing (^.core.yCoord) p q <> comparing (^.core.xCoord) p q
 
 
--- | Given an ordering and two nonempty sequences ordered according to that
--- ordering, merge them
-mergeSortedBy           :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
-mergeSortedBy cmp ls rs = NonEmpty.fromList
-                        $ mergeSortedListsBy cmp (F.toList ls) (F.toList rs)
-
-
--- | Given an ordering and two nonempty sequences ordered according to that
--- ordering, merge them
-mergeSortedListsBy     :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
-mergeSortedListsBy cmp = go
-  where
-    go []         ys     = ys
-    go xs         []     = xs
-    go xs@(x:xs') ys@(y:ys') = case x `cmp` y of
-                                 LT -> x : go xs' ys
-                                 EQ -> x : go xs' ys
-                                 GT -> y : go xs  ys'
 
 -- | Function that does the actual merging work
 mergePairs            :: forall p r. (Ord r, Num r)

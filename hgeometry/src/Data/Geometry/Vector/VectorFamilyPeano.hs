@@ -282,6 +282,6 @@ destruct   :: (ImplicitArity d, ImplicitArity (S d))
 destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
   -- FIXME: this implementaion of tail is not particularly nice
 
-snoc     :: (ImplicitArity d, ImplicitArity (S d), (1 + FromPeano d) ~ (FromPeano d + 1))
-         => VectorFamily d r -> r -> VectorFamily (S d) r
-snoc = flip V.snoc
+-- snoc     :: (ImplicitArity d, ImplicitArity (S d))
+--          => VectorFamily d r -> r -> VectorFamily (S d) r
+-- snoc = flip V.snoc

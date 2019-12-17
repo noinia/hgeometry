@@ -19,7 +19,7 @@ module Data.Geometry.PrioritySearchTree( PrioritySearchTree(..)
                                        , queryRange
                                        ) where
 
-import           Algorithms.Geometry.ClosestPair.DivideAndConquer (mergeSortedListsBy)
+import           Algorithms.DivideAndConquer (mergeSortedListsBy)
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext

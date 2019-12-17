@@ -162,6 +162,7 @@ rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
                    True  -> (,False) <$> rotateR' l r r1 (pred' r1)
                    False -> pure (r1,True)
 
+
 -- | The code that does the actual rotating
 rotateR'     :: (Ord r, Fractional r)
              => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
@@ -231,7 +232,8 @@ insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
                       . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
-    insert'' bi ai = CU.insertOrdBy (cwCmpAround (ptMap V.! ai) `on` (ptMap V.!)) bi
+    insert'' bi ai = CU.insertOrdBy (cwCmpAround' (ptMap V.! ai) `on` (ptMap V.!)) bi
+    cwCmpAround' c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
 
 
 -- | Deletes an edge
@@ -241,21 +243,21 @@ delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
     delete' x = CL.filterL (/= x) -- should we rotate left or right if it is the focus?
 
 
-
-
 -- | Lifted version of Convex.IsLeftOf
 isLeftOf           :: (Ord r, Num r)
                    => VertexID -> (VertexID, VertexID) -> Merge p r Bool
 p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
   where
-    withPtMap ptMap = (ptMap V.! p) `Convex.isLeftOf` (ptMap V.! l, ptMap V.! r)
+    withPtMap ptMap = (ptMap V.! p) `isLeftOf'` (ptMap V.! l, ptMap V.! r)
+    a `isLeftOf'` (b,c) = ccw' b c a == CCW
 
 -- | Lifted version of Convex.IsRightOf
 isRightOf           :: (Ord r, Num r)
                     => VertexID -> (VertexID, VertexID) -> Merge p r Bool
 p `isRightOf` (l,r) = withPtMap . snd . fst <$> ask
   where
-    withPtMap ptMap = (ptMap V.! p) `Convex.isRightOf` (ptMap V.! l, ptMap V.! r)
+    withPtMap ptMap = (ptMap V.! p) `isRightOf'` (ptMap V.! l, ptMap V.! r)
+    a `isRightOf'` (b,c) = ccw' b c a == CW
 
 --------------------------------------------------------------------------------
 -- * Some Helper functions

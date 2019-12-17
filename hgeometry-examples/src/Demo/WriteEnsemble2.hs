@@ -122,7 +122,7 @@ instance FromJSON EnsembleItem where
 
 toPolyLine :: [DataPoint] -> PolyLine 2 () Centi
 toPolyLine ps@(s:_) = fromPoints' $
-                      zipWith (\x (DataPoint i v) -> point2 (15 * fromIntegral x) v) [0..] ps
+                      zipWith (\x (DataPoint i v) -> Point2 (15 * fromIntegral x) v) [0..] ps
 
 
 toIpePoly    :: EnsembleItem -> IpeObject Centi

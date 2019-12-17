@@ -56,16 +56,17 @@ computeDiagonals'     :: (Ord r, Fractional r)
 computeDiagonals' pg' = (pg, monotoneDiags <> extraDiags)
   where
     pg            = toCounterClockWiseOrder pg'
-    monotoneP     = MM.makeMonotone (Identity pg') pg -- use some arbitrary proxy type
+    monotoneP     = MM.makeMonotone (Identity pg) pg -- use some arbitrary proxy type
     -- outerFaceId'  = outerFaceId monotoneP
 
     monotoneDiags = map (^._2.core) . filter (\e' -> e'^._2.extra == Diagonal)
                   . F.toList . edgeSegments $ monotoneP
     extraDiags    = concatMap (TM.computeDiagonals . toCounterClockWiseOrder')
                   . lefts . map (^._2.core)
+                  . filter (\mp -> mp^._2.extra == Inside) -- triangulate only the insides
                   -- . filter (\f -> f^._1 /= outerFaceId')
                   . F.toList . rawFacePolygons $ monotoneP
 
-    -- we alredy know we get the polgyons in *clockwise* order, so skip the
-    -- check if it is counter clockwise
-    toCounterClockWiseOrder' = reverseOuterBoundary
+    -- -- we alredy know we get the polgyons in *clockwise* order, so skip the
+    -- -- check if it is counter clockwise
+    -- toCounterClockWiseOrder'' = reverseOuterBoundary

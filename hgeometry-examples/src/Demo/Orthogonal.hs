@@ -31,7 +31,7 @@ newtype SegTree r = SegTree (SegmentTree (RangeMap r) r)
 
 -- instance Measured
 poly :: SimplePolygon () Rational
-poly = (fromPoints . map ext) [point2 61 1500, point2 89 2200, point2 82.5 2200, point2 68 1950, point2 52.5 1500]
+poly = (fromPoints . map ext) [Point2 61 1500, Point2 89 2200, Point2 82.5 2200, Point2 68 1950, Point2 52.5 1500]
 
 
-tst = sqDistanceToArg (point2 70 2100) . supportingLine <$> outerBoundaryEdges poly
+tst = sqDistanceToArg (Point2 70 2100) . supportingLine <$> outerBoundaryEdges poly

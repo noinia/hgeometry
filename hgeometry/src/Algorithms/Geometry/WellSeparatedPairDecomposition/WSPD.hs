@@ -209,7 +209,7 @@ type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
 -- | Assigns the points to a level. Returns the list of levels used. The first
 -- level in the list is the level assigned to the rest of the nodes. Their
 -- level is actually still set to Nothing in the underlying array.
-assignLevels                  :: (Fractional r, Ord r, Arity d, KnownNat d
+assignLevels                  :: (Fractional r, Ord r, Arity d
                                  , Show r, Show p
                                  )
                               => Int -- ^ Number of items we need to collect
@@ -362,9 +362,6 @@ extends = GV.imap (\i pts ->
 --------------------------------------------------------------------------------
 -- * Finding Well Separated Pairs
 
--- type AlwaysTrueWSPD d = ( Arity d, KnownNat d
---                         , AlwaysTruePFT d, AlwaysTrueTransformation d)
-
 findPairs                     :: (Floating r, Ord r, Arity d, Arity (d + 1))
                               => r -> SplitTree d p r a -> SplitTree d p r a
                               -> [WSP d p r a]
@@ -436,7 +433,7 @@ boxBox1 s lb rb = euclideanDist (centerPoint lb) (centerPoint rb) >= (s+1)*d
 
 
 -- | Computes the maximum width of a splitTree
-maxWidth                             :: (Arity d, KnownNat d, Num r)
+maxWidth                             :: (Arity d, Num r)
                                      => SplitTree d p r a -> r
 maxWidth (Leaf _)                    = 0
 maxWidth (Node _ (NodeData i b _) _) = fromJust $ widthIn' i b

@@ -88,28 +88,28 @@ triA `sameEdges` triB = all sameAdj . M.assocs $ mapping'
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
 myPoints = NonEmpty.fromList . map ext $
-           [ point2 1  3
-           , point2 4  26
-           , point2 5  17
-           , point2 6  7
-           , point2 12 16
-           , point2 19 4
-           , point2 20 0
-           , point2 20 11
-           , point2 23 23
-           , point2 31 14
-           , point2 33 5
+           [ Point2 1  3
+           , Point2 4  26
+           , Point2 5  17
+           , Point2 6  7
+           , Point2 12 16
+           , Point2 19 4
+           , Point2 20 0
+           , Point2 20 11
+           , Point2 23 23
+           , Point2 31 14
+           , Point2 33 5
            ]
 
 myPoints' :: NonEmpty.NonEmpty (Point 2 Rational :+ ())
 myPoints' = NonEmpty.fromList . map ext $
-            [ point2 64  736
-            , point2 96 688
-            , point2 128 752
-            , point2 160 704
-            , point2 128 672
-            , point2 64 656
-            , point2 192 736
-            , point2 208 704
-            , point2 192 672
+            [ Point2 64  736
+            , Point2 96 688
+            , Point2 128 752
+            , Point2 160 704
+            , Point2 128 672
+            , Point2 64 656
+            , Point2 192 736
+            , Point2 208 704
+            , Point2 192 672
             ]

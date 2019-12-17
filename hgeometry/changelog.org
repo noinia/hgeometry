@@ -2,7 +2,18 @@
 
 * Changelog
 
-** 0.9 (unreleased)
+** 0.10
+
+- renamed the smallest enclosing ball to RIC
+- improved tangency finding on convex hulls/chains
+- changes to how we order points in ccwCmpAround and cwCmpAround;
+  these will report EQ if points appear at the same angle from the
+  center point.
+- new functions ccwCmpAroundWith and cwCmpAroundWith that allow you to
+  specify the direction corresponding to "zero".
+- bugfixes
+
+** 0.9
 
 - Implemented 2D Linear Programming using randomized incremental
   construction (in \(O(n)\) expected time). This allows us to solve

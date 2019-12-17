@@ -16,11 +16,11 @@ import Data.Vinyl.CoRec
 type Envelope a r = NonEmpty (Line 2 r :+ a)
 
 -- | Given a list of non-vertical lines, computes the lower envelope using
--- duality.
+-- duality. The lines are given in left to right order.
 --
 -- \(O(n\log n)\)
 lowerEnvelope :: (Ord r, Fractional r) => NonEmpty (Line 2 r :+ a) -> Envelope a r
-lowerEnvelope = lowerEnvelopeWith upperHull
+lowerEnvelope = NonEmpty.reverse . lowerEnvelopeWith upperHull
 
 
 type UpperHullAlgorithm a r = NonEmpty (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ a)

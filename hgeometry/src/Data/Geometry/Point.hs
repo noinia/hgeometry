@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Point
@@ -10,7 +11,31 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point where
+module Data.Geometry.Point( Point(..)
+                          , origin, vector
+                          , pointFromList
+
+                          , coord , unsafeCoord
+
+                          , projectPoint
+
+                          , pattern Point2
+                          , pattern Point3
+                          , xCoord, yCoord, zCoord
+
+                          , PointFunctor(..)
+
+                          , CCW(..), ccw, ccw'
+
+                          , ccwCmpAround, cwCmpAround, ccwCmpAroundWith, cwCmpAroundWith
+                          , sortAround, insertIntoCyclicOrder
+
+                          , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
+
+                          , cmpByDistanceTo
+
+                          , squaredEuclideanDist, euclideanDist
+                          ) where
 
 import           Control.DeepSeq
 import           Control.Lens
@@ -23,13 +48,14 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
 import qualified Data.List as L
+import           Data.Ord (comparing)
 import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           Test.QuickCheck (Arbitrary)
 import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
 import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
-import           Test.QuickCheck(Arbitrary)
 
 
 --------------------------------------------------------------------------------
@@ -99,7 +125,7 @@ origin = Point $ pure 0
 
 -- | Lens to access the vector corresponding to this point.
 --
--- >>> (point3 1 2 3) ^. vector
+-- >>> (Point3 1 2 3) ^. vector
 -- Vector3 [1,2,3]
 -- >>> origin & vector .~ Vector3 1 2 3
 -- Point3 [1,2,3]
@@ -111,7 +137,7 @@ vector = lens toVec (const Point)
 -- sense that no bounds are checked. Consider using `coord` instead.
 --
 --
--- >>> point3 1 2 3 ^. unsafeCoord 2
+-- >>> Point3 1 2 3 ^. unsafeCoord 2
 -- 2
 unsafeCoord   :: Arity d => Int -> Lens' (Point d r) r
 unsafeCoord i = vector . singular (ix (i-1))
@@ -119,11 +145,11 @@ unsafeCoord i = vector . singular (ix (i-1))
 
 -- | Get the coordinate in a given dimension
 --
--- >>> point3 1 2 3 ^. coord (C :: C 2)
+-- >>> Point3 1 2 3 ^. coord (C :: C 2)
 -- 2
--- >>> point3 1 2 3 & coord (C :: C 1) .~ 10
+-- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
 -- Point3 [10,2,3]
--- >>> point3 1 2 3 & coord (C :: C 3) %~ (+1)
+-- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
 -- Point3 [1,2,4]
 coord   :: forall proxy i d r. (1 <= i, i <= d, ((i - 1) + 1) ~ i
                                , Arity (i - 1), Arity d
@@ -160,15 +186,13 @@ projectPoint = Point . prefix . toVec
 --   let
 --     f              :: Point 2 r -> r
 --     f (Point2 x y) = x
---   in f (point2 1 2)
+--   in f (Point2 1 2)
 -- :}
 -- 1
 --
 -- if we want.
 pattern Point2       :: r -> r -> Point 2 r
-pattern Point2 x y   <- (_point2 -> (x,y))
-  where
-    Point2 x y = point2 x y
+pattern Point2 x y = Point (Vector2 x y)
 {-# COMPLETE Point2 #-}
 
 -- | Similarly, we can write:
@@ -181,47 +205,14 @@ pattern Point2 x y   <- (_point2 -> (x,y))
 -- :}
 -- 3
 pattern Point3       :: r -> r -> r -> Point 3 r
-pattern Point3 x y z <- (_point3 -> (x,y,z))
-  where
-    Point3 x y z = point3 x y z
+pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}
-
--- | Construct a 2 dimensional point
---
--- >>> point2 1 2
--- Point2 [1,2]
-point2     :: r -> r -> Point 2 r
-point2 x y = Point $ Vector2 x y
-
--- | Destruct a 2 dimensional point
---
--- >>> _point2 $ point2 1 2
--- (1,2)
-_point2 :: Point 2 r -> (r,r)
-_point2 = (\(Vector2 x y) -> (x,y)) . toVec
-
-
-
--- | Construct a 3 dimensional point
---
--- >>> point3 1 2 3
--- Point3 [1,2,3]
-point3       :: r -> r -> r -> Point 3 r
-point3 x y z = Point $ Vector3 x y z
-
--- | Destruct a 3 dimensional point
---
--- >>> _point3 $ point3 1 2 3
--- (1,2,3)
-_point3 :: Point 3 r -> (r,r,r)
-_point3 = (\(Vector3 x y z) -> (x,y,z)) . toVec
-
 
 -- | Shorthand to access the first coordinate C 1
 --
--- >>> point3 1 2 3 ^. xCoord
+-- >>> Point3 1 2 3 ^. xCoord
 -- 1
--- >>> point2 1 2 & xCoord .~ 10
+-- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 [10,2]
 xCoord :: (1 <= d, Arity d) => Lens' (Point d r) r
 xCoord = coord (C :: C 1)
@@ -229,9 +220,9 @@ xCoord = coord (C :: C 1)
 
 -- | Shorthand to access the second coordinate C 2
 --
--- >>> point2 1 2 ^. yCoord
+-- >>> Point2 1 2 ^. yCoord
 -- 2
--- >>> point3 1 2 3 & yCoord %~ (+1)
+-- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 [1,3,3]
 yCoord :: (2 <= d, Arity d) => Lens' (Point d r) r
 yCoord = coord (C :: C 2)
@@ -239,9 +230,9 @@ yCoord = coord (C :: C 2)
 
 -- | Shorthand to access the third coordinate C 3
 --
--- >>> point3 1 2 3 ^. zCoord
+-- >>> Point3 1 2 3 ^. zCoord
 -- 3
--- >>> point3 1 2 3 & zCoord %~ (+1)
+-- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 [1,2,4]
 zCoord :: (3 <= d, Arity d) => Lens' (Point d r) r
 zCoord = coord (C :: C 3)
@@ -287,9 +278,9 @@ ccw' p q r = ccw (p^.core) (q^.core) (r^.core)
 -- respect to the rightward horizontal ray starting from p.  If two points q
 -- and r are colinear with p, the closest one to p is reported first.
 -- running time: O(n log n)
-sortArround   :: (Ord r, Num r)
-               => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
-sortArround c = L.sortBy (ccwCmpAround c)
+sortAround   :: (Ord r, Num r)
+             => Point 2 r :+ q -> [Point 2 r :+ p] -> [Point 2 r :+ p]
+sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 
 
 -- | Quadrants of two dimensional points. in CCW order
@@ -299,7 +290,7 @@ data Quadrant = TopRight | TopLeft | BottomLeft | BottomRight
 -- | Quadrants around point c; quadrants are closed on their "previous"
 -- boundary (i..e the boundary with the previous quadrant in the CCW order),
 -- open on next boundary. The origin itself is assigned the topRight quadrant
-quadrantWith                   :: (Ord r, 1 <= d, 2 <= d, Arity d)
+quadrantWith                   :: (Ord r, 2 <= d, Arity d)
                                => Point d r :+ q -> Point d r :+ p -> Quadrant
 quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                       , (c^.yCoord) `compare` (p^.yCoord) ) of
@@ -314,7 +305,7 @@ quadrantWith (c :+ _) (p :+ _) = case ( (c^.xCoord) `compare` (p^.xCoord)
                                    (LT, GT) -> BottomRight
 
 -- | Quadrants with respect to the origin
-quadrant :: (Ord r, Num r, 1 <= d, 2 <= d, Arity d) => Point d r :+ p -> Quadrant
+quadrant :: (Ord r, Num r, 2 <= d, Arity d) => Point d r :+ p -> Quadrant
 quadrant = quadrantWith (ext origin)
 
 -- | Given a center point c, and a set of points, partition the points into
@@ -322,7 +313,7 @@ quadrant = quadrantWith (ext origin)
 -- reported in the order topLeft, topRight, bottomLeft, bottomRight. The points
 -- are in the same order as they were in the original input lists.
 -- Points with the same x-or y coordinate as p, are "rounded" to above.
-partitionIntoQuadrants       :: (Ord r, 1 <= d, 2 <= d, Arity d)
+partitionIntoQuadrants       :: (Ord r, 2 <= d, Arity d)
                              => Point d r :+ q
                              -> [Point d r :+ p]
                              -> ( [Point d r :+ p], [Point d r :+ p]
@@ -336,38 +327,85 @@ partitionIntoQuadrants c pts = (topL, topR, bottomL, bottomR)
 
     on l q       = q^.core.l < c^.core.l
 
+
+
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the ccw ordering of p and q around c with this vector as zero
+-- direction.
+--
+-- pre: the points p,q /= c
+ccwCmpAroundWith                              :: (Ord r, Num r)
+                                              => Vector 2 r
+                                              -> Point 2 r :+ c
+                                              -> Point 2 r :+ a -> Point 2 r :+ b
+                                              -> Ordering
+ccwCmpAroundWith z@(Vector2 zx zy) (c :+ _) (q :+ _) (r :+ _) =
+    case (ccw c a q, ccw c a r) of
+      (CCW,CCW)      -> cmp
+      (CCW,CW)       -> LT
+      (CCW,CoLinear) | onZero r  -> GT
+                     | otherwise -> LT
+
+      (CW, CCW)      -> GT
+      (CW, CW)       -> cmp
+      (CW, CoLinear) -> GT
+
+      (CoLinear, CCW) | onZero q  -> LT
+                      | otherwise -> GT
+
+      (CoLinear, CW)      -> LT
+      (CoLinear,CoLinear) -> case (onZero q, onZero r) of
+                               (True, True)   -> EQ
+                               (False, False) -> EQ
+                               (True, False)  -> LT
+                               (False, True)  -> GT
+  where
+    a = c .+^ z
+    b = c .+^ Vector2 (-zy) zx
+    -- b is on a perpendicular vector to z
+
+    -- test if the point lies on the ray defined by z, starting in c
+    onZero d = case ccw c b d of
+                 CCW      -> False
+                 CW       -> True
+                 CoLinear -> True -- this shouldh appen only when you ask for c itself
+
+    cmp = case ccw c q r of
+            CCW      -> LT
+            CW       -> GT
+            CoLinear -> EQ
+
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the cw ordering of p and q around c with this vector as zero
+-- direction.
+--
+-- pre: the points p,q /= c
+cwCmpAroundWith     :: (Ord r, Num r)
+                    => Vector 2 r
+                    -> Point 2 r :+ a
+                    -> Point 2 r :+ b -> Point 2 r :+ c
+                    -> Ordering
+cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
+
+
+
+-- | Compare by distance to the first argument
+cmpByDistanceTo              :: (Ord r, Num r, Arity d)
+                             => Point d r :+ c -> Point d r :+ p -> Point d r :+ q -> Ordering
+cmpByDistanceTo (c :+ _) p q = comparing (squaredEuclideanDist c) (p^.core) (q^.core)
+
+
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
--- Points nearer to the center come before
--- points further away.
-ccwCmpAround       :: (Num r, Ord r)
-                   => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-ccwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
-                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-                         CCW      -> LT
-                         CW       -> GT
-                         CoLinear -> qdA (c^.core) (q^.core)
-                                     `compare`
-                                     qdA (c^.core) (r^.core)
-                       x -> x -- if the quadrant differs, use the order
-                              -- specified by the quadrant.
+ccwCmpAround :: (Num r, Ord r)
+             => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 
 -- | Clockwise ordering of the points around c. Points are ordered with
--- respect to the positive x-axis. Points nearer to the center come before
--- points further away.
-cwCmpAround       :: (Num r, Ord r)
-                  => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
-cwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
-                       EQ -> case ccw (c^.core) (q^.core) (r^.core) of
-                         CCW      -> GT
-                         CW       -> LT
-                         CoLinear -> qdA (c^.core) (q^.core)
-                                     `compare`
-                                     qdA (c^.core) (r^.core)
-                       LT -> GT
-                       GT -> LT -- if the quadrant differs, use the order
-                                -- specified by the quadrant.
-
+-- respect to the positive x-axis.
+cwCmpAround :: (Num r, Ord r)
+            => Point 2 r :+ qc -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
+cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 
 
 -- | Given a center c, a new point p, and a list of points ps, sorted in
@@ -378,7 +416,7 @@ cwCmpAround c q r = case (quadrantWith c q `compare` quadrantWith c r) of
 insertIntoCyclicOrder   :: (Ord r, Num r)
                         => Point 2 r :+ q -> Point 2 r :+ p
                         -> C.CList (Point 2 r :+ p) -> C.CList (Point 2 r :+ p)
-insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c)
+insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c <> cmpByDistanceTo c)
 
 
 -- | Squared Euclidean distance between two points

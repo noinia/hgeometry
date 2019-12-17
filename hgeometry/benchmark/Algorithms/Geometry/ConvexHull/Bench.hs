@@ -22,6 +22,14 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy
 import           Test.QuickCheck
 
+
+-- import           Data.Semigroup.Foldable
+-- import Data.BinaryTree
+-- import Data.Geometry.Polygon.Convex
+-- import Control.Lens
+-- import Data.Geometry.Polygon
+-- import           Data.Function (on)
+
 --------------------------------------------------------------------------------
 
 main :: IO ()
@@ -49,19 +57,20 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
     sizes' _ = [2000]
 
     build pts = [ bench "sort"                 $ nf NonEmpty.sort pts
-                , bench "sort_Linear.V2"       $ nf NonEmpty.sort ptsV2
-                , bench "sort_FamPeano"        $ nf NonEmpty.sort ptsFamPeano
-                , bench "sort_Family"          $ nf NonEmpty.sort ptsFam
-                , bench "sort_Family6"         $ nf NonEmpty.sort ptsFam6
-                , bench "sort_Fixed"           $ nf NonEmpty.sort ptsFix
+                -- , bench "sort_Linear.V2"       $ nf NonEmpty.sort ptsV2
+                -- , bench "sort_FamPeano"        $ nf NonEmpty.sort ptsFamPeano
+                -- , bench "sort_Family"          $ nf NonEmpty.sort ptsFam
+                -- , bench "sort_Family6"         $ nf NonEmpty.sort ptsFam6
+                -- , bench "sort_Fixed"           $ nf NonEmpty.sort ptsFix
 
                 , bench "grahamScan"           $ nf GrahamScan.convexHull pts
                 , bench "grahamScan_Linear.V2" $ nf GV.convexHull         ptsV2
-                , bench "grahamScan_FamPeano"  $ nf GPeano.convexHull     ptsFamPeano
-                , bench "grahamScan_Family"    $ nf GFam.convexHull       ptsFam
-                , bench "grahamScan_Fixed"     $ nf GFix.convexHull       ptsFix
+                -- , bench "grahamScan_FamPeano"  $ nf GPeano.convexHull     ptsFamPeano
+                -- , bench "grahamScan_Family"    $ nf GFam.convexHull       ptsFam
+                -- , bench "grahamScan_Fixed"     $ nf GFix.convexHull       ptsFix
 
                 , bench "Div&Conq"             $ nf DivideAndConquer.convexHull pts
+                -- , bench "Div&Conq Old"         $ nf oldDivAndConquer            pts
                 ]
       where
         ptsV2       = fmap (GV.fromP) pts
@@ -69,3 +78,11 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
         ptsFam      = fmap (GFam.fromP) pts
         ptsFam6     = fmap (GFam6.fromP) pts
         ptsFix      = fmap (GFix.fromP) pts
+
+
+
+-- oldDivAndConquer :: (Ord r, Num r) => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
+-- oldDivAndConquer = DivideAndConquer.unMerge
+--                  . foldMap1 (DivideAndConquer.Merge . ConvexPolygon . fromPoints . (:[]) . _unElem)
+--                  . asBalancedBinLeafTree
+--                  . NonEmpty.sortBy (compare `on` (^.core))

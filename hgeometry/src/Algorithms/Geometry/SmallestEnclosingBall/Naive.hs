@@ -9,7 +9,9 @@
 -- points in \(\mathbb{R}^2\)
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SmallestEnclosingBall.Naive where
+module Algorithms.Geometry.SmallestEnclosingBall.Naive( smallestEnclosingDisk
+                                                      , enclosesAll
+                                                      ) where
 
 -- just for the types
 import Control.Lens
@@ -55,7 +57,6 @@ smallestEnclosingDisk'     :: (Ord r, Num r)
                            => [Point 2 r :+ p] -> [DiskResult p r] -> DiskResult p r
 smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))
                            . filter (flip enclosesAll pts)
-
 
 -- | check if a disk encloses all points
 enclosesAll   :: (Num r, Ord r) => DiskResult p r -> [Point 2 r :+ q] -> Bool

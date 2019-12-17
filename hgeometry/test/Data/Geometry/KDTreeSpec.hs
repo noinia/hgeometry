@@ -60,5 +60,5 @@ spec = do
       property $ \(pts :: Set.Set (Point 8 Int :+ ())) -> allSameAsNaive pts
 
 
--- pts = map ext [point2 (-2) 2, point2 5 (-1)]
--- boxx = box (ext $ point2 3 (-4)) (ext $ point2 5 4)
+-- pts = map ext [Point2 (-2) 2, Point2 5 (-1)]
+-- boxx = box (ext $ Point2 3 (-4)) (ext $ Point2 5 4)

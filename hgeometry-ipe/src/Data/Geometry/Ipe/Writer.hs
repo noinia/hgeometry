@@ -453,7 +453,7 @@ combine ns  = Just $ Element "group" [] ns
 
 
 -- testPoly :: PolyLine 2 () Double
--- testPoly = fromPoints' [origin, point2 0 10, point2 10 10, point2 100 100]
+-- testPoly = fromPoints' [origin, Point2 0 10, Point2 10 10, Point2 100 100]
 
 
 
