@@ -18,8 +18,8 @@ import Control.Lens(Bifunctor(..))
 --------------------------------------------------------------------------------
 
 -- | Data type representing the graph in its JSON/Yaml format
-data Gr v f = Gr { ajacencies :: [v]
-                 , faces      :: [f]
+data Gr v f = Gr { adjacencies :: [v]
+                 , faces       :: [f]
                  } deriving (Generic)
 
 instance Bifunctor Gr where
