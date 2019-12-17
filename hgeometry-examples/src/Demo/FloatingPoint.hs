@@ -15,6 +15,7 @@ import Data.Geometry.Vector
 import Options.Applicative
 import Prelude hiding (Float,Double)
 import qualified Prelude as Prelude
+import Foreign.C.Types(CDouble,CFloat)
 
 --------------------------------------------------------------------------------
 
@@ -52,9 +53,10 @@ grid f n = [ Point2 x y :+ f x y | x <- [1..n], y <- [1..n]]
 
 comp   :: Fractional r => r -> Int -> Int -> Int -> SideTestUpDown
 comp _ (fromIntegral -> n) (fromIntegral -> x) (fromIntegral -> y) =
-    let l = Line origin (Vector2 1 1)
-        p = Point2 ((x+n')/n') ((y+n')/n')
-        n' = (10^16)
+    let l = Line (Point2 24 24) (Vector2 (-12) (-12))
+        p = Point2 ((1/2) + x*delta) ((1/2) + y*delta)
+        delta = 1/n'
+        n' = 2^53
     in p `onSideUpDown` l
 
 colorPixel   :: SideTestUpDown -> IpeAttributes Path Int
@@ -69,4 +71,7 @@ mainWith (Options t n fp) = writeIpeFile fp . singlePageFromContent . map draw $
     f x y = colorPixel $ myF n x y
     myF = case t of
             Float  -> comp (undefined :: Prelude.Float)
-            Double -> comp (undefined :: Prelude.Double)
+            Double -> comp (undefined :: CDouble)
+
+
+-- sideTest p q r =
