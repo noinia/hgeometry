@@ -136,7 +136,14 @@ instance Fractional a => Fractional (UnBounded a) where
 
   fromRational = Val . fromRational
 
-
+-- | Test if an Unbounded is actually bounded.
+--
+-- >>> unBoundedToMaybe (Val 5)
+-- Just 5
+-- >>> unBoundedToMaybe MinInfinity
+-- Nothing
+-- >>> unBoundedToMaybe MaxInfinity
+-- Nothing
 unBoundedToMaybe         :: UnBounded a -> Maybe a
 unBoundedToMaybe (Val x) = Just x
 unBoundedToMaybe _       = Nothing
