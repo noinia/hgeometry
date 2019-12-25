@@ -1,12 +1,15 @@
 {-# LANGUAGE TemplateHaskell   #-}
 module Data.UnBounded( Top, topToMaybe
                      , pattern ValT, pattern Top
+                     , _ValT, _Top
 
                      , Bottom, bottomToMaybe
                      , pattern Bottom, pattern ValB
+                     , _ValB, _Bottom
 
                      , UnBounded(..)
                      , unUnBounded
+                     , _MinInfinity, _Val, _MaxInfinity
                      , unBoundedToMaybe
                      ) where
 
@@ -47,6 +50,12 @@ instance Show a => Show (Top a) where
   show Top       = "Top"
   show ~(ValT x) = "ValT " ++ show x
 
+_ValT :: Prism (Top a) (Top b) a b
+_ValT = prism ValT (\ta -> case ta of Top -> Left Top ; ValT x -> Right x)
+
+_Top :: Prism' (Top a) ()
+_Top = prism' (const Top) (\ta -> case ta of Top -> Just () ; ValT _ -> Nothing)
+
 --------------------------------------------------------------------------------
 
 -- | `Bottom a` represents the type a, together with a 'Bottom' element,
@@ -69,6 +78,12 @@ instance Show a => Show (Bottom a) where
   show Bottom    = "Bottom"
   show ~(ValB x) = "ValB " ++ show x
 
+_ValB :: Prism (Bottom a) (Bottom b) a b
+_ValB = prism ValB (\ba -> case ba of Bottom -> Left Bottom ; ValB x -> Right x)
+
+_Bottom :: Prism' (Bottom a) ()
+_Bottom = prism' (const Bottom) (\ba -> case ba of Bottom -> Just () ; ValB _ -> Nothing)
+
 --------------------------------------------------------------------------------
 
 -- | `UnBounded a` represents the type a, together with an element
@@ -76,8 +91,8 @@ instance Show a => Show (Bottom a) where
 -- smaller than any other element.
 data UnBounded a = MinInfinity | Val { _unUnBounded :: a }  | MaxInfinity
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable)
-
 makeLenses ''UnBounded
+makePrisms ''UnBounded
 
 instance Show a => Show (UnBounded a) where
   show MinInfinity = "MinInfinity"
