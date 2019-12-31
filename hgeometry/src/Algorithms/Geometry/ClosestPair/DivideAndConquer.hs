@@ -37,7 +37,7 @@ import           Data.Util
 -- \(n\) points.
 --
 -- running time: \(O(n)\)
-closestPair :: ( Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
+closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
 closestPair = f . divideAndConquer1 mkCCP . toNonEmpty
             . LSeq.unstableSortBy (comparing (^.core))
   where
