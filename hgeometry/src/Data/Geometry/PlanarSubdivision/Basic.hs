@@ -180,7 +180,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
     oF@(FaceId (VertexId of')) = PG.leftFace ofD g
 
     mkFaceIdx i | i == 0    = Nothing
-                | otherwise = Just (c,mkFaceId i)
+                | otherwise = Just (c,mkFaceId . flipID $ i)
 
     -- at index i we are storing the outerface
     mkFaceData                 :: Int -> f -> FaceData (Dart s) f

@@ -43,7 +43,7 @@ module Data.Geometry.Polygon( PolygonType(..)
                             , withIncidentEdges, numberVertices
 
                             , asSimplePolygon
-                            , extremesLinear
+                            , extremesLinear, cmpExtreme
                             ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC

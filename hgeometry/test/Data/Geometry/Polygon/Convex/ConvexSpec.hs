@@ -11,7 +11,7 @@ import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon (extremesLinear, fromPoints)
+import           Data.Geometry.Polygon (extremesLinear, cmpExtreme, fromPoints)
 import           Data.Geometry.Polygon.Convex
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
