@@ -12,6 +12,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.PlaneGraph as PG
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+
 --------------------------------------------------------------------------------
 
 data PolygonEdgeType = Original | Diagonal
@@ -83,7 +84,7 @@ constructGraph                  :: forall proxy r s p. (Fractional r, Ord r)
 constructGraph px e origs diags =
     subdiv & PG.vertexData.traverse  %~ NonEmpty.head
            & PG.faceData             .~ faceData'
-           & PG.rawDartData.traverse  %~ snd
+           & PG.rawDartData.traverse %~ snd
   where
     subdiv :: PG.PlaneGraph s (NonEmpty p) (Bool,PolygonEdgeType) () r
     subdiv = PG.fromConnectedSegments px $ e' : origs' <> diags'
@@ -101,6 +102,7 @@ constructGraph px e origs diags =
 
     -- the interior faces
     intFaces = flip PG.leftFace subdiv <$> queryDarts
+
     faceData' :: V.Vector PolygonFaceData
     faceData' = V.create $ do
                   v' <- MV.replicate (PG.numFaces subdiv) Outside

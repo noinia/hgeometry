@@ -2,6 +2,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , computeDiagonals
+
+
+                                                            , VertexType(..)
+                                                            , classifyVertices
                                                             ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xCoordAt
@@ -31,12 +35,11 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
 
+-- import Debug.Trace
+-- import qualified          Data.CircularSeq as CC
 ----------------------------------------------------------------------------------
 
 data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
-
-
--- How about the hole vertices?
 
 -- | assigns a vertex type to each vertex
 --
@@ -152,9 +155,7 @@ computeDiagonals p' = map f . sweep
 -- pre: the polygon boundary is given in counterClockwise order.
 --
 -- running time: \(O(n\log n)\)
-makeMonotone      :: (Fractional r, Ord r
-                     -- , Show p, Show r
-                     )
+makeMonotone      :: (Fractional r, Ord r)
                   => proxy s -> Polygon t p r
                   -> PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 makeMonotone px pg = let (e:es) = listEdges pg
@@ -320,3 +321,11 @@ handleRegularR i (v :+ _) = connectToLeft i v
 --                      ]
 --                outFile = "/Users/frank/tmp/out.ipe"
 --            writeIpeFile outFile . singlePageFromContent $ out
+
+
+-- myPoly :: Polygon Multi () Rational
+-- myPoly = MultiPolygon (CC.fromList $ read "[Point2 [16 % 1,80 % 1] :+ (),Point2 [16 % 1,16 % 1] :+ (),Point2 [144 % 1,16 % 1] :+ (),Point2 [144 % 1,80 % 1] :+ ()]"
+--                       )
+--   [ fromPoints $ read "[Point2 [88 % 1,48 % 1] :+ (),Point2 [112 % 1,40 % 1] :+ (),Point2 [112 % 1,48 % 1] :+ (),Point2 [80 % 1,56 % 1] :+ ()]"
+--   , fromPoints $ read "[Point2 [32 % 1,64 % 1] :+ (),Point2 [32 % 1,32 % 1] :+ (),Point2 [64 % 1,32 % 1] :+ (),Point2 [64 % 1,64 % 1] :+ ()]"
+--   ]

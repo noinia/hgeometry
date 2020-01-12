@@ -31,8 +31,8 @@ triangulate px pg' = constructSubdivision px e es diags
 --
 -- running time: \(O(n \log n)\)
 triangulate'        :: (Ord r, Fractional r)
-                   => proxy s -> Polygon t p r
-                   -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
+                    => proxy s -> Polygon t p r
+                    -> PlaneGraph s p PolygonEdgeType PolygonFaceData r
 triangulate' px pg' = constructGraph px e es diags
   where
     (pg, diags)   = computeDiagonals' pg'
