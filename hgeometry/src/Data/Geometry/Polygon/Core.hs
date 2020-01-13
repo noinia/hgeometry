@@ -560,7 +560,7 @@ asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
 -- will be numbered last, in the same order.
 --
 -- >>> numberVertices simplePoly
--- SimplePolygon CSeq [Point2 [0 % 1,0 % 1] :+ SP 0 (),Point2 [10 % 1,0 % 1] :+ SP 1 (),Point2 [10 % 1,10 % 1] :+ SP 2 (),Point2 [5 % 1,15 % 1] :+ SP 3 (),Point2 [1 % 1,11 % 1] :+ SP 4 ()]
+-- SimplePolygon (CSeq [Point2 [0 % 1,0 % 1] :+ SP 0 (),Point2 [10 % 1,0 % 1] :+ SP 1 (),Point2 [10 % 1,10 % 1] :+ SP 2 (),Point2 [5 % 1,15 % 1] :+ SP 3 (),Point2 [1 % 1,11 % 1] :+ SP 4 ()])
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (\a r -> (a,r)) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'

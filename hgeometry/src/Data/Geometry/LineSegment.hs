@@ -224,9 +224,9 @@ instance (Ord r, Fractional r) =>
 --
 -- This function works for arbitrary dimensons.
 --
--- >>> (point3 1 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (Point3 1 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point3 3 3 3 :+ ()))
 -- True
--- >>> (point3 1 2 1) `onSegment` (ClosedLineSegment (origin :+ ()) (point3 3 3 3 :+ ()))
+-- >>> (Point3 1 2 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point3 3 3 3 :+ ()))
 -- False
 onSegment       :: (Ord r, Fractional r, Arity d)
                 => Point d r -> LineSegment d p r -> Bool

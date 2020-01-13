@@ -172,9 +172,9 @@ maxPoint b = let (CWMax p :+ e) = b^.maxP in p :+ e
 
 -- | Check if a point lies a box
 --
--- >>> origin `inBox` (boundingBoxList' [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- >>> origin `inBox` (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
 -- False
--- >>> origin `inBox` (boundingBoxList' [point3 (-1) (-2) (-3), point3 10 20 30] :: Box 3 () Int)
+-- >>> origin `inBox` (boundingBoxList' [Point3 (-1) (-2) (-3), Point3 10 20 30] :: Box 3 () Int)
 -- True
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
@@ -183,7 +183,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 -- resulting vector is 0 indexed whereas one would normally count dimensions
 -- starting at zero.
 --
--- >>> extent (boundingBoxList' [point3 1 2 3, point3 10 20 30] :: Box 3 () Int)
+-- >>> extent (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
 -- Vector3 [Range (Closed 1) (Closed 10),Range (Closed 2) (Closed 20),Range (Closed 3) (Closed 30)]
 extent                                 :: Arity d
                                        => Box d p r -> Vector d (R.Range r)
@@ -192,16 +192,16 @@ extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) 
 -- | Get the size of the box (in all dimensions). Note that the resulting vector is 0 indexed
 -- whereas one would normally count dimensions starting at zero.
 --
--- >>> size (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> size (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- Vector3 [1,2,3]
 size :: (Arity d, Num r) => Box d p r -> Vector d r
 size = fmap R.width . extent
 
 -- | Given a dimension, get the width of the box in that dimension. Dimensions are 1 indexed.
 --
--- >>> widthIn (C :: C 1) (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn (C :: C 1) (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- 1
--- >>> widthIn (C :: C 3) (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn (C :: C 3) (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- 3
 widthIn   :: forall proxy p i d r. (Arity d, Arity (i - 1), Num r, ((i-1)+1) <= d)
           => proxy i -> Box d p r -> r
@@ -210,11 +210,11 @@ widthIn _ = view (V.element (C :: C (i - 1))) . size
 
 -- | Same as 'widthIn' but with a runtime int instead of a static dimension.
 --
--- >>> widthIn' 1 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn' 1 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- Just 1
--- >>> widthIn' 3 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn' 3 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- Just 3
--- >>> widthIn' 10 (boundingBoxList' [origin, point3 1 2 3] :: Box 3 () Int)
+-- >>> widthIn' 10 (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
 -- Nothing
 widthIn'   :: (Arity d, Num r) => Int -> Box d p r -> Maybe r
 widthIn' i = preview (V.element' (i-1)) . size
