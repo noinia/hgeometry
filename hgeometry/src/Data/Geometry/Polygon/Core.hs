@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon.Core
@@ -96,7 +95,13 @@ data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 
-makePrisms ''Polygon
+-- | Prism to 'test' if we are a simple polygon
+_SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
+_SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
+
+-- | Prism to 'test' if we are a Multi polygon
+_MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
+_MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
