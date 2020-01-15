@@ -31,7 +31,7 @@ import           Text.ParserCombinators.ReadP (readP_to_S)
 
 -- | Write the output to yaml
 encodeYaml :: ToJSON a => a -> ByteString
-encodeYaml = YamlP.encodePretty YamlP.defConfig
+encodeYaml = YamlP.encodePretty encoderConfig
 
 -- | Prints the yaml
 printYaml :: ToJSON a => a -> IO ()
@@ -48,6 +48,17 @@ decodeYamlFile = decodeFileEither
 -- | Encode a yaml file
 encodeYamlFile    :: ToJSON a => FilePath -> a -> IO ()
 encodeYamlFile fp = B.writeFile fp . encodeYaml
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Encoder Configuration that we want to use.
+encoderConfig :: YamlP.Config
+encoderConfig = YamlP.setConfCompare compare YamlP.defConfig
+                -- sort fields alphabetically
+
+--------------------------------------------------------------------------------
 
 
 -- | Data type for things that have a version

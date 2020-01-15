@@ -42,9 +42,9 @@ instance (FromJSON v, FromJSON e, FromJSON f) => FromJSON (PlanarGraph s Primal 
 --------------------------------------------------------------------------------
 
 
--- | Transforms the planar graph into a format taht can be easily converted
+-- | Transforms the planar graph into a format that can be easily converted
 -- into JSON format. For every vertex, the adjacent vertices are given in
--- counter clockwise order.
+-- counter-clockwise order.
 --
 -- See 'toAdjacencyLists' for notes on how we handle self-loops.
 --
@@ -115,7 +115,7 @@ reorder v f = V.create $ do
 --------------------------------------------------------------------------------
 
 -- | Construct a planar graph from a adjacency matrix. For every vertex, all
--- vertices should be given in counter clockwise order.
+-- vertices should be given in counter-clockwise order.
 --
 -- pre: No self-loops, and no multi-edges
 --
