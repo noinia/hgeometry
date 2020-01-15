@@ -49,9 +49,9 @@ spec = do
           it "manual" $
             (PG $ GrahamScan.convexHull myPoints) == (PG $ OldDivAndConquer.convexHull myPoints)
 
-        -- it "GrahamScan and QuickHull are the same" $
-        --   property $ \pts ->
-        --     (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
+        it "GrahamScan and QuickHull are the same" $
+          property $ \pts ->
+            (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
         -- it "GrahamScan and JarvisMarch are the same" $
         --   property $ \pts ->
