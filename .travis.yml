@@ -18,6 +18,10 @@ matrix:
     env:
       - SUBPACKAGE="hgeometry-test"
 
+  - ghc: 8.8.1
+    env:
+      - SUBPACKAGE="hgeometry-test"
+
   # Stack
   - ghc: 8.4.2
     env:
@@ -27,6 +31,11 @@ matrix:
   - ghc: 8.6.3
     env:
       - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.6.yaml"
+      - SUBPACKAGE="hgeometry-test"
+
+  - ghc: 8.8.1
+    env:
+      - STACK_YAML="$TRAVIS_BUILD_DIR/stack-ghc8.8.yaml"
       - SUBPACKAGE="hgeometry-test"
 
 install:
@@ -49,8 +58,10 @@ script:
   - |
     if [ -z "$STACK_YAML" ]; then
       cabal new-test --enable-tests ${SUBPACKAGE}
+      cabal haddock
     else
       stack test --system-ghc ${SUBPACKAGE}
+      stack haddock
     fi
 
 notifications:
