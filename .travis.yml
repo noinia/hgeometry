@@ -63,10 +63,10 @@ script:
   - |
     if [ -z "$STACK_YAML" ]; then
       cabal test --enable-tests ${SUBPACKAGE}
-      cabal haddock
+      cabal haddock ${SUBPACKAGE}
     else
       stack test --system-ghc ${SUBPACKAGE}
-      stack haddock
+      stack haddock ${SUBPACKAGE}
     fi
 
 notifications:
