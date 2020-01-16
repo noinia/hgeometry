@@ -2,7 +2,7 @@ module Algorithms.Geometry.ConvexHull.ConvexHullSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
-import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
+-- import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
 import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens

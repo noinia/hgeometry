@@ -11,7 +11,13 @@
   center point.
 - new functions ccwCmpAroundWith and cwCmpAroundWith that allow you to
   specify the direction corresponding to "zero".
-- bugfixes
+- bugfixes, in particular triangulating a polygon with holes now works properly.
+- removed some unused dependencies
+- we are no longer depending on ghc-plugins; as a result hgeometry
+  now also compiles with ghcjs
+- more ToJSON/FromJSON instances.
+- removed the 'point2' and 'point3' functions in favor of the pattern
+  synonyms Point2 and Point3.
 
 ** 0.9
 
