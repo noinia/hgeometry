@@ -9,6 +9,7 @@ import           Control.Monad.Reader.Class
 import           Control.Monad.ST
 import           Control.Monad.Trans
 import           Control.Monad.Writer (Writer)
+import           Data.Bitraversable
 import           Data.Foldable (forM_)
 import           Data.Ord (comparing)
 -- import qualified Data.DoublyLinkedList as DLList
@@ -16,6 +17,7 @@ import           Data.Ord (comparing)
 import           Data.Maybe
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Polygon.Convex(lowerTangent')
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..), (<|))
@@ -23,7 +25,7 @@ import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------0
 
@@ -82,10 +84,10 @@ instance (Ord r, Fractional r, Show r) => Semigroup (Simulation s r (MergeStatus
              do l <- lc
                 r <- rc
                 let esIn = traceShowId $ mergeSortedListsBy (comparing eventTime) (events l) (events r)
-                STR h u w <- findBridge (t esIn) l r
-                es <- runKinetic l r h u w
+                STR h u v <- findBridge (t esIn) l r
+                es <- runKinetic l r h u v
                 writeHull h
-                pure $ MergeStatus (hd l) (lst r) u w es
+                pure $ MergeStatus (hd l) (lst r) u v es
     where
       t = \case
         []    -> 0
@@ -109,97 +111,135 @@ findBridge    :: (Ord r, Fractional r, Show r)
               -> Simulation s r (STR (NonEmpty Index) Index Index)
 findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
                       rh <- mapM (atTime' t) =<< toListFrom  (hd r)
-                      let Two (SP u ls) (SP v rs) = findBridge' lh rh
+                      let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
                       pure $ STR (NonEmpty.fromList $ ls <> [u,v] <> rs) u v
   where
-    atTime' t i = (:+ i) <$> atTime t i
+    atTime' t' i = (:+ i) <$> atTime t' i
 
-findBridge'       :: (Ord r, Fractional r)
-                  => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
-                  -> Two (SP p [p])
-findBridge' l0 r0 = bimap f f $ go l0 r0
-  where
-    f (SP x xs) = SP (x^.extra) ((^.extra) <$> xs)
-    ne = NonEmpty.fromList
-    isRight' []    _ _ = False
-    isRight' (x:_) l r = ccw' l r x == CW
+    findBridge' l0 r0 = bimap f f $ lowerTangent' l0 r0
+    f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
 
-    go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
-                             | isRight' ls l r = go (ne ls) rh
-                             | otherwise       = Two (SP l ls) (SP r rs)
-
-
-
-    -- go lh@(l:|lrest@(sl:_)) rh@(r:|rrest@(sr:_)) | isRight sr l r = go lh (ne rrest)
-    --                                              | isRight sl l r = go (ne lrest) rh
-    --                                              | otherwise      = Two (SP l lrest) (SP r rrest)
-    -- go lh@(l:|[])           rh@(r:|rrest@(sr:_)) | isRight sr l r = go lh (ne rrest)
-    --                                              | otherwise      = Two (SP l []) (SP r rrest)
-
-    -- go lh@(l:|lrest@(sl:_)) rh@(r:|[])           | isRight sl l r = go (ne lrest) rh
-    --                                              | otherwise      = Two (SP l lrest) (SP r [])
-    -- go (l:|[])              (r:|[])                               = Two (SP l []) (SP r [])
-
-
--- walkOutwards l (r:|rs) = case NonEmpty.nonEmpty rs of
---                            Nothing          -> SP r []
---                            Just rs'@(sr:|_) | rightTurn l r sr -> walkOutwards l rs'
---                                             | otherwise        -> SP r rs
-
+-- -- FIXME: We should be able to use lowerTangent' from Data.Geometry.Convex here now.
+-- findBridge'       :: (Ord r, Fractional r)
+--                   => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+--                   -> Two (SP p [p])
+-- findBridge' l0 r0 = bimap f f $ go l0 r0
 --   where
---     isRightTurn l r sr = ccw' l r sr /= CCW
+--     f (SP x xs) = SP (x^.extra) ((^.extra) <$> xs)
+--     ne = NonEmpty.fromList
+--     isRight' []    _ _ = False
+--     isRight' (x:_) l r = ccw' l r x == CW
 
+--     go lh@(l:|ls) rh@(r:|rs) | isRight' rs l r = go lh      (ne rs)
+--                              | isRight' ls l r = go (ne ls) rh
+--                              | otherwise       = Two (SP l ls) (SP r rs)
 
--- walkOutwards' r (l:|ls) = case NonEmpty.nonEmpty ls of
---                            Nothing -> SP l []
---                            Just ls'@(sl:|_) | rightTurn ls l r -> walkOutwards'
+type Bridge = Two Index
+pattern Bridge a b = Two a b
 
+-- run the kinetic simulation, computing the events at which the hull
+-- changes. At any point during the simulation:
 
-
-
-
-
-
-
-
-
-
-
-runKinetic           :: MergeStatus r
-                     -> MergeStatus r
-                     -> NonEmpty Index
+-- - the multable array in env represents the hulls L and R
+-- - we maintain the current bridge u on L and v on R such that
+-- - L[1..u] <> R[v..n] is the output hull H
+runKinetic           :: MergeStatus r    -- left merge status
+                     -> MergeStatus r     -- right merge status
+                     -> NonEmpty Index      -- current hull
                      -> Index -> Index
                      -> Simulation s r [Event r]
-runKinetic l r h u w = pure []
+runKinetic l r h u v = do -- e <- nexEvent (events l) (events) r
+
+
+-- runKinetic' :: EventQueue r ->
+
+
+  pure []
+
+nextEvent           :: [Event r]
+                    -> [Event r]
+                    -> Index -> Index -- bridge
+                    -> Simulation s r [Event r]
+nextEvent ls rs u v = undefined
+
+
+-- process :: [Event r] -> [Event r] -> Maybe (Event r) ->
+
+-- handleLeft :: Index -> [Event r] -> Simulation s r (Maybe (Event r), [Event r])
+-- handleLeft u = \case
+--   []                          -> pure (Nothing, [])
+--   (e@(Event _ k):es) | leftOf k u -> pure (Just e, es)
+--                      | otherwise
+
+
+applyEvent :: EventKind -> Simulation s r ()
+applyEvent = \case
+  InsertAfter i j  -> insertAfter i j
+  InsertBefore i j -> insertBefore i j
+  Delete j         -> delete j
+
+
+handleLeft                 :: Ord r => Event r -> Index -> Simulation s r (Maybe (Event r))
+handleLeft e@(Event _ k) u = g <$> askPoint l <*> askPoint u
+  where
+    l = case k of -- find the rightmost point involved in the event
+      InsertAfter _ j  -> j
+      InsertBefore _ j -> j
+      Delete j         -> j
+
+    g pl pu = if pl^.xCoord <= pu^.xCoord then Just e else Nothing
+
+handleRight                 :: Ord r => Event r -> Index -> Simulation s r (Maybe (Event r))
+handleRight e@(Event _ k) v = g <$> askPoint r <*> askPoint v
+  where
+    r = case k of -- find the leftmost point involved in the event
+      InsertAfter j _  -> j
+      InsertBefore j _ -> j
+      Delete j         -> j
+
+    g pr pv = if pv^.xCoord <= pr^.xCoord then Just e else Nothing
 
 
 
 
 
--- -- | First event involving the bridge, if any. Also returns the new bridge pair
--- bridgeTime         :: (Ord r, Fractional r)
---                    => r -> Vertex -> Vertex
---                    -> Simulation s r (Maybe (Event r, Two Vertex))
--- bridgeTime now l r = do Two a b <- neighbours l
---                         Two u v <- neighbours r
---                         [pa,pl,pb,pu,pr,pv] <- mapM getP [a,l,b,u,r,v]
-
---                         let me    = minimumOn (\(t',_,_) -> t')
---                                       [ e | e@(t',_,_) <- cands, t' >= now]
---                             cands = [ (nextTime pa pl pr, Two a r, Delete l)
---                                     , (nextTime pl pb pr, Two b r, InsertAfter  l b)
---                                     , (nextTime pl pu pr, Two l u, InsertBefore u r)
---                                     , (nextTime pl pr pv, Two l v, Delete r)
---                                     ]
---                         pure $ (\(t,br,e) -> (Event t e, br)) <$> me
+-- handleEvent       :: Event r -> Bridge
+--                   -> Simulation s r (Maybe (Event r), Bridge) -- output event and new bridge
+-- handleEvent e u v = undefined
 
 
 
+-- | Finds the next event involving the current bridge
+nextBridgeEvent         :: forall r s. (Ord r, Fractional r)
+                        => r -> Index -> Index
+                        -> Simulation s r (Maybe (Event r, Bridge))
+nextBridgeEvent now l r = findCand <$> mapM runCand cands
+  where
+    findCand cs = (\(t :+ (b,k)) -> (Event t k, b))
+               <$> minimumOn (^.core) [ t :+ x | Just (t :+ x) <- cs, now <= t]
 
--- compute the time at which r becomes colinear with the line throuh p
--- and l.
-nextTime  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
-nextTime (Point3 px py pz) (Point3 lx ly lz) (Point3 rx ry rz) = t
+    runCand (c,f) = c >>= \case
+      Nothing -> pure Nothing
+      Just x  -> Just <$> bitraverse id pure (f x)
+
+    -- candiate next events
+    cands :: [ ( Simulation s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
+    cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
+            , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
+            , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore c r))
+            , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
+            ]
+
+
+-- | compute the time at which r becomes colinear with the line throuh
+-- p and l.
+nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r r
+nextTime p l r = nextTime' <$> askPoint p <*> askPoint l <*> askPoint r
+
+-- | compute the time at which r becomes colinear with the line throuh
+-- p and l.
+nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
+nextTime' (Point3 px py pz) (Point3 lx ly lz) (Point3 rx ry rz) = t
   where
     ux = lx - px
     vx = rx - px
@@ -242,9 +282,30 @@ toListFrom i = (i :|) <$> iterateM getNext i
 toListFromR :: Index -> Simulation s r (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
 
+-- | Inserts the second argument after the first one into the linked list
+insertAfter     :: Index -> Index -> Simulation s r ()
+insertAfter i j = do v <- asks llist
+                     mr <- getNext i
+                     modify  v i  $ \c -> c { next = Just j }
+                     modify  v j  $ \c -> c { prev = Just i , next = mr }
+                     mModify v mr $ \c -> c { prev = Just j }
 
+-- | Inserts the second argument before the first one into the linked list
+insertBefore     :: Index -> Index -> Simulation s r ()
+insertBefore i h = do v <- asks llist
+                      ml <- getPrev i
+                      mModify v ml $ \c -> c { next = Just h }
+                      modify  v h  $ \c -> c { prev = ml , next = Just i }
+                      modify  v i  $ \c -> c { prev = Just h }
 
-
+-- | Deletes the element from the linked list
+delete     :: Index -> Simulation s r ()
+delete j = do v <- asks llist
+              ml <- getPrev j
+              mr <- getNext j
+              modify  v j  $ \c -> c { prev = Nothing, next = Nothing }
+              mModify v ml $ \c -> c { next = mr }
+              mModify v mr $ \c -> c { prev = ml }
 
 
 data Event r = Event { eventTime :: !r
@@ -521,8 +582,12 @@ mkLeaf i = do v <- asks llist
 
 
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
+mModify   :: PrimMonad m => MV.MVector (PrimState m) a -> Maybe Int -> (a -> a) -> m ()
+mModify v mi f = case mi of
+                   Nothing -> pure ()
+                   Just i  -> modify v i f
 
 modify        :: PrimMonad m => MV.MVector (PrimState m) a -> Int -> (a -> a) -> m ()
 modify v i f = MV.modify v f i
