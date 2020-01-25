@@ -13,8 +13,7 @@ import           Control.Monad.Writer (Writer)
 import           Data.Bitraversable
 import           Data.Foldable (forM_)
 import           Data.Ord (comparing)
--- import qualified Data.DoublyLinkedList as DLList
--- import           Data.DoublyLinkedList (DLList)
+import           Data.IndexedDoublyLinkedList
 import           Data.Maybe
 import           Data.Ext
 import           Data.Geometry.Point
@@ -87,13 +86,13 @@ instance (Ord r, Fractional r, Show r)
                 r <- rc
                 let esIn = mergeEvents (events l) (events r)
                     t    = mkT esIn
-                STR h u v <- findBridge t l r
+                STR h u v <- traceShowId <$> findBridge t l r
                 es <- runKinetic t esIn (Bridge u v)
-                writeHull h
+                writeList h
                 pure $ MergeStatus (hd l) (lst r) es
     where
       mkT = \case
-        []    -> 0
+        []    -> (-10000000) -- TODO; at what time value should we start?
         (e:_) -> e^.core - 1
 
 pointAt :: Index -> HullM s r (Point 3 r)
@@ -290,123 +289,6 @@ mkLeaf i = do v <- asks llist
 ----------------------------------------------------------------------------------
 -- * Doubly Linked List
 
-type Index = Int
-
--- | Cells in the Linked List
-data Cell = Cell { prev :: Maybe Index
-                 , next :: Maybe Index
-                 } deriving (Show,Eq)
-
--- | Doubly linked list implemented by a mutable vector. So actually
--- this data type can represent a collection of Linked Lists that can
--- efficiently be concatenated and split.
-data DLList s a = DLList { values :: !(V.Vector a)
-                         , llist  :: !(MV.MVector s Cell)
-                         }
-
-instance Functor (DLList s) where
-  fmap f (DLList v l) = DLList (fmap f v) l
-
-
---------------------------------------------------------------------------------
-
-newtype DLListMonad s b a = DLListMonad { runDLListMonad' :: ReaderT (DLList s b) (ST s) a }
-                         deriving (Functor,Applicative,Monad)
-
-instance PrimMonad (DLListMonad s b) where
-  type PrimState (DLListMonad s b) = s
-  primitive = DLListMonad . primitive
-
-instance MonadReader (DLList s b) (DLListMonad s b) where
-  local f = DLListMonad . local f . runDLListMonad'
-  ask = DLListMonad $ ask
-
-runDLListMonad         :: Show b => (ST s (DLList s b)) -> DLListMonad s b a -> ST s a
-runDLListMonad mkE sim = mkE >>= \env -> (flip runReaderT env . runDLListMonad') sim
-
-
-
-----------------------------------------
-
-newDLList    :: (PrimMonad m, s ~ PrimState m) => V.Vector b -> m (DLList s b)
-newDLList vs = DLList vs <$> MV.new (V.length vs)
-
-
-
--- | Copies the hull h into llist
-writeHull   :: NonEmpty Index -> DLListMonad s b ()
-writeHull h = do v <- asks llist
-                 forM_ (withNeighs h) $ \(STR p i s) ->
-                   modify v i $ \c -> c { prev = p , next = s }
-  where
-    withNeighs (x:|xs) = let l = x:xs
-                         in zipWith3 STR (Nothing : map Just l) l (map Just xs ++ [Nothing])
-
-----------------------------------------
--- * Queries
-
-valueAt    :: Index -> DLListMonad s b b
-valueAt  i = asks ((V.! i) . values)
-
-getNext   :: Index -> DLListMonad s b (Maybe Index)
-getNext i = do v <- asks llist
-               next <$> MV.read v i
-
-getPrev   :: Index -> DLListMonad s b (Maybe Index)
-getPrev i = do v <- asks llist
-               prev <$> MV.read v i
-
-toListFrom   :: Index -> DLListMonad s b (NonEmpty Index)
-toListFrom i = (i :|) <$> iterateM getNext i
-
-toListFromR :: Index -> DLListMonad s b (NonEmpty Index)
-toListFromR i = (i :|) <$> iterateM getPrev i
-
-----------------------------------------
--- * Updates
-
--- | Inserts the second argument after the first one into the linked list
-insertAfter     :: Index -> Index -> DLListMonad s b ()
-insertAfter i j = do v  <- asks llist
-                     mr <- getNext i
-                     modify  v i  $ \c -> c { next = Just j }
-                     modify  v j  $ \c -> c { prev = Just i , next = mr }
-                     mModify v mr $ \c -> c { prev = Just j }
-
--- | Inserts the second argument before the first one into the linked list
-insertBefore     :: Index -> Index -> DLListMonad s b ()
-insertBefore i h = do v <- asks llist
-                      ml <- getPrev i
-                      mModify v ml $ \c -> c { next = Just h }
-                      modify  v h  $ \c -> c { prev = ml , next = Just i }
-                      modify  v i  $ \c -> c { prev = Just h }
-
--- | Deletes the element from the linked list
-delete   :: Index -> DLListMonad s b ()
-delete j = do v <- asks llist
-              ml <- getPrev j
-              mr <- getNext j
-              modify  v j  $ \c -> c { prev = Nothing, next = Nothing }
-              mModify v ml $ \c -> c { next = mr }
-              mModify v mr $ \c -> c { prev = ml }
-
-----------------------------------------
--- * Helper functions
-
-iterateM  :: Monad m => (a -> m (Maybe a)) -> a -> m [a]
-iterateM f = go
-  where
-    go x = f x >>= \case
-             Nothing -> pure []
-             Just y  -> (y:) <$> go y
-
-mModify   :: PrimMonad m => MV.MVector (PrimState m) a -> Maybe Int -> (a -> a) -> m ()
-mModify v mi f = case mi of
-                   Nothing -> pure ()
-                   Just i  -> modify v i f
-
-modify        :: PrimMonad m => MV.MVector (PrimState m) a -> Int -> (a -> a) -> m ()
-modify v i f = MV.modify v f i
 
 --------------------------------------------------------------------------------
 
