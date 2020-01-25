@@ -112,15 +112,23 @@ rightBridgePoint = _2
 
 type Simulation s r = StateT Bridge (HullM s r)
 
+-- | For each of the events form the left and right hulls, construct
+-- the appropriate event handler, and merge the two streams of events
+-- into one stream.
+--
+-- Note that the event handler is a piece of code that, when run, may
+-- produce an output event (i.e. an event that states that there is a
+-- change in the complete hull). Note that whether or not this event
+-- is produced depends on the position of the bridge at the time when
+-- we handle the event.
 mergeEvents       :: Ord r => [Event r] -> [Event r] -> [r :+ Simulation s r (Maybe (Event r))]
 mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$> ls)
                                                               (f handleRight <$> rs)
   where
     f handler e@(Event t _) = t :+ handler e
 
-
--- run the kinetic simulation, computing the events at which the hull
--- changes. At any point during the simulation:
+-- | run the kinetic simulation, computing the events at which the
+-- hull changes. At any point during the simulation:
 
 -- - the multable array in env represents the hulls L and R
 -- - we maintain the current bridge u on L and v on R such that
@@ -132,7 +140,10 @@ runKinetic        :: (Ord r, Fractional r, Show r )
                   -> HullM s r [Event r]
 runKinetic t es b = evalStateT (handleEvent t es) b
 
-
+-- | The actual code for handling an event in the kinetic
+-- simulation. At every step, we recompute what the next bridge event
+-- is, and apply the first event that occurs (either this bridge
+-- event, or one of the existing events).
 handleEvent        :: (Ord r, Fractional r, Show r)
                    => r -> [r :+ Simulation s r (Maybe (Event r))] -> Simulation s r [Event r]
 handleEvent now es | traceShow ("HandleEvent ", now, length es) False = undefined
@@ -143,15 +154,14 @@ handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
     (e:es', Just be) | e `before` be -> handleExisting e es'
                      | otherwise     -> handleBridge be es
   where
+    cons me outEvents = maybeToList me <> outEvents
+
     before (a :+ _) (b :+ _) = a < b
       -- if bridge event and other event occur simultaneously, do the bridge event first
+    handleExisting (t :+ h) es' = cons <$> h <*> handleEvent t es'
+    handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent t es'
 
-    handleExisting (t :+ h) es' = (\me outEvents -> maybeToList me <> outEvents)
-                              <$> h <*> handleEvent t es'
-
-    handleBridge (t :+ h) es' = (:) <$> h <*> handleEvent t es'
-
-
+-- | Handler for an event on the left hull
 handleLeft                 :: Ord r => Event r -> Simulation s r (Maybe (Event r))
 handleLeft e@(Event _ k) = do applyEvent k
                               u <- gets (^.leftBridgePoint)
@@ -163,6 +173,7 @@ handleLeft e@(Event _ k) = do applyEvent k
           Delete j         -> j
     outputEvent pl pu = if pl^.xCoord <= pu^.xCoord then Just e else Nothing
 
+-- | Handler for an event on the right hull
 handleRight               :: Ord r => Event r -> Simulation s r (Maybe (Event r))
 handleRight e@(Event _ k) = do applyEvent k
                                v <- gets (^.rightBridgePoint)
@@ -174,44 +185,45 @@ handleRight e@(Event _ k) = do applyEvent k
           Delete j         -> j
     outputEvent pr pv = if pv^.xCoord <= pr^.xCoord then Just e else Nothing
 
-
+-- | Applies the actual event, mutating the current representation of the hulls.
 applyEvent :: EventKind -> Simulation s r ()
 applyEvent = \case
   InsertAfter i j  -> lift $ insertAfter i j
   InsertBefore i j -> lift $ insertBefore i j
   Delete j         -> lift $ delete j
 
-
-
+-- | Given the current time, computes the next bridge event (if it
+-- exists) and a handler to handle this bridge event.
 nextBridgeEvent     :: (Ord r, Fractional r)
                     => r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
 nextBridgeEvent now = do b <- get
-                         let Bridge l r = b
-                         fmap mkHandler <$> nextBridgeEvent' now l r
+                         fmap mkHandler <$> nextBridgeEvent' now b
   where
-    mkHandler (t :+ (b,k)) = t :+ do put b
-                                     pure $ Event t k
+    mkHandler (t :+ (b',k)) = t :+ do put b'
+                                      pure $ Event t k
 
--- | Finds the next event involving the current bridge
-nextBridgeEvent'         :: forall r s. (Ord r, Fractional r)
-                        => r -> Index -> Index
-                        -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now l r = findCand <$> mapM runCand cands
+-- | Finds the next event involving the current bridge.
+-- The arguments are the current time, and the current bridge indices.
+nextBridgeEvent'                  :: forall r s. (Ord r, Fractional r)
+                                  => r -> Bridge
+                                  -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
+nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
   where
     findCand cs = minimumOn (^.core) [ t :+ x | Just (t :+ x) <- cs, now < t]
 
-    runCand (c,f) = c >>= \case
+    runCand (c,f) = lift c >>= \case
       Nothing -> pure Nothing
       Just x  -> Just <$> bitraverse id pure (f x)
 
-    -- candiate next events
-    cands :: [ ( Simulation s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
-    cands = [ (lift $ getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
-            , (lift $ getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
-            , (lift $ getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore c r))
-            , (lift $ getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
+    -- candiate next events. Either one of the neighbours of the left bridge endpoint l
+    -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
+    -- with the bridge.
+    cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
+    cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
+            , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
+            , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore c r))
+            , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
             ]
-
 
 -- | compute the time at which r becomes colinear with the line throuh
 -- p and l.
