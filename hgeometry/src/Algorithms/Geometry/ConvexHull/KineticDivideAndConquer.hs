@@ -33,7 +33,9 @@ import           Debug.Trace
 -- type ConvexHull p r = [Two (Point 3 r :+ p)]
 
 
-type ConvexHull d p r = V.Vector [Index] -- [Edge]--[Two (Point 3 r :+ p)]
+type ConvexHull d p r = [Two (Point 3 r)]
+
+  -- V.Vector [Index] -- [Edge]--[Two (Point 3 r :+ p)]
 
 
 -- lowerHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
@@ -54,8 +56,28 @@ lowerHull' pts' = runST
 
 type HullM s r = DLListMonad s (Point 3 r)
 
-output   :: MergeStatus r -> HullM s r (ConvexHull 3 p r)
-output _ = pure mempty
+-- | Reports all the edges on the CH
+output    :: Show r => MergeStatus r -> HullM s r (ConvexHull 3 p r)
+output ms | traceShow ("output: ", events ms) False = undefined
+output ms = do h  <- toListFrom (hd ms)
+               es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
+               es' <- concat <$> mapM (handle . eventKind) (events ms)
+               pure $ es <> es'
+  where
+    handle ek = do es <- reportEdges ek
+                   applyEvent ek
+                   mapM (\(Two u v) -> mkEdge u v) es
+
+    mkEdge u v = Two <$> pointAt u <*> pointAt v
+
+reportEdges :: EventKind -> HullM s r [Two Index]
+reportEdges = \case
+    InsertAfter i j  -> comb [Two i j] (\r -> Two j r) <$> getNext i
+    InsertBefore i j -> comb [Two j i] (\l -> Two l j) <$> getPrev i
+    Delete j         -> asList Two <$> getPrev j <*> getNext j
+  where
+    comb xs f = maybe xs (\z -> f z : xs)
+    asList g ml mr = maybeToList $ g <$> ml <*> mr
 
 
 instance (Ord r, Fractional r, Show r)
@@ -163,7 +185,7 @@ handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
 
 -- | Handler for an event on the left hull
 handleLeft                 :: Ord r => Event r -> Simulation s r (Maybe (Event r))
-handleLeft e@(Event _ k) = do applyEvent k
+handleLeft e@(Event _ k) = do lift $ applyEvent k
                               u <- gets (^.leftBridgePoint)
                               outputEvent <$> pointAt' l <*> pointAt' u
   where
@@ -175,7 +197,7 @@ handleLeft e@(Event _ k) = do applyEvent k
 
 -- | Handler for an event on the right hull
 handleRight               :: Ord r => Event r -> Simulation s r (Maybe (Event r))
-handleRight e@(Event _ k) = do applyEvent k
+handleRight e@(Event _ k) = do lift $ applyEvent k
                                v <- gets (^.rightBridgePoint)
                                outputEvent <$> pointAt' r <*> pointAt' v
   where
@@ -186,11 +208,11 @@ handleRight e@(Event _ k) = do applyEvent k
     outputEvent pr pv = if pv^.xCoord <= pr^.xCoord then Just e else Nothing
 
 -- | Applies the actual event, mutating the current representation of the hulls.
-applyEvent :: EventKind -> Simulation s r ()
+applyEvent :: EventKind -> HullM s r ()
 applyEvent = \case
-  InsertAfter i j  -> lift $ insertAfter i j
-  InsertBefore i j -> lift $ insertBefore i j
-  Delete j         -> lift $ delete j
+  InsertAfter i j  -> insertAfter i j
+  InsertBefore i j -> insertBefore i j
+  Delete j         -> delete j
 
 -- | Given the current time, computes the next bridge event (if it
 -- exists) and a handler to handle this bridge event.
@@ -416,7 +438,8 @@ myPts = NonEmpty.fromList $ [ Point3 1 1 0 :+ 1
                             , Point3 10 20 0 :+ 4
                             ]
 
-test = run myPts
+test' = run myPts
+test = lowerHull' myPts
 
 -- foo      :: NonEmpty (Point 3 Rational :+ Int) -> V.Vector (Point 3 Rational)
 -- foo pts' = runST $ runDLListMonad (Env pts <$> MV.new 5) sim
