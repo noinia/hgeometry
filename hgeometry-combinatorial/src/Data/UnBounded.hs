@@ -1,11 +1,11 @@
 {-# LANGUAGE TemplateHaskell   #-}
 module Data.UnBounded( Top, topToMaybe
                      , pattern ValT, pattern Top
-                     , _ValT, _Top
+                     , _ValT, _Top, _TopMaybe
 
                      , Bottom, bottomToMaybe
                      , pattern Bottom, pattern ValB
-                     , _ValB, _Bottom
+                     , _ValB, _Bottom, _BottomMaybe
 
                      , UnBounded(..)
                      , unUnBounded
@@ -56,6 +56,21 @@ _ValT = prism ValT (\ta -> case ta of Top -> Left Top ; ValT x -> Right x)
 _Top :: Prism' (Top a) ()
 _Top = prism' (const Top) (\ta -> case ta of Top -> Just () ; ValT _ -> Nothing)
 
+-- | Iso between a 'Top a' and a 'Maybe a', interpreting a Top as a
+-- Nothing and vice versa. Note that this reverses the ordering of
+-- the elements.
+--
+-- >>> ValT 5 ^. _TopMaybe
+-- Just 5
+-- >>> Just 5 ^.re _TopMaybe
+-- ValT 5
+-- >>> Top ^. _TopMaybe
+-- Nothing
+-- >>> Nothing ^.re _TopMaybe
+-- Top
+_TopMaybe :: Iso' (Top a) (Maybe a)
+_TopMaybe = iso topToMaybe GTop
+
 --------------------------------------------------------------------------------
 
 -- | `Bottom a` represents the type a, together with a 'Bottom' element,
@@ -83,6 +98,20 @@ _ValB = prism ValB (\ba -> case ba of Bottom -> Left Bottom ; ValB x -> Right x)
 
 _Bottom :: Prism' (Bottom a) ()
 _Bottom = prism' (const Bottom) (\ba -> case ba of Bottom -> Just () ; ValB _ -> Nothing)
+
+-- | Iso between a 'Bottom a' and a 'Maybe a', interpreting a Bottom as a
+-- Nothing and vice versa.
+--
+-- >>> ValB 5 ^. _BottomMaybe
+-- Just 5
+-- >>> Just 5 ^.re _BottomMaybe
+-- ValB 5
+-- >>> Bottom ^. _BottomMaybe
+-- Nothing
+-- >>> Nothing ^.re _BottomMaybe
+-- Bottom
+_BottomMaybe :: Iso' (Bottom a) (Maybe a)
+_BottomMaybe = iso bottomToMaybe GBottom
 
 --------------------------------------------------------------------------------
 
