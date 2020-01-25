@@ -52,32 +52,15 @@ lowerHull' pts' = runST
     (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
 
+-- | Creates a Leaf
+mkLeaf   :: Int -> HullM s r (MergeStatus r)
+mkLeaf i = do v <- asks llist
+              MV.write v i emptyCell
+              pure $ MergeStatus i i []
 
 type HullM s r = DLListMonad s (Point 3 r)
 
--- | Reports all the edges on the CH
-output    :: Show r => MergeStatus r -> HullM s r (ConvexHull 3 p r)
-output ms | traceShow ("output: ", events ms) False = undefined
-output ms = do h  <- toListFrom (hd ms)
-               es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
-               es' <- concat <$> mapM (handle . eventKind) (events ms)
-               pure $ es <> es'
-  where
-    handle ek = do es <- reportEdges ek
-                   applyEvent ek
-                   mapM (\(Two u v) -> mkEdge u v) es
-
-    mkEdge u v = Two <$> pointAt u <*> pointAt v
-
-reportEdges :: EventKind -> HullM s r [Two Index]
-reportEdges = \case
-    InsertAfter i j  -> comb [Two i j] (\r -> Two j r) <$> getNext i
-    InsertBefore i j -> comb [Two j i] (\l -> Two l j) <$> getPrev i
-    Delete j         -> asList Two <$> getPrev j <*> getNext j
-  where
-    comb xs f = maybe xs (\z -> f z : xs)
-    asList g ml mr = maybeToList $ g <$> ml <*> mr
-
+--------------------------------------------------------------------------------
 
 instance (Ord r, Fractional r, Show r)
          => Semigroup (HullM s r (MergeStatus r)) where
@@ -95,16 +78,50 @@ instance (Ord r, Fractional r, Show r)
         []    -> (-10000000) -- TODO; at what time value should we start?
         (e:_) -> e^.core - 1
 
-pointAt :: Index -> HullM s r (Point 3 r)
-pointAt = valueAt
+--------------------------------------------------------------------------------
+-- * Producing the Output Hull
 
-pointAt' :: Index -> Simulation s r (Point 3 r)
-pointAt' = lift . pointAt
+-- | Reports all the edges on the CH
+output    :: Show r => MergeStatus r -> HullM s r (ConvexHull 3 p r)
+output ms | traceShow ("output: ", events ms) False = undefined
+output ms = do h  <- toListFrom (hd ms)
+               es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
+               es' <- concat <$> mapM (handle . eventKind) (events ms)
+               pure $ es <> es'
+  where
+    handle ek = do es <- reportEdges ek
+                   applyEvent ek
+                   mapM (\(Two u v) -> mkEdge u v) es
 
-atTime     :: Num r => r -> Index -> HullM s r (Point 2 r)
-atTime t i = (\(Point3 x y z) -> Point2 x (z - t*y)) <$> pointAt i
+    mkEdge u v = Two <$> pointAt u <*> pointAt v
 
+-- | Given an event, produces the list of (at most two) new edges on the hull.
+reportEdges :: EventKind -> HullM s r [Two Index]
+reportEdges = \case
+    InsertAfter i j  -> comb [Two i j] (\r -> Two j r) <$> getNext i
+    InsertBefore i j -> comb [Two j i] (\l -> Two l j) <$> getPrev i
+    Delete j         -> asList Two <$> getPrev j <*> getNext j
+  where
+    comb xs f = maybe xs (\z -> f z : xs)
+    asList g ml mr = maybeToList $ g <$> ml <*> mr
 
+--------------------------------------------------------------------------------
+-- * Finding the Bridge
+
+type Bridge = Two Index
+
+pattern Bridge     :: Index -> Index -> Bridge
+pattern Bridge a b = Two a b
+{-# COMPLETE Bridge #-}
+
+leftBridgePoint, rightBridgePoint :: Lens' Bridge Index
+leftBridgePoint  = _1
+rightBridgePoint = _2
+
+-- | Computes the Bridge of the Hulls (the Hulls currently encoded in
+-- the underlying Doublylinkedlist)
+--
+-- running time: \(O(n)\)
 findBridge    :: (Ord r, Fractional r, Show r)
               => r
               -> MergeStatus r
@@ -120,17 +137,9 @@ findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
     findBridge' l0 r0 = bimap f f $ lowerTangent' l0 r0
     f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
 
-type Bridge = Two Index
-pattern Bridge a b = Two a b
-{-# COMPLETE Bridge #-}
+--------------------------------------------------------------------------------
 
-leftBridgePoint :: Lens' Bridge Index
-leftBridgePoint = _1
-
-rightBridgePoint :: Lens' Bridge Index
-rightBridgePoint = _2
-
-
+-- | The Kinetic Simulation
 type Simulation s r = StateT Bridge (HullM s r)
 
 -- | For each of the events form the left and right hulls, construct
@@ -150,7 +159,7 @@ mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$>
 
 -- | run the kinetic simulation, computing the events at which the
 -- hull changes. At any point during the simulation:
-
+--
 -- - the multable array in env represents the hulls L and R
 -- - we maintain the current bridge u on L and v on R such that
 -- - L[1..u] <> R[v..n] is the output hull H
@@ -182,6 +191,9 @@ handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
     handleExisting (t :+ h) es' = cons <$> h <*> handleEvent t es'
     handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent t es'
 
+----------------------------------------
+-- * Handling the events in the Existing Hulls
+
 -- | Handler for an event on the left hull
 handleLeft                 :: Ord r => Event r -> Simulation s r (Maybe (Event r))
 handleLeft e@(Event _ k) = do lift $ applyEvent k
@@ -212,6 +224,9 @@ applyEvent = \case
   InsertAfter i j  -> insertAfter i j
   InsertBefore i j -> insertBefore i j
   Delete j         -> delete j
+
+----------------------------------------
+-- * Bridge Events
 
 -- | Given the current time, computes the next bridge event (if it
 -- exists) and a handler to handle this bridge event.
@@ -246,6 +261,9 @@ nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
             , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
             ]
 
+----------------------------------------
+-- * Helpers for computing the next interesting time in the simulation
+
 -- | compute the time at which r becomes colinear with the line throuh
 -- p and l.
 nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r r
@@ -264,33 +282,37 @@ nextTime' (Point3 px py pz) (Point3 lx ly lz) (Point3 rx ry rz) = t
     t = a / b
     -- by unfolding the def of ccw
 
+--------------------------------------------------------------------------------
 
 data Event r = Event { eventTime :: !r
                      , eventKind :: !EventKind
                      } deriving (Show,Eq)
 
-data EventKind = InsertAfter  !Index !Index -- ^ old then new
-               | InsertBefore !Index !Index
+data EventKind = InsertAfter  !Index !Index -- ^ current Index first, then the Item we insert
+               | InsertBefore !Index !Index -- ^ current Index first, then the Item we insert
                | Delete !Index
                deriving (Show,Eq,Ord)
 
-data MergeStatus r = MergeStatus { hd     :: !Index -- first item in the list
-                                 , lst    :: !Index -- last item in the list
-                                 -- , left   :: !Index -- left element in the bridge
-                                 -- , right  :: !Index -- right element in the bridge
-                                 , events :: ![Event r]
+data MergeStatus r = MergeStatus { hd     :: !Index -- ^ first item in the list
+                                 , lst    :: !Index -- ^ last item in the list
+                                 , events :: ![Event r] -- ^ Events when this Hull changes
                                  } deriving (Show,Eq)
 
-mkLeaf   :: Int -> HullM s r (MergeStatus r)
-mkLeaf i = do v <- asks llist
-              MV.write v i (Cell Nothing Nothing)
-              pure $ MergeStatus i i []
-
 ----------------------------------------------------------------------------------
--- * Doubly Linked List
+-- * Convienience Functions in the Hull Monad.
+
+pointAt :: Index -> HullM s r (Point 3 r)
+pointAt = valueAt
+
+pointAt' :: Index -> Simulation s r (Point 3 r)
+pointAt' = lift . pointAt
+
+atTime     :: Num r => r -> Index -> HullM s r (Point 2 r)
+atTime t i = (\(Point3 x y z) -> Point2 x (z - t*y)) <$> pointAt i
 
 
 --------------------------------------------------------------------------------
+-- * Pure Helpers
 
 minimumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
 minimumOn f = \case
@@ -298,7 +320,7 @@ minimumOn f = \case
     xs -> Just $ List.minimumBy (comparing f) xs
 
 --------------------------------------------------------------------------------
-
+-- * Testing stuff
 
 run      :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> MergeStatus r
 run pts' = runST

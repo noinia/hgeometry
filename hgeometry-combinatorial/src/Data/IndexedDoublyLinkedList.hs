@@ -1,5 +1,5 @@
 module Data.IndexedDoublyLinkedList( DLList(..)
-                                   , Cell(..)
+                                   , Cell(..), emptyCell
                                    , DLListMonad, runDLListMonad
                                    , Index
 
@@ -29,6 +29,9 @@ type Index = Int
 data Cell = Cell { prev :: Maybe Index
                  , next :: Maybe Index
                  } deriving (Show,Eq)
+
+emptyCell :: Cell
+emptyCell = Cell Nothing Nothing
 
 -- | Doubly linked list implemented by a mutable vector. So actually
 -- this data type can represent a collection of Linked Lists that can
