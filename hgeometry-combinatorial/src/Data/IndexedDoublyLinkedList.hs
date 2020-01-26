@@ -3,7 +3,7 @@ module Data.IndexedDoublyLinkedList( DLList(..)
                                    , DLListMonad, runDLListMonad
                                    , Index
 
-                                   , newDLList
+                                   , singletons
                                    , writeList
                                    , valueAt, getNext, getPrev
                                    , toListFrom, toListFromR
@@ -65,10 +65,9 @@ runDLListMonad mkE sim = mkE >>= \env -> (flip runReaderT env . runDLListMonad')
 
 ----------------------------------------
 
--- | Constructs a new DoublyLinkedList
-newDLList    :: (PrimMonad m, s ~ PrimState m) => V.Vector b -> m (DLList s b)
-newDLList vs = DLList vs <$> MV.new (V.length vs)
-
+-- | Constructs a new DoublyLinkedList. Every element is its own singleton list
+singletons    :: (PrimMonad m, s ~ PrimState m) => V.Vector b -> m (DLList s b)
+singletons vs = DLList vs <$> MV.replicate (V.length vs) emptyCell
 
 -- | Sets the DoublyLinkedList to the given List.
 --

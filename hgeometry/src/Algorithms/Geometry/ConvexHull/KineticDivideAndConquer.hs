@@ -42,7 +42,7 @@ type ConvexHull d p r = [Two (Point 3 r)]
 
 lowerHull'      :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' pts' = runST
-                 $ runDLListMonad (newDLList pts)
+                 $ runDLListMonad (singletons pts)
                  . (>>= output)
                  . divideAndConquer1 mkLeaf
                  $ NonEmpty.fromList [0..(n-1)]
@@ -54,9 +54,7 @@ lowerHull' pts' = runST
 
 -- | Creates a Leaf
 mkLeaf   :: Int -> HullM s r (MergeStatus r)
-mkLeaf i = do v <- asks llist
-              MV.write v i emptyCell
-              pure $ MergeStatus i i []
+mkLeaf i = pure $ MergeStatus i i []
 
 type HullM s r = DLListMonad s (Point 3 r)
 
@@ -122,11 +120,11 @@ rightBridgePoint = _2
 -- the underlying Doublylinkedlist)
 --
 -- running time: \(O(n)\)
-findBridge    :: (Ord r, Fractional r, Show r)
-              => r
-              -> MergeStatus r
-              -> MergeStatus r
-              -> HullM s r (STR (NonEmpty Index) Index Index)
+findBridge       :: (Ord r, Fractional r, Show r)
+                 => r
+                 -> MergeStatus r
+                 -> MergeStatus r
+                 -> HullM s r (STR (NonEmpty Index) Index Index)
 findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
                       rh <- mapM (atTime' t) =<< toListFrom  (hd r)
                       let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
@@ -194,29 +192,32 @@ handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
 ----------------------------------------
 -- * Handling the events in the Existing Hulls
 
--- | Handler for an event on the left hull
-handleLeft                 :: Ord r => Event r -> Simulation s r (Maybe (Event r))
-handleLeft e@(Event _ k) = do lift $ applyEvent k
-                              u <- gets (^.leftBridgePoint)
-                              outputEvent <$> pointAt' l <*> pointAt' u
+handleLeft   :: Ord r => Event r -> Simulation s r (Maybe (Event r))
+handleLeft e = handleExisting' e leftBridgePoint (<=) l
   where
-    l = case k of -- find the rightmost point involved in the event
+    l = case eventKind e of -- find the rightmost point involved in the event
           InsertAfter _ j  -> j
           InsertBefore _ j -> j
           Delete j         -> j
-    outputEvent pl pu = if pl^.xCoord <= pu^.xCoord then Just e else Nothing
 
--- | Handler for an event on the right hull
-handleRight               :: Ord r => Event r -> Simulation s r (Maybe (Event r))
-handleRight e@(Event _ k) = do lift $ applyEvent k
-                               v <- gets (^.rightBridgePoint)
-                               outputEvent <$> pointAt' r <*> pointAt' v
+handleRight   :: Ord r => Event r -> Simulation s r (Maybe (Event r))
+handleRight e = handleExisting' e rightBridgePoint (>=) r
   where
-    r = case k of -- find the leftmost point involved in the event
+    r = case eventKind e of -- find the leftmost point involved in the event
           InsertAfter j _  -> j
           InsertBefore j _ -> j
           Delete j         -> j
-    outputEvent pr pv = if pv^.xCoord <= pr^.xCoord then Just e else Nothing
+
+-- | Handler for an event on the right hull
+--
+handleExisting'  :: forall s r. Event r -> Lens' Bridge Index -> (r -> r -> Bool) -> Index
+                 -> Simulation s r (Maybe (Event r))
+handleExisting' e bridgePoint cmp p =
+    do lift $ applyEvent (eventKind e)
+       v <- gets (^.bridgePoint)
+       outputEvent <$> pointAt' p <*> pointAt' v
+  where
+    outputEvent pp bp = if (pp^.xCoord) `cmp` (bp^.xCoord) then Just e else Nothing
 
 -- | Applies the actual event, mutating the current representation of the hulls.
 applyEvent :: EventKind -> HullM s r ()
@@ -269,7 +270,7 @@ nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
 nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r r
 nextTime p l r = nextTime' <$> pointAt' p <*> pointAt' l <*> pointAt' r
 
--- | compute the time at which r becomes colinear with the line throuh
+-- | compute the time at which r becomes colinear with the line through
 -- p and l.
 nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
 nextTime' (Point3 px py pz) (Point3 lx ly lz) (Point3 rx ry rz) = t
@@ -342,8 +343,18 @@ myPts = NonEmpty.fromList $ [ Point3 1 1 0 :+ 1
                             , Point3 10 20 0 :+ 4
                             ]
 
+myPts' :: NonEmpty (Point 3 Rational :+ Int)
+myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 0
+                             , Point3 1  1  10 :+ 1
+                             , Point3 0  10 20 :+ 2
+                             , Point3 12 1  1  :+ 3
+                             ]
+
+
+
 test' = run myPts
-test = lowerHull' myPts
+
+test = mapM_ print $ lowerHull' myPts'
 
 -- foo      :: NonEmpty (Point 3 Rational :+ Int) -> V.Vector (Point 3 Rational)
 -- foo pts' = runST $ runDLListMonad (Env pts <$> MV.new 5) sim
