@@ -76,15 +76,20 @@ instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
 
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c
+{-# INLINABLE _core #-}
 
 _extra :: (core :+ extra) -> extra
 _extra (_ :+ e) = e
+{-# INLINABLE _extra #-}
 
 core :: Lens (core :+ extra) (core' :+ extra) core core'
 core = lens _core (\(_ :+ e) c -> (c :+ e))
+{-# INLINABLE core #-}
 
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
 extra = lens _extra (\(c :+ _) e -> (c :+ e))
+{-# INLINABLE extra #-}
 
 ext   :: a -> a :+ ()
 ext x = x :+ ()
+{-# INLINABLE ext #-}

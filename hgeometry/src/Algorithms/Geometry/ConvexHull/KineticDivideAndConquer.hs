@@ -1,7 +1,9 @@
 module Algorithms.Geometry.ConvexHull.KineticDivideAncConquer where
 
 import           Algorithms.DivideAndConquer
+import           Control.Applicative (liftA2)
 import           Control.Lens ((^.), bimap, Lens', _1, _2)
+import           Control.Monad ((<=<))
 import           Control.Monad.Primitive (PrimMonad(..))
 import           Control.Monad.Reader (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
@@ -10,7 +12,6 @@ import           Control.Monad.State.Class (gets, get, put)
 import           Control.Monad.State.Strict (StateT, evalStateT)
 import           Control.Monad.Trans
 import           Control.Monad.Writer (Writer)
-import           Control.Applicative (liftA2)
 import           Data.Bitraversable
 import           Data.Ext
 import           Data.Foldable (forM_)
@@ -31,6 +32,7 @@ import           Debug.Trace
 import           Data.Ratio
 --------------------------------------------------------------------------------
 
+
 -- TODO: We seem to assume that no four points are coplanar, and no
 -- three points lie on a vertical plane. Figure out where we assume that exactly.
 
@@ -39,23 +41,28 @@ import           Data.Ratio
 -- plumb the p's around.
 
 
-type ConvexHull d p r = [Three Index]
+-- type ConvexHull d p r = [Three Index]
+type ConvexHull d p r = [Three (Point 3 r :+ p)]
 
 
 -- lowerHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
 -- lowerHull = maybe mempty lowerHull' . NonEmpty.nonEmpty
 
-lowerHull'      :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
-lowerHull' pts' = runST
-                 $ runDLListMonad (singletons pts)
-                 . (>>= output)
-                 . divideAndConquer1 mkLeaf
-                 $ NonEmpty.fromList [0..(n-1)]
+
+lowerHull'      :: forall r p. (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
   where
+    computeHull :: HullM s r [Three Index]
+    computeHull = output <=< divideAndConquer1 mkLeaf $ NonEmpty.fromList [0..(n-1)]
+
     n = V.length pts
     fromNonEmpty = V.fromList . NonEmpty.toList
     (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
+
+    -- withPt = id
+    withPt = fmap (\i -> pts V.! i :+ exts V.! i)
+
 
 -- | Creates a Leaf
 mkLeaf   :: Int -> HullM s r (MergeStatus r)
@@ -102,15 +109,13 @@ instance (Ord r, Fractional r, Show r)
 -- * Producing the Output Hull
 
 -- | Reports all the edges on the CH
-output    :: Show r => MergeStatus r -> HullM s r (ConvexHull 3 p r)
+output    :: Show r => MergeStatus r -> HullM s r [Three Index]
 output ms | traceShow ("output: ", events ms) False = undefined
 output ms = catMaybes <$> mapM (handle . eventKind) (events ms)
   where
     handle ek = do mt <- reportTriangle ek
                    applyEvent ek
                    pure mt
-                   -- mapM mkTri es
-    -- mkTri = traverse pointAt
 
     -- u v w =  <$> pointAt u <*> pointAt v
 
@@ -171,7 +176,7 @@ findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
   where
     atTime' t' i = (:+ i) <$> atTime t' i
 
-    findBridge' l0 r0 = bimap f f $ lowerTangent' l0 r0
+    findBridge' l0 r0 = f <$> lowerTangent' l0 r0
     f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
 
 --------------------------------------------------------------------------------
@@ -372,19 +377,6 @@ minimumOn f = \case
 
 --------------------------------------------------------------------------------
 -- * Testing stuff
-
-run      :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> MergeStatus r
-run pts' = runST
-                 $ runDLListMonad (singletons pts)
-                 -- . (>>= output)
-                 . divideAndConquer1 mkLeaf
-                 $ NonEmpty.fromList [0..(n-1)]
-  where
-    n = V.length pts
-    fromNonEmpty = V.fromList . NonEmpty.toList
-    (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
-    unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
-
 
 myPts :: NonEmpty (Point 3 Double :+ Int)
 myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2

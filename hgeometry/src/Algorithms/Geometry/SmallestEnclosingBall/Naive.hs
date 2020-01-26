@@ -22,8 +22,8 @@ import Data.Geometry.Point
 import Data.List (minimumBy)
 import Data.Function (on)
 import Data.Maybe (fromMaybe)
-import Data.Util(STR(..),SP(..), uniquePairs, uniqueTriplets)
-
+import Data.Util(uniquePairs, uniqueTriplets)
+import qualified Data.Util as Util
 --------------------------------------------------------------------------------
 
 -- | Horrible O(n^4) implementation that simply tries all disks, checks if they
@@ -38,11 +38,11 @@ smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points
 
 pairs     :: Fractional r => [Point 2 r :+ p] -> [DiskResult p r]
 pairs pts = [ DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)
-            | SP a b <- uniquePairs pts]
+            | Util.Two a b <- uniquePairs pts]
 
 triplets     :: (Ord r, Fractional r) => [Point 2 r :+ p] -> [DiskResult p r]
 triplets pts = [DiskResult (disk' a b c) (Three a b c)
-               | STR a b c <- uniqueTriplets pts]
+               | Util.Three a b c <- uniqueTriplets pts]
 
 disk'       :: (Ord r, Fractional r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Disk () r

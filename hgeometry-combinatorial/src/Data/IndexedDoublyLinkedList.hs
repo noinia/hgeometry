@@ -60,8 +60,10 @@ instance MonadReader (DLList s b) (DLListMonad s b) where
   local f = DLListMonad . local f . runDLListMonad'
   ask = DLListMonad $ ask
 
-runDLListMonad         :: ST s (DLList s b) -> DLListMonad s b a -> ST s a
-runDLListMonad mkE sim = mkE >>= \env -> (flip runReaderT env . runDLListMonad') sim
+-- | Runs a DLList Computation, starting with singleton values, crated
+-- from the input vector.
+runDLListMonad         :: V.Vector b -> (forall s. DLListMonad s b a) -> a
+runDLListMonad vs comp = runST $ singletons vs >>= runReaderT (runDLListMonad' comp)
 
 ----------------------------------------
 

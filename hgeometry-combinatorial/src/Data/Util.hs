@@ -10,17 +10,18 @@
 --------------------------------------------------------------------------------
 module Data.Util where
 
-import Control.DeepSeq
-import Control.Lens
-import GHC.Generics (Generic)
+import           Control.DeepSeq
+import           Control.Lens
 import qualified Data.List as List
+import           GHC.Generics (Generic)
+import           Linear.V2 (V2(..))
+import           Linear.V3 (V3(..))
 
 --------------------------------------------------------------------------------
 -- * Strict Triples
 
 -- |  strict triple
-data STR a b c = STR !a !b !c
-               deriving (Show,Eq,Ord,Functor,Generic)
+data STR a b c = STR !a !b !c deriving (Show,Eq,Ord,Functor,Generic)
 
 instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (STR a b c) where
   (STR a b c) <> (STR d e f) = STR (a <> d) (b <> e) (c <> f)
@@ -41,14 +42,19 @@ instance Field2 (STR a b c) (STR a d c) b d where
 instance Field3 (STR a b c) (STR a b d) c d where
   _3 = lens (\(STR _ _ c) -> c) (\(STR a b _) d -> STR a b d)
 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- | Strict Triple with all items the same
+type Three = V3
+
+pattern Three :: a -> a -> a -> Three a
+pattern Three a b c = V3 a b c
+
 -- | Generate All unique unordered triplets.
 --
-uniqueTriplets    :: [a] -> [STR a a a]
-uniqueTriplets xs = [ STR x y z | (x:ys) <- nonEmptyTails xs, SP y z <- uniquePairs ys]
-
-
-
-
+uniqueTriplets    :: [a] -> [Three a]
+uniqueTriplets xs = [ Three x y z | (x:ys) <- nonEmptyTails xs, Two y z <- uniquePairs ys]
 
 --------------------------------------------------------------------------------
 -- * Strict Pairs
@@ -80,25 +86,16 @@ instance Bifunctor SP where
 -- | * Strict pair whose elements are of the same type.
 
 -- | Strict pair with both items the same
-type Two a = SP a a
+type Two = V2
 
 pattern Two :: a -> a -> Two a
-pattern Two a b = SP a b
-{-# COMPLETE Two #-}
+pattern Two a b = V2 a b
 
 -- | Given a list xs, generate all unique (unordered) pairs.
 --
 --
 uniquePairs    :: [a] -> [Two a]
 uniquePairs xs = [ Two x y | (x:ys) <- nonEmptyTails xs, y <- ys ]
-
---------------------------------------------------------------------------------
--- | Strict Triple with all items the same
-type Three a = STR a a a
-
-pattern Three :: a -> a -> a -> Three a
-pattern Three a b c = STR a b c
-{-# COMPLETE Three #-}
 
 --------------------------------------------------------------------------------
 

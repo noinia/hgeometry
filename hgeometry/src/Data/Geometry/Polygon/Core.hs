@@ -278,7 +278,7 @@ withIncidentEdges                    :: Polygon t p r
 withIncidentEdges (SimplePolygon vs) =
       SimplePolygon $ C.zip3LWith f (C.rotateL vs) vs (C.rotateR vs)
   where
-    f p c n = c&extra .~ SP (ClosedLineSegment p c) (ClosedLineSegment c n)
+    f p c n = c&extra .~ Two (ClosedLineSegment p c) (ClosedLineSegment c n)
 withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
   where
     (SimplePolygon vs') = withIncidentEdges $ SimplePolygon vs
