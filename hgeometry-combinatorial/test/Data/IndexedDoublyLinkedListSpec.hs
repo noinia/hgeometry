@@ -1,10 +1,10 @@
 module Data.IndexedDoublyLinkedListSpec where
 
-import Control.Monad.ST
-import Data.IndexedDoublyLinkedList
+import           Control.Monad.ST
+import           Data.IndexedDoublyLinkedList
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector as V
-import Data.List.NonEmpty (NonEmpty(..))
-import Test.Hspec
+import           Test.Hspec
 
 --------------------------------------------------------------------------------
 

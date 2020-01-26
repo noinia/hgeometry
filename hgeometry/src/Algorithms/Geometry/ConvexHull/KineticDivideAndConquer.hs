@@ -10,29 +10,35 @@ import           Control.Monad.State.Class (gets, get, put)
 import           Control.Monad.State.Strict (StateT, evalStateT)
 import           Control.Monad.Trans
 import           Control.Monad.Writer (Writer)
+import           Control.Applicative (liftA2)
 import           Data.Bitraversable
-import           Data.Foldable (forM_)
-import           Data.Ord (comparing)
-import           Data.IndexedDoublyLinkedList
-import           Data.Maybe
 import           Data.Ext
+import           Data.Foldable (forM_)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex (lowerTangent')
+import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..), (<|))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe
+import           Data.Ord (comparing)
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
+import           Data.Maybe (catMaybes)
 import           Debug.Trace
-
+import           Data.Ratio
 --------------------------------------------------------------------------------0
+
+-- TODO: We assume that no four points are colinear
+
 
 -- type ConvexHull p r = [Two (Point 3 r :+ p)]
 
 
-type ConvexHull d p r = [Two (Point 3 r)]
+-- type ConvexHull d p r = [Two (Point 3 r)]
+type ConvexHull d p r = [Three Index]
 
   -- V.Vector [Index] -- [Edge]--[Two (Point 3 r :+ p)]
 
@@ -65,16 +71,33 @@ instance (Ord r, Fractional r, Show r)
   lc <> rc = traceShow "<>" $
              do l <- lc
                 r <- rc
-                let esIn = mergeEvents (events l) (events r)
+                d <- debugHull l r
+                let esIn = traceShow d $ mergeEvents (events l) (events r)
                     t    = mkT esIn
-                STR h u v <- traceShowId <$> findBridge t l r
+                STR h u v <- traceShow ("before merge:",d) <$> findBridge t l r
                 es <- runKinetic t esIn (Bridge u v)
-                writeList h
+                writeList $ traceShow ("writing hull: ",h) h
                 pure $ MergeStatus (hd l) (lst r) es
     where
       mkT = \case
         []    -> (-10000000) -- TODO; at what time value should we start?
         (e:_) -> e^.core - 1
+
+      debugHull l r = (\a b c d -> (NonEmpty.toList a
+                                   , NonEmpty.toList b
+                                   , c
+                                   , d
+                                   , events l
+                                   , events r
+                                   )
+                      )
+                      <$> (toListFrom $ hd l) <*> (toListFrom $ hd r)
+                      <*> listHull l <*> listHull r
+
+      listHull s = do xs <- NonEmpty.toList <$> toListFrom (hd s)
+                      mapM (atTime t) xs
+         where
+           t = (-10000000)
 
 --------------------------------------------------------------------------------
 -- * Producing the Output Hull
@@ -82,16 +105,33 @@ instance (Ord r, Fractional r, Show r)
 -- | Reports all the edges on the CH
 output    :: Show r => MergeStatus r -> HullM s r (ConvexHull 3 p r)
 output ms | traceShow ("output: ", events ms) False = undefined
-output ms = do h  <- toListFrom (hd ms)
-               es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
-               es' <- concat <$> mapM (handle . eventKind) (events ms)
-               pure $ es <> es'
+output ms = catMaybes <$> mapM (handle . eventKind) (events ms)
   where
-    handle ek = do es <- reportEdges ek
+    handle ek = do mt <- reportTriangle ek
                    applyEvent ek
-                   mapM (\(Two u v) -> mkEdge u v) es
+                   pure mt
+                   -- mapM mkTri es
+    -- mkTri = traverse pointAt
 
-    mkEdge u v = Two <$> pointAt u <*> pointAt v
+    -- u v w =  <$> pointAt u <*> pointAt v
+
+  -- do h  <- toListFrom (hd ms)
+  --              -- es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
+  --              es' <- concat <$> mapM (handle . eventKind) (events ms)
+  --              pure es' -- $ es <> es'
+  -- where
+  --   handle ek = do es <- reportEdges ek
+  --                  applyEvent ek
+  --                  mapM (\(Two u v) -> mkEdge u v) es
+
+  --   mkEdge u v = Two <$> pure u <*> pure v
+  --   -- mkEdge u v = Two <$> pointAt u <*> pointAt v
+
+reportTriangle :: EventKind -> HullM s r (Maybe (Three Index))
+reportTriangle = \case
+    InsertAfter i j  -> fmap (\r   -> Three i j r)   <$> getNext i
+    InsertBefore i h -> fmap (\l   -> Three l h i)   <$> getPrev i
+    Delete j         -> liftA2 (\l r -> Three l j r) <$> getPrev j <*> getNext j
 
 -- | Given an event, produces the list of (at most two) new edges on the hull.
 reportEdges :: EventKind -> HullM s r [Two Index]
@@ -231,23 +271,36 @@ applyEvent = \case
 
 -- | Given the current time, computes the next bridge event (if it
 -- exists) and a handler to handle this bridge event.
-nextBridgeEvent     :: (Ord r, Fractional r)
+nextBridgeEvent     :: (Ord r, Fractional r, Show r )
                     => r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
 nextBridgeEvent now = do b <- get
-                         fmap mkHandler <$> nextBridgeEvent' now b
+                         es <- nextBridgeEvents b
+                         fmap mkHandler <$> nextBridgeEvent' now (debug es b)
   where
     mkHandler (t :+ (b',k)) = t :+ do put b'
                                       pure $ Event t k
 
+    debug es b = traceShow ("candidate events with ",b," ", es) b
+
+-- evalNextBridgeEvents   :: Bridge -> Simulation s r [r :+ (Bridge,EventKind)]
+-- evalNextBridgeEvents b = do cans <- nextBridgeEvents b
+--                             mapM (\(computeT :+ z) -> (:+ z) <$> computeT
+--                                  ) $ cans
+
 -- | Finds the next event involving the current bridge.
 -- The arguments are the current time, and the current bridge indices.
-nextBridgeEvent'                  :: forall r s. (Ord r, Fractional r)
-                                  => r -> Bridge
-                                  -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
-  where
-    findCand cs = minimumOn (^.core) [ t :+ x | Just (t :+ x) <- cs, now < t]
+nextBridgeEvent'       :: (Ord r, Fractional r)
+                       => r -> Bridge
+                       -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
+nextBridgeEvent' now b = minimumOn (^.core) . filter (\e -> now < e^.core)
+                      <$> nextBridgeEvents b
 
+-- | Computes all candidate bridge events
+nextBridgeEvents                  :: forall r s. (Ord r, Fractional r)
+                                  => Bridge
+                                  -> Simulation s r [r :+ (Bridge,EventKind)]
+nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
+  where
     runCand (c,f) = lift c >>= \case
       Nothing -> pure Nothing
       Just x  -> Just <$> bitraverse id pure (f x)
@@ -256,9 +309,9 @@ nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
     -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
     -- with the bridge.
     cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
-    cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
-            , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
-            , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore c r))
+    cands = [ (getPrev l, \a -> nextTime l r a :+ (Bridge a r, Delete l))
+            , (getNext l, \b -> nextTime l r b :+ (Bridge b r, InsertAfter  l b))
+            , (getPrev r, \c -> nextTime l r c :+ (Bridge l c, InsertBefore r c))
             , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
             ]
 
@@ -266,22 +319,20 @@ nextBridgeEvent' now (Bridge l r) = findCand <$> mapM runCand cands
 -- * Helpers for computing the next interesting time in the simulation
 
 -- | compute the time at which r becomes colinear with the line throuh
--- p and l.
+-- p and q.
 nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r r
-nextTime p l r = nextTime' <$> pointAt' p <*> pointAt' l <*> pointAt' r
+nextTime p q r = nextTime' <$> pointAt' p <*> pointAt' q <*> pointAt' r
 
 -- | compute the time at which r becomes colinear with the line through
--- p and l.
+-- p and q.
 nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
-nextTime' (Point3 px py pz) (Point3 lx ly lz) (Point3 rx ry rz) = t
-  where
-    ux = lx - px
+nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) = a / b
+  where        -- by unfolding the def of ccw
+    ux = qx - px
     vx = rx - px
+    a = ux*(rz - pz)  - vx*(qz - pz)
+    b = ux*(ry - py)  - vx*(qy - py)
 
-    a = (-1)*ux*(rz - pz)  - vx*(lz - pz)
-    b =      ux*(py - ry)  - vx*(py - ly)
-    t = a / b
-    -- by unfolding the def of ccw
 
 --------------------------------------------------------------------------------
 
@@ -325,7 +376,7 @@ minimumOn f = \case
 
 run      :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> MergeStatus r
 run pts' = runST
-                 $ runDLListMonad (newDLList pts)
+                 $ runDLListMonad (singletons pts)
                  -- . (>>= output)
                  . divideAndConquer1 mkLeaf
                  $ NonEmpty.fromList [0..(n-1)]
@@ -337,16 +388,16 @@ run pts' = runST
 
 
 myPts :: NonEmpty (Point 3 Rational :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 1 1 0 :+ 1
-                            , Point3 3 2 0 :+ 2
-                            , Point3 5 5 0 :+ 3
-                            , Point3 10 20 0 :+ 4
+myPts = NonEmpty.fromList $ [ Point3 1 1 0 :+ 0
+                            , Point3 3 2 0 :+ 1
+                            , Point3 5 5 0 :+ 2
+                            , Point3 10 20 0 :+ 3
                             ]
 
 myPts' :: NonEmpty (Point 3 Rational :+ Int)
-myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 0
+myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 1  1  10 :+ 1
-                             , Point3 0  10 20 :+ 2
+                             , Point3 0  10 20 :+ 0
                              , Point3 12 1  1  :+ 3
                              ]
 
@@ -355,13 +406,3 @@ myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 0
 test' = run myPts
 
 test = mapM_ print $ lowerHull' myPts'
-
--- foo      :: NonEmpty (Point 3 Rational :+ Int) -> V.Vector (Point 3 Rational)
--- foo pts' = runST $ runDLListMonad (Env pts <$> MV.new 5) sim
---   where
---     (pts,exts) = traceShowId $ bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
-
---     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
-
---     sim :: DLListMonad s Rational (V.Vector (Point 3 Rational))
---     sim = traceShow "foo"$ asks (traceShowId . points . traceShow "going")
