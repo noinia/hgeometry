@@ -29,18 +29,17 @@ import qualified Data.Vector.Mutable as MV
 import           Data.Maybe (catMaybes)
 import           Debug.Trace
 import           Data.Ratio
---------------------------------------------------------------------------------0
+--------------------------------------------------------------------------------
 
--- TODO: We assume that no four points are colinear
+-- TODO: We seem to assume that no four points are coplanar, and no
+-- three points lie on a vertical plane. Figure out where we assume that exactly.
+
+-- FIXME: We start with some arbitrary starting slope. Fix that
+
+-- plumb the p's around.
 
 
--- type ConvexHull p r = [Two (Point 3 r :+ p)]
-
-
--- type ConvexHull d p r = [Two (Point 3 r)]
 type ConvexHull d p r = [Three Index]
-
-  -- V.Vector [Index] -- [Edge]--[Two (Point 3 r :+ p)]
 
 
 -- lowerHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
@@ -263,7 +262,7 @@ handleExisting' e bridgePoint cmp p =
 applyEvent :: EventKind -> HullM s r ()
 applyEvent = \case
   InsertAfter i j  -> insertAfter i j
-  InsertBefore i j -> insertBefore i j
+  InsertBefore i h -> insertBefore i h
   Delete j         -> delete j
 
 ----------------------------------------
@@ -309,9 +308,9 @@ nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
     -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
     -- with the bridge.
     cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
-    cands = [ (getPrev l, \a -> nextTime l r a :+ (Bridge a r, Delete l))
-            , (getNext l, \b -> nextTime l r b :+ (Bridge b r, InsertAfter  l b))
-            , (getPrev r, \c -> nextTime l r c :+ (Bridge l c, InsertBefore r c))
+    cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
+            , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
+            , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore r c))
             , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
             ]
 
@@ -387,14 +386,15 @@ run pts' = runST
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
 
 
-myPts :: NonEmpty (Point 3 Rational :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 1 1 0 :+ 0
-                            , Point3 3 2 0 :+ 1
-                            , Point3 5 5 0 :+ 2
-                            , Point3 10 20 0 :+ 3
+myPts :: NonEmpty (Point 3 Double :+ Int)
+myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
+                            , Point3 1  1  10 :+ 1
+                            , Point3 0  10 20 :+ 0
+                            , Point3 12 1  1  :+ 3
+                            , Point3 22 20  1  :+ 4
                             ]
 
-myPts' :: NonEmpty (Point 3 Rational :+ Int)
+myPts' :: NonEmpty (Point 3 Double :+ Int)
 myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 1  1  10 :+ 1
                              , Point3 0  10 20 :+ 0
@@ -403,6 +403,6 @@ myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
 
 
 
-test' = run myPts
+test' = mapM_ print $ lowerHull' myPts
 
 test = mapM_ print $ lowerHull' myPts'

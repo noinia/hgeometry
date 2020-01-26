@@ -19,7 +19,7 @@ import qualified Data.List as List
 -- * Strict Triples
 
 -- |  strict triple
-data STR a b c = STR { fst' :: !a, snd' :: !b , trd' :: !c}
+data STR a b c = STR !a !b !c
                deriving (Show,Eq,Ord,Functor,Generic)
 
 instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (STR a b c) where
@@ -33,13 +33,13 @@ instance (Semigroup a, Semigroup b, Semigroup c
 instance (NFData a, NFData b, NFData c) => NFData (STR a b c)
 
 instance Field1 (STR a b c) (STR d b c) a d where
-  _1 = lens fst' (\(STR _ b c) d -> STR d b c)
+  _1 = lens (\(STR a _ _) -> a) (\(STR _ b c) d -> STR d b c)
 
 instance Field2 (STR a b c) (STR a d c) b d where
-  _2 = lens snd' (\(STR a _ c) d -> STR a d c)
+  _2 = lens (\(STR _ b _) -> b) (\(STR a _ c) d -> STR a d c)
 
 instance Field3 (STR a b c) (STR a b d) c d where
-  _3 = lens trd' (\(STR a b _) d -> STR a b d)
+  _3 = lens (\(STR _ _ c) -> c) (\(STR a b _) d -> STR a b d)
 
 -- | Generate All unique unordered triplets.
 --

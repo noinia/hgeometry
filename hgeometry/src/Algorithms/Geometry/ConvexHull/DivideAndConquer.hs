@@ -16,7 +16,6 @@ module Algorithms.Geometry.ConvexHull.DivideAndConquer( convexHull
 
 import           Algorithms.DivideAndConquer
 import           Control.Arrow ((&&&))
-import           Control.Lens ((^.), to)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
