@@ -26,7 +26,7 @@ module Data.LSeq( LSeq
                 , take
                 , drop
                 , unstableSort, unstableSortBy
-                , head, last
+                , head, tail, last, init
                 , append
 
                 , ViewL(..)
@@ -40,6 +40,7 @@ module Data.LSeq( LSeq
                 , viewr
                 , pattern (:|>)
 
+                , zipWith
 
                 , promise
                 , forceLSeq
@@ -58,7 +59,7 @@ import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           Prelude hiding (drop,take,head,last)
+import           Prelude hiding (drop,take,head,last,tail,init,zipWith)
 import           Test.QuickCheck (Arbitrary(..),vector)
 
 --------------------------------------------------------------------------------
@@ -301,6 +302,12 @@ pattern xs :|> x <- (viewr' -> (xs,x))
 head           :: LSeq (1 + n) a -> a
 head (x :<| _) = x
 
+-- | Get the LSeq without its first element
+-- -- >>> head $ forceLSeq (Proxy :: Proxy 3) $ fromList [1,2,3]
+-- LSeq (fromList [2,3])
+tail           :: LSeq (1 + n) a -> LSeq n a
+tail (_ :<| s) = s
+
 -- s = let (x :< _) = viewl s in x
 
 -- | Get the last element of the LSeq
@@ -310,6 +317,14 @@ head (x :<| _) = x
 last           :: LSeq (1 + n) a -> a
 last (_ :|> x) = x
 
+
+-- | The sequence without its last element
+--
+-- >>> init $ forceLSeq (Proxy :: Proxy 3) $ fromList [1,2,3]
+-- LSeq (fromList [1,2])
+init           :: LSeq (1 + n) a -> LSeq n a
+init (s :|> _) = s
+
 -- testL = (eval (Proxy :: Proxy 2) $ fromList [1..5])
 
 -- testL' :: LSeq 2 Integer
@@ -317,3 +332,10 @@ last (_ :|> x) = x
 
 -- test            :: Show a => LSeq (1 + n) a -> String
 -- test (x :<| xs) = show x ++ show xs
+
+
+--------------------------------------------------------------------------------
+
+-- | Zips two equal length LSeqs
+zipWith         :: (a -> b -> c) -> LSeq n a -> LSeq n b -> LSeq n c
+zipWith f sa sb = LSeq $ S.zipWith f (toSeq sa) (toSeq sb)

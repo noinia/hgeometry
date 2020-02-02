@@ -21,6 +21,14 @@ import           GHC.Generics(Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- $setup
+-- >>> :{
+-- let myPolyLine = fromPoints $ map ext [origin, Point2 10.0 10.0, Point2 10.0 20.0]
+-- :}
+
+--------------------------------------------------------------------------------
 -- * d-dimensional Polygonal Lines (PolyLines)
 
 -- | A Poly line in R^d has at least 2 vertices
@@ -80,3 +88,23 @@ asLineSegment'                :: PolyLine d p r -> Maybe (LineSegment d p r)
 asLineSegment' (PolyLine pts) = case F.toList pts of
                                   [p,q] -> Just $ ClosedLineSegment p q
                                   _     -> Nothing
+
+-- | Computes the edges, as linesegments, of an LSeq
+edgeSegments    :: Arity d => PolyLine d p r -> LSeq 1 (LineSegment d p r)
+edgeSegments pl = let vs = pl^.points
+                  in LSeq.zipWith ClosedLineSegment (LSeq.init vs) (LSeq.tail vs)
+
+
+-- | Linearly interpolate the polyline with a value in the range
+-- \([0,n-1]\), where \(n\) is the number of vertices of the polyline.
+--
+-- running time: \(O(\log n)\)
+--
+-- >>> interpolatePoly 0.5 myPolyLine
+-- Point2 [5.0,5.0]
+-- >>> interpolatePoly 1.5 myPolyLine
+-- Point2 [10.0,15.0]
+interpolatePoly      :: (RealFrac r, Arity d) => r -> PolyLine d p r -> Point d r
+interpolatePoly t pl = let i = floor t in case edgeSegments pl^?ix i of
+                         Nothing -> pl^.points.to LSeq.last.core
+                         Just e  -> interpolate (t-fromIntegral i) e
