@@ -18,7 +18,7 @@ spec = do
 
 
 runT   :: (forall s. DLListMonad s Char a) -> a
-runT c = runST $ runDLListMonad (singletons (V.fromList "abcdefghi")) c
+runT c = runDLListMonad (V.fromList "abcdefghi") c
 
 myProg :: DLListMonad s b (NonEmpty Index, NonEmpty Index)
 myProg = do writeList (0 :| [2,4,6,8])

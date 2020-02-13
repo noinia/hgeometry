@@ -13,7 +13,8 @@
 -- embedding.
 --
 --------------------------------------------------------------------------------
-module Data.PlaneGraph.Core( PlaneGraph(PlaneGraph), graph
+module Data.PlaneGraph.Core( -- $setup
+                             PlaneGraph(PlaneGraph), graph
                            , PlanarGraph
                            , VertexData(VertexData), vData, location, vtxDataToExt
                            , fromSimplePolygon, fromConnectedSegments
@@ -86,7 +87,6 @@ import qualified Data.Vector as V
 import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
-
 
 -- $setup
 -- >>> import Data.Proxy
@@ -390,17 +390,27 @@ endPoints d = PG.endPoints d . _graph
 incidentEdges   :: VertexId' s -> PlaneGraph s v e f r -> V.Vector (Dart s)
 incidentEdges v = PG.incidentEdges v . _graph
 
--- | All incoming edges incident to vertex v, in counterclockwise order around v.
+
+-- | All edges incident to vertex v in incoming direction
+-- (i.e. pointing into v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 --
 -- >>> incomingEdges (VertexId 1) smallG
--- [Dart (Arc 1) -1]
+-- [Dart (Arc 1) +1,Dart (Arc 4) -1,Dart (Arc 3) -1]
 incomingEdges   :: VertexId' s -> PlaneGraph s v e f r -> V.Vector (Dart s)
 incomingEdges v = PG.incomingEdges v . _graph
 
--- | All outgoing edges incident to vertex v, in counterclockwise order around v.
+
+
+-- | All edges incident to vertex v in incoming direction
+-- (i.e. pointing into v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 --
 -- >>> outgoingEdges (VertexId 1) smallG
--- [Dart (Arc 4) +1,Dart (Arc 3) +1]
+--
+-- [Dart (Arc 1) -1,Dart (Arc 4) +1,Dart (Arc 3) +1]
 outgoingEdges   :: VertexId' s -> PlaneGraph s v e f r  -> V.Vector (Dart s)
 outgoingEdges v = PG.outgoingEdges v . _graph
 

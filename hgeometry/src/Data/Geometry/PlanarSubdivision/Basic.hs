@@ -423,13 +423,23 @@ nextIncidentEdge d ps = let (_,d',g) = asLocalD d ps
                             d''      = PG.nextIncidentEdge d' g
                         in g^.dataOf d''
 
--- | All incoming edges incident to vertex v, in counterclockwise order around v.
+-- | All edges incident to vertex v in incoming direction
+-- (i.e. pointing into v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 incomingEdges      :: VertexId' s -> PlanarSubdivision s v e f r -> V.Vector (Dart s)
-incomingEdges v ps = V.filter (not . isPositive) $ incidentEdges v ps
+incomingEdges v ps = orient <$> incidentEdges v ps
+  where
+    orient d = if headOf d ps == v then d else twin d
 
--- | All outgoing edges incident to vertex v, in counterclockwise order around v.
+-- | All edges incident to vertex v in outgoing direction
+-- (i.e. pointing away from v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 outgoingEdges      :: VertexId' s -> PlanarSubdivision s v e f r  -> V.Vector (Dart s)
-outgoingEdges v ps = V.filter isPositive $ incidentEdges v ps
+outgoingEdges v ps = orient <$> incidentEdges v ps
+  where
+    orient d = if tailOf d ps == v then d else twin d
 
 
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
@@ -437,10 +447,7 @@ outgoingEdges v ps = V.filter isPositive $ incidentEdges v ps
 --
 -- running time: \(O(k)\), where \(k\) is the output size
 neighboursOf      :: VertexId' s -> PlanarSubdivision s v e f r -> V.Vector (VertexId' s)
-neighboursOf v ps = otherVtx <$> incidentEdges v ps
-  where
-    otherVtx d = let u = tailOf d ps in if u == v then headOf d ps else u
-
+neighboursOf v ps = flip tailOf ps <$> incomingEdges v ps
 
 -- | The face to the left of the dart
 --

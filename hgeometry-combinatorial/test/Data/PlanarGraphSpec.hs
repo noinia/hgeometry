@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.PlanarGraphSpec where
 
-
+import Control.Lens(view,_3)
 import           Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Foldable as F
@@ -90,7 +90,7 @@ fromAdjacencyListsOld      :: forall s f.(Foldable f, Functor f)
 fromAdjacencyListsOld adjM = planarGraph' . toCycleRep n $ perm
   where
     n    = sum . fmap length $ perm
-    perm = trd' . foldr toOrbit (STR mempty 0 mempty) $ adjM
+    perm = view (_3) . foldr toOrbit (STR mempty 0 mempty) $ adjM
 
 
     -- | Given a vertex with its adjacent vertices (u,vs) (in CCW order) convert this

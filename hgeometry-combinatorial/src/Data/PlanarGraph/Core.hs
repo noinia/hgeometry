@@ -432,13 +432,23 @@ incidentEdges                :: VertexId s w -> PlanarGraph s w v e f
 incidentEdges (VertexId v) g = g^?!embedding.orbits.ix v
   -- TODO: The Delaunay triang. stuff seems to produce these in clockwise order instead
 
--- | All incoming edges incident to vertex v, in counterclockwise order around v.
+-- | All edges incident to vertex v in incoming direction
+-- (i.e. pointing into v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 incomingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
-incomingEdges v g = V.filter (not . isPositive) $ incidentEdges v g
+incomingEdges v g = orient <$> incidentEdges v g
+  where
+    orient d = if headOf d g == v then d else twin d
 
--- | All outgoing edges incident to vertex v, in counterclockwise order around v.
+-- | All edges incident to vertex v in outgoing direction
+-- (i.e. pointing away from v) in counterclockwise order around v.
+--
+-- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 outgoingEdges     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (Dart s)
-outgoingEdges v g = V.filter isPositive $ incidentEdges v g
+outgoingEdges v g = orient <$> incidentEdges v g
+  where
+    orient d = if tailOf d g == v then d else twin d
 
 
 -- | Gets the neighbours of a particular vertex, in counterclockwise order
@@ -446,9 +456,7 @@ outgoingEdges v g = V.filter isPositive $ incidentEdges v g
 --
 -- running time: \(O(k)\), where \(k\) is the output size
 neighboursOf     :: VertexId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
-neighboursOf v g = otherVtx <$> incidentEdges v g
-  where
-    otherVtx d = let u = tailOf d g in if u == v then headOf d g else u
+neighboursOf v g = flip tailOf g <$> incomingEdges v g
 
 -- | Given a dart d that points into some vertex v, report the next dart in the
 -- cyclic order around v.
