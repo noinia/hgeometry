@@ -1,26 +1,24 @@
-module Algorithms.Geometry.ConvexHull.KineticDivideAncConquer where
+module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 import           Algorithms.DivideAndConquer
 import           Control.Applicative (liftA2)
 import           Control.Lens ((^.), bimap, Lens', _1, _2)
 import           Control.Monad ((<=<))
-import           Control.Monad.Primitive (PrimMonad(..))
-import           Control.Monad.Reader (ReaderT, runReaderT)
-import           Control.Monad.Reader.Class
-import           Control.Monad.ST
+import           Control.Monad (replicateM)
 import           Control.Monad.State.Class (gets, get, put)
 import           Control.Monad.State.Strict (StateT, evalStateT)
 import           Control.Monad.Trans
-import           Control.Monad.Writer (Writer)
 import           Data.Bitraversable
 import           Data.Ext
 import           Data.Foldable (forM_)
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Triangle
+import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon.Convex (lowerTangent')
+import           Data.Geometry.Triangle
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..), (<|))
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Data.Ord (comparing)
@@ -28,9 +26,17 @@ import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 
+import           Data.Geometry.Ipe
+import           Data.Geometry.Ipe.Color
 import           Data.Maybe (catMaybes)
-import           Debug.Trace
 import           Data.Ratio
+
+
+import           Control.Monad.Reader.Class
+import           Debug.Trace
+import           System.IO.Unsafe
+import           System.Random
+import qualified Data.Text as Text
 --------------------------------------------------------------------------------
 
 
@@ -50,7 +56,7 @@ type ConvexHull d p r = [Triangle 3 p r]
 -- lowerHull = maybe mempty lowerHull' . NonEmpty.nonEmpty
 
 
-lowerHull'      :: forall r p. (Ord r, Fractional r, Show r)
+lowerHull'      :: forall r p. (Ord r, Fractional r, Show r, IpeWriteText r)
                 => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
   where
@@ -72,7 +78,7 @@ type HullM s r = DLListMonad s (Point 3 r)
 
 --------------------------------------------------------------------------------
 
-instance (Ord r, Fractional r, Show r)
+instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
   lc <> rc = traceShow "<>" $
              do l <- lc
@@ -83,7 +89,9 @@ instance (Ord r, Fractional r, Show r)
                 STR h u v <- traceShow ("before merge:",d) <$> findBridge t l r
                 es <- runKinetic t esIn (Bridge u v)
                 writeList $ traceShow ("writing hull: ",h) h
-                pure $ MergeStatus (hd l) (lst r) es
+                let ms = MergeStatus (hd l) (lst r) es
+                pts <- getPoints
+                pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
     where
       mkT = \case
         []    -> (-10000000) -- TODO; at what time value should we start?
@@ -367,8 +375,11 @@ pointAt' :: Index -> Simulation s r (Point 3 r)
 pointAt' = lift . pointAt
 
 atTime     :: Num r => r -> Index -> HullM s r (Point 2 r)
-atTime t i = (\(Point3 x y z) -> Point2 x (z - t*y)) <$> pointAt i
+atTime t i = atTime' t <$> pointAt i
 
+-- | Computes the position of the given point at time t
+atTime'                  :: Num r => r -> Point 3 r -> Point 2 r
+atTime' t (Point3 x y z) = Point2 x (z - t*y)
 
 --------------------------------------------------------------------------------
 -- * Pure Helpers
@@ -410,3 +421,54 @@ myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
 test = mapM_ print $ lowerHull' myPts
 
 test' = mapM_ print $ lowerHull' myPts'
+
+
+--------------------------------------------------------------------------------
+
+drawDebug            :: (IpeWriteText r, Ord r, Fractional r)
+                     => String -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> FilePath
+drawDebug s ms b pts = unsafePerformIO $
+                       do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
+                          drawAll fp ms b pts
+                          pure fp
+  where
+    randomS :: IO String
+    randomS = replicateM 10 $ randomRIO ('a','z')
+
+
+drawAll ::  (IpeWriteText r, Ord r, Fractional r) =>
+            FilePath
+        -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> IO ()
+drawAll fp ms b pts = writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ draw ms b pts
+
+draw          :: (Fractional r, Ord r, IpeWriteText r)
+              => MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
+draw ms b pts = fmap (\t -> drawAt t ms b pts) times
+  where
+    times = NonEmpty.fromList . (initT :)
+          . concatMap (\e -> let t = eventTime e in [t-eps,t,t+eps]) $ events ms
+    eps = (1/1000)
+
+    initT = (-10000000)
+    -- we should recompute the bridge I guess
+
+drawAt                       :: (Num r, Ord r, IpeWriteText r)
+                             => r -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> IpePage r
+drawAt t ms (Bridge l r) pts = fromContent $ obs <> [drawBridge l r pts2, time]
+  where
+    pts2 = fmap (atTime' t) pts
+
+    obs = V.toList . V.imap (\i p -> iO $ labelled id defIO (p :+ i)) $ pts2
+    time = iO $ ipeLabel ((fromJust $ ipeWriteText t) :+ Point2 (-50) (-50))
+
+
+
+drawHull       :: [Index] -> V.Vector (Point 2 r) -> IpeObject r
+drawHull h pts = iO . ipePolyLine . fromPoints $ [ (pts V.! i) :+ () | i <- h ]
+
+drawBridge         :: Index -> Index -> V.Vector (Point 2 r) -> IpeObject r
+drawBridge l r pts = let s = ClosedLineSegment (ext $ pts V.! l) (ext $ pts V.! r)
+                     in iO $ ipeLineSegment s ! attr SStroke red
+
+getPoints :: DLListMonad s x (V.Vector x)
+getPoints = asks values

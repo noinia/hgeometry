@@ -38,6 +38,7 @@ import           Data.Geometry.Transformation
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Text (Text)
+import qualified Data.Text as Text
 import           Data.Maybe (fromMaybe)
 import           Linear.Affine ((.+^))
 import           Data.Vinyl.CoRec
@@ -218,6 +219,17 @@ ipeGroup    :: IpeOut [IpeObject r] Group r
 ipeGroup xs = Group xs :+ mempty
 
 
-
-
 --------------------------------------------------------------------------------
+-- * Text Converters
+
+-- | Creates an text label
+ipeLabel            :: IpeOut (Text :+ Point 2 r) TextLabel r
+ipeLabel (txt :+ p) = Label txt p :+ mempty
+
+
+-- | Annotate an IpeOut with a label
+labelled                 :: (Show lbl, NumType g ~ r, ToObject i)
+                         => (g -> Point 2 r) -- ^ where to place the label
+                         -> IpeOut g i r     -- ^ how to draw the geometric object
+                         -> IpeOut (g :+ lbl) Group r
+labelled pos f (g :+ lbl) = ipeGroup [iO $ f g, iO $ ipeLabel ((Text.pack $ show lbl) :+ pos g)]
