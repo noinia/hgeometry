@@ -83,22 +83,30 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
   lc <> rc = traceShow "<>" $
              do l <- lc
                 r <- rc
-                d <- debugHull l r
+
+                d@(lh,rh,_,_,_,_) <- debugHull l r
+                pts <- getPoints
+
                 let esIn = traceShow d $ mergeEvents (events l) (events r)
                     t    = mkT esIn
-                STR h u v <- traceShow ("before merge:",d) <$> findBridge t l r
-                es <- runKinetic t esIn (Bridge u v)
+                STR h u v <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
+                                       ) <$> findBridge t l r
+                let b = traceShow ("hull:",h) $ (Bridge u v)
+
+                es <- runKinetic t esIn $ traceShow (drawDebug "before_merge_" t h b pts)
+                                        b
                 writeList $ traceShow ("writing hull: ",h) h
                 let ms = MergeStatus (hd l) (lst r) es
-                pts <- getPoints
-                pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
+                pure ms
+                --
+                -- pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
     where
       mkT = \case
-        []    -> (-10000000) -- TODO; at what time value should we start?
+        []    -> (-1000) -- TODO; at what time value should we start?
         (e:_) -> e^.core - 1
 
-      debugHull l r = (\a b c d -> (NonEmpty.toList a
-                                   , NonEmpty.toList b
+      debugHull l r = (\a b c d -> ( a
+                                   , b
                                    , c
                                    , d
                                    , events l
@@ -119,11 +127,11 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
 -- | Reports all the edges on the CH
 output    :: Show r => MergeStatus r -> HullM s r [Three Index]
 output ms | traceShow ("output: ", events ms) False = undefined
-output ms = catMaybes <$> mapM (handle . eventKind) (events ms)
+output ms = catMaybes <$> mapM handle  (events ms)
   where
-    handle ek = do mt <- reportTriangle ek
-                   applyEvent ek
-                   pure mt
+    handle e = do mt <- reportTriangle (eventKind e)
+                  applyEvent e
+                  pure mt
 
     -- u v w =  <$> pointAt u <*> pointAt v
 
@@ -180,7 +188,7 @@ findBridge       :: (Ord r, Fractional r, Show r)
 findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
                       rh <- mapM (atTime' t) =<< toListFrom  (hd r)
                       let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
-                      pure $ STR (NonEmpty.fromList $ ls <> [u,v] <> rs) u v
+                      pure $ STR (NonEmpty.fromList $ reverse ls <> [u,v] <> rs) u v
   where
     atTime' t' i = (:+ i) <$> atTime t' i
 
@@ -201,7 +209,8 @@ type Simulation s r = StateT Bridge (HullM s r)
 -- change in the complete hull). Note that whether or not this event
 -- is produced depends on the position of the bridge at the time when
 -- we handle the event.
-mergeEvents       :: Ord r => [Event r] -> [Event r] -> [r :+ Simulation s r (Maybe (Event r))]
+mergeEvents       :: (Ord r, Show r)
+                  => [Event r] -> [Event r] -> [r :+ Simulation s r (Maybe (Event r))]
 mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$> ls)
                                                               (f handleRight <$> rs)
   where
@@ -213,26 +222,38 @@ mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$>
 -- - the multable array in env represents the hulls L and R
 -- - we maintain the current bridge u on L and v on R such that
 -- - L[1..u] <> R[v..n] is the output hull H
-runKinetic        :: (Ord r, Fractional r, Show r )
+runKinetic        :: (Ord r, Fractional r, Show r, IpeWriteText r )
                   => r          -- starting time
                   -> [r :+ Simulation s r (Maybe (Event r))]  -- existing events
                   -> Bridge -- initial bridge
                   -> HullM s r [Event r]
 runKinetic t es b = evalStateT (handleEvent t es) b
 
+
+
+fromBridge :: Bridge -> DLListMonad s b (NonEmpty Index)
+fromBridge (Bridge l r) = (\lh rh -> NonEmpty.reverse lh <> rh
+                             ) <$> toListFromR l <*> toListFrom r
+
 -- | The actual code for handling an event in the kinetic
 -- simulation. At every step, we recompute what the next bridge event
 -- is, and apply the first event that occurs (either this bridge
 -- event, or one of the existing events).
-handleEvent        :: (Ord r, Fractional r, Show r)
+handleEvent        :: (Ord r, Fractional r, Show r, IpeWriteText r)
                    => r -> [r :+ Simulation s r (Maybe (Event r))] -> Simulation s r [Event r]
-handleEvent now es | traceShow ("HandleEvent ", now, length es) False = undefined
-handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
-    ([],Nothing)                     -> pure []
-    ([],Just be)                     -> handleBridge be []
-    (e:es', Nothing)                 -> handleExisting e es'
-    (e:es', Just be) | e `before` be -> handleExisting e es'
-                     | otherwise     -> handleBridge be es
+handleEvent now es | traceShow ("HandleEvent ", now, map (^.core) es) False = undefined
+handleEvent now es = do -- nextBridgeEvent now >>= \mbe -> case (es, mbe) of
+       mbe <- nextBridgeEvent now
+       pts <- lift $ getPoints
+       b <- get
+       h <- lift $ fromBridge b
+       case traceShow (drawDebug ("handleEvent_" <> show now) now h b pts)
+            (es, mbe) of
+         ([],Nothing)                     -> pure []
+         ([],Just be)                     -> handleBridge be []
+         (e:es', Nothing)                 -> handleExisting e es'
+         (e:es', Just be) | e `before` be -> handleExisting e es'
+                          | otherwise     -> handleBridge be es
   where
     cons me outEvents = maybeToList me <> outEvents
 
@@ -241,10 +262,13 @@ handleEvent now es = nextBridgeEvent now >>= \mbe -> case (es, mbe) of
     handleExisting (t :+ h) es' = cons <$> h <*> handleEvent t es'
     handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent t es'
 
+
+
+
 ----------------------------------------
 -- * Handling the events in the Existing Hulls
 
-handleLeft   :: Ord r => Event r -> Simulation s r (Maybe (Event r))
+handleLeft   :: (Ord r, Show r) => Event r -> Simulation s r (Maybe (Event r))
 handleLeft e = handleExisting' e leftBridgePoint (<=) l
   where
     l = case eventKind e of -- find the rightmost point involved in the event
@@ -252,7 +276,8 @@ handleLeft e = handleExisting' e leftBridgePoint (<=) l
           InsertBefore _ j -> j
           Delete j         -> j
 
-handleRight   :: Ord r => Event r -> Simulation s r (Maybe (Event r))
+handleRight   :: (Ord r, Show r)
+              => Event r -> Simulation s r (Maybe (Event r))
 handleRight e = handleExisting' e rightBridgePoint (>=) r
   where
     r = case eventKind e of -- find the leftmost point involved in the event
@@ -262,21 +287,26 @@ handleRight e = handleExisting' e rightBridgePoint (>=) r
 
 -- | Handler for an event on the right hull
 --
-handleExisting'  :: forall s r. Event r -> Lens' Bridge Index -> (r -> r -> Bool) -> Index
+handleExisting'  :: forall s r. (Show r)
+                 => Event r -> Lens' Bridge Index -> (r -> r -> Bool) -> Index
                  -> Simulation s r (Maybe (Event r))
 handleExisting' e bridgePoint cmp p =
-    do lift $ applyEvent (eventKind e)
+    do lift $ applyEvent e
        v <- gets (^.bridgePoint)
        outputEvent <$> pointAt' p <*> pointAt' v
   where
     outputEvent pp bp = if (pp^.xCoord) `cmp` (bp^.xCoord) then Just e else Nothing
 
+
 -- | Applies the actual event, mutating the current representation of the hulls.
-applyEvent :: EventKind -> HullM s r ()
-applyEvent = \case
+applyEvent' :: EventKind -> HullM s r ()
+applyEvent' = \case
   InsertAfter i j  -> insertAfter i j
   InsertBefore i h -> insertBefore i h
   Delete j         -> delete j
+
+applyEvent   :: (Show r) => Event r -> HullM s r ()
+applyEvent e = applyEvent' $ traceShow ("applyEvent ",e) (eventKind e)
 
 ----------------------------------------
 -- * Bridge Events
@@ -289,7 +319,7 @@ nextBridgeEvent now = do b <- get
                          es <- nextBridgeEvents b
                          fmap mkHandler <$> nextBridgeEvent' now (debug es b)
   where
-    mkHandler (t :+ (b',k)) = t :+ do put b'
+    mkHandler (t :+ (b',k)) = t :+ do put $ traceShow ("setting bridge to ",b'," at time ",t) b'
                                       pure $ Event t k
 
     debug es b = traceShow ("candidate events with ",b," ", es) b
@@ -301,11 +331,14 @@ nextBridgeEvent now = do b <- get
 
 -- | Finds the next event involving the current bridge.
 -- The arguments are the current time, and the current bridge indices.
-nextBridgeEvent'       :: (Ord r, Fractional r)
+nextBridgeEvent'       :: (Ord r, Fractional r, Show r)
                        => r -> Bridge
                        -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now b = minimumOn (^.core) . filter (\e -> now < e^.core)
+nextBridgeEvent' now b = tr . minimumOn (^.core) . trz . filter (\e -> now < e^.core)
                       <$> nextBridgeEvents b
+  where
+    tr x = traceShow ("nextBridgeEvent', next event found: ",(^.core) <$> x) x
+    trz x = traceShow ("filtered events",now, (^.core) <$> x) x
 
 -- | Computes all candidate bridge events
 nextBridgeEvents                  :: forall r s. (Ord r, Fractional r)
@@ -425,46 +458,70 @@ test' = mapM_ print $ lowerHull' myPts'
 
 --------------------------------------------------------------------------------
 
-drawDebug            :: (IpeWriteText r, Ord r, Fractional r)
-                     => String -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> FilePath
-drawDebug s ms b pts = unsafePerformIO $
+drawDebug             :: (IpeWriteText r, Ord r, Fractional r)
+                      => String
+                      -> r
+                      -> NonEmpty Index
+                      -> Bridge
+                      -> V.Vector (Point 3 r)
+                      -> FilePath
+drawDebug s t h blr pts = unsafePerformIO $
                        do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
-                          drawAll fp ms b pts
+                          drawAllAt fp t h blr pts
                           pure fp
   where
     randomS :: IO String
     randomS = replicateM 10 $ randomRIO ('a','z')
 
 
-drawAll ::  (IpeWriteText r, Ord r, Fractional r) =>
-            FilePath
-        -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> IO ()
-drawAll fp ms b pts = writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ draw ms b pts
 
-draw          :: (Fractional r, Ord r, IpeWriteText r)
-              => MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
-draw ms b pts = fmap (\t -> drawAt t ms b pts) times
+
+
+
+drawAllAt fp t h blr pts = writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ draw t h blr pts
+
+
+draw                       :: (Fractional r, Ord r, IpeWriteText r)
+                           => r
+                           -> NonEmpty Index
+                           -> Bridge
+                           -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
+draw t h blr pts = fmap (\t' -> drawAt t' h blr pts)
+                 $ NonEmpty.fromList [t-eps,t,t+eps]
   where
-    times = NonEmpty.fromList . (initT :)
-          . concatMap (\e -> let t = eventTime e in [t-eps,t,t+eps]) $ events ms
-    eps = (1/1000)
+    eps = (1/10)
 
-    initT = (-10000000)
-    -- we should recompute the bridge I guess
+
+-- draw          :: (Fractional r, Ord r, IpeWriteText r)
+--               => MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
+-- draw ms b pts = fmap (\t -> drawAt t ms b pts) times
+--   where
+--     times = NonEmpty.fromList . (initT :)
+--           . concatMap (\e -> let t = eventTime e in [t-eps,t,t+eps]) $ events ms
+--     eps = (1/1000)
+
+--     initT = (-10000000)
+--     -- we should recompute the bridge I guess
 
 drawAt                       :: (Num r, Ord r, IpeWriteText r)
-                             => r -> MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> IpePage r
-drawAt t ms (Bridge l r) pts = fromContent $ obs <> [drawBridge l r pts2, time]
+                             => r
+                             -> NonEmpty Index
+                             -> Bridge
+                             -> V.Vector (Point 3 r) -> IpePage r
+drawAt t h (Bridge l r) pts = fromContent $
+   pts' <> [drawHull h pts2, drawBridge l r pts2, time]
   where
     pts2 = fmap (atTime' t) pts
-
-    obs = V.toList . V.imap (\i p -> iO $ labelled id defIO (p :+ i)) $ pts2
+    pts' = V.toList . V.imap (\i p -> iO $ labelled id defIO (p :+ i)) $ pts2
     time = iO $ ipeLabel ((fromJust $ ipeWriteText t) :+ Point2 (-50) (-50))
 
+    -- lh = NonEmpty.head lh' NonEmpty.<| lh'
+    -- rh = NonEmpty.head rh' NonEmpty.<| rh'
 
 
-drawHull       :: [Index] -> V.Vector (Point 2 r) -> IpeObject r
-drawHull h pts = iO . ipePolyLine . fromPoints $ [ (pts V.! i) :+ () | i <- h ]
+
+drawHull       :: NonEmpty Index -> V.Vector (Point 2 r) -> IpeObject r
+drawHull h pts = iO . ipePolyLine . fromPoints $ [ (pts V.! i) :+ () | i <- NonEmpty.toList h ]
 
 drawBridge         :: Index -> Index -> V.Vector (Point 2 r) -> IpeObject r
 drawBridge l r pts = let s = ClosedLineSegment (ext $ pts V.! l) (ext $ pts V.! r)

@@ -37,7 +37,6 @@ import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
 import           Data.Ratio
 import           Data.Singletons
 import           Data.Text (Text)
-import qualified Data.Text as T
 import qualified Data.Text as Text
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.Functor
@@ -138,6 +137,10 @@ writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
 instance IpeWriteText Text where
   ipeWriteText = Just
 
+instance IpeWriteText String where
+  ipeWriteText = ipeWriteText . Text.pack
+
+
 -- | Add attributes to a node
 addAtts :: Node Text Text -> [(Text,Text)] -> Node Text Text
 n `addAtts` ats = n { eAttributes = ats ++ eAttributes n }
@@ -169,13 +172,13 @@ instance Integral a => IpeWriteText (Ratio a) where
       f = id
 
 writeByShow :: Show t => t -> Maybe Text
-writeByShow = ipeWriteText . T.pack . show
+writeByShow = ipeWriteText . Text.pack . show
 
 unwords' :: [Maybe Text] -> Maybe Text
-unwords' = fmap T.unwords . sequence
+unwords' = fmap Text.unwords . sequence
 
 unlines' :: [Maybe Text] -> Maybe Text
-unlines' = fmap T.unlines . sequence
+unlines' = fmap Text.unlines . sequence
 
 
 instance IpeWriteText r => IpeWriteText (Point 2 r) where
@@ -372,7 +375,7 @@ instance IpeWrite View where
                                                   , ("active", _layerName act)
                                                   ] []
     where
-      ls = T.unwords .  map _layerName $ lrs
+      ls = Text.unwords .  map _layerName $ lrs
 
 instance (IpeWriteText r)  => IpeWrite (IpePage r) where
   ipeWrite (IpePage lrs vs objs) = Just .
