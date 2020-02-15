@@ -16,6 +16,7 @@ import           Data.Bitraversable
 import           Data.Ext
 import           Data.Foldable (forM_)
 import           Data.Geometry.Point
+import           Data.Geometry.Triangle
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
@@ -42,27 +43,26 @@ import           Data.Ratio
 
 
 -- type ConvexHull d p r = [Three Index]
-type ConvexHull d p r = [Three (Point 3 r :+ p)]
+type ConvexHull d p r = [Triangle 3 p r]
 
 
 -- lowerHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
 -- lowerHull = maybe mempty lowerHull' . NonEmpty.nonEmpty
 
 
-lowerHull'      :: forall r p. (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHull'      :: forall r p. (Ord r, Fractional r, Show r)
+                => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
   where
     computeHull :: HullM s r [Three Index]
     computeHull = output <=< divideAndConquer1 mkLeaf $ NonEmpty.fromList [0..(n-1)]
 
     n = V.length pts
-    fromNonEmpty = V.fromList . NonEmpty.toList
     (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
 
     -- withPt = id
-    withPt = fmap (\i -> pts V.! i :+ exts V.! i)
-
+    withPt (Three a b c) = let pt i = pts V.! i :+ exts V.! i in Triangle (pt a) (pt b) (pt c)
 
 -- | Creates a Leaf
 mkLeaf   :: Int -> HullM s r (MergeStatus r)
@@ -319,6 +319,9 @@ nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
             , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
             ]
 
+    -- TODO: verify that nextTime a l r == nextTime l r a ?
+
+
 ----------------------------------------
 -- * Helpers for computing the next interesting time in the simulation
 
@@ -386,6 +389,12 @@ myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             , Point3 22 20  1  :+ 4
                             ]
 
+-- myResult = [1 2 3
+--             2 3 4
+--             0 1 2
+--             0 2 4
+--            ]
+
 myPts' :: NonEmpty (Point 3 Double :+ Int)
 myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 1  1  10 :+ 1
@@ -393,8 +402,11 @@ myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 12 1  1  :+ 3
                              ]
 
+-- 1 2 3
+-- 0 1 2
+-- 0 2 3
 
 
-test' = mapM_ print $ lowerHull' myPts
+test = mapM_ print $ lowerHull' myPts
 
-test = mapM_ print $ lowerHull' myPts'
+test' = mapM_ print $ lowerHull' myPts'
