@@ -63,6 +63,8 @@ modules =
   , "Data.Geometry.Polygon"
   , "Data.Geometry.Ball"
   , "Data.Geometry.Box"
+  , "Data.Geometry.HyperPlane"
 
   -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
+  , "Algorithms.Geometry.ConvexHull.Naive"
   ]

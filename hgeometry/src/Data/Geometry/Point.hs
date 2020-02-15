@@ -130,7 +130,7 @@ origin = Point $ pure 0
 -- Point3 [1,2,3]
 vector :: Lens' (Point d r) (Vector d r)
 vector = lens toVec (const Point)
-
+{-# INLINABLE vector #-}
 
 -- | Get the coordinate in a given dimension. This operation is unsafe in the
 -- sense that no bounds are checked. Consider using `coord` instead.
@@ -141,6 +141,7 @@ vector = lens toVec (const Point)
 unsafeCoord   :: Arity d => Int -> Lens' (Point d r) r
 unsafeCoord i = vector . singular (ix (i-1))
                 -- Points are 1 indexed, vectors are 0 indexed
+{-# INLINABLE unsafeCoord #-}
 
 -- | Get the coordinate in a given dimension
 --

@@ -68,12 +68,29 @@ type Plane = HyperPlane 3
 
 pattern Plane     :: Point 3 r -> Vector 3 r -> Plane r
 pattern Plane p n = HyperPlane p n
+{-# COMPLETE Plane #-}
 
+-- | Produces a plane. If r lies counter clockwise of q w.r.t. p then
+-- the normal vector of the resulting plane is pointing "upwards".
+--
+-- >>> from3Points origin (Point3 1 0 0) (Point3 0 1 0)
+-- HyperPlane {_inPlane = Point3 [0,0,0], _normalVec = Vector3 [0,0,1]}
 from3Points       :: Num r => Point 3 r -> Point 3 r -> Point 3 r -> HyperPlane 3 r
 from3Points p q r = let u = q .-. p
                         v = r .-. p
                     in HyperPlane p (u `cross` v)
 
+instance OnSideUpDownTest (Plane r) where
+  -- >>> (Point3 5 5 5) `onSideUpDown` from3Points origin (Point3 1 0 0) (Point3 0 1 0)
+  -- Above
+  -- >>> (Point3 5 5 (-5)) `onSideUpDown` from3Points origin (Point3 1 0 0) (Point3 0 1 0)
+  -- Below
+  -- >>> (Point3 5 5 0) `onSideUpDown` from3Points origin (Point3 1 0 0) (Point3 0 1 0)
+  -- On
+  q `onSideUpDown` (Plane p n) = let v = q .-. p in case (n `dot` v) `compare` 0 of
+                                   LT -> Below
+                                   EQ -> On
+                                   GT -> Above
 
 type instance IntersectionOf (Line 3 r) (Plane r) = [NoIntersection, Point 3 r, Line 3 r]
 

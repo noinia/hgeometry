@@ -50,6 +50,7 @@ type Three = V3
 
 pattern Three :: a -> a -> a -> Three a
 pattern Three a b c = V3 a b c
+{-# COMPLETE Three #-}
 
 -- | Generate All unique unordered triplets.
 --
@@ -90,6 +91,7 @@ type Two = V2
 
 pattern Two :: a -> a -> Two a
 pattern Two a b = V2 a b
+{-# COMPLETE Two #-}
 
 -- | Given a list xs, generate all unique (unordered) pairs.
 --

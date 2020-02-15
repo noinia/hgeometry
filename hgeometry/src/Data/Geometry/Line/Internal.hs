@@ -215,29 +215,34 @@ toLinearFunction l@(Line _ ~(Vector2 vx vy)) = match (l `intersect` verticalLine
     :& (H $ \_              -> Nothing)    -- l is a vertical line (through x=0)
     :& RNil
 
+
 -- | Result of a side test
 data SideTestUpDown = Below | On | Above deriving (Show,Read,Eq,Ord)
 
--- | Given a point q and a line l, compute to which side of l q lies. For
--- vertical lines the left side of the line is interpeted as below.
---
--- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 10 5)
--- Above
--- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 (-10) 5)
--- Above
--- >>> Point2 5 5 `onSideUpDown` (verticalLine 10)
--- Below
--- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
--- On
-onSideUpDown                :: (Ord r, Num r) => Point 2 r -> Line 2 r -> SideTestUpDown
-q `onSideUpDown` (Line p v) = let r    =  p .+^ v
-                                  f z         = (z^.xCoord, -z^.yCoord)
-                                  minBy g a b = F.minimumBy (comparing g) [a,b]
-                                  maxBy g a b = F.maximumBy (comparing g) [a,b]
-                              in case ccw (minBy f p r) (maxBy f p r) q of
-                                   CCW      -> Above
-                                   CW       -> Below
-                                   CoLinear -> On
+class OnSideUpDownTest t where
+  onSideUpDown :: (d ~ Dimension t, r ~ NumType t, Ord r, Num r)
+               => Point d r -> t -> SideTestUpDown
+
+instance OnSideUpDownTest (Line 2 r) where
+  -- | Given a point q and a line l, compute to which side of l q lies. For
+  -- vertical lines the left side of the line is interpeted as below.
+  --
+  -- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 10 5)
+  -- Above
+  -- >>> Point2 10 10 `onSideUpDown` (lineThrough origin $ Point2 (-10) 5)
+  -- Above
+  -- >>> Point2 5 5 `onSideUpDown` (verticalLine 10)
+  -- Below
+  -- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
+  -- On
+  q `onSideUpDown` (Line p v) = let r    =  p .+^ v
+                                    f z         = (z^.xCoord, -z^.yCoord)
+                                    minBy g a b = F.minimumBy (comparing g) [a,b]
+                                    maxBy g a b = F.maximumBy (comparing g) [a,b]
+                                in case ccw (minBy f p r) (maxBy f p r) q of
+                                     CCW      -> Above
+                                     CW       -> Below
+                                     CoLinear -> On
 
 -- | Result of a side test
 data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)
