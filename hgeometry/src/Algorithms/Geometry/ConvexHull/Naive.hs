@@ -43,39 +43,3 @@ isValidTriangle (Triangle p q r) pts = listToMaybe $ filter (\a -> (a^.core) `li
     c  = p&core.zCoord -~ 1
     h  = if (c^.core) `liesBelow` h' then h' else h'&normalVec %~ ((-1) *^)
     a `liesBelow` plane = (a `onSideUpDown` plane) == Below
-
-
-
-
-reorder                  :: Ord p => Triangle 3 p r -> Triangle 3 p r
-reorder (Triangle p q r) = let [p',q',r'] = List.sortOn (^.extra) [p,q,r] in Triangle p' q' r'
-
-
-myPts :: NonEmpty (Point 3 Double :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                            , Point3 1  1  10 :+ 1
-                            , Point3 0  10 20 :+ 0
-                            , Point3 12 1  1  :+ 3
-                            , Point3 22 20  1  :+ 4
-                            ]
-
--- myResult = [1 2 3
---             2 3 4
---             0 1 2
---             0 2 4
---            ]
-
-myPts' :: NonEmpty (Point 3 Double :+ Int)
-myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                             , Point3 1  1  10 :+ 1
-                             , Point3 0  10 20 :+ 0
-                             , Point3 12 1  1  :+ 3
-                             ]
-
--- 1 2 3
--- 0 1 2
--- 0 2 3
-
-test = mapM_ print . map reorder $ lowerHull' myPts
-
-test' = mapM_ print . map reorder $ lowerHull' myPts'

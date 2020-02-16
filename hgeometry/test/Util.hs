@@ -7,8 +7,9 @@ import qualified Data.ByteString.Lazy as LB
 import           Data.Ext
 import           Data.Function (on)
 import           Data.Geometry.Ipe
-import qualified Data.List as L
+import qualified Data.List as List
 import           Data.Proxy
+import qualified Data.Set as Set
 import           Data.Singletons (Apply)
 import           Data.Vinyl
 import           System.Directory (removeFile, getTemporaryDirectory)
@@ -20,26 +21,26 @@ import           Test.Hspec
 
 byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
                => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
-byStrokeColour = map (map fst) . L.groupBy ((==) `on` snd) . L.sortOn snd
+byStrokeColour = map (map fst) . List.groupBy ((==) `on` snd) . List.sortOn snd
                . map (\x -> (x,lookup' x))
   where
     lookup' (_ :+ ats) = lookupAttr (Proxy :: Proxy Stroke) ats
 
 -- | Computes all elements on which the two lists differ
 difference :: Eq a => [a] -> [a] -> [a]
-difference xs ys = (xs L.\\ ys) ++ (ys L.\\ xs)
+difference xs ys = (xs List.\\ ys) ++ (ys List.\\ xs)
 
 -- differenceBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 
 
 diffBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
-diffBy p xs ys = foldr (L.deleteBy p) ys xs
+diffBy p xs ys = foldr (List.deleteBy p) ys xs
 
 -- | \(O(n^2)\) set that ignores duplicates and order
 newtype NaiveSet a = NaiveSet [a] deriving (Show)
 
 instance Eq a => Eq (NaiveSet a) where
-  (NaiveSet xs) == (NaiveSet ys) = L.null $ difference xs ys
+  (NaiveSet xs) == (NaiveSet ys) = List.null $ difference xs ys
 
 
 -- | Given a file with some file contents and a procedure that produces a
@@ -89,3 +90,16 @@ sameFile       :: FilePath -> FilePath -> IO Bool
 sameFile fa fb = do a <- LB.readFile fa
                     b <- LB.readFile fb
                     pure $ a == b
+
+
+--------------------------------------------------------------------------------
+
+-- | Generates a set of n elements (all being different), using the
+-- given generator.
+setOf    :: Ord a => Int -> Gen a -> Gen (Set.Set a)
+setOf n g = buildSet mempty <$> do sz <- getSize
+                                   infiniteListOf (resize (max sz n) g)
+  where
+    buildSet s (x:xs) | length s == n = s
+                      | otherwise     = let s' = Set.insert x s in buildSet s' xs
+    buildSet _  _                     = error "setOf: absurd"
