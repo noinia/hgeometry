@@ -4,7 +4,9 @@
 module Data.Geometry.Triangle where
 
 import           Control.Lens
+import           Data.Bifoldable
 import           Data.Bifunctor
+import           Data.Bitraversable
 import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Geometry.Ball (Disk, disk)
@@ -19,28 +21,44 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import qualified Data.List as List
 import           Data.Maybe (mapMaybe)
+import           Data.Util
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 
-
 --------------------------------------------------------------------------------
 
 -- | Triangles in \(d\)-dimensional space.
-data Triangle d p r = Triangle (Point d r :+ p)
-                               (Point d r :+ p)
-                               (Point d r :+ p)
+data Triangle d p r = Triangle !(Point d r :+ p)
+                               !(Point d r :+ p)
+                               !(Point d r :+ p)
 
 deriving instance (Arity d, Show r, Show p) => Show (Triangle d p r)
 deriving instance (Arity d, Read r, Read p) => Read (Triangle d p r)
 deriving instance (Arity d, Eq r, Eq p)     => Eq (Triangle d p r)
 
-instance Arity d => Functor (Triangle d p) where
-  fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)
+instance Arity d => Bifunctor  (Triangle d) where bimap = bimapDefault
+instance Arity d => Bifoldable (Triangle d) where bifoldMap = bifoldMapDefault
 
+instance Arity d => Bitraversable (Triangle d) where
+  bitraverse f g (Triangle p q r) = let tr = bitraverse (traverse g) f in
+    Triangle <$> tr p <*> tr q <*> tr r
+
+-- instance Arity d => Functor (Triangle d p) where
+--   fmap f (Triangle p q r) = let f' = first (fmap f) in Triangle (f' p) (f' q) (f' r)
+
+instance Field1 (Triangle d p r) (Triangle d p r) (Point d r :+ p) (Point d r :+ p) where
+  _1 = lens (\(Triangle p _ _) -> p) (\(Triangle _ q r) p -> Triangle p q r)
+instance Field2 (Triangle d p r) (Triangle d p r) (Point d r :+ p) (Point d r :+ p) where
+  _2 = lens (\(Triangle _ q _) -> q) (\(Triangle p _ r) q -> Triangle p q r)
+instance Field3 (Triangle d p r) (Triangle d p r) (Point d r :+ p) (Point d r :+ p) where
+  _3 = lens (\(Triangle _ _ r) -> r) (\(Triangle p q _) r -> Triangle p q r)
 
 type instance NumType   (Triangle d p r) = r
 type instance Dimension (Triangle d p r) = d
+
+_TriangleThreePoints :: Iso' (Triangle d p r) (Three (Point d r :+ p))
+_TriangleThreePoints = iso (\(Triangle p q r) -> Three p q r) (\(Three p q r) -> Triangle p q r)
 
 instance PointFunctor (Triangle d p) where
   pmap f (Triangle p q r) = Triangle (p&core %~ f) (q&core %~ f) (r&core %~ f)
