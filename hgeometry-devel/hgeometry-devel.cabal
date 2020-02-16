@@ -15,7 +15,7 @@ extra-source-files:  README.md
 
 library
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
-  hs-source-dirs:      src
+  hs-source-dirs:      src test
   default-language:    Haskell2010
   default-extensions: TypeFamilies
                     , GADTs
@@ -85,9 +85,13 @@ library
               , mtl                     >= 2.2
               , template-haskell
 
-              , hspec, QuickCheck, quickcheck-instances
+              , hspec                   >= 2.7
+              , QuickCheck, quickcheck-instances
               , random
 
 
   exposed-modules:
                    Algorithms.Geometry.ConvexHull.KineticDivideAndConquer
+
+
+                   Algorithms.Geometry.ConvexHull.ConvexHull3DSpec

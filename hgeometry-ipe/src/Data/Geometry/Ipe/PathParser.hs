@@ -12,6 +12,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Ratio
+import           Data.RealNumber.Rational
 import           Data.Text (Text)
 import qualified Data.Text as T
 import           Text.Parsec.Error (messageString, errorMessages)
@@ -39,6 +40,7 @@ defaultFromSeq x (Just (l,y)) = let x'          = fromInteger x
 
 instance Coordinate Double
 instance Coordinate (Ratio Integer)
+instance Coordinate (RealNumber p)
 
 -----------------------------------------------------------------------
 -- | Running the parsers

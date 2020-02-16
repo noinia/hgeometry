@@ -37,8 +37,8 @@ instance KnownNat p => HasResolution (NatPrec p) where
 
 instance KnownNat p => Show (RealNumber p) where
   show r = case asFixed r of
-             Exact p -> dropWhileEnd (== '0') . show $ p
-             Lossy p -> (<> "~")              . show $ p
+             Exact p -> dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p
+             Lossy p -> (<> "~")                                      . show $ p
 
 instance KnownNat p => Read (RealNumber p) where
   readsPrec i = map wrap . readsPrec @(Fixed (NatPrec p)) i

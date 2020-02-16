@@ -82,17 +82,27 @@ type HullM s r = DLListMonad s (Point 3 r)
 
 --------------------------------------------------------------------------------
 
+-- | Computes a lowerbound on the z-value with which to start
+lowerboundT     :: (Ord r, Fractional r) => NonEmpty (Point 3 r) -> r
+lowerboundT pts = (-1) * deltaZ / deltaY
+  where
+    zs = fmap (^.zCoord) pts
+    ys = fmap (NonEmpty.head) . NonEmpty.group1 .  NonEmpty.sort . fmap (^.yCoord) $ pts
+
+    deltaZ = maximum zs - minimum zs
+    deltaY = minimum $ zipWith (-) (NonEmpty.tail ys) (NonEmpty.toList ys)
+
+
 instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
-  lc <> rc = traceShow "<>" $
-             do l <- lc
+  lc <> rc = do l <- lc
                 r <- rc
 
                 d@(lh,rh,_,_,_,_) <- debugHull l r
                 pts <- getPoints
 
                 let esIn = traceShow d $ mergeEvents (events l) (events r)
-                    t    = mkT esIn
+                    t    = (-1000) -- TODO; at what time value should we start?
                 STR h u v <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
                                        ) <$> findBridge t l r
                 let b = traceShow ("hull:",h) $ (Bridge u v)
@@ -105,10 +115,6 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                 --
                 -- pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
     where
-      mkT = \case
-        []    -> (-1000) -- TODO; at what time value should we start?
-        (e:_) -> e^.core - 1
-
       debugHull l r = (\a b c d -> ( a
                                    , b
                                    , c
@@ -232,7 +238,6 @@ runKinetic        :: (Ord r, Fractional r, Show r, IpeWriteText r )
                   -> Bridge -- initial bridge
                   -> HullM s r [Event r]
 runKinetic t es b = evalStateT (handleEvent t es) b
-
 
 
 fromBridge :: Bridge -> DLListMonad s b (NonEmpty Index)
