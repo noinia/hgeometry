@@ -106,6 +106,9 @@ instance IpeWrite t => IpeWrite [t] where
                   [] -> Nothing
                   ns -> (Just $ Element "group" [] ns)
 
+instance IpeWrite t => IpeWrite (NonEmpty t) where
+  ipeWrite = ipeWrite . F.toList
+
 instance (IpeWrite l, IpeWrite r) => IpeWrite (Either l r) where
   ipeWrite = either ipeWrite ipeWrite
 

@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
 
-import           Util
-
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
 import qualified Algorithms.Geometry.SmallestEnclosingBall.RIC as RIC
 import           Algorithms.Geometry.SmallestEnclosingBall.Types
 import           Control.Lens
 import           Control.Monad (when)
-import           Control.Monad.Random.Strict(evalRand)
+import           Control.Monad.Random.Strict (evalRand)
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ball (fromDiameter, disk, Disk)
@@ -17,6 +15,7 @@ import           Data.Maybe
 import           Data.Proxy
 import           System.Random (mkStdGen)
 import           Test.Hspec
+import           Test.Util
 
 
 spec :: Spec

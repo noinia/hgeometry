@@ -12,7 +12,7 @@ import           Data.Maybe
 import qualified Data.Set as Set
 import           Data.Vinyl
 import           Test.Hspec
-import           Util
+import           Test.Util
 
 
 spec :: Spec

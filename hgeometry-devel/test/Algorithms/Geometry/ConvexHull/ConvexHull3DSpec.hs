@@ -31,9 +31,10 @@ spec = describe "3D ConvexHull tests" $ do
 newtype HullInput = HI (NonEmpty (Point 3 (RealNumber 10) :+ Int)) deriving (Eq,Show)
 
 instance Arbitrary HullInput where
-  arbitrary = (\as bs -> fromPts $ as <> bs) <$> setOf 3 arbitrary <*> pure mempty
+  arbitrary = (\as bs -> fromPts $ as <> bs) <$> setOf 3 arbitrary <*> arbitrary
     where
-      fromPts pts = HI . NonEmpty.fromList $ zipWith (:+) (Set.toList pts) ([1..])
+      fromPts pts = HI . NonEmpty.fromList
+                 $ zipWith (:+) (fmap (realToFrac @Int @(RealNumber 10)) <$> Set.toList pts) ([1..])
 
 
 sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)

@@ -20,7 +20,7 @@ import           Data.Semigroup
 import qualified Data.Set as Set
 import           Test.Hspec
 import           Test.QuickCheck
-import           Util
+import           Test.Util
 
 import           Debug.Trace
 

@@ -1,4 +1,4 @@
-module Util where
+module Test.Util where
 
 import           Control.Exception.Base (bracket)
 import           Control.Monad (when)
@@ -16,6 +16,7 @@ import           System.Directory (removeFile, getTemporaryDirectory)
 import           System.FilePath (takeExtension)
 import           System.IO (hClose,openTempFile, Handle)
 import           Test.Hspec
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 

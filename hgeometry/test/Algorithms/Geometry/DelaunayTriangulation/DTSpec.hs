@@ -11,9 +11,10 @@ import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (mapMaybe, fromJust)
+import           Data.RealNumber.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
-import           Util
+import           Test.Util
 
 
 dtEdges :: (Fractional r, Ord r)
@@ -113,3 +114,27 @@ myPoints' = NonEmpty.fromList . map ext $
             , Point2 208 704
             , Point2 192 672
             ]
+
+--------------------------------------------------------------------------------
+-- Issue #28 mentions that these sets loop.
+
+-- for Doubles I guess.
+
+buggyPoints :: NonEmpty.NonEmpty (Point 2 (RealNumber 10) :+ Int)
+buggyPoints = NonEmpty.fromList $ [ Point2 38.5 3.5  :+ 0
+                                  , Point2 67.0 33.0 :+ 1
+                                  , Point2 46.0 45.5 :+ 2
+                                  , Point2 55.5 42.0 :+ 3
+                                  , Point2 36.0 25.0 :+ 4
+                                  , Point2 76.5 12.0 :+ 5
+                                  , Point2 29.0 26.5 :+ 6
+                                  , Point2 55.0 10.5 :+ 7
+                                  ]
+
+buggyPoints2 :: NonEmpty.NonEmpty (Point 2 (RealNumber 18) :+ Char)
+buggyPoints2 = NonEmpty.fromList $ [ Point2 217.44781269876754 249.24741543498274 :+ 'a'
+                                   , Point2 237.91428506927295 105.8082929316906  :+ 'b'
+                                   , Point2 51.46936876163245 193.21960885915342  :+ 'c'
+                                   , Point2 172.55365082143922 2.8346743864823387 :+ 'd'
+                                   , Point2 250.55083565080437 93.13205719006257  :+ 'e'
+                                   ]

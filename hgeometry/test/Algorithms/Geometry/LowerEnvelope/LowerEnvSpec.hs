@@ -19,7 +19,7 @@ import           Data.Semigroup
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 import           Test.Hspec
-import           Util
+import           Test.Util
 
 -- import Algorithms.Geometry.LowerEnvelope.Types
 

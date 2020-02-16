@@ -12,7 +12,7 @@ import qualified Data.LSeq as LSeq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           Test.Hspec
-import           Util
+import           Test.Util
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------

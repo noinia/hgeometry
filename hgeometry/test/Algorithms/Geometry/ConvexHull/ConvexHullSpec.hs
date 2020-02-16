@@ -21,7 +21,7 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck(property)
 import           Test.QuickCheck.Instances ()
--- import           Util
+-- import           Test.Util
 
 import           Debug.Trace
 

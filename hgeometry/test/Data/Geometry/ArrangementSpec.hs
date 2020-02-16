@@ -9,7 +9,7 @@ import           Data.Geometry.Arrangement
 import           Data.Geometry.Arrangement.Draw
 import           Data.Geometry.Ipe
 import           Test.Hspec
-import           Util(runOnFile)
+import           Test.Util(runOnFile)
 
 spec :: Spec
 spec = testCases "test/Data/Geometry/arrangement.ipe"

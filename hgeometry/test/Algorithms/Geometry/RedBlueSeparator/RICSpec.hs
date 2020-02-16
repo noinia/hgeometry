@@ -13,7 +13,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           System.Random (mkStdGen)
 import           Test.Hspec
--- import           Util
+-- import           Test.Util
 
 --------------------------------------------------------------------------------
 
