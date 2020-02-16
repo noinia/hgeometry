@@ -35,6 +35,7 @@ import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
 import           Data.Ratio
+import           Data.RealNumber.Rational
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as Text
@@ -160,6 +161,9 @@ instance IpeWriteText Int where
 
 instance IpeWriteText Integer where
   ipeWriteText = writeByShow
+
+instance IpeWriteText (RealNumber p) where
+  ipeWriteText = ipeWriteText . realToFrac @(RealNumber p) @Rational
 
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow

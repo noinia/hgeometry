@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 import           Algorithms.DivideAndConquer
@@ -29,7 +30,7 @@ import qualified Data.Vector.Mutable as MV
 import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Color
 import           Data.Maybe (catMaybes)
-import           Data.Ratio
+import           Data.RealNumber.Rational
 
 
 import           Control.Monad.Reader.Class
@@ -37,6 +38,13 @@ import           Debug.Trace
 import           System.IO.Unsafe
 import           System.Random
 import qualified Data.Text as Text
+
+
+import qualified Data.Set as Set
+import Test.Hspec
+import           Test.QuickCheck(property, Gen, Arbitrary(..), generate, infiniteListOf, getSize, resize)
+import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
+
 --------------------------------------------------------------------------------
 
 
@@ -425,7 +433,7 @@ minimumOn f = \case
 --------------------------------------------------------------------------------
 -- * Testing stuff
 
-myPts :: NonEmpty (Point 3 Double :+ Int)
+myPts :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
 myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             , Point3 1  1  10 :+ 1
                             , Point3 0  10 20 :+ 0
@@ -439,7 +447,7 @@ myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
 --             0 2 4
 --            ]
 
-myPts' :: NonEmpty (Point 3 Double :+ Int)
+myPts' :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
 myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 1  1  10 :+ 1
                              , Point3 0  10 20 :+ 0
@@ -529,3 +537,41 @@ drawBridge l r pts = let s = ClosedLineSegment (ext $ pts V.! l) (ext $ pts V.! 
 
 getPoints :: DLListMonad s x (V.Vector x)
 getPoints = asks values
+
+--------------------------------------------------------------------------------
+
+spec :: Spec
+spec = describe "3D ConvexHull tests" $ do
+         it "same as naive on myPts " $ sameAsNaive myPts
+         it "same as naive on myPts'" $ sameAsNaive myPts'
+         it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive pts
+
+newtype HullInput = HI (NonEmpty (Point 3 (RealNumber 10) :+ Int)) deriving (Eq,Show)
+
+instance Arbitrary HullInput where
+  arbitrary = (\as bs -> fromPts $ as <> bs) <$> setOf 3 arbitrary <*> pure mempty
+    where
+      fromPts pts = HI . NonEmpty.fromList $ zipWith (:+) (Set.toList pts) ([1..])
+
+sameAsNaive pts = (H $ lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
+
+newtype Hull p r = H (ConvexHull 3 p r) deriving (Show)
+
+instance (Eq r, Ord p) => Eq (Hull p r) where
+  (H ha) == (H hb) = f ha == f hb
+    where
+      f = List.sortOn g . map reorder
+      g = fmap (^.extra) . (^._TriangleThreePoints)
+
+reorder                  :: Ord p => Triangle 3 p r -> Triangle 3 p r
+reorder (Triangle p q r) = let [p',q',r'] = List.sortOn (^.extra) [p,q,r] in Triangle p' q' r'
+
+
+
+setOf    :: Ord a => Int -> Gen a -> Gen (Set.Set a)
+setOf n g = buildSet mempty <$> do sz <- getSize
+                                   infiniteListOf (resize (max sz n) g)
+  where
+    buildSet s (x:xs) | length s == n = s
+                      | otherwise     = let s' = Set.insert x s in buildSet s' xs
+    buildSet _  _                     = error "setOf: absurd"

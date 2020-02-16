@@ -1,11 +1,17 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module Data.RealNumber.Rational(RealNumber(..)) where
+module Data.RealNumber.Rational(RealNumber(..)
+
+                               -- * Converting to and from RealNumber's
+                               , AsFixed(..), asFixed
+                               , toFixed, fromFixed
+                               ) where
 
 import Data.Data
 import Data.Fixed
 import Data.List (dropWhileEnd)
 import GHC.Generics (Generic(..))
 import GHC.TypeLits
+import Test.QuickCheck(Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
@@ -30,9 +36,9 @@ instance KnownNat p => HasResolution (NatPrec p) where
 
 
 instance KnownNat p => Show (RealNumber p) where
-  showsPrec i (RealNumber r) = case asFixed @(NatPrec p) r of
-                                 Exact p -> fmap (dropWhileEnd (== '0')) . showsPrec i $ p
-                                 Lossy p -> fmap (<> "~") . showsPrec i $ p
+  show r = case asFixed r of
+             Exact p -> dropWhileEnd (== '0') . show $ p
+             Lossy p -> (<> "~")              . show $ p
 
 instance KnownNat p => Read (RealNumber p) where
   readsPrec i = map wrap . readsPrec @(Fixed (NatPrec p)) i
@@ -41,14 +47,21 @@ instance KnownNat p => Read (RealNumber p) where
                                                  '~':s'' -> (x,s'')
                                                  _       -> (x,s')
 
+instance KnownNat p => Arbitrary (RealNumber p) where
+  arbitrary = fromFixed <$> arbitrary
+
+--------------------------------------------------------------------------------
+
+
+
 
 data AsFixed p = Exact !(Fixed p) | Lossy !(Fixed p) deriving (Show,Eq)
 
-toFixed :: HasResolution p => Rational -> Fixed p
+toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
 toFixed = realToFrac
 
-fromFixed :: HasResolution p => Fixed p -> Rational
+fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 fromFixed = realToFrac
 
-asFixed   :: HasResolution p => Rational -> AsFixed p
+asFixed   :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
 asFixed r = let p = toFixed r in if r == fromFixed p then Exact p else Lossy p
