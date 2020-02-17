@@ -22,6 +22,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
+import           Data.UnBounded
 import           Data.Ord (comparing)
 import           Data.Util
 import qualified Data.Vector as V
@@ -55,6 +56,13 @@ import qualified Data.Text as Text
 --     Otherwise the test for computing the next time t does not exist
 --       (slope of the supp. plane of three such points is +infty)
 
+
+-- FIXME: The kinetic sim. now treats three points on a vertical plane
+-- as happening at time t=-\infty. That means we should find faces on
+-- the lower envelope that have that property separately.
+--
+-- I think we can do that by projecting the points down onto the
+-- xy-plane, and computing a 2D convex hull.
 
 
 -- FIXME: We start with some arbitrary starting slope. Fix that
@@ -116,7 +124,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                                        ) <$> findBridge t l r
                 let b = traceShow ("hull:",h) $ (Bridge u v)
 
-                es <- runKinetic t esIn $ traceShow (drawDebug "before_merge_" t h b pts)
+                es <- runKinetic Bottom esIn $ traceShow (drawDebug "before_merge_" Bottom h b pts)
                                         b
                 writeList $ traceShow ("writing hull: ",h) h
                 let ms = MergeStatus (hd l) (lst r) es
@@ -242,7 +250,7 @@ mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$>
 -- - we maintain the current bridge u on L and v on R such that
 -- - L[1..u] <> R[v..n] is the output hull H
 runKinetic        :: (Ord r, Fractional r, Show r, IpeWriteText r )
-                  => r          -- starting time
+                  => Bottom r          -- starting time
                   -> [r :+ Simulation s r (Maybe (Event r))]  -- existing events
                   -> Bridge -- initial bridge
                   -> HullM s r [Event r]
@@ -258,7 +266,7 @@ fromBridge (Bridge l r) = (\lh rh -> NonEmpty.reverse lh <> rh
 -- is, and apply the first event that occurs (either this bridge
 -- event, or one of the existing events).
 handleEvent        :: (Ord r, Fractional r, Show r, IpeWriteText r)
-                   => r -> [r :+ Simulation s r (Maybe (Event r))] -> Simulation s r [Event r]
+                   => Bottom r -> [r :+ Simulation s r (Maybe (Event r))] -> Simulation s r [Event r]
 handleEvent now es | traceShow ("HandleEvent ", now, map (^.core) es) False = undefined
 handleEvent now es = do -- nextBridgeEvent now >>= \mbe -> case (es, mbe) of
        mbe <- nextBridgeEvent now
@@ -277,8 +285,8 @@ handleEvent now es = do -- nextBridgeEvent now >>= \mbe -> case (es, mbe) of
 
     before (a :+ _) (b :+ _) = a < b
       -- if bridge event and other event occur simultaneously, do the bridge event first
-    handleExisting (t :+ h) es' = cons <$> h <*> handleEvent t es'
-    handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent t es'
+    handleExisting (t :+ h) es' = cons <$> h <*> handleEvent (ValB t) es'
+    handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent (ValB t) es'
 
 
 
@@ -332,7 +340,7 @@ applyEvent e = applyEvent' $ traceShow ("applyEvent ",e) (eventKind e)
 -- | Given the current time, computes the next bridge event (if it
 -- exists) and a handler to handle this bridge event.
 nextBridgeEvent     :: (Ord r, Fractional r, Show r )
-                    => r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
+                    => Bottom r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
 nextBridgeEvent now = do b <- get
                          es <- nextBridgeEvents b
                          fmap mkHandler <$> nextBridgeEvent' now (debug es b)
@@ -350,18 +358,22 @@ nextBridgeEvent now = do b <- get
 -- | Finds the next event involving the current bridge.
 -- The arguments are the current time, and the current bridge indices.
 nextBridgeEvent'       :: (Ord r, Fractional r, Show r)
-                       => r -> Bridge
+                       => Bottom r -> Bridge
                        -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now b = tr . minimumOn (^.core) . trz . filter (\e -> now < e^.core)
+nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms . filter (\e -> now < e^.core)
                       <$> nextBridgeEvents b
   where
     tr x = traceShow ("nextBridgeEvent', next event found: ",(^.core) <$> x) x
-    trz x = traceShow ("filtered events",now, (^.core) <$> x) x
+    -- trz x = traceShow ("filtered events",now, (^.core) <$> x) x
+
+    -- since e^.core > now, we now e^.core /= Bottom, so we can drop
+    -- the 'Bottom' part, and work with actual 'r' values.
+    dropBottoms = mapMaybe (bitraverse bottomToMaybe pure)
 
 -- | Computes all candidate bridge events
 nextBridgeEvents                  :: forall r s. (Ord r, Fractional r)
                                   => Bridge
-                                  -> Simulation s r [r :+ (Bridge,EventKind)]
+                                  -> Simulation s r [Bottom r :+ (Bridge,EventKind)]
 nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
   where
     runCand (c,f) = lift c >>= \case
@@ -371,7 +383,7 @@ nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
     -- candiate next events. Either one of the neighbours of the left bridge endpoint l
     -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
     -- with the bridge.
-    cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r r :+ (Bridge, EventKind) )]
+    cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r (Bottom r) :+ (Bridge, EventKind) )]
     cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
             , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
             , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore r c))
@@ -386,22 +398,23 @@ nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
 
 -- | compute the time at which r becomes colinear with the line throuh
 -- p and q.
-nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r r
+nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r (Bottom r)
 nextTime p q r = nextTime' <$> pointAt' p <*> pointAt' q <*> pointAt' r
 
 -- | compute the time at which r becomes colinear with the line through
 -- p and q.
 --
 -- pre: x-order is: p,q,r
-nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
-nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) = a / b
+nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> Bottom r
+nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
+    if b == 0 then Bottom else ValB $ a / b
   where        -- by unfolding the def of ccw
     ux = qx - px
     vx = rx - px
     a = ux*(rz - pz)  - vx*(qz - pz)
     b = ux*(ry - py)  - vx*(qy - py)
-    -- if ux and vx are both zero, we divide by zero!?
-    -- this is when p,q, and r are on a vertical plane
+  -- b == zero means the three points are on a vertical plane. This corresponds
+  -- to t = -\infty.
 
 
 --------------------------------------------------------------------------------
@@ -482,12 +495,12 @@ test' = mapM_ print $ lowerHull' myPts'
 
 drawDebug             :: (IpeWriteText r, Ord r, Fractional r)
                       => String
-                      -> r
+                      -> Bottom r
                       -> NonEmpty Index
                       -> Bridge
                       -> V.Vector (Point 3 r)
                       -> FilePath
-drawDebug s t h blr pts = unsafePerformIO $
+drawDebug s t' h blr pts = unsafePerformIO $
                        do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
                           drawAllAt fp t h blr pts
                           pure fp
@@ -495,8 +508,9 @@ drawDebug s t h blr pts = unsafePerformIO $
     randomS :: IO String
     randomS = replicateM 10 $ randomRIO ('a','z')
 
-
-
+    t = case t' of
+          Bottom   -> -1000
+          ValB t'' -> t''
 
 
 
@@ -561,6 +575,7 @@ getPoints = asks values
        -- (after 2 tests)
        --   HI ((Point3 [0,-3,0] :+ 1) :| [Point3 [0,-1,0] :+ 2,Point3 [0,0,1] :+ 3,Point3 [3,0,1] :+ 4])
 
+testPts :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
 testPts = NonEmpty.fromList $ [ Point3 0 (-3) 0 :+ 1
                               , Point3 0 (-1) 0 :+ 2
                               , Point3 0 0    1 :+ 3
