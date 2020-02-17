@@ -43,13 +43,21 @@ import qualified Data.Text as Text
 
 --------------------------------------------------------------------------------
 
+-- TODO: Replace EventKind by a partial function
 
 -- TODO: We seem to assume that no four points are coplanar, and no
 -- three points lie on a vertical plane. Figure out where we assume that exactly.
 
--- FIXME: We start with some arbitrary starting slope. Fix that
+-- no four points coplanar:
+--     - otherwise events may happen simultaneously
+--     - output may not be a set of triangles
+-- no three points on a vertical plane:
+--     Otherwise the test for computing the next time t does not exist
+--       (slope of the supp. plane of three such points is +infty)
 
--- plumb the p's around.
+
+
+-- FIXME: We start with some arbitrary starting slope. Fix that
 
 
 -- type ConvexHull d p r = [Three Index]
@@ -83,14 +91,15 @@ type HullM s r = DLListMonad s (Point 3 r)
 --------------------------------------------------------------------------------
 
 -- | Computes a lowerbound on the z-value with which to start
+-- pre: not all points on a vertical plane
 lowerboundT     :: (Ord r, Fractional r) => NonEmpty (Point 3 r) -> r
-lowerboundT pts = (-1) * deltaZ / deltaY
+lowerboundT pts = ((-1)*) . maximum . catMaybes
+                $ zipWith slope (NonEmpty.toList pts') (NonEmpty.tail pts')
   where
-    zs = fmap (^.zCoord) pts
-    ys = fmap (NonEmpty.head) . NonEmpty.group1 .  NonEmpty.sort . fmap (^.yCoord) $ pts
+    pts' = NonEmpty.sortBy (comparing (^.yCoord) <> comparing (^.zCoord)) pts
 
-    deltaZ = maximum zs - minimum zs
-    deltaY = minimum $ zipWith (-) (NonEmpty.tail ys) (NonEmpty.toList ys)
+    slope p q = let d = q^.yCoord - p^.yCoord
+                in if d == 0 then Nothing else Just $ (abs $ q^.zCoord - p^.zCoord) / d
 
 
 instance (Ord r, Fractional r, Show r, IpeWriteText r)
@@ -102,7 +111,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                 pts <- getPoints
 
                 let esIn = traceShow d $ mergeEvents (events l) (events r)
-                    t    = (-1000) -- TODO; at what time value should we start?
+                    t    = (-10000000) -- TODO; at what time value should we start?
                 STR h u v <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
                                        ) <$> findBridge t l r
                 let b = traceShow ("hull:",h) $ (Bridge u v)
@@ -382,6 +391,8 @@ nextTime p q r = nextTime' <$> pointAt' p <*> pointAt' q <*> pointAt' r
 
 -- | compute the time at which r becomes colinear with the line through
 -- p and q.
+--
+-- pre: x-order is: p,q,r
 nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> r
 nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) = a / b
   where        -- by unfolding the def of ccw
@@ -389,6 +400,8 @@ nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) = a / b
     vx = rx - px
     a = ux*(rz - pz)  - vx*(qz - pz)
     b = ux*(ry - py)  - vx*(qy - py)
+    -- if ux and vx are both zero, we divide by zero!?
+    -- this is when p,q, and r are on a vertical plane
 
 
 --------------------------------------------------------------------------------
@@ -540,3 +553,17 @@ getPoints :: DLListMonad s x (V.Vector x)
 getPoints = asks values
 
 --------------------------------------------------------------------------------
+
+
+
+       -- uncaught exception: ArithException
+       -- Ratio has zero denominator
+       -- (after 2 tests)
+       --   HI ((Point3 [0,-3,0] :+ 1) :| [Point3 [0,-1,0] :+ 2,Point3 [0,0,1] :+ 3,Point3 [3,0,1] :+ 4])
+
+testPts = NonEmpty.fromList $ [ Point3 0 (-3) 0 :+ 1
+                              , Point3 0 (-1) 0 :+ 2
+                              , Point3 0 0    1 :+ 3
+                              , Point3 3 0    1 :+ 4
+                              ]
+-- looks like a vertical plane with three pts to me, figure out how to handle those
