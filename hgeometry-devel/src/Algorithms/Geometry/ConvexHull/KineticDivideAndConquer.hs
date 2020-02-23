@@ -359,7 +359,7 @@ applyEvent e = applyEvent' $ traceShow ("applyEvent ",e) (eventKind e)
 nextBridgeEvent     :: (Ord r, Fractional r, Show r )
                     => Bottom r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
 nextBridgeEvent now = do b <- get
-                         es <- nextBridgeEvents b
+                         es <- candidateBridgeEvents b
                          fmap mkHandler <$> nextBridgeEvent' now (debug es b)
   where
     mkHandler (t :+ (b',k)) = t :+ do put $ traceShow ("setting bridge to ",b'," at time ",t) b'
@@ -367,18 +367,13 @@ nextBridgeEvent now = do b <- get
 
     debug es b = traceShow ("candidate events with ",b," ", es) b
 
--- evalNextBridgeEvents   :: Bridge -> Simulation s r [r :+ (Bridge,EventKind)]
--- evalNextBridgeEvents b = do cans <- nextBridgeEvents b
---                             mapM (\(computeT :+ z) -> (:+ z) <$> computeT
---                                  ) $ cans
-
 -- | Finds the next event involving the current bridge.
 -- The arguments are the current time, and the current bridge indices.
 nextBridgeEvent'       :: (Ord r, Fractional r, Show r)
                        => Bottom r -> Bridge
                        -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
 nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms . filter (\e -> now < e^.core)
-                      <$> nextBridgeEvents b
+                      <$> candidateBridgeEvents b
   where
     tr x = traceShow ("nextBridgeEvent', next event found: ",(^.core) <$> x) x
     -- trz x = traceShow ("filtered events",now, (^.core) <$> x) x
@@ -388,10 +383,10 @@ nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms . filter (\e -> n
     dropBottoms = mapMaybe (bitraverse bottomToMaybe pure)
 
 -- | Computes all candidate bridge events
-nextBridgeEvents                  :: forall r s. (Ord r, Fractional r)
-                                  => Bridge
-                                  -> Simulation s r [Bottom r :+ (Bridge,EventKind)]
-nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
+candidateBridgeEvents              :: forall r s. (Ord r, Fractional r)
+                                   => Bridge
+                                   -> Simulation s r [Bottom r :+ (Bridge,EventKind)]
+candidateBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
   where
     runCand (c,f) = lift c >>= \case
       Nothing -> pure Nothing
