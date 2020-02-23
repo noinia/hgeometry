@@ -399,29 +399,43 @@ nextBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
     -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
     -- with the bridge.
     cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r (Bottom r) :+ (Bridge, EventKind) )]
-    cands = [ (getPrev l, \a -> nextTime a l r :+ (Bridge a r, Delete l))
-            , (getNext l, \b -> nextTime l b r :+ (Bridge b r, InsertAfter  l b))
-            , (getPrev r, \c -> nextTime l c r :+ (Bridge l c, InsertBefore r c))
-            , (getNext r, \d -> nextTime l r d :+ (Bridge l d, Delete r))
+    cands = [ (getPrev l, \a -> nextTime a a l r :+ (Bridge a r, Delete l))
+            , (getNext l, \b -> nextTime b l b r :+ (Bridge b r, InsertAfter  l b))
+            , (getPrev r, \c -> nextTime c l c r :+ (Bridge l c, InsertBefore r c))
+            , (getNext r, \d -> nextTime d l r d :+ (Bridge l d, Delete r))
             ]
 
+    nextTime p a b c = colinearTime a b c -- >>= isValidCandidate l r p
+
+
     -- TODO: verify that nextTime a l r == nextTime l r a ?
+
 
 
 ----------------------------------------
 -- * Helpers for computing the next interesting time in the simulation
 
+isValidCandidate       :: (Num r, Ord r)
+                       => Index -> Index -> Index -> Bottom r -> Simulation s r (Bottom r)
+isValidCandidate l r p = lift . \case
+   Bottom -> pure Bottom -- bottoms are already invalid?
+   ValB t -> let t' = t + 1 in f t <$> atTime t' l <*> atTime t' r <*> atTime t' p
+  where
+    f t l' r' p' | (p' `onSideUpDown` (lineThrough l' r')) == Below = ValB t
+                 | otherwise                                        = Bottom
+
+
 -- | compute the time at which r becomes colinear with the line throuh
 -- p and q.
-nextTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r (Bottom r)
-nextTime p q r = nextTime' <$> pointAt' p <*> pointAt' q <*> pointAt' r
+colinearTime       :: (Ord r, Fractional r) => Index -> Index -> Index -> Simulation s r (Bottom r)
+colinearTime p q r = colinearTime' <$> pointAt' p <*> pointAt' q <*> pointAt' r
 
 -- | compute the time at which r becomes colinear with the line through
 -- p and q.
 --
 -- pre: x-order is: p,q,r
-nextTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> Bottom r
-nextTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
+colinearTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> Bottom r
+colinearTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
     if b == 0 then Bottom else ValB $ a / b
   where        -- by unfolding the def of ccw
     ux = qx - px
