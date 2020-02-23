@@ -310,7 +310,7 @@ handleEvent now es = do -- nextBridgeEvent now >>= \mbe -> case (es, mbe) of
 -- * Handling the events in the Existing Hulls
 
 handleLeft   :: (Ord r, Show r) => Event r -> Simulation s r (Maybe (Event r))
-handleLeft e = handleExisting' e leftBridgePoint (<=) l
+handleLeft e = handleExisting' e leftBridgePoint (l <=)
   where
     l = case eventKind e of -- find the rightmost point involved in the event
           InsertAfter _ j  -> j
@@ -319,7 +319,7 @@ handleLeft e = handleExisting' e leftBridgePoint (<=) l
 
 handleRight   :: (Ord r, Show r)
               => Event r -> Simulation s r (Maybe (Event r))
-handleRight e = handleExisting' e rightBridgePoint (>=) r
+handleRight e = handleExisting' e rightBridgePoint (<= r)
   where
     r = case eventKind e of -- find the leftmost point involved in the event
           InsertAfter j _  -> j
@@ -329,14 +329,16 @@ handleRight e = handleExisting' e rightBridgePoint (>=) r
 -- | Handler for an event on the right hull
 --
 handleExisting'  :: forall s r. (Show r)
-                 => Event r -> Lens' Bridge Index -> (r -> r -> Bool) -> Index
+                 => Event r -> Lens' Bridge Index -> (Int -> Bool)
                  -> Simulation s r (Maybe (Event r))
-handleExisting' e bridgePoint cmp p =
+handleExisting' e bridgePoint occursInOutput =
     do lift $ applyEvent e
        v <- gets (^.bridgePoint)
-       outputEvent <$> pointAt' p <*> pointAt' v
-  where
-    outputEvent pp bp = if (pp^.xCoord) `cmp` (bp^.xCoord) then Just e else Nothing
+       pure $ if occursInOutput v then Just e else Nothing
+
+       -- outputEvent <$> pointAt' p <*> pointAt' v
+  -- where
+  --   outputEvent pp bp = if (pp^.xCoord) `cmp` (bp^.xCoord) then Just e else Nothing
 
 
 -- | Applies the actual event, mutating the current representation of the hulls.
