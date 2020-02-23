@@ -2,7 +2,7 @@
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 import           Algorithms.DivideAndConquer
-import           Control.Applicative (liftA2)
+import           Control.Applicative (liftA2,(<|>))
 import           Control.Lens ((^.), bimap, Lens', _1, _2)
 import           Control.Monad ((<=<))
 import           Control.Monad (replicateM)
@@ -14,16 +14,19 @@ import           Data.Ext
 import           Data.Foldable (forM_)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Line(lineThrough, onSideUpDown, SideTestUpDown(..))
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Triangle
+import           Data.Geometry.Vector
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
-import           Data.UnBounded
 import           Data.Ord (comparing)
+import           Data.Semigroup (sconcat)
+import           Data.UnBounded
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -84,11 +87,15 @@ lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
     computeHull = output <=< divideAndConquer1 mkLeaf $ NonEmpty.fromList [0..(n-1)]
 
     n = V.length pts
-    (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortWith (^.core.xCoord) $ pts'
+    (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortBy cmpXYZ $ pts'
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
 
     -- withPt = id
     withPt (Three a b c) = let pt i = pts V.! i :+ exts V.! i in Triangle (pt a) (pt b) (pt c)
+
+    -- sort on x-coord first (and on equal y and z coordinate later)
+    cmpXYZ = comparing (^.core)
+
 
 -- | Creates a Leaf
 mkLeaf   :: Int -> HullM s r (MergeStatus r)
@@ -115,29 +122,37 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
   lc <> rc = do l <- lc
                 r <- rc
 
-                d@(lh,rh,_,_,_,_) <- debugHull l r
+
+                d <- debugHull l r
                 pts <- getPoints
 
                 let esIn = traceShow d $ mergeEvents (events l) (events r)
                     t    = (-10000000) -- TODO; at what time value should we start?
                 STR h u v <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
                                        ) <$> findBridge t l r
-                let b = traceShow ("hull:",h) $ (Bridge u v)
+                let b = traceShow ("bridge:", u, v, "hull:",h) $ (Bridge u v)
 
-                es <- runKinetic Bottom esIn $ traceShow (drawDebug "before_merge_" Bottom h b pts)
+                es <- runKinetic Bottom esIn
+                      $ traceShow (drawDebug ("before_merge_" <> rangeS l r) Bottom h b pts)
                                         b
                 writeList $ traceShow ("writing hull: ",h) h
-                let ms = MergeStatus (hd l) (lst r) es
-                pure ms
+                let !ms = MergeStatus (hd l) (lst r) es
+                fp <- renderMovieIO ("movie_" <> rangeS l r) ms
+                pure $ traceShow fp ms
                 --
                 -- pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
     where
-      debugHull l r = (\a b c d -> ( a
-                                   , b
-                                   , c
-                                   , d
-                                   , events l
-                                   , events r
+      rangeS l r = show (hd l) <> "-" <> show (lst r)
+
+
+      debugHull l r = (\a b c d -> ( "MERGING ", hd l, "-",lst l, " WITH "
+                                   , hd r, "-", lst r
+                                   -- , a
+                                   -- , b
+                                   -- , c
+                                   -- , d
+                                   -- , events l
+                                   -- , events r
                                    )
                       )
                       <$> (toListFrom $ hd l) <*> (toListFrom $ hd r)
@@ -493,6 +508,16 @@ test' = mapM_ print $ lowerHull' myPts'
 
 --------------------------------------------------------------------------------
 
+renderMovieIO s ms = do pgs <- renderMovie ms
+                        pure $ unsafePerformIO $
+                          do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
+                             writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ pgs
+                             pure fp
+  where
+    randomS :: IO String
+    randomS = replicateM 10 $ randomRIO ('a','z')
+
+
 drawDebug             :: (IpeWriteText r, Ord r, Fractional r)
                       => String
                       -> Bottom r
@@ -566,6 +591,73 @@ drawBridge l r pts = let s = ClosedLineSegment (ext $ pts V.! l) (ext $ pts V.! 
 getPoints :: DLListMonad s x (V.Vector x)
 getPoints = asks values
 
+
+-- | Reports all the edges on the CH
+renderMovie    :: (Show r, Fractional r, Ord r, IpeWriteText r)
+               => MergeStatus r -> HullM s r (NonEmpty (IpePage r))
+-- renderMovie ms | traceShow ("output: ", events ms) False = undefined
+renderMovie ms = do h0 <- toListFrom $ hd ms
+                    res <- renderMovie'
+                    writeList h0 -- restore the original list and state
+                    pure $ res
+  where
+    renderMovie' = combine <$> mapM handle (events ms)
+    combine xs = case NonEmpty.nonEmpty xs of
+      Nothing  -> fromContent [] :| []
+      Just pgs -> sconcat pgs
+
+    handle e = do let t = eventTime e
+                  pts <- getPoints
+                  i <- fromEvent (eventKind e)
+                  hBefore <- fromI i
+                  applyEvent e
+                  hAfter <- fromI i
+                  let pages' = drawMovie t hBefore hAfter pts
+                  pure pages'
+
+fromI i = f <$> toListFromR i <*> toListFrom i
+  where
+    f (NonEmpty.toList -> l) r = NonEmpty.fromList $ reverse l <> NonEmpty.tail r
+
+fromEvent = \case
+    InsertAfter i j  -> pure i
+    InsertBefore i h -> pure i
+    Delete j         -> (\a b -> fromJust $ a <|> b) <$> getPrev j <*> getNext j
+
+
+drawMovie             :: (Fractional r, Ord r, IpeWriteText r)
+                      => r -> NonEmpty Index -> NonEmpty Index -> V.Vector (Point 3 r)
+                      -> NonEmpty (IpePage r)
+drawMovie t h0 h1 pts = NonEmpty.fromList
+    [ fromContent $ d pts0 <> [ drawHull h0 pts0, time $ t - eps  ]
+    , fromContent $ d pts2 <> [ drawHull h1 pts2, time $ t        ]
+    , fromContent $ d pts1 <> [ drawHull h1 pts1, time $ t + eps  ]
+    ]
+  where
+    pts0 = fmap (atTime' $ t - eps ) $ pts
+    pts1 = fmap (atTime' $ t + eps ) $ pts
+    pts2 = fmap (atTime' t) $ pts
+
+    time x = iO $ ipeLabel ((fromJust $ ipeWriteText x) :+ Point2 (-50) (-50))
+
+    eps = (1/10)
+
+
+    d pts' = V.toList
+           . V.slice s (1 + tt - s)
+           . V.imap (\i p -> iO $ labelled id defIO (p :+ i))
+           $ pts'
+
+    hpts = [ (pts V.! i)^.xCoord | i <- NonEmpty.toList h0]
+
+    -- xRange = ClosedRange (minimum hpts) (maximum hpts)
+    (s,tt) = (NonEmpty.head h0, NonEmpty.last h0)
+
+
+
+    -- atts =
+
+
 --------------------------------------------------------------------------------
 
 
@@ -582,3 +674,34 @@ testPts = NonEmpty.fromList $ [ Point3 0 (-3) 0 :+ 1
                               , Point3 3 0    1 :+ 4
                               ]
 -- looks like a vertical plane with three pts to me, figure out how to handle those
+
+-- buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+-- buggyPoints = NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 1
+--                                   ,Point3 (-4) 7    (-5) :+ 2
+--                                   ,Point3 0    (-7) (-2) :+ 3
+--                                   ,Point3 2    (-7) 0    :+ 4
+--                                   ,Point3 2    (-6) (-2) :+ 5
+--                                   ,Point3 2    5    4    :+ 6
+--                                   ,Point3 5    (-1) 2    :+ 7
+--                                   ,Point3 6    6    6    :+ 8
+--                                   ,Point3 7    (-5) (-6) :+ 9
+--                                   ]
+
+buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 0
+                                                            ,Point3 (-4) 7    (-5) :+ 1
+                                                            ,Point3 0    (-7) (-2) :+ 2
+                                                            ,Point3 2    (-7) 0    :+ 3
+                                                            ,Point3 2    (-6) (-2) :+ 4
+                                                            ,Point3 2    5    4    :+ 5
+                                                            ,Point3 5    (-1) 2    :+ 6
+                                                            ,Point3 6    6    6    :+ 7
+                                                            ,Point3 7    (-5) (-6) :+ 8
+                                                            ]
+
+
+  -- 1) 3D ConvexHull tests same as naive quickcheck
+  --      Falsifiable (after 8 tests):
+  --        HI ((Point3 [-7,2,4] :+ 1) :| [Point3 [-4,7,-5] :+ 2,Point3 [0,-7,-2] :+ 3,Point3 [2,-7,0] :+ 4,Point3 [2,-6,-2] :+ 5,Point3 [2,5,4] :+ 6,Point3 [5,-1,2] :+ 7,Point3 [6,6,6] :+ 8,Point3 [7,-5,-6] :+ 9])
+  --      expected: H [Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [6,6,6] :+ 8) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9)]
+  --       but got: H [Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9)]
