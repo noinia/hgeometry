@@ -6,7 +6,7 @@ module Data.IndexedDoublyLinkedList( DLList(..)
                                    , singletons
                                    , writeList
                                    , valueAt, getNext, getPrev
-                                   , toListFrom, toListFromR
+                                   , toListFrom, toListFromR, toListContains
                                    , insertAfter, insertBefore
                                    , delete
                                    ) where
@@ -17,6 +17,7 @@ import           Control.Monad.Reader.Class
 import           Control.Monad.ST
 import           Data.Foldable (forM_)
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
@@ -111,6 +112,16 @@ toListFrom i = (i :|) <$> iterateM getNext i
 -- running time: \(O(k)\), where \(k\) is the length of the output list
 toListFromR :: Index -> DLListMonad s b (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
+
+-- | Computes a maximal length list that contains the element i.
+--
+-- running time: \(O(k)\), where \(k\) is the length of the output
+-- list
+toListContains   :: Index -> DLListMonad s b (NonEmpty Index)
+toListContains i = f <$> toListFromR i <*> toListFrom i
+  where
+    f l r = NonEmpty.fromList $ reverse (NonEmpty.toList l) <> NonEmpty.tail r
+
 
 ----------------------------------------
 -- * Updates

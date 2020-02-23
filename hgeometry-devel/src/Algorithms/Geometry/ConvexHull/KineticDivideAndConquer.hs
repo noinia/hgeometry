@@ -258,6 +258,10 @@ mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$>
   where
     f handler e@(Event t _) = t :+ handler e
 
+    -- TODO: deal with multiple events happening simultaneously
+
+
+
 -- | run the kinetic simulation, computing the events at which the
 -- hull changes. At any point during the simulation:
 --
@@ -372,18 +376,31 @@ nextBridgeEvent now = do b <- get
 nextBridgeEvent'       :: (Ord r, Fractional r, Show r)
                        => Bottom r -> Bridge
                        -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms . filter (\e -> now < e^.core)
+nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms
+                       . filter isFutureEvent -- (\e -> now < e^.core)
+                       . trz
                       <$> candidateBridgeEvents b
   where
     tr x = traceShow ("nextBridgeEvent', next event found: ",(^.core) <$> x) x
-    -- trz x = traceShow ("filtered events",now, (^.core) <$> x) x
+    trz x = traceShow ("non-filtered events",now, (^.core) <$> x) x
 
     -- since e^.core > now, we now e^.core /= Bottom, so we can drop
     -- the 'Bottom' part, and work with actual 'r' values.
     dropBottoms = mapMaybe (bitraverse bottomToMaybe pure)
 
+    -- FIXME: this seems to fix the current issue, but I'm
+    -- not convinced this is good enough/works in  -- general
+    isFutureEvent e = case now `compare` (e^.core) of
+                  LT -> True
+                  EQ -> case e^.extra._2 of
+                          Delete _ -> True
+
+                          _        -> False
+                  GT -> False
+
+
 -- | Computes all candidate bridge events
-candidateBridgeEvents              :: forall r s. (Ord r, Fractional r)
+candidateBridgeEvents              :: forall r s. (Ord r, Fractional r, Show r)
                                    => Bridge
                                    -> Simulation s r [Bottom r :+ (Bridge,EventKind)]
 candidateBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
@@ -402,19 +419,23 @@ candidateBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
             , (getNext r, \d -> nextTime d l r d :+ (Bridge l d, Delete r))
             ]
 
-    nextTime p a b c = colinearTime a b c -- >>= isValidCandidate l r p
+    nextTime p a b c = colinearTime a b c >>= isValidCandidate l r p
 
 
     -- TODO: verify that nextTime a l r == nextTime l r a ?
 
-
+isValidCandidate   :: (Num r, Ord r, Show r)
+                       => Index -> Index -> Index -> Bottom r -> Simulation s r (Bottom r)
+isValidCandidate l r p t = do res <- isValidCandidate' l r p t
+                              pure $ traceShow ("isValidCandidate: ",l,r,p,res) res
 
 ----------------------------------------
 -- * Helpers for computing the next interesting time in the simulation
 
-isValidCandidate       :: (Num r, Ord r)
+-- this does not realy work.
+isValidCandidate'       :: (Num r, Ord r)
                        => Index -> Index -> Index -> Bottom r -> Simulation s r (Bottom r)
-isValidCandidate l r p = lift . \case
+isValidCandidate' l r p = lift . \case
    Bottom -> pure Bottom -- bottoms are already invalid?
    ValB t -> let t' = t + 1 in f t <$> atTime t' l <*> atTime t' r <*> atTime t' p
   where
@@ -620,15 +641,11 @@ renderMovie ms = do h0 <- toListFrom $ hd ms
     handle e = do let t = eventTime e
                   pts <- getPoints
                   i <- fromEvent (eventKind e)
-                  hBefore <- fromI i
+                  hBefore <- toListContains i
                   applyEvent e
-                  hAfter <- fromI i
+                  hAfter <- toListContains i
                   let pages' = drawMovie t hBefore hAfter pts
                   pure pages'
-
-fromI i = f <$> toListFromR i <*> toListFrom i
-  where
-    f (NonEmpty.toList -> l) r = NonEmpty.fromList $ reverse l <> NonEmpty.tail r
 
 fromEvent = \case
     InsertAfter i j  -> pure i
@@ -716,3 +733,20 @@ buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4 
   --        HI ((Point3 [-7,2,4] :+ 1) :| [Point3 [-4,7,-5] :+ 2,Point3 [0,-7,-2] :+ 3,Point3 [2,-7,0] :+ 4,Point3 [2,-6,-2] :+ 5,Point3 [2,5,4] :+ 6,Point3 [5,-1,2] :+ 7,Point3 [6,6,6] :+ 8,Point3 [7,-5,-6] :+ 9])
   --      expected: H [Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [6,6,6] :+ 8) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9)]
   --       but got: H [Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9)]
+
+
+
+buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
+                                                             , Point3 (-5) (-2) 5 :+ 1
+                                                             , Point3 (-5) (-1) 4 :+ 2
+                                                             , Point3 (0) (2)   2 :+ 3
+                                                             , Point3 (1) (-5)  4 :+ 4
+                                                             , Point3 (3) (-3)  2 :+ 5
+                                                             , Point3 (3) (-1)  1 :+ 6
+                                                             ]
+
+
+              -- expected: H [Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-2,5] :+ 2) (Point3 [-5,-1,4] :+ 3),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-1,4] :+ 3) (Point3 [0,2,2] :+ 4),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [0,2,2] :+ 4) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [1,-5,4] :+ 5) (Point3 [3,-3,2] :+ 6),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [3,-3,2] :+ 6) (Point3 [3,-1,1] :+ 7)]
+
+
+              -- but got: H [Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [1,-5,4] :+ 5) (Point3 [3,-3,2] :+ 6),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [3,-3,2] :+ 6) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [0,2,2] :+ 4) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-1,4] :+ 3) (Point3 [0,2,2] :+ 4)]
