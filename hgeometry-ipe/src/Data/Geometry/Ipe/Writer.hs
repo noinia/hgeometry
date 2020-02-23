@@ -10,7 +10,17 @@
 -- Description :  Converting data types into IpeTypes
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.Writer where
+module Data.Geometry.Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
+                               , toIpeXML
+
+                               , printAsIpeSelection, toIpeSelectionXML
+
+
+                               , IpeWrite(..)
+                               , IpeWriteText(..)
+
+                               , ipeWriteAttrs, writeAttrValues
+                               ) where
 
 import           Control.Lens ((^.), (^..), (.~), (&))
 import qualified Data.ByteString as B
@@ -246,11 +256,6 @@ instance IpeWriteText r => IpeWrite (IpeSymbol r) where
                            , ("name", n)
                            ] []
 
--- instance IpeWriteText (SymbolAttrElf rs r) => IpeWriteText (SymbolAttribute r rs) where
---   ipeWriteText (SymbolAttribute x) = ipeWriteText x
-
-
-
 --------------------------------------------------------------------------------
 
 instance IpeWriteText r => IpeWriteText (GT.Matrix 3 3 r) where
@@ -358,18 +363,6 @@ instance (IpeWriteText r) => IpeWrite (IpeObject r) where
     ipeWrite (IpeUse       s) = ipeWrite s
     ipeWrite (IpePath      p) = ipeWrite p
 
-
-ipeWriteRec :: (RecAll f rs IpeWrite, RMap rs, ReifyConstraint IpeWrite f rs, RecordToList rs)
-            => Rec f rs -> [Node Text Text]
-ipeWriteRec = catMaybes . recordToList
-            . rmap (\(Compose (Dict x)) -> Const $ ipeWrite x)
-            . reifyConstraint @IpeWrite
-
-
--- instance IpeWriteText (GroupAttrElf rs r) => IpeWriteText (GroupAttribute r rs) where
---   ipeWriteText (GroupAttribute x) = ipeWriteText x
-
-
 --------------------------------------------------------------------------------
 
 deriving instance IpeWriteText LayerName
@@ -431,48 +424,3 @@ instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
 
 instance IpeWrite () where
   ipeWrite = const Nothing
-
--- -- | slightly clever instance that produces a group if there is more than one
--- -- element and just an element if there is only one value produced
--- instance IpeWrite a => IpeWrite [a] where
---   ipeWrite = combine . mapMaybe ipeWrite
-
-
-combine     :: [Node Text Text] -> Maybe (Node Text Text)
-combine []  = Nothing
-combine [n] = Just n
-combine ns  = Just $ Element "group" [] ns
-
--- instance (IpeWrite a, IpeWrite b) => IpeWrite (a,b) where
---   ipeWrite (a,b) = combine . catMaybes $ [ipeWrite a, ipeWrite b]
-
-
-
--- -- | The default symbol for a point
--- ipeWritePoint :: IpeWriteText r => Point 2 r -> Maybe (Node Text Text)
--- ipeWritePoint = ipeWrite . flip Symbol "mark/disk(sx)"
-
-
--- instance (IpeWriteText r, Floating r) => IpeWrite (Circle r) where
---   ipeWrite = ipeWrite . Path . S2.l1Singleton . fromCircle
-
-
-
---------------------------------------------------------------------------------
-
-
-
--- testPoly :: PolyLine 2 () Double
--- testPoly = fromPoints' [origin, Point2 0 10, Point2 10 10, Point2 100 100]
-
-
-
-
--- testWriteUse :: Maybe (Node Text Text)
--- testWriteUse = ipeWriteExt sym
---   where
---     sym :: IpeSymbol Double :+ (Rec (SymbolAttribute Double) [Size, SymbolStroke])
---     sym = Symbol origin "mark" :+ (  SymbolAttribute (IpeSize  $ Named "normal")
---                                   :& SymbolAttribute (IpeColor $ Named "green")
---                                   :& RNil
---                                   )
