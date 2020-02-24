@@ -15,7 +15,7 @@ renderOutputToFile           :: Show r
                              -> IO ()
 renderOutputToFile fp pts ts = Text.writeFile fp $ renderOutput pts ts
 
--- assumes points are 1 indexed.
+-- assumes points are 0 indexed.
 renderOutput                             :: Show r
                                          => NonEmpty (Point 3 r :+ Int) -> [Triangle 3 Int r]
                                          -> Text.Text
@@ -36,7 +36,7 @@ renderPt          :: Show r => (Point 3 r :+ extra) -> Text.Text
 renderPt (p :+ _) = let Point3 x y z = showT <$> p in Text.unwords [x,y,z]
 
 renderTri                  :: Triangle 3 Int r -> Text.Text
-renderTri (Triangle p q r) = let i a = showT $ a^.extra - 1 in Text.unwords ["3",i p, i q, i r]
+renderTri (Triangle p q r) = let i a = showT $ a^.extra in Text.unwords ["3",i p, i q, i r]
 
 
 showT :: Show a => a -> Text.Text
