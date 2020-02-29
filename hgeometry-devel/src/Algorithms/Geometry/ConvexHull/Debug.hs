@@ -1,53 +1,33 @@
 module Algorithms.Geometry.ConvexHull.Debug where
 
-import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Helpers
 import           Algorithms.Geometry.ConvexHull.Types
-import           Control.Applicative (liftA2,(<|>))
-import           Control.Lens ((^.), bimap, Lens', _1, _2)
-import           Control.Monad ((<=<))
+import           Control.Applicative ((<|>))
+import           Control.Lens ((^.))
 import           Control.Monad (replicateM)
-import           Control.Monad.State.Class (gets, get, put)
-import           Control.Monad.State.Strict (StateT, evalStateT)
-import           Control.Monad.Trans
-import           Data.Bitraversable
-import           Data.Either (partitionEithers)
 import           Data.Ext
-import           Data.Foldable (forM_)
-import           Data.Geometry.Line (lineThrough, onSideUpDown, SideTestUpDown(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon.Convex (lowerTangent')
-import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
 import           Data.IndexedDoublyLinkedList
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
-import           Data.Ord (comparing)
 import           Data.Semigroup (sconcat)
 import           Data.UnBounded
-import           Data.Util
 import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
 import           Data.Geometry.Ipe
 import           Data.Geometry.Ipe.Color
-import           Data.Maybe (catMaybes)
-import           Data.RealNumber.Rational
 
 
 import           Control.Monad.Reader.Class
-import           Debug.Trace
 import           System.IO.Unsafe
 import           System.Random
-import qualified Data.Text as Text
-
-import           Algorithms.Geometry.ConvexHull.RenderPLY
 
 
+
+debugHull :: Num r1 => MergeStatus r2 -> MergeStatus r3 -> DLListMonad s (Point 3 r1) ([Char], Index, [Char], Index, [Char], Index, [Char], Index)
 debugHull l r = (\a b c d -> ( "MERGING ", hd l, "-",lst l, " WITH "
                              , hd r, "-", lst r
                                           -- , a
@@ -69,6 +49,7 @@ debugHull l r = (\a b c d -> ( "MERGING ", hd l, "-",lst l, " WITH "
 
 
 
+renderMovieIO :: (Show r, Fractional r, Ord r, IpeWriteText r) => [Char] -> MergeStatus r -> DLListMonad s (Point 3 r) [Char]
 renderMovieIO s ms = do pgs <- renderMovie ms
                         pure $ unsafePerformIO $
                           do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
@@ -100,6 +81,7 @@ drawDebug s t' h blr pts = unsafePerformIO $
 
 
 
+drawAllAt :: (IpeWriteText r, Fractional r, Ord r) => FilePath -> r -> NonEmpty Index -> Bridge -> V.Vector (Point 3 r) -> IO ()
 drawAllAt fp t h blr pts = writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ draw t h blr pts
 
 
@@ -167,15 +149,16 @@ renderMovie ms = do h0 <- toListFrom $ hd ms
       Nothing  -> fromContent [] :| []
       Just pgs -> sconcat pgs
 
-    handle e = do let t = eventTime e
+    handle e = do let t = e^.eventTime
                   pts <- getPoints
-                  i <- fromEvent (eventKind e)
+                  i <- undefined -- fromEvent (e^.eventKind) -- FIXME!
                   hBefore <- toListContains i
                   applyEvent e
                   hAfter <- toListContains i
                   let pages' = drawMovie t hBefore hAfter pts
                   pure pages'
 
+fromEvent :: Action -> DLListMonad s b Index
 fromEvent = \case
     InsertAfter i j  -> pure i
     InsertBefore i h -> pure i

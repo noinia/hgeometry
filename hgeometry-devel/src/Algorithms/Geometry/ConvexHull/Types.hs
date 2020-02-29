@@ -1,12 +1,13 @@
 module Algorithms.Geometry.ConvexHull.Types where
 
-import           Control.Lens (Lens', _1, _2)
-import           Control.Monad.State.Strict (StateT)
-import           Data.Ext
-import           Data.Geometry.Point
-import           Data.Geometry.Triangle
-import           Data.IndexedDoublyLinkedList
-import           Data.Util
+import Control.Lens (Lens', _1, _2)
+import Control.Monad.State.Strict (StateT)
+import Data.Ext
+import Data.Geometry.Point
+import Data.Geometry.Triangle
+import Data.IndexedDoublyLinkedList
+import Data.List.NonEmpty (NonEmpty)
+import Data.Util
 
 --------------------------------------------------------------------------------
 
@@ -37,35 +38,34 @@ rightBridgePoint = _2
 -- | The Kinetic Simulation
 type Simulation s r = StateT Bridge (HullM s r)
 
-type Event' r  = r :+ EventKind
-type MEvent' r = r :+ [EventKind]
-
-
-type Handler s r = Simulation s r [Event r]
-
--- type BridgeEvent = SP Bridge EventKind
-
-
 type Existing a = Either a a
 
 --------------------------------------------------------------------------------
 
-data Event r = Event { eventTime :: !r
-                     , eventKind :: !EventKind
-                     } deriving (Show,Eq)
+type Event r = r :+ NonEmpty Action
 
-data EventKind = InsertAfter  !Index !Index -- ^ current Index first, then the Item we insert
-               | InsertBefore !Index !Index -- ^ current Index first, then the Item we insert
-               | Delete !Index
-               deriving (Show,Eq,Ord)
+eventTime :: Lens' (Event r) r
+eventTime = core
 
-getRightMost :: EventKind -> Index
+eventActions :: Lens' (Event r) (NonEmpty Action)
+eventActions = extra
+
+-- data Event r = Event { eventTime :: !r
+--                      , eventKind :: !Action
+--                      } deriving (Show,Eq)
+
+data Action = InsertAfter  !Index !Index -- ^ current Index first, then the Item we insert
+            | InsertBefore !Index !Index -- ^ current Index first, then the Item we insert
+            | Delete !Index
+            deriving (Show,Eq,Ord)
+
+getRightMost :: Action -> Index
 getRightMost = \case
   InsertAfter _ j  -> j
   InsertBefore _ j -> j
   Delete j         -> j
 
-getLeftMost :: EventKind -> Index
+getLeftMost :: Action -> Index
 getLeftMost = \case
   InsertAfter j _  -> j
   InsertBefore j _ -> j

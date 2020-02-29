@@ -1,13 +1,19 @@
 module Algorithms.Geometry.ConvexHull.Helpers where
 
 import           Algorithms.Geometry.ConvexHull.Types
+import           Control.Lens (view)
 import           Control.Monad.Trans
 import           Data.Geometry.Point
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
+import           Data.Semigroup.Foldable
+import           Data.Foldable(toList)
 
-import Debug.Trace
+
+import           Debug.Trace
 
 ----------------------------------------------------------------------------------
 -- * Convienience Functions in the Hull Monad.
@@ -27,18 +33,24 @@ atTime' t (Point3 x y z) = Point2 x (z - t*y)
 
 
 -- | Applies the actual event, mutating the current representation of the hulls.
-applyEvent' :: EventKind -> HullM s r ()
+applyEvent' :: Action -> HullM s r ()
 applyEvent' = \case
   InsertAfter i j  -> insertAfter i j
   InsertBefore i h -> insertBefore i h
   Delete j         -> delete j
 
-applyEvent   :: (Show r) => Event r -> HullM s r ()
-applyEvent e = applyEvent' $ traceShow ("applyEvent ",e) (eventKind e)
-
+applyEvent :: Event r -> HullM s r ()
+applyEvent = mapM_ applyEvent' . view eventActions
 
 --------------------------------------------------------------------------------
 -- * Generic Helpers
+
+
+groupOn   :: Eq b => (a -> b) -> [a] -> [NonEmpty a]
+groupOn f = map NonEmpty.fromList . List.groupBy (\a b -> f a == f b)
+
+maximumOn1   :: (Foldable1 f, Ord b) => (a -> b) -> f a -> a
+maximumOn1 f = List.maximumBy (comparing f) . toList
 
 minimumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
 minimumOn f = \case

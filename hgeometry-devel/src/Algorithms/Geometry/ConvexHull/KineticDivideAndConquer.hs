@@ -2,19 +2,24 @@
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 import           Algorithms.DivideAndConquer
+import           Algorithms.Geometry.ConvexHull.Debug
+import           Algorithms.Geometry.ConvexHull.Helpers
+import           Algorithms.Geometry.ConvexHull.Types
 import           Control.Applicative (liftA2,(<|>))
-import           Control.Lens ((^.), bimap, Lens', _1, _2)
+import           Control.Lens ((^.), (&), (%~), bimap, Lens', _1, _2)
 import           Control.Monad ((<=<))
 import           Control.Monad (replicateM)
 import           Control.Monad.State.Class (gets, get, put)
 import           Control.Monad.State.Strict (StateT, evalStateT)
 import           Control.Monad.Trans
 import           Data.Bitraversable
+import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Foldable (forM_)
+import           Data.Foldable (toList)
+import           Data.Geometry.Line (lineThrough, onSideUpDown, SideTestUpDown(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Line(lineThrough, onSideUpDown, SideTestUpDown(..))
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Triangle
@@ -43,11 +48,11 @@ import           System.IO.Unsafe
 import           System.Random
 import qualified Data.Text as Text
 
-
+import           Algorithms.Geometry.ConvexHull.RenderPLY
 
 --------------------------------------------------------------------------------
 
--- TODO: Replace EventKind by a partial function
+-- TODO: Replace Action by a partial function?
 
 -- TODO: We seem to assume that no four points are coplanar, and no
 -- three points lie on a vertical plane. Figure out where we assume that exactly.
@@ -60,19 +65,19 @@ import qualified Data.Text as Text
 --       (slope of the supp. plane of three such points is +infty)
 
 
--- FIXME: The kinetic sim. now treats three points on a vertical plane
+-- TODO: The kinetic sim. now treats three points on a vertical plane
 -- as happening at time t=-\infty. That means we should find faces on
 -- the lower envelope that have that property separately.
 --
 -- I think we can do that by projecting the points down onto the
 -- xy-plane, and computing a 2D convex hull.
-
+--
+-- I Think this is actually fine, since for s.t. like the delaunay
+-- triangulation you don't want those faces anyway.
 
 -- FIXME: We start with some arbitrary starting slope. Fix that
 
 
--- type ConvexHull d p r = [Three Index]
-type ConvexHull d p r = [Triangle 3 p r]
 
 
 -- lowerHull :: (Ord r, Fractional r) => [Point 3 r :+ p] -> ConvexHull 3 p r
@@ -101,7 +106,6 @@ lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
 mkLeaf   :: Int -> HullM s r (MergeStatus r)
 mkLeaf i = pure $ MergeStatus i i []
 
-type HullM s r = DLListMonad s (Point 3 r)
 
 --------------------------------------------------------------------------------
 
@@ -109,7 +113,7 @@ type HullM s r = DLListMonad s (Point 3 r)
 -- pre: not all points on a vertical plane
 lowerboundT     :: (Ord r, Fractional r) => NonEmpty (Point 3 r) -> r
 lowerboundT pts = ((-1)*) . maximum . catMaybes
-                $ zipWith slope (NonEmpty.toList pts') (NonEmpty.tail pts')
+                $ zipWith slope (toList pts') (NonEmpty.tail pts')
   where
     pts' = NonEmpty.sortBy (comparing (^.yCoord) <> comparing (^.zCoord)) pts
 
@@ -145,23 +149,6 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
       rangeS l r = show (hd l) <> "-" <> show (lst r)
 
 
-      debugHull l r = (\a b c d -> ( "MERGING ", hd l, "-",lst l, " WITH "
-                                   , hd r, "-", lst r
-                                   -- , a
-                                   -- , b
-                                   -- , c
-                                   -- , d
-                                   -- , events l
-                                   -- , events r
-                                   )
-                      )
-                      <$> (toListFrom $ hd l) <*> (toListFrom $ hd r)
-                      <*> listHull l <*> listHull r
-
-      listHull s = do xs <- NonEmpty.toList <$> toListFrom (hd s)
-                      mapM (atTime t) xs
-         where
-           t = (-10000000)
 
 --------------------------------------------------------------------------------
 -- * Producing the Output Hull
@@ -169,54 +156,20 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
 -- | Reports all the edges on the CH
 output    :: Show r => MergeStatus r -> HullM s r [Three Index]
 output ms | traceShow ("output: ", events ms) False = undefined
-output ms = catMaybes <$> mapM handle  (events ms)
+output ms = concat <$> mapM handle (events ms)
   where
-    handle e = do mt <- reportTriangle (eventKind e)
+    handle e = do ts <- catMaybes . toList <$> mapM reportTriangle (e^.eventActions)
                   applyEvent e
-                  pure mt
+                  pure ts
 
-    -- u v w =  <$> pointAt u <*> pointAt v
-
-  -- do h  <- toListFrom (hd ms)
-  --              -- es  <- sequence $ zipWith mkEdge (NonEmpty.toList h) (NonEmpty.tail h)
-  --              es' <- concat <$> mapM (handle . eventKind) (events ms)
-  --              pure es' -- $ es <> es'
-  -- where
-  --   handle ek = do es <- reportEdges ek
-  --                  applyEvent ek
-  --                  mapM (\(Two u v) -> mkEdge u v) es
-
-  --   mkEdge u v = Two <$> pure u <*> pure v
-  --   -- mkEdge u v = Two <$> pointAt u <*> pointAt v
-
-reportTriangle :: EventKind -> HullM s r (Maybe (Three Index))
+reportTriangle :: Action -> HullM s r (Maybe (Three Index))
 reportTriangle = \case
     InsertAfter i j  -> fmap (\r   -> Three i j r)   <$> getNext i
     InsertBefore i h -> fmap (\l   -> Three l h i)   <$> getPrev i
     Delete j         -> liftA2 (\l r -> Three l j r) <$> getPrev j <*> getNext j
 
--- | Given an event, produces the list of (at most two) new edges on the hull.
-reportEdges :: EventKind -> HullM s r [Two Index]
-reportEdges = \case
-    InsertAfter i j  -> comb [Two i j] (\r -> Two j r) <$> getNext i
-    InsertBefore i j -> comb [Two j i] (\l -> Two l j) <$> getPrev i
-    Delete j         -> asList Two <$> getPrev j <*> getNext j
-  where
-    comb xs f = maybe xs (\z -> f z : xs)
-    asList g ml mr = maybeToList $ g <$> ml <*> mr
-
 --------------------------------------------------------------------------------
 -- * Finding the Bridge
-
-type Bridge = Two Index
-
-pattern Bridge     :: Index -> Index -> Bridge
-pattern Bridge a b = Two a b
-{-# COMPLETE Bridge #-}
-
-leftBridgePoint, rightBridgePoint :: Lens' Bridge Index
-leftBridgePoint  = _1
-rightBridgePoint = _2
 
 -- | Computes the Bridge of the Hulls (the Hulls currently encoded in
 -- the underlying Doublylinkedlist)
@@ -227,40 +180,28 @@ findBridge       :: (Ord r, Fractional r, Show r)
                  -> MergeStatus r
                  -> MergeStatus r
                  -> HullM s r (STR (NonEmpty Index) Index Index)
-findBridge t l r = do lh <- mapM (atTime' t) =<< toListFromR (lst l)
-                      rh <- mapM (atTime' t) =<< toListFrom  (hd r)
+findBridge t l r = do lh <- mapM (atTime'' t) =<< toListFromR (lst l)
+                      rh <- mapM (atTime'' t) =<< toListFrom  (hd r)
                       let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
                       pure $ STR (NonEmpty.fromList $ reverse ls <> [u,v] <> rs) u v
   where
-    atTime' t' i = (:+ i) <$> atTime t' i
+    atTime'' t' i = (:+ i) <$> atTime t' i
 
     findBridge' l0 r0 = f <$> lowerTangent' l0 r0
     f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
 
 --------------------------------------------------------------------------------
 
--- | The Kinetic Simulation
-type Simulation s r = StateT Bridge (HullM s r)
-
--- | For each of the events form the left and right hulls, construct
--- the appropriate event handler, and merge the two streams of events
--- into one stream.
---
--- Note that the event handler is a piece of code that, when run, may
--- produce an output event (i.e. an event that states that there is a
--- change in the complete hull). Note that whether or not this event
--- is produced depends on the position of the bridge at the time when
--- we handle the event.
 mergeEvents       :: (Ord r, Show r)
-                  => [Event r] -> [Event r] -> [r :+ Simulation s r (Maybe (Event r))]
-mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$> ls)
-                                                              (f handleRight <$> rs)
+                  => [Event r] -> [Event r] -> [r :+ NonEmpty (Existing Action)]
+mergeEvents ls rs = map combine . groupOn (^.core)
+                  $ mergeSortedListsBy (comparing (^.core)) (wrap Left ls) (wrap Right  rs)
   where
-    f handler e@(Event t _) = t :+ handler e
+    wrap f = map (&extra %~ \k -> f <$> k)
+    combine ((t:+as):|es) = t :+ (sconcat $ as :| map (^.extra) es)
 
-    -- TODO: deal with multiple events happening simultaneously
-
-
+--------------------------------------------------------------------------------
+-- * Running the simulation
 
 -- | run the kinetic simulation, computing the events at which the
 -- hull changes. At any point during the simulation:
@@ -269,178 +210,169 @@ mergeEvents ls rs = mergeSortedListsBy (comparing $ (^.core)) (f handleLeft  <$>
 -- - we maintain the current bridge u on L and v on R such that
 -- - L[1..u] <> R[v..n] is the output hull H
 runKinetic        :: (Ord r, Fractional r, Show r, IpeWriteText r )
-                  => Bottom r          -- starting time
-                  -> [r :+ Simulation s r (Maybe (Event r))]  -- existing events
+                  => Bottom r                          -- ^ starting time
+                  -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
                   -> Bridge -- initial bridge
                   -> HullM s r [Event r]
 runKinetic t es b = evalStateT (handleEvent t es) b
 
+-- | Given the current time, handling an event means three things:
+-- 1. figuring out when the first bridge event is
+-- 2. figuring out at what time the next event happens, what actions
+--    occur at that time, and performing those.
+-- 3. handling all remaining events.
+handleEvent        :: (Ord r, Fractional r)
+                   => Bottom r                         -- ^ The current time
+                   -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
+                   -> Simulation s r [Event r]
+handleEvent now es = do mbe <- firstBridgeEvent now
+                        case nextEvent mbe es of
+                          None                   -> pure []
+                          Next t bacts eacts es' -> (:) <$> handleAllAtTime t bacts eacts
+                                                        <*> handleEvent (ValB t) es'
 
-fromBridge :: Bridge -> DLListMonad s b (NonEmpty Index)
-fromBridge (Bridge l r) = (\lh rh -> NonEmpty.reverse lh <> rh
-                             ) <$> toListFromR l <*> toListFrom r
+--------------------------------------------------------------------------------
+-- * Handling all events at a particular time.
 
--- | The actual code for handling an event in the kinetic
--- simulation. At every step, we recompute what the next bridge event
--- is, and apply the first event that occurs (either this bridge
--- event, or one of the existing events).
-handleEvent        :: (Ord r, Fractional r, Show r, IpeWriteText r)
-                   => Bottom r -> [r :+ Simulation s r (Maybe (Event r))] -> Simulation s r [Event r]
-handleEvent now es | traceShow ("HandleEvent ", now, map (^.core) es) False = undefined
-handleEvent now es = do -- nextBridgeEvent now >>= \mbe -> case (es, mbe) of
-       mbe <- nextBridgeEvent now
-       pts <- lift $ getPoints
-       b <- get
-       h <- lift $ fromBridge b
-       case traceShow (drawDebug ("handleEvent_" <> show now) now h b pts)
-            (es, mbe) of
-         ([],Nothing)                     -> pure []
-         ([],Just be)                     -> handleBridge be []
-         (e:es', Nothing)                 -> handleExisting e es'
-         (e:es', Just be) | e `before` be -> handleExisting e es'
-                          | otherwise     -> handleBridge be es
+-- handles all events at the current time.
+handleAllAtTime :: (Ord r, Num r)
+                => r
+                -- ^ the current time
+                -> [Action]
+                -- ^ The bridge events happening at the current time (if they exists).
+
+                -- I guess we care only about deletions here now anyway, since we have to recompute the bridge event. Maybe that is not entirely true....
+                --
+
+                -> [Existing Action]
+                -- ^ all *existing* events that are happening at the
+                -- current time. I.e. events in either the left or right hulls
+                -> Simulation s r (Event r)
+handleAllAtTime now mbe ees =
+    do b <- get
+       let Bridge l r = b
+       ls <- handleOneSide now levs l
+       rs <- handleOneSide now revs r
+       b' <- newBridge (NonEmpty.reverse ls) rs
+       let Bridge l' r' = b'
+           louts = filter (\e -> getRightMost e <= l `max` l') levs
+           routs = filter (\e -> r `min` r' <= getLeftMost e) revs
+           -- TODO: we need to output bridge events
+           -- I guess that we can just figure out what type of bridge event we have here based on
+           -- l, l', r, and r' no?
+
+           -- since even if the bridge event is 'delete l' or so, then
+           -- we would actually find this now.
+
+
+
+       put b'
+       pure $ now :+ NonEmpty.fromList (louts <> routs)
   where
-    cons me outEvents = maybeToList me <> outEvents
+    (levs,revs) = partitionEithers ees
 
-    before (a :+ _) (b :+ _) = a < b
-      -- if bridge event and other event occur simultaneously, do the bridge event first
-    handleExisting (t :+ h) es' = cons <$> h <*> handleEvent (ValB t) es'
-    handleBridge   (t :+ h) es' = (:)  <$> h <*> handleEvent (ValB t) es'
-
-
-
-
-----------------------------------------
--- * Handling the events in the Existing Hulls
-
-handleLeft   :: (Ord r, Show r) => Event r -> Simulation s r (Maybe (Event r))
-handleLeft e = handleExisting' e leftBridgePoint (l <=)
+-- at most two?
+determineBridgeEvents                             :: Bridge -> Bridge -> [Action]
+determineBridgeEvents (Bridge l r) (Bridge l' r') = le <> re
   where
-    l = case eventKind e of -- find the rightmost point involved in the event
-          InsertAfter _ j  -> j
-          InsertBefore _ j -> j
-          Delete j         -> j
+    le = case (l `compare` l') of
+           LT -> [InsertAfter l l'] -- TDOO should this really be after l? Or after whatever is the prececessor of l' now?
+           EQ -> []
+           GT -> [Delete l] -- I guess we should only report this delete if it did not hapen already anyway? Can that even happen?
 
-handleRight   :: (Ord r, Show r)
-              => Event r -> Simulation s r (Maybe (Event r))
-handleRight e = handleExisting' e rightBridgePoint (<= r)
+    re = case (r `compare` r') of
+           LT -> [Delete r]
+           EQ -> []
+           GT -> [InsertBefore r r'] -- TODO; same here !
+
+
+
+
+
+
+newBridge       :: Ord r =>  NonEmpty Index -> NonEmpty Index -> Simulation s r Bridge
+newBridge ls rs = Bridge <$> fastestPoint ls <*> fastestPoint rs
+
+fastestPoint :: Ord r => NonEmpty Index -> Simulation s r Index
+fastestPoint = fmap ((^._1) . maximumOn1 (^._2.yCoord)) . mapM (\i -> (i,) <$> pointAt' i)
+
+-- | Handles one side of the stuff to do at the moment.
+handleOneSide           :: (Ord r, Num r)
+                        => r -> [Action] -> Index -> Simulation s r (NonEmpty Index)
+handleOneSide now evs l = do lift $ mapM_ applyEvent' insertions
+                             lift $ mapM_ applyEvent' deletions
+                             ls <- colinears now l
+                             lift $ mapM_ applyEvent' delBridge
+                             pure ls
   where
-    r = case eventKind e of -- find the leftmost point involved in the event
-          InsertAfter j _  -> j
-          InsertBefore j _ -> j
-          Delete j         -> j
+    (delBridge, deletions, insertions) = partitionActions evs l
 
--- | Handler for an event on the right hull
---
-handleExisting'  :: forall s r. (Show r)
-                 => Event r -> Lens' Bridge Index -> (Int -> Bool)
-                 -> Simulation s r (Maybe (Event r))
-handleExisting' e bridgePoint occursInOutput =
-    do lift $ applyEvent e
-       v <- gets (^.bridgePoint)
-       pure $ if occursInOutput v then Just e else Nothing
-
-       -- outputEvent <$> pointAt' p <*> pointAt' v
-  -- where
-  --   outputEvent pp bp = if (pp^.xCoord) `cmp` (bp^.xCoord) then Just e else Nothing
-
-
--- | Applies the actual event, mutating the current representation of the hulls.
-applyEvent' :: EventKind -> HullM s r ()
-applyEvent' = \case
-  InsertAfter i j  -> insertAfter i j
-  InsertBefore i h -> insertBefore i h
-  Delete j         -> delete j
-
-applyEvent   :: (Show r) => Event r -> HullM s r ()
-applyEvent e = applyEvent' $ traceShow ("applyEvent ",e) (eventKind e)
-
-----------------------------------------
--- * Bridge Events
-
--- | Given the current time, computes the next bridge event (if it
--- exists) and a handler to handle this bridge event.
-nextBridgeEvent     :: (Ord r, Fractional r, Show r )
-                    => Bottom r -> Simulation s r (Maybe (r :+ Simulation s r (Event r)))
-nextBridgeEvent now = do b <- get
-                         es <- candidateBridgeEvents b
-                         fmap mkHandler <$> nextBridgeEvent' now (debug es b)
+partitionActions       :: [Action] -> Index -> (Maybe Action, [Action], [Action])
+partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
   where
-    mkHandler (t :+ (b',k)) = t :+ do put $ traceShow ("setting bridge to ",b'," at time ",t) b'
-                                      pure $ Event t k
+    (dels,ins) = List.partition isDelete evs
+    (bridgeDels,rest) = List.partition (\(Delete i) -> i == l) dels
+    isDelete = \case
+      Delete _ -> False
+      _        -> True
 
-    debug es b = traceShow ("candidate events with ",b," ", es) b
-
--- | Finds the next event involving the current bridge.
--- The arguments are the current time, and the current bridge indices.
-nextBridgeEvent'       :: (Ord r, Fractional r, Show r)
-                       => Bottom r -> Bridge
-                       -> Simulation s r (Maybe (r :+ (Bridge,EventKind)))
-nextBridgeEvent' now b = tr . minimumOn (^.core) . dropBottoms
-                       . filter isFutureEvent -- (\e -> now < e^.core)
-                       . trz
-                      <$> candidateBridgeEvents b
+colinears     :: (Ord r, Num r) => r -> Index -> Simulation s r (NonEmpty Index)
+colinears t x = do b <- get >>= traverse (lift . atTime t)
+                   ls <- lift (toListFromR x) >>= takeColinear b
+                   rs <- lift (toListFrom  x) >>= takeColinear b
+                   pure $ NonEmpty.fromList $ (reverse ls) <> [x] <> rs
   where
-    tr x = traceShow ("nextBridgeEvent', next event found: ",(^.core) <$> x) x
-    trz x = traceShow ("non-filtered events",now, (^.core) <$> x) x
+    takeColinear b (_ :| is) = takeWhileM (isColinearWith b t) is
 
-    -- since e^.core > now, we now e^.core /= Bottom, so we can drop
-    -- the 'Bottom' part, and work with actual 'r' values.
-    dropBottoms = mapMaybe (bitraverse bottomToMaybe pure)
-
-    -- FIXME: this seems to fix the current issue, but I'm
-    -- not convinced this is good enough/works in  -- general
-    isFutureEvent e = case now `compare` (e^.core) of
-                  LT -> True
-                  EQ -> case e^.extra._2 of
-                          Delete _ -> True
-
-                          _        -> False
-                  GT -> False
+-- | Given two 2d-points (representing the bridge at time t), time t,
+-- and index i, test if the point with index i is colinear with the
+-- bridge.
+isColinearWith               :: (Ord r, Num r)
+                             => Two (Point 2 r) -> r -> Index
+                             -> Simulation s r Bool
+isColinearWith (Two l r) t i = (\p -> ccw l r p == CoLinear) <$> lift (atTime t i)
 
 
--- | Computes all candidate bridge events
-candidateBridgeEvents              :: forall r s. (Ord r, Fractional r, Show r)
-                                   => Bridge
-                                   -> Simulation s r [Bottom r :+ (Bridge,EventKind)]
-candidateBridgeEvents (Bridge l r) = catMaybes <$> mapM runCand cands
-  where
-    runCand (c,f) = lift c >>= \case
-      Nothing -> pure Nothing
-      Just x  -> Just <$> bitraverse id pure (f x)
+--------------------------------------------------------------------------------
+-- * Computing the Next Event
 
-    -- candiate next events. Either one of the neighbours of the left bridge endpoint l
-    -- becomes colinear with the bridge, or one of the neighbours of r becomes colinear
-    -- with the bridge.
-    cands :: [ ( HullM s r (Maybe Index), Index -> Simulation s r (Bottom r) :+ (Bridge, EventKind) )]
-    cands = [ (getPrev l, \a -> nextTime a a l r :+ (Bridge a r, Delete l))
-            , (getNext l, \b -> nextTime b l b r :+ (Bridge b r, InsertAfter  l b))
-            , (getPrev r, \c -> nextTime c l c r :+ (Bridge l c, InsertBefore r c))
-            , (getNext r, \d -> nextTime d l r d :+ (Bridge l d, Delete r))
-            ]
+data NextEvent r = None | Next { nextEventTime   :: !r
+                               , bridgeActions   :: ![Action]
+                               , existingActions :: ![Existing Action]
+                               , remainingEvents :: ![r :+ NonEmpty (Existing Action)]
+                               } deriving (Show,Eq)
 
-    nextTime p a b c = colinearTime a b c >>= isValidCandidate l r p
+-- | Figures out what the time of the first event is (if it exists)
+-- and collects everything that happens at that time (and which
+-- existing events happen later)
+nextEvent        :: Ord r
+                  => Maybe (Event r)
+                  -> [r :+ NonEmpty (Existing Action)]
+                  -> NextEvent r
+nextEvent Nothing              []                       = None
+nextEvent Nothing              ((te :+ eacts) : es')    = Next te []             (toList eacts) es'
+nextEvent (Just (tb :+ bacts)) []                       = Next tb (toList bacts) []             []
+nextEvent (Just (tb :+ bacts)) es@((te :+ eacts) : es') =
+    case tb `compare` te of
+      LT -> Next tb (toList bacts) []             es
+      EQ -> Next tb (toList bacts) (toList eacts) es'
+      GT -> Next te []             (toList eacts) es'
+
+-- | Computes the first time a bridge event happens, and all actions
+-- that happen at that time.
+firstBridgeEvent     :: Ord r => Bottom r -> Simulation s r (Maybe (Event r))
+firstBridgeEvent now = collectEarliest <$> candidateBridgeEvents now
+
+-- | Collect all a's that actually happen at the earliest time.
+collectEarliest    :: Ord t => [t :+ NonEmpty a] -> Maybe (t :+ NonEmpty a)
+collectEarliest xs = let mt = minimumOn (^.core) xs in
+  (\(t :+ _) -> t :+ sconcat (NonEmpty.fromList [ a | t' :+ a <- xs, t' == t])) <$> mt
+
+candidateBridgeEvents     :: Bottom r -> Simulation s r [Event r]
+candidateBridgeEvents now = undefined
 
 
-    -- TODO: verify that nextTime a l r == nextTime l r a ?
-
-isValidCandidate   :: (Num r, Ord r, Show r)
-                       => Index -> Index -> Index -> Bottom r -> Simulation s r (Bottom r)
-isValidCandidate l r p t = do res <- isValidCandidate' l r p t
-                              pure $ traceShow ("isValidCandidate: ",l,r,p,res) res
-
-----------------------------------------
--- * Helpers for computing the next interesting time in the simulation
-
--- this does not realy work.
-isValidCandidate'       :: (Num r, Ord r)
-                       => Index -> Index -> Index -> Bottom r -> Simulation s r (Bottom r)
-isValidCandidate' l r p = lift . \case
-   Bottom -> pure Bottom -- bottoms are already invalid?
-   ValB t -> let t' = t + 1 in f t <$> atTime t' l <*> atTime t' r <*> atTime t' p
-  where
-    f t l' r' p' | (p' `onSideUpDown` (lineThrough l' r')) == Below = ValB t
-                 | otherwise                                        = Bottom
+--------------------------------------------------------------------------------
 
 
 -- | compute the time at which r becomes colinear with the line throuh
@@ -462,291 +394,3 @@ colinearTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
     b = ux*(ry - py)  - vx*(qy - py)
   -- b == zero means the three points are on a vertical plane. This corresponds
   -- to t = -\infty.
-
-
---------------------------------------------------------------------------------
-
-data Event r = Event { eventTime :: !r
-                     , eventKind :: !EventKind
-                     } deriving (Show,Eq)
-
-data EventKind = InsertAfter  !Index !Index -- ^ current Index first, then the Item we insert
-               | InsertBefore !Index !Index -- ^ current Index first, then the Item we insert
-               | Delete !Index
-               deriving (Show,Eq,Ord)
-
-data MergeStatus r = MergeStatus { hd     :: !Index -- ^ first item in the list
-                                 , lst    :: !Index -- ^ last item in the list
-                                 , events :: ![Event r] -- ^ Events when this Hull changes
-                                 } deriving (Show,Eq)
-
-----------------------------------------------------------------------------------
--- * Convienience Functions in the Hull Monad.
-
-pointAt :: Index -> HullM s r (Point 3 r)
-pointAt = valueAt
-
-pointAt' :: Index -> Simulation s r (Point 3 r)
-pointAt' = lift . pointAt
-
-atTime     :: Num r => r -> Index -> HullM s r (Point 2 r)
-atTime t i = atTime' t <$> pointAt i
-
--- | Computes the position of the given point at time t
-atTime'                  :: Num r => r -> Point 3 r -> Point 2 r
-atTime' t (Point3 x y z) = Point2 x (z - t*y)
-
---------------------------------------------------------------------------------
--- * Pure Helpers
-
-minimumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
-minimumOn f = \case
-    [] -> Nothing
-    xs -> Just $ List.minimumBy (comparing f) xs
-
---------------------------------------------------------------------------------
--- * Testing stuff
-
-myPts :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                            , Point3 1  1  10 :+ 1
-                            , Point3 0  10 20 :+ 0
-                            , Point3 12 1  1  :+ 3
-                            , Point3 22 20  1  :+ 4
-                            ]
-
--- myResult = [1 2 3
---             2 3 4
---             0 1 2
---             0 2 4
---            ]
-
-myPts' :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
-myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                             , Point3 1  1  10 :+ 1
-                             , Point3 0  10 20 :+ 0
-                             , Point3 12 1  1  :+ 3
-                             ]
-
--- 1 2 3
--- 0 1 2
--- 0 2 3
-
-
-test = mapM_ print $ lowerHull' myPts
-
-test' = mapM_ print $ lowerHull' myPts'
-
-
---------------------------------------------------------------------------------
-
-renderMovieIO s ms = do pgs <- renderMovie ms
-                        pure $ unsafePerformIO $
-                          do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
-                             writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ pgs
-                             pure fp
-  where
-    randomS :: IO String
-    randomS = replicateM 10 $ randomRIO ('a','z')
-
-
-drawDebug             :: (IpeWriteText r, Ord r, Fractional r)
-                      => String
-                      -> Bottom r
-                      -> NonEmpty Index
-                      -> Bridge
-                      -> V.Vector (Point 3 r)
-                      -> FilePath
-drawDebug s t' h blr pts = unsafePerformIO $
-                       do fp <- (\s1 -> "/tmp/out" <> s <> "_" <> s1 <> ".ipe") <$> randomS
-                          drawAllAt fp t h blr pts
-                          pure fp
-  where
-    randomS :: IO String
-    randomS = replicateM 10 $ randomRIO ('a','z')
-
-    t = case t' of
-          Bottom   -> -1000
-          ValB t'' -> t''
-
-
-
-drawAllAt fp t h blr pts = writeIpeFile fp . IpeFile Nothing [basicIpeStyle] $ draw t h blr pts
-
-
-draw                       :: (Fractional r, Ord r, IpeWriteText r)
-                           => r
-                           -> NonEmpty Index
-                           -> Bridge
-                           -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
-draw t h blr pts = fmap (\t' -> drawAt t' h blr pts)
-                 $ NonEmpty.fromList [t-eps,t,t+eps]
-  where
-    eps = (1/10)
-
-
--- draw          :: (Fractional r, Ord r, IpeWriteText r)
---               => MergeStatus r -> Bridge -> V.Vector (Point 3 r) -> NonEmpty (IpePage r)
--- draw ms b pts = fmap (\t -> drawAt t ms b pts) times
---   where
---     times = NonEmpty.fromList . (initT :)
---           . concatMap (\e -> let t = eventTime e in [t-eps,t,t+eps]) $ events ms
---     eps = (1/1000)
-
---     initT = (-10000000)
---     -- we should recompute the bridge I guess
-
-drawAt                       :: (Num r, Ord r, IpeWriteText r)
-                             => r
-                             -> NonEmpty Index
-                             -> Bridge
-                             -> V.Vector (Point 3 r) -> IpePage r
-drawAt t h (Bridge l r) pts = fromContent $
-   pts' <> [drawHull h pts2, drawBridge l r pts2, time]
-  where
-    pts2 = fmap (atTime' t) pts
-    pts' = V.toList . V.imap (\i p -> iO $ labelled id defIO (p :+ i)) $ pts2
-    time = iO $ ipeLabel ((fromJust $ ipeWriteText t) :+ Point2 (-50) (-50))
-
-    -- lh = NonEmpty.head lh' NonEmpty.<| lh'
-    -- rh = NonEmpty.head rh' NonEmpty.<| rh'
-
-
-
-drawHull       :: NonEmpty Index -> V.Vector (Point 2 r) -> IpeObject r
-drawHull h pts = iO . ipePolyLine . fromPoints $ [ (pts V.! i) :+ () | i <- NonEmpty.toList h ]
-
-drawBridge         :: Index -> Index -> V.Vector (Point 2 r) -> IpeObject r
-drawBridge l r pts = let s = ClosedLineSegment (ext $ pts V.! l) (ext $ pts V.! r)
-                     in iO $ ipeLineSegment s ! attr SStroke red
-
-getPoints :: DLListMonad s x (V.Vector x)
-getPoints = asks values
-
-
--- | Reports all the edges on the CH
-renderMovie    :: (Show r, Fractional r, Ord r, IpeWriteText r)
-               => MergeStatus r -> HullM s r (NonEmpty (IpePage r))
--- renderMovie ms | traceShow ("output: ", events ms) False = undefined
-renderMovie ms = do h0 <- toListFrom $ hd ms
-                    res <- renderMovie'
-                    writeList h0 -- restore the original list and state
-                    pure $ res
-  where
-    renderMovie' = combine <$> mapM handle (events ms)
-    combine xs = case NonEmpty.nonEmpty xs of
-      Nothing  -> fromContent [] :| []
-      Just pgs -> sconcat pgs
-
-    handle e = do let t = eventTime e
-                  pts <- getPoints
-                  i <- fromEvent (eventKind e)
-                  hBefore <- toListContains i
-                  applyEvent e
-                  hAfter <- toListContains i
-                  let pages' = drawMovie t hBefore hAfter pts
-                  pure pages'
-
-fromEvent = \case
-    InsertAfter i j  -> pure i
-    InsertBefore i h -> pure i
-    Delete j         -> (\a b -> fromJust $ a <|> b) <$> getPrev j <*> getNext j
-
-
-drawMovie             :: (Fractional r, Ord r, IpeWriteText r)
-                      => r -> NonEmpty Index -> NonEmpty Index -> V.Vector (Point 3 r)
-                      -> NonEmpty (IpePage r)
-drawMovie t h0 h1 pts = NonEmpty.fromList
-    [ fromContent $ d pts0 <> [ drawHull h0 pts0, time $ t - eps  ]
-    , fromContent $ d pts2 <> [ drawHull h1 pts2, time $ t        ]
-    , fromContent $ d pts1 <> [ drawHull h1 pts1, time $ t + eps  ]
-    ]
-  where
-    pts0 = fmap (atTime' $ t - eps ) $ pts
-    pts1 = fmap (atTime' $ t + eps ) $ pts
-    pts2 = fmap (atTime' t) $ pts
-
-    time x = iO $ ipeLabel ((fromJust $ ipeWriteText x) :+ Point2 (-50) (-50))
-
-    eps = (1/10)
-
-
-    d pts' = V.toList
-           . V.slice s (1 + tt - s)
-           . V.imap (\i p -> iO $ labelled id defIO (p :+ i))
-           $ pts'
-
-    hpts = [ (pts V.! i)^.xCoord | i <- NonEmpty.toList h0]
-
-    -- xRange = ClosedRange (minimum hpts) (maximum hpts)
-    (s,tt) = (NonEmpty.head h0, NonEmpty.last h0)
-
-
-
-    -- atts =
-
-
---------------------------------------------------------------------------------
-
-
-
-       -- uncaught exception: ArithException
-       -- Ratio has zero denominator
-       -- (after 2 tests)
-       --   HI ((Point3 [0,-3,0] :+ 1) :| [Point3 [0,-1,0] :+ 2,Point3 [0,0,1] :+ 3,Point3 [3,0,1] :+ 4])
-
-testPts :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
-testPts = NonEmpty.fromList $ [ Point3 0 (-3) 0 :+ 1
-                              , Point3 0 (-1) 0 :+ 2
-                              , Point3 0 0    1 :+ 3
-                              , Point3 3 0    1 :+ 4
-                              ]
--- looks like a vertical plane with three pts to me, figure out how to handle those
-
--- buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
--- buggyPoints = NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 1
---                                   ,Point3 (-4) 7    (-5) :+ 2
---                                   ,Point3 0    (-7) (-2) :+ 3
---                                   ,Point3 2    (-7) 0    :+ 4
---                                   ,Point3 2    (-6) (-2) :+ 5
---                                   ,Point3 2    5    4    :+ 6
---                                   ,Point3 5    (-1) 2    :+ 7
---                                   ,Point3 6    6    6    :+ 8
---                                   ,Point3 7    (-5) (-6) :+ 9
---                                   ]
-
-buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
-buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 0
-                                                            ,Point3 (-4) 7    (-5) :+ 1
-                                                            ,Point3 0    (-7) (-2) :+ 2
-                                                            ,Point3 2    (-7) 0    :+ 3
-                                                            ,Point3 2    (-6) (-2) :+ 4
-                                                            ,Point3 2    5    4    :+ 5
-                                                            ,Point3 5    (-1) 2    :+ 6
-                                                            ,Point3 6    6    6    :+ 7
-                                                            ,Point3 7    (-5) (-6) :+ 8
-                                                            ]
-
-
-  -- 1) 3D ConvexHull tests same as naive quickcheck
-  --      Falsifiable (after 8 tests):
-  --        HI ((Point3 [-7,2,4] :+ 1) :| [Point3 [-4,7,-5] :+ 2,Point3 [0,-7,-2] :+ 3,Point3 [2,-7,0] :+ 4,Point3 [2,-6,-2] :+ 5,Point3 [2,5,4] :+ 6,Point3 [5,-1,2] :+ 7,Point3 [6,6,6] :+ 8,Point3 [7,-5,-6] :+ 9])
-  --      expected: H [Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [6,6,6] :+ 8) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9)]
-  --       but got: H [Triangle (Point3 [0,-7,-2] :+ 3) (Point3 [2,-7,0] :+ 4) (Point3 [7,-5,-6] :+ 9),Triangle (Point3 [-7,2,4] :+ 1) (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3),Triangle (Point3 [-4,7,-5] :+ 2) (Point3 [0,-7,-2] :+ 3) (Point3 [7,-5,-6] :+ 9)]
-
-
-
-buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
-                                                             , Point3 (-5) (-2) 5 :+ 1
-                                                             , Point3 (-5) (-1) 4 :+ 2
-                                                             , Point3 (0) (2)   2 :+ 3
-                                                             , Point3 (1) (-5)  4 :+ 4
-                                                             , Point3 (3) (-3)  2 :+ 5
-                                                             , Point3 (3) (-1)  1 :+ 6
-                                                             ]
-
-
-              -- expected: H [Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-2,5] :+ 2) (Point3 [-5,-1,4] :+ 3),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-1,4] :+ 3) (Point3 [0,2,2] :+ 4),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [0,2,2] :+ 4) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [1,-5,4] :+ 5) (Point3 [3,-3,2] :+ 6),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [3,-3,2] :+ 6) (Point3 [3,-1,1] :+ 7)]
-
-
-              -- but got: H [Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [1,-5,4] :+ 5) (Point3 [3,-3,2] :+ 6),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [3,-3,2] :+ 6) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [0,2,2] :+ 4) (Point3 [3,-1,1] :+ 7),Triangle (Point3 [-5,-3,4] :+ 1) (Point3 [-5,-1,4] :+ 3) (Point3 [0,2,2] :+ 4)]
