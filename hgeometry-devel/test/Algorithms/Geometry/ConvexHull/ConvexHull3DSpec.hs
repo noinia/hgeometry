@@ -7,6 +7,7 @@ import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
+import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -36,6 +37,9 @@ instance Arbitrary HullInput where
       fromPts pts = HI . NonEmpty.fromList
                  $ zipWith (:+) (fmap (realToFrac @Int @(RealNumber 10)) <$> Set.toList pts) ([0..])
 
+-- FIXME: This actually works only for non-degenerate outputs. I.e. if
+-- the output contains a face with more than three sides (i.e. not a
+-- triangle) there are multiple, valid, ways of triangulating it.
 
 sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
 
@@ -60,7 +64,7 @@ myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             ]
 
 toTri       :: Eq a =>  NonEmpty (Point d r :+ a) -> Three a -> Triangle d a r
-toTri pts t = let pt i = head $ NonEmpty.filter (\t -> t^.extra == i) pts
+toTri pts t = let pt i = List.head $ NonEmpty.filter (\t -> t^.extra == i) pts
               in (t&traverse %~ pt)^.from _TriangleThreePoints
 
 myHull :: Hull Int Double
@@ -95,3 +99,42 @@ setOf n g = buildSet mempty <$> do sz <- getSize
     buildSet s (x:xs) | length s == n = s
                       | otherwise     = let s' = Set.insert x s in buildSet s' xs
     buildSet _  _                     = error "setOf: absurd"
+
+
+--------------------------------------------------------------------------------
+-- * Some difficult point sets
+
+buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 0
+                                                            ,Point3 (-4) 7    (-5) :+ 1
+                                                            ,Point3 0    (-7) (-2) :+ 2
+                                                            ,Point3 2    (-7) 0    :+ 3
+                                                            ,Point3 2    (-6) (-2) :+ 4
+                                                            ,Point3 2    5    4    :+ 5
+                                                            ,Point3 5    (-1) 2    :+ 6
+                                                            ,Point3 6    6    6    :+ 7
+                                                            ,Point3 7    (-5) (-6) :+ 8
+                                                            ]
+
+buggyPoints2 :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
+                                                             , Point3 (-5) (-2) 5 :+ 1
+                                                             , Point3 (-5) (-1) 4 :+ 2
+                                                             , Point3 (0) (2)   2 :+ 3
+                                                             , Point3 (1) (-5)  4 :+ 4
+                                                             , Point3 (3) (-3)  2 :+ 5
+                                                             , Point3 (3) (-1)  1 :+ 6
+                                                             ]
+
+buggyPoints3 :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9) (  7) :+ 0,
+                                                               Point3 (-8 ) (-9) ( -2) :+ 1,
+                                                               Point3 (-8 ) (7 ) ( -2) :+ 2,
+                                                               Point3 (-6 ) (9 ) ( 7) :+ 3,
+                                                               Point3 (-3 ) (-6) ( -8) :+ 4,
+                                                               Point3 (-3 ) (4 ) (  1) :+ 5,
+                                                               Point3 (-2 ) (-9) ( -9) :+ 6,
+                                                               Point3 (1  ) (-3) ( 1) :+ 7,
+                                                               Point3 (4  ) (5 ) ( 8) :+ 8,
+                                                               Point3 (10 ) (3 ) ( 3) :+ 9
+                                                             ]

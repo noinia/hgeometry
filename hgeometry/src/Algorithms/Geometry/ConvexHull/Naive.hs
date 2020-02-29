@@ -18,11 +18,19 @@ import           Data.Util
 
 type ConvexHull d p r = [Triangle 3 p r]
 
-lowerHull'                 :: forall r p. (Ord r, Fractional r, Show r)
-                           => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
-lowerHull' (toList -> pts) = let mkT (Three p q r) = Triangle p q r in
-    [ t | t <- mkT <$> uniqueTriplets pts, isNothing (isValidTriangle t pts) ]
+lowerHull' :: forall r p. (Ord r, Fractional r, Show r)
+           => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHull' = filter (not . isVertical) . lowerHullAll
+  where
+    isVertical (Triangle p q r) =
+      ccw' (p&core %~ projectPoint) (q&core %~ projectPoint) (r&core %~ projectPoint) == CoLinear
 
+-- | Generates a set of triangles to be used to construct a complete
+-- convex hull. In particular, it may contain vertical triangles.
+lowerHullAll                 :: forall r p. (Ord r, Fractional r, Show r)
+                             => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
+lowerHullAll (toList -> pts) = let mkT (Three p q r) = Triangle p q r in
+    [ t | t <- mkT <$> uniqueTriplets pts, isNothing (isValidTriangle t pts) ]
 
 -- | Tests if this is a valid triangle for the lower envelope. That
 -- is, if all point lie above the plane through these points. Returns
