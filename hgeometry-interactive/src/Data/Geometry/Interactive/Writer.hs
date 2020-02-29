@@ -6,17 +6,17 @@ import           Control.Lens hiding (Const,rmap)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ball
-import           Data.Geometry.Interactive.OrphanInstances()
+import           Data.Geometry.Box
+import           Data.Geometry.Interactive.OrphanInstances ()
 import qualified Data.Geometry.Ipe as Ipe
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
-import           Data.Geometry.Vector
-import           Data.Geometry.Box
-import           Data.Geometry.PolyLine
+import           Data.Geometry.PolyLine (PolyLine, fromLineSegment, points)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
+import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (catMaybes, mapMaybe)
 import           Data.Proxy
