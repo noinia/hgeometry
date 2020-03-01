@@ -151,7 +151,7 @@ renderMovie ms = do h0 <- toListFrom $ hd ms
 
     handle e = do let t = e^.eventTime
                   pts <- getPoints
-                  i <- undefined -- fromEvent (e^.eventKind) -- FIXME!
+                  i <- fromEvent . NonEmpty.head $ e^.eventActions
                   hBefore <- toListContains i
                   applyEvent e
                   hAfter <- toListContains i

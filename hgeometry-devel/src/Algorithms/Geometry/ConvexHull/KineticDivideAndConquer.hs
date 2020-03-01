@@ -5,25 +5,18 @@ import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Debug
 import           Algorithms.Geometry.ConvexHull.Helpers
 import           Algorithms.Geometry.ConvexHull.Types
-import           Control.Applicative (liftA2,(<|>))
-import           Control.Lens ((^.), (&), (%~), bimap, Lens', _1, _2)
+import           Control.Applicative (liftA2)
+import           Control.Lens ((^.), (&), (%~), bimap, _1, _2)
 import           Control.Monad ((<=<))
-import           Control.Monad (replicateM)
-import           Control.Monad.State.Class (gets, get, put)
-import           Control.Monad.State.Strict (StateT, evalStateT)
+import           Control.Monad.State.Class (get, put)
+import           Control.Monad.State.Strict (evalStateT)
 import           Control.Monad.Trans
-import           Data.Bitraversable
 import           Data.Either (partitionEithers)
 import           Data.Ext
-import           Data.Foldable (forM_)
 import           Data.Foldable (toList)
-import           Data.Geometry.Line (lineThrough, onSideUpDown, SideTestUpDown(..))
-import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
 import           Data.IndexedDoublyLinkedList
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -34,21 +27,14 @@ import           Data.Semigroup (sconcat)
 import           Data.UnBounded
 import           Data.Util
 import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
 
 import           Data.Geometry.Ipe
-import           Data.Geometry.Ipe.Color
 import           Data.Maybe (catMaybes)
 import           Data.RealNumber.Rational
 
 
-import           Control.Monad.Reader.Class
 import           Debug.Trace
-import           System.IO.Unsafe
-import           System.Random
-import qualified Data.Text as Text
 
-import           Algorithms.Geometry.ConvexHull.RenderPLY
 
 --------------------------------------------------------------------------------
 
@@ -132,8 +118,8 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
 
                 let esIn = traceShow d $ mergeEvents (events l) (events r)
                     t    = (-10000000) -- TODO; at what time value should we start?
-                STR h u v <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
-                                       ) <$> findBridge t l r
+                (h,u,v) <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
+                                     ) <$> findBridge t l r
                 let b = traceShow ("bridge:", u, v, "hull:",h) $ (Bridge u v)
 
                 es <- runKinetic Bottom esIn
@@ -179,16 +165,28 @@ findBridge       :: (Ord r, Fractional r, Show r)
                  => r
                  -> MergeStatus r
                  -> MergeStatus r
-                 -> HullM s r (STR (NonEmpty Index) Index Index)
-findBridge t l r = do lh <- mapM (atTime'' t) =<< toListFromR (lst l)
-                      rh <- mapM (atTime'' t) =<< toListFrom  (hd r)
-                      let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
-                      pure $ STR (NonEmpty.fromList $ reverse ls <> [u,v] <> rs) u v
+                 -> HullM s r (NonEmpty Index, Index, Index)
+findBridge t l r = do lh <- toListFromR (lst l)
+                      rh <- toListFrom  (hd r)
+                      findBridgeFrom t lh rh
+
+findBridgeFrom       :: (Ord r, Fractional r, Show r)
+                     => r
+                     -> NonEmpty Index
+                     -> NonEmpty Index
+                     -> HullM s r (NonEmpty Index, Index, Index)
+findBridgeFrom t l r = do lh <- mapM (atTime'' t) l
+                          rh <- mapM (atTime'' t) r
+                          let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
+                          pure $ (fromL $ reverse ls <> [u,v] <> rs, u, v)
   where
     atTime'' t' i = (:+ i) <$> atTime t' i
-
     findBridge' l0 r0 = f <$> lowerTangent' l0 r0
     f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
+
+    fromL xs = case NonEmpty.nonEmpty xs of
+                 Nothing -> error "findBridge"
+                 Just n  -> n
 
 --------------------------------------------------------------------------------
 
@@ -221,89 +219,91 @@ runKinetic t es b = evalStateT (handleEvent t es) b
 -- 2. figuring out at what time the next event happens, what actions
 --    occur at that time, and performing those.
 -- 3. handling all remaining events.
-handleEvent        :: (Ord r, Fractional r)
+handleEvent        :: (Ord r, Fractional r, Show r)
                    => Bottom r                         -- ^ The current time
                    -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
                    -> Simulation s r [Event r]
 handleEvent now es = do mbe <- firstBridgeEvent now
-                        case nextEvent mbe es of
+                        case traceShowId $ nextEvent mbe es of
                           None                   -> pure []
-                          Next t bacts eacts es' -> (:) <$> handleAllAtTime t bacts eacts
-                                                        <*> handleEvent (ValB t) es'
-
+                          Next t eacts es' -> do me  <- handleAllAtTime t eacts
+                                                 evs <- handleEvent (ValB t) es'
+                                                 pure $ maybeToList me <> evs
 --------------------------------------------------------------------------------
 -- * Handling all events at a particular time.
 
 -- handles all events at the current time.
-handleAllAtTime :: (Ord r, Num r)
+handleAllAtTime :: (Ord r, Fractional r, Show r)
                 => r
                 -- ^ the current time
-                -> [Action]
-                -- ^ The bridge events happening at the current time (if they exists).
-
-                -- I guess we care only about deletions here now anyway, since we have to recompute the bridge event. Maybe that is not entirely true....
-                --
-
                 -> [Existing Action]
                 -- ^ all *existing* events that are happening at the
                 -- current time. I.e. events in either the left or right hulls
-                -> Simulation s r (Event r)
-handleAllAtTime now mbe ees =
+                -> Simulation s r (Maybe (Event r))
+handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
+handleAllAtTime now ees =
     do b <- get
        let Bridge l r = b
-       ls <- handleOneSide now levs l
-       rs <- handleOneSide now revs r
-       b' <- newBridge (NonEmpty.reverse ls) rs
+       (delL,ls) <- handleOneSide now levs l
+       (delR,rs) <- handleOneSide now revs r
+       b' <- newBridge now (NonEmpty.reverse ls) rs
        let Bridge l' r' = b'
            louts = filter (\e -> getRightMost e <= l `max` l') levs
            routs = filter (\e -> r `min` r' <= getLeftMost e) revs
-           -- TODO: we need to output bridge events
-           -- I guess that we can just figure out what type of bridge event we have here based on
-           -- l, l', r, and r' no?
-
-           -- since even if the bridge event is 'delete l' or so, then
-           -- we would actually find this now.
-
-
-
+       la <- leftBridgeEvent  l l' delL levs
+       ra <- rightBridgeEvent r r' delR revs
        put b'
-       pure $ now :+ NonEmpty.fromList (louts <> routs)
+       pure . outputEvent now $ louts <> routs <> catMaybes [la,ra]
+         -- the bridge actions should be after louts and routs;
   where
     (levs,revs) = partitionEithers ees
+    outputEvent t acts = (t :+) <$> NonEmpty.nonEmpty acts
 
--- at most two?
-determineBridgeEvents                             :: Bridge -> Bridge -> [Action]
-determineBridgeEvents (Bridge l r) (Bridge l' r') = le <> re
+-- | Computes if we should output a new bridge action for the left endpoint
+leftBridgeEvent                         :: Index -> Index -> Bool -> [Action]
+                                        -> Simulation s r (Maybe Action)
+leftBridgeEvent l l' alreadyDeleted evs = lift $ case (l `compare` l') of
+    LT | shouldBeInserted l' evs -> (\(Just p) -> Just $ InsertAfter p l') <$> getPrev l'
+    -- since l < l', l' has a predecessor, and hence the fromJust is safe.
+    GT | not alreadyDeleted      -> pure . Just $ Delete l
+    _                            -> pure Nothing
+
+rightBridgeEvent                         :: Index -> Index -> Bool -> [Action]
+                                         -> Simulation s r (Maybe Action)
+--rightBridgeEvent r r' b evs | traceShow ("rightBridgeEvent ",r,r',b,evs) False = undefined
+rightBridgeEvent r r' alreadyDeleted evs = lift $ case (r' `compare` r) of
+    LT | shouldBeInserted r' evs -> (\(Just p) -> Just $ InsertBefore p r') <$> getNext r'
+    -- since r' < r, r' has a successor, and hence the fromJust is safe
+    GT | not alreadyDeleted      -> pure . Just $ Delete r
+    _                            -> pure Nothing
+
+-- | Figure out if the given index has been inserted in one of the actions.
+shouldBeInserted   :: Index -> [Action] -> Bool
+shouldBeInserted i = null . filter isInsert
   where
-    le = case (l `compare` l') of
-           LT -> [InsertAfter l l'] -- TDOO should this really be after l? Or after whatever is the prececessor of l' now?
-           EQ -> []
-           GT -> [Delete l] -- I guess we should only report this delete if it did not hapen already anyway? Can that even happen?
+    isInsert = \case
+      InsertAfter  _ j | j == i -> True
+      InsertBefore _ j | j == i -> True
+      _                         -> False
 
-    re = case (r `compare` r') of
-           LT -> [Delete r]
-           EQ -> []
-           GT -> [InsertBefore r r'] -- TODO; same here !
+-- | Considering that all points in ls and rs are colinear at time t
+-- (and contain the bridge at time). Compute the new bridge.
+newBridge         :: (Ord r, Fractional r, Show r)
+                  =>  r -> NonEmpty Index -> NonEmpty Index -> Simulation s r Bridge
+newBridge t ls rs = lift $ (\(_,l,r) -> Bridge l r) <$> findBridgeFrom (t+1) ls rs
+  -- claim: all colinear a t time t means we can pick any time t' > t
+  -- to compute the new bridge
 
-
-
-
-
-
-newBridge       :: Ord r =>  NonEmpty Index -> NonEmpty Index -> Simulation s r Bridge
-newBridge ls rs = Bridge <$> fastestPoint ls <*> fastestPoint rs
-
-fastestPoint :: Ord r => NonEmpty Index -> Simulation s r Index
-fastestPoint = fmap ((^._1) . maximumOn1 (^._2.yCoord)) . mapM (\i -> (i,) <$> pointAt' i)
-
--- | Handles one side of the stuff to do at the moment.
+--
+-- returns wether the current bridge was deleted and the colinears
+-- with the current bridge
 handleOneSide           :: (Ord r, Num r)
-                        => r -> [Action] -> Index -> Simulation s r (NonEmpty Index)
+                        => r -> [Action] -> Index -> Simulation s r (Bool, NonEmpty Index)
 handleOneSide now evs l = do lift $ mapM_ applyEvent' insertions
                              lift $ mapM_ applyEvent' deletions
                              ls <- colinears now l
                              lift $ mapM_ applyEvent' delBridge
-                             pure ls
+                             pure (isJust delBridge, ls)
   where
     (delBridge, deletions, insertions) = partitionActions evs l
 
@@ -313,16 +313,20 @@ partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
     (dels,ins) = List.partition isDelete evs
     (bridgeDels,rest) = List.partition (\(Delete i) -> i == l) dels
     isDelete = \case
-      Delete _ -> False
-      _        -> True
+      Delete _ -> True
+      _        -> False
 
 colinears     :: (Ord r, Num r) => r -> Index -> Simulation s r (NonEmpty Index)
-colinears t x = do b <- get >>= traverse (lift . atTime t)
+colinears t x = do b  <- get >>= traverse (lift . atTime t)
                    ls <- lift (toListFromR x) >>= takeColinear b
                    rs <- lift (toListFrom  x) >>= takeColinear b
-                   pure $ NonEmpty.fromList $ (reverse ls) <> [x] <> rs
+                   pure $ fromL $ (reverse ls) <> [x] <> rs
   where
     takeColinear b (_ :| is) = takeWhileM (isColinearWith b t) is
+
+    fromL xs = case NonEmpty.nonEmpty xs of
+                 Nothing -> error "colinears"
+                 Just n  -> n
 
 -- | Given two 2d-points (representing the bridge at time t), time t,
 -- and index i, test if the point with index i is colinear with the
@@ -337,7 +341,6 @@ isColinearWith (Two l r) t i = (\p -> ccw l r p == CoLinear) <$> lift (atTime t 
 -- * Computing the Next Event
 
 data NextEvent r = None | Next { nextEventTime   :: !r
-                               , bridgeActions   :: ![Action]
                                , existingActions :: ![Existing Action]
                                , remainingEvents :: ![r :+ NonEmpty (Existing Action)]
                                } deriving (Show,Eq)
@@ -346,31 +349,31 @@ data NextEvent r = None | Next { nextEventTime   :: !r
 -- and collects everything that happens at that time (and which
 -- existing events happen later)
 nextEvent        :: Ord r
-                  => Maybe (Event r)
+                  => Maybe r
                   -> [r :+ NonEmpty (Existing Action)]
                   -> NextEvent r
-nextEvent Nothing              []                       = None
-nextEvent Nothing              ((te :+ eacts) : es')    = Next te []             (toList eacts) es'
-nextEvent (Just (tb :+ bacts)) []                       = Next tb (toList bacts) []             []
-nextEvent (Just (tb :+ bacts)) es@((te :+ eacts) : es') =
-    case tb `compare` te of
-      LT -> Next tb (toList bacts) []             es
-      EQ -> Next tb (toList bacts) (toList eacts) es'
-      GT -> Next te []             (toList eacts) es'
+nextEvent Nothing   []                       = None
+nextEvent Nothing   ((te :+ eacts) : es')    = Next te (toList eacts) es'
+nextEvent (Just tb) []                       = Next tb []             []
+nextEvent (Just tb) es@((te :+ eacts) : es') = case tb `compare` te of
+                                                 LT -> Next tb []             es
+                                                 EQ -> Next tb (toList eacts) es'
+                                                 GT -> Next te (toList eacts) es'
 
--- | Computes the first time a bridge event happens, and all actions
--- that happen at that time.
-firstBridgeEvent     :: Ord r => Bottom r -> Simulation s r (Maybe (Event r))
-firstBridgeEvent now = collectEarliest <$> candidateBridgeEvents now
-
--- | Collect all a's that actually happen at the earliest time.
-collectEarliest    :: Ord t => [t :+ NonEmpty a] -> Maybe (t :+ NonEmpty a)
-collectEarliest xs = let mt = minimumOn (^.core) xs in
-  (\(t :+ _) -> t :+ sconcat (NonEmpty.fromList [ a | t' :+ a <- xs, t' == t])) <$> mt
-
-candidateBridgeEvents     :: Bottom r -> Simulation s r [Event r]
-candidateBridgeEvents now = undefined
-
+-- | Computes the first time a bridge event happens.
+firstBridgeEvent     :: (Ord r, Fractional r) => Bottom r -> Simulation s r (Maybe r)
+firstBridgeEvent now = do br <- get
+                          let Bridge l r = br
+                          cands <- sequence [ getPrev l >>~ \a -> colinearTime a l r
+                                            , getNext l >>~ \b -> colinearTime l b r
+                                            , getPrev r >>~ \c -> colinearTime l c r
+                                            , getNext r >>~ \d -> colinearTime l r d
+                                            ]
+                          pure $ minimum' [t | c@(ValB t) <- cands, now < c]
+  where
+    c >>~ k = lift c >>= \case
+                Nothing -> pure Bottom
+                Just i  -> k i
 
 --------------------------------------------------------------------------------
 
@@ -394,3 +397,39 @@ colinearTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
     b = ux*(ry - py)  - vx*(qy - py)
   -- b == zero means the three points are on a vertical plane. This corresponds
   -- to t = -\infty.
+
+
+
+--------------------------------------------------------------------------------
+
+myPts :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
+                            , Point3 1  1  10 :+ 1
+                            , Point3 0  10 20 :+ 0
+                            , Point3 12 1  1  :+ 3
+                            , Point3 22 20  1  :+ 4
+                            ]
+
+-- myResult = [1 2 3
+--             2 3 4
+--             0 1 2
+--             0 2 4
+--            ]
+
+myPts' :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
+                             , Point3 1  1  10 :+ 1
+                             , Point3 0  10 20 :+ 0
+                             , Point3 12 1  1  :+ 3
+                             ]
+
+-- 1 2 3
+-- 0 1 2
+-- 0 2 3
+
+
+test :: IO ()
+test = mapM_ print $ lowerHull' myPts
+
+test' :: IO ()
+test' = mapM_ print $ lowerHull' myPts'

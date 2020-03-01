@@ -47,10 +47,19 @@ applyEvent = mapM_ applyEvent' . view eventActions
 
 
 groupOn   :: Eq b => (a -> b) -> [a] -> [NonEmpty a]
-groupOn f = map NonEmpty.fromList . List.groupBy (\a b -> f a == f b)
+groupOn f = map fromL . List.groupBy (\a b -> f a == f b)
+  where
+    fromL xs = case NonEmpty.nonEmpty xs of
+                 Nothing -> error "groupOn"
+                 Just n   -> n
+
+
 
 maximumOn1   :: (Foldable1 f, Ord b) => (a -> b) -> f a -> a
 maximumOn1 f = List.maximumBy (comparing f) . toList
+
+minimum' :: Ord a => [a] -> Maybe a
+minimum' = minimumOn id
 
 minimumOn   :: Ord b => (a -> b) -> [a] -> Maybe a
 minimumOn f = \case
