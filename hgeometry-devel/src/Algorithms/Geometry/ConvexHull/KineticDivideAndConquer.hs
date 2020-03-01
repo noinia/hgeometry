@@ -1,13 +1,14 @@
 {-# LANGUAGE BangPatterns #-}
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
+
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Debug
 import           Algorithms.Geometry.ConvexHull.Helpers
 import           Algorithms.Geometry.ConvexHull.Types
 import           Control.Applicative (liftA2)
 import           Control.Lens ((^.), (&), (%~), bimap, _1, _2)
-import           Control.Monad ((<=<))
+import           Control.Monad ((<=<), filterM)
 import           Control.Monad.State.Class (get, put)
 import           Control.Monad.State.Strict (evalStateT)
 import           Control.Monad.Trans
@@ -33,6 +34,7 @@ import           Data.Maybe (catMaybes)
 import           Data.RealNumber.Rational
 
 
+import Data.Geometry.Vector
 import           Debug.Trace
 
 
@@ -75,7 +77,7 @@ lowerHull'      :: forall r p. (Ord r, Fractional r, Show r, IpeWriteText r)
 lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
   where
     computeHull :: HullM s r [Three Index]
-    computeHull = output <=< divideAndConquer1 mkLeaf $ NonEmpty.fromList [0..(n-1)]
+    computeHull = output <=< divideAndConquer1 mkLeaf $ leafIndices pts
 
     n = V.length pts
     (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortBy cmpXYZ $ pts'
@@ -87,10 +89,21 @@ lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
     -- sort on x-coord first (and on equal y and z coordinate later)
     cmpXYZ = comparing (^.core)
 
+-- | Creates a non-empty list, one for each x-coordinate, with all ids
+-- that have that x-coordinate
+--
+-- pre:  - the input points vector is non-emtpy, and sorted on increasing x-coordinate
+leafIndices :: Eq r => V.Vector (Point 3 r) -> NonEmpty (NonEmpty Index)
+leafIndices = fmap (fmap (^._1)) . NonEmpty.groupWith1 (^._2.xCoord) . NonEmpty.fromList
+            . zip [0..] . V.toList
 
 -- | Creates a Leaf
-mkLeaf   :: Int -> HullM s r (MergeStatus r)
-mkLeaf i = pure $ MergeStatus i i []
+mkLeaf    :: NonEmpty Index -> HullM s r (MergeStatus r)
+mkLeaf is = pure $ MergeStatus i i []
+
+
+runDegenerateKinetic = undefined
+-- | I guess this actually means computing the lower envelope in the time * y'-coord space.
 
 
 --------------------------------------------------------------------------------
@@ -248,20 +261,38 @@ handleAllAtTime now ees =
        (delR,rs) <- handleOneSide now revs r
        b' <- newBridge now (NonEmpty.reverse ls) rs
        let Bridge l' r' = b'
-           louts = filter (\e -> getRightMost e <= l `max` l') levs
-           routs = filter (\e -> r `min` r' <= getLeftMost e) revs
+       louts <- filterM (occursBeforeAt now $ l `max` l') levs
+       routs <- filterM (occursAfterAt  now $ r `min` r') revs
        la <- leftBridgeEvent  l l' delL levs
        ra <- rightBridgeEvent r r' delR revs
        put b'
-       pure . outputEvent now $ louts <> routs <> catMaybes [la,ra]
+       pure . tr . outputEvent now $ louts <> routs <> catMaybes [la,ra]
          -- the bridge actions should be after louts and routs;
   where
     (levs,revs) = partitionEithers ees
     outputEvent t acts = (t :+) <$> NonEmpty.nonEmpty acts
 
+    tr x = traceShow ("outputting event: ",x) x
+
+
+occursBeforeAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
+occursBeforeAt t l e = lift $ before <$> atTime (t+1) (getRightMost e) <*> atTime (t+1) l
+  where
+    p `before` pl = p <= pl  -- lexicographic on x,y
+
+occursAfterAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
+occursAfterAt t r e = lift $ after <$> atTime (t+1) (getLeftMost e) <*> atTime (t+1) r
+  where
+    (Point2 x y) `after` (Point2 rx ry) = case x `compare` rx of
+                                            LT -> False
+                                            GT -> True
+                                            EQ -> ry <= y
+
+
 -- | Computes if we should output a new bridge action for the left endpoint
 leftBridgeEvent                         :: Index -> Index -> Bool -> [Action]
                                         -> Simulation s r (Maybe Action)
+leftBridgeEvent l l' b evs | traceShow ("leftBridgeEvent ",l,l',b,evs) False = undefined
 leftBridgeEvent l l' alreadyDeleted evs = lift $ case (l `compare` l') of
     LT | shouldBeInserted l' evs -> (\(Just p) -> Just $ InsertAfter p l') <$> getPrev l'
     -- since l < l', l' has a predecessor, and hence the fromJust is safe.
@@ -270,7 +301,7 @@ leftBridgeEvent l l' alreadyDeleted evs = lift $ case (l `compare` l') of
 
 rightBridgeEvent                         :: Index -> Index -> Bool -> [Action]
                                          -> Simulation s r (Maybe Action)
---rightBridgeEvent r r' b evs | traceShow ("rightBridgeEvent ",r,r',b,evs) False = undefined
+rightBridgeEvent r r' b evs | traceShow ("rightBridgeEvent ",r,r',b,evs) False = undefined
 rightBridgeEvent r r' alreadyDeleted evs = lift $ case (r' `compare` r) of
     LT | shouldBeInserted r' evs -> (\(Just p) -> Just $ InsertBefore p r') <$> getNext r'
     -- since r' < r, r' has a successor, and hence the fromJust is safe
@@ -433,3 +464,15 @@ test = mapM_ print $ lowerHull' myPts
 
 test' :: IO ()
 test' = mapM_ print $ lowerHull' myPts'
+
+buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 0
+                                                            ,Point3 (-4) 7    (-5) :+ 1
+                                                            ,Point3 0    (-7) (-2) :+ 2
+                                                            ,Point3 2    (-7) 0    :+ 3
+                                                            ,Point3 2    (-6) (-2) :+ 4
+                                                            ,Point3 2    5    4    :+ 5
+                                                            ,Point3 5    (-1) 2    :+ 6
+                                                            ,Point3 6    6    6    :+ 7
+                                                            ,Point3 7    (-5) (-6) :+ 8
+                                                            ]
