@@ -39,7 +39,7 @@ data Cell r = Cell { _lowerLeft  :: !(Point 2 r)
 makeLenses ''Cell
 
 data QuadTree' q v p = Leaf p | Node { _nodeData   :: !v
-                                     , _quadrants  :: Quadrants q
+                                     , _quadrants  :: !(Quadrants q)
                                      } deriving (Show,Eq,Generic)
 makePrisms ''QuadTree'
 
@@ -94,30 +94,36 @@ offset v qt = qt&cell.lowerLeft %~ (.+^ v)
 withOffset     :: Num r => Vector 2 r -> (Point 2 r -> a) -> (Point 2 r -> a)
 withOffset v f = \p -> f $ p .+^ v
 
-data Split p = No p | Yes deriving (Show,Eq)
+data Split p = No !p | Yes deriving (Show,Eq)
 
-buildQT                     :: forall r. Fractional r
-                            => (Point 2 r -> Sign)
-                            -> SI -> QuadTree (Quadrants Sign) Sign r
-buildQT f i = QuadTree (Cell origin i) $ case shouldSplit i of
+-- | Given a function with which to label the corners, and a test if
+-- we should keep splitting builds a quadtree on the square \([0,2^i]
+-- \times [0,2^i]\).
+buildQT                 :: forall r p. Fractional r
+                        => (Point 2 r -> p)
+                        -> (SI -> Quadrants p -> Split p)
+                        -> SI
+                        -> QuadTree (Quadrants p) p r
+buildQT f shouldSplit i = QuadTree (Cell origin i) $ case shouldSplit i corners of
                                            No p -> Leaf p
                                            Yes  -> Node corners chs
   where
     corners = f <$> Quadrants (Point2 w w) (Point2 w 0) origin (Point2 0 w)
-    sgn = _northEast corners
     w = 2 `pow` i
     j = i - 1
     r = 2 `pow` j
 
     chs = build <$> Quadrants (Vector2 r r) (Vector2 r 0) (Vector2 0 0) (Vector2 0 r)
 
-    build   :: Vector 2 r -> QuadTree (Quadrants Sign) Sign r
-    build v = offset v $ buildQT (withOffset v f) j
+    build   :: Vector 2 r -> QuadTree (Quadrants p) p r
+    build v = offset v $ buildQT (withOffset v f) shouldSplit j
 
-    shouldSplit i' | all (sgn ==) corners = No sgn
-                   | i' < 0               = No Zero
-                   | otherwise            = Yes
-
+shouldSplit'                                   :: Eq p => p -> SI -> Quadrants p -> Split p
+shouldSplit' z i corners | all (sgn ==) corners = No sgn
+                         | i < 0                = No z
+                         | otherwise            = Yes
+  where
+    sgn = _northEast corners
 
 pow                 :: Fractional r => r -> Int -> r
 pow b i | i < 0     = 1 / (b ^ (abs i))
@@ -134,4 +140,4 @@ pow b i | i < 0     = 1 / (b ^ (abs i))
 
 
 
-test = buildQT (testSign $ \p -> p^.yCoord - (0.5 * p^.xCoord + 0.1)) 2
+test = buildQT (testSign $ \p -> p^.yCoord - (0.5 * p^.xCoord + 0.1)) (shouldSplit' Zero) 2
