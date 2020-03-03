@@ -38,9 +38,9 @@ data Cell r = Cell { _lowerLeft  :: !(Point 2 r)
 
 makeLenses ''Cell
 
-data QuadTree' q v p = Leaf p | Node { _nodeData   :: !v
-                                     , _quadrants  :: !(Quadrants q)
-                                     } deriving (Show,Eq,Generic)
+data QuadTree' q v p = QTLeaf p | QTNode { _nodeData   :: !v
+                                         , _quadrants  :: !(Quadrants q)
+                                         } deriving (Show,Eq,Generic)
 makePrisms ''QuadTree'
 
 instance Bifunctor (QuadTree' q) where
@@ -49,28 +49,52 @@ instance Bifoldable (QuadTree' q) where
   bifoldMap = bifoldMapDefault
 instance Bitraversable (QuadTree' q) where
   bitraverse f g = \case
-    Leaf p    -> Leaf <$> g p
-    Node v qs -> flip Node qs <$> f v
+    QTLeaf p    -> QTLeaf <$> g p
+    QTNode v qs -> flip QTNode qs <$> f v
 
 data QuadTree v p r = QuadTree { _cell :: !(Cell r)
                                , _tree :: !(QuadTree' (QuadTree v p r) v p)
                                } deriving (Show,Eq)
 makeLenses ''QuadTree
 
--- | Gets all cells
-cells                :: QuadTree v p r -> NonEmpty (Cell r :+ Either p v)
-cells (QuadTree c t) = case t of
-                              Leaf p    -> (c :+ Left p)  :| []
-                              Node v qs -> (c :+ Right v) :| concatMap (NonEmpty.toList . cells) qs
+pattern Leaf     :: Cell r -> p -> QuadTree v p r
+pattern Leaf c p = QuadTree c (QTLeaf p)
 
--- data Split v p = No p | Yes v (Split v p) (Split v p) (Split v p) (Split v p) deriving (Show,Eq)
+pattern Node        :: Cell r -> v -> Quadrants (QuadTree v p r) -> QuadTree v p r
+pattern Node c v qs = QuadTree c (QTNode v qs)
+
+{-# COMPLETE Leaf, Node #-}
+
+instance Functor (QuadTree v p) where
+  fmap f = trimap id id f
+
+
+trimap       :: (v -> v') -> (p -> p') -> (r -> r') -> QuadTree v p r -> QuadTree v' p' r'
+trimap f g h = runIdentity . tritraverse (pure . f) (pure . g) (pure . h)
+
+tritraverse       :: Applicative f => (v -> f v') -> (p -> f p') -> (r -> f r')
+                  -> QuadTree v p r -> f (QuadTree v' p' r')
+tritraverse f g h = go
+  where
+    go (QuadTree c t) = QuadTree <$> traverse h c <*> goT t
+
+    goT = \case
+      QTLeaf p    -> QTLeaf <$> g p
+      QTNode v qs -> QTNode <$> f v <*> traverse go qs
+
+
+-- | Gets all cells
+cells :: QuadTree v p r -> NonEmpty (Cell r :+ Either p v)
+cells = \case
+          Leaf c p    -> (c :+ Left p)  :| []
+          Node c v qs -> (c :+ Right v) :| concatMap (NonEmpty.toList . cells) qs
 
 
 -- buildQuadTree'          :: Point 2 Int -> SI -> Split v p
 --                         -> (Split v p -> Split v p) -> QuadTree' v p
 -- buildQuadTree' o w s = case s of
---                             No p  -> Leaf p
---                             Yes v -> Node o w v (buildQuadTree' (o .+^ Vector2 r r) r )
+--                             No p  -> QTLeaf p
+--                             Yes v -> QTNode o w v (buildQuadTree' (o .+^ Vector2 r r) r )
 --   where
 --     r = w `div` 2
 
@@ -94,7 +118,8 @@ offset v qt = qt&cell.lowerLeft %~ (.+^ v)
 withOffset     :: Num r => Vector 2 r -> (Point 2 r -> a) -> (Point 2 r -> a)
 withOffset v f = \p -> f $ p .+^ v
 
-data Split p = No !p | Yes deriving (Show,Eq)
+data Split p = No !p | Yes deriving (Show,Read,Eq,Ord)
+makePrisms ''Split
 
 -- | Given a function with which to label the corners, and a test if
 -- we should keep splitting builds a quadtree on the square \([0,2^i]
@@ -105,8 +130,8 @@ buildQT                 :: forall r p. Fractional r
                         -> SI
                         -> QuadTree (Quadrants p) p r
 buildQT f shouldSplit i = QuadTree (Cell origin i) $ case shouldSplit i corners of
-                                           No p -> Leaf p
-                                           Yes  -> Node corners chs
+                                                       No p -> QTLeaf p
+                                                       Yes  -> QTNode corners chs
   where
     corners = f <$> Quadrants (Point2 w w) (Point2 w 0) origin (Point2 0 w)
     w = 2 `pow` i
