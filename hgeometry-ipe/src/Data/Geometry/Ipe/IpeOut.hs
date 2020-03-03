@@ -20,6 +20,7 @@ module Data.Geometry.Ipe.IpeOut where
 import           Control.Lens hiding (Simple)
 import           Data.Bifunctor
 import           Data.Ext
+import           Data.Foldable (toList)
 import           Data.Geometry.Ball
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -30,18 +31,18 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.PolyLine(PolyLine,fromLineSegment)
+import           Data.Geometry.PolyLine (PolyLine,fromLineSegment)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe (fromMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import           Data.Maybe (fromMaybe)
-import           Linear.Affine ((.+^))
 import           Data.Vinyl.CoRec
+import           Linear.Affine ((.+^))
 
 --------------------------------------------------------------------------------
 
@@ -215,8 +216,8 @@ ipeRectangle r = ipePolygon $ fromPoints [tl,tr,br,bl]
 --------------------------------------------------------------------------------
 -- * Group Converters
 
-ipeGroup    :: IpeOut [IpeObject r] Group r
-ipeGroup xs = Group xs :+ mempty
+ipeGroup    :: Foldable f => IpeOut (f (IpeObject r)) Group r
+ipeGroup xs = Group (toList xs) :+ mempty
 
 
 --------------------------------------------------------------------------------
