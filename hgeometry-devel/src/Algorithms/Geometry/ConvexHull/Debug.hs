@@ -187,14 +187,16 @@ drawMovie t h0 h1 pts = NonEmpty.fromList
 
 
     d pts' = V.toList
-           . V.slice s (1 + tt - s)
-           . V.imap (\i p -> iO $ labelled id defIO (p :+ i))
+           -- . V.slice s (1 + tt - s)
+           . V.map (^.extra)
+           . V.filter (\(x :+ _) -> x `inRange` xRange)
+           . V.imap (\i p -> (p^.xCoord) :+ (iO $ labelled id defIO (p :+ i)))
            $ pts'
 
     hpts = [ (pts V.! i)^.xCoord | i <- NonEmpty.toList h0]
 
-    -- xRange = ClosedRange (minimum hpts) (maximum hpts)
-    (s,tt) = (NonEmpty.head h0, NonEmpty.last h0)
+    xRange = ClosedRange (minimum hpts) (maximum hpts)
+    -- (s,tt) = (NonEmpty.head h0, NonEmpty.last h0)
 
 
 

@@ -138,11 +138,11 @@ simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPo
 -- breakpoint and the line just after the breakpoint.
 --
 -- running time: \(O(n \log n)\)
-lowerEnvelope     :: (Ord r, Fractional r) => NonEmpty (Point 2 r :+ a) -> SP a [r :+ Two a]
+lowerEnvelope     :: (Ord r, Fractional r, Show r) => NonEmpty (Point 2 r :+ a) -> SP a [r :+ Two a]
 lowerEnvelope pts = SP i $ zipWith f (NonEmpty.toList h) tl
   where
-    f (pa :+ a) (pb :+ b) = let Vector2 x y = pb .-. pa in y / x :+ Two a b
-    h@((_ :+ i) :| tl) = GrahamScan.upperHullFromSorted $ pts
+    f (pa :+ a) (pb :+ b) = let Vector2 x y = traceShow (pa,pb) $ pb .-. pa in y / x :+ Two a b
+    h@((_ :+ i) :| tl) = GrahamScan.upperHullFromSorted' $ pts
     -- every edge of the upper hull corresponds to some line. In the
     -- primal this line represents a vertex of the lower envelope. The
     -- x-coordinate of this point is the slope of the line.
@@ -561,6 +561,7 @@ buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 
 
 
 
+
 buggyPoints3 :: NonEmpty (Point 3 R :+ Int)
 buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9) (  7) :+ 0,
                                                                Point3 (-8 ) (-9) ( -2) :+ 1,
@@ -574,7 +575,22 @@ buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9)
                                                                Point3 (10 ) (3 ) ( 3) :+ 9
                                                              ]
 
+buggyPoints4 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints4 = fmap (bimap (10 *^) id) . NonEmpty.fromList $
+ [Point3 (-3) 1 2 :+ 0
+ ,Point3 0 1 1 :+ 1
+ ,Point3 3 (-1) 0 :+ 2
+ ,Point3 3 0 0 :+ 3
+ ]
+
+               -- expected: H
+
+               -- [Triangle (Point3 [-3,1,2] :+ 0) (Point3 [0,1,1] :+ 1) (Point3 [3,-1,0] :+ 2)
+               -- ,Triangle (Point3 [-3,1,2] :+ 0) (Point3 [0,1,1] :+ 1) (Point3 [3,0,0] :+ 3)
+               -- ,Triangle (Point3 [-3,1,2] :+ 0) (Point3 [3,-1,0] :+ 2) (Point3 [3,0,0] :+ 3)
+               -- ,Triangle (Point3 [0,1,1] :+ 1) (Point3 [3,-1,0] :+ 2) (Point3 [3,0,0] :+ 3)]
 
 
-
-         HI ((Point3 [-4,-2,-4] :+ 0) :| [Point3 [-4,-2,2] :+ 1,Point3 [-4,3,1] :+ 2,Point3 [-3,3,-2] :+ 3,Point3 [-2,2,-1] :+ 4,Point3 [-2,3,-2] :+ 5,Point3 [0,0,-4] :+ 6])
+               -- but got: H
+               -- [Triangle (Point3 [-3,1,2] :+ 0) (Point3 [3,-1,0] :+ 2) (Point3 [3,0,0] :+ 3)
+               -- ,Triangle (Point3 [-3,1,2] :+ 0) (Point3 [0,1,1] :+ 1) (Point3 [3,0,0] :+ 3)]
