@@ -3,6 +3,7 @@ module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 
 import           Algorithms.DivideAndConquer
+import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
 import           Algorithms.Geometry.ConvexHull.Debug
 import           Algorithms.Geometry.ConvexHull.Helpers
 import           Algorithms.Geometry.ConvexHull.Types
@@ -23,7 +24,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
-import           Data.Ord (comparing)
+import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup (sconcat)
 import           Data.UnBounded
 import           Data.Util
@@ -39,8 +40,6 @@ import           Debug.Trace
 
 
 --------------------------------------------------------------------------------
-
--- TODO: Replace Action by a partial function?
 
 -- TODO: We seem to assume that no four points are coplanar, and no
 -- three points lie on a vertical plane. Figure out where we assume that exactly.
@@ -79,15 +78,29 @@ lowerHull' pts' = map withPt $ runDLListMonad pts computeHull
     computeHull :: HullM s r [Three Index]
     computeHull = output <=< divideAndConquer1 mkLeaf $ leafIndices pts
 
-    n = V.length pts
     (pts,exts) = bimap V.fromList V.fromList . unExt . NonEmpty.sortBy cmpXYZ $ pts'
     unExt = foldr (\(p :+ e) (ps,es) -> (p:ps,e:es)) ([],[])
 
     -- withPt = id
     withPt (Three a b c) = let pt i = pts V.! i :+ exts V.! i in Triangle (pt a) (pt b) (pt c)
 
-    -- sort on x-coord first (and on equal y and z coordinate later)
-    cmpXYZ = comparing (^.core)
+-- | Comparator for the points. We sort the points lexicographically
+-- on increasing x-coordiante, decreasing y-coordinate, and increasing
+-- z-coordinate. The extra data is ignored.
+--
+-- The divide and conquer algorithm needs the points sorted in
+-- increasing order on x.
+--
+-- The choice of sorting order of the y and z-coordinates is such that
+-- in a leaf (all points with the same x-coord). Are already
+-- pre-sorted in the right way: in particular, increasing on their
+-- "slope" in the "Time x Y'" space. This means that when we compute
+-- the lower envelope of these lines (using the duality and upper
+-- hull) we don't have to re-sort the points. See 'simulateLeaf'' for
+-- details.
+cmpXYZ :: Ord r => (Point 3 r :+ p) -> (Point 3 r :+ q) -> Ordering
+cmpXYZ (Point3 px py pz :+ _) (Point3 qx qy qz :+ _) =
+  compare px qx <> compare (Down py) (Down qy) <> compare pz qz
 
 -- | Creates a non-empty list, one for each x-coordinate, with all ids
 -- that have that x-coordinate
@@ -98,13 +111,42 @@ leafIndices = fmap (fmap (^._1)) . NonEmpty.groupWith1 (^._2.xCoord) . NonEmpty.
             . zip [0..] . V.toList
 
 -- | Creates a Leaf
-mkLeaf    :: NonEmpty Index -> HullM s r (MergeStatus r)
-mkLeaf is = pure $ MergeStatus i i []
+mkLeaf    :: (Ord r, Fractional r, Show r) => NonEmpty Index -> HullM s r (MergeStatus r)
+mkLeaf is = (\(SP i evts) -> MergeStatus i i evts) <$> simulateLeaf is
 
+-- | Computes the first index
+simulateLeaf    :: (Ord r, Fractional r, Show r) => NonEmpty Index -> HullM s r (SP Index [Event r])
+simulateLeaf is = simulateLeaf' <$> mapM (\i -> (:+ i) <$> pointAt i) is
 
-runDegenerateKinetic = undefined
--- | I guess this actually means computing the lower envelope in the time * y'-coord space.
+simulateLeaf' :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ Index) -> SP Index [Event r]
+simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPoint)
+  where
+    toEvents = map (&extra %~ fromBreakPoint)
+    -- Every point in R^3 maps to a non-vertical line: y' = -y*t + z
+    -- which then dualizes to the the point (-y,-z)
+    toDualPoint (Point3 _ y z) = Point2 (-1*y) (-1*z)
+    -- at every breakpoint we insert b and delete a.
+    fromBreakPoint (Two a b) = NonEmpty.fromList [InsertAfter a b, Delete a]
 
+    tc = traceShowId
+
+-- | Given a set of lines, represented by their dual points, compute
+-- the lower envelope of those lines. Returns the associated value of
+-- the leftmost line, and all breakpoints. For every breakpoint we
+-- also return the associated values of the line just before the
+-- breakpoint and the line just after the breakpoint.
+--
+-- running time: \(O(n \log n)\)
+lowerEnvelope     :: (Ord r, Fractional r) => NonEmpty (Point 2 r :+ a) -> SP a [r :+ Two a]
+lowerEnvelope pts = SP i $ zipWith f (NonEmpty.toList h) tl
+  where
+    f (pa :+ a) (pb :+ b) = let Vector2 x y = pb .-. pa in y / x :+ Two a b
+    h@((_ :+ i) :| tl) = GrahamScan.upperHullFromSorted $ pts
+    -- every edge of the upper hull corresponds to some line. In the
+    -- primal this line represents a vertex of the lower envelope. The
+    -- x-coordinate of this point is the slope of the line.
+
+-- TODO: Presort the points properly so that we don't have to resort here.
 
 --------------------------------------------------------------------------------
 
@@ -124,8 +166,6 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
   lc <> rc = do l <- lc
                 r <- rc
-
-
                 d <- debugHull l r
                 pts <- getPoints
 
@@ -175,31 +215,22 @@ reportTriangle = \case
 --
 -- running time: \(O(n)\)
 findBridge       :: (Ord r, Fractional r, Show r)
-                 => r
-                 -> MergeStatus r
-                 -> MergeStatus r
-                 -> HullM s r (NonEmpty Index, Index, Index)
+                 => r -> MergeStatus r -> MergeStatus r -> HullM s r (NonEmpty Index, Index, Index)
 findBridge t l r = do lh <- toListFromR (lst l)
                       rh <- toListFrom  (hd r)
                       findBridgeFrom t lh rh
 
 findBridgeFrom       :: (Ord r, Fractional r, Show r)
-                     => r
-                     -> NonEmpty Index
-                     -> NonEmpty Index
+                     => r -> NonEmpty Index -> NonEmpty Index
                      -> HullM s r (NonEmpty Index, Index, Index)
 findBridgeFrom t l r = do lh <- mapM (atTime'' t) l
                           rh <- mapM (atTime'' t) r
                           let Two (u :+ ls) (v :+ rs) = findBridge' lh rh
-                          pure $ (fromL $ reverse ls <> [u,v] <> rs, u, v)
+                          pure $ (NonEmpty.fromList $ reverse ls <> [u,v] <> rs, u, v)
   where
     atTime'' t' i = (:+ i) <$> atTime t' i
     findBridge' l0 r0 = f <$> lowerTangent' l0 r0
     f (c :+ es) = c^.extra :+ ((^.extra) <$> es)
-
-    fromL xs = case NonEmpty.nonEmpty xs of
-                 Nothing -> error "findBridge"
-                 Just n  -> n
 
 --------------------------------------------------------------------------------
 
@@ -242,6 +273,7 @@ handleEvent now es = do mbe <- firstBridgeEvent now
                           Next t eacts es' -> do me  <- handleAllAtTime t eacts
                                                  evs <- handleEvent (ValB t) es'
                                                  pure $ maybeToList me <> evs
+
 --------------------------------------------------------------------------------
 -- * Handling all events at a particular time.
 
@@ -283,11 +315,11 @@ occursBeforeAt t l e = lift $ before <$> atTime (t+1) (getRightMost e) <*> atTim
 occursAfterAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
 occursAfterAt t r e = lift $ after <$> atTime (t+1) (getLeftMost e) <*> atTime (t+1) r
   where
+    -- p.x > r.x or (p.x == r.x && p.y >= r.y)
     (Point2 x y) `after` (Point2 rx ry) = case x `compare` rx of
                                             LT -> False
                                             GT -> True
                                             EQ -> ry <= y
-
 
 -- | Computes if we should output a new bridge action for the left endpoint
 leftBridgeEvent                         :: Index -> Index -> Bool -> [Action]
@@ -319,12 +351,15 @@ shouldBeInserted i = null . filter isInsert
 
 -- | Considering that all points in ls and rs are colinear at time t
 -- (and contain the bridge at time). Compute the new bridge.
+--
+-- running time: linear in the number of points in ls and rs.
 newBridge         :: (Ord r, Fractional r, Show r)
                   =>  r -> NonEmpty Index -> NonEmpty Index -> Simulation s r Bridge
 newBridge t ls rs = lift $ (\(_,l,r) -> Bridge l r) <$> findBridgeFrom (t+1) ls rs
   -- claim: all colinear a t time t means we can pick any time t' > t
   -- to compute the new bridge
 
+-- |
 --
 -- returns wether the current bridge was deleted and the colinears
 -- with the current bridge
@@ -363,8 +398,7 @@ colinears t x = do b  <- get >>= traverse (lift . atTime t)
 -- and index i, test if the point with index i is colinear with the
 -- bridge.
 isColinearWith               :: (Ord r, Num r)
-                             => Two (Point 2 r) -> r -> Index
-                             -> Simulation s r Bool
+                             => Two (Point 2 r) -> r -> Index -> Simulation s r Bool
 isColinearWith (Two l r) t i = (\p -> ccw l r p == CoLinear) <$> lift (atTime t i)
 
 
@@ -379,10 +413,9 @@ data NextEvent r = None | Next { nextEventTime   :: !r
 -- | Figures out what the time of the first event is (if it exists)
 -- and collects everything that happens at that time (and which
 -- existing events happen later)
-nextEvent        :: Ord r
-                  => Maybe r
-                  -> [r :+ NonEmpty (Existing Action)]
-                  -> NextEvent r
+nextEvent                                    :: Ord r
+                                             => Maybe r -> [r :+ NonEmpty (Existing Action)]
+                                             -> NextEvent r
 nextEvent Nothing   []                       = None
 nextEvent Nothing   ((te :+ eacts) : es')    = Next te (toList eacts) es'
 nextEvent (Just tb) []                       = Next tb []             []
@@ -476,3 +509,24 @@ buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4 
                                                             ,Point3 6    6    6    :+ 7
                                                             ,Point3 7    (-5) (-6) :+ 8
                                                             ]
+
+
+
+-- [Triangle (Point3 [0,-70,-20] :+ 2) (Point3 [20,-70,0] :+ 3) (Point3 [70,-50,-60] :+ 8)
+-- ,Triangle (Point3 [-70,20,40] :+ 0) (Point3 [-40,70,-50] :+ 1) (Point3 [0,-70,-20] :+ 2)
+-- ,Triangle (Point3 [-40,70,-50] :+ 1) (Point3 [0,-70,-20] :+ 2) (Point3 [70,-50,-60] :+ 8)
+-- ,Triangle (Point3 [-40,70,-50] :+ 1) (Point3 [60,60,60] :+ 7) (Point3 [70,-50,-60] :+ 8)]
+
+
+
+-- [Triangle (Point3 [-70,20,40] :+ 0) (Point3 [-40,70,-50] :+ 1) (Point3 [0,-70,-20] :+ 2)
+--   ,Triangle (Point3 [-40,70,-50] :+ 1) (Point3 [0,-70,-20] :+ 2) (Point3 [70,-50,-60] :+ 8)
+--   ,Triangle (Point3 [-40,70,-50] :+ 1) (Point3 [60,60,60] :+ 7) (Point3 [70,-50,-60] :+ 8)
+--   ,Triangle (Point3 [0,-70,-20] :+ 2) (Point3 [20,-70,0] :+ 3) (Point3 [70,-50,-60] :+ 8)]
+
+
+subs :: SP Index [Event (RealNumber 10)]
+subs = simulateLeaf' . NonEmpty.fromList $   [Point3 2    (-7) 0    :+ 3
+                                             ,Point3 2    (-6) (-2) :+ 4
+                                             ,Point3 2    5    4    :+ 5
+                                             ]

@@ -1,6 +1,8 @@
 module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 , upperHull
                                                 , lowerHull
+
+                                                , upperHullFromSorted
                                                 ) where
 
 import           Control.Lens ((^.))
@@ -31,6 +33,7 @@ lowerHull :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r 
 lowerHull = hull reverse
 
 
+
 -- | Helper function so that that can compute both the upper or the lower hull, depending
 -- on the function f
 hull               :: (Ord r, Num r)
@@ -43,6 +46,18 @@ hull f pts         = hull' .  f
 incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
+
+
+-- | Given a sequence of points that is sorted on increasing
+-- x-coordinate and decreasing y-coordinate, computes the upper
+-- hull. In constrast to the 'upperHull' function, the result is
+-- returned *from right to left*.
+--
+-- running time: \(O(n)\).
+upperHullFromSorted :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> NonEmpty (Point 2 r :+ p)
+upperHullFromSorted = \case
+  h@(_ :| [])  -> h
+  pts          -> hull' $ NonEmpty.toList pts
 
 
 -- | Precondition: The list of input points is sorted
