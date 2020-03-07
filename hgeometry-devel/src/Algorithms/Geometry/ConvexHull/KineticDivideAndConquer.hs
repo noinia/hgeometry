@@ -38,6 +38,7 @@ import           Data.RealNumber.Rational
 import Data.Geometry.Vector
 import           Debug.Trace
 
+import Algorithms.Geometry.ConvexHull.RenderPLY
 
 --------------------------------------------------------------------------------
 
@@ -197,9 +198,10 @@ output    :: Show r => MergeStatus r -> HullM s r [Three Index]
 output ms | traceShow ("output: ", events ms) False = undefined
 output ms = concat <$> mapM handle (events ms)
   where
-    handle e = do ts <- catMaybes . toList <$> mapM reportTriangle (e^.eventActions)
-                  applyEvent e
-                  pure ts
+    handle e = catMaybes . toList <$> mapM applyAndReport (e^.eventActions)
+    applyAndReport a = do mt <- reportTriangle a
+                          applyEvent' a
+                          pure mt
 
 reportTriangle :: Action -> HullM s r (Maybe (Three Index))
 reportTriangle = \case
@@ -297,7 +299,7 @@ handleAllAtTime now ees =
        routs <- filterM (occursAfterAt  now $ r `min` r') revs
        la <- leftBridgeEvent  l l' delL levs
        ra <- rightBridgeEvent r r' delR revs
-       put b'
+       put $ traceShow ("bridge after time: ", now, " is ", b') b'
        pure . tr . outputEvent now $ louts <> routs <> catMaybes [la,ra]
          -- the bridge actions should be after louts and routs;
   where
@@ -530,3 +532,49 @@ subs = simulateLeaf' . NonEmpty.fromList $   [Point3 2    (-7) 0    :+ 3
                                              ,Point3 2    (-6) (-2) :+ 4
                                              ,Point3 2    5    4    :+ 5
                                              ]
+
+-- SP 5 [0.33333333333~ :+ InsertAfter 5 3 :| [Delete 5]]
+
+type R = RealNumber 10
+buggyPoints2 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
+                                                             , Point3 (-5) (-2) 5 :+ 1
+                                                             , Point3 (-5) (-1) 4 :+ 2
+                                                             , Point3 (0) (2)   2 :+ 3
+                                                             , Point3 (1) (-5)  4 :+ 4
+                                                             , Point3 (3) (-3)  2 :+ 5
+                                                             , Point3 (3) (-1)  1 :+ 6
+                                                             ]
+
+
+-- [Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [10,-50,40] :+ 4) (Point3 [30,-30,20] :+ 5)
+-- ,Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [0,20,20] :+ 3) (Point3 [30,-10,10] :+ 6)
+-- ,Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [-50,-10,40] :+ 2) (Point3 [0,20,20] :+ 3)]
+
+
+-- should be:
+--[Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [-50,-10,40] :+ 2) (Point3 [0,20,20] :+ 3)
+--,Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [0,20,20] :+ 3) (Point3 [30,-10,10] :+ 6)
+--,Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [10,-50,40] :+ 4) (Point3 [30,-30,20] :+ 5)
+-- missing:
+-- ,Triangle (Point3 [-50,-30,40] :+ 0) (Point3 [30,-30,20] :+ 5) (Point3 [30,-10,10] :+ 6)]
+
+
+
+buggyPoints3 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9) (  7) :+ 0,
+                                                               Point3 (-8 ) (-9) ( -2) :+ 1,
+                                                               Point3 (-8 ) (7 ) ( -2) :+ 2,
+                                                               Point3 (-6 ) (9 ) ( 7) :+ 3,
+                                                               Point3 (-3 ) (-6) ( -8) :+ 4,
+                                                               Point3 (-3 ) (4 ) (  1) :+ 5,
+                                                               Point3 (-2 ) (-9) ( -9) :+ 6,
+                                                               Point3 (1  ) (-3) ( 1) :+ 7,
+                                                               Point3 (4  ) (5 ) ( 8) :+ 8,
+                                                               Point3 (10 ) (3 ) ( 3) :+ 9
+                                                             ]
+
+
+
+
+         HI ((Point3 [-4,-2,-4] :+ 0) :| [Point3 [-4,-2,2] :+ 1,Point3 [-4,3,1] :+ 2,Point3 [-3,3,-2] :+ 3,Point3 [-2,2,-1] :+ 4,Point3 [-2,3,-2] :+ 5,Point3 [0,0,-4] :+ 6])

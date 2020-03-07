@@ -62,13 +62,13 @@ data Action = InsertAfter  !Index !Index -- ^ current Index first, then the Item
 getRightMost :: Action -> Index
 getRightMost = \case
   InsertAfter _ j  -> j
-  InsertBefore _ j -> j
+  InsertBefore j _ -> j
   Delete j         -> j
 
 getLeftMost :: Action -> Index
 getLeftMost = \case
   InsertAfter j _  -> j
-  InsertBefore j _ -> j
+  InsertBefore _ j -> j
   Delete j         -> j
 
 

@@ -1,9 +1,10 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
-import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
+import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
+import           Control.Monad (forM_)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
@@ -20,14 +21,24 @@ import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
+type R = RealNumber 10
+
 spec :: Spec
 spec = describe "3D ConvexHull tests" $ do
          it "manual on myPts"  $ (H $ Naive.lowerHull' myPts)  `shouldBe` myHull
          it "manual on myPts'" $ (H $ Naive.lowerHull' myPts') `shouldBe` myHull'
 
-         it "same as naive on myPts " $ sameAsNaive myPts
-         it "same as naive on myPts'" $ sameAsNaive myPts'
+         it "same as naive on manual samples" $ do
+           forM_ [myPts,myPts', buggyPoints, buggyPoints2, buggyPoints3]
+             sameAsNaive
+
+         it "same as naive on buggyPoints " $ sameAsNaive myPts
+
+
          it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive pts
+
+
+
 
 newtype HullInput = HI (NonEmpty (Point 3 (RealNumber 10) :+ Int)) deriving (Eq,Show)
 
@@ -55,7 +66,7 @@ reorder                  :: Ord p => Triangle 3 p r -> Triangle 3 p r
 reorder (Triangle p q r) = let [p',q',r'] = List.sortOn (^.extra) [p,q,r] in Triangle p' q' r'
 
 
-myPts :: NonEmpty (Point 3 Double :+ Int)
+myPts :: NonEmpty (Point 3 R :+ Int)
 myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             , Point3 1  1  10 :+ 1
                             , Point3 0  10 20 :+ 0
@@ -67,21 +78,21 @@ toTri       :: Eq a =>  NonEmpty (Point d r :+ a) -> Three a -> Triangle d a r
 toTri pts t = let pt i = List.head $ NonEmpty.filter (\t -> t^.extra == i) pts
               in (t&traverse %~ pt)^.from _TriangleThreePoints
 
-myHull :: Hull Int Double
+myHull :: Hull Int R
 myHull = H . map (toTri myPts) $ [ Three 1 2 3
                                  , Three 2 3 4
                                  , Three 0 1 2
                                  , Three 0 2 4
                                  ]
 
-myPts' :: NonEmpty (Point 3 Double :+ Int)
+myPts' :: NonEmpty (Point 3 R :+ Int)
 myPts' = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                              , Point3 1  1  10 :+ 1
                              , Point3 0  10 20 :+ 0
                              , Point3 12 1  1  :+ 3
                              ]
 
-myHull' :: Hull Int Double
+myHull' :: Hull Int R
 myHull' = H . map (toTri myPts') $ [ Three 1 2 3
                                    , Three 0 1 2
                                    , Three 0 2 3
@@ -104,7 +115,7 @@ setOf n g = buildSet mempty <$> do sz <- getSize
 --------------------------------------------------------------------------------
 -- * Some difficult point sets
 
-buggyPoints :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints :: NonEmpty (Point 3 R :+ Int)
 buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4    :+ 0
                                                             ,Point3 (-4) 7    (-5) :+ 1
                                                             ,Point3 0    (-7) (-2) :+ 2
@@ -116,7 +127,7 @@ buggyPoints = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [Point3 (-7) 2    4 
                                                             ,Point3 7    (-5) (-6) :+ 8
                                                             ]
 
-buggyPoints2 :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints2 :: NonEmpty (Point 3 R :+ Int)
 buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
                                                              , Point3 (-5) (-2) 5 :+ 1
                                                              , Point3 (-5) (-1) 4 :+ 2
@@ -126,7 +137,7 @@ buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 
                                                              , Point3 (3) (-1)  1 :+ 6
                                                              ]
 
-buggyPoints3 :: NonEmpty (Point 3 (RealNumber 10) :+ Int)
+buggyPoints3 :: NonEmpty (Point 3 R :+ Int)
 buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9) (  7) :+ 0,
                                                                Point3 (-8 ) (-9) ( -2) :+ 1,
                                                                Point3 (-8 ) (7 ) ( -2) :+ 2,
@@ -138,3 +149,10 @@ buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9)
                                                                Point3 (4  ) (5 ) ( 8) :+ 8,
                                                                Point3 (10 ) (3 ) ( 3) :+ 9
                                                              ]
+
+
+-- subs :: SP Index [Event (RealNumber 10)]
+-- subs = simulateLeaf' . NonEmpty.fromList $ [Point3 2    (-7) 0    :+ 3
+--                                            ,Point3 2    (-6) (-2) :+ 4
+--                                            ,Point3 2    5    4    :+ 5
+--                                            ]
