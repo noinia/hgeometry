@@ -31,7 +31,6 @@ data HalfLine d r = HalfLine { _startPoint        :: Point  d r
 makeLenses ''HalfLine
 
 deriving instance (Show r, Arity d)   => Show    (HalfLine d r)
-deriving instance (Eq r, Arity d)     => Eq      (HalfLine d r)
 deriving instance (NFData r, Arity d) => NFData  (HalfLine d r)
 
 deriving instance Arity d           => Functor (HalfLine d)
@@ -40,6 +39,11 @@ deriving instance Arity d           => T.Traversable (HalfLine d)
 
 type instance Dimension (HalfLine d r) = d
 type instance NumType   (HalfLine d r) = r
+
+
+instance (Eq r, Fractional r, Arity d) => Eq (HalfLine d r) where
+  (HalfLine p u) == (HalfLine q v) = let lam = scalarMultiple u v
+                                     in p == q && (signum <$> lam) == Just 1
 
 instance HasStart (HalfLine d r) where
   type StartCore  (HalfLine d r) = Point d r

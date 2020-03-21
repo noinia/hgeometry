@@ -8,6 +8,7 @@ module Data.RealNumber.Rational(RealNumber(..)
 
 import Data.Data
 import Data.Fixed
+import Data.Hashable
 import Data.List (dropWhileEnd)
 import GHC.Generics (Generic(..))
 import GHC.TypeLits
@@ -26,7 +27,7 @@ import Test.QuickCheck(Arbitrary(..))
 -- If the number cannot be displayed exactly a '~' is printed after
 -- the number.
 newtype RealNumber (p :: Nat) = RealNumber Rational
-  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic)
+  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable)
 
 
 data NatPrec (p :: Nat) = NatPrec

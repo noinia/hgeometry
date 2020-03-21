@@ -25,11 +25,14 @@ type instance Dimension (HyperPlane d r) = d
 type instance NumType   (HyperPlane d r) = r
 
 deriving instance (Arity d, Show r)   => Show    (HyperPlane d r)
-deriving instance (Arity d, Eq r)     => Eq      (HyperPlane d r)
 deriving instance (NFData r, Arity d) => NFData  (HyperPlane d r)
 deriving instance Arity d => Functor     (HyperPlane d)
 deriving instance Arity d => Foldable    (HyperPlane d)
 deriving instance Arity d => Traversable (HyperPlane d)
+
+instance (Arity d, Eq r, Fractional r) => Eq (HyperPlane d r) where
+  (HyperPlane p u) == h@(HyperPlane _ v) = p `intersects` h && u `isScalarMultipleOf` v
+
 
 instance (Arity d, Arity (d + 1), Fractional r) => IsTransformable (HyperPlane d r) where
   transformBy t (HyperPlane p v) = HyperPlane (transformBy t p) (transformBy t v)

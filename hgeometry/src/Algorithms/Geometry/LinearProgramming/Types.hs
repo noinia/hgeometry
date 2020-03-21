@@ -26,14 +26,14 @@ data LPSolution d r = NoSolution
                     | UnBounded (HalfLine d r)
 makePrisms ''LPSolution
 
-deriving instance (Arity d, Show r)   => Show    (LPSolution d r)
-deriving instance (Arity d, Eq r)     => Eq      (LPSolution d r)
+deriving instance (Arity d, Show r)             => Show    (LPSolution d r)
+deriving instance (Arity d, Eq r, Fractional r) => Eq      (LPSolution d r)
 
 data LinearProgram d r = LinearProgram { _objective   :: !(Vector d r)
                                        , _constraints :: [HalfSpace d r]
                                        }
 makeLenses ''LinearProgram
 
-deriving instance Arity d             => Functor (LinearProgram d)
-deriving instance (Arity d, Show r)   => Show    (LinearProgram d r)
-deriving instance (Arity d, Eq r)     => Eq      (LinearProgram d r)
+deriving instance Arity d                       => Functor (LinearProgram d)
+deriving instance (Arity d, Show r)             => Show    (LinearProgram d r)
+deriving instance (Arity d, Fractional r, Eq r) => Eq      (LinearProgram d r)

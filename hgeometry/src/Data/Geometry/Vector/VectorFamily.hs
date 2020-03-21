@@ -39,6 +39,7 @@ import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
 import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
 import           Data.Proxy
+import           Data.Hashable
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -75,6 +76,8 @@ instance Arity d => Affine (Vector d) where
   type Diff (Vector d) = Vector d
   u .-. v = u ^-^ v
   p .+^ v = p ^+^ v
+
+deriving instance (Arity d, Hashable r) => Hashable (Vector d r)
 
 instance Arity d => Ixed (Vector d r) where
   ix = element'

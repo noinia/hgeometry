@@ -46,6 +46,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as Vec
+import           Data.Hashable
 import qualified Data.List as L
 import           Data.Ord (comparing)
 import           Data.Proxy
@@ -95,6 +96,8 @@ deriving instance Arity d                => Foldable (Point d)
 deriving instance Arity d                => Traversable (Point d)
 deriving instance (Arity d, NFData r)    => NFData (Point d r)
 deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
+deriving instance (Arity d, Hashable r)  => Hashable (Point d r)
+
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d

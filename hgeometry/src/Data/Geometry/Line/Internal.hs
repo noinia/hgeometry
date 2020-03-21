@@ -53,6 +53,8 @@ deriving instance Arity d             => T.Traversable (Line d)
 instance (Arity d, Eq r, Fractional r) => Eq (Line d r) where
   l@(Line p _) == m = l `isParallelTo` m && p `onLine` m
 
+
+
 instance (Arbitrary r, Arity d, Num r, Eq r) => Arbitrary (Line d r) where
   arbitrary = do p <- arbitrary
                  q <- suchThat arbitrary (/= p)

@@ -14,7 +14,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , module LV
                            , C(..)
                            , Affine(..)
-                           , qdA, distanceA
+                           , quadrance, qdA, distanceA
                            , dot, norm, signorm
                            , isScalarMultipleOf
                            , scalarMultiple
@@ -25,16 +25,15 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            ) where
 
 import           Control.Applicative (liftA2)
-import           Control.Lens(Lens')
+import           Control.Lens (Lens')
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
 import           Data.Geometry.Vector.VectorFixed (C(..))
-import           Data.Maybe
 import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..), qdA, distanceA)
-import           Linear.Metric (dot,norm,signorm)
+import           Linear.Metric (dot,norm,signorm,quadrance)
 import           Linear.Vector as LV
 import           Test.QuickCheck
 
@@ -51,8 +50,12 @@ instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
 --
 -- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 10 10
 -- True
+-- >>> Vector3 1 1 2 `isScalarMultipleOf` Vector3 10 10 20
+-- True
 -- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 10 1
 -- False
+-- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 (-1) (-1)
+-- True
 -- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 11.1 11.1
 -- True
 -- >>> Vector2 1 1 `isScalarMultipleOf` Vector2 11.1 11.2
@@ -63,11 +66,20 @@ instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
 -- True
 -- >>> Vector2 2 1 `isScalarMultipleOf` Vector2 4 0
 -- False
+-- >>> Vector3 2 1 0 `isScalarMultipleOf` Vector3 4 0 5
+-- False
+-- >>> Vector3 0 0 0 `isScalarMultipleOf` Vector3 4 0 5
+-- True
 isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
                          => Vector d r -> Vector d r -> Bool
-u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
+u `isScalarMultipleOf` v = let d = u `dot` v
+                               num = quadrance u * quadrance v
+                           in num == 0 || 1 == d*d / num
+-- u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
 {-# SPECIALIZE
     isScalarMultipleOf :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Bool  #-}
+{-# SPECIALIZE
+    isScalarMultipleOf :: (Eq r, Fractional r) => Vector 3 r -> Vector 3 r -> Bool  #-}
 
 -- | scalarMultiple u v computes the scalar labmda s.t. v = lambda * u (if it exists)
 scalarMultiple     :: (Eq r, Fractional r, Arity d)

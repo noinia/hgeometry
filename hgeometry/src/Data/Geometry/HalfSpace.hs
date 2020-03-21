@@ -38,13 +38,14 @@ import GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
--- | A Halfspace in \(d\) dimensions.
+-- | A Halfspace in \(d\) dimensions. Note that the intended side of
+-- the halfspace is already indicated by the normal vector of the
+-- bounding plane.
 newtype HalfSpace d r = HalfSpace { _boundingPlane :: HyperPlane d  r }
                        deriving Generic
 makeLenses ''HalfSpace
 
 deriving instance (Arity d, Show r)   => Show    (HalfSpace d r)
-deriving instance (Arity d, Eq r)     => Eq      (HalfSpace d r)
 -- deriving instance (NFData r, Arity d) => NFData  (HalfSpace d r)
 deriving instance Arity d => Functor     (HalfSpace d)
 deriving instance Arity d => Foldable    (HalfSpace d)
@@ -54,6 +55,12 @@ type instance NumType (HalfSpace d r)   = r
 type instance Dimension (HalfSpace d r) = d
 
 deriving instance (Arity d, Arity (d + 1), Fractional r) => IsTransformable (HalfSpace d r)
+
+instance (Arity d, Eq r, Fractional r) => Eq (HalfSpace d r) where
+  (HalfSpace h) == (HalfSpace h') = let u = h^.normalVec
+                                        v = h'^.normalVec
+                                        d = quadrance (u ^+^ v) - (quadrance u)
+                                    in h == h' && signum d == 1
 
 --------------------------------------------------------------------------------
 

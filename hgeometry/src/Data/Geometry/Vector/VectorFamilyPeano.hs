@@ -5,7 +5,7 @@ module Data.Geometry.Vector.VectorFamilyPeano where
 import           Control.Applicative (liftA2)
 import           Control.DeepSeq
 import           Control.Lens hiding (element)
-import           Data.Aeson(FromJSON(..),ToJSON(..))
+import           Data.Aeson (FromJSON(..),ToJSON(..))
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
@@ -19,6 +19,7 @@ import qualified Linear.V2 as L2
 import qualified Linear.V3 as L3
 import qualified Linear.V4 as L4
 import           Linear.Vector
+import           Data.Hashable
 
 --------------------------------------------------------------------------------
 -- * Natural number stuff
@@ -187,6 +188,17 @@ instance (NFData r, ImplicitArity d) => NFData (VectorFamily d r) where
                            (SS (SS (SS (SS SZ))))     -> rnf v
                            (SS (SS (SS (SS (SS _))))) -> rnf v
   {-# INLINE rnf #-}
+
+
+instance (ImplicitPeano d, Hashable r) => Hashable (VectorFamily d r) where
+  hashWithSalt = case (implicitPeano :: SingPeano d) of
+                   SZ                         -> hashWithSalt
+                   (SS SZ)                    -> hashWithSalt
+                   (SS (SS SZ))               -> hashWithSalt
+                   (SS (SS (SS SZ)))          -> hashWithSalt
+                   (SS (SS (SS (SS SZ))))     -> hashWithSalt
+                   (SS (SS (SS (SS (SS _))))) -> hashWithSalt
+
 
 instance ImplicitArity d => Ixed (VectorFamily d r) where
   ix = element'

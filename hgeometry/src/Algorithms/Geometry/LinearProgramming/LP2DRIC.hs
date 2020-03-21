@@ -86,8 +86,8 @@ data LPState d r = LPState { _obj     :: !(Vector d r)
                            , _current :: !(Point d r)
                            }
 
-deriving instance (Arity d, Show r)   => Show    (LPState d r)
-deriving instance (Arity d, Eq r)     => Eq      (LPState d r)
+deriving instance (Arity d, Show r)             => Show    (LPState d r)
+deriving instance (Arity d, Eq r, Fractional r) => Eq      (LPState d r)
 
 obj     :: Lens' (LPState d r) (Vector d r)
 obj     = lens _obj     (\(LPState _ s p) o -> LPState o s p)
