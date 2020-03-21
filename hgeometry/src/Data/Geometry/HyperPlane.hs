@@ -127,3 +127,23 @@ class HasSupportingPlane t where
 
 instance HasSupportingPlane (HyperPlane d r) where
   supportingPlane = id
+
+
+-- | Given
+-- * a plane,
+-- * a unit vector in the plane that will represent the y-axis (i.e. the "view up" vector), and
+-- * a point in the plane,
+--
+-- computes the plane coordinates of the given point, using the
+-- inPlane point as the origin, the normal vector of the plane as the
+-- unit vector in the "z-direction" and the view up vector as the
+-- y-axis.
+--
+-- >>> planeCoordinatesWith (Plane origin (Vector3 0 0 1)) (Vector3 0 1 0) (Point3 10 10 0)
+-- Point2 [10.0,10.0]
+planeCoordinatesWith       :: Fractional r => Plane r -> Vector 3 r -> Point 3 r -> Point 2 r
+planeCoordinatesWith h vup = projectPoint . transformBy (planeCoordinatesTransform h vup)
+
+planeCoordinatesTransform                    :: Num r => Plane r -> Vector 3 r -> Transformation 3 r
+planeCoordinatesTransform (HyperPlane o n) v =   rotateTo (Vector3 (v `cross` n) v n)
+                                             |.| translation ((-1) *^ toVec o)

@@ -2,7 +2,6 @@
 module Data.Geometry.Transformation where
 
 import           Control.Lens (lens,Lens',set)
-import           Unsafe.Coerce(unsafeCoerce)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
@@ -12,6 +11,7 @@ import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Linear.Matrix ((!*),(!*!))
 import qualified Linear.Matrix as Lin
+import           Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 -- * Matrices
@@ -30,6 +30,9 @@ multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a ->
 mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
 (Matrix m) `mult` v = m !* v
 
+-- | Produces the Identity Matrix
+identityMatrix :: (Arity d, Num r) => Matrix d d r
+identityMatrix = Matrix $ V.imap mkRow (pure 1)
 
 class Invertible n r where
   inverse' :: Matrix n n r -> Matrix n n r
@@ -62,7 +65,6 @@ deriving instance (Ord r, Arity (d + 1))  => Ord (Transformation d r)
 deriving instance Arity (d + 1)           => Functor (Transformation d)
 
 type instance NumType (Transformation d r) = r
-
 
 -- | Compose transformations (right to left)
 (|.|) :: (Num r, Arity (d + 1)) => Transformation d r -> Transformation d r -> Transformation d r

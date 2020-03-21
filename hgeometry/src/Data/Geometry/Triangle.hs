@@ -12,6 +12,7 @@ import           Data.Ext
 import           Data.Geometry.Ball (Disk, disk)
 import           Data.Geometry.Boundary
 import           Data.Geometry.HyperPlane
+import           Data.Geometry.HalfSpace
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -233,3 +234,16 @@ instance (Fractional r, Ord r) => (Line 3 r) `IsIntersectableWith` (Triangle 3 p
          :& (H $ \(LineSegment s e) -> coRec $ LineSegment (s&unEndPoint.core %~ lift)
                                                            (e&unEndPoint.core %~ lift))
          :& RNil
+
+
+-- | Computes the halfspace above the triangle.
+--
+-- >>> toUpperHalfSpace (Triangle (ext $ origin) (ext $ Point3 10 0 0) (ext $ Point3 0 10 0))
+-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 [0,0,0], _normalVec = Vector3 [0,0,100]}}
+toUpperHalfSpace                  :: (Ord r, Num r) => Triangle 3 p r -> HalfSpace 3 r
+toUpperHalfSpace (Triangle p q r) = HalfSpace h
+  where
+    h' = from3Points (p^.core) (q^.core) (r^.core)
+    c  = p&core.zCoord -~ 1
+    h  = if (c^.core) `liesBelow` h' then h' else h'&normalVec %~ ((-1) *^)
+    a `liesBelow` plane = (a `onSideUpDown` plane) == Below
