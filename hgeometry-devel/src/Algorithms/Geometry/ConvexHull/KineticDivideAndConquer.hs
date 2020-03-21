@@ -139,7 +139,7 @@ simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPo
 --
 -- running time: \(O(n \log n)\)
 lowerEnvelope     :: (Ord r, Fractional r, Show r) => NonEmpty (Point 2 r :+ a) -> SP a [r :+ Two a]
-lowerEnvelope pts = SP i $ zipWith f (NonEmpty.toList h) tl
+lowerEnvelope pts = SP i $ zipWith f (toList h) tl
   where
     f (pa :+ a) (pb :+ b) = let Vector2 x y = traceShow (pa,pb) $ pb .-. pa in y / x :+ Two a b
     h@((_ :+ i) :| tl) = GrahamScan.upperHullFromSorted' $ pts
@@ -388,13 +388,9 @@ colinears     :: (Ord r, Num r) => r -> Index -> Simulation s r (NonEmpty Index)
 colinears t x = do b  <- get >>= traverse (lift . atTime t)
                    ls <- lift (toListFromR x) >>= takeColinear b
                    rs <- lift (toListFrom  x) >>= takeColinear b
-                   pure $ fromL $ (reverse ls) <> [x] <> rs
+                   pure . NonEmpty.fromList $ (reverse ls) <> [x] <> rs
   where
     takeColinear b (_ :| is) = takeWhileM (isColinearWith b t) is
-
-    fromL xs = case NonEmpty.nonEmpty xs of
-                 Nothing -> error "colinears"
-                 Just n  -> n
 
 -- | Given two 2d-points (representing the bridge at time t), time t,
 -- and index i, test if the point with index i is colinear with the
@@ -594,3 +590,38 @@ buggyPoints4 = fmap (bimap (10 *^) id) . NonEmpty.fromList $
                -- but got: H
                -- [Triangle (Point3 [-3,1,2] :+ 0) (Point3 [3,-1,0] :+ 2) (Point3 [3,0,0] :+ 3)
                -- ,Triangle (Point3 [-3,1,2] :+ 0) (Point3 [0,1,1] :+ 1) (Point3 [3,0,0] :+ 3)]
+
+
+point3 :: [r] -> Point 3 r
+point3 = fromJust . pointFromList
+
+buggyPoints5 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints5 = fmap (bimap (10 *^) id) . NonEmpty.fromList $
+                 [point3 [-21,14,-4]   :+ 0
+                 ,point3 [-16,-15,-14] :+ 1
+                 ,point3 [-16,12,-23]  :+ 2
+                 ,point3 [-16,15,-6]   :+ 3
+                 ,point3 [-14,12,16]   :+ 4
+                 ,point3 [-11,-19,-7]  :+ 5
+                 ,point3 [-9,18,14]    :+ 6
+                 ,point3 [-7,5,5]      :+ 7
+                 ,point3 [-6,14,11]    :+ 8
+                 ,point3 [-6,16,-14]   :+ 9
+                 ,point3 [-3,16,10]    :+ 10
+                 ,point3 [1,-4,0]      :+ 11
+                 ,point3 [1,19,14]     :+ 12
+                 ,point3 [3,4,-7]      :+ 13
+                 ,point3 [6,-8,22]     :+ 14
+                 ,point3 [8,6,12]      :+ 15
+                 ,point3 [12,-2,-17]   :+ 16
+                 ,point3 [14,11,1]     :+ 17
+                 ,point3 [21,-13,20]   :+ 18
+                 ,point3 [23,-18,14]   :+ 19
+                 ,point3 [23,-6,-18]   :+ 20
+                 ,point3 [23,4,-16]    :+ 21
+                 ]
+
+         -- expected: HalfSpacesOf [Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-6,16,-14] :+ 9) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-18,14] :+ 19) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9) (Point3 [1,19,14] :+ 12),Triangle (Point3 [-6,16,-14] :+ 9) (Point3 [1,19,14] :+ 12) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [1,19,14] :+ 12) (Point3 [14,11,1] :+ 17) (Point3 [23,4,-16] :+ 21)]
+
+
+         -- but got: HalfSpacesOf [Triangle (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-18,14] :+ 19) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-6,16,-14] :+ 9) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3),Triangle (Point3 [-6,16,-14] :+ 9) (Point3 [-3,16,10] :+ 10) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6),Triangle (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9) (Point3 [-3,16,10] :+ 10)]

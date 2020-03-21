@@ -1,6 +1,7 @@
 module Data.List.Set( Set, singleton
                     , insert, delete
                     , union, intersection, difference
+                    , fromList, insertAll
                     ) where
 
 import qualified Data.List as List
@@ -36,6 +37,9 @@ insert x s@(Set xs) | x `elem` s = s
 
 insertAll      :: Eq a => [a] -> Set a -> Set a
 insertAll xs s = List.foldl' (flip insert) s xs
+
+fromList :: Eq a => [a] -> Set a
+fromList = flip insertAll mempty
 
 -- | Deletes an element from the set
 --

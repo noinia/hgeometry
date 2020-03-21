@@ -9,6 +9,7 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
+import qualified Data.List.Set as ListSet
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -52,7 +53,19 @@ instance Arbitrary HullInput where
 -- the output contains a face with more than three sides (i.e. not a
 -- triangle) there are multiple, valid, ways of triangulating it.
 
-sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
+-- sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
+
+sameAsNaive pts = (HalfSpacesOf $ DivAndConc.lowerHull' pts)
+                  `shouldBe`
+                  (HalfSpacesOf $ Naive.lowerHull' pts)
+
+newtype HalfSpaces p r = HalfSpacesOf (ConvexHull 3 p r) deriving Show
+
+instance (Ord r, Fractional r) => Eq (HalfSpaces p r) where
+  (HalfSpacesOf cha) == (HalfSpacesOf chb) = hsOf cha == hsOf chb
+    where
+      hsOf = flip ListSet.insertAll mempty . map Naive.upperHalfSpaceOf
+
 
 newtype Hull p r = H (ConvexHull 3 p r) deriving (Show)
 
