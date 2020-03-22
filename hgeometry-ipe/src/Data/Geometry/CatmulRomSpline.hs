@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.CatmulRomSpline where
 
 import           Data.Ext
@@ -15,7 +16,22 @@ import Data.RealNumber.Rational
 
 --------------------------------------------------------------------------------
 
+-- | Catmul-Rom Spline.
 newtype Spline d r = Spline (LSeq 4 (Point d r))
+
+deriving instance (Arity d, Show r) => Show (Spline d r)
+deriving instance (Arity d, Eq r)   => Eq (Spline d r)
+
+deriving instance Arity d => Functor (Spline d)
+
+-- | Constructs a spline from four points.
+fromPoints              :: Point d r -> Point d r -> Point d r -> Point d r -> Spline d r
+fromPoints p1 p2 p3 p4 = fromListOfPoints [p1,p2,p3,p4]
+
+-- | Constructs a spline from a list of, at least four, points.
+fromListOfPoints :: [Point d r] -> Spline d r
+fromListOfPoints = Spline . LSeq.promise . LSeq.fromList
+
 
 -- | Converts a CatmulRom Spline into a series of Cubic Bezier curves.
 toCubicBezier  :: (Arity d, Fractional r) => Spline d r -> NonEmpty (CubicBezier d r)
