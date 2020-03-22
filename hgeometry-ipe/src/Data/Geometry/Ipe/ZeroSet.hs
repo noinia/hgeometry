@@ -22,4 +22,4 @@ drawQuadTree :: Fractional r => IpeOut (QuadTree v p r) Group r
 drawQuadTree = ipeGroup . fmap (\(c :+ _) -> iO $ drawCell c) . cells
 
 
--- test' = printAsIpeSelection $ drawQuadTree test
+test' = printAsIpeSelection $ drawQuadTree test
