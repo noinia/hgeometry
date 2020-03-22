@@ -4,15 +4,17 @@ import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAn
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
-import           Control.Monad (forM_)
+import           Control.Monad (forM, forM_)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
-import qualified Data.List.Set as ListSet
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.List.Util(leaveOutOne)
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List.Set as ListSet
+import           Data.Maybe
 import           Data.RealNumber.Rational
 import qualified Data.Set as Set
 import           Data.Util
@@ -38,6 +40,12 @@ spec = describe "3D ConvexHull tests" $ do
 
          it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive pts
 
+
+spec' = describe "test" $ do
+  it "same as naive on buggyPoints " $ sameAsNaive buggyPoints5
+
+specShrink = describe "shrink" $ forM_ (zip [0..] $ leaveOutOne buggyPoints5') $ \(i,pts) ->
+               it ("same as Naive " <> show i) $ sameAsNaive (mkBuggy pts)
 
 
 
@@ -162,6 +170,61 @@ buggyPoints3 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-9 ) (-9)
                                                                Point3 (4  ) (5 ) ( 8) :+ 8,
                                                                Point3 (10 ) (3 ) ( 3) :+ 9
                                                              ]
+
+
+point3 :: [r] -> Point 3 r
+point3 = fromJust . pointFromList
+
+buggyPoints5 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints5 = mkBuggy $ buggyPoints5'
+
+mkBuggy = fmap (bimap (10 *^) id) . NonEmpty.fromList
+
+buggyPoints5' :: [Point 3 R :+ Int]
+buggyPoints5' = [ point3 [-21,14,-4]   :+ 0
+                ,point3 [-16,-15,-14] :+ 1
+                ,point3 [-14,12,16]   :+ 2
+                ,point3 [-11,-19,-7]  :+ 3
+                ,point3 [-9,18,14]    :+ 4
+                ,point3 [-7,5,5]      :+ 5
+                ,point3 [-6,14,11]    :+ 6
+                ,point3 [-3,16,10]    :+ 7
+                ,point3 [1,-4,0]      :+ 8
+                ,point3 [1,19,14]     :+ 9
+                ,point3 [3,4,-7]      :+ 10
+                ,point3 [6,-8,22]     :+ 11
+                ,point3 [8,6,12]      :+ 12
+                ,point3 [12,-2,-17]   :+ 13
+                ,point3 [23,-18,14]   :+ 14
+                ,point3 [23,-6,-18]   :+ 15
+                ]
+
+
+
+-- buggyPoints5' :: [Point 3 R :+ Int]
+-- buggyPoints5' = [point3 [-21,14,-4]   :+ 0
+--                 ,point3 [-16,-15,-14] :+ 1
+--                 -- ,point3 [-16,12,-23]  :+ 2
+--                 -- ,point3 [-16,15,-6]   :+ 3
+--                 ,point3 [-14,12,16]   :+ 4
+--                 ,point3 [-11,-19,-7]  :+ 5
+--                 ,point3 [-9,18,14]    :+ 6
+--                 ,point3 [-7,5,5]      :+ 7
+--                 ,point3 [-6,14,11]    :+ 8
+--                 -- ,point3 [-6,16,-14]   :+ 9
+--                 ,point3 [-3,16,10]    :+ 10
+--                 ,point3 [1,-4,0]      :+ 11
+--                 ,point3 [1,19,14]     :+ 12
+--                 ,point3 [3,4,-7]      :+ 13
+--                 ,point3 [6,-8,22]     :+ 14
+--                 ,point3 [8,6,12]      :+ 15
+--                 ,point3 [12,-2,-17]   :+ 16
+--                 -- ,point3 [14,11,1]     :+ 17
+--                 -- ,point3 [21,-13,20]   :+ 18
+--                 ,point3 [23,-18,14]   :+ 19
+--                 ,point3 [23,-6,-18]   :+ 20
+--                 -- ,point3 [23,4,-16]    :+ 21
+--                 ]
 
 
 -- subs :: SP Index [Event (RealNumber 10)]

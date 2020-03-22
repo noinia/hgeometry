@@ -172,9 +172,9 @@ drawMovie             :: (Fractional r, Ord r, IpeWriteText r)
                       => r -> NonEmpty Index -> NonEmpty Index -> V.Vector (Point 3 r)
                       -> NonEmpty (IpePage r)
 drawMovie t h0 h1 pts = NonEmpty.fromList
-    [ fromContent $ d pts0 <> [ drawHull h0 pts0, time $ t - eps  ]
-    , fromContent $ d pts2 <> [ drawHull h1 pts2, time $ t        ]
-    , fromContent $ d pts1 <> [ drawHull h1 pts1, time $ t + eps  ]
+    [ --fromContent $ d pts0 <> [ drawHull h0 pts0, time $ t - eps  ]
+     fromContent $ d pts2 <> [ drawHull h1 pts2, time $ t        ]
+--    , fromContent $ d pts1 <> [ drawHull h1 pts1, time $ t + eps  ]
     ]
   where
     pts0 = fmap (atTime' $ t - eps ) $ pts
@@ -197,6 +197,7 @@ drawMovie t h0 h1 pts = NonEmpty.fromList
 
     xRange = ClosedRange (minimum hpts) (maximum hpts)
     -- (s,tt) = (NonEmpty.head h0, NonEmpty.last h0)
+
 
 
 

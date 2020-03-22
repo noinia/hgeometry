@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE BangPatterns #-}
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
@@ -120,7 +121,7 @@ simulateLeaf    :: (Ord r, Fractional r, Show r) => NonEmpty Index -> HullM s r 
 simulateLeaf is = simulateLeaf' <$> mapM (\i -> (:+ i) <$> pointAt i) is
 
 simulateLeaf' :: (Ord r, Fractional r, Show r) => NonEmpty (Point 3 r :+ Index) -> SP Index [Event r]
-simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPoint)
+simulateLeaf' = (&_2 %~ toEvents) . lowerEnvelope . fmap (&core %~ toDualPoint)
   where
     toEvents = map (&extra %~ fromBreakPoint)
     -- Every point in R^3 maps to a non-vertical line: y' = -y*t + z
@@ -129,7 +130,6 @@ simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPo
     -- at every breakpoint we insert b and delete a.
     fromBreakPoint (Two a b) = NonEmpty.fromList [InsertAfter a b, Delete a]
 
-    tc = traceShowId
 
 -- | Given a set of lines, represented by their dual points, compute
 -- the lower envelope of those lines. Returns the associated value of
@@ -141,13 +141,11 @@ simulateLeaf' = (&_2 %~ toEvents) . tc . lowerEnvelope . fmap (&core %~ toDualPo
 lowerEnvelope     :: (Ord r, Fractional r, Show r) => NonEmpty (Point 2 r :+ a) -> SP a [r :+ Two a]
 lowerEnvelope pts = SP i $ zipWith f (toList h) tl
   where
-    f (pa :+ a) (pb :+ b) = let Vector2 x y = traceShow (pa,pb) $ pb .-. pa in y / x :+ Two a b
+    f (pa :+ a) (pb :+ b) = let Vector2 x y = pb .-. pa in y / x :+ Two a b
     h@((_ :+ i) :| tl) = GrahamScan.upperHullFromSorted' $ pts
     -- every edge of the upper hull corresponds to some line. In the
     -- primal this line represents a vertex of the lower envelope. The
     -- x-coordinate of this point is the slope of the line.
-
--- TODO: Presort the points properly so that we don't have to resort here.
 
 --------------------------------------------------------------------------------
 
@@ -167,26 +165,21 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
   lc <> rc = do l <- lc
                 r <- rc
-                d <- debugHull l r
-                pts <- getPoints
-
-                let esIn = traceShow d $ mergeEvents (events l) (events r)
+                let esIn = mergeEvents (events l) (events r)
                     t    = (-10000000) -- TODO; at what time value should we start?
-                (h,u,v) <- traceShow ("before merge:",d,t,events l, events r,map (^.core) esIn
-                                     ) <$> findBridge t l r
-                let b = traceShow ("bridge:", u, v, "hull:",h) $ (Bridge u v)
-
-                es <- runKinetic Bottom esIn
-                      $ traceShow (drawDebug ("before_merge_" <> rangeS l r) Bottom h b pts)
-                                        b
-                writeList $ traceShow ("writing hull: ",h) h
+                (h,u,v) <- findBridge t l r
+                let b = Bridge u v
+                es <- runKinetic Bottom esIn b
+                writeList h
                 let !ms = MergeStatus (hd l) (lst r) es
-                fp <- renderMovieIO ("movie_" <> rangeS l r) ms
-                pure $ traceShow fp ms
+                -- fp <- renderMovieIO ("movie_" <> rangeS l r) ms
+                pure ms
                 --
                 -- pure $ traceShow (drawDebug "combined" ms (Bridge u v) pts) ms
     where
       rangeS l r = show (hd l) <> "-" <> show (lst r)
+
+
 
 
 
@@ -195,7 +188,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
 
 -- | Reports all the edges on the CH
 output    :: Show r => MergeStatus r -> HullM s r [Three Index]
-output ms | traceShow ("output: ", events ms) False = undefined
+-- output ms | traceShow ("output: ", events ms) False = undefined
 output ms = concat <$> mapM handle (events ms)
   where
     handle e = catMaybes . toList <$> mapM applyAndReport (e^.eventActions)
@@ -261,6 +254,7 @@ runKinetic        :: (Ord r, Fractional r, Show r, IpeWriteText r )
 runKinetic t es b = evalStateT (handleEvent t es) b
 
 -- | Given the current time, handling an event means three things:
+--
 -- 1. figuring out when the first bridge event is
 -- 2. figuring out at what time the next event happens, what actions
 --    occur at that time, and performing those.
@@ -270,8 +264,8 @@ handleEvent        :: (Ord r, Fractional r, Show r)
                    -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
                    -> Simulation s r [Event r]
 handleEvent now es = do mbe <- firstBridgeEvent now
-                        case traceShowId $ nextEvent mbe es of
-                          None                   -> pure []
+                        case nextEvent mbe es of
+                          None             -> pure []
                           Next t eacts es' -> do me  <- handleAllAtTime t eacts
                                                  evs <- handleEvent (ValB t) es'
                                                  pure $ maybeToList me <> evs
@@ -287,10 +281,12 @@ handleAllAtTime :: (Ord r, Fractional r, Show r)
                 -- ^ all *existing* events that are happening at the
                 -- current time. I.e. events in either the left or right hulls
                 -> Simulation s r (Maybe (Event r))
-handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
+-- handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
 handleAllAtTime now ees =
     do b <- get
-       let Bridge l r = b
+       let Bridge l r = b -- traceShow ("bridge before handling side events: ",b) b
+       -- currentHL <- lift $ toListContains l
+       -- currentHR <- lift $ toListContains r
        (delL,ls) <- handleOneSide now levs l
        (delR,rs) <- handleOneSide now revs r
        b' <- newBridge now (NonEmpty.reverse ls) rs
@@ -299,14 +295,14 @@ handleAllAtTime now ees =
        routs <- filterM (occursAfterAt  now $ r `min` r') revs
        la <- leftBridgeEvent  l l' delL levs
        ra <- rightBridgeEvent r r' delR revs
-       put $ traceShow ("bridge after time: ", now, " is ", b') b'
+       put b'        -- put $ traceShow ("bridge after time: ", now, " is ", b') b'
        pure . tr . outputEvent now $ louts <> routs <> catMaybes [la,ra]
          -- the bridge actions should be after louts and routs;
   where
     (levs,revs) = partitionEithers ees
     outputEvent t acts = (t :+) <$> NonEmpty.nonEmpty acts
 
-    tr x = traceShow ("outputting event: ",x) x
+    tr x = x -- traceShow ("outputting event: ",x) x
 
 
 occursBeforeAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
@@ -326,7 +322,7 @@ occursAfterAt t r e = lift $ after <$> atTime (t+1) (getLeftMost e) <*> atTime (
 -- | Computes if we should output a new bridge action for the left endpoint
 leftBridgeEvent                         :: Index -> Index -> Bool -> [Action]
                                         -> Simulation s r (Maybe Action)
-leftBridgeEvent l l' b evs | traceShow ("leftBridgeEvent ",l,l',b,evs) False = undefined
+-- leftBridgeEvent l l' b evs | traceShow ("leftBridgeEvent ",l,l',b,evs) False = undefined
 leftBridgeEvent l l' alreadyDeleted evs = lift $ case (l `compare` l') of
     LT | shouldBeInserted l' evs -> (\(Just p) -> Just $ InsertAfter p l') <$> getPrev l'
     -- since l < l', l' has a predecessor, and hence the fromJust is safe.
@@ -335,7 +331,7 @@ leftBridgeEvent l l' alreadyDeleted evs = lift $ case (l `compare` l') of
 
 rightBridgeEvent                         :: Index -> Index -> Bool -> [Action]
                                          -> Simulation s r (Maybe Action)
-rightBridgeEvent r r' b evs | traceShow ("rightBridgeEvent ",r,r',b,evs) False = undefined
+-- rightBridgeEvent r r' b evs | traceShow ("rightBridgeEvent ",r,r',b,evs) False = undefined
 rightBridgeEvent r r' alreadyDeleted evs = lift $ case (r' `compare` r) of
     LT | shouldBeInserted r' evs -> (\(Just p) -> Just $ InsertBefore p r') <$> getNext r'
     -- since r' < r, r' has a successor, and hence the fromJust is safe
@@ -357,6 +353,7 @@ shouldBeInserted i = null . filter isInsert
 -- running time: linear in the number of points in ls and rs.
 newBridge         :: (Ord r, Fractional r, Show r)
                   =>  r -> NonEmpty Index -> NonEmpty Index -> Simulation s r Bridge
+-- newBridge t ls rs | traceShow ("newBridge ", t,ls,rs) False = undefined
 newBridge t ls rs = lift $ (\(_,l,r) -> Bridge l r) <$> findBridgeFrom (t+1) ls rs
   -- claim: all colinear a t time t means we can pick any time t' > t
   -- to compute the new bridge
@@ -365,11 +362,12 @@ newBridge t ls rs = lift $ (\(_,l,r) -> Bridge l r) <$> findBridgeFrom (t+1) ls 
 --
 -- returns wether the current bridge was deleted and the colinears
 -- with the current bridge
-handleOneSide           :: (Ord r, Num r)
+handleOneSide           :: (Ord r, Num r, Show r)
                         => r -> [Action] -> Index -> Simulation s r (Bool, NonEmpty Index)
+-- handleOneSide now evs l | traceShow ("handleOneSide ",now,evs,l) False = undefined
 handleOneSide now evs l = do lift $ mapM_ applyEvent' insertions
                              lift $ mapM_ applyEvent' deletions
-                             ls <- colinears now l
+                             ls <- colinears' now l (length insertions)
                              lift $ mapM_ applyEvent' delBridge
                              pure (isJust delBridge, ls)
   where
@@ -384,13 +382,29 @@ partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
       Delete _ -> True
       _        -> False
 
-colinears     :: (Ord r, Num r) => r -> Index -> Simulation s r (NonEmpty Index)
-colinears t x = do b  <- get >>= traverse (lift . atTime t)
-                   ls <- lift (toListFromR x) >>= takeColinear b
-                   rs <- lift (toListFrom  x) >>= takeColinear b
-                   pure . NonEmpty.fromList $ (reverse ls) <> [x] <> rs
+-- | Given the current time t, a starting index i, and a distance d,
+-- finds all points within "d+1" hops from i that are colinear with i
+-- at the current time t.
+colinears'       :: (Ord r, Num r, Show r) => r -> Index -> Int -> Simulation s r (NonEmpty Index)
+colinears' t i d = do b  <- get >>= traverse (lift . atTime t)
+                      ls <- lift (toListFromR i) >>= takeColinear b
+                      rs <- lift (toListFrom  i) >>= takeColinear b
+                      pure . NonEmpty.fromList $ (reverse ls) <> [i] <> rs
   where
-    takeColinear b (_ :| is) = takeWhileM (isColinearWith b t) is
+    takeColinear b (_ :| is) = filterM (isColinearWith b t) $ take (d+1) is
+
+
+-- colinears     :: (Ord r, Num r, Show r) => r -> Index -> Simulation s r (NonEmpty Index)
+-- colinears t i = do b  <- get >>= traverse (lift . atTime t)
+--                    ls' <- lift dump
+--                    ls <- lift (toListFromR i) >>= takeColinear b
+--                    rs <- lift (toListFrom  i) >>= takeColinear b
+--                    pure . NonEmpty.fromList . tr b ls' $ (reverse ls) <> [i] <> rs
+--   where
+--     takeColinear b (_ :| is) = takeWhileM (isColinearWith b t) is
+--     tr b ys xs = traceShow ("colinears",i,b,xs,ys) xs
+--     -- FIXME: the toListFrom on rs is the problem. The current bridge is 15, but is being replaced by 14, which has the exact same x-coord. So, we need to walk to the left there as well.
+
 
 -- | Given two 2d-points (representing the bridge at time t), time t,
 -- and index i, test if the point with index i is colinear with the
@@ -596,32 +610,26 @@ point3 :: [r] -> Point 3 r
 point3 = fromJust . pointFromList
 
 buggyPoints5 :: NonEmpty (Point 3 R :+ Int)
-buggyPoints5 = fmap (bimap (10 *^) id) . NonEmpty.fromList $
-                 [point3 [-21,14,-4]   :+ 0
-                 ,point3 [-16,-15,-14] :+ 1
-                 ,point3 [-16,12,-23]  :+ 2
-                 ,point3 [-16,15,-6]   :+ 3
-                 ,point3 [-14,12,16]   :+ 4
-                 ,point3 [-11,-19,-7]  :+ 5
-                 ,point3 [-9,18,14]    :+ 6
-                 ,point3 [-7,5,5]      :+ 7
-                 ,point3 [-6,14,11]    :+ 8
-                 ,point3 [-6,16,-14]   :+ 9
-                 ,point3 [-3,16,10]    :+ 10
-                 ,point3 [1,-4,0]      :+ 11
-                 ,point3 [1,19,14]     :+ 12
-                 ,point3 [3,4,-7]      :+ 13
-                 ,point3 [6,-8,22]     :+ 14
-                 ,point3 [8,6,12]      :+ 15
-                 ,point3 [12,-2,-17]   :+ 16
-                 ,point3 [14,11,1]     :+ 17
-                 ,point3 [21,-13,20]   :+ 18
-                 ,point3 [23,-18,14]   :+ 19
-                 ,point3 [23,-6,-18]   :+ 20
-                 ,point3 [23,4,-16]    :+ 21
-                 ]
+buggyPoints5 = mkBuggy $ buggyPoints5'
 
-         -- expected: HalfSpacesOf [Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-6,16,-14] :+ 9) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-18,14] :+ 19) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9) (Point3 [1,19,14] :+ 12),Triangle (Point3 [-6,16,-14] :+ 9) (Point3 [1,19,14] :+ 12) (Point3 [23,4,-16] :+ 21),Triangle (Point3 [1,19,14] :+ 12) (Point3 [14,11,1] :+ 17) (Point3 [23,4,-16] :+ 21)]
+mkBuggy = fmap (bimap (10 *^) id) . NonEmpty.fromList
 
 
-         -- but got: HalfSpacesOf [Triangle (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-18,14] :+ 19) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-11,-19,-7] :+ 5) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,-15,-14] :+ 1) (Point3 [-16,12,-23] :+ 2),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-6,16,-14] :+ 9) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,12,-23] :+ 2) (Point3 [-16,15,-6] :+ 3),Triangle (Point3 [-6,16,-14] :+ 9) (Point3 [-3,16,10] :+ 10) (Point3 [23,-6,-18] :+ 20),Triangle (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9),Triangle (Point3 [-21,14,-4] :+ 0) (Point3 [-16,15,-6] :+ 3) (Point3 [-9,18,14] :+ 6),Triangle (Point3 [-9,18,14] :+ 6) (Point3 [-6,16,-14] :+ 9) (Point3 [-3,16,10] :+ 10)]
+buggyPoints5' :: [Point 3 R :+ Int]
+buggyPoints5' = [point3 [-21,14,-4]   :+ 0
+                ,point3 [-16,-15,-14] :+ 1
+                ,point3 [-14,12,16]   :+ 4
+                ,point3 [-11,-19,-7]  :+ 5
+                ,point3 [-9,18,14]    :+ 6
+                ,point3 [-7,5,5]      :+ 7
+                ,point3 [-6,14,11]    :+ 8
+                ,point3 [-3,16,10]    :+ 10
+                ,point3 [1,-4,0]      :+ 11
+                ,point3 [1,19,14]     :+ 12
+                ,point3 [3,4,-7]      :+ 13
+                ,point3 [6,-8,22]     :+ 14
+                ,point3 [8,6,12]      :+ 15
+                ,point3 [12,-2,-17]   :+ 16
+                ,point3 [23,-18,14]   :+ 19
+                ,point3 [23,-6,-18]   :+ 20
+                ]

@@ -9,6 +9,7 @@ module Data.IndexedDoublyLinkedList( DLList(..)
                                    , toListFrom, toListFromR, toListContains
                                    , insertAfter, insertBefore
                                    , delete
+                                   -- , dump
                                    ) where
 
 import           Control.Monad.Primitive (PrimMonad(..))
@@ -169,3 +170,12 @@ mModify v mi f = case mi of
 
 modify        :: PrimMonad m => MV.MVector (PrimState m) a -> Int -> (a -> a) -> m ()
 modify v i f = MV.modify v f i
+
+
+--------------------------------------------------------------------------------
+
+-- | For debugging purposes, dump the values and the cells
+dump :: DLListMonad s a (V.Vector a, V.Vector Cell)
+dump = do DLList v cs <- ask
+          cs' <- V.freeze cs
+          pure (v,cs')
