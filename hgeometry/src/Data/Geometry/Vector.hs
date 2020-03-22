@@ -26,6 +26,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
 
 import           Control.Applicative (liftA2)
 import           Control.Lens (Lens')
+import           Control.Monad.State
 import qualified Data.Foldable as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
@@ -35,7 +36,8 @@ import           GHC.TypeLits
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm,quadrance)
 import           Linear.Vector as LV
-import           Test.QuickCheck
+import           System.Random (Random(..))
+import           Test.QuickCheck (Arbitrary(..),infiniteList)
 
 --------------------------------------------------------------------------------
 
@@ -45,6 +47,10 @@ type instance NumType   (Vector d r) = r
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
 
+instance (Random r, Arity d) => Random (Vector d r) where
+  randomR (lows,highs) g0 = flip runState g0 $
+                            FV.zipWithM (\l h -> state $ randomR (l,h)) lows highs
+  random g0 = flip runState g0 $ FV.replicateM (state random)
 
 -- | 'isScalarmultipleof u v' test if v is a scalar multiple of u.
 --
