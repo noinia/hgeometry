@@ -37,6 +37,7 @@ import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Value
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon (Polygon, outerBoundary, holeList, asSimplePolygon)
 import qualified Data.Geometry.Transformation as GT
@@ -300,6 +301,9 @@ instance IpeWriteText r => IpeWriteText (Polygon t () r) where
     -- TODO: We are not really guaranteed that there is at least one point, it would
     -- be nice if the type could guarantee that.
 
+
+instance IpeWriteText r => IpeWriteText (CubicBezier 2 r) where
+  ipeWriteText (CubicBezier p q r s) = unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p

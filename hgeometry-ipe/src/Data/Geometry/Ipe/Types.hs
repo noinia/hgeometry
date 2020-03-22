@@ -24,6 +24,7 @@ import           Data.Ext
 import           Data.Geometry.Box(Rectangle)
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.Polygon(SimplePolygon)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -117,7 +118,7 @@ instance Fractional r => IsTransformable (IpeSymbol r) where
 data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    | PolygonPath            (SimplePolygon () r)
                      -- TODO
-                   | CubicBezierSegment     -- (CubicBezier 2 r)
+                   | CubicBezierSegment     (CubicBezier 2 r)
                    | QuadraticBezierSegment -- (QuadraticBezier 2 r)
                    | EllipseSegment (Matrix 3 3 r)
                    | ArcSegment
