@@ -1,10 +1,12 @@
 module Data.Tree.Util where
 
-import Data.Maybe(listToMaybe,maybeToList)
-import Control.Lens
-import Control.Monad((>=>))
-import Data.Tree
+import           Control.Lens
+import           Control.Monad ((>=>))
 import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe (listToMaybe,maybeToList)
+import           Data.Tree
 
 --------------------------------------------------------------------------------
 
@@ -152,3 +154,27 @@ findNodes p = go
   where
     go t = let mh = if p t then [[]] else []
            in map (rootLabel t:) $ mh <> concatMap go (children t)
+
+
+-- | BFS Traversal of the rose tree that decomposes it into levels.
+--
+-- running time: \(O(n)\)
+levels :: Tree a -> NonEmpty (NonEmpty a)
+levels = go1 . (:| [])
+  where
+    go0   :: [Tree a] -> [NonEmpty a]
+    go0 q = case NonEmpty.nonEmpty q of
+              Nothing -> []
+              Just q1 -> NonEmpty.toList $ go1 q1
+    {-# INLINE go0 #-}
+
+    -- all work essentially happens here: given a bunch of trees whose
+    -- root elements all have the same level, extract the values
+    -- stored at these root nodes, collect all children in a big list,
+    -- and explore those recursively.
+    go1    :: NonEmpty (Tree a) -> NonEmpty (NonEmpty a)
+    go1 qs = fmap root' qs :| go0 (concatMap children' qs)
+    {-# INLINE go1 #-}
+
+    root'     (Node x _)   = x
+    children' (Node _ chs) = chs
