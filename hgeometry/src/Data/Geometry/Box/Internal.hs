@@ -17,6 +17,7 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
+import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -25,12 +26,11 @@ import qualified Data.Geometry.Vector as V
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Range as R
 import qualified Data.Semigroup.Foldable as F
-import qualified Data.Foldable as F
 import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl.CoRec (asA)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           Test.QuickCheck(Arbitrary(..))
+import           Test.QuickCheck (Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
@@ -240,23 +240,7 @@ height :: Num r => Rectangle p r -> r
 height = widthIn (C :: C 2)
 
 
--- | Get the corners of a rectangle, the order is:
--- (TopLeft, TopRight, BottomRight, BottomLeft).
--- The extra values in the Top points are taken from the Top point,
--- the extra values in the Bottom points are taken from the Bottom point
-corners :: Num r => Rectangle p r -> ( Point 2 r :+ p
-                                     , Point 2 r :+ p
-                                     , Point 2 r :+ p
-                                     , Point 2 r :+ p
-                                     )
-corners r     = let w = width r
-                    p = (_maxP r)&core %~ _cwMax
-                    q = (_minP r)&core %~ _cwMin
-                in ( p&core.xCoord %~ (subtract w)
-                   , p
-                   , q&core.xCoord %~ (+ w)
-                   , q
-                   )
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- * Constructing bounding boxes

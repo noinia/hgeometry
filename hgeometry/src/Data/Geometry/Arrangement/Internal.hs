@@ -192,12 +192,9 @@ unBoundedParts         :: (Ord r, Fractional r)
 unBoundedParts rect ls = [tl] <> t <> [tr] <> reverse r <> [br] <> reverse b <> [bl] <> l
   where
     sideIntersections' = over (traverse._2) Just . sideIntersections ls
-    (t,r,b,l)     = map4 sideIntersections'      $ sides   rect
-    (tl,tr,br,bl) = map4 ((,Nothing) . (^.core)) $ corners rect
+    Sides t r b l       = fmap sideIntersections'      $ sides   rect
+    Corners tl tr br bl = fmap ((,Nothing) . (^.core)) $ corners rect
 
-
-map4              :: (a -> b) -> (a,a,a,a) -> (b,b,b,b)
-map4 f (a,b',c,d) = (f a, f b', f c, f d)
 
 -- | Links the vertices  of the outer boundary with those in the subdivision
 link       :: Eq r => [(Point 2 r, a)] -> PlanarSubdivision s v (Maybe e) f r
@@ -270,8 +267,8 @@ findStartVertex p arr = do
     i  <- binarySearchVec (pred' ss) (arr^.unboundedIntersections)
     pure $ arr^.unboundedIntersections.singular (ix i)
   where
-    (t,r,b,l) = sides'' $ arr^.boundedArea
-    sides'' = map4 (\(ClosedLineSegment a c) -> LineSegment (Closed a) (Open c)) . sides
+    Sides t r b l = sides'' $ arr^.boundedArea
+    sides''       = fmap (\(ClosedLineSegment a c) -> LineSegment (Closed a) (Open c)) . sides
 
     findSide q = fmap fst . List.find (onSegment q . snd) $ zip [1..] [t,r,b,l]
 

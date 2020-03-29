@@ -80,7 +80,7 @@ instance (Ord r, Fractional r)
         _     -> coRec NoIntersection
       _     -> error "intersect; line x boundary rect; absurd"
     where
-      (t,r,b,l) = sides' rect
+      Sides t r b l = sides' rect
       ints = map (\s -> sl `intersect` toSL s) [t,r,b,l]
 
       nub' = map L.head . L.group . L.sort
