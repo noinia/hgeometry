@@ -211,7 +211,7 @@ ipePolygon (first (const ()) -> pg) = case pg of
 ipeRectangle   :: Num r => IpeOut (Rectangle p r) Path r
 ipeRectangle r = ipePolygon $ fromPoints [tl,tr,br,bl]
   where
-    (tl, tr, br, bl) = corners r
+    Corners tl tr br bl = corners r
 
 --------------------------------------------------------------------------------
 -- * Group Converters
