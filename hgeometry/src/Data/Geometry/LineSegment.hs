@@ -14,6 +14,7 @@ module Data.Geometry.LineSegment( LineSegment
                                 , pattern LineSegment
                                 , pattern LineSegment'
                                 , pattern ClosedLineSegment
+                                , pattern OpenLineSegment
                                 , endPoints
 
                                 , _SubLine
@@ -79,11 +80,15 @@ pattern LineSegment'          :: Point d r :+ p
 pattern LineSegment'      s t <- ((^.start) &&& (^.end) -> (s,t))
 {-# COMPLETE LineSegment' #-}
 
-pattern ClosedLineSegment     :: Point d r :+ p
-                              -> Point d r :+ p
-                              -> LineSegment d p r
+pattern ClosedLineSegment     :: Point d r :+ p -> Point d r :+ p -> LineSegment d p r
 pattern ClosedLineSegment s t = GLineSegment (ClosedInterval s t)
 {-# COMPLETE ClosedLineSegment #-}
+
+pattern OpenLineSegment     :: Point d r :+ p -> Point d r :+ p -> LineSegment d p r
+pattern OpenLineSegment s t = GLineSegment (OpenInterval s t)
+{-# COMPLETE OpenLineSegment #-}
+
+
 
 type instance Dimension (LineSegment d p r) = d
 type instance NumType   (LineSegment d p r) = r

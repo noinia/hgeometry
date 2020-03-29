@@ -1,7 +1,12 @@
 {-# LANGUAGE TemplateHaskell  #-}
-module Data.Geometry.Box.Corners where
+module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
+                                , corners
 
-import Control.Lens (makeLenses,Ixed(..),Index, IxValue,(%~),(&))
+                                , InterCardinalDirection(..)
+                                , _NorthWest, _NorthEast, _SouthEast, _SouthWest
+                                ) where
+
+import Control.Lens (makeLenses,makePrisms,Ixed(..),Index, IxValue,(%~),(&))
 import Data.Ext
 import Data.Functor.Apply
 import Data.Geometry.Box.Internal
@@ -21,9 +26,11 @@ data Corners a = Corners { _northWest  :: !a
 makeLenses ''Corners
 
 -- | Data Type to index Corners
-data Directions = NorthWest | NorthEast | SouthEast | SouthWest deriving (Show,Read,Eq,Ord,Generic)
+data InterCardinalDirection = NorthWest | NorthEast | SouthEast | SouthWest
+  deriving (Show,Read,Eq,Ord,Generic)
+makePrisms ''InterCardinalDirection
 
-type instance Index   (Corners a) = Directions
+type instance Index   (Corners a) = InterCardinalDirection
 type instance IxValue (Corners a) = a
 
 instance Ixed (Corners a) where
@@ -40,6 +47,12 @@ instance Traversable1 Corners where
 instance Applicative Corners where
   pure x = Corners x x x x
   (Corners f g h i) <*> (Corners a b c d) = Corners (f a) (g b) (h c) (i d)
+
+instance Semigroup a => Semigroup (Corners a) where
+  s <> s' = (<>) <$> s <*> s'
+instance Monoid a => Monoid (Corners a) where
+  mempty = pure mempty
+
 
 --------------------------------------------------------------------------------
 

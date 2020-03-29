@@ -1,8 +1,10 @@
 {-# LANGUAGE TemplateHaskell  #-}
-module Data.Geometry.Box.Sides(Sides(..), north, east, south, west
+module Data.Geometry.Box.Sides( Sides(Sides), north, east, south, west
                               , topSide, bottomSide, leftSide, rightSide
                               , sides, sides'
-                              , Side(..)
+
+                              , CardinalDirection(..)
+                              , _North, _East, _South, _West
                               ) where
 
 import Data.Geometry.Box.Internal
@@ -13,7 +15,7 @@ import Data.Functor.Apply
 import Data.Semigroup.Foldable.Class
 import Data.Semigroup.Traversable.Class
 import GHC.Generics (Generic)
-import Control.Lens(makeLenses, makePrisms)
+import Control.Lens(makeLenses, makePrisms,Ixed(..),Index, IxValue)
 
 --------------------------------------------------------------------------------
 
@@ -33,8 +35,26 @@ instance Foldable1 Sides
 instance Traversable1 Sides where
   traverse1 f (Sides a b c d) = Sides <$> f a <.> f b <.> f c <.> f d
 
-data Side = North | East | South | West deriving (Show,Read,Eq,Ord)
-makePrisms ''Side
+instance Semigroup a => Semigroup (Sides a) where
+  s <> s' = (<>) <$> s <*> s'
+instance Monoid a => Monoid (Sides a) where
+  mempty = pure mempty
+
+
+data CardinalDirection = North | East | South | West deriving (Show,Read,Eq,Ord)
+makePrisms ''CardinalDirection
+
+type instance Index   (Sides a) = CardinalDirection
+type instance IxValue (Sides a) = a
+
+instance Ixed (Sides a) where
+  ix = \case
+    North -> north
+    East  -> east
+    South -> south
+    West  -> west
+
+--------------------------------------------------------------------------------
 
 topSide :: Num r => Rectangle p r -> LineSegment 2 p r
 topSide = (\(Corners l r _ _) -> ClosedLineSegment l r) . corners
