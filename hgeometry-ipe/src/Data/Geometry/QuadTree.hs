@@ -2,7 +2,7 @@
 module Data.Geometry.QuadTree where
 
 import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&))
-import           Control.Zipper
+-- import           Control.Zipper
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.BinaryTree (RoseElem(..))
