@@ -1,7 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 module Data.Geometry.QuadTree where
 
-import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&))
+import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&),(^?!),(^@.),ix,iix)
 -- import           Control.Zipper
 import           Data.Bifoldable
 import           Data.Bifunctor
@@ -71,6 +72,13 @@ instance Bitraversable1 Tree where
     Leaf p    -> Leaf <$> g p
     Node v qs -> Node <$> f v <.> traverse1 (bitraverse1 f g) qs
 
+-- | Fold on the Tree type.
+foldTree     :: (p -> b) -> (v -> Quadrants b -> b) -> Tree v p -> b
+foldTree f g = go
+  where
+    go = \case
+      Leaf p    -> f p
+      Node v qs -> g v (go <$> qs)
 
 -- | Produce a list of all leaves of a quad tree
 leaves :: Tree v p -> NonEmpty p
@@ -78,11 +86,12 @@ leaves = NonEmpty.fromList . bifoldMap (const []) (:[])
 
 -- | Converts into a RoseTree
 toRoseTree :: Tree v p -> RoseTree.Tree (RoseElem v p)
-toRoseTree = go
-  where
-    go = \case
-      Leaf p    -> RoseTree.Node (LeafNode p) []
-      Node v qs -> RoseTree.Node (InternalNode v) (go <$> F.toList qs)
+toRoseTree = foldTree (\p    -> RoseTree.Node (LeafNode p)     [])
+                      (\v qs -> RoseTree.Node (InternalNode v) (F.toList qs))
+
+-- | Computes the height of the quadtree
+height :: Tree v p -> Integer
+height = foldTree (const 1) (\_ -> (1 +) . maximum)
 
 --------------------------------------------------------------------------------
 
@@ -113,8 +122,7 @@ instance (Ord r, Num r) => (Point 2 r) `IsIntersectableWith` Cell where
   nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` c = p `intersect` (second toR $ toBox c)
     where
-      toR :: Int -> r
-      toR = fromInteger . toInteger
+      toR = fromInteger @r . toInteger
 
 
 cellWidth            :: Cell -> Int
@@ -175,26 +183,92 @@ withCells' c0 = \case
   Node v qs -> Node (v :+ c0) (withCells' <$> splitCell c0 <*> qs)
 
 --------------------------------------------------------------------------------
--- * Functions operating on the QuadTree (in temrs of the 'Tree' type)
+-- * Functions operating on the QuadTree (in terms of the 'Tree' type)
 
-withCells                :: QuadTree v p -> QuadTree (v :+ Cell) (p :+ Cell)
-withCells (QuadTree w t) = QuadTree w $ withCells' (Cell w origin) t
+withCells    :: QuadTree v p -> QuadTree (v :+ Cell) (p :+ Cell)
+withCells qt = qt&tree .~ withCellsTree qt
 
-
+withCellsTree                :: QuadTree v p -> Tree (v :+ Cell) (p :+ Cell)
+withCellsTree (QuadTree w t) = withCells' (Cell w origin) t
 
 --------------------------------------------------------------------------------
 
 
 -- | Build a QuadtTree from a set of points.
-fromPoints :: Cell
-           -> [Point 2 R :+ p]
-           -> Tree () (Maybe (Point 2 R :+ p))
+--
+-- pre: the points lie inside the initial given cell.
+--
+-- running time: \(O(nh)\), where \(n\) is the number of points and
+-- \(h\) is the height of the resulting quadTree.
+fromPoints :: (Num r, Ord r)
+           => Cell -> [Point 2 r :+ p]
+           -> Tree () (Maybe (Point 2 r :+ p))
 fromPoints = build f
   where
     f c = \case
       []   -> No Nothing
       [p]  -> No (Just p)
-      pts  -> Yes () $ (\cell -> filter (`inCell` cell) pts) <$> splitCell c
+      pts  -> Yes () $ partitionPoints c pts
+        -- (\cell -> filter (`inCell` cell) pts) <$> splitCell c
+
+-- | Partitions the points into quadrants. See 'quadrantOf' for the
+-- precise rules.
+partitionPoints   :: (Num r, Ord r) => Cell -> [Point 2 r :+ p] -> Quadrants [Point 2 r :+ p]
+partitionPoints c = foldMap (\p -> let q = quadrantOf (p^.core) c in mempty&ix q %~ (p:))
+
+
+-- | Locates the cell containing the given point, if it exists.
+--
+-- running time: \(O(h)\), where \(h\) is the height of the quadTree
+findLeaf                                       :: (Num r, Ord r)
+                                               => Point 2 r -> QuadTree v p -> Maybe (p :+ Cell)
+findLeaf q (QuadTree w t) | q `intersects` c0  = Just $ findLeaf' c0 t
+                          | otherwise          = Nothing
+  where
+    c0 = Cell w origin
+    -- |
+    -- pre: p intersects c
+    findLeaf' c = \case
+      Leaf p    -> p :+ c
+      Node _ qs -> let quad = quadrantOf q c
+                   in findLeaf' ((splitCell c)^?!ix quad) (qs^?!ix quad)
+
+
+-- | Computes the quadrant of the cell corresponding to the current
+-- point. Note that we decide the quadrant solely based on the
+-- midpoint. If the query point lies outside the cell, it is still
+-- assigned a quadrant.
+--
+-- - The northEast quadrants includes its bottom and left side
+-- - The southEast quadrant  includes its            left side
+-- - The northWest quadrant  includes its bottom          side
+-- - The southWest quadrants does not include any of its sides.
+--
+--
+-- >>> quadrantOf (Point2 9 9) (Cell 4 origin)
+-- NorthEast
+-- >>> quadrantOf (Point2 8 9) (Cell 4 origin)
+-- NorthEast
+-- >>> quadrantOf (Point2 8 8) (Cell 4 origin)
+-- NorthEast
+-- >>> quadrantOf (Point2 8 7) (Cell 4 origin)
+-- SouthEast
+-- >>> quadrantOf (Point2 4 7) (Cell 4 origin)
+-- SouthWest
+-- >>> quadrantOf (Point2 4 10) (Cell 4 origin)
+-- NorthWest
+-- >>> quadrantOf (Point2 4 40) (Cell 4 origin)
+-- NorthEast
+-- >>> quadrantOf (Point2 4 40) (Cell 4 origin)
+-- NorthWest
+quadrantOf     :: forall r. (Num r, Ord r)
+               => Point 2 r -> Cell -> InterCardinalDirection
+quadrantOf q c = let m = fromInteger @r . toInteger <$> midPoint c
+                 in case (q^.xCoord < m^.xCoord, q^.yCoord < m^.yCoord) of
+                      (False,False) -> NorthEast
+                      (False,True)  -> SouthEast
+                      (True,False)  -> NorthWest
+                      (True,True)   -> SouthWest
 
 
 --------------------------------------------------------------------------------
@@ -294,6 +368,13 @@ withNeighbours cs = map (\c@(_ :+ me) -> c :+ neighboursOf me) cs
     neighboursOf me = foldMap (`relationTo` me) cs
 
 
+
+leafNeighboursOf   :: Cell -> QuadTree v p -> Sides [p :+ Cell]
+leafNeighboursOf c = neighboursOf c . leaves . withCellsTree
+  where
+    neighboursOf me = foldMap (`relationTo` me)
+
+
 exploreWith               :: forall p. Eq p
                           => (p :+ Cell -> Bool) -- ^ continue exploring?
                           -> p :+ Cell -- ^ start
@@ -326,6 +407,8 @@ explorePathWith p start' = toPath . exploreWith p start'
     toPath (RoseTree.Node x chs) = ($ x ) $ case chs of
                                               []    -> (:| [])
                                               (c:_) -> (NonEmpty.<| toPath c)
+
+
 
 
 
