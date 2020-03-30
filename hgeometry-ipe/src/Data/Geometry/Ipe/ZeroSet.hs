@@ -14,6 +14,11 @@ import           Data.Geometry.Vector
 import           Data.Intersection
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Geometry.QuadTree.Cell
+import           Data.Geometry.QuadTree.Quadrants
+import           Data.Geometry.QuadTree.Tree (Tree(..))
+import qualified Data.Geometry.QuadTree.Tree as Tree
+import           Data.Geometry.QuadTree.Split
 
 
 import           Data.Geometry.Ipe.Writer
@@ -30,7 +35,7 @@ drawQuadTree :: IpeOut (QuadTree v p) Group R
 drawQuadTree = drawQuadTreeWith (\(_ :+ c) -> drawCell c)
 
 drawQuadTreeWith           :: ToObject i => IpeOut (p :+ Cell) i r -> IpeOut (QuadTree v p) Group r
-drawQuadTreeWith drawCell' = ipeGroup . fmap (iO . drawCell') . (^.tree.to leaves) . withCells
+drawQuadTreeWith drawCell' = ipeGroup . fmap (iO . drawCell') . leaves . withCells
 
 drawZeroCell :: IpeOut (Either v Sign :+ Cell) Path R
 drawZeroCell = \(p :+ c) -> case p of
@@ -50,27 +55,32 @@ testT = fromZeros (Cell 8 origin) (\q -> (r^2) - squaredEuclideanDist origin (re
 
 
 -- trace           :: Cell
-trace startP qt = explorePathWith (const True) start zCells
-  where
-    zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
-           . (^.tree.to leaves) . withCells $ qt
+-- trace startP qt = explorePathWith (const True) start zCells
+--   where
+--     zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
+--            . leaves $ qt'
 
-    [start] = filter (\(_ :+ c) -> startP `intersects` c) zCells
+--     qt' = withCells qt
+    -- start =
+
+    -- [start] = filter (\(_ :+ c) -> startP `intersects` c) zCells
 
 
 
-testTrace = trace myStartP testT
+-- testTrace = trace myStartP testT
 
 myStartP = (Point2 0 (90.5 :: Rational))
 
-[startX] = filter (\(_ :+ c) -> myStartP `intersects` c) zCells
+-- [startX] = filter (\(_ :+ c) -> myStartP `intersects` c) zCells
 
-findS :: [(p :+ Cell) :+ e] -> [(p :+ Cell) :+ e]
-findS = filter (\((_ :+ c) :+ _) -> myStartP `intersects` c)
+-- findS :: [(p :+ Cell) :+ e] -> [(p :+ Cell) :+ e]
+-- findS = filter (\((_ :+ c) :+ _) -> myStartP `intersects` c)
 
 
 zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
-           . (^.tree.to leaves) . withCells $ testT
+       . leaves . withCells $ testT
+
+
 
 
 -- testTrace =

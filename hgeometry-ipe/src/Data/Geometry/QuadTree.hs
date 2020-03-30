@@ -1,6 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
-module Data.Geometry.QuadTree where
+module Data.Geometry.QuadTree-- ( module Data.Geometry.QuadTree.Cell
+                             -- , module Data.Geometry.QuadTree.Quadrants
+                             -- , module Data.Geometry.QuadTree.Split
+                             -- , QuadTree(..)
+                             -- , leaves
+                             -- , withCells
+                             -- )
+                             where
+
 
 import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&),(^?!),(^@.),ix,iix,view)
 -- import           Control.Zipper
@@ -73,10 +81,14 @@ leaves = Tree.leaves . view tree
 
 --------------------------------------------------------------------------------
 
--- | Builds a QuadTree
-build     :: (Cell -> i -> Split i v p) -> Cell -> i -> QuadTree v p
-build f c = QuadTree (c^.cellWidthIndex) . Tree.build f c
+-- | Given a starting cell, a Tree builder, and some input required by
+-- the builder, constructs a quadTree.
+buildOn           :: Cell -> (Cell -> i -> Tree v p) -> i -> QuadTree v p
+buildOn c builder = QuadTree (c^.cellWidthIndex) . builder c
 
+-- | The Equivalent of Tree.build for constructing a QuadTree
+build     :: (Cell -> i -> Split i v p) -> Cell -> i -> QuadTree v p
+build f c = buildOn c (Tree.build f)
 
 -- | Build a QuadtTree from a set of points.
 --
@@ -85,8 +97,7 @@ build f c = QuadTree (c^.cellWidthIndex) . Tree.build f c
 -- running time: \(O(nh)\), where \(n\) is the number of points and
 -- \(h\) is the height of the resulting quadTree.
 fromPoints   :: (Num r, Ord r) => Cell -> [Point 2 r :+ p] -> QuadTree () (Maybe (Point 2 r :+ p))
-fromPoints c = QuadTree (c^.cellWidthIndex) . Tree.fromPoints c
-
+fromPoints c = buildOn c Tree.fromPoints
 
 -- | Locates the cell containing the given point, if it exists.
 --
@@ -117,8 +128,7 @@ fromZerosWith           :: (Num a, Eq a, v ~ Quadrants Sign, p ~ Sign, i ~ v)
                            -> (Cell -> i -> Split i v (Either i p))
                            )
                         -> Cell -> (Point 2 R -> a) -> QuadTree (Quadrants Sign) (Either i p)
-fromZerosWith limit c0 f = QuadTree (c0^.cellWidthIndex)
-                        $ Tree.build (limit $ shouldSplitZeros f') c0 (f' <$> cellCorners c0)
+fromZerosWith limit c0 f = build (limit $ shouldSplitZeros f') c0 (f' <$> cellCorners c0)
   where
     f' = fromSignum f
 
@@ -175,7 +185,7 @@ isZeroCell = \case
     Right s -> s == Zero
 
 
-
+--------------------------------------------------------------------------------
 
 
 withNeighbours    :: [p :+ Cell] -> [(p :+ Cell) :+ Sides [p :+ Cell]]
