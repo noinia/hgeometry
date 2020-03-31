@@ -409,7 +409,6 @@ incomingEdges v = PG.incomingEdges v . _graph
 -- running time: \(O(k)\), where \(k) is the total number of incident edges of v
 --
 -- >>> outgoingEdges (VertexId 1) smallG
---
 -- [Dart (Arc 1) -1,Dart (Arc 4) +1,Dart (Arc 3) +1]
 outgoingEdges   :: VertexId' s -> PlaneGraph s v e f r  -> V.Vector (Dart s)
 outgoingEdges v = PG.outgoingEdges v . _graph

@@ -73,12 +73,15 @@ import qualified Data.Sequence as Seq
 import           Data.Util
 import           Data.Vinyl.CoRec (asA)
 
+-- import Data.RealNumber.Rational
+
 --------------------------------------------------------------------------------
 
 {- $setup
+>>> import Data.RealNumber.Rational
 >>> :{
 -- import qualified Data.CircularSeq as C
-let simplePoly :: SimplePolygon () Rational
+let simplePoly :: SimplePolygon () (RealNumber 10)
     simplePoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
                                                         , Point2 10 0
                                                         , Point2 10 10
@@ -268,11 +271,11 @@ listEdges pg = let f = F.toList . outerBoundaryEdges
 --
 --
 -- >>> mapM_ print . polygonVertices $ withIncidentEdges simplePoly
--- Point2 [0 % 1,0 % 1] :+ SP LineSegment (Closed (Point2 [1 % 1,11 % 1] :+ ())) (Closed (Point2 [0 % 1,0 % 1] :+ ())) LineSegment (Closed (Point2 [0 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,0 % 1] :+ ()))
--- Point2 [10 % 1,0 % 1] :+ SP LineSegment (Closed (Point2 [0 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,0 % 1] :+ ())) LineSegment (Closed (Point2 [10 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,10 % 1] :+ ()))
--- Point2 [10 % 1,10 % 1] :+ SP LineSegment (Closed (Point2 [10 % 1,0 % 1] :+ ())) (Closed (Point2 [10 % 1,10 % 1] :+ ())) LineSegment (Closed (Point2 [10 % 1,10 % 1] :+ ())) (Closed (Point2 [5 % 1,15 % 1] :+ ()))
--- Point2 [5 % 1,15 % 1] :+ SP LineSegment (Closed (Point2 [10 % 1,10 % 1] :+ ())) (Closed (Point2 [5 % 1,15 % 1] :+ ())) LineSegment (Closed (Point2 [5 % 1,15 % 1] :+ ())) (Closed (Point2 [1 % 1,11 % 1] :+ ()))
--- Point2 [1 % 1,11 % 1] :+ SP LineSegment (Closed (Point2 [5 % 1,15 % 1] :+ ())) (Closed (Point2 [1 % 1,11 % 1] :+ ())) LineSegment (Closed (Point2 [1 % 1,11 % 1] :+ ())) (Closed (Point2 [0 % 1,0 % 1] :+ ()))
+-- Point2 [0,0] :+ V2 LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ())) LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ()))
+-- Point2 [10,0] :+ V2 LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ())) LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ()))
+-- Point2 [10,10] :+ V2 LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ())) LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ()))
+-- Point2 [5,15] :+ V2 LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ())) LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ()))
+-- Point2 [1,11] :+ V2 LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ())) LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ()))
 withIncidentEdges                    :: Polygon t p r
                                      -> Polygon t (Two (LineSegment 2 p r)) r
 withIncidentEdges (SimplePolygon vs) =
@@ -565,7 +568,7 @@ asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
 -- will be numbered last, in the same order.
 --
 -- >>> numberVertices simplePoly
--- SimplePolygon (CSeq [Point2 [0 % 1,0 % 1] :+ SP 0 (),Point2 [10 % 1,0 % 1] :+ SP 1 (),Point2 [10 % 1,10 % 1] :+ SP 2 (),Point2 [5 % 1,15 % 1] :+ SP 3 (),Point2 [1 % 1,11 % 1] :+ SP 4 ()])
+-- SimplePolygon (CSeq [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()])
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (\a r -> (a,r)) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
