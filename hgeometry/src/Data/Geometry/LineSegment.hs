@@ -194,7 +194,6 @@ instance (Ord r, Fractional r) =>
       :& (H $ coRec . subLineToSegment)
       :& RNil
 
-
 instance (Ord r, Fractional r) =>
          (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
   nonEmptyIntersection = defaultNonEmptyIntersection

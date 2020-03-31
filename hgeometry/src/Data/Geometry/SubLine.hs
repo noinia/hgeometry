@@ -136,7 +136,7 @@ instance (Ord r, Fractional r) =>
       :& RNil
     where
       s'  = (fixEndPoints sm)^.subRange
-      s'' = bimap (^.extra) id
+      s'' = asProperInterval . first (^.extra)
           $ s'&start.core .~ toOffset' (s'^.start.extra.core) l
               &end.core   .~ toOffset' (s'^.end.extra.core)   l
 

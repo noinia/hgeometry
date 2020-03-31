@@ -28,16 +28,21 @@ spec = do
        (seg^._SubLine))
     `shouldBe` False
 
-  it "Intersection test" $
+  it "Intersection test" $ do
     let mySeg :: LineSegment 2 () Rational
         mySeg    = ClosedLineSegment (ext origin) (ext $ Point2 14 0)
         myLine :: SubLine 2 () (UnBounded Rational) Rational
         myLine   = fromLine $ lineThrough (Point2 0 0) (Point2 10 0)
         myAnswer :: Interval () (UnBounded Rational)
         myAnswer = ClosedInterval (ext $ Val 0) (ext . Val $ 7 % 5)
-    in (myLine `intersect` (mkSL mySeg))
-       `shouldBe`
-       coRec (myLine&subRange .~ myAnswer)
+    (myLine `intersect` (mkSL mySeg)) `shouldBe` coRec (myLine&subRange .~ myAnswer)
+
+    let sc, sm :: LineSegment 2 () Rational
+        sc = ClosedLineSegment (ext $ Point2 1 1) (ext $ Point2 1 2)
+        sm = ClosedLineSegment (ext $ Point2 1 2) (ext $ Point2 1 1)
+    (sc `intersects` sm) `shouldBe` True
+
+
 
 
 mkSL  :: (Num r, Arity d) => LineSegment d () r -> SubLine d () (UnBounded r) r

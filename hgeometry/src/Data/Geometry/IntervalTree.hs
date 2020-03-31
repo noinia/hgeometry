@@ -55,7 +55,7 @@ fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
                  => [i] -> IntervalTree i r
 fromIntervals is = foldr insert (createTree pts) is
   where
-    endPoints (toRange -> Range' a b) = [a,b]
+    endPoints (asRange -> Range' a b) = [a,b]
     pts = List.sort . concatMap endPoints $ is
 
 -- | Lists the intervals. We don't guarantee anything about the order
@@ -100,7 +100,7 @@ insert                    :: (Ord r, IntervalLike i, NumType i ~ r)
                           => i -> IntervalTree i r -> IntervalTree i r
 insert i (IntervalTree t) = IntervalTree $ insert' t
   where
-    ri@(Range a b) = toRange i
+    ri@(Range a b) = asRange i
 
     insert' Nil = Nil
     insert' (Internal l nd@(_splitPoint -> m) r)
@@ -119,7 +119,7 @@ delete :: (Ord r, IntervalLike i, NumType i ~ r, Eq i)
           => i -> IntervalTree i r -> IntervalTree i r
 delete i (IntervalTree t) = IntervalTree $ delete' t
   where
-    ri@(Range a b) = toRange i
+    ri@(Range a b) = asRange i
 
     delete' Nil = Nil
     delete' (Internal l nd@(_splitPoint -> m) r)
@@ -137,15 +137,13 @@ delete i (IntervalTree t) = IntervalTree $ delete' t
 
 -- | Anything that looks like an interval
 class IntervalLike i where
-  toRange :: i -> Range (NumType i)
+  asRange :: i -> Range (NumType i)
 
 instance IntervalLike (Range r) where
-  toRange = id
+  asRange = id
 
 instance IntervalLike (Interval p r) where
-  toRange = fmap (^.core) . _unInterval
-
-
+  asRange = fmap (^.core) . toRange
 
 --------------------------------------------------------------------------------
 

@@ -118,7 +118,7 @@ fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType
                    -> NonEmpty (Interval p r) -> SegmentTree v r
 fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
   where
-    endPoints (toRange -> Range' a b) = [a,b]
+    endPoints (asRange -> Range' a b) = [a,b]
     pts = nub' . NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
     nub' = fmap NonEmpty.head . NonEmpty.group1
 
@@ -186,7 +186,7 @@ insert                   :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
                          => i -> SegmentTree v r -> SegmentTree v r
 insert i (SegmentTree t) = SegmentTree $ insertRoot t
   where
-    ri@(Range a b) = toRange i
+    ri@(Range a b) = asRange i
     insertRoot t' = maybe t' (flip insert' t') $ getRange t'
 
     insert' inR         lf@(Leaf nd@(LeafData rr _))
@@ -209,7 +209,7 @@ delete :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
           => i -> SegmentTree v r -> SegmentTree v r
 delete i (SegmentTree t) = SegmentTree $ delete' t
   where
-    (Range _ b) = toRange i
+    (Range _ b) = asRange i
 
     delete' (Leaf ld) = Leaf $ ld&leafAssoc %~ deleteAssoc i
     delete' (Node l nd@(_splitPoint -> m) r)
@@ -254,7 +254,7 @@ instance Eq a => Assoc [I a] (I a) where
 
 
 instance IntervalLike a => IntervalLike (I a) where
-  toRange = toRange . _unI
+  asRange = asRange . _unI
 
 
 fromIntervals' :: (Eq p, Ord r)

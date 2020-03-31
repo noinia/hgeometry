@@ -1,7 +1,10 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Interval(
                              -- * 1 dimensional Intervals
-                               Interval(..)
+                               Interval
+                             , fromRange, toRange
+                             , _Range
+
                              , pattern OpenInterval
                              , pattern ClosedInterval
                              , pattern Interval
@@ -12,12 +15,13 @@ module Data.Geometry.Interval(
                              , inInterval
                              , shiftLeft'
 
+                             , asProperInterval, flipInterval
+
                              , module Data.Range
-                             )
-       where
+                             ) where
 
 import           Control.DeepSeq
-import           Control.Lens (makeLenses, (^.),(%~),(&), Lens')
+import           Control.Lens (lens, (^.),(%~),(&), Lens')
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
@@ -34,9 +38,19 @@ import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
 -- | An Interval is essentially a 'Data.Range' but with possible payload
-newtype Interval a r = GInterval { _unInterval :: Range (r :+ a) }
+--
+-- We can think of an interval being defined as:
+--
+-- >>> data Interval a r = Interval (EndPoint (r :+ a)) (EndPoint (r :+ a))
+newtype Interval a r = GInterval { toRange :: Range (r :+ a) }
                      deriving (Eq,Generic,Arbitrary)
-makeLenses ''Interval
+
+_Range :: Lens' (Interval a r) (Range (r :+ a))
+_Range = lens toRange (const GInterval)
+
+-- | Constrct an interval from a Range
+fromRange :: Range (r :+ a) -> Interval a r
+fromRange = GInterval
 
 deriving instance (NFData a, NFData r) => NFData (Interval a r)
 
@@ -63,7 +77,7 @@ instance Bifunctor Interval where
 --  inInterval and inRange is that the extra value is *not* used in the
 --  comparison with inInterval, whereas it is in inRange.
 inInterval       :: Ord r => r -> Interval a r -> Bool
-x `inInterval` r = x `inRange` (fmap (^.core) $ r^.unInterval )
+x `inInterval` r = x `inRange` (fmap (^.core) $ r^._Range )
 
 
 pattern OpenInterval       :: (r :+ a) -> (r :+ a) -> Interval a r
@@ -87,7 +101,7 @@ class HasStart t where
 instance HasStart (Interval a r) where
   type StartCore (Interval a r) = r
   type StartExtra (Interval a r) = a
-  start = unInterval.lower.unEndPoint
+  start = _Range.lower.unEndPoint
 
 class HasEnd t where
   type EndCore t
@@ -97,7 +111,7 @@ class HasEnd t where
 instance HasEnd (Interval a r) where
   type EndCore (Interval a r) = r
   type EndExtra (Interval a r) = a
-  end = unInterval.upper.unEndPoint
+  end = _Range.upper.unEndPoint
 
 type instance Dimension (Interval a r) = 1
 type instance NumType   (Interval a r) = r
@@ -121,6 +135,17 @@ instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
 
       g (Arg _ x) = x
 
+-- | Shifts the interval to the left by delta
+shiftLeft'       :: Num r => r -> Interval a r -> Interval a r
+shiftLeft' delta = fmap (subtract delta)
 
-shiftLeft'   :: Num r => r -> Interval a r -> Interval a r
-shiftLeft' x = fmap (subtract x)
+
+-- | Makes sure the start and endpoint are oriented such that the
+-- starting value is smaller than the ending value.
+asProperInterval                                     :: Ord r => Interval p r -> Interval p r
+asProperInterval i | (i^.start.core) > (i^.end.core) = flipInterval i
+                   | otherwise                       = i
+
+-- | Flips the start and endpoint of the interval.
+flipInterval :: Interval a r -> Interval a r
+flipInterval = _Range %~ \(Range s t) -> Range t s
