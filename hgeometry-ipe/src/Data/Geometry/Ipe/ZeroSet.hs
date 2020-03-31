@@ -9,6 +9,8 @@ import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.IpeOut
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Point
+import           Data.Geometry.PolyLine(PolyLine)
+import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.QuadTree
 import           Data.Geometry.Vector
 import           Data.Intersection
@@ -22,6 +24,8 @@ import           Data.Geometry.QuadTree.Split
 
 
 import           Data.Geometry.Ipe.Writer
+
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -44,8 +48,12 @@ drawZeroCell = \(p :+ c) -> case p of
                               Right _    -> drawCell c
 
 
-test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . (:[]) . iO
-      $ drawQuadTreeWith drawZeroCell testT
+test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent $
+        [ iO $ drawQuadTreeWith drawZeroCell testT
+        , iO $ defIO pl
+        ]
+  where
+    Just pl = traceZeroFrom Zero myStartP testT
 
 
 testT :: QuadTree (Quadrants Sign) (Either (Quadrants Sign) Sign)
@@ -54,13 +62,35 @@ testT = fromZeros (Cell 8 origin) (\q -> (r^2) - squaredEuclideanDist origin (re
     r = 90.5 :: Rational -- draw circle of radius r
 
 
--- trace           :: Cell
--- trace startP qt = explorePathWith (const True) start zCells
---   where
---     zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
---            . leaves $ qt'
 
---     qt' = withCells qt
+centerPoints = fmap (\(p :+ c) -> midPoint c :+ p)
+
+--
+traceZeroFrom           :: forall zero r b v. (Eq zero, Num r, Ord r)
+                        => zero -- ^ the zero value
+                        -> Point 2 r -> QuadTree v (Either b zero)
+                        -> Maybe (PolyLine 2 (Either b zero) Int)
+traceZeroFrom zero p qt = do startCell <- findLeaf p qt
+                             let zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell zero p)
+                                        . leaves . withCells $ qt
+                                 path   = explorePathWith (const True) startCell zCells
+                             PolyLine.fromPoints . NonEmpty.toList . centerPoints $ path
+
+
+
+
+
+
+-- startCell :: Maybe (Either (Quadrants Sign) Sign :+ Cell)
+-- startCell = findLeaf myStartP testT
+
+trace startP qt = case findLeaf startP qt of
+                    Nothing        -> []
+                    Just startCell -> NonEmpty.toList $ explorePathWith (const True) startCell zCells
+  where
+    zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell Zero p)
+           . leaves $ qt'
+    qt' = withCells qt
     -- start =
 
     -- [start] = filter (\(_ :+ c) -> startP `intersects` c) zCells
@@ -77,8 +107,8 @@ myStartP = (Point2 0 (90.5 :: Rational))
 -- findS = filter (\((_ :+ c) :+ _) -> myStartP `intersects` c)
 
 
-zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
-       . leaves . withCells $ testT
+-- zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
+--        . leaves . withCells $ testT
 
 
 

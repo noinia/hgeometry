@@ -17,16 +17,10 @@ module Data.Geometry.Box( module Data.Geometry.Box.Internal
                         ) where
 
 import Control.DeepSeq
-import Control.Lens (makeLenses)
-import Data.Functor.Apply
 import Data.Geometry.Box.Corners
 import Data.Geometry.Box.Internal
 import Data.Geometry.Box.Sides
-import Data.Geometry.LineSegment
 import Data.Geometry.Vector
-import Data.Semigroup.Foldable.Class
-import Data.Semigroup.Traversable.Class
-import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 

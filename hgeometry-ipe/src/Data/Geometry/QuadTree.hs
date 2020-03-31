@@ -21,6 +21,7 @@ import qualified Data.Foldable as F
 import           Data.Functor.Apply
 import           Data.Geometry.Box
 import           Data.Geometry.LineSegment
+import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import           Data.Intersection
@@ -120,8 +121,9 @@ findLeaf q (QuadTree w t) | q `intersects` c0  = Just $ findLeaf' c0 t
 
 fromZeros :: (Num a, Eq a, v ~ Quadrants Sign)
           => Cell -> (Point 2 R -> a) -> QuadTree v (Either v Sign)
-fromZeros = fromZerosWith (limitWidthTo 0)
-
+fromZeros = fromZerosWith (limitWidthTo 1)
+            -- we will need to connect to a center point later, so we
+            -- will want to be able to subdivide one more step at the very end.
 
 fromZerosWith           :: (Num a, Eq a, v ~ Quadrants Sign, p ~ Sign, i ~ v)
                         => (  (Cell -> i -> Split i v p)
@@ -134,8 +136,30 @@ fromZerosWith limit c0 f = build (limit $ shouldSplitZeros f') c0 (f' <$> cellCo
 
 
 
+-- type Sign = Ordering
+
+-- pattern Negative :: Sign
+-- pattern Negative = LT
+-- pattern Zero :: Sign
+-- pattern Zero     = EQ
+-- pattern Positive :: Sign
+-- pattern Positive = GT
+-- {-# COMPLETE Negative, Zero, Positive #-}
+
+-- fromOrdering :: Ordering -> Sign
+-- fromOrdering = id
+
 
 data Sign = Negative | Zero | Positive deriving (Show,Eq,Ord)
+
+
+
+-- | Interpret an ordering result as a Sign
+fromOrdering :: Ordering -> Sign
+fromOrdering = \case
+    LT -> Negative
+    EQ -> Zero
+    GT -> Positive
 
 fromSignum   :: (Num a, Eq a) => (b -> a) -> b -> Sign
 fromSignum f = \x -> case signum (f x) of
@@ -144,14 +168,13 @@ fromSignum f = \x -> case signum (f x) of
                        1  -> Positive
                        _  -> error "absurd: fromSignum"
 
-
-
-shouldSplitZeros :: (Point 2 R -> Sign) -- ^ The function we are evaluating
+shouldSplitZeros :: forall r sign. (Num r, Eq sign)
+                 => (Point 2 r -> sign) -- ^ The function we are evaluating
                  -> Cell
-                 -> Quadrants Sign -- ^ signs of the corners
-                 -> Split (Quadrants Sign) -- ^ to compute further signs we use signs
-                          (Quadrants Sign) -- ^ we store the signs of the corners
-                          Sign             -- ^ Leaves store the sign corresponding to the leaf
+                 -> Quadrants sign -- ^ signs of the corners
+                 -> Split (Quadrants sign) -- ^ to compute further signs we use signs
+                          (Quadrants sign) -- ^ we store the signs of the corners
+                          sign             -- ^ Leaves store the sign corresponding to the leaf
 shouldSplitZeros f (Cell w' p) qs@(Quadrants nw ne se sw) | all sameSign qs = No ne
                                                           | otherwise       = Yes qs qs'
   where
@@ -173,17 +196,14 @@ shouldSplitZeros f (Cell w' p) qs@(Quadrants nw ne se sw) | all sameSign qs = No
     rr    = 2 ^ r
     ww    = 2 ^ w'
 
-    fAt x y = f $ p .+^ Vector2 x y
+    fAt x y = f . fmap toR $ p .+^ Vector2 x y
 
 
-
-
-
-isZeroCell :: Either v Sign -> Bool
-isZeroCell = \case
+isZeroCell   :: (Eq sign) => sign -- ^ the zero value
+             -> Either v sign -> Bool
+isZeroCell z = \case
     Left _  -> True -- if we kept splitting then we must have a sign transition
-    Right s -> s == Zero
-
+    Right s -> s == z
 
 --------------------------------------------------------------------------------
 
@@ -202,8 +222,8 @@ leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
     neighboursOf me = foldMap (`relationTo` me)
 
 
-exploreWith               :: forall p. Eq p
-                          => (p :+ Cell -> Bool) -- ^ continue exploring?
+exploreWith               :: forall p.
+                             (p :+ Cell -> Bool) -- ^ continue exploring?
                           -> p :+ Cell -- ^ start
                           -> [p :+ Cell] -- ^ all cells
                           -> RoseTree.Tree (p :+ Cell)
@@ -213,21 +233,20 @@ exploreWith p start' cells = go0 start'
     cs   = withNeighbours cells
 
     -- initially, just explore everyone
-    go0      c = RoseTree.Node c [ go c n | n <- neighboursOf c, p n ]
+    go0      c = RoseTree.Node c [ go c n | n <- neighboursOf (c^.extra), p n ]
 
     -- explore only the nodes other than the one we just came from
-    go pred' c = RoseTree.Node c [ go c n | n <- neighboursOf c, continue pred' n ]
+    go pred' c = RoseTree.Node c [ go c n | n <- neighboursOf (c^.extra), continue pred' n ]
 
-    continue pred' n = n /= pred' && p n
+    continue pred' n = (n^.extra) /= (pred'^.extra) && p n
 
-    neighboursOf   :: p :+ Cell -> [p :+ Cell]
-    neighboursOf c = case List.find (\n -> n^.core == c) cs of
+    neighboursOf   :: Cell -> [p :+ Cell]
+    neighboursOf c = case List.find (\n -> n^.core.extra == c) cs of
                        Nothing       -> []
                        Just (_ :+ s) -> concat s
 
 
-explorePathWith          :: Eq p
-                         => ((p :+ Cell) -> Bool)
+explorePathWith          :: ((p :+ Cell) -> Bool)
                          -> (p :+ Cell) -> [p :+ Cell] -> NonEmpty (p :+ Cell)
 explorePathWith p start' = toPath . exploreWith p start'
   where
@@ -264,6 +283,7 @@ relationTo        :: (p :+ Cell) -> Cell -> Sides [p :+ Cell]
 c `relationTo` me = f <$> Sides b l t r <*> cellSides me
   where
     Sides t r b l = cellSides (c^.extra)
+    -- f e e' | traceShow ("f ",e,e',e `sideIntersects` e') False = undefined
     f e e' | e `sideIntersects` e' = [c]
            | otherwise             = []
 
@@ -271,11 +291,24 @@ c `relationTo` me = f <$> Sides b l t r <*> cellSides me
     toRat :: Int -> Rational
     toRat = realToFrac
 
+
+
+-- relTest = let qt@(QuadTree _ t) = withCells $ completeTree 1
+--               (Node (_ :+ c) _) = t
+--               (Quadrants nw ne se sw) = splitCell c
+--           in (not . null) <$> (() :+ ne) `relationTo` nw
+--              -- should be west
+
+
 -- eastNeighbours    :: [p :+ Cell] -> [(p :+ Cell) :+ [p :+ Cell]]
 -- eastNeighbours cs = map (\(_ :+ c) -> Map.lookup c ns) cs
 --   where
 
 
+-- | Constructs an empty/complete tree from the starting width
+completeTree    :: WidthIndex -> QuadTree () ()
+completeTree w0 =
+    build (\_ w -> if w == 0 then No () else Yes () (pure $ w - 1)) (Cell w0 origin) w0
 
 
 

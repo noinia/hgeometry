@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 module Data.Geometry.QuadTree.Cell where
 
 import           Control.Lens (makeLenses, (^.),(&),(%~),ix)
@@ -19,6 +18,10 @@ type WidthIndex = Int
 
 type R = Int
 
+toR :: Num r => Int -> r
+toR = fromInteger . toInteger
+
+
 -- | A Cell corresponding to a node in the QuadTree
 data Cell = Cell { _cellWidthIndex :: WidthIndex
                  , _lowerLeft      :: Point 2 Int
@@ -30,10 +33,7 @@ type instance IntersectionOf (Point 2 r) Cell = '[ NoIntersection, Point 2 r]
 
 instance (Ord r, Num r) => (Point 2 r) `IsIntersectableWith` Cell where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  p `intersect` c = p `intersect` (second toR $ toBox c)
-    where
-      toR = fromInteger @r . toInteger
-
+  p `intersect` c = p `intersect` (second (toR @r) $ toBox c)
 
 cellWidth            :: Cell -> Int
 cellWidth (Cell w _) = 2 ^ w
@@ -102,7 +102,7 @@ partitionPoints c = foldMap (\p -> let q = quadrantOf (p^.core) c in mempty&ix q
 -- NorthWest
 quadrantOf     :: forall r. (Num r, Ord r)
                => Point 2 r -> Cell -> InterCardinalDirection
-quadrantOf q c = let m = fromInteger @r . toInteger <$> midPoint c
+quadrantOf q c = let m = toR <$> midPoint c
                  in case (q^.xCoord < m^.xCoord, q^.yCoord < m^.yCoord) of
                       (False,False) -> NorthEast
                       (False,True)  -> SouthEast
