@@ -9,6 +9,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.QuadTree.Quadrants
 import           Data.Geometry.Vector
+import           Data.Geometry.Properties
 import           Data.Intersection
 
 --------------------------------------------------------------------------------
@@ -16,61 +17,64 @@ import           Data.Intersection
 -- | side lengths will be 2^i for some integer i
 type WidthIndex = Int
 
-type R = Int
-
-toR :: Num r => Int -> r
-toR = fromInteger . toInteger
-
-
 -- | A Cell corresponding to a node in the QuadTree
-data Cell = Cell { _cellWidthIndex :: WidthIndex
-                 , _lowerLeft      :: Point 2 Int
-                 } deriving (Show,Eq)
+data Cell r = Cell { _cellWidthIndex :: WidthIndex
+                   , _lowerLeft      :: Point 2 r
+                   } deriving (Show,Eq)
 makeLenses ''Cell
 
+type instance Dimension (Cell r) = 2
+type instance NumType   (Cell r) = r
 
-type instance IntersectionOf (Point 2 r) Cell = '[ NoIntersection, Point 2 r]
+type instance IntersectionOf (Point 2 r) (Cell r) = '[ NoIntersection, Point 2 r]
 
-instance (Ord r, Num r) => (Point 2 r) `IsIntersectableWith` Cell where
+instance (Ord r, Fractional r) => (Point 2 r) `IsIntersectableWith` (Cell r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
-  p `intersect` c = p `intersect` (second (toR @r) $ toBox c)
+  p `intersect` c = p `intersect` toBox c
 
-cellWidth            :: Cell -> Int
-cellWidth (Cell w _) = 2 ^ w
+pow   :: Fractional r => WidthIndex -> r
+pow i = case i `compare` 0 of
+          LT -> 1 / (2 ^ (-1*i))
+          EQ -> 1
+          GT -> 2 ^ i
 
-toBox            :: Cell -> Box 2 () Int
-toBox (Cell w p) = box (ext $ p) (ext $ p .+^ Vector2 (2^w) (2^w))
+cellWidth            :: Fractional r => Cell r -> r
+cellWidth (Cell w _) = pow w
 
-inCell            :: Point 2 R :+ p -> Cell -> Bool
-inCell (p :+ _) c = p `inBox` (toBox c)
+toBox            :: Fractional r => Cell r -> Box 2 () r
+toBox (Cell w p) = box (ext $ p) (ext $ p .+^ Vector2 (pow w) (pow w))
 
-cellCorners :: Cell -> Quadrants (Point 2 R)
+inCell            :: (Fractional r, Ord r) => Point 2 r :+ p -> Cell r -> Bool
+inCell (p :+ _) c = p `inBox` toBox c
+
+cellCorners :: Fractional r => Cell r -> Quadrants (Point 2 r)
 cellCorners = fmap (^.core) . corners . toBox
 
 -- | Sides are open
-cellSides :: Cell -> Sides (LineSegment 2 () R)
+cellSides :: Fractional r => Cell r -> Sides (LineSegment 2 () r)
 cellSides = fmap (\(ClosedLineSegment p q) -> OpenLineSegment p q) . sides . toBox
 
-splitCell            :: Cell -> Quadrants Cell
+splitCell            :: (Num r, Fractional r) => Cell r -> Quadrants (Cell r)
 splitCell (Cell w p) = Quadrants (Cell r $ f 0 rr)
                                  (Cell r $ f rr rr)
                                  (Cell r $ f rr 0)
                                  (Cell r p)
   where
     r     = w - 1
-    rr    = 2 ^ r
+    rr    = pow r
     f x y = p .+^ Vector2 x y
 
 
-midPoint            :: Cell -> Point 2 Int
-midPoint (Cell w p) = let rr = 2 ^ (w - 1) in p .+^ Vector2 rr rr
+midPoint            :: Fractional r => Cell r -> Point 2 r
+midPoint (Cell w p) = let rr = pow (w - 1) in p .+^ Vector2 rr rr
 
 
 --------------------------------------------------------------------------------
 
 -- | Partitions the points into quadrants. See 'quadrantOf' for the
 -- precise rules.
-partitionPoints   :: (Num r, Ord r) => Cell -> [Point 2 r :+ p] -> Quadrants [Point 2 r :+ p]
+partitionPoints   :: (Fractional r, Ord r)
+                  => Cell r -> [Point 2 r :+ p] -> Quadrants [Point 2 r :+ p]
 partitionPoints c = foldMap (\p -> let q = quadrantOf (p^.core) c in mempty&ix q %~ (p:))
 
 -- | Computes the quadrant of the cell corresponding to the current
@@ -100,9 +104,9 @@ partitionPoints c = foldMap (\p -> let q = quadrantOf (p^.core) c in mempty&ix q
 -- NorthEast
 -- >>> quadrantOf (Point2 4 40) (Cell 4 origin)
 -- NorthWest
-quadrantOf     :: forall r. (Num r, Ord r)
-               => Point 2 r -> Cell -> InterCardinalDirection
-quadrantOf q c = let m = toR <$> midPoint c
+quadrantOf     :: forall r. (Fractional r, Ord r)
+               => Point 2 r -> Cell r -> InterCardinalDirection
+quadrantOf q c = let m = midPoint c
                  in case (q^.xCoord < m^.xCoord, q^.yCoord < m^.yCoord) of
                       (False,False) -> NorthEast
                       (False,True)  -> SouthEast

@@ -23,6 +23,9 @@ import qualified Data.Tree as RoseTree
 
 --------------------------------------------------------------------------------
 
+-- | Our cells use Rational numbers as their numeric type
+-- type CellR = Cell (RealNumber 10)
+
 -- | The Actual Tree type representing a quadTree
 data Tree v p = Leaf p
               | Node v (Quadrants (Tree v p))
@@ -74,8 +77,8 @@ height = foldTree (const 1) (\_ -> (1 +) . maximum)
 -- * Functions operating on the QuadTree (in temrs of the 'Tree' type)
 
 -- | Builds a QuadTree
-build             :: (Cell -> pts -> Split pts v p)
-                  -> Cell -> pts -> Tree v p
+build             :: Fractional r
+                  => (Cell r -> pts -> Split pts v p) -> Cell r -> pts -> Tree v p
 build shouldSplit = build'
   where
     build' cc pts = case shouldSplit cc pts of
@@ -83,7 +86,7 @@ build shouldSplit = build'
                       Yes v qs -> Node v $ build' <$> splitCell cc <*> qs
 
 -- | Annotate the tree with its corresponing cells
-withCells :: Cell -> Tree v p -> Tree (v :+ Cell) (p :+ Cell)
+withCells :: Fractional r => Cell r -> Tree v p -> Tree (v :+ Cell r) (p :+ Cell r)
 withCells c0 = \case
   Leaf p    -> Leaf (p :+ c0)
   Node v qs -> Node (v :+ c0) (withCells <$> splitCell c0 <*> qs)
@@ -98,14 +101,14 @@ withCells c0 = \case
 --
 -- running time: \(O(nh)\), where \(n\) is the number of points and
 -- \(h\) is the height of the resulting quadTree.
-fromPoints :: (Num r, Ord r)
-           => Cell -> [Point 2 r :+ p]
+fromPoints :: (Fractional r, Ord r)
+           => Cell r -> [Point 2 r :+ p]
            -> Tree () (Maybe (Point 2 r :+ p))
 fromPoints = build fromPointsF
 
 -- | The function that can be used to build a quadTree 'fromPoints'
-fromPointsF   :: (Num r, Ord r)
-              => Cell -> [Point 2 r :+ p]
+fromPointsF   :: (Fractional r, Ord r)
+              => Cell r -> [Point 2 r :+ p]
               -> Split [Point 2 r :+ p] () (Maybe (Point 2 r :+ p))
 fromPointsF c = \case
       []   -> No Nothing

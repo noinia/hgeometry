@@ -14,8 +14,8 @@ makePrisms ''Split
 
 -- | Split only when the Cell-width is at least wMin
 limitWidthTo        :: WidthIndex -- ^ smallest allowed width of a cell (i.e. width of a leaf)
-                    -> (Cell -> pts -> Split pts v p)
-                    -> (Cell -> pts -> Split pts v (Either pts p))
+                    -> (Cell r -> pts -> Split pts v p)
+                    -> (Cell r -> pts -> Split pts v (Either pts p))
 limitWidthTo wMin f = \c pts -> case f c pts of
                                   No p                                -> No (Right p)
                                   Yes v qs | wMin < c^.cellWidthIndex -> Yes v qs
