@@ -25,7 +25,7 @@ import           GHC.TypeLits
 --------------------------------------------------------------------------------
 -- $setup
 -- >>> :{
--- let myPolyLine = fromPoints $ map ext [origin, Point2 10.0 10.0, Point2 10.0 20.0]
+-- let myPolyLine = fromPointsUnsafe $ map ext [origin, Point2 10.0 10.0, Point2 10.0 20.0]
 -- :}
 
 --------------------------------------------------------------------------------
@@ -64,19 +64,23 @@ instance (ToJSON p, ToJSON r, Arity d) => ToJSON (PolyLine d p r) where
     toEncoding = genericToEncoding defaultOptions
 instance (FromJSON p, FromJSON r, Arity d, KnownNat d) => FromJSON (PolyLine d p r)
 
+-- | Builds a Polyline from a list of points, if there are sufficiently many points
+fromPoints :: [Point d r :+ p] -> Maybe (PolyLine d p r)
+fromPoints = fmap PolyLine . LSeq.eval (C @ 2) . LSeq.fromList
+
 -- | pre: The input list contains at least two points
-fromPoints :: [Point d r :+ p] -> PolyLine d p r
-fromPoints = PolyLine . LSeq.forceLSeq (C  :: C 2) . LSeq.fromList
+fromPointsUnsafe :: [Point d r :+ p] -> PolyLine d p r
+fromPointsUnsafe = PolyLine . LSeq.forceLSeq (C @ 2) . LSeq.fromList
 
 -- | pre: The input list contains at least two points. All extra vields are
 -- initialized with mempty.
-fromPoints' :: (Monoid p) => [Point d r] -> PolyLine d p r
-fromPoints' = fromPoints . map (\p -> p :+ mempty)
+fromPointsUnsafe' :: (Monoid p) => [Point d r] -> PolyLine d p r
+fromPointsUnsafe' = fromPointsUnsafe . map (\p -> p :+ mempty)
 
 
 -- | We consider the line-segment as closed.
 fromLineSegment                     :: LineSegment d p r -> PolyLine d p r
-fromLineSegment ~(LineSegment' p q) = fromPoints [p,q]
+fromLineSegment ~(LineSegment' p q) = fromPointsUnsafe [p,q]
 
 -- | Convert to a closed line segment by taking the first two points.
 asLineSegment                            :: PolyLine d p r -> LineSegment d p r

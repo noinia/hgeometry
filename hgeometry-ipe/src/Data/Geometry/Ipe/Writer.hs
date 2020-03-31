@@ -423,7 +423,8 @@ fromPolyLine = Path . LSeq.fromNonEmpty . (:| []) . PolyLineSegment
 
 
 instance (IpeWriteText r) => IpeWrite (LineSegment 2 p r) where
-  ipeWrite (LineSegment' p q) = ipeWrite . fromPolyLine . fromPoints . map (extra .~ ()) $ [p,q]
+  ipeWrite (LineSegment' p q) =
+    ipeWrite . fromPolyLine . fromPointsUnsafe . map (extra .~ ()) $ [p,q]
 
 
 instance IpeWrite () where

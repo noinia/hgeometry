@@ -22,15 +22,15 @@ import           Data.Ord (comparing)
 douglasPeucker         :: (Ord r, Fractional r, Arity d)
                        => r -> PolyLine d p r -> PolyLine d p r
 douglasPeucker eps pl
-    | dst <= (eps*eps) = fromPoints [a,b]
+    | dst <= (eps*eps) = fromPointsUnsafe [a,b] -- at least two points, so we are fine.
     | otherwise        = douglasPeucker eps pref `merge` douglasPeucker eps subf
   where
-    pts     = pl^.points
-    a       = LSeq.head pts
-    b       = LSeq.last pts
-    (i,dst)             = maxDist pts (ClosedLineSegment a b)
+    pts         = pl^.points
+    a           = LSeq.head pts
+    b           = LSeq.last pts
+    (i,dst)     = maxDist pts (ClosedLineSegment a b)
 
-    (pref,subf)         = split i pl
+    (pref,subf) = split i pl
 
 --------------------------------------------------------------------------------
 -- * Internal functions

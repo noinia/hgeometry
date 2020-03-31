@@ -196,7 +196,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
                                       poly = Polygon.fromPoints . dropRepeats $ pts
-                                      pl   = fromPoints pts
+                                      pl   = fromPointsUnsafe pts
                                   in case xs of
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
