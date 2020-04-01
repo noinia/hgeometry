@@ -1,6 +1,10 @@
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.BezierSpline
-  ( BezierSpline (BezierSpline)
+{-# LANGUAGE TemplateHaskell #-}
+module Data.Geometry.BezierSpline(
+    BezierSpline (BezierSpline)
+  , controlPoints
+  , fromPointSeq
+
   , evaluate
   , split
   , subBezier
@@ -10,100 +14,124 @@ module Data.Geometry.BezierSpline
   , snap
   ) where
 
+import           Control.Lens hiding (Empty)
+import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import           Data.Geometry.Vector hiding (head, init, last)
-import qualified Data.LSeq as LSeq
+import           Data.Geometry.Vector
 import           Data.LSeq (LSeq)
+import qualified Data.LSeq as LSeq
+import           Data.Sequence (Seq(..))
+import qualified Data.Sequence as Seq
 import           Data.Traversable (fmapDefault,foldMapDefault)
+import           GHC.TypeNats
+import qualified Test.QuickCheck as QC
 
 --------------------------------------------------------------------------------
 
--- newtype Bezier n d r = Bezier { controlPoints :: [Point d r] }
+-- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
+newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq n (Point d r) }
+makeLenses ''BezierSpline
 
--- | Datatype representing a Bezier curve of degree n in d-dimensional space.
-newtype BezierSpline d r = BezierSpline { controlPoints :: [Point d r] }
+deriving instance (Arity d, Eq r) => Eq (BezierSpline n d r)
 
-deriving instance (Arity d, Eq r) => Eq (BezierSpline d r)
-
-type instance Dimension (BezierSpline d r) = d
-type instance NumType   (BezierSpline d r) = r
+type instance Dimension (BezierSpline n d r) = d
+type instance NumType   (BezierSpline n d r) = r
 
 
-instance (Arity d, Show r) => Show (BezierSpline d r) where
-  show (BezierSpline ps) = mconcat [ "BezierSpline", show $ length ps - 1, " ", show ps ]
+instance (Arity n, Arity d, QC.Arbitrary r) => QC.Arbitrary (BezierSpline n d r) where
+  arbitrary = fromPointSeq . Seq.fromList <$> QC.vector (fromIntegral . natVal $ C @n)
 
-instance Arity d => Functor (BezierSpline d) where
+-- | Constructs the Bezier Spline from a given sequence of points.
+fromPointSeq :: Seq (Point d r) -> BezierSpline n d r
+fromPointSeq = BezierSpline . LSeq.promise . LSeq.fromSeq
+
+
+instance (Arity d, Show r) => Show (BezierSpline n d r) where
+  show (BezierSpline ps) =
+    mconcat [ "BezierSpline", show $ length ps - 1, " ", show (F.toList ps) ]
+
+instance Arity d => Functor (BezierSpline n d) where
   fmap = fmapDefault
 
-instance Arity d => Foldable (BezierSpline d) where
+instance Arity d => Foldable (BezierSpline n d) where
   foldMap = foldMapDefault
 
-instance Arity d => Traversable (BezierSpline d) where
+instance Arity d => Traversable (BezierSpline n d) where
   traverse f (BezierSpline ps) = BezierSpline <$> traverse (traverse f) ps
 
 
 
-
-
 -- | Evaluate a BezierSpline curve at time t in [0, 1]
-evaluate :: (Arity d, Ord r, Num r, Show r) => BezierSpline d r -> r -> Point d r
-evaluate b t | t < 0 || t > 1                = error $ "Evaluation parameter " ++ show t ++ " out of bounds."
-             | length (controlPoints b) == 0 = error "Bezier curve of degree -1?"
-             | length (controlPoints b) == 1 = head $ controlPoints b
-             | otherwise = flip evaluate t $ BezierSpline $ zipWith (blend t) (init $ controlPoints b) (tail $ controlPoints b)
-  where blend t p q = p .+^ t *^ (q .-. p)
+--
+-- pre: \(t \in [0,1]\)
+evaluate    :: (Arity d, Ord r, Num r) => BezierSpline (1 + n) d r -> r -> Point d r
+evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
+  where
+    evaluate' = \case
+      (p :<| Empty)  -> p
+      pts@(_ :<| tl) -> let (ini :|> _) = pts in evaluate' $ Seq.zipWith blend ini tl
+      _              -> error "evaluate: absurd"
 
-tangent :: (Arity d, Num r) => BezierSpline d r -> Vector d r
-tangent b | length (controlPoints b) == 0 = error "Bezier curve of degree -1?"
-          | length (controlPoints b) == 1 = error "Bezier curve of degree 0 has no tangent."
-          | otherwise = controlPoints b !! 1 .-. controlPoints b !! 0
+    blend p q = p .+^ t *^ (q .-. p)
 
--- | Restrict a Bezier curve to the piece between parameters t < u in [0, 1].
-subBezier     :: (Arity d, Ord r, Num r) => r -> r -> BezierSpline d r -> BezierSpline d r
+
+tangent   :: (Arity d, Num r, 2 <= n) => BezierSpline n d r -> Vector d r
+tangent b = b^?!controlPoints.ix 1  .-. b^?!controlPoints.ix 0
+
+-- | Restrict a Bezier curve to th,e piece between parameters t < u in [0, 1].
+subBezier     :: (KnownNat n, Arity d, Ord r, Num r)
+              => r -> r -> BezierSpline (1+n) d r -> BezierSpline (1+n) d r
 subBezier t u = fst . split u . snd . split t
 
 -- | Split a Bezier curve at time t in [0, 1] into two pieces.
-split :: (Arity d, Ord r, Num r) => r -> BezierSpline d r -> (BezierSpline d r, BezierSpline d r)
-split t b | t < 0 || t > 1                = error "Split parameter out of bounds."
-          | length (controlPoints b) == 0 = error "Bezier curve of degree -1?"
-          | otherwise = let n = length (controlPoints b) - 1 -- degree of curve
-                            ps = collect t $ controlPoints b
-                        in (BezierSpline $ take (n + 1) ps, BezierSpline $ drop n ps)
+split :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
+      => r -> BezierSpline (1+n) d r -> (BezierSpline (1+n) d r, BezierSpline (1+n) d r)
+split t b | t < 0 || t > 1 = error "Split parameter out of bounds."
+          | otherwise      = let n  = fromIntegral $ natVal (C @n)
+                                 ps  = collect t $ b^.controlPoints
+                             in ( fromPointSeq . Seq.take (n + 1) $ ps
+                                , fromPointSeq . Seq.drop n       $ ps
+                                )
 
-collect       :: (Arity d, Ord r, Num r) => r -> [Point d r] -> [Point d r]
-collect _ []  = []
-collect _ [p] = [p]
-collect t ps  = [head ps] ++ collect t (zipWith (blend t) (init ps) (tail ps)) ++ [last ps]
-  where blend t p q = p .+^ t *^ (q .-. p)
+collect   :: (Arity d, Ord r, Num r) => r -> LSeq (1+n) (Point d r) -> Seq (Point d r)
+collect t = go . LSeq.toSeq
+  where
+    go = \case
+      ps@(_ :<| Empty) -> ps
+      ps@(p :<| tl)    -> let (ini :|> q) = ps in (p :<| go (Seq.zipWith blend ini tl)) :|> q
+      _                -> error "collect: absurd"
 
-{-
+    blend p q = p .+^ t *^ (q .-. p)
 
--- | Merge to Bezier pieces. Assumes they can be merged into a single piece of the same degree
---   (as would e.g. be the case for the result of a 'split' operation).
---   Does not test whether this is the case!
-merge :: (Arity d, Ord r, Num r) => (Bezier d r, Bezier d r) -> Bezier d r
+-- {-
 
--}
+-- -- | Merge to Bezier pieces. Assumes they can be merged into a single piece of the same degree
+-- --   (as would e.g. be the case for the result of a 'split' operation).
+-- --   Does not test whether this is the case!
+-- merge :: (Arity d, Ord r, Num r) => (Bezier d r, Bezier d r) -> Bezier d r
+
+-- -}
 
 -- | Approximate Bezier curve by Polyline with given resolution.
 --   TODO: Make collection of points more efficient! Currently quadratic.
-approximate :: (Arity d, Ord r, Fractional r) => r -> BezierSpline d r -> [Point d r]
-approximate r b | qdA (head $ controlPoints b) (last $ controlPoints b) < r ^ 2 = [head $ controlPoints b, last $ controlPoints b]
+approximate :: (KnownNat n, Arity d, Ord r, Fractional r)
+            => r -> BezierSpline (1+n) d r -> [Point d r]
+approximate r b | qdA (LSeq.head $ _controlPoints b) (LSeq.last $ _controlPoints b) < r ^ 2 = [LSeq.head $ _controlPoints b, LSeq.last $ _controlPoints b]
                 | otherwise = let (b1, b2) = split 0.5 b
                               in approximate r b1 ++ tail (approximate r b2)
 
 -- | Given a point on (or close to) a Bezier curve, return the corresponding parameter value.
 --   (For points far away from the curve, the function will return the parameter value of
 --   an approximate locally closest point to the input point.)
-parameterOf :: (Arity d, Ord r, Fractional r, Show r) => BezierSpline d r -> Point d r -> r
+parameterOf      :: (Arity d, Ord r, Fractional r) => BezierSpline (1+n) d r -> Point d r -> r
 parameterOf b p = binarySearch (qdA p . evaluate b) treshold (1 - treshold)
   where treshold = 0.0001
 
-binarySearch :: (Ord r, Fractional r) => (r -> r) -> r -> r -> r
+binarySearch                                    :: (Ord r, Fractional r) => (r -> r) -> r -> r -> r
 binarySearch f l r | abs (f l - f r) < treshold = m
-                   | derivative f m  > 0 = binarySearch f l m
-                   | otherwise           = binarySearch f m r
+                   | derivative f m  > 0        = binarySearch f l m
+                   | otherwise                  = binarySearch f m r
   where m = (l + r) / 2
         treshold = 0.0001
 
@@ -112,5 +140,5 @@ derivative f x = (f (x + delta) - f x) / delta
   where delta = 0.00001
 
 -- | Snap a point close to a Bezier curve to the curve.
-snap   :: (Arity d, Ord r, Fractional r, Show r) => BezierSpline d r -> Point d r -> Point d r
+snap   :: (Arity d, Ord r, Fractional r) => BezierSpline (1 + n) d r -> Point d r -> Point d r
 snap b = evaluate b . parameterOf b
