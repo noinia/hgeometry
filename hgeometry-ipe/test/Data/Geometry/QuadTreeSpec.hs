@@ -1,9 +1,12 @@
 module Data.Geometry.QuadTreeSpec where
 
+import Control.Lens
 import Test.Hspec
 import Data.Ext
+import Data.Geometry.Box.Sides
 import Data.Geometry.QuadTree
 import Data.Geometry.QuadTree.Quadrants
+import Data.Geometry.QuadTree.Tree(Tree(..))
 import Data.Geometry.QuadTree.Cell
 import Data.ByteString(ByteString)
 import Data.Proxy
@@ -19,9 +22,10 @@ relTests = it "correct relation" $ do
              let qt@(QuadTree _ t) = withCells $ completeTree 1
                  (Node (_ :+ c) _) = t
                  (Quadrants nw ne se sw) = splitCell c
-                 a `hasRelTo` b = (not . null) <$> (() :+ ne) `relationTo` nw
-             (ne `hasRelTo` nw) `shouldBe` (mempty&east .~ True)
-             (ne `hasRelTo` sw) `shouldBe` (mempty&north .~ True)
-             (ne `hasRelTo` se) `shouldBe` mempty
-             (nw `hasRelTo` ne) `shouldBe` (mempty&west .~ True)
-             (sw `hasRelTo` nw) `shouldBe` (mempty&south .~ True)
+                 a `hasRelTo` b = (not . null) <$> (() :+ a) `relationTo` b
+                 empty = pure False
+             (ne `hasRelTo` nw) `shouldBe` (empty&east .~ True)
+             (ne `hasRelTo` se) `shouldBe` (empty&north .~ True)
+             (ne `hasRelTo` sw) `shouldBe` empty
+             (nw `hasRelTo` ne) `shouldBe` (empty&west .~ True)
+             (sw `hasRelTo` nw) `shouldBe` (empty&south .~ True)

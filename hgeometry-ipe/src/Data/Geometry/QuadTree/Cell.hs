@@ -18,8 +18,8 @@ import           Data.Intersection
 type WidthIndex = Int
 
 -- | A Cell corresponding to a node in the QuadTree
-data Cell r = Cell { _cellWidthIndex :: WidthIndex
-                   , _lowerLeft      :: Point 2 r
+data Cell r = Cell { _cellWidthIndex :: {-# UNPACK #-} !WidthIndex
+                   , _lowerLeft      ::                !(Point 2 r)
                    } deriving (Show,Eq)
 makeLenses ''Cell
 

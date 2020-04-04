@@ -4,13 +4,14 @@ import           Control.Lens
 import           Data.Ext
 import           Data.Foldable
 import           Data.Geometry.Box
+-- import qualified Data.Geometry.CatmulRomSpline as CatmulRom
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.IpeOut
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Point
-import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.PolyLine (PolyLine)
+import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.QuadTree
 import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Quadrants
@@ -30,6 +31,11 @@ import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 10
+
+
+-- drawSpline :: Fractional r => IpeOut (CatmulRom.Spline 2 r) Path r
+-- drawSpline = \s -> toCubicBezier s
+
 
 drawCell :: Fractional r => IpeOut (Cell r) Path r
 drawCell = \c -> ipeRectangle (toBox c)
@@ -52,7 +58,8 @@ drawZeroCell = \(p :+ c) -> case p of
 
 test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent $
         [ iO $ drawQuadTreeWith drawZeroCell testT
-        , iO $ defIO pl
+        ,
+          iO $ defIO pl
         ]
   where
     Just pl = traceZeroFrom Zero myStartP testT
@@ -77,7 +84,7 @@ traceZeroFrom zero' p qt = do startCell <- findLeaf p qt
                                          . leaves . withCells $ qt
                                   path   = explorePathWith (const True) startCell zCells
                               PolyLine.fromPoints . NonEmpty.toList . centerPoints $ path
-
+                              -- CatmulRom.fromListOfPoints . NonEmpty.toList . centerPoints $ path
 
 
 

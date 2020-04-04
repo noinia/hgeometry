@@ -27,8 +27,8 @@ import qualified Data.Tree as RoseTree
 -- type CellR = Cell (RealNumber 10)
 
 -- | The Actual Tree type representing a quadTree
-data Tree v p = Leaf p
-              | Node v (Quadrants (Tree v p))
+data Tree v p = Leaf !p
+              | Node !v (Quadrants (Tree v p)) -- quadrants are stored lazily on purpose
               deriving (Show,Eq)
 makePrisms ''Tree
 
