@@ -12,6 +12,8 @@ module Data.Geometry.BezierSpline(
   , approximate
   , parameterOf
   , snap
+
+  , pattern Bezier2, pattern Bezier3
   ) where
 
 import           Control.Lens hiding (Empty)
@@ -32,6 +34,18 @@ import qualified Test.QuickCheck as QC
 -- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
 newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq n (Point d r) }
 makeLenses ''BezierSpline
+
+-- | Quadratic Bezier Spline
+pattern Bezier2      :: Point d r -> Point d r -> Point d r -> BezierSpline 2 d r
+pattern Bezier2 p q r <- ((F.toList . LSeq.take 3 . _controlPoints) -> [p,q,r])
+  where
+    Bezier2 p q r = fromPointSeq . Seq.fromList $ [p,q,r]
+
+-- | Cubic Bezier Spline
+pattern Bezier3         :: Point d r -> Point d r -> Point d r -> Point d r -> BezierSpline 3 d r
+pattern Bezier3 p q r s <- ((F.toList . LSeq.take 4 . _controlPoints) -> [p,q,r,s])
+  where
+    Bezier3 p q r s = fromPointSeq . Seq.fromList $ [p,q,r,s]
 
 deriving instance (Arity d, Eq r) => Eq (BezierSpline n d r)
 

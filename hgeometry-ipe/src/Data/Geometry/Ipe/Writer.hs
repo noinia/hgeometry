@@ -301,9 +301,8 @@ instance IpeWriteText r => IpeWriteText (Polygon t () r) where
     -- TODO: We are not really guaranteed that there is at least one point, it would
     -- be nice if the type could guarantee that.
 
-
-instance IpeWriteText r => IpeWriteText (CubicBezier 2 r) where
-  ipeWriteText (CubicBezier p q r s) = unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
+instance IpeWriteText r => IpeWriteText (BezierSpline 3 2 r) where
+  ipeWriteText (Bezier3 p q r s) = unlines' . map ipeWriteText $ [MoveTo p, CurveTo q r s]
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p

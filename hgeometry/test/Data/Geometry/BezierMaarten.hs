@@ -1,4 +1,4 @@
-
+{-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.BezierMaarten
   ( Bezier (Bezier)
   , evaluate
