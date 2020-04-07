@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Arrangement.Internal where
 
+import           Algorithms.BinarySearch
 import           Control.Lens
 import qualified Data.CircularSeq as CSeq
 import           Data.Ext
@@ -25,7 +26,6 @@ import           Data.Geometry.Properties
 import qualified Data.List as List
 import           Data.Maybe
 import           Data.Ord (Down(..))
-import           Data.Sequence.Util
 import qualified Data.Vector as V
 import           Data.Vinyl.CoRec
 
