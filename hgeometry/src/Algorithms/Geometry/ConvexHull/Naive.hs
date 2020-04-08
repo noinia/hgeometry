@@ -1,4 +1,8 @@
-module Algorithms.Geometry.ConvexHull.Naive where
+module Algorithms.Geometry.ConvexHull.Naive( ConvexHull
+                                           , lowerHull', lowerHullAll
+
+                                           , isValidTriangle, upperHalfSpaceOf
+                                           ) where
 
 import           Control.Lens
 import           Data.Ext
@@ -19,6 +23,12 @@ import           Data.Util
 
 type ConvexHull d p r = [Triangle 3 p r]
 
+-- | Computes the lower hull without its vertical triangles.
+--
+-- pre: The points are in general position. In particular, no four
+-- points should be coplanar.
+--
+-- running time: \(O(n^4)\)
 lowerHull' :: forall r p. (Ord r, Fractional r, Show r)
            => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHull' = filter (not . isVertical) . lowerHullAll
@@ -28,6 +38,11 @@ lowerHull' = filter (not . isVertical) . lowerHullAll
 
 -- | Generates a set of triangles to be used to construct a complete
 -- convex hull. In particular, it may contain vertical triangles.
+--
+-- pre: The points are in general position. In particular, no four
+-- points should be coplanar.
+--
+-- running time: \(O(n^4)\)
 lowerHullAll                 :: forall r p. (Ord r, Fractional r, Show r)
                              => NonEmpty (Point 3 r :+ p) -> ConvexHull 3 p r
 lowerHullAll (toList -> pts) = let mkT (Three p q r) = Triangle p q r in
