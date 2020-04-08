@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.QuadTree.Cell where
 
-import           Control.Lens (makeLenses, (^.),(&),(%~),ix)
+import           Control.Lens (makeLenses, (^.),(&),(%~),ix, to)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Box
@@ -22,6 +22,20 @@ data Cell r = Cell { _cellWidthIndex :: {-# UNPACK #-} !WidthIndex
                    , _lowerLeft      ::                !(Point 2 r)
                    } deriving (Show,Eq)
 makeLenses ''Cell
+
+-- | Computes a cell that contains the given rectangle
+fitsRectangle   :: (RealFrac r, Ord r) => Rectangle p r -> Cell r
+fitsRectangle b = Cell w ((b^.to minPoint.core) .-^ Vector2 (-1) (-1))
+  where
+    w = lg' . ceiling . (1+) . maximum . size $ b
+
+    -- "approximate log" that over approximates by a factor of at most two.
+    lg'   :: Integer -> WidthIndex
+    lg' n = go 1
+      where
+        go i | floor (pow i) <= n = go (i+1) -- note that the floor does not really do anything
+                                             -- since i is integral and >= 1.
+             | otherwise  = i
 
 type instance Dimension (Cell r) = 2
 type instance NumType   (Cell r) = r

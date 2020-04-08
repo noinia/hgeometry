@@ -10,7 +10,7 @@ module Data.Geometry.QuadTree-- ( module Data.Geometry.QuadTree.Cell
                              where
 
 
-import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&),(^?!),(^@.),ix,iix,view)
+import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&),(^?!),(^@.),ix,iix,view,to)
 -- import           Control.Zipper
 import           Data.Bifoldable
 import           Data.Bifunctor
@@ -33,6 +33,7 @@ import           Data.Semigroup.Traversable.Class
 import qualified Data.Sequence as Seq
 import qualified Data.Tree as RoseTree
 import           Debug.Trace
+import           Numeric.Natural(Natural)
 import           GHC.Generics (Generic)
 import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Quadrants
@@ -98,9 +99,15 @@ build f c = buildOn c (Tree.build f)
 --
 -- running time: \(O(nh)\), where \(n\) is the number of points and
 -- \(h\) is the height of the resulting quadTree.
-fromPoints   :: (Fractional r, Ord r)
-             => Cell r -> [Point 2 r :+ p] -> QuadTree () (Maybe (Point 2 r :+ p))
-fromPoints c = buildOn c Tree.fromPoints
+fromPointsBox   :: (Fractional r, Ord r)
+                 => Cell r -> [Point 2 r :+ p] -> QuadTree () (Maybe (Point 2 r :+ p))
+fromPointsBox c = buildOn c Tree.fromPoints
+
+fromPoints     :: (RealFrac r, Ord r)
+               => NonEmpty (Point 2 r :+ p) -> QuadTree () (Maybe (Point 2 r :+ p))
+fromPoints pts = buildOn c Tree.fromPoints (F.toList pts)
+  where
+    c = fitsRectangle $ boundingBoxList (view core <$> pts)
 
 -- | Locates the cell containing the given point, if it exists.
 --
@@ -125,14 +132,24 @@ fromZeros :: (Fractional r, Ord r, Num a, Eq a, v ~ Quadrants Sign)
           => Cell r -> (Point 2 r -> a) -> QuadTree v (Either v Sign)
 fromZeros = fromZerosWith (limitWidthTo (-1))
 
-fromZerosWith           :: (Num a, Eq a, v ~ Quadrants Sign, p ~ Sign, i ~ v, Fractional r, Ord r)
-                        => (  (Cell r -> i -> Split i v p)
-                           -> (Cell r -> i -> Split i v (Either i p))
-                           )
-                        -> Cell r -> (Point 2 r -> a) -> QuadTree (Quadrants Sign) (Either i p)
-fromZerosWith limit c0 f = build (limit $ shouldSplitZeros f') c0 (f' <$> cellCorners c0)
-  where
-    f' = fromSignum f
+
+fromZerosWith            ::  (Fractional r, Ord r, Eq a, Num a)
+                         => Limiter r (Corners Sign) (Corners Sign) Sign
+                         -> Cell r
+                         -> (Point 2 r -> a)
+                         -> QuadTree (Quadrants Sign) (Signs Sign)
+fromZerosWith limit c0 f = fromZerosWith' limit c0 (fromSignum f)
+
+
+type Signs sign = Either (Corners sign) sign
+
+
+fromZerosWith'           :: (Eq sign, Fractional r, Ord r)
+                         => Limiter r (Corners sign) (Corners sign) sign
+                         -> Cell r
+                         -> (Point 2 r -> sign)
+                         -> QuadTree (Quadrants sign) (Signs sign)
+fromZerosWith' limit c0 f = build (limit $ shouldSplitZeros f) c0 (f <$> cellCorners c0)
 
 
 
@@ -170,11 +187,10 @@ fromSignum f = \x -> case signum (f x) of
 
 shouldSplitZeros :: forall r sign. (Fractional r, Eq sign)
                  => (Point 2 r -> sign) -- ^ The function we are evaluating
-                 -> Cell r
-                 -> Quadrants sign -- ^ signs of the corners
-                 -> Split (Quadrants sign) -- ^ to compute further signs we use signs
-                          (Quadrants sign) -- ^ we store the signs of the corners
-                          sign             -- ^ Leaves store the sign corresponding to the leaf
+                 -> Splitter r
+                             (Quadrants sign) -- ^ the input are the signs of the corners
+                             (Quadrants sign) -- ^ at internal nodes we store signs of corners
+                             sign
 shouldSplitZeros f (Cell w' p) qs@(Quadrants nw ne se sw) | all sameSign qs = No ne
                                                           | otherwise       = Yes qs qs'
   where
@@ -208,107 +224,11 @@ isZeroCell z = \case
 --------------------------------------------------------------------------------
 
 
-withNeighbours    :: (Fractional r, Ord r)
-                  => [p :+ Cell r] -> [(p :+ Cell r) :+ Sides [p :+ Cell r]]
-withNeighbours cs = map (\c@(_ :+ me) -> c :+ neighboursOf me) cs
-  where
-    neighboursOf me = foldMap (`relationTo` me) cs
-
-
-leafNeighboursOf   :: (Fractional r, Ord r) => Cell r -> QuadTree v p -> Sides [p :+ Cell r]
-leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
-  where
-    neighboursOf me = foldMap (`relationTo` me)
-
-
-exploreWith                :: forall p r. (Ord r, Fractional r)
-                           => (p :+ Cell r -> Bool) -- ^ continue exploring?
-                           -> p :+ Cell r -- ^ start
-                           -> [p :+ Cell r] -- ^ all cells
-                           -> RoseTree.Tree (p :+ Cell r)
-exploreWith p start' cells = go0 start'
-  where
-    cs   :: [(p :+ Cell r) :+ Sides [p :+ Cell r]]
-    cs   = withNeighbours cells
-
-    -- initially, just explore everyone
-    go0      c = RoseTree.Node c [ go c n | n <- neighboursOf (c^.extra), p n ]
-
-    -- explore only the nodes other than the one we just came from
-    go pred' c = RoseTree.Node c [ go c n | n <- neighboursOf (c^.extra), continue pred' n ]
-
-    continue pred' n = (n^.extra) /= (pred'^.extra) && p n
-
-    neighboursOf   :: Cell r -> [p :+ Cell r]
-    neighboursOf c = case List.find (\n -> n^.core.extra == c) cs of
-                       Nothing       -> []
-                       Just (_ :+ s) -> concat s
-
-
-explorePathWith          :: (Ord r, Fractional r)
-                         => ((p :+ Cell r) -> Bool)
-                         -> (p :+ Cell r) -> [p :+ Cell r] -> NonEmpty (p :+ Cell r)
-explorePathWith p start' = toPath . exploreWith p start'
-  where
-    toPath (RoseTree.Node x chs) = ($ x ) $ case chs of
-                                              []    -> (:| [])
-                                              (c:_) -> (NonEmpty.<| toPath c)
-
-
-
-
-
-
--- trace             :: Cell r -> [p :+ Cell r] -> [p :+ Cell r]
--- trace start cells = go0 start'
---   where
---     cs     = withNeighbours cs
---     start' = find (\c -> c^.extra == start) cs
-
---     go0 = undefined
---     go p (s :+ neighs) = case find (\c -> ) neighs
-
---     ( s:+ ) =
-
---       \case
---       Nothing            -> []
---       Just (s :+ neighs) -> s : go (otherN)
---     go1 s =
-
-
-
-
-
-relationTo        :: (Fractional r, Ord r) => (p :+ Cell r) -> Cell r -> Sides [p :+ Cell r]
-c `relationTo` me = f <$> Sides b l t r <*> cellSides me
-  where
-    Sides t r b l = cellSides (c^.extra)
-    -- f e e' | traceShow ("f ",e,e',e `sideIntersects` e') False = undefined
-    f e e' | e `intersects` e' = [c]
-           | otherwise         = []
-
-
-
-
--- relTest = let qt@(QuadTree _ t) = withCellRs $ completeTree 1
---               (Node (_ :+ c) _) = t
---               (Quadrants nw ne se sw) = splitCell c
---           in (not . null) <$> (() :+ ne) `relationTo` nw
---              -- should be west
-
-
--- eastNeighbours    :: [p :+ Cell] -> [(p :+ Cell) :+ [p :+ Cell]]
--- eastNeighbours cs = map (\(_ :+ c) -> Map.lookup c ns) cs
---   where
-
 
 -- | Constructs an empty/complete tree from the starting width
 completeTree    :: WidthIndex -> QuadTree () ()
 completeTree w0 =
     build (\_ w -> if w == 0 then No () else Yes () (pure $ w - 1)) (Cell w0 origin) w0
-
-
-
 
 --------------------------------------------------------------------------------
 

@@ -78,7 +78,7 @@ height = foldTree (const 1) (\_ -> (1 +) . maximum)
 
 -- | Builds a QuadTree
 build             :: Fractional r
-                  => (Cell r -> pts -> Split pts v p) -> Cell r -> pts -> Tree v p
+                  => Splitter r pts v p -> Cell r -> pts -> Tree v p
 build shouldSplit = build'
   where
     build' cc pts = case shouldSplit cc pts of
@@ -108,8 +108,7 @@ fromPoints = build fromPointsF
 
 -- | The function that can be used to build a quadTree 'fromPoints'
 fromPointsF   :: (Fractional r, Ord r)
-              => Cell r -> [Point 2 r :+ p]
-              -> Split [Point 2 r :+ p] () (Maybe (Point 2 r :+ p))
+              => Splitter r [Point 2 r :+ p] () (Maybe (Point 2 r :+ p))
 fromPointsF c = \case
       []   -> No Nothing
       [p]  -> No (Just p)
