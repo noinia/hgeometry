@@ -1,160 +1,233 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.ZeroSet where
 
-import           Control.Lens
-import           Data.Bitraversable
+import           Algorithms.BinarySearch
+import           Control.Lens (makeLenses, (^.), (%~), (.~), (&), (^?!), ix)
+-- import           Control.Zipper
 import           Data.Bifoldable
+import           Data.Bifunctor
+import           Data.Bitraversable
 import           Data.Ext
+import           Data.Geometry.Box
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Vector
+import           Data.Geometry.PolyLine (PolyLine)
+import qualified Data.Geometry.PolyLine as PolyLine
+import           Data.Intersection
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           GHC.Generics
+import qualified Data.Tree as RoseTree
+import           Data.Geometry.QuadTree.Cell
+import           Data.Geometry.QuadTree.Split
+import           Data.Geometry.QuadTree
+import qualified Data.Geometry.QuadTree.Tree as Tree
 
-import           Debug.Trace
+
+-- import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
--- | side lengths will be 2^i for some integer i
-type SI = Int
-
-
--- data QuadTree v p r = QuadTree { _startLowerLeft :: !(Point 2 r)
---                                , _tree           :: QuadTree' v p
---                                } deriving (Show,Eq)
-
-
-
-data Quadrants a = Quadrants { _northEast  :: !a
-                             , _southEast  :: !a
-                             , _southWest  :: !a
-                             , _northWest  :: !a
-                             } deriving (Show,Eq,Ord,Generic,Functor,Foldable,Traversable)
-makeLenses ''Quadrants
-
-data Cell r = Cell { _lowerLeft  :: !(Point 2 r)
-                   , _sideLenghI :: !SI
-                   } deriving (Show,Eq,Generic,Functor,Foldable,Traversable)
-
-makeLenses ''Cell
-
-data QuadTree' q v p = QTLeaf p | QTNode { _nodeData   :: !v
-                                         , _quadrants  :: !(Quadrants q)
-                                         } deriving (Show,Eq,Generic)
-makePrisms ''QuadTree'
-
-instance Bifunctor (QuadTree' q) where
-  bimap = bimapDefault
-instance Bifoldable (QuadTree' q) where
-  bifoldMap = bifoldMapDefault
-instance Bitraversable (QuadTree' q) where
-  bitraverse f g = \case
-    QTLeaf p    -> QTLeaf <$> g p
-    QTNode v qs -> flip QTNode qs <$> f v
-
-data QuadTree v p r = QuadTree { _cell :: !(Cell r)
-                               , _tree :: !(QuadTree' (QuadTree v p r) v p)
+data ZeroConfig r = ZeroConfig { _maxDepth     :: WidthIndex
+                                 -- ^ smallest allowed cells in the quadTree
+                               , _edgeTreshold :: r
+                                 -- ^ treshold when to stop searching
+                                 -- for a sign-change on an edge
                                } deriving (Show,Eq)
-makeLenses ''QuadTree
-
-pattern Leaf     :: Cell r -> p -> QuadTree v p r
-pattern Leaf c p = QuadTree c (QTLeaf p)
-
-pattern Node        :: Cell r -> v -> Quadrants (QuadTree v p r) -> QuadTree v p r
-pattern Node c v qs = QuadTree c (QTNode v qs)
-
-{-# COMPLETE Leaf, Node #-}
-
-instance Functor (QuadTree v p) where
-  fmap f = trimap id id f
+makeLenses ''ZeroConfig
 
 
-trimap       :: (v -> v') -> (p -> p') -> (r -> r') -> QuadTree v p r -> QuadTree v' p' r'
-trimap f g h = runIdentity . tritraverse (pure . f) (pure . g) (pure . h)
+defaultZeroConfig :: Fractional r => ZeroConfig r
+defaultZeroConfig = ZeroConfig (-1) 0.001
 
-tritraverse       :: Applicative f => (v -> f v') -> (p -> f p') -> (r -> f r')
-                  -> QuadTree v p r -> f (QuadTree v' p' r')
-tritraverse f g h = go
+
+traceZero       :: (Eq a, Num a, RealFrac r, Ord r)
+                => ZeroConfig r
+                -> (Point 2 r -> a)
+                -> LineSegment 2 b r -- ^ somewhere on this segment there should
+                -- be a single transition where the sign changes
+                -> Rectangle c r -- ^ bounding box
+                -> Maybe (PolyLine 2 () r)
+traceZero cfg f = traceZero' cfg (fromSignum f) Zero
+
+
+traceZero'                 :: (Eq sign, RealFrac r, Ord r)
+                            => ZeroConfig r
+                           -> (Point 2 r -> sign)
+                           -> sign -- ^ zero value
+                           -> LineSegment 2 b r -- ^ somewhere on this segment there should
+                           -- be a single transition where the sign changes
+                           -> Rectangle c r -- ^ bounding box
+                           -> Maybe (PolyLine 2 () r)
+traceZero' cfg f zero' s b = do startCell <- findLeaf startPoint qt
+                                toPolyLineWith predicate $ trace startCell
   where
-    go (QuadTree c t) = QuadTree <$> traverse h c <*> goT t
+    findZero   = findZeroOnEdgeWith (cfg^.edgeTreshold) f
+    predicate  = undefined
 
-    goT = \case
-      QTLeaf p    -> QTLeaf <$> g p
-      QTNode v qs -> QTNode <$> f v <*> traverse go qs
+    s'         = s&endPoints %~ \(pt :+ _) -> pt :+ f pt -- annotate s with the sign
+    qt         = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle b) f
+    startPoint = findZero s'
+
+    trace startCell' = explorePathWith (const True) startCell' zCells
+
+    -- cells that are zero
+    zCells = NonEmpty.filter (\(p' :+ _) -> isZeroCell zero' p') . leaves . withCells $ qt
 
 
--- | Gets all cells
-cells :: QuadTree v p r -> NonEmpty (Cell r :+ Either p v)
-cells = \case
-          Leaf c p    -> (c :+ Left p)  :| []
-          Node c v qs -> (c :+ Right v) :| concatMap (NonEmpty.toList . cells) qs
+--------------------------------------------------------------------------------
 
 
--- buildQuadTree'          :: Point 2 Int -> SI -> Split v p
---                         -> (Split v p -> Split v p) -> QuadTree' v p
--- buildQuadTree' o w s = case s of
---                             No p  -> QTLeaf p
---                             Yes v -> QTNode o w v (buildQuadTree' (o .+^ Vector2 r r) r )
+-- -- | Computes the line segments representing the sides of the cells in the path
+-- withEdges             :: Fractional r
+--                       => Path CardinalDirection (v :+ Cell r)
+--                       -> Path (LineSegment 2 v r) (v :+ Cell r)
+-- withEdges (Path s xs) = Path s $ map (\x -> x&core .~ f x) xs
 --   where
---     r = w `div` 2
 
 
 
 
-data Sign = Negative | Zero | Positive deriving (Show,Eq,Ord)
+-- traceZeroFrom'            :: forall zero r b v. (Eq zero, Fractional r, Ord r)
+--                          =>
+--                          -> zero -- ^ the zero value
+--                          -> Point 2 r -> QuadTree v (Either b zero)
+--                          -> Maybe (Path CardinalDirection ((Either b zero) :+ Cell r))
+-- traceZeroFrom' zero' p qt = trace <$> findLeaf p qt
+--   where
+--     trace startCell = explorePathWith (const True) startCell zCells
+--     zCells = NonEmpty.filter (\(p' :+ _) -> isZeroCell zero' p') . leaves . withCells $ qt
 
-testSign   :: (Ord r, Num r) => (p -> r) -> p -> Sign
-testSign f = \p -> case f p `compare` 0 of
-                     LT -> Negative
-                     EQ -> Zero
-                     GT -> Positive
 
 
 
 
-offset      :: Num r => Vector 2 r -> QuadTree v p r -> QuadTree v p r
-offset v qt = qt&cell.lowerLeft %~ (.+^ v)
+--------------------------------------------------------------------------------
+-- * Tracing cells
 
-withOffset     :: Num r => Vector 2 r -> (Point 2 r -> a) -> (Point 2 r -> a)
-withOffset v f = \p -> f $ p .+^ v
-
-data Split p = No !p | Yes deriving (Show,Read,Eq,Ord)
-makePrisms ''Split
-
--- | Given a function with which to label the corners, and a test if
--- we should keep splitting builds a quadtree on the square \([0,2^i]
--- \times [0,2^i]\).
-buildQT                 :: forall r p. Fractional r
-                        => (Point 2 r -> p)
-                        -> (SI -> Quadrants p -> Split p)
-                        -> SI
-                        -> QuadTree (Quadrants p) p r
-buildQT f shouldSplit i = QuadTree (Cell origin i) $ case shouldSplit i corners of
-                                                       No p -> QTLeaf p
-                                                       Yes  -> QTNode corners chs
+-- | Given a list of cells, computes for each cell its neighboring
+withNeighbours    :: (Fractional r, Ord r)
+                  => [p :+ Cell r] -> [(p :+ Cell r) :+ Sides [p :+ Cell r]]
+withNeighbours cs = map (\c@(_ :+ me) -> c :+ neighboursOf me) cs
   where
-    corners = f <$> Quadrants (Point2 w w) (Point2 w 0) origin (Point2 0 w)
-    w = 2 `pow` i
-    j = i - 1
-    r = 2 `pow` j
+    neighboursOf me = foldMap (`relationTo` me) cs
 
-    chs = build <$> Quadrants (Vector2 r r) (Vector2 r 0) (Vector2 0 0) (Vector2 0 r)
 
-    build   :: Vector 2 r -> QuadTree (Quadrants p) p r
-    build v = offset v $ buildQT (withOffset v f) shouldSplit j
-
-shouldSplit'                                   :: Eq p => p -> SI -> Quadrants p -> Split p
-shouldSplit' z i corners | all (sgn ==) corners = No sgn
-                         | i < 0                = No z
-                         | otherwise            = Yes
+-- | Given a cell and a quadTree, finds the cells representing leaves
+-- adjacent to the given cell.
+leafNeighboursOf   :: (Fractional r, Ord r) => Cell r -> QuadTree v p -> Sides [p :+ Cell r]
+leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
   where
-    sgn = _northEast corners
-
-pow                 :: Fractional r => r -> Int -> r
-pow b i | i < 0     = 1 / (b ^ (abs i))
-        | otherwise = b ^ i
+    neighboursOf me = foldMap (`relationTo` me)
 
 
+relationTo        :: (Fractional r, Ord r) => (p :+ Cell r) -> Cell r -> Sides [p :+ Cell r]
+c `relationTo` me = f <$> Sides b l t r <*> cellSides me
+  where
+    Sides t r b l = cellSides (c^.extra)
+    -- f e e' | traceShow ("f ",e,e',e `sideIntersects` e') False = undefined
+    f e e' | e `intersects` e' = [c]
+           | otherwise         = []
+
+--------------------------------------------------------------------------------
+
+-- | edges of type e vertices of type v
+data ExplorationTree e v = Root v [RoseTree.Tree (e :+ v)] deriving (Show,Eq)
+
+-- | construct a tree traversal of the cells
+exploreWith                :: forall p r. (Ord r, Fractional r)
+                           => (p :+ Cell r -> Bool) -- ^ continue exploring?
+                           -> p :+ Cell r -- ^ start
+                           -> [p :+ Cell r] -- ^ all cells
+                           -> ExplorationTree CardinalDirection (p :+ Cell r)
+exploreWith p start' cells = go0 start'
+  where
+    cs   :: [(p :+ Cell r) :+ Sides [p :+ Cell r]]
+    cs   = withNeighbours cells
+
+    -- initially, just explore everyone
+    go0      c = Root c [ go c n | n <- neighboursOf (c^.extra), p (n^.extra) ]
+
+    -- explore only the nodes other than the one we just came from
+    go pred' r@(_ :+ c) =
+      RoseTree.Node r [ go c n | n <- neighboursOf (c^.extra), continue pred' (n^.extra)]
+
+    continue pred' n = (n^.extra) /= (pred'^.extra) && p n
+
+    neighboursOf   :: Cell r -> [CardinalDirection :+ (p :+ Cell r)]
+    neighboursOf c = case List.find (\n -> n^.core.extra == c) cs of
+                       Nothing       -> []
+                       Just (_ :+ s) -> concat $ (\d -> map (d :+)) <$> sideDirections <*> s
+
+
+-- | A path is a non-empty alternating sequence of vertices and edges. There
+-- is one more vertex than there are edges.
+data Path e v = Path v [e :+ v] deriving (Show,Eq)
+
+instance Bifunctor Path where
+  bimap = bimapDefault
+instance Bifoldable Path where
+  bifoldMap = bifoldMapDefault
+instance Bitraversable Path where
+  bitraverse f g (Path s es) = Path <$> g s <*> traverse (bitraverse f g) es
+
+
+
+-- | computes the (start vertex, the edge sequence crossed, target vertex) if it exists
+-- (and otherwise just returns the single vertex in the path)
+pathFromTo :: Path e v -> Either v (v,NonEmpty e,v)
+pathFromTo = \case
+  Path s [] -> Left s
+  Path s xs -> Right (s,NonEmpty.fromList $ map (^.core) xs, (List.last xs)^.extra)
+
+
+
+-- | Explores into a path;
+--
+-- if there are multiple choices where to go to, just pick the first
+-- one.
+explorePathWith          :: (Ord r, Fractional r)
+                         => ((p :+ Cell r) -> Bool)
+                         -> (p :+ Cell r) -> [p :+ Cell r]
+                         -> Path CardinalDirection (p :+ Cell r)
+explorePathWith p start' = toPath . exploreWith p start'
+  where
+    toPath (Root s chs) = Path s $ onFirstChild toPath' chs
+    toPath' (RoseTree.Node x chs) = (x:) $ onFirstChild toPath' chs
+    onFirstChild f = \case
+      []    -> []
+      (c:_) -> f c
+
+-- | Computes the line segments representing the sides of the cells in the path
+withEdges             :: Fractional r
+                      => Path CardinalDirection (v :+ Cell r)
+                      -> Path (LineSegment 2 v r) (v :+ Cell r)
+withEdges (Path s xs) = Path s $ map (\x -> x&core .~ f x) xs
+  where
+    f (d :+ (v :+ c)) = let e = (cellSides c)^?!ix (oppositeDirection d)
+                        in first (const v) e -- store v's in the asociated data
+
+
+-- | Turns a path into a polyline
+toPolyLineWith            :: Fractional r
+                          => (LineSegment 2 p r -> Point 2 r)
+                          -> Path CardinalDirection (p :+ Cell r)
+                          -> Maybe (PolyLine 2 () r)
+toPolyLineWith findZero p = PolyLine.fromPoints . map ext . ptsOf $ p
+  where
+    ptsOf = concat' . pathFromTo . bimap findZero (\(_ :+ c) -> midPoint c) . withEdges
+    concat' = \case
+      Left s         -> [s]
+      Right (s,es,t) -> [s] <> NonEmpty.toList es <> [t]
+
+
+toPolyLine   :: (Fractional r, Ord r)
+             => (Point 2 r -> Bool)
+             -> Path CardinalDirection (Signs sign :+ Cell r)
+             -> Maybe (PolyLine 2 () r)
+toPolyLine p = toPolyLineWith f
+  where
+    f = undefined
 
 
 
@@ -162,7 +235,26 @@ pow b i | i < 0     = 1 / (b ^ (abs i))
 
 
 
+-- relTest = let qt@(QuadTree _ t) = withCellRs $ completeTree 1
+--               (Node (_ :+ c) _) = t
+--               (Quadrants nw ne se sw) = splitCell c
+--           in (not . null) <$> (() :+ ne) `relationTo` nw
+--              -- should be west
+
+
+-- eastNeighbours    :: [p :+ Cell] -> [(p :+ Cell) :+ [p :+ Cell]]
+-- eastNeighbours cs = map (\(_ :+ c) -> Map.lookup c ns) cs
+--   where
 
 
 
-test = buildQT (testSign $ \p -> p^.yCoord - (0.5 * p^.xCoord + 0.1)) (shouldSplit' Zero) 2
+
+-- | Given a line segment with different endpoints, find the flipping point
+findZeroOnEdgeWith         :: (Fractional r, Ord r, Eq sign)
+                           => r
+                           -> (Point 2 r -> sign)
+                           -> LineSegment 2 sign r -> Point 2 r
+findZeroOnEdgeWith eps f s = interpolate tStar s
+  where
+    p t   = s^.end.extra == f (interpolate t s)
+    tStar = binarySearchUntil eps p 0 1
