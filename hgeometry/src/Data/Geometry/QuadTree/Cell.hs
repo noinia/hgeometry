@@ -126,3 +126,17 @@ quadrantOf q c = let m = midPoint c
                       (False,True)  -> SouthEast
                       (True,False)  -> NorthWest
                       (True,True)   -> SouthWest
+
+
+
+-- | Given two cells c and me, compute on which side of `me` the cell
+-- `c` is.
+--
+-- pre: c and me are non-overlapping
+relationTo        :: (Fractional r, Ord r)
+                  => (p :+ Cell r) -> Cell r -> Sides (Maybe (p :+ Cell r))
+c `relationTo` me = f <$> Sides b l t r <*> cellSides me
+  where
+    Sides t r b l = cellSides (c^.extra)
+    f e e' | e `intersects` e' = Just c
+           | otherwise         = Nothing

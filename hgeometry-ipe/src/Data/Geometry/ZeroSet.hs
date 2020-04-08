@@ -22,7 +22,7 @@ import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Split
 import           Data.Geometry.QuadTree
 import qualified Data.Geometry.QuadTree.Tree as Tree
-
+import           Data.Maybe (maybeToList)
 
 -- import           Debug.Trace
 
@@ -110,7 +110,7 @@ withNeighbours    :: (Fractional r, Ord r)
                   => [p :+ Cell r] -> [(p :+ Cell r) :+ Sides [p :+ Cell r]]
 withNeighbours cs = map (\c@(_ :+ me) -> c :+ neighboursOf me) cs
   where
-    neighboursOf me = foldMap (`relationTo` me) cs
+    neighboursOf me = foldMap (\c -> fmap maybeToList $ c `relationTo` me) cs
 
 
 -- | Given a cell and a quadTree, finds the cells representing leaves
@@ -118,16 +118,7 @@ withNeighbours cs = map (\c@(_ :+ me) -> c :+ neighboursOf me) cs
 leafNeighboursOf   :: (Fractional r, Ord r) => Cell r -> QuadTree v p -> Sides [p :+ Cell r]
 leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
   where
-    neighboursOf me = foldMap (`relationTo` me)
-
-
-relationTo        :: (Fractional r, Ord r) => (p :+ Cell r) -> Cell r -> Sides [p :+ Cell r]
-c `relationTo` me = f <$> Sides b l t r <*> cellSides me
-  where
-    Sides t r b l = cellSides (c^.extra)
-    -- f e e' | traceShow ("f ",e,e',e `sideIntersects` e') False = undefined
-    f e e' | e `intersects` e' = [c]
-           | otherwise         = []
+    neighboursOf me = foldMap (\c -> fmap maybeToList $ c `relationTo` me)
 
 --------------------------------------------------------------------------------
 

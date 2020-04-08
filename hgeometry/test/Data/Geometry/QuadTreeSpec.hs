@@ -10,7 +10,9 @@ import Data.Geometry.QuadTree.Tree(Tree(..))
 import Data.Geometry.QuadTree.Cell
 import Data.ByteString(ByteString)
 import Data.Proxy
+import Data.Maybe(isJust)
 
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = do
@@ -22,7 +24,7 @@ relTests = it "correct relation" $ do
              let qt@(QuadTree _ t) = withCells $ completeTree 1
                  (Node (_ :+ c) _) = t
                  (Quadrants nw ne se sw) = splitCell c
-                 a `hasRelTo` b = (not . null) <$> (() :+ a) `relationTo` b
+                 a `hasRelTo` b = isJust <$> (() :+ a) `relationTo` b
                  empty = pure False
              (ne `hasRelTo` nw) `shouldBe` (empty&east .~ True)
              (ne `hasRelTo` se) `shouldBe` (empty&north .~ True)
