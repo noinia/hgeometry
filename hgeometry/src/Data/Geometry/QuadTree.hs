@@ -10,30 +10,14 @@ module Data.Geometry.QuadTree-- ( module Data.Geometry.QuadTree.Cell
                              where
 
 
-import           Control.Lens (makeLenses,makePrisms,(^.),(.~),(%~),(&),(^?!),(^@.),ix,iix,view,to)
--- import           Control.Zipper
-import           Data.Bifoldable
-import           Data.Bifunctor
-import           Data.BinaryTree (RoseElem(..))
-import           Data.Bitraversable
+import           Control.Lens (makeLenses, (^.), (.~), (&), (^?!), ix, view)
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Functor.Apply
 import           Data.Geometry.Box
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Line
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import           Data.Intersection
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable.Class
-import           Data.Semigroup.Traversable.Class
-import qualified Data.Sequence as Seq
-import qualified Data.Tree as RoseTree
-import           Debug.Trace
-import           Numeric.Natural(Natural)
 import           GHC.Generics (Generic)
 import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Quadrants
@@ -41,32 +25,13 @@ import           Data.Geometry.QuadTree.Tree (Tree(..))
 import qualified Data.Geometry.QuadTree.Tree as Tree
 import           Data.Geometry.QuadTree.Split
 
-
-import           Debug.Trace
-
---------------------------------------------------------------------------------
-
--- data Quadrants a b c d = Quadrants { _northEast  :: a
---                                    , _southEast  :: b
---                                    , _southWest  :: c
---                                    , _northWest  :: d
---                                    } deriving (Show,Eq,Ord,Generic)
--- type Quadrants' a = Quadrants a a a a
-
--- qMap f g h i (Quadrants a b c d) = Quadrants (f a) (g b) (h c) (i d)
-
-
---------------------------------------------------------------------------------
---
-
-
 --------------------------------------------------------------------------------
 
 -- | Subdiv of the area from [0,2^w] x [0,2^w]
-data QuadTree v p = QuadTree { _boxWidthIndex :: WidthIndex
-                             , _tree          :: Tree v p
+data QuadTree v p = QuadTree { _boxWidthIndex :: !WidthIndex
+                             , _tree          :: !(Tree v p)
                              }
-                  deriving (Show,Eq)
+                  deriving (Show,Eq,Generic)
 makeLenses ''QuadTree
 
 --------------------------------------------------------------------------------

@@ -36,11 +36,15 @@ library
   ghc-options: -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
   exposed-modules:
-                    -- * Drawing Graps and Planar Subdivisions
+                    -- * Drawing Graphs and Planar Subdivisions
                     Data.Geometry.PlanarSubdivision.Draw
                     Data.Geometry.Arrangement.Draw
                     Data.Geometry.Triangulation.Draw
                     Data.Tree.Draw
+
+
+                    -- Data.Geometry.CatmulRomSpline
+                    Data.Geometry.QuadTree.Draw
 
                     -- * Ipe Types
                     Data.Geometry.Ipe
@@ -105,11 +109,13 @@ library
               , hexpat           >= 0.20.9
               , aeson            >= 1.0
               , yaml             >= 0.8
-
+              -- , zippers          >= 0.2
 
               , mtl
               , random
               , template-haskell
+
+              -- , hslua
 
 
   hs-source-dirs: src
