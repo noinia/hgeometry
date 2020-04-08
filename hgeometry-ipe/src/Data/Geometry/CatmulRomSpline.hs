@@ -1,4 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.CatmulRomSpline
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Catmul Rom Splines
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.CatmulRomSpline where
 
 import           Data.Ext
@@ -26,22 +36,25 @@ deriving instance Arity d => Functor (Spline d)
 
 -- | Constructs a spline from four points.
 fromPoints              :: Point d r -> Point d r -> Point d r -> Point d r -> Spline d r
-fromPoints p1 p2 p3 p4 = fromListOfPoints [p1,p2,p3,p4]
+fromPoints p1 p2 p3 p4 = fromListOfPointsUnsafe [p1,p2,p3,p4]
 
--- | Constructs a spline from a list of, at least four, points.
-fromListOfPoints :: [Point d r] -> Spline d r
-fromListOfPoints = Spline . LSeq.promise . LSeq.fromList
+-- | Constructs a spline from a list of, at least four, points..
+fromListOfPoints :: [Point d r] -> Maybe (Spline d r)
+fromListOfPoints = fmap Spline . LSeq.eval (C @4) . LSeq.fromList
+
+fromListOfPointsUnsafe :: [Point d r] -> Spline d r
+fromListOfPointsUnsafe = Spline . LSeq.promise . LSeq.fromList
 
 
 -- | Converts a CatmulRom Spline into a series of Cubic Bezier curves.
-toCubicBezier  :: (Arity d, Fractional r) => Spline d r -> NonEmpty (CubicBezier d r)
+toCubicBezier  :: (Arity d, Fractional r) => Spline d r -> NonEmpty (BezierSpline 3 d r)
 toCubicBezier (Spline (toList -> pts)) =
     NonEmpty.fromList $ List.zipWith4 f pts (drop 1 pts) (drop 2 pts) (drop 3 pts)
     -- note that since the spline is guaranteed to contain at least four points, the
     -- drop's are safe, and so is  the conversion into a NonEmpty list.
   where
     f p1 p2 p3 p4 =
-      CubicBezier p2 (p2 .+^ ((p1 .-. p3) ^/ (6*tau))) (p3 .-^ ((p4 .-. p2) ^/ (6*tau))) p3
+      Bezier3 p2 (p2 .+^ ((p1 .-. p3) ^/ (6*tau))) (p3 .-^ ((p4 .-. p2) ^/ (6*tau))) p3
 
     -- the tension
     tau = 1 / 2
