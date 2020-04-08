@@ -5,6 +5,7 @@ module Data.Geometry.Box.Sides( Sides(Sides), north, east, south, west
 
                               , CardinalDirection(..)
                               , _North, _East, _South, _West
+                              , oppositeDirection, sideDirections
                               ) where
 
 import Data.Geometry.Box.Internal
@@ -53,6 +54,19 @@ instance Ixed (Sides a) where
     East  -> east
     South -> south
     West  -> west
+
+-- | Constructs a Sides value that indicates the appropriate
+-- direction.
+sideDirections :: Sides CardinalDirection
+sideDirections = Sides North East South West
+
+-- | Computes the direction opposite to the given one.
+oppositeDirection :: CardinalDirection -> CardinalDirection
+oppositeDirection = \case
+  North -> South
+  East  -> West
+  South -> North
+  West  -> East
 
 --------------------------------------------------------------------------------
 
