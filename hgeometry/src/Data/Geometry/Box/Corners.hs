@@ -1,18 +1,17 @@
 {-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
-                                , corners
-
-                                , InterCardinalDirection(..)
-                                , _NorthWest, _NorthEast, _SouthEast, _SouthWest
+                                , corners, cornersInDirection
                                 ) where
 
-import Control.Lens (makeLenses,makePrisms,Ixed(..),Index, IxValue,(%~),(&))
+import Control.Lens (makeLenses,makePrisms,Ixed(..),Index, IxValue,(%~),(&),(^?!))
 import Data.Ext
 import Data.Functor.Apply
 import Data.Geometry.Box.Internal
+import Data.Geometry.Directions
 import Data.Geometry.Point
 import Data.Semigroup.Foldable.Class
 import Data.Semigroup.Traversable.Class
+import Data.Util
 import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
@@ -25,10 +24,6 @@ data Corners a = Corners { _northWest  :: !a
                          } deriving (Show,Eq,Ord,Generic,Functor,Foldable,Traversable)
 makeLenses ''Corners
 
--- | Data Type to index Corners
-data InterCardinalDirection = NorthWest | NorthEast | SouthEast | SouthWest
-  deriving (Show,Read,Eq,Ord,Generic)
-makePrisms ''InterCardinalDirection
 
 type instance Index   (Corners a) = InterCardinalDirection
 type instance IxValue (Corners a) = a
@@ -66,3 +61,10 @@ corners r     = let w = width r
                     q = (_minP r)&core %~ _cwMin
                 in Corners (p&core.xCoord %~ (subtract w)) p
                            (q&core.xCoord %~ (+ w))        q
+
+
+--------------------------------------------------------------------------------
+
+-- | Gets the corners in a particular direction
+cornersInDirection     :: CardinalDirection -> Corners p -> Two p
+cornersInDirection d c = (\icd -> c^?!ix icd) <$> interCardinalsOf d

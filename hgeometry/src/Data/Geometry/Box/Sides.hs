@@ -3,20 +3,18 @@ module Data.Geometry.Box.Sides( Sides(Sides), north, east, south, west
                               , topSide, bottomSide, leftSide, rightSide
                               , sides, sides'
 
-                              , CardinalDirection(..)
-                              , _North, _East, _South, _West
-                              , oppositeDirection, sideDirections
+                              , sideDirections
                               ) where
 
+import Data.Geometry.Directions
 import Data.Geometry.Box.Internal
 import Data.Geometry.Box.Corners
 import Data.Geometry.LineSegment
-import Data.Geometry.Vector
 import Data.Functor.Apply
 import Data.Semigroup.Foldable.Class
 import Data.Semigroup.Traversable.Class
 import GHC.Generics (Generic)
-import Control.Lens(makeLenses, makePrisms,Ixed(..),Index, IxValue)
+import Control.Lens(makeLenses, Ixed(..), Index, IxValue)
 
 --------------------------------------------------------------------------------
 
@@ -42,9 +40,6 @@ instance Monoid a => Monoid (Sides a) where
   mempty = pure mempty
 
 
-data CardinalDirection = North | East | South | West deriving (Show,Read,Eq,Ord)
-makePrisms ''CardinalDirection
-
 type instance Index   (Sides a) = CardinalDirection
 type instance IxValue (Sides a) = a
 
@@ -59,14 +54,6 @@ instance Ixed (Sides a) where
 -- direction.
 sideDirections :: Sides CardinalDirection
 sideDirections = Sides North East South West
-
--- | Computes the direction opposite to the given one.
-oppositeDirection :: CardinalDirection -> CardinalDirection
-oppositeDirection = \case
-  North -> South
-  East  -> West
-  South -> North
-  West  -> East
 
 --------------------------------------------------------------------------------
 
