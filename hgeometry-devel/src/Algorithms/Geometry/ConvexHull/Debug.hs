@@ -127,7 +127,7 @@ drawAt t h (Bridge l r) pts = fromContent $
 drawHull       :: NonEmpty Index -> V.Vector (Point 2 r) -> IpeObject r
 drawHull h pts = case h of
     (i :| []) -> iO' (pts V.! i)
-    _         -> iO . ipePolyLine . fromPoints $ [ (pts V.! i) :+ () | i <- NonEmpty.toList h ]
+    _         -> iO . ipePolyLine . fromPointsUnsafe $ [ (pts V.! i) :+ () | i <- NonEmpty.toList h ]
 
 drawBridge         :: Index -> Index -> V.Vector (Point 2 r) -> IpeObject r
 drawBridge l r pts | l == r    = iO'' (pts V.! l) (attr SStroke red)

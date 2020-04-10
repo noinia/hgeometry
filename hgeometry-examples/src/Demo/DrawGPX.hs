@@ -8,6 +8,7 @@ module Demo.DrawGPX where
 import           Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 import           Control.Applicative
 import           Control.Lens
+import           Control.Monad
 import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -135,7 +136,7 @@ colors = map (T.unwords . map (T.pack . printf "%.4f" . (/ 256.0))) colors'
 
 
 asPolyLine :: Track -> Maybe (PolyLine 2 Time Rational)
-asPolyLine = fmap fromPoints . f . map toPt . _trackPoints
+asPolyLine = fromPoints <=< f . map toPt . _trackPoints
   where
     f xs@(_:_:_) = Just xs
     f _          = Nothing

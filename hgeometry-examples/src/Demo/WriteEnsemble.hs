@@ -51,7 +51,7 @@ mainWith (Options kind inPath outPath) = do
           "precip" -> asPrecipPt
           _        -> asTempPt
     polies <- mapM (fmap (asPts f) . readFile' . ((inPath ++ "/") ++)) inFiles
-    let polies' = map (fromPoints . take 100) . trim $ polies
+    let polies' = map (fromPointsUnsafe . take 100) . trim $ polies
     writeIpeFile outPath . singlePageFromContent . map iO' $ polies'
 
 readFile'    :: String -> IO T.Text
