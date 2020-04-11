@@ -1,5 +1,8 @@
 module Data.Tree.Util where
 
+import           Data.Bifoldable
+import           Data.Bifunctor
+import           Data.Bitraversable
 import           Control.Lens
 import           Control.Monad ((>=>))
 import qualified Data.List as List
@@ -17,6 +20,21 @@ import           Data.Tree
 --                     , Node 3 [ Node 4 [] ]
 --                     ]
 -- :}
+
+
+--------------------------------------------------------------------------------
+
+-- | Nodes in a tree are typically either an internal node or a leaf node
+data TreeNode v a = InternalNode v | LeafNode a deriving (Show,Eq)
+
+instance Bifunctor TreeNode where
+  bimap = bimapDefault
+instance Bifoldable TreeNode where
+  bifoldMap = bifoldMapDefault
+instance Bitraversable TreeNode where
+  bitraverse f g = \case
+    InternalNode v -> InternalNode <$> f v
+    LeafNode l     -> LeafNode     <$> g l
 
 --------------------------------------------------------------------------------
 -- * Zipper on rose trees

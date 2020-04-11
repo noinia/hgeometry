@@ -20,6 +20,7 @@ import           Data.Measured.Class
 import           Data.Measured.Size
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
+import           Data.Tree.Util (TreeNode(..))
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
 import           Test.QuickCheck
@@ -118,16 +119,13 @@ zipExactWith _ _ _            _               =
 --------------------------------------------------------------------------------
 -- * Converting into a Data.Tree
 
-data RoseElem v a = InternalNode v | LeafNode a deriving (Show,Eq,Functor)
-
-toRoseTree              :: BinLeafTree v a -> Tree.Tree (RoseElem v a)
+toRoseTree              :: BinLeafTree v a -> Tree.Tree (TreeNode v a)
 toRoseTree (Leaf x)     = Tree.Node (LeafNode x) []
 toRoseTree (Node l v r) = Tree.Node (InternalNode v) (map toRoseTree [l,r])
 
 
 drawTree :: (Show v, Show a) => BinLeafTree v a -> String
 drawTree = Tree.drawTree . fmap show . toRoseTree
-
 
 --------------------------------------------------------------------------------
 -- * Internal Node Tree

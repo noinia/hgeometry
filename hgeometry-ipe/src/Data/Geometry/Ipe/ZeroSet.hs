@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.ZeroSet where
 
 import           Algorithms.BinarySearch
@@ -29,7 +30,7 @@ import           Data.Intersection
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
-
+import           Data.Tree.Util (TreeNode(..))
 import           Data.Geometry.Ipe.Writer
 
 import           Debug.Trace
@@ -45,13 +46,23 @@ drawZeroCell' = \(p :+ c) -> case p of
                                Right _    -> drawCell c
 
 
-drawCorners :: Fractional r => IpeOut (Either (Corners Sign) Sign :+ Cell r) Ipe.Group r
+drawCorners :: Fractional r => IpeOut (Either (Corners Sign) p :+ Cell r) Ipe.Group r
 drawCorners = \(p :+ c) -> ipeGroup $ case p of
                               Left ss -> toList $ draw <$> cellCorners c <*> ss
                               Right _ -> []
   where
     draw     :: Point 2 r -> Sign -> Ipe.IpeObject r
     draw q s = iO $ defIO q ! attr SStroke (toColor s)
+
+
+drawCell' :: Fractional r => IpeOut (TreeNode (Corners Sign) p :+ Cell r) Ipe.Group r
+drawCell' = \(tn :+ c) -> ipeGroup [ iO $ drawCell c, iO $ drawCorners (toEither tn :+ c)
+                                   ]
+
+toEither :: TreeNode v p -> Either v p
+toEither = \case
+  InternalNode v -> Left v
+  LeafNode l     -> Right l
 
 toColor :: Sign -> IpeColor r
 toColor = \case
@@ -72,8 +83,9 @@ addD xs = map (fmap $ realToFrac @R @Double) xs
 
 test' :: IO ()
 test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
-        [ iO $ drawQuadTreeWith (drawZeroCell @R) qt
-        , iO $ defIO pl
+        [ -- iO $ drawQuadTreeWith (drawZeroCell @R) qt ! attr SLayer "qt"
+         iO $ defIO pl ! attr SLayer "pl"
+        , iO $ quadTreeLevels drawCell' qt
         ]
   where
     f   :: Point 2 R -> R
@@ -89,65 +101,3 @@ test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
     qt = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle rect) (fromSignum f)
 
     cfg = defaultZeroConfig
-
-
--- testT :: QuadTree (Quadrants Sign) (Either (Quadrants Sign) Sign)
--- testT = fromZeros (Cell 8 origin) f
---   where
---     r = 90.5 :: R -- draw circle of radius r
-
-
--- centerPoints :: (Functor f, Fractional r) => f (p :+ Cell r) -> f (Point 2 r :+ p)
--- centerPoints = fmap (\(p :+ c) -> midPoint c :+ p)
-
-
--- traceZeroFrom'            :: forall zero r b v. (Eq zero, Fractional r, Ord r)
---                          => zero -- ^ the zero value
---                          -> Point 2 r -> QuadTree v (Either b zero)
---                          -> Maybe (PolyLine 2 () r)
--- traceZeroFrom' = toPolyLineWith findZeroOnEdge
-
---
-
-
-
--- findZeroOnEdge :: Fractional r => LineSegment 2 sign r -> Point 2 r
--- findZeroOnEdge = interpolate (1 / 2)
-
-
-
-
-
--- startCell :: Maybe (Either (Quadrants Sign) Sign :+ Cell)
--- startCell = findLeaf myStartP testT
-
--- trace startP qt = case findLeaf startP qt of
---                     Nothing        -> []
---                     Just startCell -> NonEmpty.toList $ explorePathWith (const True) startCell zCells
---   where
---     zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell Zero p)
---            . leaves $ qt'
---     qt' = withCells qt
-    -- start =
-
-    -- [start] = filter (\(_ :+ c) -> startP `intersects` c) zCells
-
-
-
--- testTrace = trace myStartP testT
-
--- myStartP = (Point2 0 (90.5 :: Rational))
-
--- [startX] = filter (\(_ :+ c) -> myStartP `intersects` c) zCells
-
--- findS :: [(p :+ Cell) :+ e] -> [(p :+ Cell) :+ e]
--- findS = filter (\((_ :+ c) :+ _) -> myStartP `intersects` c)
-
-
--- zCells = NonEmpty.filter (\(p :+ _) -> isZeroCell p)
---        . leaves . withCells $ testT
-
-
-
-
--- testTrace =

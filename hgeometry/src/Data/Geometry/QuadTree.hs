@@ -15,16 +15,16 @@ import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
 import           Data.Geometry.Point
+import           Data.Geometry.QuadTree.Cell
+import           Data.Geometry.QuadTree.Quadrants
+import           Data.Geometry.QuadTree.Split
+import           Data.Geometry.QuadTree.Tree (Tree(..))
+import qualified Data.Geometry.QuadTree.Tree as Tree
 import           Data.Geometry.Vector
 import           Data.Intersection
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Tree.Util (TreeNode(..), levels)
 import           GHC.Generics (Generic)
-import           Data.Geometry.QuadTree.Cell
-import           Data.Geometry.QuadTree.Quadrants
-import           Data.Geometry.QuadTree.Tree (Tree(..))
-import qualified Data.Geometry.QuadTree.Tree as Tree
-import           Data.Geometry.QuadTree.Split
-
 --------------------------------------------------------------------------------
 
 -- | Subdiv of the area from [0,2^w] x [0,2^w]
@@ -46,6 +46,10 @@ withCellsTree (QuadTree w t) = Tree.withCells (Cell w origin) t
 
 leaves :: QuadTree v p -> NonEmpty p
 leaves = Tree.leaves . view tree
+
+perLevel :: QuadTree v p -> NonEmpty (NonEmpty (TreeNode v p))
+perLevel = levels . Tree.toRoseTree . view tree
+
 
 --------------------------------------------------------------------------------
 
@@ -196,35 +200,3 @@ completeTree w0 =
     build (\_ w -> if w == 0 then No () else Yes () (pure $ w - 1)) (Cell w0 origin) w0
 
 --------------------------------------------------------------------------------
-
-
-
--- neighbours   :: _ :> zipper -> [zipper]
--- neighbours z = upwards
-
-
--- test :: Top :> (Quadrants a :@ Directions) a
--- test = zipper (Quadrants _ _ _ _) & downward northEast
-
--- data TZ a = TZ { _focus            :: RoseTree.Tree a
---                , _leftSiblings     :: [RoseTree.Tree a]
---                , _rightSiblings    :: [RoseTree.Tree a]
---                , _parent           :: Maybe (TZ a)
---                }
-
--- toRoot t = TZ t [] [] Nothing2
-
--- toFirstChild :: TZ a -> Maybe (TZ a)
--- toFirstChild z@(TZ (RoseTree.Node _ chs) _ _ _) = case chs of
---                                                       []       -> Nothing
---                                                       (c:chs') -> Just $ TZ c [] chs' (Just z)
-
-
-
-
--- toParent (TZ t ls rs mp) = case mp of
---     Nothing -> Nothing
---     Just (TZ x als ars mg) -> Just
---                            $ TZ (RoseTree.Node (root x) (reverse ls <> [t] <> rs)) als ars mg
---   where
---     root (RoseTree.Node x _) = x

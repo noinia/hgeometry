@@ -6,7 +6,6 @@ module Data.Geometry.QuadTree.Tree where
 import           Control.Lens (makePrisms)
 import           Data.Bifoldable
 import           Data.Bifunctor
-import           Data.BinaryTree (RoseElem(..))
 import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -20,6 +19,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable.Class
 import           Data.Semigroup.Traversable.Class
 import qualified Data.Tree as RoseTree
+import           Data.Tree.Util (TreeNode(..))
 
 --------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ leaves :: Tree v p -> NonEmpty p
 leaves = NonEmpty.fromList . bifoldMap (const []) (:[])
 
 -- | Converts into a RoseTree
-toRoseTree :: Tree v p -> RoseTree.Tree (RoseElem v p)
+toRoseTree :: Tree v p -> RoseTree.Tree (TreeNode v p)
 toRoseTree = foldTree (\p    -> RoseTree.Node (LeafNode p)     [])
                       (\v qs -> RoseTree.Node (InternalNode v) (F.toList qs))
 
