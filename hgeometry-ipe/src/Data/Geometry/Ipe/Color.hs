@@ -12,17 +12,27 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Ipe.Color where
 
-import           Data.Colour.SRGB (RGB(..))
-import           Data.Geometry.Ipe.Value
-import           Data.Text
+import Data.Colour.SRGB (RGB(..))
+import Data.Geometry.Ipe.Value
+import Data.Text
+import Data.Traversable
 --------------------------------------------------------------------------------
 
-newtype IpeColor r = IpeColor (IpeValue (RGB r))    deriving (Show,Read,Eq)
+newtype IpeColor r = IpeColor (IpeValue (RGB r)) deriving (Show,Read,Eq)
 
 instance Ord r => Ord (IpeColor r) where
   (IpeColor c) `compare` (IpeColor c') = fmap f c `compare` fmap f c'
     where
       f (RGB r g b) = (r,g,b)
+
+instance Functor IpeColor where
+  fmap = fmapDefault
+instance Foldable IpeColor where
+  foldMap = foldMapDefault
+instance Traversable IpeColor where
+  traverse f (IpeColor v) = IpeColor <$> traverse traverseRGB v
+    where
+      traverseRGB (RGB r g b) = RGB <$> f r <*> f g <*> f b
 
 -- | Creates a named color
 named :: Text -> IpeColor r

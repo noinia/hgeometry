@@ -120,10 +120,10 @@ instance Fractional r => IsTransformable (IpeSymbol r) where
 -- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    | PolygonPath            (SimplePolygon () r)
-                     -- TODO
                    | CubicBezierSegment     (BezierSpline 3 2 r)
-                   | QuadraticBezierSegment -- (QuadraticBezier 2 r)
-                   | EllipseSegment (Matrix 3 3 r)
+                   | QuadraticBezierSegment (BezierSpline 2 2 r)
+                   | EllipseSegment         (Matrix 3 3 r)
+                     -- TODO
                    | ArcSegment
                    | SplineSegment          -- (Spline 2 r)
                    | ClosedSplineSegment    -- (ClosedSpline 2 r)
@@ -139,20 +139,22 @@ instance Foldable PathSegment where
   foldMap = foldMapDefault
 instance Traversable PathSegment where
   traverse f = \case
-    PolyLineSegment p       -> PolyLineSegment <$> bitraverse pure f p
-    PolygonPath p           -> PolygonPath <$> bitraverse pure f p
-    CubicBezierSegment b    -> CubicBezierSegment <$> traverse f b
-    QuadraticBezierSegment  -> pure QuadraticBezierSegment
-    EllipseSegment m        -> EllipseSegment <$> traverse f m
-    ArcSegment              -> pure ArcSegment
-    SplineSegment           -> pure SplineSegment
-    ClosedSplineSegment     -> pure ClosedSplineSegment
+    PolyLineSegment p        -> PolyLineSegment <$> bitraverse pure f p
+    PolygonPath p            -> PolygonPath <$> bitraverse pure f p
+    CubicBezierSegment b     -> CubicBezierSegment <$> traverse f b
+    QuadraticBezierSegment b -> QuadraticBezierSegment <$> traverse f b
+    EllipseSegment m         -> EllipseSegment <$> traverse f m
+    ArcSegment               -> pure ArcSegment
+    SplineSegment            -> pure SplineSegment
+    ClosedSplineSegment      -> pure ClosedSplineSegment
 
 instance Fractional r => IsTransformable (PathSegment r) where
-  transformBy t (PolyLineSegment p) = PolyLineSegment $ transformBy t p
-  transformBy t (PolygonPath p)     = PolygonPath $ transformBy t p
-  transformBy _ _                   = error "transformBy: not implemented yet"
-
+  transformBy t = \case
+    PolyLineSegment p        -> PolyLineSegment $ transformBy t p
+    PolygonPath p            -> PolygonPath $ transformBy t p
+    CubicBezierSegment b     -> CubicBezierSegment $ transformBy t b
+    QuadraticBezierSegment b -> QuadraticBezierSegment $ transformBy t b
+    _                        -> error "transformBy: not implemented yet"
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: LSeq.LSeq 1 (PathSegment r) }

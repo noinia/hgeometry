@@ -73,7 +73,6 @@ newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
              (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
 
 
-
 deriving instance Eq   (Apply f label) => Eq   (Attr f label)
 deriving instance Ord  (Apply f label) => Ord  (Attr f label)
 
@@ -87,6 +86,14 @@ pattern Attr x = GAttr (Just x)
 pattern NoAttr :: Attr f label
 pattern NoAttr = GAttr Nothing
 {-# COMPLETE NoAttr, Attr #-}
+
+
+traverseAttr   :: Applicative h => (Apply f label -> h (Apply g label))
+               -> Attr f label -> h (Attr g label)
+traverseAttr f = \case
+  Attr x -> Attr <$> f x
+  NoAttr -> pure NoAttr
+
 
 instance Show (Apply f label) => Show (Attr f label) where
   showsPrec d NoAttr   = showParen (d > app_prec) $ showString "NoAttr"
@@ -140,6 +147,22 @@ instance RecApplicative ats => Monoid (Attributes f ats) where
 
 instance Semigroup (Attributes f ats) where
   (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith mappend as bs
+
+
+-- traverseAttrs               :: Applicative h
+--                             => ((forall label. Apply f label -> h (Apply g label)))
+--                             -> Attributes f ats -> h (Attributes g ats)
+-- traverseAttrs f (Attrs ats) = Attrs <$> rtraverse (traverseAttr f) ats
+
+traverseAttrs               :: Applicative h
+                            => (forall label. Attr f label -> h (Attr g label))
+                            -> Attributes f ats -> h (Attributes g ats)
+traverseAttrs f (Attrs ats) = Attrs <$> rtraverse f ats
+
+-- withF   :: Applicative h
+--         => (forall label proxy. proxy label -> Apply f label -> h (Apply g label))
+--         -> (forall label. Attr f label  -> h (Attr g label))
+-- withF f = undefined
 
 
 
@@ -225,11 +248,8 @@ data TransformationTypes = Affine | Rigid | Translations deriving (Show,Read,Eq)
 -- data SymbolAttributeUniverse = SymbolStroke | SymbolFill | SymbolPen | Size
 --                              deriving (Show,Eq)
 
-
-
-newtype IpeSize  r = IpeSize  (IpeValue r)          deriving (Show,Eq,Ord)
-newtype IpePen   r = IpePen   (IpeValue r)          deriving (Show,Eq,Ord)
-
+newtype IpeSize  r = IpeSize  (IpeValue r) deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+newtype IpePen   r = IpePen   (IpeValue r) deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 
 -- -- | And the corresponding types
@@ -259,7 +279,7 @@ newtype IpePen   r = IpePen   (IpeValue r)          deriving (Show,Eq,Ord)
 -- | Possible values for Dash
 data IpeDash r = DashNamed Text
                | DashPattern [r] r
-               deriving (Show,Eq)
+               deriving (Show,Eq,Functor,Foldable,Traversable)
 
 -- | Allowed Fill types
 data FillType = Wind | EOFill deriving (Show,Read,Eq)
@@ -272,7 +292,7 @@ type IpeGradient = Text
 -- | Possible values for an ipe arrow
 data IpeArrow r = IpeArrow { _arrowName :: Text
                            , _arrowSize :: IpeSize r
-                           } deriving (Show,Eq)
+                           } deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''IpeArrow
 
 normalArrow :: IpeArrow r

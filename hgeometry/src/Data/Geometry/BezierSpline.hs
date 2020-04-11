@@ -20,6 +20,7 @@ import           Control.Lens hiding (Empty)
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
+import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.LSeq (LSeq)
 import qualified Data.LSeq as LSeq
@@ -74,7 +75,12 @@ instance Arity d => Foldable (BezierSpline n d) where
 instance Arity d => Traversable (BezierSpline n d) where
   traverse f (BezierSpline ps) = BezierSpline <$> traverse (traverse f) ps
 
+instance (Fractional r, Arity d, Arity (d + 1), Arity n)
+          => IsTransformable (BezierSpline n d r) where
+  transformBy = transformPointFunctor
 
+instance PointFunctor (BezierSpline n d) where
+  pmap f = over controlPoints (fmap f)
 
 -- | Evaluate a BezierSpline curve at time t in [0, 1]
 --
