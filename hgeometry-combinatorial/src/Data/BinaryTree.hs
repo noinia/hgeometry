@@ -1,5 +1,4 @@
 {-# Language DeriveFunctor#-}
-{-# Language FunctionalDependencies #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.BinaryTree
@@ -17,12 +16,13 @@ import           Control.DeepSeq
 import           Data.Bifunctor.Apply
 import           Data.List.NonEmpty (NonEmpty)
 import           Data.Maybe (mapMaybe)
+import           Data.Measured.Class
+import           Data.Measured.Size
 import           Data.Semigroup.Foldable
 import qualified Data.Tree as Tree
 import qualified Data.Vector as V
 import           GHC.Generics (Generic)
 import           Test.QuickCheck
-
 --------------------------------------------------------------------------------
 
 -- | Binary tree that stores its values (of type a) in the leaves. Internal
@@ -32,9 +32,6 @@ data BinLeafTree v a = Leaf !a
                      deriving (Show,Read,Eq,Ord,Functor,Generic)
 
 instance (NFData v, NFData a) => NFData (BinLeafTree v a)
-
-class Semigroup v => Measured v a | a -> v where
-  measure :: a -> v
 
 -- | smart constructor
 node     :: Measured v a => BinLeafTree v a -> BinLeafTree v a -> BinLeafTree v a
@@ -116,35 +113,6 @@ zipExactWith f g (Node l m r) (Node l' m' r') = Node (zipExactWith f g l l')
 zipExactWith _ _ _            _               =
     error "zipExactWith: tree structures not the same "
 
-newtype Size = Size Int deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord,Generic,NFData)
-
-instance Semigroup Size where
-  x <> y = x + y
-
-instance Monoid Size where
-  mempty = Size 0
-  mappend = (<>)
-
-newtype Elem a = Elem { _unElem :: a }
-               deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
-
-instance Measured Size (Elem a) where
-  measure _ = 1
-
-
-data Sized a = Sized !Size a
-             deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
-instance NFData a => NFData (Sized a)
-
-instance Semigroup a => Semigroup (Sized a) where
-  (Sized i a) <> (Sized j b) = Sized (i <> j) (a <> b)
-
-instance Monoid a => Monoid (Sized a) where
-  mempty = Sized mempty mempty
-  (Sized i a) `mappend` (Sized j b) = Sized (i <> j) (a `mappend` b)
-
--- instance Semigroup a => Measured Size (Sized a) where
---   measure (Sized i _) = i
 
 
 --------------------------------------------------------------------------------

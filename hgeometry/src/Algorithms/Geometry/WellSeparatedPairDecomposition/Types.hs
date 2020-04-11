@@ -19,6 +19,7 @@ import           Data.Geometry.Box
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import qualified Data.LSeq as LSeq
+import           Data.Measured.Class
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 

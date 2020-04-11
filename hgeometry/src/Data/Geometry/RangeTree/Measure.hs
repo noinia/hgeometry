@@ -1,6 +1,6 @@
 module Data.Geometry.RangeTree.Measure where
 
-import           Data.BinaryTree(Measured(..))
+import Data.Measured.Class
 import Data.Functor.Product(Product(..))
 import Data.Functor.Classes
 

@@ -9,6 +9,8 @@ import           Data.Geometry.RangeTree.Measure
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Range
+import           Data.Measured.Class
+import           Data.Measured.Size
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
 import qualified Data.Set as Set

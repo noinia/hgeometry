@@ -8,21 +8,22 @@ import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.BinaryTree
 import qualified Data.CircularList as CL
-import qualified Data.CircularSeq as CS
 import qualified Data.CircularList.Util as CU
+import qualified Data.CircularSeq as CS
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Geometry hiding (rotateTo)
 import           Data.Geometry.Ball (disk, insideBall)
 import           Data.Geometry.Polygon
-import qualified Data.Geometry.Polygon.Convex as Convex
 import           Data.Geometry.Polygon.Convex (ConvexPolygon(..), simplePolygon)
+import qualified Data.Geometry.Polygon.Convex as Convex
 import qualified Data.IntMap.Strict as IM
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (fromJust, fromMaybe)
+import           Data.Measured.Size
 import qualified Data.Vector as V
 
 -------------------------------------------------------------------------------

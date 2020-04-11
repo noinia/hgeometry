@@ -34,6 +34,8 @@ import           Data.Geometry.Properties
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Measured.Class
+import           Data.Measured.Size
 import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
@@ -73,7 +75,7 @@ makeLenses ''SegmentTree
 --                         AtomicRange -> OpenRange   MinInfinity MaxInfinity
 
 
-data BuildLeaf a = LeafSingleton a | LeafRange a a deriving (Show,Eq)
+data BuildLeaf a = LeafSingleton !a | LeafRange !a !a deriving (Show,Eq)
 
 -- | Given a sorted list of endpoints, without duplicates, construct a segment tree
 --

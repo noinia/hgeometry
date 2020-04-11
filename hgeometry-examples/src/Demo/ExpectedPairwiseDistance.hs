@@ -11,13 +11,15 @@ import           Data.BinaryTree
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Char (isSpace)
+import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
+import           Data.Measured.Class
+import           Data.Measured.Size
 import           Data.Proxy
-import           Data.Data
 import           Data.Semigroup
 import qualified Data.Set as Set
 import           GHC.TypeLits

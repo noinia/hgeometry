@@ -2,7 +2,6 @@
 module Data.Geometry.RangeTree where
 
 import           Control.Lens hiding (element)
-import           Data.BinaryTree (Measured(..))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
@@ -11,6 +10,7 @@ import           Data.Geometry.RangeTree.Measure
 import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Measured.Class
 import           Data.Proxy
 import           Data.Range
 import           Data.Semigroup.Foldable
