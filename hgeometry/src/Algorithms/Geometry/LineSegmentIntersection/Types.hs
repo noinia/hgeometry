@@ -16,6 +16,8 @@ import           GHC.Generics
 
 --------------------------------------------------------------------------------
 
+type Compare a = a -> a -> Ordering
+
 -- get the endpoints of a line segment
 endPoints'   :: (HasEnd s, HasStart s) => s -> (StartCore s, EndCore s)
 endPoints' s = (s^.start.core,s^.end.core)

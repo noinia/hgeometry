@@ -26,7 +26,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Ord (Down(..), comparing)
-import           Data.OrdSeq (Compare)
 import qualified Data.Set as SS -- status struct
 import qualified Data.Set.Util as SS -- status struct
 import qualified Data.Set as EQ -- event queue
