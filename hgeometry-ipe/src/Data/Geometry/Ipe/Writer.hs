@@ -22,7 +22,7 @@ module Data.Geometry.Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
                                , ipeWriteAttrs, writeAttrValues
                                ) where
 
-import           Control.Lens ((^.), (^..), (.~), (&))
+import           Control.Lens (view, (^.), (^..), (.~), (&))
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import           Data.Colour.SRGB (RGB(..))
@@ -34,6 +34,7 @@ import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Path
 import           Data.Geometry.Ipe.Value
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -133,7 +134,7 @@ instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
 -- | Functon to write all attributes in a Rec
 ipeWriteAttrs           :: ( RecordToList rs, RMap rs
                            , ReifyConstraint IpeWriteText (Attr f) rs
-                           , AllSatisfy IpeAttrName rs
+                           , AllConstrained IpeAttrName rs
                            , RecAll (Attr f) rs IpeWriteText
                            ) => IA.Attributes f rs -> [(Text,Text)]
 ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNames  r)
@@ -244,7 +245,7 @@ instance IpeWriteText r => IpeWriteText (IpeArrow r) where
                                                             <*> ipeWriteText s
 
 instance IpeWriteText r => IpeWriteText (Path r) where
-  ipeWriteText = fmap concat' . sequence . fmap ipeWriteText . _pathSegments
+  ipeWriteText = fmap concat' . sequence . fmap ipeWriteText . view pathSegments
     where
       concat' = F.foldr1 (\t t' -> t <> "\n" <> t')
 
@@ -320,7 +321,7 @@ instance (IpeWriteText r) => IpeWrite (Group r) where
   ipeWrite (Group gs) = ipeWrite gs
 
 
-instance ( AllSatisfy IpeAttrName rs
+instance ( AllConstrained IpeAttrName rs
          , RecordToList rs, RMap rs
          , ReifyConstraint IpeWriteText (Attr f) rs
          , RecAll (Attr f) rs IpeWriteText
@@ -375,10 +376,10 @@ instance IpeWrite LayerName where
 
 instance IpeWrite View where
   ipeWrite (View lrs act) = Just $ Element "view" [ ("layers", ls)
-                                                  , ("active", _layerName act)
+                                                  , ("active", act^.layerName)
                                                   ] []
     where
-      ls = Text.unwords .  map _layerName $ lrs
+      ls = Text.unwords .  map (^.layerName) $ lrs
 
 instance (IpeWriteText r)  => IpeWrite (IpePage r) where
   ipeWrite (IpePage lrs vs objs) = Just .

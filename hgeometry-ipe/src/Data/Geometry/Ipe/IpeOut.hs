@@ -22,10 +22,12 @@ import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Color (IpeColor(..))
+import           Data.Geometry.Ipe.Content
 import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
@@ -161,6 +163,10 @@ instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
   defIO = ipeDisk
 
+instance Floating r => HasDefaultIpeOut (Circle p r) where
+  type DefaultIpeOut (Circle p r) = Path
+  defIO = ipeCircle
+
 instance Num r => HasDefaultIpeOut (Rectangle p r) where
   type DefaultIpeOut (Rectangle p r) = Path
   defIO = ipeRectangle
@@ -192,6 +198,10 @@ ipeCircle (Circle (c :+ _) r) = (path $ EllipseSegment m) :+ mempty
         m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
         -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
         -- get the input circle.
+
+-- ipeBezier :: (n <= 3) => IpeOut (Bezier n d r) Path r
+-- ipeBezier
+
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r

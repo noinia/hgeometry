@@ -7,7 +7,7 @@ import           Data.Char (isSpace)
 import           Data.Ext (ext)
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.ParserPrimitives
-import           Data.Geometry.Ipe.Types (Operation(..))
+import           Data.Geometry.Ipe.Path (Operation(..))
 import           Data.Geometry.Point
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector

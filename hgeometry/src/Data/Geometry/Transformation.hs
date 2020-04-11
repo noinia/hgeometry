@@ -65,6 +65,8 @@ deriving instance (Show r, Arity (d + 1)) => Show (Transformation d r)
 deriving instance (Eq r, Arity (d + 1))   => Eq (Transformation d r)
 deriving instance (Ord r, Arity (d + 1))  => Ord (Transformation d r)
 deriving instance Arity (d + 1)           => Functor (Transformation d)
+deriving instance Arity (d + 1)           => Foldable (Transformation d)
+deriving instance Arity (d + 1)           => Traversable (Transformation d)
 
 type instance NumType (Transformation d r) = r
 

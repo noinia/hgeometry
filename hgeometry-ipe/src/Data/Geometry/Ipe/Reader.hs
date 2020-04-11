@@ -36,6 +36,8 @@ import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
 import           Data.Geometry.Ipe.PathParser
+import           Data.Geometry.Ipe.Path
+import           Data.Geometry.Ipe.Matrix
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Value
 import           Data.Geometry.Ipe.Color(IpeColor(..))
@@ -242,7 +244,7 @@ ipeReadRec       :: forall f ats.
                  ( RecApplicative ats
                  , ReifyConstraint IpeReadAttr (Attr f) ats
                  , RecAll (Attr f) ats IpeReadAttr
-                 , AllSatisfy IpeAttrName ats
+                 , AllConstrained IpeAttrName ats
                  )
                  => Proxy f -> Proxy ats
                  -> Node Text Text
@@ -267,7 +269,7 @@ ipeReadAttrs     :: forall proxy proxy' i r f ats.
                  , ReifyConstraint IpeReadAttr (Attr f) ats
                  , RecApplicative ats
                  , RecAll (Attr f) ats IpeReadAttr
-                 , AllSatisfy IpeAttrName ats
+                 , AllConstrained IpeAttrName ats
                  )
                  => proxy i -> proxy' r
                  -> Node Text Text
@@ -298,7 +300,7 @@ ipeReadObject           :: ( IpeRead (i r)
                            , RecApplicative ats
                            , ReifyConstraint IpeReadAttr (Attr f) ats
                            , RecAll (Attr f) ats IpeReadAttr
-                           , AllSatisfy IpeAttrName ats
+                           , AllConstrained IpeAttrName ats
                            )
                         => Proxy i -> proxy r -> Node Text Text
                         -> Either ConversionError (i r :+ IpeAttributes i r)

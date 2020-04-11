@@ -22,7 +22,6 @@ import Data.Text (Text)
 import Data.Vinyl
 import Data.Vinyl.TypeLevel
 import Data.Vinyl.Functor
-import GHC.Exts
 import Text.Read (lexP, step, parens, prec, (+++)
                 , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
 
@@ -94,6 +93,12 @@ traverseAttr f = \case
   Attr x -> Attr <$> f x
   NoAttr -> pure NoAttr
 
+-- | Traverse for the situation where the type is not actually parameterized.
+pureAttr :: (Applicative h, Apply f a ~ Apply g a) => Attr f a -> h (Attr g a)
+pureAttr = pure . \case
+    Attr a -> Attr a
+    NoAttr -> NoAttr
+
 
 instance Show (Apply f label) => Show (Attr f label) where
   showsPrec d NoAttr   = showParen (d > app_prec) $ showString "NoAttr"
@@ -148,21 +153,10 @@ instance RecApplicative ats => Monoid (Attributes f ats) where
 instance Semigroup (Attributes f ats) where
   (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith mappend as bs
 
-
--- traverseAttrs               :: Applicative h
---                             => ((forall label. Apply f label -> h (Apply g label)))
---                             -> Attributes f ats -> h (Attributes g ats)
--- traverseAttrs f (Attrs ats) = Attrs <$> rtraverse (traverseAttr f) ats
-
 traverseAttrs               :: Applicative h
                             => (forall label. Attr f label -> h (Attr g label))
                             -> Attributes f ats -> h (Attributes g ats)
 traverseAttrs f (Attrs ats) = Attrs <$> rtraverse f ats
-
--- withF   :: Applicative h
---         => (forall label proxy. proxy label -> Apply f label -> h (Apply g label))
---         -> (forall label. Attr f label  -> h (Attr g label))
--- withF f = undefined
 
 
 
@@ -170,6 +164,8 @@ zipRecsWith                       :: (forall a. f a -> g a -> h a)
                                   -> Rec f as -> Rec g as -> Rec h as
 zipRecsWith _ RNil      _         = RNil
 zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
+
+
 
 attrLens   :: forall at ats proxy f. (at ∈ ats)
            => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
@@ -298,42 +294,14 @@ makeLenses ''IpeArrow
 normalArrow :: IpeArrow r
 normalArrow = IpeArrow "normal" (IpeSize $ Named "normal/normal")
 
--- -- | and their types
--- type family PathAttrElf (r :: *) (s :: PathAttributeUniverse) :: * where
---   PathAttrElf r Stroke   = IpeColor
---   PathAttrElf r Fill     = IpeColor
---   PathAttrElf r Dash     = IpeDash r
---   PathAttrElf r Pen      = IpePen r
---   PathAttrElf r LineCap  = Int
---   PathAttrElf r LineJoin = Int
---   PathAttrElf r FillRule = FillType
---   PathAttrElf r Arrow    = IpeArrow r
---   PathAttrElf r RArrow   = IpeArrow r
---   PathAttrElf r Opacity  = IpeOpacity
---   PathAttrElf r Tiling   = IpeTiling
---   PathAttrElf r Gradient = IpeGradient
-
--- genDefunSymbols [''PathAttrElf]
-
--- type PathAttributes r = [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
---                         , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
---                         ]
-
--- type PathAttributes r =
---   Attributes (PathAttrElfSym1 r) [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
---                                  , FillRule, Arrow, RArrow, Opacity, Tiling, Gradient
---                                  ]
-
 --------------------------------------------------------------------------------
 -- | Group Attributes
-
 
 -- | The only group attribute is a Clip
 -- data GroupAttributeUniverse = Clip deriving (Show,Read,Eq,Ord)
 
 -- A clipping path is a Path. Which is defined in Data.Geometry.Ipe.Types. To
 -- avoid circular imports, we define GroupAttrElf and GroupAttribute there.
-
 
 --------------------------------------------------------------------------------
 -- * Attribute names in Ipe
@@ -371,14 +339,14 @@ instance IpeAttrName Gradient   where attrName _ = "gradient"
 instance IpeAttrName Clip     where attrName _ = "clip"
 
 
--- | Function that states that all elements in xs satisfy a given constraint c
-type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
-  AllSatisfy c '[] = ()
-  AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
+-- -- | Function that states that all elements in xs satisfy a given constraint c
+-- type family AllSatisfy (c :: k -> Constraint) (xs :: [k]) :: Constraint where
+--   AllSatisfy c '[] = ()
+--   AllSatisfy c (x ': xs) = (c x, AllSatisfy c xs)
 
 
 -- | Writing Attribute names
-writeAttrNames           :: AllSatisfy IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
+writeAttrNames           :: AllConstrained IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
 writeAttrNames RNil      = RNil
 writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
   where
@@ -386,3 +354,5 @@ writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
     write'' _ = attrName (Proxy :: Proxy s)
 
 --
+
+--------------------------------------------------------------------------------

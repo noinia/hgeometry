@@ -13,6 +13,7 @@ module Data.Geometry.Ipe.FromIpe where
 
 import           Control.Lens hiding (Simple)
 import           Data.Ext
+import           Data.Geometry.Ipe.Path
 import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
