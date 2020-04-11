@@ -15,7 +15,9 @@ module Data.Geometry.Box.Internal where
 
 import           Control.DeepSeq
 import           Control.Lens
+import           Data.Bifoldable
 import           Data.Bifunctor
+import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Point
@@ -59,6 +61,10 @@ data Box d p r = Box { _minP :: !(CWMin (Point d r) :+ p)
                      , _maxP :: !(CWMax (Point d r) :+ p)
                      } deriving Generic
 makeLenses ''Box
+
+
+
+
 
 -- | Given the point with the lowest coordinates and the point with highest
 -- coordinates, create a box.
@@ -108,12 +114,14 @@ instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
       r `intersect'` s = asA @(R.Range r) $ r `intersect` s
 
 instance Arity d => Bifunctor (Box d) where
-  bimap :: forall p q r s. (p -> q) -> (r -> s) -> Box d p r -> Box d q s
-  bimap f g (Box mi ma) = Box (bimap g' f mi) (bimap g' f ma)
+  bimap = bimapDefault
+instance Arity d => Bifoldable (Box d) where
+  bifoldMap = bifoldMapDefault
+instance Arity d => Bitraversable (Box d) where
+  bitraverse f g (Box mi ma) = Box <$> bitraverse (tr g) f mi <*> bitraverse (tr g) f ma
     where
-      g' :: Functor g => g (Point d r) -> g (Point d s)
-      g' = fmap (fmap g)
-
+      tr    :: (Traversable t, Applicative f) => (r -> f s) -> t (Point d r) -> f (t (Point d s))
+      tr g' = traverse $ traverse g'
 
 -- -- In principle this should also just work for Boxes in higher dimensions. It is just
 -- -- that we need a better way to compute their corners

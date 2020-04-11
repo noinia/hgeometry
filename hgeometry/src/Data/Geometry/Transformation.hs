@@ -23,6 +23,8 @@ deriving instance (Show r, Arity n, Arity m) => Show (Matrix n m r)
 deriving instance (Eq r, Arity n, Arity m)   => Eq (Matrix n m r)
 deriving instance (Ord r, Arity n, Arity m)  => Ord (Matrix n m r)
 deriving instance (Arity n, Arity m)         => Functor (Matrix n m)
+deriving instance (Arity n, Arity m)         => Foldable (Matrix n m)
+deriving instance (Arity n, Arity m)         => Traversable (Matrix n m)
 
 multM :: (Arity r, Arity c, Arity c', Num a) => Matrix r c a -> Matrix c c' a -> Matrix r c' a
 (Matrix a) `multM` (Matrix b) = Matrix $ a !*! b

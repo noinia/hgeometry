@@ -131,13 +131,14 @@ pattern Sphere c r = Boundary (Ball c r)
 
 type Disk p r = Ball 2 p r
 
+-- | Given the center and the squared radius, constructs a disk
 pattern Disk     :: Point 2 r :+ p -> r -> Disk p r
 pattern Disk c r = Ball c r
 {-# COMPLETE Disk #-}
 
-
 type Circle p r = Sphere 2 p r
 
+-- | Given the center and the squared radius, constructs a circle
 pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r
 pattern Circle c r = Sphere c r
 {-# COMPLETE Circle #-}

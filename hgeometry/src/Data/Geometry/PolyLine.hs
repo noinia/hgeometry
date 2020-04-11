@@ -5,7 +5,9 @@ module Data.Geometry.PolyLine where
 
 import           Control.Lens
 import           Data.Aeson
+import           Data.Bifoldable
 import           Data.Bifunctor
+import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
@@ -17,7 +19,7 @@ import           Data.Geometry.Vector
 import           Data.LSeq (LSeq, pattern (:<|))
 import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE
-import           GHC.Generics(Generic)
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -58,7 +60,11 @@ instance PointFunctor (PolyLine d p) where
   pmap f = over points (fmap (first f))
 
 instance Arity d => Bifunctor (PolyLine d) where
-  bimap f g (PolyLine pts) = PolyLine $ fmap (bimap (fmap g) f) pts
+  bimap = bimapDefault
+instance Arity d => Bifoldable (PolyLine d) where
+  bifoldMap = bifoldMapDefault
+instance Arity d => Bitraversable (PolyLine d) where
+  bitraverse f g (PolyLine pts) = PolyLine <$> traverse (bitraverse (traverse g) f) pts
 
 instance (ToJSON p, ToJSON r, Arity d) => ToJSON (PolyLine d p r) where
     toEncoding = genericToEncoding defaultOptions

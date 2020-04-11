@@ -17,33 +17,29 @@ module Data.Geometry.Ipe.Types where
 
 
 import           Control.Lens
-import           Data.Proxy
-import           Data.Vinyl hiding (Label)
-
+import           Data.Bitraversable
 import           Data.Ext
-import           Data.Geometry.Box(Rectangle)
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
 import           Data.Geometry.BezierSpline
-import           Data.Geometry.Polygon(SimplePolygon)
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-
-import           Data.Maybe(mapMaybe)
-import           Data.Singletons.TH(genDefunSymbols)
-
-import           Data.Geometry.Ipe.Literal
-import           Data.Geometry.Ipe.Color
+import           Data.Geometry.Box (Rectangle)
 import qualified Data.Geometry.Ipe.Attributes as AT
 import           Data.Geometry.Ipe.Attributes hiding (Matrix)
-import           Data.Text(Text)
-import           Text.XML.Expat.Tree(Node)
-
-import           GHC.Exts
-
-
+import           Data.Geometry.Ipe.Color
+import           Data.Geometry.Ipe.Literal
+import           Data.Geometry.Point
+import           Data.Geometry.PolyLine
+import           Data.Geometry.Polygon (SimplePolygon)
+import           Data.Geometry.Properties
+import           Data.Geometry.Transformation
+import qualified Data.LSeq as LSeq
 import qualified Data.List.NonEmpty as NE
-import qualified Data.LSeq          as LSeq
+import           Data.Maybe (mapMaybe)
+import           Data.Proxy
+import           Data.Singletons.TH (genDefunSymbols)
+import           Data.Text (Text)
+import           Data.Traversable
+import           Data.Vinyl hiding (Label)
+import           GHC.Exts
+import           Text.XML.Expat.Tree (Node)
 
 --------------------------------------------------------------------------------
 
@@ -65,14 +61,21 @@ type instance Dimension (Image r) = 2
 instance Fractional r => IsTransformable (Image r) where
   transformBy t = over rect (transformBy t)
 
+instance Functor Image where
+  fmap = fmapDefault
+instance Foldable Image where
+  foldMap = foldMapDefault
+instance Traversable Image where
+  traverse f (Image d r) = Image d <$> bitraverse pure f r
+
 --------------------------------------------------------------------------------
 -- | Text Objects
 
 data TextLabel r = Label Text (Point 2 r)
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 data MiniPage r = MiniPage Text (Point 2 r) r
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 type instance NumType   (TextLabel r) = r
 type instance Dimension (TextLabel r) = 2
@@ -96,7 +99,7 @@ width (MiniPage _ _ w) = w
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text
                           }
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 makeLenses ''IpeSymbol
 
 type instance NumType   (IpeSymbol r) = r
@@ -130,6 +133,21 @@ makePrisms ''PathSegment
 type instance NumType   (PathSegment r) = r
 type instance Dimension (PathSegment r) = 2
 
+instance Functor PathSegment where
+  fmap = fmapDefault
+instance Foldable PathSegment where
+  foldMap = foldMapDefault
+instance Traversable PathSegment where
+  traverse f = \case
+    PolyLineSegment p       -> PolyLineSegment <$> bitraverse pure f p
+    PolygonPath p           -> PolygonPath <$> bitraverse pure f p
+    CubicBezierSegment b    -> CubicBezierSegment <$> traverse f b
+    QuadraticBezierSegment  -> pure QuadraticBezierSegment
+    EllipseSegment m        -> EllipseSegment <$> traverse f m
+    ArcSegment              -> pure ArcSegment
+    SplineSegment           -> pure SplineSegment
+    ClosedSplineSegment     -> pure ClosedSplineSegment
+
 instance Fractional r => IsTransformable (PathSegment r) where
   transformBy t (PolyLineSegment p) = PolyLineSegment $ transformBy t p
   transformBy t (PolygonPath p)     = PolygonPath $ transformBy t p
@@ -138,7 +156,7 @@ instance Fractional r => IsTransformable (PathSegment r) where
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: LSeq.LSeq 1 (PathSegment r) }
-                 deriving (Show,Eq)
+                 deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''Path
 
 type instance NumType   (Path r) = r
@@ -157,7 +175,7 @@ data Operation r = MoveTo (Point 2 r)
                  | Spline [Point 2 r]
                  | ClosedSpline [Point 2 r]
                  | ClosePath
-                 deriving (Eq, Show)
+                 deriving (Eq, Show,Functor,Foldable,Traversable)
 makePrisms ''Operation
 
 --------------------------------------------------------------------------------
@@ -209,7 +227,7 @@ genDefunSymbols [''AttrMap]
 
 
 -- | A group is essentially a list of IpeObjects.
-newtype Group r = Group [IpeObject r] deriving (Show,Eq)
+newtype Group r = Group [IpeObject r] deriving (Show,Eq) --,Functor,Foldable,Traversable)
 
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
@@ -239,6 +257,12 @@ type IpeObject' g r = g r :+ IpeAttributes g r
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 attributes = extra
 
+-- traverseAttributes   :: Applicative f => (r -> f s) -> IpeAttributes g r -> f (IpeAttributes g s)
+-- traverseAttributes f = traverseAttrs (traverseAttr f)
+
+-- (Attrs ats) = Attrs <$> rtraverse (traverseAttr f) ats
+
+
 data IpeObject r =
     IpeGroup     (IpeObject' Group     r)
   | IpeImage     (IpeObject' Image     r)
@@ -246,6 +270,17 @@ data IpeObject r =
   | IpeMiniPage  (IpeObject' MiniPage  r)
   | IpeUse       (IpeObject' IpeSymbol r)
   | IpePath      (IpeObject' Path      r)
+
+
+-- instance Traversable IpeObject where
+--   traverse f = \case
+--     IpeGroup g -> IpeGroup <$> traverse f g
+--       IpeImage i     -> (IpeObject' Image     r)
+--    IpeTextLabel l -> (IpeObject' TextLabel r)
+--    IpeMiniPage p ->  (IpeObject' MiniPage  r)
+--    IpeUse     u ->
+--    IpePath    p ->
+
 
 
 deriving instance (Show r) => Show (IpeObject r)
