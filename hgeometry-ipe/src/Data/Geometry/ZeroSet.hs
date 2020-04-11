@@ -19,10 +19,12 @@ import           Data.Geometry.ZeroSet.AlternatingPath
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (maybeToList)
+import qualified Data.Sequence as Seq
+import           Data.Sequence (Seq)
 import qualified Data.Tree as RoseTree
 import           Data.Util
 
--- import           Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -36,10 +38,10 @@ makeLenses ''ZeroConfig
 
 
 defaultZeroConfig :: Fractional r => ZeroConfig r
-defaultZeroConfig = ZeroConfig (-1) 0.001
+defaultZeroConfig = ZeroConfig 2 0.001
 
 
-traceZero       :: (Eq a, Num a, RealFrac r, Ord r)
+traceZero       :: (Eq a, Num a, RealFrac r, Ord r, Show r)
                 => ZeroConfig r
                 -> (Point 2 r -> a)
                 -> LineSegment 2 b r -- ^ somewhere on this segment there should
@@ -49,7 +51,7 @@ traceZero       :: (Eq a, Num a, RealFrac r, Ord r)
 traceZero cfg f = traceZero' cfg (fromSignum f) Zero
 
 
-traceZero'                 :: (Eq sign, RealFrac r, Ord r)
+traceZero'                 :: (Eq sign, RealFrac r, Ord r, Show r, Show sign)
                             => ZeroConfig r
                            -> (Point 2 r -> sign)
                            -> sign -- ^ zero value
@@ -64,9 +66,13 @@ traceZero' cfg f zero' s b = do startCell <- findLeaf startPoint qt
 
     s'         = s&endPoints %~ \(pt :+ _) -> pt :+ f pt -- annotate s with the sign
     qt         = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle b) f
-    startPoint = findZero s'
+    startPoint = traceShowId $ findZero s'
 
-    trace startCell' = withCorners $ explorePathWith (const True) startCell' zCells
+    trace startCell' = case alternatingFromTo . trace' $ startCell' of
+                         Singleton v           -> Singleton startPoint
+                         FromTo _ es (_ :+ ec) -> FromTo startPoint es (midPoint ec)
+
+    trace' startCell' = withCorners $ explorePathWith (const True) startCell' zCells
 
     -- cells that are zero
     zCells = NonEmpty.filter (\(p' :+ _) -> isZeroCell zero' p') . leaves . withCells $ qt
@@ -95,7 +101,7 @@ leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
 data ExplorationTree e v = Root v [RoseTree.Tree (e :+ v)] deriving (Show,Eq)
 
 -- | construct a tree traversal of the cells
-exploreWith                :: forall p r. (Ord r, Fractional r)
+exploreWith                :: forall p r. (Ord r, Fractional r, Show r, Show p)
                            => (p :+ Cell r -> Bool) -- ^ continue exploring?
                            -> p :+ Cell r -- ^ start
                            -> [p :+ Cell r] -- ^ all cells
@@ -115,7 +121,7 @@ exploreWith p start' cells = go0 start'
     continue pred' n = (n^.extra) /= (pred'^.extra) && p n
 
     neighboursOf'   :: Cell r -> [CardinalDirection :+ (p :+ Cell r)]
-    neighboursOf' c = case List.find (\n -> n^.core.extra == c) cs of
+    neighboursOf' c = case traceShowId $ List.find (\n -> n^.core.extra == c) cs of
                        Nothing       -> []
                        Just (_ :+ s) -> concat $ (\d -> map (d :+)) <$> sideDirections <*> s
 
@@ -124,7 +130,7 @@ exploreWith p start' cells = go0 start'
 --
 -- if there are multiple choices where to go to, just pick the first
 -- one.
-explorePathWith          :: (Ord r, Fractional r)
+explorePathWith          :: (Ord r, Fractional r, Show r, Show p)
                          => ((p :+ Cell r) -> Bool)
                          -> (p :+ Cell r) -> [p :+ Cell r]
                          -> AlternatingPath CardinalDirection (p :+ Cell r)
@@ -147,9 +153,10 @@ withCorners (AlternatingPath v xs) = AlternatingPath v $ map f xs
   where
     f (d :+ z@(ss :+ c)) = s :+ z
       where
-        s' = (cellSides c)^?!ix d
+        d' = oppositeDirection d
+        s' = (cellSides c)^?!ix d'
         s  = case ss of
-               Left cs -> let Two a b = cornersInDirection d cs
+               Left cs -> let Two a b = cornersInDirection d' cs
                           in s'&endPoints.extra .~ a
                                &end.extra       .~ b
                Right p -> s'&endPoints.extra .~ p
@@ -164,23 +171,25 @@ withEdges (AlternatingPath s xs) = AlternatingPath s $ map (\x -> x&core .~ f x)
     f (d :+ (v :+ c)) = let e = (cellSides c)^?!ix (oppositeDirection d)
                         in first (const v) e -- store v's in the asociated data
 
+
+
+
 -- | Turns a path into a polyline
 toPolyLineWith            :: Fractional r
                           => (LineSegment 2 p r -> Point 2 r)
-                          -> AlternatingPath (LineSegment 2 p r) (v :+ Cell r)
+                          -> FromTo (LineSegment 2 p r) (Point 2 r)
                           -> Maybe (PolyLine 2 () r)
 toPolyLineWith findZero p = PolyLine.fromPoints . map ext . ptsOf $ p
   where
-    ptsOf = concat' . alternatingFromTo . bimap findZero (\(_ :+ c) -> midPoint c)
+    ptsOf = concat' . first findZero
     concat' = \case
-      Left s         -> [s]
-      Right (s,es,t) -> [s] <> NonEmpty.toList es <> [t]
-
+      Singleton s   -> [s]
+      FromTo s es t -> [s] <> NonEmpty.toList es <> [t]
 
 --------------------------------------------------------------------------------
 
 -- | Given a line segment with different endpoints, find the flipping point
-findZeroOnEdgeWith         :: (Fractional r, Ord r, Eq sign)
+findZeroOnEdgeWith         :: (Fractional r, Ord r, Eq sign, Show r, Show sign)
                            => r
                            -> (Point 2 r -> sign)
                            -> LineSegment 2 sign r -> Point 2 r

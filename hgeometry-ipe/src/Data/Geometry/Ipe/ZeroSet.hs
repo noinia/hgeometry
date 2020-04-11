@@ -8,6 +8,7 @@ import           Data.Geometry.Box
 -- import qualified Data.Geometry.CatmulRomSpline as CatmulRom
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Color
+import           Data.Geometry.Ball
 import           Data.Geometry.Ipe.IpeOut
 import qualified Data.Geometry.Ipe.Types as Ipe
 import           Data.Geometry.Ipe.Types (singlePageFromContent)
@@ -37,30 +38,57 @@ import           Debug.Trace
 
 type R = RealNumber 10
 
-drawZeroCell :: Fractional r => IpeOut (Either v Sign :+ Cell r) Ipe.Path r
-drawZeroCell = \(p :+ c) -> case p of
-                              Left _     -> drawCell c ! attr SFill blue
-                              Right Zero -> drawCell c ! attr SFill green
-                              Right _    -> drawCell c
+drawZeroCell' :: Fractional r => IpeOut (Either v Sign :+ Cell r) Ipe.Path r
+drawZeroCell' = \(p :+ c) -> case p of
+                               Left _     -> drawCell c ! attr SFill blue
+                               Right Zero -> drawCell c ! attr SFill green
+                               Right _    -> drawCell c
 
+
+drawCorners :: Fractional r => IpeOut (Either (Corners Sign) Sign :+ Cell r) Ipe.Group r
+drawCorners = \(p :+ c) -> ipeGroup $ case p of
+                              Left ss -> toList $ draw <$> cellCorners c <*> ss
+                              Right _ -> []
+  where
+    draw     :: Point 2 r -> Sign -> Ipe.IpeObject r
+    draw q s = iO $ defIO q ! attr SStroke (toColor s)
+
+toColor :: Sign -> IpeColor r
+toColor = \case
+  Zero     -> purple
+  Positive -> blue
+  Negative -> red
+
+
+drawZeroCell            :: Fractional r => IpeOut (Either (Corners Sign) Sign :+ Cell r) Ipe.Group r
+drawZeroCell = \z -> ipeGroup [ iO $ drawZeroCell' z, iO $ drawCorners z]
+
+
+addD    :: [Ipe.IpeObject R] -> [Ipe.IpeObject Double]
+addD xs = map (fmap $ realToFrac @R @Double) xs
+        <> [iO $ defIO $ Circle (ext origin) (r*r)]
+  where
+    r = 90.5
 
 test' :: IO ()
-test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent $
-        [ -- iO $ drawQuadTreeWith drawZeroCell testT
-        -- ,
-          iO $ defIO pl
+test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
+        [ iO $ drawQuadTreeWith (drawZeroCell @R) qt
+        , iO $ defIO pl
         ]
   where
     f   :: Point 2 R -> R
     f q = (r^2) - squaredEuclideanDist origin (realToFrac <$> q)
     r = 90.5 :: R -- draw circle of radius r
 
-    Just pl = traceZero' defaultZeroConfig (fromSignum f) Zero startSeg rect
+    Just pl = traceZero' cfg (fromSignum f) Zero startSeg rect
 
     startSeg :: LineSegment 2 () R
     startSeg = ClosedLineSegment (ext $ origin) (ext $ Point2 0 100)
+    rect     :: Rectangle () R
     rect     = box (ext $ origin) (ext $ Point2 300 300)
+    qt = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle rect) (fromSignum f)
 
+    cfg = defaultZeroConfig
 
 
 -- testT :: QuadTree (Quadrants Sign) (Either (Quadrants Sign) Sign)

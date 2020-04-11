@@ -43,9 +43,22 @@ instance Bitraversable AlternatingPath where
 
 -- | Computes the (start vertex, the edge sequence crossed, target vertex) if it exists
 -- (and otherwise just returns the single vertex in the path)
-alternatingFromTo :: AlternatingPath e v -> Either v (v,NonEmpty e,v)
+alternatingFromTo :: AlternatingPath e v -> FromTo e v
 alternatingFromTo = \case
-  AlternatingPath s [] -> Left s
-  AlternatingPath s xs -> Right (s,NonEmpty.fromList $ map (^.core) xs, (List.last xs)^.extra)
+  AlternatingPath s [] -> Singleton s
+  AlternatingPath s xs -> FromTo s (NonEmpty.fromList $ map (^.core) xs) ((List.last xs)^.extra)
 
 --------------------------------------------------------------------------------
+
+data FromTo e v = Singleton !v
+                | FromTo !v !(NonEmpty.NonEmpty e) !v
+                deriving (Show,Eq,Read)
+
+instance Bifunctor FromTo where
+  bimap = bimapDefault
+instance Bifoldable FromTo where
+  bifoldMap = bifoldMapDefault
+instance Bitraversable FromTo where
+  bitraverse f g = \case
+    Singleton x   -> Singleton <$> g x
+    FromTo s es t -> FromTo <$> g s <*> traverse f es <*> g t
