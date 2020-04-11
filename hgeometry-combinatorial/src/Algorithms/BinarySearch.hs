@@ -36,13 +36,20 @@ binarySearch p = go
 --
 -- - \(p h\) = True
 -- - \(p (h - \varepsilon)\) = False
-binarySearchUntil       :: (Fractional r, Ord r)
+--
+-- >>> binarySearchUntil (0.1) (>= 0.5) 0 (1 :: Double)
+-- 0.5
+-- >>> binarySearchUntil (0.1) (>= 0.51) 0 (1 :: Double)
+-- 0.5625
+-- >>> binarySearchUntil (0.01) (>= 0.51) 0 (1 :: Double)
+-- 0.515625
+binarySearchUntil       :: (Fractional r, Ord r, Show r)
                         => r
                         -> (r -> Bool) -> r -> r -> r
 binarySearchUntil eps p = go
   where
     go l u | u - l < eps = u
-           | otherwise   = let m = l + u / 2
+           | otherwise   = let m = (l + u) / 2
                            in if p m then go l m else go m u
 
 
