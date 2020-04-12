@@ -27,27 +27,27 @@ import           Data.Tree.Util (TreeNode(..), levels)
 import           GHC.Generics (Generic)
 --------------------------------------------------------------------------------
 
--- | Subdiv of the area from [0,2^w] x [0,2^w]
-data QuadTree v p = QuadTree { _boxWidthIndex :: !WidthIndex
-                             , _tree          :: !(Tree v p)
-                             }
-                  deriving (Show,Eq,Generic)
+-- | QuadTree on the starting cell
+data QuadTree v p r = QuadTree { _startingCell  :: !(Cell r)
+                               , _tree          :: !(Tree v p)
+                               }
+                    deriving (Show,Eq,Generic,Functor,Foldable,Traversable)
 makeLenses ''QuadTree
 
 --------------------------------------------------------------------------------
 -- * Functions operating on the QuadTree (in terms of the 'Tree' type)
 
-withCells    :: (Fractional r, Ord r) => QuadTree v p -> QuadTree (v :+ Cell r) (p :+ Cell r)
+withCells    :: (Fractional r, Ord r) => QuadTree v p r -> QuadTree (v :+ Cell r) (p :+ Cell r) r
 withCells qt = qt&tree .~ withCellsTree qt
 
 withCellsTree                :: (Fractional r, Ord r)
-                             => QuadTree v p -> Tree (v :+ Cell r) (p :+ Cell r)
-withCellsTree (QuadTree w t) = Tree.withCells (Cell w origin) t
+                             => QuadTree v p r -> Tree (v :+ Cell r) (p :+ Cell r)
+withCellsTree (QuadTree c t) = Tree.withCells c t
 
-leaves :: QuadTree v p -> NonEmpty p
+leaves :: QuadTree v p r -> NonEmpty p
 leaves = Tree.leaves . view tree
 
-perLevel :: QuadTree v p -> NonEmpty (NonEmpty (TreeNode v p))
+perLevel :: QuadTree v p r -> NonEmpty (NonEmpty (TreeNode v p))
 perLevel = levels . Tree.toRoseTree . view tree
 
 
@@ -55,11 +55,11 @@ perLevel = levels . Tree.toRoseTree . view tree
 
 -- | Given a starting cell, a Tree builder, and some input required by
 -- the builder, constructs a quadTree.
-buildOn           :: Cell r -> (Cell r -> i -> Tree v p) -> i -> QuadTree v p
-buildOn c builder = QuadTree (c^.cellWidthIndex) . builder c
+buildOn            :: Cell r -> (Cell r -> i -> Tree v p) -> i -> QuadTree v p r
+buildOn c0 builder = QuadTree c0 . builder c0
 
 -- | The Equivalent of Tree.build for constructing a QuadTree
-build     :: (Fractional r, Ord r) => (Cell r -> i -> Split i v p) -> Cell r -> i -> QuadTree v p
+build     :: (Fractional r, Ord r) => (Cell r -> i -> Split i v p) -> Cell r -> i -> QuadTree v p r
 build f c = buildOn c (Tree.build f)
 
 -- | Build a QuadtTree from a set of points.
@@ -69,11 +69,11 @@ build f c = buildOn c (Tree.build f)
 -- running time: \(O(nh)\), where \(n\) is the number of points and
 -- \(h\) is the height of the resulting quadTree.
 fromPointsBox   :: (Fractional r, Ord r)
-                 => Cell r -> [Point 2 r :+ p] -> QuadTree () (Maybe (Point 2 r :+ p))
+                 => Cell r -> [Point 2 r :+ p] -> QuadTree () (Maybe (Point 2 r :+ p)) r
 fromPointsBox c = buildOn c Tree.fromPoints
 
 fromPoints     :: (RealFrac r, Ord r)
-               => NonEmpty (Point 2 r :+ p) -> QuadTree () (Maybe (Point 2 r :+ p))
+               => NonEmpty (Point 2 r :+ p) -> QuadTree () (Maybe (Point 2 r :+ p)) r
 fromPoints pts = buildOn c Tree.fromPoints (F.toList pts)
   where
     c = fitsRectangle $ boundingBoxList (view core <$> pts)
@@ -82,11 +82,10 @@ fromPoints pts = buildOn c Tree.fromPoints (F.toList pts)
 --
 -- running time: \(O(h)\), where \(h\) is the height of the quadTree
 findLeaf                                       :: (Fractional r, Ord r)
-                                               => Point 2 r -> QuadTree v p -> Maybe (p :+ Cell r)
-findLeaf q (QuadTree w t) | q `intersects` c0  = Just $ findLeaf' c0 t
-                          | otherwise          = Nothing
+                                               => Point 2 r -> QuadTree v p r -> Maybe (p :+ Cell r)
+findLeaf q (QuadTree c0 t) | q `intersects` c0  = Just $ findLeaf' c0 t
+                           | otherwise          = Nothing
   where
-    c0 = Cell w origin
     -- |
     -- pre: p intersects c
     findLeaf' c = \case
@@ -98,7 +97,7 @@ findLeaf q (QuadTree w t) | q `intersects` c0  = Just $ findLeaf' c0 t
 
 
 fromZeros :: (Fractional r, Ord r, Num a, Eq a, v ~ Quadrants Sign)
-          => Cell r -> (Point 2 r -> a) -> QuadTree v (Either v Sign)
+          => Cell r -> (Point 2 r -> a) -> QuadTree v (Either v Sign) r
 fromZeros = fromZerosWith (limitWidthTo (-1))
 
 
@@ -106,7 +105,7 @@ fromZerosWith            ::  (Fractional r, Ord r, Eq a, Num a)
                          => Limiter r (Corners Sign) (Corners Sign) Sign
                          -> Cell r
                          -> (Point 2 r -> a)
-                         -> QuadTree (Quadrants Sign) (Signs Sign)
+                         -> QuadTree (Quadrants Sign) (Signs Sign) r
 fromZerosWith limit c0 f = fromZerosWith' limit c0 (fromSignum f)
 
 
@@ -117,7 +116,7 @@ fromZerosWith'           :: (Eq sign, Fractional r, Ord r)
                          => Limiter r (Corners sign) (Corners sign) sign
                          -> Cell r
                          -> (Point 2 r -> sign)
-                         -> QuadTree (Quadrants sign) (Signs sign)
+                         -> QuadTree (Quadrants sign) (Signs sign) r
 fromZerosWith' limit c0 f = build (limit $ shouldSplitZeros f) c0 (f <$> cellCorners c0)
 
 
@@ -195,8 +194,8 @@ isZeroCell z = \case
 
 
 -- | Constructs an empty/complete tree from the starting width
-completeTree    :: WidthIndex -> QuadTree () ()
-completeTree w0 =
-    build (\_ w -> if w == 0 then No () else Yes () (pure $ w - 1)) (Cell w0 origin) w0
+completeTree    :: (Fractional r, Ord r) => Cell r -> QuadTree () () r
+completeTree c0 =
+    build (\_ w -> if w == 0 then No () else Yes () (pure $ w - 1)) c0 (c0^.cellWidthIndex)
 
 --------------------------------------------------------------------------------

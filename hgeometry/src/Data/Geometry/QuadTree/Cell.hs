@@ -21,7 +21,7 @@ type WidthIndex = Int
 -- | A Cell corresponding to a node in the QuadTree
 data Cell r = Cell { _cellWidthIndex :: {-# UNPACK #-} !WidthIndex
                    , _lowerLeft      ::                !(Point 2 r)
-                   } deriving (Show,Eq)
+                   } deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''Cell
 
 -- | Computes a cell that contains the given rectangle

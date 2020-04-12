@@ -92,7 +92,7 @@ neighboursOf me = foldMap (\c -> fmap maybeToList $ c `relationTo` me)
 
 -- | Given a cell and a quadTree, finds the cells representing leaves
 -- adjacent to the given cell.
-leafNeighboursOf   :: (Fractional r, Ord r) => Cell r -> QuadTree v p -> Sides [p :+ Cell r]
+leafNeighboursOf   :: (Fractional r, Ord r) => Cell r -> QuadTree v p r -> Sides [p :+ Cell r]
 leafNeighboursOf c = neighboursOf c . Tree.leaves . withCellsTree
 
 --------------------------------------------------------------------------------

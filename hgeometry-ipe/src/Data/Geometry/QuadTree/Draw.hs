@@ -19,16 +19,16 @@ import           Data.Vinyl.Core
 drawCell :: Fractional r => IpeOut (Cell r) Path r
 drawCell = \c -> ipeRectangle (toBox c)
 
-drawQuadTree :: (Fractional r, Ord r) => IpeOut (QuadTree v p) Group r
+drawQuadTree :: (Fractional r, Ord r) => IpeOut (QuadTree v p r) Group r
 drawQuadTree = drawQuadTreeWith (\(_ :+ c) -> drawCell c)
 
 drawQuadTreeWith           :: (ToObject i, Fractional r, Ord r)
-                           => IpeOut (p :+ Cell r) i r -> IpeOut (QuadTree v p) Group r
+                           => IpeOut (p :+ Cell r) i r -> IpeOut (QuadTree v p r) Group r
 drawQuadTreeWith drawCell' = ipeGroup . fmap (iO . drawCell') . leaves . withCells
 
 quadTreeLevels           :: forall i r v p. (ToObject i, Fractional r, Ord r
                                             )
-                         => IpeOut (TreeNode v p :+ Cell r) i r -> IpeOut (QuadTree v p) Group r
+                         => IpeOut (TreeNode v p :+ Cell r) i r -> IpeOut (QuadTree v p r) Group r
 quadTreeLevels drawCell' = \qt -> let lvls = fmap (fmap flip') . perLevel . withCells $ qt
                                   in ipeGroup . fmap iO . zipWith drawLevel [1..] . F.toList $ lvls
   where
