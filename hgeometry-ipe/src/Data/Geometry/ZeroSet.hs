@@ -38,7 +38,7 @@ makeLenses ''ZeroConfig
 
 
 defaultZeroConfig :: Fractional r => ZeroConfig r
-defaultZeroConfig = ZeroConfig 2 0.001
+defaultZeroConfig = ZeroConfig (-1) 0.001
 
 
 traceZero       :: (Eq a, Num a, RealFrac r, Ord r, Show r)
@@ -66,10 +66,10 @@ traceZero' cfg f zero' s b = do startCell <- findLeaf startPoint qt
 
     s'         = s&endPoints %~ \(pt :+ _) -> pt :+ f pt -- annotate s with the sign
     qt         = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle b) f
-    startPoint = traceShowId $ findZero s'
+    startPoint = findZero s'
 
     trace startCell' = case alternatingFromTo . trace' $ startCell' of
-                         Singleton v           -> Singleton startPoint
+                         Singleton _           -> Singleton startPoint
                          FromTo _ es (_ :+ ec) -> FromTo startPoint es (midPoint ec)
 
     trace' startCell' = withCorners $ explorePathWith (const True) startCell' zCells
@@ -121,7 +121,7 @@ exploreWith p start' cells = go0 start'
     continue pred' n = (n^.extra) /= (pred'^.extra) && p n
 
     neighboursOf'   :: Cell r -> [CardinalDirection :+ (p :+ Cell r)]
-    neighboursOf' c = case traceShowId $ List.find (\n -> n^.core.extra == c) cs of
+    neighboursOf' c = case List.find (\n -> n^.core.extra == c) cs of
                        Nothing       -> []
                        Just (_ :+ s) -> concat $ (\d -> map (d :+)) <$> sideDirections <*> s
 
@@ -190,7 +190,7 @@ toPolyLineWith findZero p = PolyLine.fromPoints . map ext . ptsOf $ p
 
 -- | Given a line segment with different endpoints, find the flipping point
 findZeroOnEdgeWith         :: (Fractional r, Ord r, Eq sign, Show r, Show sign)
-                           => r
+                           => r -- ^ treshold on when to give up
                            -> (Point 2 r -> sign)
                            -> LineSegment 2 sign r -> Point 2 r
 findZeroOnEdgeWith eps f s = interpolate tStar s

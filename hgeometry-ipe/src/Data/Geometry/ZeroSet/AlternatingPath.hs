@@ -1,31 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Data.Geometry.ZeroSet.AlternatingPath where
 
-import           Algorithms.BinarySearch
-import           Control.Lens (makeLenses, (^.), (%~), (.~), (&), (^?!), ix)
-import           Data.Util
+import           Control.Lens ((^.))
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import           Data.Geometry.Box
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine (PolyLine)
-import qualified Data.Geometry.PolyLine as PolyLine
-import           Data.Intersection
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Tree as RoseTree
-import           Data.Geometry.QuadTree.Cell
-import           Data.Geometry.QuadTree.Split
-import           Data.Geometry.Directions
-import           Data.Geometry.QuadTree
-import qualified Data.Geometry.QuadTree.Tree as Tree
-import           Data.Maybe (maybeToList)
-
-
 
 --------------------------------------------------------------------------------
 
@@ -50,6 +32,9 @@ alternatingFromTo = \case
 
 --------------------------------------------------------------------------------
 
+-- | Models a path from some vertex v, via a bunch of edges e, to
+-- another vertex v.  Note that if the source and the target vertex
+-- are the same, the path just consists of a singleton vertex v.
 data FromTo e v = Singleton !v
                 | FromTo !v !(NonEmpty.NonEmpty e) !v
                 deriving (Show,Eq,Read)

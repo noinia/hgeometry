@@ -30,7 +30,7 @@ import           Data.Intersection
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
-import           Data.Tree.Util (TreeNode(..))
+import           Data.Tree.Util (TreeNode(..), _TreeNodeEither)
 import           Data.Geometry.Ipe.Writer
 
 import           Debug.Trace
@@ -56,13 +56,9 @@ drawCorners = \(p :+ c) -> ipeGroup $ case p of
 
 
 drawCell' :: Fractional r => IpeOut (TreeNode (Corners Sign) p :+ Cell r) Ipe.Group r
-drawCell' = \(tn :+ c) -> ipeGroup [ iO $ drawCell c, iO $ drawCorners (toEither tn :+ c)
+drawCell' = \(tn :+ c) -> ipeGroup [ iO $ drawCell c, iO $ drawCorners (tn^._TreeNodeEither :+ c)
                                    ]
 
-toEither :: TreeNode v p -> Either v p
-toEither = \case
-  InternalNode v -> Left v
-  LeafNode l     -> Right l
 
 toColor :: Sign -> IpeColor r
 toColor = \case
@@ -74,6 +70,8 @@ toColor = \case
 drawZeroCell            :: Fractional r => IpeOut (Either (Corners Sign) Sign :+ Cell r) Ipe.Group r
 drawZeroCell = \z -> ipeGroup [ iO $ drawZeroCell' z, iO $ drawCorners z]
 
+--------------------------------------------------------------------------------
+
 
 addD    :: [Ipe.IpeObject R] -> [Ipe.IpeObject Double]
 addD xs = map (fmap $ realToFrac @R @Double) xs
@@ -83,9 +81,9 @@ addD xs = map (fmap $ realToFrac @R @Double) xs
 
 test' :: IO ()
 test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
-        [ -- iO $ drawQuadTreeWith (drawZeroCell @R) qt ! attr SLayer "qt"
-         iO $ defIO pl ! attr SLayer "pl"
-        , iO $ quadTreeLevels drawCell' qt
+        [ iO $ drawQuadTreeWith (drawZeroCell @R) qt ! attr SLayer "qt"
+        , iO $ defIO pl ! attr SLayer "pl"
+--        , iO $ quadTreeLevels drawCell' qt
         ]
   where
     f   :: Point 2 R -> R
@@ -95,9 +93,10 @@ test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
     Just pl = traceZero' cfg (fromSignum f) Zero startSeg rect
 
     startSeg :: LineSegment 2 () R
-    startSeg = ClosedLineSegment (ext $ origin) (ext $ Point2 0 100)
+    startSeg = ClosedLineSegment (ext $ origin) (ext $ Point2 100 0)
     rect     :: Rectangle () R
-    rect     = box (ext $ origin) (ext $ Point2 300 300)
+    -- rect     = box (ext $ Point2 64 0) (ext $ Point2 96 32)
+    rect     = box (ext $ Point2 64 0) (ext $ Point2 96 64)
     qt = fromZerosWith' (limitWidthTo $ cfg^.maxDepth) (fitsRectangle rect) (fromSignum f)
 
     cfg = defaultZeroConfig

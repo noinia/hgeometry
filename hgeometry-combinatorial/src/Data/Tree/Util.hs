@@ -36,6 +36,15 @@ instance Bitraversable TreeNode where
     InternalNode v -> InternalNode <$> f v
     LeafNode l     -> LeafNode     <$> g l
 
+-- | A TreeNode is isomorphic to Either
+_TreeNodeEither :: Iso' (TreeNode v p) (Either v p)
+_TreeNodeEither = iso tne etn
+  where
+    tne = \case
+      InternalNode v -> Left v
+      LeafNode l     -> Right l
+    etn = either InternalNode LeafNode
+
 --------------------------------------------------------------------------------
 -- * Zipper on rose trees
 
