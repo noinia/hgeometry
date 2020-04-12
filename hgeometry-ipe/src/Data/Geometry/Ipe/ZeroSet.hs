@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.Ipe.ZeroSet where
 
-import           Algorithms.BinarySearch
 import           Control.Lens
 import           Data.Ext
 import           Data.Foldable
@@ -16,24 +15,14 @@ import           Data.Geometry.Ipe.Types (singlePageFromContent)
 import           Data.Geometry.Point
 import           Data.Geometry.LineSegment
 import           Data.Geometry.ZeroSet
-import           Data.Geometry.PolyLine (PolyLine)
-import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.QuadTree
 import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Draw
-import           Data.Geometry.QuadTree.Quadrants
 import           Data.Geometry.QuadTree.Split
-import           Data.Geometry.QuadTree.Tree (Tree(..))
-import qualified Data.Geometry.QuadTree.Tree as Tree
-import           Data.Geometry.Vector
-import           Data.Intersection
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
 import           Data.Tree.Util (TreeNode(..), _TreeNodeEither)
 import           Data.Geometry.Ipe.Writer
 
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 

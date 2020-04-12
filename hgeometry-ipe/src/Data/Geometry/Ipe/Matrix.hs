@@ -1,32 +1,14 @@
 module Data.Geometry.Ipe.Matrix where
 
 import           Control.Lens hiding (rmap)
-import           Data.Bitraversable
 import           Data.Ext
-import           Data.Geometry.BezierSpline
-import           Data.Geometry.Box (Rectangle)
 import qualified Data.Geometry.Ipe.Attributes as AT
 import           Data.Geometry.Ipe.Attributes hiding (Matrix)
-import           Data.Geometry.Ipe.Color
-import           Data.Geometry.Ipe.Path
-import           Data.Geometry.Ipe.Literal
 import           Data.Geometry.Ipe.Types
-import           Data.Geometry.Point
-import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon (SimplePolygon)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import qualified Data.LSeq as LSeq
-import qualified Data.List.NonEmpty as NE
-import           Data.Maybe (mapMaybe)
 import           Data.Proxy
-import           Data.Singletons.TH (genDefunSymbols)
-import           Data.Text (Text)
-import           Data.Traversable
 import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.TypeLevel (AllConstrained)
-import           GHC.Exts
-import           Text.XML.Expat.Tree (Node)
 
 --------------------------------------------------------------------------------
 

@@ -27,7 +27,6 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Content
 import           Data.Geometry.Ipe.FromIpe
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Line
