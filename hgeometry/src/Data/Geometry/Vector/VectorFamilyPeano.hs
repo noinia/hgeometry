@@ -78,7 +78,9 @@ unVF :: Lens (VectorFamily  d r) (VectorFamily d t)
 unVF = lens _unVF (const VectorFamily)
 {-# INLINE unVF #-}
 
-type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
+-- type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
+class (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
+instance (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
 
 instance (Eq r, ImplicitArity d) => Eq (VectorFamily d r) where
   (VectorFamily u) == (VectorFamily v) = case (implicitPeano :: SingPeano d) of

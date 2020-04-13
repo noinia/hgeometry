@@ -60,7 +60,10 @@ unV :: Lens (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (
 unV = lens _unV (const MKVector)
 {-# INLINE unV #-}
 
-type Arity d = (ImplicitArity (Peano d), KnownNat d)
+-- type Arity d = (ImplicitArity (Peano d), KnownNat d)
+class (ImplicitArity (Peano d), KnownNat d) => Arity d
+instance (ImplicitArity (Peano d), KnownNat d) => Arity d
+
 
 deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
 deriving instance (Ord r, Arity d) => Ord (Vector d r)
