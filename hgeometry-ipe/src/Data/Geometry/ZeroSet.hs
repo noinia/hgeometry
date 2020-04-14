@@ -24,6 +24,7 @@ import           Data.Sequence (Seq)
 import qualified Data.Tree as RoseTree
 import           Data.Util
 
+import           Data.Geometry.Ball
 import           Debug.Trace
 
 --------------------------------------------------------------------------------
@@ -36,10 +37,36 @@ data ZeroConfig r = ZeroConfig { _maxDepth     :: WidthIndex
                                } deriving (Show,Eq)
 makeLenses ''ZeroConfig
 
-
 defaultZeroConfig :: Fractional r => ZeroConfig r
 defaultZeroConfig = ZeroConfig (-1) 0.001
 
+--------------------------------------------------------------------------------
+
+traceBisectorDisks :: ( RealFrac r, Ord r, Show r
+                      , Floating a, Ord a
+                      )
+                   => ZeroConfig r
+                   -> Disk d r -> Disk e r
+                   -> Rectangle c r
+                   -> Maybe (PolyLine 2 () r)
+traceBisectorDisks cfg s t = traceBisector cfg (f s) (f t)
+  where
+    f (Disk (c :+ _) r) = c :+ (sqrt $ realToFrac r)
+
+
+traceBisector                           :: ( RealFrac r, Ord r, Show r
+                                           , Floating a, Ord a
+                                           )
+                                        => ZeroConfig r
+                                        -> Point 2 r :+ a -> Point 2 r :+ a
+                                        -> Rectangle c r
+                                        -> Maybe (PolyLine 2 () r)
+traceBisector cfg s t = traceZero cfg f (ClosedLineSegment s t)
+  where
+    f q = dist s q - dist t q
+    dist (p :+ w) q = w + euclideanDist (realToFrac <$> p) (realToFrac <$> q)
+
+--------------------------------------------------------------------------------
 
 traceZero       :: (Eq a, Num a, RealFrac r, Ord r, Show r)
                 => ZeroConfig r
@@ -50,7 +77,7 @@ traceZero       :: (Eq a, Num a, RealFrac r, Ord r, Show r)
                 -> Maybe (PolyLine 2 () r)
 traceZero cfg f = traceZero' cfg (fromSignum f) Zero
 
-
+-- | Trace the zeroset
 traceZero'                 :: (Eq sign, RealFrac r, Ord r, Show r, Show sign)
                             => ZeroConfig r
                            -> (Point 2 r -> sign)
@@ -69,8 +96,8 @@ traceZero' cfg f zero' s b = do startCell <- findLeaf startPoint qt
     startPoint = findZero s'
 
     trace startCell' = case alternatingFromTo . trace' $ startCell' of
-                         Singleton _           -> Singleton startPoint
-                         FromTo _ es (_ :+ ec) -> FromTo startPoint es (midPoint ec)
+                         Singleton _                    -> Singleton startPoint
+                         FromTo (_ :+ st) es (_ :+ tgt) -> FromTo (midPoint st) es (midPoint tgt)
 
     trace' startCell' = withCorners $ explorePathWith (const True) startCell' zCells
 
@@ -126,17 +153,23 @@ exploreWith p start' cells = go0 start'
                        Just (_ :+ s) -> concat $ (\d -> map (d :+)) <$> sideDirections <*> s
 
 
--- | Explores into a path;
---
--- if there are multiple choices where to go to, just pick the first
+-- | Explores into a maximal path; If there are somehow multiple
+-- choices to take (except at the initial step) we take only the first
 -- one.
 explorePathWith          :: (Ord r, Fractional r, Show r, Show p)
-                         => ((p :+ Cell r) -> Bool)
+                         => ((p :+ Cell r) -> Bool) -- ^ continue exploring?
                          -> (p :+ Cell r) -> [p :+ Cell r]
                          -> AlternatingPath CardinalDirection (p :+ Cell r)
 explorePathWith p start' = toPath . exploreWith p start'
   where
-    toPath (Root s chs) = AlternatingPath s $ onFirstChild toPath' chs
+    -- toPath (Root s chs) = AlternatingPath s $ onFirstChild toPath' chs
+    toPath (Root s chs) = case (AlternatingPath s . toPath') <$> chs of
+        []         -> AlternatingPath s []
+        [p']       -> p'
+        (c1:c2:_)  -> let AlternatingPath t ys  = first oppositeDirection $ reversePath c1
+                          AlternatingPath _ ys' = c2
+                      in AlternatingPath t (ys <> ys')
+
     toPath' (RoseTree.Node x chs) = (x:) $ onFirstChild toPath' chs
     onFirstChild f = \case
       []    -> []

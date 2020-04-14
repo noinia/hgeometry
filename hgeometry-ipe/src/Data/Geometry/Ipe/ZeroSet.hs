@@ -82,7 +82,7 @@ test' = writeIpeFile "/tmp/test.ipe" . singlePageFromContent . addD $
     Just pl = traceZero' cfg (fromSignum f) Zero startSeg rect
 
     startSeg :: LineSegment 2 () R
-    startSeg = ClosedLineSegment (ext $ origin) (ext $ Point2 100 0)
+    startSeg = ClosedLineSegment (ext $ origin) (ext $ Point2 100 50)
     rect     :: Rectangle () R
     -- rect     = box (ext $ Point2 64 0) (ext $ Point2 96 32)
     rect     = box (ext $ Point2 64 0) (ext $ Point2 96 64)

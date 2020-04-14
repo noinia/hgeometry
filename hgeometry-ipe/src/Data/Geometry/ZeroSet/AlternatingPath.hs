@@ -30,6 +30,17 @@ alternatingFromTo = \case
   AlternatingPath s [] -> Singleton s
   AlternatingPath s xs -> FromTo s (NonEmpty.fromList $ map (^.core) xs) ((List.last xs)^.extra)
 
+
+reversePath                          :: AlternatingPath e v -> AlternatingPath e v
+reversePath p@(AlternatingPath s xs) = case xs of
+    []             -> p
+    ((e1 :+ _):tl) -> let ys = (e1 :+ s) : List.zipWith (\(_ :+ v) (e :+ _) -> e :+ v) xs tl
+                          t  = (last xs)^.extra
+                      in AlternatingPath t (reverse ys)
+
+
+
+
 --------------------------------------------------------------------------------
 
 -- | Models a path from some vertex v, via a bunch of edges e, to
