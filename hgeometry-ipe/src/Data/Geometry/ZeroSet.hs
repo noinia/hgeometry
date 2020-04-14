@@ -2,7 +2,7 @@
 module Data.Geometry.ZeroSet where
 
 import           Algorithms.BinarySearch
-import           Control.Lens (makeLenses, (^.), (%~), (.~), (&), (^?!), ix)
+import           Control.Lens (makeLenses, (^.), (%~), (.~), (&), (^?!), ix, to)
 import           Data.Bifunctor
 import           Data.Ext
 import           Data.Geometry.Box
@@ -16,11 +16,12 @@ import           Data.Geometry.QuadTree.Cell
 import           Data.Geometry.QuadTree.Split
 import qualified Data.Geometry.QuadTree.Tree as Tree
 import           Data.Geometry.ZeroSet.AlternatingPath
+import qualified Data.LSeq as LSeq
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (maybeToList)
-import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq)
+import qualified Data.Sequence as Seq
 import qualified Data.Tree as RoseTree
 import           Data.Util
 
@@ -42,18 +43,32 @@ defaultZeroConfig = ZeroConfig (-1) 0.001
 
 --------------------------------------------------------------------------------
 
-traceBisectorDisks :: ( RealFrac r, Ord r, Show r
-                      , Floating a, Ord a
-                      )
-                   => ZeroConfig r
-                   -> Disk d r -> Disk e r
-                   -> Rectangle c r
-                   -> Maybe (PolyLine 2 () r)
+traceFromPrefix        ::  forall r b c e. ( RealFrac r, Ord r, Show r
+                                      )
+                        => ZeroConfig r
+                        -> PolyLine 2 b r -> PolyLine 2 e r
+                        -> Rectangle c r
+                        -> Maybe (PolyLine 2 () r)
+traceFromPrefix cfg s t = traceBisector cfg (f s) (f t)
+  where
+    f   :: PolyLine 2 z r -> Point 2 r :+ Double
+    f p = let v = p^.PolyLine.points.to LSeq.last in v&extra .~ euclideanLength p
+    euclideanLength p = sum . fmap segmentLength . PolyLine.edgeSegments . second realToFrac $ p
+
+
+traceBisectorDisks          :: forall r c b e. ( RealFrac r, Ord r, Show r
+                                      )
+                            => ZeroConfig r
+                           -> Disk b r -> Disk e r
+                           -> Rectangle c r
+                           -> Maybe (PolyLine 2 () r)
 traceBisectorDisks cfg s t = traceBisector cfg (f s) (f t)
   where
-    f (Disk (c :+ _) r) = c :+ (sqrt $ realToFrac r)
+    f                   :: Disk z r -> Point 2 r :+ Double
+    f (Disk (c :+ _) r) = c :+ (negate . sqrt $ realToFrac r)
 
 
+-- | Traces a weighted bisector.
 traceBisector                           :: ( RealFrac r, Ord r, Show r
                                            , Floating a, Ord a
                                            )

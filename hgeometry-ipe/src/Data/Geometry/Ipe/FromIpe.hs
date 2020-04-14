@@ -13,12 +13,14 @@ module Data.Geometry.Ipe.FromIpe where
 
 import           Control.Lens hiding (Simple)
 import           Data.Ext
+import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Path
 import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
+import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.LSeq as LSeq
@@ -67,6 +69,26 @@ _asPolyLine = prism' poly2path path2poly
 -- | Convert to a simple polygon
 _asSimplePolygon :: Prism' (Path r) (Polygon Simple () r)
 _asSimplePolygon = _asSomePolygon._Left
+
+
+-- | Tries to convert a path into a rectangle.
+_asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle () r)
+_asRectangle = prism' rectToPath pathToRect
+  where
+    rectToPath (corners -> Corners a b c d) = review _asSimplePolygon . fromPoints $ [a,b,c,d]
+    pathToRect p = p^?_asSimplePolygon >>= asRect
+
+    asRect    :: SimplePolygon () r -> Maybe (Rectangle () r)
+    asRect pg = case pg^..outerBoundary.traverse of
+        [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (boundingBoxList' [a,c])
+        [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (boundingBoxList' [a,c])
+        _                                                    -> Nothing
+
+    isH (p :+ _) (q :+ _) = p^.xCoord == q^.xCoord
+    isV (p :+ _) (q :+ _) = p^.yCoord == q^.yCoord
+
+
+
 
 -- | Convert to a triangle
 _asTriangle :: Prism' (Path r) (Triangle 2 () r)

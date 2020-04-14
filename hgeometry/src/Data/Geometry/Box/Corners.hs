@@ -3,7 +3,7 @@ module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southE
                                 , corners, cornersInDirection
                                 ) where
 
-import Control.Lens (makeLenses,makePrisms,Ixed(..),Index, IxValue,(%~),(&),(^?!))
+import Control.Lens (makeLenses,Ixed(..),Index, IxValue,(%~),(&),(^?!))
 import Data.Ext
 import Data.Functor.Apply
 import Data.Geometry.Box.Internal

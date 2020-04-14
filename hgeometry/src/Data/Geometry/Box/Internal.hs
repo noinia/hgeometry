@@ -274,3 +274,6 @@ instance IsBoxable (Point d r) where
 
 instance IsBoxable (Box d p r) where
   boundingBox (Box m m') = Box (m&extra .~ ()) (m'&extra .~ ())
+
+instance IsBoxable c => IsBoxable (c :+ e) where
+  boundingBox = boundingBox . view core
