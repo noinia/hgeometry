@@ -17,11 +17,16 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Data.Ord (comparing)
+import           Data.RealNumber.Rational
 import           Data.Traversable (traverse)
 import           Data.Util
 import           Test.Hspec
 import           Test.QuickCheck (Arbitrary(..), property, suchThat)
 import           Test.QuickCheck.Instances ()
+
+--------------------------------------------------------------------------------
+
+type R = RealNumber 10
 
 
 spec :: Spec
@@ -64,7 +69,7 @@ toSpec (TestCase poly) = do
 
 
 
-readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase R])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase (ConvexPolygon poly) | (poly :+ _) <- polies ]

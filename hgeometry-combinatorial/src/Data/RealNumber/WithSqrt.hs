@@ -2,9 +2,10 @@
 {-# LANGUAGE TypeApplications #-}
 module Data.RealNumber.WithSqrt where
 
+import Data.Kind (Constraint)
+import Data.Functor.Identity
 import Data.Proxy
 import Data.Reflection
-import Data.Functor.Identity
 
 --------------------------------------------------------------------------------
 
@@ -97,7 +98,7 @@ instance (Ord r, Fractional r, Reifies root r) => Floating (WithSqrt root r) whe
 -- | Run a computation using our WithRoot type.
 --
 -- pre: the computation that we run does not return a value still involving sqrt terms
-runWithRoot          :: forall proxy constr r computation.
+runWithRoot          :: forall proxy (constr :: * -> Constraint) r computation.
                         ( Functor computation, Ord r, Real r, Fractional r
                         , (forall root. constr (WithSqrt root r))
                         )
@@ -133,7 +134,7 @@ test2 :: forall r. (Floating r, Show r) => ConstR String r
 test2 = ConstR $ show (test @r)
 
 test'   :: Double -> Double
-test' r = runIdentity $ runWithRoot @None r (Identity test)
+test' r = runIdentity $ runWithRoot (Proxy @None) r (Identity test)
 
 test2'   :: Double -> String
-test2' r = runConstR $ runWithRoot @Show r test2
+test2' r = runConstR $ runWithRoot (Proxy @Show) r test2
