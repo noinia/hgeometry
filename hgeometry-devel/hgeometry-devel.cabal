@@ -89,6 +89,8 @@ library
               , QuickCheck, quickcheck-instances
               , random
 
+              , criterion
+
 
   exposed-modules:
                    Algorithms.Geometry.ConvexHull.KineticDivideAndConquer
@@ -99,3 +101,73 @@ library
                    Algorithms.Geometry.ConvexHull.RenderPLY
 
                    Algorithms.Geometry.ConvexHull.ConvexHull3DSpec
+
+
+
+benchmark benchmarks
+
+  hs-source-dirs: benchmark
+
+  -- main-is: Benchmarks.hs
+  main-is: Bench.hs
+
+  type: exitcode-stdio-1.0
+
+  -- other-modules:
+
+
+  build-depends:
+                base
+              , criterion                      >= 1.1.4.0
+              , linear
+              , deepseq
+              , deepseq-generics
+              , hgeometry                       >= 0.10.0.0
+              , hgeometry-combinatorial
+              , hgeometry-ipe
+              , hgeometry-devel
+              , lens
+              , semigroupoids
+              , QuickCheck
+              , bytestring
+              , containers
+              , optparse-applicative
+              , vinyl
+              , vector
+              , dlist
+              , mtl
+
+
+  ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors
+
+  default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+                    , PatternSynonyms
+                    , ViewPatterns
+                    , LambdaCase
+                    , TupleSections
+
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , AutoDeriveTypeable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+                    , OverloadedStrings

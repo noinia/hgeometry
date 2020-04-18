@@ -1,5 +1,18 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE BangPatterns #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.KineticDivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(3\)-d convex hull algorithm. The implementation is based on
+--
+-- <http://tmc.web.engr.illinois.edu/ch3d/ch3d.pdf A Minimalist’s Implementationof the3-dDivide-and-ConquerConvex Hull Algorithm>
+-- by Timothy M. Chan
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.KineticDivideAndConquer where
 
 
@@ -147,6 +160,9 @@ lowerEnvelope pts = SP i $ zipWith f (toList h) tl
     -- primal this line represents a vertex of the lower envelope. The
     -- x-coordinate of this point is the slope of the line.
 
+
+
+
 --------------------------------------------------------------------------------
 
 -- | Computes a lowerbound on the z-value with which to start
@@ -161,6 +177,21 @@ lowerboundT pts = ((-1)*) . maximum . catMaybes
                 in if d == 0 then Nothing else Just $ (abs $ q^.zCoord - p^.zCoord) / d
 
 
+initialHull' :: (Ord r, Num r) => NonEmpty (Point 3 r :+ p) -> NonEmpty p
+initialHull' = fmap (^.extra)
+             . GrahamScan.lowerHull
+             . fmap (&core %~ \(Point3 x _ z) -> Point2 x z)
+
+initialHull''     :: (Ord r, Num r) => MergeStatus r -> MergeStatus r -> HullM s r (NonEmpty Index)
+initialHull'' l r = do pts <- fst <$> dump
+                       let pts'  = V.imap (\i p -> p :+ i) pts
+                           xMin  = (pts' V.! (hd  l))^.core.xCoord
+                           xMax  = (pts' V.! (lst r))^.core.xCoord
+                           pts'' = V.filter (\(p :+ _) -> let x = p^.xCoord
+                                                          in xMin <= x && x <= xMax
+                                            ) pts'
+                       pure $ initialHull' . NonEmpty.fromList . V.toList $ pts''
+
 instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
   lc <> rc = do l <- lc
@@ -168,7 +199,10 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                 let esIn = mergeEvents (events l) (events r)
                     t    = (-10000000) -- TODO; at what time value should we start?
                 (h,u,v) <- findBridge t l r
+                -- (vec,_) <- dump
+                -- h' <- initialHull'' l r
                 let b = Bridge u v
+                    -- b' = traceShow ("hull=hull?", if h /= h' then show (vec,l,r,h,h') else "Same") b
                 es <- runKinetic Bottom esIn b
                 writeList h
                 let !ms = MergeStatus (hd l) (lst r) es

@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Triangle where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifoldable
 import           Data.Bifunctor
@@ -11,8 +12,8 @@ import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Geometry.Ball (Disk, disk)
 import           Data.Geometry.Boundary
-import           Data.Geometry.HyperPlane
 import           Data.Geometry.HalfSpace
+import           Data.Geometry.HyperPlane
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -25,6 +26,7 @@ import           Data.Maybe (mapMaybe)
 import           Data.Util
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
+import           GHC.Generics (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -33,10 +35,13 @@ import           GHC.TypeLits
 data Triangle d p r = Triangle !(Point d r :+ p)
                                !(Point d r :+ p)
                                !(Point d r :+ p)
+                      deriving (Generic)
 
-deriving instance (Arity d, Show r, Show p) => Show (Triangle d p r)
-deriving instance (Arity d, Read r, Read p) => Read (Triangle d p r)
-deriving instance (Arity d, Eq r, Eq p)     => Eq (Triangle d p r)
+deriving instance (Arity d, Show r, Show p)     => Show   (Triangle d p r)
+deriving instance (Arity d, Read r, Read p)     => Read   (Triangle d p r)
+deriving instance (Arity d, Eq r, Eq p)         => Eq     (Triangle d p r)
+
+instance (Arity d, NFData r, NFData p) => NFData (Triangle d p r)
 
 instance Arity d => Bifunctor  (Triangle d) where bimap = bimapDefault
 instance Arity d => Bifoldable (Triangle d) where bifoldMap = bifoldMapDefault

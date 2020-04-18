@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE BangPatterns #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.LSeq
@@ -47,14 +48,16 @@ module Data.LSeq( LSeq
                 ) where
 
 import           Control.DeepSeq
-import           Control.Lens ((%~), (&), (<&>), (^?), bimap)
+import           Control.Lens ((%~), (&), (<&>), (^?!), bimap)
 import           Control.Lens.At (Ixed(..), Index, IxValue)
 import           Data.Aeson
+import           Data.Coerce(coerce)
 import qualified Data.Foldable as F
+import           Data.Functor.Apply
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
 import           Data.Proxy
 import           Data.Semigroup.Foldable
+import           Data.Semigroup.Traversable
 import qualified Data.Sequence as S
 import qualified Data.Traversable as Tr
 import           GHC.Generics (Generic)
@@ -104,6 +107,10 @@ instance Ixed (LSeq n a) where
     | otherwise                 = pure s
 
 instance (1 <= n) => Foldable1 (LSeq n)
+-- instance (1 <= n) => Traversable1 (LSeq n) where
+--   traverse1 f s = case traverse1 f $ viewl s of
+--                     x :< s' -> x <| s'
+
 
 empty :: LSeq 0 a
 empty = LSeq S.empty
@@ -136,8 +143,8 @@ eval n (LSeq xs)
 -- checked.
 --
 -- This function should be a noop
-promise :: LSeq m a -> LSeq n a
-promise = LSeq . toSeq
+promise :: forall m n a. LSeq m a -> LSeq n a
+promise = coerce
 
 
 -- | Forces the first n elements of the LSeq
@@ -145,11 +152,11 @@ forceLSeq   :: KnownNat n => proxy n -> LSeq m a -> LSeq n a
 forceLSeq n = promise . go (fromInteger $ natVal n)
   where
     -- forces the Lseq for n' positions
-    go      :: Int -> LSeq m a -> LSeq m a
-    go n' s | n' <= l    = s
-            | otherwise  = error msg
+    go                    :: Int -> LSeq m a -> LSeq m a
+    go !n' s | n' <= l    = s
+             | otherwise  = error msg
       where
-        l   = S.length . S.take n' . toSeq $ s
+        !l  = S.length . S.take n' . toSeq $ s
         msg = "forceLSeq: too few elements. expected " <> show n' <> " but found " <> show l
 
 
@@ -163,7 +170,7 @@ sa `append` sb = LSeq $ (toSeq sa) <> toSeq sb
 -- | get the element with index i, counting from the left and starting at 0.
 -- O(log(min(i,n-i)))
 index     :: LSeq n a -> Int -> a
-index s i = fromJust $ s^?ix i
+index s i = s^?!ix i
 
 adjust       :: (a -> a) -> Int -> LSeq n a -> LSeq n a
 adjust f i s = s&ix i %~ f
@@ -221,6 +228,15 @@ instance Foldable (ViewL n) where
   foldMap = Tr.foldMapDefault
 instance Traversable (ViewL n) where
   traverse f (x :< xs) = (:<) <$> f x <*> traverse f xs
+instance (1 <= n) => Foldable1 (ViewL n)
+instance (1 <= n) => Traversable1 (ViewL n) where
+  traverse1 f (a :< LSeq as) = (\(b :< bs) -> b :< promise bs) <$> go a as
+    where
+      go x = \case
+        S.Empty       -> (:< empty) <$> f x
+        (y S.:<| ys) -> (\x' (y' :< ys') -> x' :< promise @1 @0 (y' :<| ys'))
+                        <$> f x <.> go y ys
+
 instance Eq a => Eq (ViewL n a) where
   s == s' = F.toList s == F.toList s'
 instance Ord a => Ord (ViewL n a) where

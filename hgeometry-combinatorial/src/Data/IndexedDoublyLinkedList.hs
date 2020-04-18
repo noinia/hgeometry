@@ -9,7 +9,7 @@ module Data.IndexedDoublyLinkedList( DLList(..)
                                    , toListFrom, toListFromR, toListContains
                                    , insertAfter, insertBefore
                                    , delete
-                                   -- , dump
+                                   , dump
                                    ) where
 
 import           Control.Monad.Primitive (PrimMonad(..))
@@ -26,6 +26,8 @@ import qualified Data.Vector.Mutable as MV
 --------------------------------------------------------------------------------
 
 type Index = Int
+
+-- TODO: Switch to unobxed sums for these!
 
 -- | Cells in the Linked List
 data Cell = Cell { prev :: Maybe Index

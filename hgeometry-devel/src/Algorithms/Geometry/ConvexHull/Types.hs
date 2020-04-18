@@ -23,6 +23,7 @@ type HullM s r = DLListMonad s (Point 3 r)
 
 --------------------------------------------------------------------------------
 
+-- TODO: Define bridge as a data type so we can add UNPACK pragmas
 type Bridge = Two Index
 
 pattern Bridge     :: Index -> Index -> Bridge
@@ -54,9 +55,11 @@ eventActions = extra
 --                      , eventKind :: !Action
 --                      } deriving (Show,Eq)
 
-data Action = InsertAfter  !Index !Index -- ^ current Index first, then the Item we insert
-            | InsertBefore !Index !Index -- ^ current Index first, then the Item we insert
-            | Delete !Index
+data Action = InsertAfter  {-# UNPACK #-} !Index {-# UNPACK #-} !Index
+            -- ^ current Index first, then the Item we insert
+            | InsertBefore {-# UNPACK #-} !Index {-# UNPACK #-} !Index
+              -- ^ current Index first, then the Item we insert
+            | Delete {-# UNPACK #-} !Index
             deriving (Show,Eq,Ord)
 
 getRightMost :: Action -> Index
@@ -72,10 +75,14 @@ getLeftMost = \case
   Delete j         -> j
 
 
-data MergeStatus r = MergeStatus { hd     :: !Index -- ^ first item in the list
-                                 , lst    :: !Index -- ^ last item in the list
+data MergeStatus r = MergeStatus { hd     :: {-# UNPACK #-} !Index -- ^ first item in the list
+                                 , lst    :: {-# UNPACK #-} !Index -- ^ last item in the list
                                  , events :: ![Event r] -- ^ Events when this Hull changes
                                  } deriving (Show,Eq)
+
+-- data MergeStatus' r = MergeStatus' { initialHull :: (NonEmpty Index)
+--                                    , events'     :: [Event r]
+--                                    } deriving (Show,Eq)
 
 
 
