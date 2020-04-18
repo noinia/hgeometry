@@ -1,6 +1,7 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
+import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
@@ -37,6 +38,9 @@ spec = describe "3D ConvexHull tests" $ do
 
          it "same as naive on buggyPoints " $ sameAsNaive myPts
 
+
+         it "same as minimalist quickcheck" $ property $ \(HI pts) ->
+           DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
 
          it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive pts
 

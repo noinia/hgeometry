@@ -2,6 +2,7 @@ module Main where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as CH2D
 import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivideAndConquer
+import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
 
 -- import           Benchmark.Util
 import           Control.DeepSeq
@@ -55,6 +56,7 @@ benchBuild ps = bgroup "build" [ bgroup (show n) (build $ take' n ps)
     build pts = [ bench "sort"                 $ nf NonEmpty.sort pts
                 , bench "2D CH"                $ nf ch2d pts
                 , bench "3D CH"                $ nf DivideAndConquer.lowerHull' pts
+                , bench "3D CH Minim"          $ nf Minimalist.lowerHull' pts
                 -- , bench "Div&Conq Old"         $ nf oldDivAndConquer            pts
                 ]
       where
