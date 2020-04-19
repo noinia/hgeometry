@@ -421,11 +421,11 @@ partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
 -- at the current time t.
 colinears'       :: (Ord r, Num r, Show r) => r -> Index -> Int -> Simulation s r (NonEmpty Index)
 colinears' t i d = do b  <- get >>= traverse (lift . atTime t)
-                      ls <- lift (toListFromRK (d+1) i) >>= takeColinear b
-                      rs <- lift (toListFromK (d+1)  i) >>= takeColinear b
+                      ls <- lift (toListFromR i) >>= takeColinear b
+                      rs <- lift (toListFrom  i) >>= takeColinear b
                       pure . NonEmpty.fromList $ (reverse ls) <> [i] <> rs
   where
-    takeColinear b (_ :| is) = filterM (isColinearWith b t) is
+    takeColinear b (_ :| is) = filterM (isColinearWith b t) $ take (d+1) is
 
 
 -- colinears     :: (Ord r, Num r, Show r) => r -> Index -> Simulation s r (NonEmpty Index)
@@ -690,7 +690,7 @@ buggyPoints6' = [ point3 [0  ,0, 00]   :+ 0
                -- ,point3 [23,-6,-18]   :+ 20
                ]
 
-
+-- mkBuggy = fmap (bimap (10 *^) id) . NonEmpty.fromList
 
 
 buggyPoints7 :: [Point 3 R :+ Int]
