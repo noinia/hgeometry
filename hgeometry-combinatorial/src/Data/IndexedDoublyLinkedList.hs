@@ -7,6 +7,7 @@ module Data.IndexedDoublyLinkedList( DLList(..)
                                    , writeList
                                    , valueAt, getNext, getPrev
                                    , toListFrom, toListFromR, toListContains
+                                   , toListFromK, toListFromRK
                                    , insertAfter, insertBefore
                                    , delete
                                    , dump
@@ -109,12 +110,19 @@ getPrev i = do v <- asks llist
 toListFrom   :: Index -> DLListMonad s b (NonEmpty Index)
 toListFrom i = (i :|) <$> iterateM getNext i
 
+-- | Takes the current element and its k next's
+toListFromK     :: Index -> Int -> DLListMonad s b (NonEmpty Index)
+toListFromK i k = (i :|) <$> replicateM k getNext i
+
 -- | Computes a maximal length list by walking backwards in the
 -- DoublyLinkedList, starting from the Given index
 --
 -- running time: \(O(k)\), where \(k\) is the length of the output list
 toListFromR :: Index -> DLListMonad s b (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
+
+toListFromRK     :: Index -> Int -> DLListMonad s b (NonEmpty Index)
+toListFromRK i k = (i :|) <$> replicateM k getPrev i
 
 -- | Computes a maximal length list that contains the element i.
 --
@@ -157,6 +165,15 @@ delete j = do v <- asks llist
 
 ----------------------------------------
 -- * Helper functions
+
+-- | Applies the action at most n times.
+replicateM     :: Monad m => Int -> (a -> m (Maybe a)) -> a -> m [a]
+replicateM n f = go n
+  where
+    go 0 _ = pure []
+    go k x = f x >>= \case
+               Nothing -> pure []
+               Just y  -> (y:) <$> go (k-1) y
 
 iterateM  :: Monad m => (a -> m (Maybe a)) -> a -> m [a]
 iterateM f = go

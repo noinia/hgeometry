@@ -421,11 +421,11 @@ partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
 -- at the current time t.
 colinears'       :: (Ord r, Num r, Show r) => r -> Index -> Int -> Simulation s r (NonEmpty Index)
 colinears' t i d = do b  <- get >>= traverse (lift . atTime t)
-                      ls <- lift (toListFromR i) >>= takeColinear b
-                      rs <- lift (toListFrom  i) >>= takeColinear b
+                      ls <- lift (toListFromRK (d+1) i) >>= takeColinear b
+                      rs <- lift (toListFromK (d+1)  i) >>= takeColinear b
                       pure . NonEmpty.fromList $ (reverse ls) <> [i] <> rs
   where
-    takeColinear b (_ :| is) = filterM (isColinearWith b t) $ take (d+1) is
+    takeColinear b (_ :| is) = filterM (isColinearWith b t) is
 
 
 -- colinears     :: (Ord r, Num r, Show r) => r -> Index -> Simulation s r (NonEmpty Index)
@@ -667,3 +667,107 @@ buggyPoints5' = [point3 [-21,14,-4]   :+ 0
                 ,point3 [23,-18,14]   :+ 19
                 ,point3 [23,-6,-18]   :+ 20
                 ]
+
+buggyPoints6 = mkBuggy $ buggyPoints6'
+
+buggyPoints6' :: [Point 3 R :+ Int]
+buggyPoints6' = [ point3 [0  ,0, 00]   :+ 0
+                , point3 [1 ,0, 0]    :+ 1
+                , point3 [1, 2, 0 ]  :+ 2
+                , point3 [2 ,0, 2]    :+ 3
+               -- ,point3 [-11,-19,-7]  :+ 5
+               -- ,point3 [-9,18,14]    :+ 6
+               -- ,point3 [-7,5,5]      :+ 7
+               -- ,point3 [-6,14,11]    :+ 8
+               -- ,point3 [-3,16,10]    :+ 10
+               -- ,point3 [1,-4,0]      :+ 11
+               -- ,point3 [1,19,14]     :+ 12
+               -- ,point3 [3,4,-7]      :+ 13
+               -- ,point3 [6,-8,22]     :+ 14
+               -- ,point3 [8,6,12]      :+ 15
+               -- ,point3 [12,-2,-17]   :+ 16
+               -- ,point3 [23,-18,14]   :+ 19
+               -- ,point3 [23,-6,-18]   :+ 20
+               ]
+
+
+
+
+buggyPoints7 :: [Point 3 R :+ Int]
+buggyPoints7 = [point3 [-82,-84,-74] :+ 0
+               ,point3 [-82,-27,66] :+ 1
+               ,point3 [-82,6,-62] :+ 2
+               ,point3 [-75,73,41] :+ 3
+               ,point3 [-72,21,-81] :+ 4
+               ,point3 [-69,-64,81] :+ 5
+               ,point3 [-68,-53,40] :+ 6
+               ,point3 [-68,2,-63] :+ 7
+               ,point3 [-67,-92,82] :+ 8
+               ,point3 [-66,-73,29] :+ 9
+               ,point3 [-66,17,-79] :+ 10
+               ,point3 [-66,35,-68] :+ 11
+               ,point3 [-59,-78,-71] :+ 12
+               ,point3 [-58,32,74] :+ 13
+               ,point3 [-57,-82,12] :+ 14
+               ,point3 [-55,-7,-57] :+ 15
+               ,point3 [-50,-77,23] :+ 16
+               ,point3 [-48,-9,72] :+ 17
+               ,point3 [-41,21,65] :+ 18
+               ,point3 [-39,-72,40] :+ 19
+               ,point3 [-39,63,-33] :+ 20
+               ,point3 [-36,90,86] :+ 21
+               ,point3 [-34,6,-3] :+ 22
+               ,point3 [-30,-31,68] :+ 23
+               ,point3 [-29,-15,53] :+ 24
+               ,point3 [-21,-51,-76] :+ 25
+               ,point3 [-20,59,26] :+ 26
+               ,point3 [-17,-54,-92] :+ 27
+               ,point3 [-17,-4,27] :+ 28
+               ,point3 [-16,-47,26] :+ 29
+               ,point3 [-13,23,-55] :+ 30
+               ,point3 [-11,-33,-13] :+ 31
+               ,point3 [-9,-32,59] :+ 32
+               ,point3 [-9,-1,11] :+ 33
+               ,point3 [-6,-68,-27] :+ 34
+               ,point3 [-6,25,-20] :+ 35
+               ,point3 [-4,85,24] :+ 36
+               ,point3 [-1,-39,-89] :+ 37
+               ,point3 [2,-36,36] :+ 38
+               ,point3 [2,22,28] :+ 39
+               ,point3 [4,-42,-27] :+ 40
+               ,point3 [8,89,3] :+ 41
+               ,point3 [12,-53,-2] :+ 42
+               ,point3 [12,32,-28] :+ 43
+               ,point3 [13,27,-92] :+ 44
+               ,point3 [15,90,79] :+ 45
+               ,point3 [16,26,72] :+ 46
+               ,point3 [19,91,-30] :+ 47
+               ,point3 [20,-57,-3] :+ 48
+               ,point3 [21,53,-84] :+ 49
+               ,point3 [22,-88,-25] :+ 50
+               ,point3 [26,82,20] :+ 51
+               ,point3 [27,-68,69] :+ 52
+               ,point3 [27,87,-92] :+ 53
+               ,point3 [32,-6,83] :+ 54
+               ,point3 [33,54,-47] :+ 55
+               ,point3 [34,-61,16] :+ 56
+               ,point3 [35,-58,21] :+ 57
+               ,point3 [37,35,31] :+ 58
+               ,point3 [41,-92,-84] :+ 59
+               ,point3 [42,-63,59] :+ 60
+               ,point3 [44,-84,-90] :+ 61
+               ,point3 [47,0,78] :+ 62
+               ,point3 [51,-69,44] :+ 63
+               ,point3 [51,-49,-20] :+ 64
+               ,point3 [51,92,-84] :+ 65
+               ,point3 [52,-80,-92] :+ 66
+               ,point3 [54,-13,-50] :+ 67
+               ,point3 [57,58,-50] :+ 68
+               ,point3 [59,83,-29] :+ 69
+               ,point3 [71,14,-8] :+ 70
+               ,point3 [77,-1,-47] :+ 71
+               ,point3 [78,-58,-74] :+ 72
+               ,point3 [79,34,-21] :+ 73
+               ,point3 [84,-82,-1] :+ 74
+               ,point3 [85,38,34] :+ 75
+               ]
