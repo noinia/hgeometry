@@ -22,6 +22,7 @@ import           Data.Ord (comparing)
 import           Data.Semigroup
 import           Data.Sequence (Seq(..))
 import           Data.Util
+-- import           Data.Witherable.Class
 import           Prelude hiding (Either(..))
 
 --------------------------------------------------------------------------------
@@ -209,62 +210,98 @@ trace          :: Ord t => t -> Bridge p -> Alternating (Scene p) (Event' Existi
 trace  t b anim = trace' b anim (nextBridgeChange t (currentScene anim) b)
 
 
-data NextEvent' f p t = BridgeEvent
-                      | ExistingEvent (Event' f p t) (Alternating (Scene p) (Event' f p t))
-                      | CombinedEvent (Event' f p t) (Alternating (Scene p) (Event' f p t))
+
+
+data NextEvent' f p t = BridgeEvent   (Event p t)
+                      | ExistingEvent (Event' f p t)             (Alternating (Scene p) (Event' f p t))
+                      | CombinedEvent (Event' f p t) (Event p t) (Alternating (Scene p) (Event' f p t))
 type NextEvent = NextEvent' Existing
+
+nextTime = \case
+  BridgeEvent   e     -> e^.eventTime
+  ExistingEvent e   _ -> e^.eventTime
+  CombinedEvent e _ _ -> e^.eventTime
+
 
 
 nextEvent                    :: Ord t
-                             => Alternating (Scene p) (Event' Existing p t) -> Maybe t
-                             -> Maybe (t :+ NextEvent p t)
+                             => Alternating (Scene p) (Event' Existing p t)
+                             -> Maybe (Event p t) -- ^ The first bridge event
+                             -> Maybe (NextEvent p t)
 nextEvent (Alternating _ es) = go es
   where
     go []           Nothing  = Nothing
-    go []           (Just t) = Just $ t:+ BridgeEvent
-    go ((e:+s):es') Nothing  = let t' = e^.eventTime
-                               in Just $ t' :+ ExistingEvent e (Alternating s es')
-    go ((e:+s):es') (Just t) = let t' = e^.eventTime
-                               in Just $ case t' `compare` t of
-                                           LT -> t' :+ ExistingEvent e (Alternating s es')
-                                           EQ -> t  :+ CombinedEvent e (Alternating s es')
-                                           GT -> t  :+ BridgeEvent
+    go []           (Just b) = Just $ BridgeEvent b
+    go ((e:+s):es') Nothing  = Just $ ExistingEvent e (Alternating s es')
+    go ((e:+s):es') (Just b) = Just $ case (e^.eventTime) `compare` (b^.eventTime) of
+                                        LT -> ExistingEvent e   (Alternating s es')
+                                        EQ -> CombinedEvent e b (Alternating s es')
+                                        GT -> BridgeEvent b
 
 trace'        :: Ord t
-              => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> Maybe t
+              => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> Maybe (Event p t)
               -> [Event p t]
 trace' b a mt = case nextEvent a mt of
-    Nothing        -> []
-    Just (t :+ ne) -> let STR evt b' a' = continue t ne
-                          mx ?: xs = maybe xs (:xs) mx
-                      in evt ?: trace t b' a'
+    Nothing  -> []
+    Just ne  -> let STR evt b' a' = continue ne
+                    mx ?: xs = maybe xs (:xs) mx
+                in evt ?: trace (nextTime ne) b' a'
   where
-    continue t = \case
-      ExistingEvent e a' -> STR (fromExistingEvent b e)       b  a'
-      BridgeEvent        -> let SP acts b' = handleBridgeEvent b t (currentScene a) in
-                            STR (Just $ newEvent t acts)      b' a
-      CombinedEvent e a' -> let SP acts b' = handleBridgeEvent b t (currentScene a') in
-                            STR (Just $ combinedEvent e acts) b' a'
+    continue = \case
+      ExistingEvent e a'    -> STR (fromExistingEvent b e)     b  a'
+      BridgeEvent e         -> let SP e' b' = handleBridgeEvent b e (currentScene a) in
+                               STR (Just e')                   b' a
+                               -- in this case there is not much to handle; since
+                               -- we actually know what the bridge should look like now
+      CombinedEvent e be a' -> let SP e' b' = handleBridgeEvent b e (currentScene a') in
+                               STR (Just $ combinedEvent e e') b' a'
 
     newEvent t acts = t :+ (coerce acts)
-    combinedEvent (t :+ eActs) (coerce -> ac:|acts) = t :+ (ac:| (acts <> filterActions b eActs))
+
+
+
+handleOnlyBridgeEvent = undefined
+-- it seems that in this case there is necessarily only one action
+-- involving a bridge point i.e. if the left bridgepoint gets
+-- overtaken by both its predecesor and successor, then we would have
+-- an existing event in the left hull as well. Same for on the right
+-- so the worst thing that can happen is that we have one event on the
+-- left, and one on the right.
+
+-- TODO: Figure out once more what happens if we have an event on the left *and* on the *right*
+-- in particular, make sure that all four cases are ok:
+--
+-- insert, insert: does this still mean we have an insert event?
+-- delete, delete:
+-- insert, delete
+-- delete, insert -- should be symemtric to the one above
+
+
+
+
+
+combinedEvent = undefined
+-- combinedEvent (t :+ eActs) (coerce -> ac:|acts) = t :+ (ac:| (acts <> filterActions b eActs))
     -- the combining is going to be more complicated I think
 
 -- | Handles a bridge event; i.e. figures out if
-handleBridgeEvent                    :: Bridge p -> t -> Scene p
-                                     -> SP (NonEmpty (Action p)) (Bridge p)
-handleBridgeEvent b@(Bridge l r) t s = SP (toNonEmpty . catMaybes $ [leftE, rightE]) b'
+handleBridgeEvent                             :: Bridge p -> Event' f p t -> Scene p
+                                              -> SP (Event p t) (Bridge p)
+handleBridgeEvent b@(Bridge l r) e@(t :+ _) s = SP e' b'
   where
-    b'@(Bridge l' r') = findBridgeFrom b t s
+    b'@(Bridge l' r') = undefined -- findBridgeFrom b e s
+
+    e' = undefined
+
     toNonEmpty = fromMaybe (error "Bridge event without producing output!") . NonEmpty.nonEmpty
-    leftE = case l' `compareX` l of
-              EQ -> Nothing
-              LT -> Just $ Delete l
-              GT -> Just $ InsertAfter l l'
-    rightE = case r' `compareX` r of
-               EQ -> Nothing
-               LT -> Just $ Delete r
-               GT -> Just $ InsertBefore r r'
+    -- leftE = case l' `compareX` l of
+    --           EQ -> Nothing
+    --           LT -> Just $ Delete l
+    --           GT -> Just $ InsertAfter l l'
+    -- rightE = case r' `compareX` r of
+    --            EQ -> Nothing
+    --            LT -> Just $ Delete r
+    --            GT -> Just $ InsertBefore r r'
   -- TODO: It may be possible to save the comparison here by keeping track of what type of
   -- actions we had to perform in 'nextBridgeChangeWith'
 
@@ -272,7 +309,7 @@ handleBridgeEvent b@(Bridge l r) t s = SP (toNonEmpty . catMaybes $ [leftE, righ
 compareX = undefined
 
 
-findBridgeFrom       :: Bridge p -> t -> Scene p -> Bridge p
+findBridgeFrom       :: Bridge p -> Event p t -> Scene p -> Bridge p
 findBridgeFrom b t s = undefined
                        -- essentially: find the outermost points colinear with the bridge,
                        -- unless we are deleting those at this time.
@@ -281,21 +318,117 @@ findBridgeFrom b t s = undefined
 
 
 
-initialBridgeChange :: Ord t => Scene p -> Bridge p -> Maybe t
-initialBridgeChange = nextBridgeChangeWith id
+initialBridgeChange :: Ord t => Scene p -> Bridge p -> Maybe (Event p t)
+initialBridgeChange = nextBridgeChangeWith (const True)
 
-nextBridgeChange :: Ord t => t -> Scene p -> Bridge p -> Maybe t
-nextBridgeChange t  = nextBridgeChangeWith (filter (t <))
+nextBridgeChange :: Ord t => t -> Scene p -> Bridge p -> Maybe (Event p t)
+nextBridgeChange t  = nextBridgeChangeWith (t <)
+
+
+
+-- -- data BridgeE e p t = BridgeE (Bridge p) !(e Identity p t) deriving (Show,Eq)
+-- data BridgeEvent p t = BE (Event p t) (Bridge p)
+
+
+-- data These' l = None
+--               | This l
+--               | That l
+--               | Both l l
+--               deriving (Show,Eq,Functor,Foldable,Traversable)
+
+-- embedMaybe   :: (l -> These' l) -> Maybe l -> These l
+-- embedMaybe f = \case
+--   Nothing -> None
+--   Just x  -> f x
+
+-- instance Filterable These' where
+--   catMaybes = \case
+--     None     -> None
+--     This l   -> embedMaybe This l
+--     That r   -> embedMaybe That r
+--     Both l r -> case l of
+--                   Nothing -> embedMaybe r
+--                   Just x  -> case r of
+--                                Nothing -> This l
+--                                Just y  -> Both x y
+
+-- minimaThese     :: (a -> a -> Ordering) -> These a -> These a
+-- minimaThese cmp = \case
+--   None     -> None
+--   This l   -> This l
+--   That r   -> That r
+--   Both l r -> case l `cmp` r of
+--                 LT -> This l
+--                 EQ -> Both l r
+--                 GT -> That r
+
+
 
 nextBridgeChangeWith                  :: Ord t
-                                      => ([t] -> [t])
-                                      -> Scene p -> Bridge p -> Maybe t
-nextBridgeChangeWith f s (Bridge u v) = minimum1 . f . catMaybes $
-                                        [ getPrev u s >>= \a -> colinearTime a u v
-                                        , getNext u s >>= \b -> colinearTime u b v
-                                        , getPrev v s >>= \c -> colinearTime u c v
-                                        , getNext v s >>= \d -> colinearTime u v d
-                                        ]
+                                      => (t -> Bool)
+                                      -> Scene p -> Bridge p -> Maybe (Event p t)
+nextBridgeChangeWith p s (Bridge u v) =
+    fmap asEvent . NonEmpty.nonEmpty . minimaOn (^.core) . filter (p . (^.core)) . catMaybes $
+      [ getPrev u s >>= \a -> colinearTime a u v <&> (:+ Delete u)
+      , getNext u s >>= \b -> colinearTime u b v <&> (:+ InsertAfter u b)
+      , getPrev v s >>= \c -> colinearTime u c v <&> (:+ InsertBefore v c)
+      , getNext v s >>= \d -> colinearTime u v d <&> (:+ Delete v)
+      ]
+  where
+    asEvent as@(a:|_) = a^.core :+ (coerce $ (^.extra) <$> as)
+
+    -- TODO: IF we distinguish between deleteL and deleteR we can recover what the new
+    -- bridge is supposed to be in the onlyBridgeEvent case
+    -- we should also just store the a and d I guess
+
+
+
+  -- where
+  --   f = minimaThese (comparing (^.core)) . filter (p . (^.core)) . catMaybes
+
+  --   left = case f leftCandidates of
+  --            None                      -> Nothing
+  --            This (t :+ a)             -> Just $ t :+ (a :+ (Delete u       ))
+  --            That (t :+ b)             -> Just $ t :+ (b :+ (InsertAfter u b))
+  --            Both (t :+ a) (_ :+ b)
+  --                 | a `isFasterThan` b -> Just $ t :+ (a :+ (Delete u       ))
+  --                 | otherwise
+  --            -- it seems that what happens depends on which of a and b gets deleted
+  --            -- moreover, it may depend on who is the right bridgepoint
+
+  --              -> Just $ t :+ (fastest a b)
+  --            a -> This $ a&extra %~ Delete
+
+
+  --   leftCandidates  = Both (getPrev u s >>= \a -> colinearTime a u v <&> (:+ a))
+  --                          (getNext u s >>= \b -> colinearTime u b v <&> (:+ b))
+
+
+
+  --   -- leftCandidates  = Both (getPrev u s >>= \a -> colinearTime a u v <&> (:+ Delete u))
+  --   --                        (getNext u s >>= \b -> colinearTime u b v <&> (:+ InsertAfter u b))
+
+
+
+  --   -- rightCandidates = Both (getPrev v s >>= \c -> colinearTime u c v <&> (:+ $ InsertBefore v c))
+  --   --                        (getNext v s >>= \d -> colinearTime u v d <&> (mk Right d $ Delete v))
+
+
+
+
+  --     [
+  --           ,
+  --           ]
+
+
+
+
+
+
+
+  -- I guess these insertions may be wrong; if there happens to be a faster guy
+  -- the deletions seem ok though
+
 
 colinearTime :: p -> p -> p -> Maybe t
 colinearTime = undefined
@@ -352,3 +485,20 @@ minimum1 :: Ord a => [a] -> Maybe a
 minimum1 = \case
   [] -> Nothing
   xs -> Just $ List.minimum xs
+
+
+minimaOn   :: Ord b => (a -> b) -> [a] -> [a]
+minimaOn f = minimaBy (comparing f)
+
+-- | computes all minima
+minimaBy     :: (a -> a -> Ordering) -> [a] -> [a]
+minimaBy cmp = \case
+  []     -> []
+  (x:xs) -> NonEmpty.toList $ List.foldl' (\mins@(m:|_) y -> case m `cmp` y of
+                                                               LT -> mins
+                                                               EQ -> (y NonEmpty.<| mins)
+                                                               GT -> (y:|[])
+                                          ) (x:|[]) xs
+
+-- minimaBy'        :: Witherable f => (a -> a -> Ordering) -> f a -> f a
+-- minimaBy' cmp xs =
