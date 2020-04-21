@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Transformation where
 
-import           Control.Lens (lens,Lens',set)
+import           Control.Lens (iso,Lens',set,Iso)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
@@ -58,8 +58,9 @@ instance Fractional r => Invertible 4 r where
 -- | A type representing a Transformation for d dimensional objects
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (d + 1) (d + 1) r }
 
-transformationMatrix :: Lens' (Transformation d r) (Matrix (d + 1) (d + 1) r)
-transformationMatrix = lens _transformationMatrix (const Transformation)
+transformationMatrix :: Iso (Transformation d r)       (Transformation d       s)
+                            (Matrix (d + 1) (d + 1) r) (Matrix (d + 1) (d + 1) s)
+transformationMatrix = iso _transformationMatrix Transformation
 
 deriving instance (Show r, Arity (d + 1)) => Show (Transformation d r)
 deriving instance (Eq r, Arity (d + 1))   => Eq (Transformation d r)

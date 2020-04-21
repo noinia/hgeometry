@@ -30,6 +30,7 @@ import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.Geometry.Box
+import           Data.Geometry.Ellipse(ellipseMatrix)
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Color (IpeColor(..))
@@ -308,7 +309,7 @@ instance IpeWriteText r => IpeWriteText (BezierSpline 3 2 r) where
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment p) = ipeWriteText p
   ipeWriteText (PolygonPath     p) = ipeWriteText p
-  ipeWriteText (EllipseSegment  m) = ipeWriteText $ Ellipse m
+  ipeWriteText (EllipseSegment  e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
   ipeWriteText _                   = error "ipeWriteText: PathSegment, not implemented yet."
 
 instance IpeWriteText r => IpeWrite (Path r) where

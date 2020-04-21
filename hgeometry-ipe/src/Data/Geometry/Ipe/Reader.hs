@@ -33,6 +33,7 @@ import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
 import           Data.Geometry.Box
+import           Data.Geometry.Ellipse(ellipseMatrix)
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
 import           Data.Geometry.Ipe.PathParser
@@ -191,6 +192,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
                       Right (p:ps) -> Right $ p NE.:| ps
 
       fromOps []            = Right []
+      fromOps [Ellipse m]   = Right [EllipseSegment . view (from ellipseMatrix) $ m]
       fromOps (MoveTo p:xs) = fromOps' p xs
       fromOps _             = Left "Path should start with a move to"
 
@@ -202,6 +204,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
                                   in case xs of
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
+
       fromOps' _ _ = Left "fromOpts': rest not implemented yet."
 
       span' pr = L.span (not . isn't pr)

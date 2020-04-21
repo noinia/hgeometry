@@ -22,6 +22,7 @@ import           Data.Bifunctor
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
+import           Data.Geometry.Ellipse(Ellipse, circleToEllipse)
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
@@ -157,6 +158,9 @@ instance HasDefaultIpeOut (ConvexPolygon p r) where
   type DefaultIpeOut (ConvexPolygon p r) = Path
   defIO = defIO . view simplePolygon
 
+instance HasDefaultIpeOut (Ellipse r) where
+  type DefaultIpeOut (Ellipse r) = Path
+  defIO = ipeEllipse
 
 instance Floating r => HasDefaultIpeOut (Disk p r) where
   type DefaultIpeOut (Disk p r) = Path
@@ -188,19 +192,14 @@ ipeLineSegment s = (path . pathSegment $ s) :+ mempty
 ipePolyLine   :: IpeOut (PolyLine 2 p r) Path r
 ipePolyLine p = (path . PolyLineSegment . first (const ()) $ p) :+ mempty
 
+ipeEllipse :: IpeOut (Ellipse r) Path r
+ipeEllipse = \e -> (path $ EllipseSegment e) :+ mempty
+
+ipeCircle :: Floating r => IpeOut (Circle p r) Path r
+ipeCircle = ipeEllipse . circleToEllipse
+
 ipeDisk   :: Floating r => IpeOut (Disk p r) Path r
 ipeDisk d = ipeCircle (Boundary d) ! attr SFill (IpeColor "0.722 0.145 0.137")
-
-ipeCircle                     :: Floating r => IpeOut (Circle p r) Path r
-ipeCircle (Circle (c :+ _) r) = (path $ EllipseSegment m) :+ mempty
-      where
-        m = translation (toVec c) |.| uniformScaling (sqrt r) ^. transformationMatrix
-        -- m is the matrix s.t. if we apply m to the unit circle centered at the origin, we
-        -- get the input circle.
-
--- ipeBezier :: (n <= 3) => IpeOut (Bezier n d r) Path r
--- ipeBezier
-
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r

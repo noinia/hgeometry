@@ -28,6 +28,7 @@ import           Control.Lens hiding (rmap)
 import           Data.Bitraversable
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Point
+import           Data.Geometry.Ellipse(Ellipse)
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon (SimplePolygon)
 import           Data.Geometry.Properties
@@ -43,7 +44,7 @@ data PathSegment r = PolyLineSegment        (PolyLine 2 () r)
                    | PolygonPath            (SimplePolygon () r)
                    | CubicBezierSegment     (BezierSpline 3 2 r)
                    | QuadraticBezierSegment (BezierSpline 2 2 r)
-                   | EllipseSegment         (Matrix 3 3 r)
+                   | EllipseSegment         (Ellipse r)
                      -- TODO
                    | ArcSegment
                    | SplineSegment          -- (Spline 2 r)
@@ -64,7 +65,7 @@ instance Traversable PathSegment where
     PolygonPath p            -> PolygonPath <$> bitraverse pure f p
     CubicBezierSegment b     -> CubicBezierSegment <$> traverse f b
     QuadraticBezierSegment b -> QuadraticBezierSegment <$> traverse f b
-    EllipseSegment m         -> EllipseSegment <$> traverse f m
+    EllipseSegment e         -> EllipseSegment <$> traverse f e
     ArcSegment               -> pure ArcSegment
     SplineSegment            -> pure SplineSegment
     ClosedSplineSegment      -> pure ClosedSplineSegment

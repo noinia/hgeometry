@@ -123,8 +123,9 @@ pattern Sphere     :: Point d r :+ p -> r -> Sphere d p r
 pattern Sphere c r = Boundary (Ball c r)
 {-# COMPLETE Sphere #-}
 
-
-
+-- |
+_BallSphere :: Iso (Disk p r) (Disk p s) (Circle p r) (Circle p s)
+_BallSphere = _Boundary
 
 --------------------------------------------------------------------------------
 -- * Disks and Circles, aka 2-dimensional Balls and Spheres
@@ -137,6 +138,10 @@ pattern Disk c r = Ball c r
 {-# COMPLETE Disk #-}
 
 type Circle p r = Sphere 2 p r
+
+-- | Iso for converting between Disks and Circles, i.e. forgetting the boundary
+_DiskCircle  :: Iso (Disk p r) (Disk p s) (Circle p r) (Circle p s)
+_DiskCircle = _BallSphere
 
 -- | Given the center and the squared radius, constructs a circle
 pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r

@@ -114,7 +114,7 @@ readRectangle = runParser pRectangle
 -- | The parsers themselves
 
 
-pOperation :: Coordinate r => Parser (Operation r)
+pOperation :: forall r. Coordinate r => Parser (Operation r)
 pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                      , LineTo       <$> pPoint                         *>> 'l'
                      , CurveTo      <$> pPoint <*> pPoint' <*> pPoint' *>> 'c'
@@ -128,6 +128,7 @@ pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
              where
                pPoint' = pWhiteSpace *> pPoint
                p *>> c = p <*>< pWhiteSpace ***> pChar c
+
 
 
 pPoint :: Coordinate r => Parser (Point 2 r)

@@ -9,18 +9,37 @@
 -- Functions that help reading geometric values from ipe images.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Ipe.FromIpe where
+module Data.Geometry.Ipe.FromIpe(
+  -- * Individual readers
+    _asLineSegment
+  , _asRectangle
+  , _asTriangle
+
+  , _asPolyLine
+  , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
+
+  -- * Dealing with Attributes
+  , _withAttrs
+
+  -- * Default readers
+  , HasDefaultFromIpe(..)
+
+  -- * Reading all elements of a particular type
+  , readAll, readAllFrom
+  ) where
 
 import           Control.Lens hiding (Simple)
 import           Data.Ext
+import           Data.Geometry.Ball
 import           Data.Geometry.Box
+import           Data.Geometry.Ellipse (Ellipse, _EllipseCircle)
 import           Data.Geometry.Ipe.Path
 import           Data.Geometry.Ipe.Reader
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
 import qualified Data.Geometry.PolyLine as PolyLine
 import           Data.Geometry.Polygon
-import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Triangle
 import qualified Data.LSeq as LSeq
@@ -42,6 +61,10 @@ import           Data.List.NonEmpty (NonEmpty(..))
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
+
+
+
+
 
 
 -- | Try to convert a path into a line segment, fails if the path is not a line
@@ -88,8 +111,6 @@ _asRectangle = prism' rectToPath pathToRect
     isV (p :+ _) (q :+ _) = p^.yCoord == q^.yCoord
 
 
-
-
 -- | Convert to a triangle
 _asTriangle :: Prism' (Path r) (Triangle 2 () r)
 _asTriangle = prism' triToPath path2tri
@@ -101,6 +122,28 @@ _asTriangle = prism' triToPath path2tri
                               (a :| [b,c]) -> Just $ Triangle a b c
                               _            -> Nothing
                     _    -> Nothing
+
+
+  -- an ellipse is an affine transformation of the unit disk
+
+
+-- (Disk origin 1) (Vector2 1 1)
+
+_asEllipse :: Prism' (Path r) (Ellipse r)
+_asEllipse = prism' toPath toEllipse
+  where
+    toPath      = Path . fromSingleton  . EllipseSegment
+    toEllipse p = case p^..pathSegments.traverse._EllipseSegment of
+                    [e] -> Just e
+                    _   -> Nothing
+
+_asCircle :: (Floating r, Eq r) => Prism' (Path r) (Circle () r)
+_asCircle = _asEllipse._EllipseCircle
+-- FIXME: For reading we should not need the floating constraint!
+
+_asDisk :: (Floating r, Eq r) => Prism' (Path r) (Disk () r)
+_asDisk = _asCircle.from _DiskCircle
+
 
 -- | Convert to a multipolygon
 _asMultiPolygon :: Prism' (Path r) (MultiPolygon () r)
@@ -127,6 +170,11 @@ pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
                     [pg]                 -> Just . Left  $ pg
                     SimplePolygon vs: hs -> Just . Right $ MultiPolygon vs hs
 
+
+
+
+
+--------------------------------------------------------------------------------
 
 
 -- | Use the first prism to select the ipe object to depicle with, and the second
@@ -169,6 +217,18 @@ class HasDefaultFromIpe g where
 instance HasDefaultFromIpe (LineSegment 2 () r) where
   type DefaultFromIpe (LineSegment 2 () r) = Path
   defaultFromIpe = _withAttrs _IpePath _asLineSegment
+
+instance HasDefaultFromIpe (Ellipse r) where
+  type DefaultFromIpe (Ellipse r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asEllipse
+
+instance (Floating r, Eq r) => HasDefaultFromIpe (Circle () r) where
+  type DefaultFromIpe (Circle () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asCircle
+
+instance (Floating r, Eq r) => HasDefaultFromIpe (Disk () r) where
+  type DefaultFromIpe (Disk () r) = Path
+  defaultFromIpe = _withAttrs _IpePath _asDisk
 
 instance HasDefaultFromIpe (PolyLine.PolyLine 2 () r) where
   type DefaultFromIpe (PolyLine.PolyLine 2 () r) = Path
