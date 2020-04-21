@@ -52,6 +52,7 @@ import           Data.Ord (comparing)
 import           Data.Proxy
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           System.Random (Random(..))
 import           Test.QuickCheck (Arbitrary)
 import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
 import           Text.ParserCombinators.ReadPrec (lift)
@@ -97,6 +98,7 @@ deriving instance Arity d                => Traversable (Point d)
 deriving instance (Arity d, NFData r)    => NFData (Point d r)
 deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
 deriving instance (Arity d, Hashable r)  => Hashable (Point d r)
+deriving instance (Arity d, Random r)    => Random (Point d r)
 
 
 type instance NumType (Point d r) = r
