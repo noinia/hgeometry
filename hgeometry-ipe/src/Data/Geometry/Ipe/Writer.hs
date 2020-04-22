@@ -172,6 +172,9 @@ mn `mAddAtts` ats = fmap (`addAtts` ats) mn
 instance IpeWriteText Double where
   ipeWriteText = writeByShow
 
+instance IpeWriteText Float where
+  ipeWriteText = writeByShow
+
 instance IpeWriteText Int where
   ipeWriteText = writeByShow
 

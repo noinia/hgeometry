@@ -39,6 +39,7 @@ defaultFromSeq x (Just (l,y)) = let x'          = fromInteger x
                                 in z * (abs x' + asDecimal y')
 
 instance Coordinate Double
+instance Coordinate Float
 instance Coordinate (Ratio Integer)
 instance Coordinate (RealNumber p)
 
