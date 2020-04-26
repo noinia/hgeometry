@@ -16,44 +16,25 @@
 module Algorithms.Geometry.ConvexHull.Minimalist where
 
 import           Algorithms.DivideAndConquer
-import           Algorithms.Geometry.ConvexHull.Helpers (groupOn)
 import           Algorithms.Geometry.ConvexHull.Movie
 import           Algorithms.Geometry.ConvexHull.Scene
-import           Control.Arrow ((>>>))
 import           Control.Lens
-import           Control.Monad.State.Class (get, put)
-import           Control.Monad.State.Strict (evalStateT)
-import           Data.Bifoldable
-import           Data.Bifunctor
-import           Data.Bitraversable
 import           Data.Coerce
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Functor.Identity
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
-import           Data.Geometry.Vector
-import qualified Data.List as List
 import           Data.List.Alternating
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (minimaOn)
-import qualified Data.Map as Map
-import           Data.Maybe (catMaybes, fromMaybe)
-import           Data.Ord (Down(..),comparing)
+import           Data.Maybe (catMaybes)
+import           Data.Ord (Down(..))
 import           Data.Semigroup
-import           Data.Sequence (Seq(..))
-import           Data.Typeable (TypeRep, Typeable, typeOf)
 import           Data.Util
-import           GHC.TypeNats
--- import           Data.Witherable.Class
 import           Prelude hiding (Either(..))
-import           Refined (Refined, unrefine, Predicate(..), throwRefine, RefineException(..))
 
 
-import           Algorithms.Geometry.ConvexHull.RenderPLY
 import           Data.Geometry.Ipe
-import           Debug.Trace (traceShow,traceShowId)
 
 
 --------------------------------------------------------------------------------
@@ -80,8 +61,8 @@ outputTriangles = undefined
 -- * Merging
 
 -- |
-merge     :: (Ord t, Num t, HasScene p, Semigroup (Scene p), HasNeighbours p
-             ) => Movie p t -> Movie p t -> Movie p t
+merge     :: (Ord t, Fractional t, HasScene p, Semigroup (Scene p), HasNeighbours p, AsPoint p t)
+          => Movie p t -> Movie p t -> Movie p t
 merge l r = let anim   = play $ l `sideBySide` r
                 SP b h = initialBridge (initialScene l) (initialScene r)
             in Movie h $ traceBridge b anim
@@ -103,19 +84,19 @@ findBridge = undefined
 
 
 -- | Traces the bridge
-traceBridge         :: (Ord t, Num t, HasNeighbours p)
+traceBridge         :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
                     => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
 traceBridge b0 anim = trace' b0 anim (initialBridgeChange (currentScene anim) b0)
   where
     initialBridgeChange = nextBridgeChange (const True)
       -- initially, there is no requirement on the time of the next bridge event.
 
-trace           :: (Ord t, Num t, HasNeighbours p)
+trace           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
                 => t -> Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
 trace  t b anim = trace' b anim (nextBridgeChange (> t) (currentScene anim) b)
 
 
-trace'        :: (Ord t, Num t, HasNeighbours p)
+trace'        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
               => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> Maybe (BridgeInfo p t)
               -> [Event p t]
 trace' b a mt = case nextEvent a mt of
@@ -179,7 +160,7 @@ nextEvent (Alternating _ es) = go es
 
 -- | Computes the next bridge change that satisifies the given
 -- predicate.
-nextBridgeChange                  :: (Ord t, HasNeighbours p)
+nextBridgeChange                  :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
                                   => (t -> Bool)
                                   -> Scene p -> Bridge p -> Maybe (BridgeInfo p t)
 nextBridgeChange p s (Bridge u v) =
@@ -192,14 +173,17 @@ nextBridgeChange p s (Bridge u v) =
   where
     asEvent as@(a:|_) = a^.core :+ ((^.extra) <$> as)
 
-colinearTime :: p -> p -> p -> Maybe t
-colinearTime = undefined
+-- | compute the time at which r becomes colinear with the line through
+-- p and q.
+--
+-- pre: p_x < q_x < r_x
+colinearTime       :: (AsPoint p t, Ord t, Fractional t) => p -> p -> p -> Maybe t
+colinearTime p q r = colinearTime' (asPoint p) (asPoint q) (asPoint r)
 
 -- | compute the time at which r becomes colinear with the line through
 -- p and q.
 --
 -- pre: p_x < q_x < r_x
---
 colinearTime'  :: (Ord r, Fractional r) => Point 3 r -> Point 3 r -> Point 3 r -> Maybe r
 colinearTime' (Point3 px py pz) (Point3 qx qy qz) (Point3 rx ry rz) =
     if b == 0 then Nothing else Just $ a / b
@@ -284,6 +268,7 @@ combinedEvent (Bridge l r) e bi s s' = SP undefined b'   -- TODO: figure out whi
     ls = colinears l
     rs = colinears r
 
+colinears :: a
 colinears = undefined
 
 -- -- | Finds all points on the *new* hull, colinear with the bridge
