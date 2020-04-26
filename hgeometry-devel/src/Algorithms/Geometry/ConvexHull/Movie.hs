@@ -39,6 +39,18 @@ data Action p = InsertAfter p p  -- ^ current Index first, then the Item we inse
               | Delete p
               deriving (Show,Eq,Ord)
 
+leftMost :: Action p -> p
+leftMost = \case
+  InsertAfter l _  -> l
+  InsertBefore _ l -> l
+  Delete l         -> l
+
+rightMost :: Action p -> p
+rightMost = \case
+  InsertAfter _ r  -> r
+  InsertBefore r _ -> r
+  Delete r         -> r
+
 ----------------------------------------
 
 data Existing a = Left a | Right a deriving (Show,Eq,Ord,Functor)

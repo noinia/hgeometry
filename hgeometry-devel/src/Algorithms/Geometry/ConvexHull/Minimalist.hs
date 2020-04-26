@@ -22,12 +22,13 @@ import           Control.Lens
 import           Data.Coerce
 import           Data.Ext
 import           Data.Geometry.Point
+import           Data.Geometry.Polygon.Convex(lowerTangent')
 import           Data.Geometry.Triangle
 import           Data.List.Alternating
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (minimaOn)
-import           Data.Maybe (catMaybes)
+import           Data.Maybe (mapMaybe, catMaybes)
 import           Data.Ord (Down(..))
 import           Data.Semigroup
 import           Data.Util
@@ -39,7 +40,7 @@ import           Data.Geometry.Ipe
 
 --------------------------------------------------------------------------------
 
-type LowerHull d p r = [Triangle 3 p r]
+type LowerHull d q r = [Triangle 3 q r]
 
 -- | Computes the lower hull, i.e. set of triangles s.t.
 -- the points are above all supporting planes
@@ -53,18 +54,31 @@ lowerHull' = outputTriangles
 --------------------------------------------------------------------------------
 -- * Producing the Output
 
-outputTriangles :: Movie p t -> LowerHull 3 q r
-outputTriangles = undefined
+outputTriangles :: (HasNeighbours p, WithExtra p q, AsPoint p r, HasScene p)
+                => Movie p t -> LowerHull 3 q r
+outputTriangles = concatMap (\(s,(e :+ _)) -> reportTriangles s e) . withNeighbours . play
+  where
+    reportTriangles s = mapMaybe (reportTriangle s . runIdentity) . NonEmpty.toList . view actions
 
+reportTriangle   :: (HasNeighbours p, WithExtra p q, AsPoint p r)
+                 => Scene p -> Action p -> Maybe (Triangle 3 q r)
+reportTriangle s = fmap (view (re _TriangleThreePoints) . asPoint') . reportTriangle'
+  where
+    asPoint' = fmap (\p -> asPoint p :+ askExtra p)
+
+    reportTriangle' = \case
+      InsertAfter i j  ->          Three i j    <$> getNext i s
+      InsertBefore i h -> (\l   -> Three l h i) <$> getPrev i s
+      Delete j         -> (\l r -> Three l j r) <$> getPrev j s <*> getNext j s
 
 --------------------------------------------------------------------------------
 -- * Merging
 
 -- |
-merge     :: (Ord t, Fractional t, HasScene p, Semigroup (Scene p), HasNeighbours p, AsPoint p t)
+merge     :: (Ord t, Ord p, Fractional t, HasScene p, Semigroup (Scene p), HasNeighbours p, AsPoint p t)
           => Movie p t -> Movie p t -> Movie p t
 merge l r = let anim   = play $ l `sideBySide` r
-                SP b h = initialBridge (initialScene l) (initialScene r)
+                b :+ h = initialBridge (initialScene l) (initialScene r)
             in Movie h $ traceBridge b anim
 
 
@@ -76,27 +90,38 @@ pattern Bridge u v = Two u v
 
 type Hull p = Scene p
 
-initialBridge :: Hull p -> Hull p -> SP (Bridge p) (Hull p)
-initialBridge = undefined
+initialBridge       :: (AsPoint p t, Ord t, Num t, HasNeighbours p, HasScene p)
+                    => Hull p -> Hull p -> Bridge p :+ Hull p
+initialBridge lh rh = mkHull $ findBridge' (-1000000000000) (fromRightMost lh) (fromLeftMost rh)
+  where
+    mkHull (Two (l:+ls) (r:+rs)) =
+      Bridge l r :+ (fromNonEmpty . NonEmpty.fromList $ (reverse ls) <> [l,r] <> rs)
 
-findBridge :: t -> NonEmpty p -> NonEmpty p -> Bridge p
-findBridge = undefined
+findBridge       :: (AsPoint p t, Ord t, Num t) => t -> NonEmpty p -> NonEmpty p
+                 -> Bridge p
+findBridge t l r = (\(Two l' r') -> Bridge (l'^.core) (r'^.core)) $ findBridge' t l r
 
+findBridge'       :: (AsPoint p t, Ord t, Num t) => t -> NonEmpty p -> NonEmpty p
+                 -> Two (p :+ [p])
+findBridge' t l r = strip $ lowerTangent' (atTime'' t <$> l) (atTime'' t <$> r)
+  where
+    atTime'' t' p = atTime t' p :+ p
+    strip = fmap (bimap (^.extra) (fmap (^.extra)))
 
 -- | Traces the bridge
-traceBridge         :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
+traceBridge         :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p)
                     => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
 traceBridge b0 anim = trace' b0 anim (initialBridgeChange (currentScene anim) b0)
   where
     initialBridgeChange = nextBridgeChange (const True)
       -- initially, there is no requirement on the time of the next bridge event.
 
-trace           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
+trace           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p)
                 => t -> Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
 trace  t b anim = trace' b anim (nextBridgeChange (> t) (currentScene anim) b)
 
 
-trace'        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t)
+trace'        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p)
               => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> Maybe (BridgeInfo p t)
               -> [Event p t]
 trace' b a mt = case nextEvent a mt of
@@ -113,20 +138,23 @@ trace' b a mt = case nextEvent a mt of
                                                                    (currentScene a') in
                                STR (Just e') b' a'
 
-fromExistingEvent               :: Bridge p -> Event' Existing p t -> Maybe (Event p t)
+fromExistingEvent               :: Ord p
+                                => Bridge p -> Event' Existing p t -> Maybe (Event p t)
 fromExistingEvent b (t :+ acts) = fmap (t:+) . NonEmpty.nonEmpty . filterActions b $ acts
 
-filterActions              :: Bridge p -> NonEmpty (Existing (Action p)) -> [Identity (Action p)]
+filterActions              :: Ord p
+                           => Bridge p -> NonEmpty (Existing (Action p)) -> [Identity (Action p)]
 filterActions (Bridge l r) = foldr f []
   where
     f (Left act)  xs = if act `occursLeftOf`  l then (Identity act):xs else xs
     f (Right act) xs = if act `occursRightOf` r then (Identity act):xs else xs
 
 
-occursLeftOf  :: Action p -> p -> Bool
-occursLeftOf = undefined
-occursRightOf :: Action p -> p -> Bool
-occursRightOf = undefined
+occursLeftOf     :: Ord p => Action p -> p -> Bool
+occursLeftOf a p = rightMost a <= p
+
+occursRightOf     :: Ord p => Action p -> p -> Bool
+occursRightOf a p = p <= leftMost a
 
 ----------------------------------------
 -- ** Finding the Next event
@@ -240,7 +268,7 @@ fromBridgeInfo = extra %~ fmap (coerce . toAction)
 ----------------------------------------
 -- ** Handling an event
 
-bridgeEventOnly      :: (Num t)
+bridgeEventOnly      :: (Num t, Ord t, AsPoint p t)
                      => Bridge p -- ^ current bridge
                      -> BridgeInfo p t -- ^ the suggested event
                      -> SP (Event p t) (Bridge p) -- ^ the event to output and the new bridge
@@ -255,7 +283,7 @@ bridgeEventOnly b bi =
     _            -> error "bridgeEventOnly: absurd, <=2 actions possible"
     -- TODO: make BridgeAction return a These or so.
 
-combinedEvent             :: Num t
+combinedEvent             :: (Num t, Ord t, AsPoint p t)
                           => Bridge p
                           -> Event' Existing p t -> BridgeInfo p t
                           -> Scene p -- ^ old scene
@@ -285,10 +313,10 @@ colinears = undefined
 --------------------------------------------------------------------------------
 -- * Base case
 
-baseCase     :: ( p ~ (Point 3 r :+ q), t ~ r
+baseCase     :: ( p ~ (PExt q r), t ~ r
                 , Ord r)
              => NonEmpty (Point 3 r :+ q) -> Movie p t
-baseCase pts = Movie (singleton . NonEmpty.head $ pts) []
+baseCase pts = Movie (singleton . PExt . NonEmpty.head $ pts) []
 -- TODO: Do the right thing
 
 
@@ -316,3 +344,10 @@ cmpXYZ (Point3 px py pz :+ _) (Point3 qx qy qz :+ _) =
 
 --------------------------------------------------------------------------------
 -- * Helpers
+
+atTime     :: (Num r, AsPoint p r) => r -> p -> Point 2 r
+atTime t p = atTime' t $ asPoint p
+
+-- | Computes the position of the given point at time t
+atTime'                  :: Num r => r -> Point 3 r -> Point 2 r
+atTime' t (Point3 x y z) = Point2 x (z - t*y)
