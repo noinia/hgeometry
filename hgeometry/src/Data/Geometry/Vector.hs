@@ -35,7 +35,7 @@ import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
 import           Linear.Affine (Affine(..), qdA, distanceA)
 import           Linear.Metric (dot,norm,signorm,quadrance)
-import           Linear.Vector as LV
+import           Linear.Vector as LV hiding (E(..))
 import           System.Random (Random(..))
 import           Test.QuickCheck (Arbitrary(..),infiniteList)
 

@@ -80,9 +80,6 @@ data MergeStatus r = MergeStatus { hd     :: {-# UNPACK #-} !Index -- ^ first it
                                  , events :: ![Event r] -- ^ Events when this Hull changes
                                  } deriving (Show,Eq)
 
--- data MergeStatus' r = MergeStatus' { initialHull :: (NonEmpty Index)
---                                    , events'     :: [Event r]
---                                    } deriving (Show,Eq)
 
 
 
