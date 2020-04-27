@@ -1,7 +1,8 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
-import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as Minimalist
+import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
+import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
@@ -32,24 +33,32 @@ spec = describe "3D ConvexHull tests" $ do
          it "manual on myPts"  $ (H $ Naive.lowerHull' myPts)  `shouldBe` myHull
          it "manual on myPts'" $ (H $ Naive.lowerHull' myPts') `shouldBe` myHull'
 
-         it "same as naive on manual samples" $ do
-           forM_ [myPts,myPts', buggyPoints, buggyPoints2, buggyPoints3, buggyPoints6]
-             sameAsNaive
+         -- describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
 
-         it "same as naive on buggyPoints " $ sameAsNaive myPts
+         describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
+
+         -- it "minimalist and Div&Conc quickcheck" $ property $ \(HI pts) ->
+         --     DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
+         -- it "Imperative minimalist and divide and conquer quickcheck" $ property $ \(HI pts) ->
+         --     DivAndConc.lowerHull' pts == MinimalistImp.lowerHull' pts
+  where
+    specAlg alg = do
+      it "same as naive on manual samples" $ do
+        forM_ [myPts,myPts', buggyPoints, buggyPoints2, buggyPoints3, buggyPoints6]
+          (sameAsNaive alg)
+      it "same as naive on buggyPoints " $ sameAsNaive alg myPts
+      it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
 
 
-         it "same as minimalist quickcheck" $ property $ \(HI pts) ->
-           DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
 
-         it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive pts
+
 
 
 spec' = describe "test" $ do
-  it "same as naive on buggyPoints " $ sameAsNaive (mkBuggy buggyPoints7)
+  it "same as naive on buggyPoints " $ sameAsNaive DivAndConc.lowerHull' (mkBuggy buggyPoints7)
 
 specShrink = describe "shrink" $ forM_ (zip [0..] $ leaveOutOne buggyPoints7) $ \(i,pts) ->
-               it ("same as Naive " <> show i) $ sameAsNaive (mkBuggy pts)
+               it ("same as Naive " <> show i) $ sameAsNaive DivAndConc.lowerHull' (mkBuggy pts)
 
 
 
@@ -74,9 +83,9 @@ instance Arbitrary HullInput where
 
 -- sameAsNaive pts = (H $ DivAndConc.lowerHull' pts) `shouldBe` (H $ Naive.lowerHull' pts)
 
-sameAsNaive pts = (HalfSpacesOf $ DivAndConc.lowerHull' pts)
-                  `shouldBe`
-                  (HalfSpacesOf $ Naive.lowerHull' pts)
+sameAsNaive alg pts = (HalfSpacesOf $ alg pts)
+                      `shouldBe`
+                      (HalfSpacesOf $ Naive.lowerHull' pts)
 
 newtype HalfSpaces p r = HalfSpacesOf (ConvexHull 3 p r) deriving Show
 

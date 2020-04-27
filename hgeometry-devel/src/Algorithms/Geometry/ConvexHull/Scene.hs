@@ -48,6 +48,20 @@ class WithExtra p q where
 -- type instance Scene (Point 3 r :+ p) = Map.Map r (Point 3 r :+ p)
 type instance Scene (PExt p r) = Map.Map r (PExt p r)
 
+toListFromWhile       :: HasNeighbours p => p -> (p -> Bool) -> Scene p -> NonEmpty p
+toListFromWhile x p s = NonEmpty.unfoldr f x
+  where
+    f q = (q, getNext q s >>= \n -> if p n then Just n else Nothing)
+
+toListFromRWhile       :: HasNeighbours p => p -> (p -> Bool) -> Scene p -> NonEmpty p
+toListFromRWhile x p s = NonEmpty.unfoldr f x
+  where
+    f q = (q, getPrev q s >>= \n -> if p n then Just n else Nothing)
+
+exploreFrom       :: HasNeighbours p => p -> (p -> Bool) -> Scene p -> NonEmpty p
+exploreFrom x p s = let (_ :| prevs) = toListFromRWhile x p s
+                    in NonEmpty.fromList $ (reverse prevs) <> (toList $ toListFromWhile x p s)
+
 --------------------------------------------------------------------------------
 
 instance AsPoint (Point 3 r) r where
