@@ -50,10 +50,13 @@ type LowerHull d q r = [Triangle 3 q r]
 -- the points are above all supporting planes
 lowerHull' :: forall r q. (Ord r, Fractional r, Show r, IpeWriteText r)
            => NonEmpty (Point 3 r :+ q) -> LowerHull 3 q r
-lowerHull' = outputTriangles
-           . divideAndConquer1With merge baseCase
-           . NonEmpty.groupWith1 (^.core.xCoord)
-           . NonEmpty.sortBy cmpXYZ
+lowerHull' pts = outputTriangles
+               . divideAndConquer1With (merge t0) baseCase
+               . NonEmpty.groupWith1 (^.core.xCoord)
+               . NonEmpty.sortBy cmpXYZ
+               $ pts
+  where
+    t0 = -1000000000000000
 
 --------------------------------------------------------------------------------
 -- * Producing the Output
@@ -80,12 +83,11 @@ reportTriangle s = fmap toTriangle . reportTriplet
 -- * Merging
 
 -- |
-merge     :: (Ord t, Ord p, Fractional t, HasScene p, Semigroup (Scene p), HasNeighbours p, AsPoint p t)
-          => Movie p t -> Movie p t -> Movie p t
-merge l r = let anim   = play $ l `sideBySide` r
-                b :+ h = initialBridge (initialScene l) (initialScene r)
-            in Movie h $ traceBridge b anim
-
+merge        :: (Ord t, Ord p, Fractional t, HasScene p, Semigroup (Scene p), HasNeighbours p, AsPoint p t)
+             => t -> Movie p t -> Movie p t -> Movie p t
+merge t0 l r = let anim   = play $ l `sideBySide` r
+                   b :+ h = initialBridge t0 (initialScene l) (initialScene r)
+               in Movie h $ traceBridge b anim
 
 type Bridge p = Two p
 pattern Bridge     :: p -> p -> Bridge p
@@ -95,9 +97,9 @@ pattern Bridge u v = Two u v
 type Hull p = Scene p
 
 -- | Finds the initial bridge.
-initialBridge       :: (AsPoint p t, Ord t, Num t, HasNeighbours p, HasScene p)
-                    => Hull p -> Hull p -> Bridge p :+ Hull p
-initialBridge lh rh = mkHull $ findBridge' (-1000000000000) (fromRightMost lh) (fromLeftMost rh)
+initialBridge         :: (AsPoint p t, Ord t, Num t, HasNeighbours p, HasScene p)
+                      => t -> Hull p -> Hull p -> Bridge p :+ Hull p
+initialBridge t0 lh rh = mkHull $ findBridge' t0 (fromRightMost lh) (fromLeftMost rh)
   where
     mkHull (Two (l:+ls) (r:+rs)) =
       Bridge l r :+ (fromNonEmpty . NonEmpty.fromList $ (reverse ls) <> [l,r] <> rs)
@@ -140,7 +142,7 @@ trace' b a mt = case nextEvent a mt of
     continue = \case
       ExistingEvent e a'    -> STR (fromExistingEvent b e)     b  a'
       BridgeEvent e         -> let SP e' b' = bridgeEventOnly b e in
-                               STR (Just e')                   b' a
+                               STR e'                          b' a
       CombinedEvent e bi a' -> let SP e' b' = combinedEvent b e bi (currentScene a) in
                                STR e' b' a'
 
@@ -341,9 +343,9 @@ findPointInScene t p q oldS mba acts = case mba of
       InsertBefore _ z -> Just z
       Delete _         -> Nothing
 
-    leftMost = minimum
+    leftMost' = minimum
     -- TODO: state why this is suposedly safe
-    maybeDeleted = leftMost . filter (areColinearAt t p q) . mapMaybe deletedNeighbour $ acts
+    maybeDeleted = leftMost' . filter (areColinearAt t p q) . mapMaybe deletedNeighbour $ acts
     deletedNeighbour = \case
       Delete a         -> getPrev a oldS
       _                -> Nothing
