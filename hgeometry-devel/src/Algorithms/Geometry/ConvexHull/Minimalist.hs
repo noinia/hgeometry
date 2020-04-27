@@ -236,6 +236,15 @@ type BridgeInfo p t = t :+ NonEmpty (BridgeAction p)
 bridgeEventTime :: Lens (BridgeInfo p t) (BridgeInfo p t') t t'
 bridgeEventTime = core
 
+partitionBridgeActions :: NonEmpty (BridgeAction p) -> (Maybe (Action p), Maybe (Action p))
+partitionBridgeActions = foldr f (Nothing,Nothing)
+  where
+    f (BA a p) ~(l,r) = case p of
+                          Left  _ -> (Just a,r)
+                          Right _ -> (l,Just a)
+
+
+
 -- bridgeActions :: Lens (BridgeInfo p t)            (BridgeInfo q t)
 --                       (NonEmpty (BridgeAction p)) (NonEmpty (BridgeAction q))
 -- bridgeActions = extra
@@ -266,16 +275,13 @@ bridgeFromAction (Bridge l r) (BA a p) = case a of
 -- handles that bridge event. This function assumes that there are no
 -- existing events at the time of teh bridge event. The result is the
 -- event that we should output and the new bridge.
-bridgeEventOnly               :: (Num t, Ord t, AsPoint p t)
-                              => Bridge p -> BridgeInfo p t
-                              -> SP (Maybe (Event p t)) (Bridge p)
-bridgeEventOnly b (t :+ acts) = case acts of
+bridgeEventOnly                  :: (Num t, Ord t, AsPoint p t, Eq p)
+                                 => Bridge p -> BridgeInfo p t
+                                 -> SP (Maybe (Event p t)) (Bridge p)
+bridgeEventOnly b bi@(t :+ acts) = case acts of
     (a  :| [])   -> SP (Just $ t :+ acts') (bridgeFromAction b a)
     (al :| [ar]) -> let b' = findBridge (1 + t) (collect al) (collect ar)
-                    in SP undefined b' -- we need to filter which
-                                       -- actions should actually
-                                       -- occur, depending on b'
-                       -- we can pick any time t' > t
+                    in SP (mkNewEvent bi b') b'
     _            -> error "bridgeEventOnly: absurd, <=2 actions possible"
   where
     acts' = fmap (Identity . toAction) acts
@@ -286,17 +292,19 @@ combinedEvent             :: (Fractional t, Ord t, AsPoint p t, HasNeighbours p,
                           -> BridgeInfo p t
                           -> Scene p -- ^ old scene
                           -> SP (Maybe (Event p t)) (Bridge p)
-combinedEvent (Bridge l r) acts (t :+ bActs) s = SP e b'
+combinedEvent (Bridge l r) acts bi@(t :+ bActs) s = SP (mkNewEvent bi b') b'
   where
     b' = findBridge (1 + t) (NonEmpty.reverse ls) rs
     ls = colinears t l r s lAct leftActs
     rs = colinears t r l s rAct rightActs
 
-    e = fmap (t :+) . NonEmpty.nonEmpty . fmap (Identity . toAction)
-      . filter (shouldOutput b') . toList $ bActs
-
     (leftActs,rightActs) = partitionExisting acts
-    (lAct :| [rAct]) = undefined
+    (lAct,rAct)          = partitionBridgeActions bActs
+
+
+mkNewEvent                :: Eq p => BridgeInfo p t -> Bridge p -> Maybe (Event p t)
+mkNewEvent (t :+ acts) b' = fmap (t :+) . NonEmpty.nonEmpty . fmap (Identity . toAction)
+                          . filter (shouldOutput b') . toList $ acts
 
 shouldOutput                         :: Eq p => Bridge p -> BridgeAction p -> Bool
 shouldOutput (Bridge l' r') (BA _ p) = case p of
