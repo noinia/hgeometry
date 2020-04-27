@@ -266,9 +266,9 @@ bridgeFromAction (Bridge l r) (BA a p) = case a of
 -- event that we should output and the new bridge.
 bridgeEventOnly               :: (Num t, Ord t, AsPoint p t)
                               => Bridge p -> BridgeInfo p t
-                              -> SP (Event p t) (Bridge p)
+                              -> SP (Maybe (Event p t)) (Bridge p)
 bridgeEventOnly b (t :+ acts) = case acts of
-    (a  :| [])   -> SP (t :+ acts') (bridgeFromAction b a)
+    (a  :| [])   -> SP (Just $ t :+ acts') (bridgeFromAction b a)
     (al :| [ar]) -> let b' = findBridge (1 + t) (collect al) (collect ar)
                     in SP undefined b' -- we need to filter which
                                        -- actions should actually
@@ -296,22 +296,25 @@ combinedEvent (Bridge l r) acts (t :+ bActs) s = SP e b'
     (leftActs,rightActs) = partitionExisting acts
     (lAct :| [rAct]) = undefined
 
-shouldOutput (Bridge l' r') (BA a p) = case p of
-    Left ll  -> handle l' ll
-    Right rr -> handle r' rr
-  where
-    handle p' pp = case a of
-                     InsertBefore o _ -> undefined
-                       -- hmm, I that if p' /= pp, then we should now insert
-                       -- an InsertBefore o p' instead of an InsertBefore o pp
-                       -- hmm, still not entirely sure about that though.
-                     InsertAfter  _ _ -> undefined
-                     Delete       _   -> p' /= pp -- hmm, what if there already was an existing delete!?
+shouldOutput                         :: Eq p => Bridge p -> BridgeAction p -> Bool
+shouldOutput (Bridge l' r') (BA _ p) = case p of
+    Left ll  -> ll == l'
+    Right rr -> rr == r'
+  -- if the bridge changes to something else than what the bridge event istself
+  -- tells us. There must already be existing events that will happen anyway.
 
 
--- determineOutActs (Bridge )=
-
-
+  -- where
+    -- handle p' pp = case a of
+    --                  InsertBefore _ _ -> p' == pp -- if the bridge is now different
+    --                                               -- there already is an existing
+    --                                               -- insertion/the element is already
+    --                                               -- present anyway
+    --                  InsertAfter  _ _ -> p' == pp
+    --                  Delete       q   -> p' /= q -- as long as we are not deleting
+    --                                              -- new bridge endpoint; delete it.
+    --                  -- I think we should probably do this only when
+    --                  -- there is no deletion of q already anyway
 
 -- | Find all points in the scene colinear with the bridge and "connected" to p
 colinears           :: (AsPoint p t, HasNeighbours p, Ord p, Ord t, Fractional t)
@@ -425,6 +428,7 @@ mx ?: xs = maybe xs (:xs) mx
 
 
 
+partitionExisting :: Foldable f => f (Existing a) -> ([a], [a])
 partitionExisting = foldr (eitherAct left right) ([],[])
  where
   left  a ~(l, r) = (a:l, r)
