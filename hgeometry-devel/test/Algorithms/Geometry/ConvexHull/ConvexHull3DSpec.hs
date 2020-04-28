@@ -43,9 +43,15 @@ spec = describe "3D ConvexHull tests" $ do
          --     DivAndConc.lowerHull' pts == MinimalistImp.lowerHull' pts
   where
     specAlg alg = do
-      it "same as naive on manual samples" $ do
-        forM_ [myPts,myPts', buggyPoints, buggyPoints2, buggyPoints3, buggyPoints6]
-          (sameAsNaive alg)
+      describe "same as naive on manual samples" $ do
+        forM_ [ ("myPts",myPts)
+              , ("myPts'",myPts')
+              , ("buggyPoints",buggyPoints)
+              , ("buggyPoints2",buggyPoints2)
+              , ("buggyPoints3",buggyPoints3)
+              , ("buggyPoints6",buggyPoints6)
+              ] $ \(msg,pts) ->
+          it msg $ (sameAsNaive alg) pts
       it "same as naive on buggyPoints " $ sameAsNaive alg myPts
       it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
 
