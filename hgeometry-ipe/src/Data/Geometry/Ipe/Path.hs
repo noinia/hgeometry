@@ -76,8 +76,11 @@ instance Fractional r => IsTransformable (PathSegment r) where
     PolygonPath p            -> PolygonPath $ transformBy t p
     CubicBezierSegment b     -> CubicBezierSegment $ transformBy t b
     QuadraticBezierSegment b -> QuadraticBezierSegment $ transformBy t b
-    _                        -> error "transformBy: not implemented yet"
-
+    EllipseSegment e         -> EllipseSegment $ transformBy t e
+    -- TODO:
+    ArcSegment               -> ArcSegment
+    SplineSegment            -> SplineSegment
+    ClosedSplineSegment      -> ClosedSplineSegment
 
 
 -- | A path is a non-empty sequence of PathSegments.
