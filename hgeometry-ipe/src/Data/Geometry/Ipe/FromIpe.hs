@@ -245,16 +245,15 @@ instance HasDefaultFromIpe (MultiPolygon () r) where
 
 
 -- | Read all g's from some ipe page(s).
-readAll :: (HasDefaultFromIpe g, r ~ NumType g, Foldable f)
-        => f (IpePage r) -> [g :+ IpeAttributes (DefaultFromIpe g) r]
-readAll = foldMap (^..content.traverse.defaultFromIpe)
-
+readAll   :: (HasDefaultFromIpe g, r ~ NumType g)
+          => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAll p = p^..content.traverse.defaultFromIpe
 
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".
 readAllFrom    :: (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => FilePath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
-readAllFrom fp = readAll <$> readSinglePageFile fp
+readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
 
 fromSingleton :: a -> LSeq.LSeq 1 a
 fromSingleton = LSeq.fromNonEmpty . (:| [])

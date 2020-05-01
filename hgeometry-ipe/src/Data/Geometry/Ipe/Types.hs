@@ -53,8 +53,7 @@ module Data.Geometry.Ipe.Types(
   , fromContent
 
   , IpeFile(IpeFile), preamble, styles, pages
-  , singlePageFile, singlePageFromContent
-
+  , ipeFile, singlePageFile, singlePageFromContent
   ) where
 
 
@@ -131,9 +130,15 @@ data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
                deriving (Eq,Show)
 makeLenses ''IpeFile
 
+
+-- | Convenience constructor for creating an ipe file without preamble
+-- and with the default stylesheet.
+ipeFile :: NE.NonEmpty (IpePage r) -> IpeFile r
+ipeFile = IpeFile Nothing [basicIpeStyle]
+
 -- | Convenience function to construct an ipe file consisting of a single page.
-singlePageFile   :: IpePage r -> IpeFile r
-singlePageFile p = IpeFile Nothing [basicIpeStyle] (p NE.:| [])
+singlePageFile :: IpePage r -> IpeFile r
+singlePageFile = ipeFile . (NE.:| [])
 
 -- | Create a single page ipe file from a list of IpeObjects
 singlePageFromContent :: [IpeObject r] -> IpeFile r

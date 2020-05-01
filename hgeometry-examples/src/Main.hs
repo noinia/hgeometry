@@ -16,8 +16,7 @@ import qualified Demo.ExpectedPairwiseDistance as ExpPWD
 import qualified Demo.TriangulateWorld as TriangulateWorld
 import qualified Demo.FloatingPoint as FloatingPoint
 
-
-
+import qualified Ipe.GrowingDisks as GrowingDisks
 
 --------------------------------------------------------------------------------
 
@@ -30,6 +29,7 @@ data Options = BAPC                      BAPCOptions
              | ExpectedPairwiseDistance  ExpPWD.Options
              | TriangulateWorld          TriangulateWorld.Options
              | FloatingPoint             FloatingPoint.Options
+             | GrowingDisks              GrowingDisks.Options
              deriving Data
 
 parser :: Parser Options
@@ -42,6 +42,7 @@ parser = subparser (
     <> command' ExpectedPairwiseDistance       ExpPWD.options
     <> command' TriangulateWorld               TriangulateWorld.options
     <> command' FloatingPoint                  FloatingPoint.options
+    <> command' GrowingDisks                   GrowingDisks.options
     )
 
 
@@ -56,6 +57,7 @@ mainWith opts' = case opts' of
   ExpectedPairwiseDistance opts       -> ExpPWD.mainWith opts
   TriangulateWorld opts               -> TriangulateWorld.mainWith opts
   FloatingPoint opts                  -> FloatingPoint.mainWith opts
+  GrowingDisks opts                   -> GrowingDisks.mainWith opts
 
 --------------------------------------------------------------------------------
 
