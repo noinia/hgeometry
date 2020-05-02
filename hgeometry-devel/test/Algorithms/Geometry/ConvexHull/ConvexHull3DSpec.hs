@@ -1,8 +1,8 @@
 module Algorithms.Geometry.ConvexHull.ConvexHull3DSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.KineticDivideAndConquer as DivAndConc
-import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
 import qualified Algorithms.Geometry.ConvexHull.Minimalist as Minimalist
+import qualified Algorithms.Geometry.ConvexHull.MinimalistImperative as MinimalistImp
 import           Algorithms.Geometry.ConvexHull.Naive (ConvexHull)
 import qualified Algorithms.Geometry.ConvexHull.Naive as Naive
 import           Control.Lens
@@ -13,9 +13,9 @@ import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.List.Util(leaveOutOne)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.List.Set as ListSet
+import           Data.List.Util (leaveOutOne)
 import           Data.Maybe
 import           Data.RealNumber.Rational
 import qualified Data.Set as Set
@@ -23,6 +23,7 @@ import           Data.Util
 -- import           Algorithms.Util
 import           Test.Hspec
 import           Test.QuickCheck
+import           Test.Hspec.Core.QuickCheck (modifyMaxSize)
 
 --------------------------------------------------------------------------------
 
@@ -33,9 +34,9 @@ spec = describe "3D ConvexHull tests" $ do
          it "manual on myPts"  $ (H $ Naive.lowerHull' myPts)  `shouldBe` myHull
          it "manual on myPts'" $ (H $ Naive.lowerHull' myPts') `shouldBe` myHull'
 
-         -- describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
+         describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
 
-         describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
+         -- describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
 
          -- it "minimalist and Div&Conc quickcheck" $ property $ \(HI pts) ->
          --     DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
@@ -53,7 +54,8 @@ spec = describe "3D ConvexHull tests" $ do
               ] $ \(msg,pts) ->
           it msg $ (sameAsNaive alg) pts
       it "same as naive on buggyPoints " $ sameAsNaive alg myPts
-      it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
+      modifyMaxSize (const 1000) $
+        it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
 
 
 
@@ -63,8 +65,12 @@ spec = describe "3D ConvexHull tests" $ do
 spec' = describe "test" $ do
   it "same as naive on buggyPoints " $ sameAsNaive DivAndConc.lowerHull' (mkBuggy buggyPoints7)
 
-specShrink = describe "shrink" $ forM_ (zip [0..] $ leaveOutOne buggyPoints7) $ \(i,pts) ->
+specShrink = describe "shrink" $ forM_ sets $ \(_:+i,pts) ->
                it ("same as Naive " <> show i) $ sameAsNaive DivAndConc.lowerHull' (mkBuggy pts)
+  where
+    sets = leaveOutOne buggyPoints7
+
+
 
 
 
@@ -94,6 +100,9 @@ sameAsNaive alg pts = (HalfSpacesOf $ alg pts)
                       (HalfSpacesOf $ Naive.lowerHull' pts)
 
 newtype HalfSpaces p r = HalfSpacesOf (ConvexHull 3 p r) deriving Show
+
+-- instance Show (HalfSpaces p r) where
+--   show _ = "HalfSpace"
 
 instance (Ord r, Fractional r) => Eq (HalfSpaces p r) where
   (HalfSpacesOf cha) == (HalfSpacesOf chb) = hsOf cha == hsOf chb
@@ -245,10 +254,10 @@ buggyPoints6' = [ point3 [0 ,0, 00]   :+ 0
 
 
 buggyPoints7 :: [Point 3 R :+ Int]
-buggyPoints7 = [point3 [-82,-84,-74] :+ 0
-               ,point3 [-82,-27,66] :+ 1
-               ,point3 [-82,6,-62] :+ 2
-               ,point3 [-75,73,41] :+ 3
+buggyPoints7 = [-- point3 [-82,-84,-74] :+ 0
+               point3 [-82,-27,66] :+ 1
+               -- ,point3 [-82,6,-62] :+ 2
+               -- ,point3 [-75,73,41] :+ 3
                ,point3 [-72,21,-81] :+ 4
                ,point3 [-69,-64,81] :+ 5
                ,point3 [-68,-53,40] :+ 6
@@ -321,3 +330,46 @@ buggyPoints7 = [point3 [-82,-84,-74] :+ 0
                ,point3 [84,-82,-1] :+ 74
                ,point3 [85,38,34] :+ 75
                ]
+
+
+
+buggyPoints7S :: [Point 3 R :+ Int]
+buggyPoints7S = [point3 [-82,-27,66]  :+ 0
+                ,point3 [-72,21,-81]  :+ 1
+                ,point3 [-69,-64,81]  :+ 2
+                ,point3 [-68,2,-63]   :+ 3
+                ,point3 [-67,-92,82]  :+ 4
+                ,point3 [-66,-73,29]  :+ 5
+                ,point3 [-59,-78,-71] :+ 6
+                ,point3 [-58,32,74]   :+ 7
+                ,point3 [-57,-82,12]  :+ 8
+                ,point3 [-55,-7,-57]  :+ 9
+                ,point3 [-50,-77,23]  :+ 10
+                ,point3 [-48,-9,72]   :+ 11
+                ,point3 [-41,21,65]   :+ 12
+                ,point3 [-39,-72,40]  :+ 13
+                ,point3 [-39,63,-33]  :+ 14
+                ,point3 [-36,90,86]   :+ 15
+                ,point3 [-34,6,-3]    :+ 16
+                ,point3 [-30,-31,68]  :+ 17
+                ,point3 [-29,-15,53]  :+ 18
+                ,point3 [-21,-51,-76] :+ 19
+                ,point3 [-20,59,26]   :+ 20
+                ,point3 [-17,-54,-92] :+ 21
+                ,point3 [-16,-47,26]  :+ 22
+                ,point3 [-13,23,-55]  :+ 23
+                ,point3 [-11,-33,-13] :+ 24
+                ,point3 [-9,-32,59]   :+ 25
+                ,point3 [-6,-68,-27]  :+ 26
+                ,point3 [-4,85,24]    :+ 27
+                ,point3 [-1,-39,-89]  :+ 28
+                ,point3 [2,-36,36]    :+ 29
+                ,point3 [4,-42,-27]   :+ 30
+                ,point3 [8,89,3]      :+ 31
+                ,point3 [12,-53,-2]   :+ 32
+                ,point3 [13,27,-92]   :+ 33
+                ,point3 [22,-88,-25]  :+ 34
+                ,point3 [26,82,20]    :+ 35
+                ,point3 [27,87,-92]   :+ 36
+                ,point3 [52,-80,-92]  :+ 37
+                ]

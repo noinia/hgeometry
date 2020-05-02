@@ -6,7 +6,7 @@ import qualified Data.Foldable as F
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.List.Zipper (allNonEmptyNexts, dropNext)
+import           Data.List.Zipper (allNonEmptyNexts, extractNext)
 import qualified Data.List.Zipper as Zipper
 import           Data.Maybe
 import           Data.Ord (comparing)
@@ -16,17 +16,19 @@ import           Data.Ord (comparing)
 -- | Given an input list, computes all lists in which just one element is missing.
 --
 -- >>> mapM_ print $ leaveOutOne [1..5]
--- [2,3,4,5]
--- [1,3,4,5]
--- [1,2,4,5]
--- [1,2,3,5]
--- [1,2,3,4]
+-- (1,[2,3,4,5])
+-- (2,[1,3,4,5])
+-- (3,[1,2,4,5])
+-- (4,[1,2,3,5])
+-- (5,[1,2,3,4])
 -- >>> leaveOutone []
 -- []
 -- >>> leaveOutOne [1]
--- [[]]
-leaveOutOne    :: [a] -> [[a]]
-leaveOutOne xs = (F.toList . fromJust . dropNext) <$> allNonEmptyNexts (Zipper.fromList xs)
+-- [(1,[])]
+leaveOutOne    :: [a] -> [(a,[a])]
+leaveOutOne xs = (second F.toList . fromJust . extractNext)
+              <$> allNonEmptyNexts (Zipper.fromList xs)
+
 
 --------------------------------------------------------------------------------
 -- * Improved functions for minima and maxima

@@ -47,13 +47,18 @@ goPrev (Zipper xs ys) = case xs of
 allNexts :: Zipper a -> [Zipper a]
 allNexts = List.unfoldr (fmap (\z -> (z,goNext z))) . Just
 
+-- | Returns the next element, and the zipper without it
+extractNext                :: Zipper a -> Maybe (a, Zipper a)
+extractNext (Zipper xs ys) = case ys of
+                               []      -> Nothing
+                               (y:ys') -> Just $ (y,Zipper xs ys')
+
+
 -- | Drops the next element in the zipper.
 --
 -- running time: \(O(1)\)
-dropNext                :: Zipper a -> Maybe (Zipper a)
-dropNext (Zipper xs ys) = case ys of
-                            []      -> Nothing
-                            (_:ys') -> Just $ Zipper xs ys'
+dropNext :: Zipper a -> Maybe (Zipper a)
+dropNext = fmap snd . extractNext
 
 -- | Computes all list that still have next elements.
 --

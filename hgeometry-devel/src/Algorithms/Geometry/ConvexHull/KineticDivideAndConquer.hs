@@ -204,7 +204,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                 -- h' <- initialHull'' l r
                 let b = Bridge u v
                     -- b' = traceShow ("hull=hull?", if h /= h' then show (vec,l,r,h,h') else "Same") b
-                es <- traceShow ("MERGING " <> rangeS l r) runKinetic Bottom esIn b
+                es <- runKinetic Bottom esIn b
                 writeList h
                 let !ms = MergeStatus (hd l) (lst r) es
                 -- fp <- renderMovieIO ("movie_" <> rangeS l r) ms
@@ -299,7 +299,7 @@ handleEvent        :: (Ord r, Fractional r, Show r)
                    -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
                    -> Simulation s r [Event r]
 handleEvent now es = do mbe <- firstBridgeEvent now
-                        case traceShowId $ nextEvent mbe es of
+                        case nextEvent mbe es of
                           None             -> pure []
                           Next t eacts es' -> do me  <- handleAllAtTime t eacts
                                                  evs <- handleEvent (ValB t) es'
@@ -316,16 +316,16 @@ handleAllAtTime :: (Ord r, Fractional r, Show r)
                 -- ^ all *existing* events that are happening at the
                 -- current time. I.e. events in either the left or right hulls
                 -> Simulation s r (Maybe (Event r))
-handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
+-- handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
 handleAllAtTime now ees =
     do b <- get
-       let Bridge l r = traceShow ("bridge before handling side events: ",b) b
-       currentHL <- lift $ toListContains l
-       currentHR <- lift $ toListContains r
+       let Bridge l r = b -- traceShow ("bridge before handling side events: ",b) b
+       -- currentHL <- lift $ toListContains l
+       -- currentHR <- lift $ toListContains r
        (delL,ls) <- handleOneSide now levs l
        (delR,rs) <- handleOneSide now revs r
        b' <- newBridge now (NonEmpty.reverse ls) rs
-       let Bridge l' r' = traceShow ("hulls and new bridge ",currentHL,currentHR,b') b'
+       let Bridge l' r' = b' -- traceShow ("hulls and new bridge ",currentHL,currentHR,b') b'
        louts <- filterM (occursBeforeAt now $ l `max` l') levs
        routs <- filterM (occursAfterAt  now $ r `min` r') revs
        la <- leftBridgeEvent  l l' delL louts
@@ -337,7 +337,7 @@ handleAllAtTime now ees =
     (levs,revs) = partitionEithers ees
     outputEvent t acts = (t :+) <$> NonEmpty.nonEmpty acts
 
-    tr x = traceShow ("outputting event: ",x) x
+    tr x = x -- traceShow ("outputting event: ",x) x
 
 
 occursBeforeAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
@@ -424,11 +424,11 @@ partitionActions evs l = (listToMaybe bridgeDels, rest, ins)
 -- at the current time t.
 colinears'       :: (Ord r, Num r, Show r) => r -> Index -> Int -> Simulation s r (NonEmpty Index)
 colinears' t i d = do b  <- get >>= traverse (lift . atTime t)
-                      ls <- lift (toListFromR i) >>= takeColinear b
-                      rs <- lift (toListFrom  i) >>= takeColinear b
+                      ls <- lift (toListFromRK i (d+1)) >>= takeColinear b
+                      rs <- lift (toListFromK  i (d+1)) >>= takeColinear b
                       pure . NonEmpty.fromList $ (reverse ls) <> [i] <> rs
   where
-    takeColinear b (_ :| is) = filterM (isColinearWith b t) $ take (d+1) is
+    takeColinear b (_ :| is) = filterM (isColinearWith b t) is -- $ take (d+1) is
 
 
 -- colinears     :: (Ord r, Num r, Show r) => r -> Index -> Simulation s r (NonEmpty Index)
@@ -476,14 +476,13 @@ nextEvent (Just tb) es@((te :+ eacts) : es') = case tb `compare` te of
 -- | Computes the first time a bridge event happens.
 firstBridgeEvent     :: (Ord r, Fractional r, Show r) => Bottom r -> Simulation s r (Maybe r)
 firstBridgeEvent now = do br <- get
-                          let Bridge l r = traceShowId br
+                          let Bridge l r = br
                           cands <- sequence [ getPrev l >>~ \a -> colinearTime a l r
                                             , getNext l >>~ \b -> colinearTime l b r
                                             , getPrev r >>~ \c -> colinearTime l c r
                                             , getNext r >>~ \d -> colinearTime l r d
                                             ]
-                          let cands' = traceShowId cands
-                          pure $ minimum' [t | c@(ValB t) <- cands', now < c]
+                          pure $ minimum' [t | c@(ValB t) <- cands, now < c]
   where
     c >>~ k = lift c >>= \case
                 Nothing -> pure Bottom
