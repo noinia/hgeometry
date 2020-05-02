@@ -196,6 +196,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
          => Semigroup (HullM s r (MergeStatus r)) where
   lc <> rc = do l <- lc
                 r <- rc
+
                 let esIn = mergeEvents (events l) (events r)
                     t    = (-10000000) -- TODO; at what time value should we start?
                 (h,u,v) <- findBridge t l r
@@ -203,7 +204,7 @@ instance (Ord r, Fractional r, Show r, IpeWriteText r)
                 -- h' <- initialHull'' l r
                 let b = Bridge u v
                     -- b' = traceShow ("hull=hull?", if h /= h' then show (vec,l,r,h,h') else "Same") b
-                es <- runKinetic Bottom esIn b
+                es <- traceShow ("MERGING " <> rangeS l r) runKinetic Bottom esIn b
                 writeList h
                 let !ms = MergeStatus (hd l) (lst r) es
                 -- fp <- renderMovieIO ("movie_" <> rangeS l r) ms
@@ -298,7 +299,7 @@ handleEvent        :: (Ord r, Fractional r, Show r)
                    -> [r :+ NonEmpty (Existing Action)] -- ^ the existing events
                    -> Simulation s r [Event r]
 handleEvent now es = do mbe <- firstBridgeEvent now
-                        case nextEvent mbe es of
+                        case traceShowId $ nextEvent mbe es of
                           None             -> pure []
                           Next t eacts es' -> do me  <- handleAllAtTime t eacts
                                                  evs <- handleEvent (ValB t) es'
@@ -315,20 +316,20 @@ handleAllAtTime :: (Ord r, Fractional r, Show r)
                 -- ^ all *existing* events that are happening at the
                 -- current time. I.e. events in either the left or right hulls
                 -> Simulation s r (Maybe (Event r))
--- handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
+handleAllAtTime now ees | traceShow ("handleAllAtTime",now,ees) False = undefined
 handleAllAtTime now ees =
     do b <- get
-       let Bridge l r = b -- traceShow ("bridge before handling side events: ",b) b
-       -- currentHL <- lift $ toListContains l
-       -- currentHR <- lift $ toListContains r
+       let Bridge l r = traceShow ("bridge before handling side events: ",b) b
+       currentHL <- lift $ toListContains l
+       currentHR <- lift $ toListContains r
        (delL,ls) <- handleOneSide now levs l
        (delR,rs) <- handleOneSide now revs r
        b' <- newBridge now (NonEmpty.reverse ls) rs
-       let Bridge l' r' = b'
+       let Bridge l' r' = traceShow ("hulls and new bridge ",currentHL,currentHR,b') b'
        louts <- filterM (occursBeforeAt now $ l `max` l') levs
        routs <- filterM (occursAfterAt  now $ r `min` r') revs
-       la <- leftBridgeEvent  l l' delL levs
-       ra <- rightBridgeEvent r r' delR revs
+       la <- leftBridgeEvent  l l' delL louts
+       ra <- rightBridgeEvent r r' delR routs
        put b'        -- put $ traceShow ("bridge after time: ", now, " is ", b') b'
        pure . tr . outputEvent now $ louts <> routs <> catMaybes [la,ra]
          -- the bridge actions should be after louts and routs;
@@ -336,7 +337,7 @@ handleAllAtTime now ees =
     (levs,revs) = partitionEithers ees
     outputEvent t acts = (t :+) <$> NonEmpty.nonEmpty acts
 
-    tr x = x -- traceShow ("outputting event: ",x) x
+    tr x = traceShow ("outputting event: ",x) x
 
 
 occursBeforeAt       :: (Ord r, Num r) =>  r -> Index -> Action -> Simulation s r Bool
@@ -380,6 +381,8 @@ shouldBeInserted i = null . filter isInsert
       InsertAfter  _ j | j == i -> True
       InsertBefore _ j | j == i -> True
       _                         -> False
+  -- it seems that this should depend on if the existing insertion event actually goes through
+
 
 -- | Considering that all points in ls and rs are colinear at time t
 -- (and contain the bridge at time). Compute the new bridge.
@@ -471,15 +474,16 @@ nextEvent (Just tb) es@((te :+ eacts) : es') = case tb `compare` te of
                                                  GT -> Next te (toList eacts) es'
 
 -- | Computes the first time a bridge event happens.
-firstBridgeEvent     :: (Ord r, Fractional r) => Bottom r -> Simulation s r (Maybe r)
+firstBridgeEvent     :: (Ord r, Fractional r, Show r) => Bottom r -> Simulation s r (Maybe r)
 firstBridgeEvent now = do br <- get
-                          let Bridge l r = br
+                          let Bridge l r = traceShowId br
                           cands <- sequence [ getPrev l >>~ \a -> colinearTime a l r
                                             , getNext l >>~ \b -> colinearTime l b r
                                             , getPrev r >>~ \c -> colinearTime l c r
                                             , getNext r >>~ \d -> colinearTime l r d
                                             ]
-                          pure $ minimum' [t | c@(ValB t) <- cands, now < c]
+                          let cands' = traceShowId cands
+                          pure $ minimum' [t | c@(ValB t) <- cands', now < c]
   where
     c >>~ k = lift c >>= \case
                 Nothing -> pure Bottom
@@ -691,6 +695,51 @@ buggyPoints6' = [ point3 [0  ,0, 00]   :+ 0
                ]
 
 -- mkBuggy = fmap (bimap (10 *^) id) . NonEmpty.fromList
+
+
+
+
+buggyPoints7S :: [Point 3 R :+ Int]
+buggyPoints7S = [point3 [-82,-27,66]  :+ 0
+                ,point3 [-72,21,-81]  :+ 1
+                ,point3 [-69,-64,81]  :+ 2
+                ,point3 [-68,2,-63]   :+ 3
+                ,point3 [-67,-92,82]  :+ 4
+                ,point3 [-66,-73,29]  :+ 5
+                ,point3 [-59,-78,-71] :+ 6
+                ,point3 [-58,32,74]   :+ 7
+                ,point3 [-57,-82,12]  :+ 8
+                ,point3 [-55,-7,-57]  :+ 9
+                ,point3 [-50,-77,23]  :+ 10
+                ,point3 [-48,-9,72]   :+ 11
+                ,point3 [-41,21,65]   :+ 12
+                ,point3 [-39,-72,40]  :+ 13
+                ,point3 [-39,63,-33]  :+ 14
+                ,point3 [-36,90,86]   :+ 15
+                ,point3 [-34,6,-3]    :+ 16
+                ,point3 [-30,-31,68]  :+ 17
+                ,point3 [-29,-15,53]  :+ 18
+                ,point3 [-21,-51,-76] :+ 19
+                ,point3 [-20,59,26]   :+ 20
+                ,point3 [-17,-54,-92] :+ 21
+                ,point3 [-16,-47,26]  :+ 22
+                ,point3 [-13,23,-55]  :+ 23
+                ,point3 [-11,-33,-13] :+ 24
+                ,point3 [-9,-32,59]   :+ 25
+                ,point3 [-6,-68,-27]  :+ 26
+                ,point3 [-4,85,24]    :+ 27
+                ,point3 [-1,-39,-89]  :+ 28
+                ,point3 [2,-36,36]    :+ 29
+                ,point3 [4,-42,-27]   :+ 30
+                ,point3 [8,89,3]      :+ 31
+                ,point3 [12,-53,-2]   :+ 32
+                ,point3 [13,27,-92]   :+ 33
+                ,point3 [22,-88,-25]  :+ 34
+                ,point3 [26,82,20]    :+ 35
+                ,point3 [27,87,-92]   :+ 36
+                ,point3 [52,-80,-92]  :+ 37
+                ]
+
 
 
 buggyPoints7 :: [Point 3 R :+ Int]
