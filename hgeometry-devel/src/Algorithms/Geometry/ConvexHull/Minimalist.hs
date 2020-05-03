@@ -69,7 +69,9 @@ outputTriangles :: (HasNeighbours p, WithExtra p q, AsPoint p r, HasScene p)
                 => Movie p t -> LowerHull 3 q r
 outputTriangles = concatMap (\(s,(e :+ _)) -> reportTriangles s e) . withNeighbours . play
   where
-    reportTriangles s = mapMaybe (reportTriangle s . runIdentity) . toList . view actions
+    reportTriangles (Identity s) =
+      mapMaybe (reportTriangle s . runIdentity) . toList . view actions
+
 
 reportTriangle   :: (HasNeighbours p, WithExtra p q, AsPoint p r)
                  => Scene p -> Action p -> Maybe (Triangle 3 q r)
@@ -93,8 +95,10 @@ merge        :: ( Ord t, Ord p, Fractional t, AsPoint p t
              => t -> Movie p t -> Movie p t -> Movie p t
 merge t0 l r = let b :+ h = tr "inital" $ initialBridge t0 (initialScene l) (initialScene r)
                    m@(Movie pts _ _)   = l `sideBySide` r
-               in debugMovieTo ("merge_" <> rangeOfS l <> "_" <> rangeOfS r) $
-                 Movie pts h $ traceBridge b (play $ m)
+               in debugMovieTo ("merge_" <> rangeOfSS l r) $
+                  movie pts h $ tr ("events " <> rangeOfSS l r) $ traceBridge b (play $ m)
+
+
 
 type Bridge p = Two p
 pattern Bridge     :: p -> p -> Bridge p
@@ -102,6 +106,8 @@ pattern Bridge u v = Two u v
 {-# COMPLETE Bridge #-}
 
 type Hull p = Scene p
+
+type Hulls p = Two (Hull p)
 
 --------------------------------------------------------------------------------
 -- * Computing the Initial Bridge
@@ -128,13 +134,14 @@ findBridge t l r = (\(Two l' r') -> Bridge (l'^.core) (r'^.core)) $ findBridge' 
 --------------------------------------------------------------------------------
 -- * Tracing the Bridge
 
+type Animation p t = Alternating (Two (Scene p)) (Event' Existing p t)
+
 -- | Start Tracing the Bridge
 traceBridge         :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                        , Show p, Show t, Show (Scene p)
                        )
-                    => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
-traceBridge b0 anim = reverse
-                    $ trace' b0 anim (initialBridgeChange (currentScene anim) b0)
+                    => Bridge p -> Animation p t -> [Event p t]
+traceBridge b0 anim = trace' b0 anim (initialBridgeChange (currentScene anim) b0)
   where
     initialBridgeChange = nextBridgeChange (const True)
       -- initially, there is no requirement on the time of the next bridge event.
@@ -146,7 +153,7 @@ traceBridge b0 anim = reverse
 trace'        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                  , Show p, Show t, Show (Scene p)
                  )
-              => Bridge p -> Alternating (Scene p) (Event' Existing p t) -> Maybe (BridgeInfo p t)
+              => Bridge p -> Animation p t -> Maybe (BridgeInfo p t)
               -> [Event p t]
 trace' b a mt = case nextEvent a mt of
     Nothing  -> []
@@ -164,7 +171,7 @@ trace' b a mt = case nextEvent a mt of
 trace           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                    , Show p, Show t, Show (Scene p)
                    )
-                => t -> Bridge p -> Alternating (Scene p) (Event' Existing p t) -> [Event p t]
+                => t -> Bridge p -> Animation p t -> [Event p t]
 trace  t b anim = trace' b anim (nextBridgeChange (> t) (currentScene anim) b)
 
 
@@ -185,22 +192,21 @@ filterActions (Bridge l r) = foldr f []
 ----------------------------------------
 -- ** Finding the Next event
 
-data NextEvent' f p t =
+data NextEvent p t =
     BridgeEvent   (BridgeInfo p t)
-  | ExistingEvent (Event' f p t)                             (Alternating (Scene p) (Event' f p t))
-  | CombinedEvent (NonEmpty (f (Action p))) (BridgeInfo p t) (Alternating (Scene p) (Event' f p t))
-type NextEvent = NextEvent' Existing
+  | ExistingEvent (Event' Existing p t)                             (Animation p t)
+  | CombinedEvent (NonEmpty (Existing (Action p))) (BridgeInfo p t) (Animation p t)
 
 deriving instance (Show p, Show t, Show (Scene p)) => Show (NextEvent p t)
 
-nextTime :: NextEvent' f p t -> t
+nextTime :: NextEvent p t -> t
 nextTime = \case
   BridgeEvent   e     -> e^.bridgeEventTime
   ExistingEvent e   _ -> e^.eventTime
   CombinedEvent _ e _ -> e^.bridgeEventTime
 
 nextEvent                    :: Ord t
-                             => Alternating (Scene p) (Event' Existing p t)
+                             => Animation p t
                              -> Maybe (BridgeInfo p t) -- ^ The first bridge event
                              -> Maybe (NextEvent p t)
 nextEvent (Alternating _ es) = go es
@@ -216,19 +222,19 @@ nextEvent (Alternating _ es) = go es
 
 -- | Computes the next bridge change that satisifies the given
 -- predicate.
-nextBridgeChange                  :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t
-                                     , Show t, Show p
-                                     )
-                                  => (t -> Bool)
-                                  -> Scene p -> Bridge p -> Maybe (BridgeInfo p t)
-nextBridgeChange p s (Bridge u v) =
+nextBridgeChange                            :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t
+                                               , Show t, Show p
+                                               )
+                                            => (t -> Bool)
+                                            -> Hulls p -> Bridge p -> Maybe (BridgeInfo p t)
+nextBridgeChange p (Two sl sr) (Bridge u v) =
     fmap asEvent . NonEmpty.nonEmpty . minimaOn (^.core) . filter (p . (^.core)) . catMaybes
     . tr "nextBridgeChange, candidates"
     $
-      [ getPrev u s >>= \a -> colinearTime a u v <&> (:+ BA (Delete u)         (Left a))
-      , getNext u s >>= \b -> colinearTime u b v <&> (:+ BA (InsertAfter u b)  (Left b))
-      , getPrev v s >>= \c -> colinearTime u c v <&> (:+ BA (InsertBefore v c) (Right c))
-      , getNext v s >>= \d -> colinearTime u v d <&> (:+ BA (Delete v)         (Right d))
+      [ getPrev u sl >>= \a -> colinearTime a u v <&> (:+ BA (Delete u)         (Left a))
+      , getNext u sl >>= \b -> colinearTime u b v <&> (:+ BA (InsertAfter u b)  (Left b))
+      , getPrev v sr >>= \c -> colinearTime u c v <&> (:+ BA (InsertBefore v c) (Right c))
+      , getNext v sr >>= \d -> colinearTime u v d <&> (:+ BA (Delete v)         (Right d))
       ]
   where
     asEvent as@(a:|_) = a^.core :+ ((^.extra) <$> as)
@@ -323,13 +329,13 @@ combinedEvent                                     :: (Fractional t, Ord t, AsPoi
                                                   => Bridge p
                                                   -> NonEmpty (Existing (Action p))
                                                   -> BridgeInfo p t
-                                                  -> Scene p -- ^ old scene
+                                                  -> Hulls p -- ^ old scene
                                                   -> SP (Maybe (Event p t)) (Bridge p)
-combinedEvent (Bridge l r) acts bi@(t :+ bActs) s = SP (mkNewEvent bi b') b'
+combinedEvent (Bridge l r) acts bi@(t :+ bActs) (Two sl sr) = SP (mkNewEvent bi b') b'
   where
     b' = findBridge (1 + t) (NonEmpty.reverse ls) rs
-    ls = colinears t l r s lAct leftActs
-    rs = colinears t r l s rAct rightActs
+    ls = colinears t l r sl lAct leftActs
+    rs = colinears t r l sr rAct rightActs
 
     (leftActs,rightActs) = partitionExisting acts
     (lAct,rAct)          = partitionBridgeActions bActs
@@ -402,10 +408,11 @@ colinearsFrom p q t s = exploreFrom p (areColinearAt t p q) s
 -- * Base case
 
 baseCase     :: ( p ~ (PExt q r), t ~ r
-                , Ord r, Fractional r, Show r)
+                , Ord r, Fractional r, Show r, Show q
+                )
              => NonEmpty (Point 3 r :+ q) -> Movie p t
 baseCase pts = let SP p evts = simulateLeaf (PExt <$> pts)
-               in Movie (PExt <$> pts) (singleton p) evts
+               in Movie (PExt <$> pts) (Identity $ singleton p) evts
 
 simulateLeaf :: (AsPoint p t, Ord t, Fractional t, Show t) => NonEmpty p -> SP p [Event p t]
 simulateLeaf = (&_2 %~ toEvents) . lowerEnvelope . fmap (\p -> toDualPoint (asPoint p) :+ p)
@@ -498,6 +505,24 @@ partitionExisting = foldr (eitherAct left right) ([],[])
 
 type R = RealNumber 10
 
+--------------------------------------------------------------------------------
+-- * Debugging stuff
+
+rangeOfSS    :: (HasNeighbours p, Ord p, WithExtra p Int) => Movie p t -> Movie p t -> String
+rangeOfSS l r = rangeOfS l <> "_" <> rangeOfS r
+
+rangeOfS   :: (HasNeighbours p, Ord p, WithExtra p Int) => Movie p t -> String
+rangeOfS m = let (a,b) = bimap (show @Int. askExtra) (show @Int . askExtra) $ rangeOf m
+             in a <> "_" <> b
+
+rangeOf   :: (HasNeighbours p, Ord p) => Movie p t -> (p,p)
+rangeOf m = let s = fromLeftMost $ initialScene m
+            in (minimum s, maximum s)
+
+
+
+--------------------------------------------------------------------------------
+
 myPts :: NonEmpty (Point 3 R :+ Int)
 myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             , Point3 1  1  10 :+ 1
@@ -507,15 +532,12 @@ myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
                             ]
 
 
-
-
---------------------------------------------------------------------------------
--- * Debugging stuff
-
-rangeOfS   :: forall p t. (HasNeighbours p, Ord p, WithExtra p Int) => Movie p t -> String
-rangeOfS m = let (a,b) = bimap (show @Int. askExtra) (show @Int . askExtra) $ rangeOf m
-             in a <> "_" <> b
-
-rangeOf   :: (HasNeighbours p, Ord p) => Movie p t -> (p,p)
-rangeOf m = let s = fromLeftMost $ initialScene m
-            in (minimum s, maximum s)
+buggyPoints2 :: NonEmpty (Point 3 R :+ Int)
+buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
+                                                             , Point3 (-5) (-2) 5 :+ 1
+                                                             , Point3 (-5) (-1) 4 :+ 2
+                                                             , Point3 (0) (2)   2 :+ 3
+                                                             , Point3 (1) (-5)  4 :+ 4
+                                                             , Point3 (3) (-3)  2 :+ 5
+                                                             , Point3 (3) (-1)  1 :+ 6
+                                                             ]

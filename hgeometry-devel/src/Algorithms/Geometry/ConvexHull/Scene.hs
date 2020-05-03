@@ -14,13 +14,14 @@ import qualified Data.Map as Map
 import           Data.Ord (comparing)
 import           Prelude hiding (Either(..))
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- type Scene p = [p]
 
 type family Scene p = result | result -> p
 
-class HasScene p where
+class Show p => HasScene p where
   insertBefore       :: p -> p -> Scene p -> Scene p
   insertAfter        :: p -> p -> Scene p -> Scene p
   delete             :: p -> Scene p -> Scene p
@@ -88,10 +89,26 @@ instance AsPoint (PExt p r) r where
 instance WithExtra (PExt p r) p where
   askExtra = view extra . unPExt
 
-instance Ord r => HasScene (PExt p r) where
+
+
+
+-- TODO: when handling an event at time t we should take care of
+-- points at the same x-coordinate properly. At this point the map may simply swallow them. Which is not good if we have Delete x and a simultaneous insert x operation. It may be that the insert is accidentally immediately removed.
+
+instance (Ord r, Show p) => HasScene (PExt p r) where
   insertBefore _ p = Map.insert (xC p) p -- we just ingore information about
   insertAfter  _ p = Map.insert (xC p) p -- possible neighbours
-  delete         p = Map.delete (xC p)
+  delete  (PExt p) = Map.update f (p^.core.xCoord)
+    where
+      f pp@(PExt p') | (p'^.core) == (p^.core) = Nothing
+                     | otherwise               = Just pp
+                       -- if some simultaneous event already replaced this thing
+                       -- ignore it
+
+                       -- this does not work, since at the time of
+                       -- simulaneous events, the points really are at
+                       -- the same position.
+
   singleton      p = Map.singleton (xC p) p
 
   fromNonEmpty ps  = Map.fromAscList [(xC p,p) | p <- toList ps]

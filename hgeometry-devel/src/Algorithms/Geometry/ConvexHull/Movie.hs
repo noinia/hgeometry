@@ -1,7 +1,9 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Algorithms.Geometry.ConvexHull.Movie where
 
 import           Algorithms.DivideAndConquer
 import           Algorithms.Geometry.ConvexHull.Helpers (groupOn)
+import           Algorithms.Geometry.ConvexHull.Scene
 import           Control.Lens
 import           Data.Ext
 import qualified Data.List as List
@@ -9,16 +11,29 @@ import           Data.List.Alternating
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           Data.Semigroup
+import           Data.Util
 import           Prelude hiding (Either(..))
-import           Algorithms.Geometry.ConvexHull.Scene
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
-data Movie' f p t = Movie { allPoints    :: NonEmpty p
-                          , initialScene :: Scene p
-                          , events       :: [Event' f p t]
-                          }
-type Movie p t = Movie' Identity p t
+
+data Movie' f g p t = Movie { allPoints     :: NonEmpty p
+                            , initialScene' :: f (Scene p)
+                            , events        :: [Event' g p t]
+                            }
+type Movie p t = Movie' Identity Identity p t
+
+deriving instance (Show (f (Scene p)), Show (Event' g p t), Show p) => Show (Movie' f g p t)
+
+
+
+movie          ::  NonEmpty p -> Scene p -> [Event' g p t] -> Movie' Identity g p t
+movie pts s es = Movie pts (Identity s) es
+
+initialScene :: Movie' Identity g p t -> Scene p
+initialScene = runIdentity . initialScene'
+
 
 ----------------------------------------
 
@@ -65,13 +80,17 @@ instance CanAquire Existing where
   acquire = \case
     Left x  -> x
     Right x -> x
+
+
 --------------------------------------------------------------------------------
 
 
 -- | plays two movies side by side
-sideBySide                           :: (Ord t, Semigroup (Scene p))
-                                     => Movie p t -> Movie p t -> Movie' Existing p t
-sideBySide (Movie pl l el) (Movie pr r er) = Movie (pl <> pr) (l <> r) (mergeEvents el er)
+sideBySide                           :: Ord t
+                                     => Movie p t -> Movie p t -> Movie' Two Existing p t
+sideBySide (Movie pl l el) (Movie pr r er) = Movie (pl <> pr)
+                                                   (Two (runIdentity l) (runIdentity r))
+                                                   (mergeEvents el er)
 
 mergeEvents       :: Ord t
                   => [Event p t] -> [Event p t] -> [Event' Existing p t]
@@ -86,27 +105,41 @@ mergeEvents ls rs = map combine . groupOn (^.eventTime)
 
 -- | Playing a movie produces an alternating list of scenes and events
 -- at which the scene changes.
-play               :: (CanAquire f, HasScene p)
-                   => Movie' f p t -> Alternating (Scene p) (Event' f p t)
-play (Movie _ h0 es) = Alternating h0 (view extra $ List.foldl' applyEvent (h0 :+ []) es)
+play               :: (CanApply f g, HasScene p)
+                   => Movie' f g p t -> Alternating (f (Scene p)) (Event' g p t)
+play (Movie _ h0 es) = Alternating h0
+                                   (reverse . view extra $ List.foldl' applyEvent (h0 :+ []) es)
+                                   -- TODO: make this into a DList
+
+class CanApply f g where
+  applyAction :: (HasScene p, Show p) => f (Scene p) -> g (Action p) -> f (Scene p)
+
+instance CanApply Identity Identity where
+  applyAction (Identity s) (Identity a) = Identity $ applyAction' s a
+
+instance CanApply Two Existing where
+  applyAction (Two sl sr) = \case
+    Left a  -> Two (applyAction' sl a) sr
+    Right a -> Two sl (applyAction' sr a)
 
 
-
-applyEvent             :: (CanAquire f, HasScene p)
-                       => Scene p :+ [Event' f p t :+ Scene p]
-                       -> Event' f p t
-                       -> Scene p :+ [Event' f p t :+ Scene p]
+applyEvent             :: (CanApply f g, HasScene p)
+                       => f (Scene p) :+ [Event' g p t :+ f (Scene p)]
+                       -> Event' g p t
+                       -> f (Scene p) :+ [Event' g p t :+ f (Scene p)]
 applyEvent (s :+ xs) e = let s' = applyActions (e^.actions) s
                          in s' :+ (e :+ s'):xs
+                         -- we want to snoc instead of cons here
 
-applyActions        :: (CanAquire f, HasScene p) => NonEmpty (f (Action p)) -> Scene p -> Scene p
+applyActions        :: (CanApply f g, HasScene p)
+                    => NonEmpty (g (Action p)) -> f (Scene p) -> f (Scene p)
 applyActions acts s = List.foldl' applyAction s acts
 
-applyAction      :: (CanAquire f, HasScene p) => Scene p -> f (Action p) -> Scene p
-applyAction s fa = case acquire fa of
-                     InsertBefore p x -> insertBefore p x s
-                     InsertAfter  p x -> insertAfter  p x s
-                     Delete x         -> delete x s
+applyAction'      :: (Show p, HasScene p) => Scene p -> Action p -> Scene p
+applyAction' s = \case
+    InsertBefore p x -> insertBefore p x s
+    InsertAfter  p x -> insertAfter  p x s
+    Delete x         -> delete x s
 
 --------------------------------------------------------------------------------
 
