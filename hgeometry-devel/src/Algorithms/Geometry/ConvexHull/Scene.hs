@@ -7,8 +7,7 @@ import           Control.Lens
 import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Point
-import           Data.Geometry.Properties
-import qualified Data.IndexedDoublyLinkedList.Bare as IDLList
+-- import qualified Data.IndexedDoublyLinkedList.Bare as IDLList
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -67,7 +66,10 @@ exploreFrom x p s = let (_ :| prevs) = toListFromRWhile x p s
 instance AsPoint (Point 3 r) r where
   asPoint = id
 
-newtype PExt p r = PExt (Point 3 r :+ p) deriving (Show)
+newtype PExt p r = PExt (Point 3 r :+ p)
+
+instance Show p => Show (PExt p r) where
+  show (PExt (_ :+ p)) = "P" <> show p
 
 unPExt :: PExt p r -> Point 3 r :+ p
 unPExt (PExt x) = x
@@ -104,15 +106,15 @@ instance Ord r => HasNeighbours (PExt p r) where
 --------------------------------------------------------------------------------
 -- * The fast monadic Implementation
 
-newtype P s r = P IDLList.Index deriving (Show,Eq)
-newtype T s t = T t             deriving (Show,Eq,Ord,Num,Fractional)
+-- newtype P s r = P IDLList.Index deriving (Show,Eq)
+-- newtype T s t = T t             deriving (Show,Eq,Ord,Num,Fractional)
 
--- type instance NumType (P s r) = T s r
+-- -- type instance NumType (P s r) = T s r
 
-newtype SceneM s r a = SceneM { runSceneM :: IDLList.IDLListMonad s a }
-                     deriving (Functor,Applicative,Monad)
+-- newtype SceneM s r a = SceneM { runSceneM :: IDLList.IDLListMonad s a }
+--                      deriving (Functor,Applicative,Monad)
 
-type instance Scene (P s r) = SceneM s r ()
+-- type instance Scene (P s r) = SceneM s r ()
 
 -- insertBefore'               :: P s r -> P s r -> a -> Scene (P s r)
 -- insertBefore' (P p) (P x) _ = SceneM (IDLList.insertBefore p x)

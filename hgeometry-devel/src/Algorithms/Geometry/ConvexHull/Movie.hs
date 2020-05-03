@@ -14,7 +14,8 @@ import           Algorithms.Geometry.ConvexHull.Scene
 
 --------------------------------------------------------------------------------
 
-data Movie' f p t = Movie { initialScene :: Scene p
+data Movie' f p t = Movie { allPoints    :: NonEmpty p
+                          , initialScene :: Scene p
                           , events       :: [Event' f p t]
                           }
 type Movie p t = Movie' Identity p t
@@ -70,7 +71,7 @@ instance CanAquire Existing where
 -- | plays two movies side by side
 sideBySide                           :: (Ord t, Semigroup (Scene p))
                                      => Movie p t -> Movie p t -> Movie' Existing p t
-sideBySide (Movie l el) (Movie r er) = Movie (l <> r) (mergeEvents el er)
+sideBySide (Movie pl l el) (Movie pr r er) = Movie (pl <> pr) (l <> r) (mergeEvents el er)
 
 mergeEvents       :: Ord t
                   => [Event p t] -> [Event p t] -> [Event' Existing p t]
@@ -87,7 +88,7 @@ mergeEvents ls rs = map combine . groupOn (^.eventTime)
 -- at which the scene changes.
 play               :: (CanAquire f, HasScene p)
                    => Movie' f p t -> Alternating (Scene p) (Event' f p t)
-play (Movie h0 es) = Alternating h0 (view extra $ List.foldl' applyEvent (h0 :+ []) es)
+play (Movie _ h0 es) = Alternating h0 (view extra $ List.foldl' applyEvent (h0 :+ []) es)
 
 
 
