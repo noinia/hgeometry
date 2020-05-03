@@ -23,7 +23,7 @@ import           Data.Util
 -- import           Algorithms.Util
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.Hspec.Core.QuickCheck (modifyMaxSize)
+import           Test.Hspec.Core.QuickCheck (modifyMaxSuccess)
 
 --------------------------------------------------------------------------------
 
@@ -51,10 +51,14 @@ spec = describe "3D ConvexHull tests" $ do
               , ("buggyPoints2",buggyPoints2)
               , ("buggyPoints3",buggyPoints3)
               , ("buggyPoints6",buggyPoints6)
+              , ("buggyPoints7S", NonEmpty.fromList buggyPoints7S)
+              , ("buggyPointsSpeedup", NonEmpty.fromList buggySpeedup)
+              , ("buggyPoints8",NonEmpty.fromList buggy8)
+              , ("buggyPoints9",NonEmpty.fromList buggy9)
               ] $ \(msg,pts) ->
           it msg $ (sameAsNaive alg) pts
       it "same as naive on buggyPoints " $ sameAsNaive alg myPts
-      modifyMaxSize (const 1000) $
+      modifyMaxSuccess (const 1000) $
         it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
 
 
@@ -63,12 +67,12 @@ spec = describe "3D ConvexHull tests" $ do
 
 
 spec' = describe "test" $ do
-  it "same as naive on buggyPoints " $ sameAsNaive DivAndConc.lowerHull' (mkBuggy buggyPoints7)
+  it "same as naive on buggyPoints " $ sameAsNaive DivAndConc.lowerHull' (mkBuggy buggy8)
 
 specShrink = describe "shrink" $ forM_ sets $ \(_:+i,pts) ->
                it ("same as Naive " <> show i) $ sameAsNaive DivAndConc.lowerHull' (mkBuggy pts)
   where
-    sets = leaveOutOne buggyPoints7
+    sets = leaveOutOne buggySpeedup
 
 
 
@@ -373,3 +377,50 @@ buggyPoints7S = [point3 [-82,-27,66]  :+ 0
                 ,point3 [27,87,-92]   :+ 36
                 ,point3 [52,-80,-92]  :+ 37
                 ]
+
+buggySpeedup :: [Point 3 R :+ Int]
+buggySpeedup = [ point3 [-33,28,23] :+ 0
+               , point3 [-29,-20,-31] :+ 1
+               , point3 [-23,-20,-31] :+ 2
+               , point3 [-23,19,27] :+ 3
+               , point3 [-22,-9,-22] :+ 4
+               , point3 [-20,-33,-4] :+ 5
+               , point3 [-19,-13,6] :+ 6
+               , point3 [-13,15,19] :+ 7
+               , point3 [-11,1,-28] :+ 9
+               , point3 [-9,-8,8] :+ 10
+               , point3 [-8,11,-8] :+ 11
+               , point3 [-7,-32,-31] :+ 12
+               , point3 [11,12,4] :+ 21
+               , point3 [13,-29,3] :+ 22
+               , point3 [19,25,-30] :+ 23
+               , point3 [22,-21,30] :+ 24
+               , point3 [25,-37,0] :+ 25
+               , point3 [30,-10,-31] :+ 26
+               ]
+
+buggy8 :: [Point 3 R :+ Int]
+buggy8 = [ point3 [-11,-5,8] :+ 0
+         , point3 [-10,3,-6] :+ 1
+         , point3 [-9,3,-7] :+ 2
+         , point3 [-7,6,-9] :+ 3
+         , point3 [-7,9,-4] :+ 4
+         , point3 [-6,-2,-10] :+ 5
+         , point3 [-6,11,9] :+ 6
+         , point3 [-5,10,5] :+ 7
+         , point3 [2,5,-7] :+ 8
+         , point3 [5,1,8] :+ 9
+         , point3 [10,4,-8] :+ 10
+         ]
+
+buggy9 :: [Point 3 R :+ Int]
+buggy9 = [ point3 [-18,-13,2] :+ 0
+         , point3 [-7,6,5] :+ 1
+         , point3 [-4,-6,20] :+ 2
+         , point3 [-2,-17,-7] :+ 3
+         , point3 [-1,-12,-6] :+ 4
+         , point3 [-1,4,5] :+ 5
+         , point3 [-1,6,16] :+ 6
+         , point3 [14,-5,-17] :+ 7
+         , point3 [15,-20,19] :+ 8
+         , point3 [16,-11,-14] :+ 9]

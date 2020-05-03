@@ -62,6 +62,13 @@ data Action = InsertAfter  {-# UNPACK #-} !Index {-# UNPACK #-} !Index
             | Delete {-# UNPACK #-} !Index
             deriving (Show,Eq,Ord)
 
+isDelete :: Action -> Bool
+isDelete = \case
+  Delete _         -> True
+  InsertAfter _ _  -> False
+  InsertBefore _ _ -> False
+
+
 getRightMost :: Action -> Index
 getRightMost = \case
   InsertAfter _ j  -> j
@@ -71,6 +78,13 @@ getRightMost = \case
 getLeftMost :: Action -> Index
 getLeftMost = \case
   InsertAfter j _  -> j
+  InsertBefore _ j -> j
+  Delete j         -> j
+
+
+getInsertedOrDeleted :: Action -> Index
+getInsertedOrDeleted = \case
+  InsertAfter _ j  -> j
   InsertBefore _ j -> j
   Delete j         -> j
 

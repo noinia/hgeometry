@@ -154,14 +154,20 @@ insertBefore i h = do v <- asks llist
                       modify  v i  $ \c -> c { prev = Just h }
 
 -- | Deletes the element from the linked list. This element thus
--- essentially becomes a singleton list.
-delete   :: Index -> DLListMonad s b ()
+-- essentially becomes a singleton list. Returns the pair of indices
+-- that now have become neighbours (i.e. the predecessor and successor
+-- of j just before we deleted j).
+delete   :: Index -> DLListMonad s b (Maybe Index, Maybe Index)
 delete j = do v <- asks llist
               ml <- getPrev j
               mr <- getNext j
               modify  v j  $ \c -> c { prev = Nothing, next = Nothing }
               mModify v ml $ \c -> c { next = mr }
               mModify v mr $ \c -> c { prev = ml }
+              pure (ml,mr)
+
+
+
 
 ----------------------------------------
 -- * Helper functions
