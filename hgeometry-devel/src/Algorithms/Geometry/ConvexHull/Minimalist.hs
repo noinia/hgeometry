@@ -23,7 +23,7 @@ import           Algorithms.Geometry.ConvexHull.Scene
 import           Control.Lens
 import           Data.Coerce
 import           Data.Ext
-import           Data.Foldable (toList)
+import           Data.Foldable
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Triangle
@@ -33,7 +33,8 @@ import           Data.List.Alternating
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (minimaOn)
-import           Data.Maybe (mapMaybe, catMaybes)
+import           Data.Maybe (mapMaybe, catMaybes, maybeToList, fromMaybe)
+import           Data.Monoid (Alt(..))
 import           Data.Ord (Down(..))
 import           Data.Semigroup
 import           Data.Util
@@ -70,19 +71,36 @@ outputTriangles :: (HasNeighbours p, WithExtra p q, AsPoint p r, HasScene p)
 outputTriangles = concatMap (\(s,(e :+ _)) -> reportTriangles s e) . withNeighbours . play
   where
     reportTriangles (Identity s) =
-      mapMaybe (reportTriangle s . runIdentity) . toList . view actions
+      foldMap (reportTriangle s . runIdentity) . toList . view actions
 
-
-reportTriangle   :: (HasNeighbours p, WithExtra p q, AsPoint p r)
-                 => Scene p -> Action p -> Maybe (Triangle 3 q r)
-reportTriangle s = fmap toTriangle . reportTriplet
+reportTriangle   :: forall p q r. (HasNeighbours p, WithExtra p q, AsPoint p r
+                                  , Show p
+                                  )
+                 => Scene p -> Action p -> [Triangle 3 q r]
+reportTriangle s = fmap toTriangle . reportTriplets
   where
-    toPoint p     = asPoint p :+ askExtra p
-    toTriangle    = view (re _TriangleThreePoints) . fmap toPoint
-    reportTriplet = \case
-      InsertAfter i j  ->          Three i j    <$> getNext i s
-      InsertBefore i h -> (\l   -> Three l h i) <$> getPrev i s
-      Delete j         -> (\l r -> Three l j r) <$> getPrev j s <*> getNext j s
+    toPoint p        = asPoint p :+ askExtra p
+    toTriangle       = view (re _TriangleThreePoints) . fmap toPoint
+    reportTriplets a = case a of
+      Replace i j      -> catMaybes [        Three i j    <$> getNext i s
+                                    , (\l -> Three l i j) <$> getPrev i s
+                                    ]
+      _                -> maybeToList $ reportTriplet a
+
+    reportTriplet  = \case
+      InsertAfter i j  ->          Three i j     <$> getNext i s
+      InsertBefore i h -> (\l   -> Three l h i)  <$> getPrev i s
+      Delete j         -> (\l r -> Three l j r)  <$> getPrev j s <*> getNext j s
+      Replace _ _      -> error "replace not supported in output"
+
+    --     --
+    -- replaceReplace :: Identity (Action p) -> [Action p]
+    -- replaceReplace = runIdentity >>> \case
+    --   Replace      a b -> [InsertAfter a b, Delete a]
+    --   a                -> [a]
+    -- fromBreakPoint (Two a b) = coerce <$> NonEmpty.fromList [InsertAfter a b, Delete a]
+
+
 
 --------------------------------------------------------------------------------
 -- * Merging
@@ -141,7 +159,7 @@ traceBridge         :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                        , Show p, Show t, Show (Scene p)
                        )
                     => Bridge p -> Animation p t -> [Event p t]
-traceBridge b0 anim = trace' b0 anim (initialBridgeChange (currentScene anim) b0)
+traceBridge b0 anim = trace b0 anim (initialBridgeChange (currentScene anim) b0)
   where
     initialBridgeChange = nextBridgeChange (const True)
       -- initially, there is no requirement on the time of the next bridge event.
@@ -150,29 +168,43 @@ traceBridge b0 anim = trace' b0 anim (initialBridgeChange (currentScene anim) b0
 
 -- | The actual tracing happens in this function. Given the current bridge, and the
 -- animation representing the .
-trace'        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
+trace        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                  , Show p, Show t, Show (Scene p)
                  )
               => Bridge p -> Animation p t -> Maybe (BridgeInfo p t)
               -> [Event p t]
-trace' b a mt = case nextEvent a mt of
+trace b a mt = case tr "trace, nextEvent: " $ nextEvent a mt of
     Nothing  -> []
-    Just ne  -> let STR evt b' a' = continue (tr "trace'; ne: " ne)
-                in evt ?: trace (nextTime ne) b' a'
+    Just ne  -> let STR evt b' a' = tr "trace, outputting" $ continue (tr "trace, ne: " ne)
+                in evt ?: trace' (nextTime ne) b' a'
   where
     continue = \case
-      ExistingEvent e a'    -> STR (fromExistingEvent b e)     b  a'
-      BridgeEvent e         -> let SP e' b' = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e in
-                               STR e'                          b' a
-      CombinedEvent e bi a' -> let SP e' b' = combinedEvent b e bi (currentScene a) in
-                               STR e' b' a'
+      ExistingEvent e a'    -> let b' = bridgeFromExisting b e
+                               in STR (fromExistingEvent b' e)    b'  a'
+                               -- if the existing event is a replace, the bridge may change!
+      BridgeEvent e         -> let SP e' b' = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
+                               in STR e'                          b' a
+      CombinedEvent e bi a' -> let SP e' b' = combinedEvent b e bi (currentScene a)
+                               in STR e' b' a'
 
-
-trace           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
+-- | Continues tracing by finding a new birdge event
+trace'           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                    , Show p, Show t, Show (Scene p)
                    )
                 => t -> Bridge p -> Animation p t -> [Event p t]
-trace  t b anim = trace' b anim (nextBridgeChange (> t) (currentScene anim) b)
+trace'  t b anim = trace b anim (nextBridgeChange (> t) (currentScene anim) b)
+
+----------------------------------------
+-- Handle  Existing
+
+bridgeFromExisting                :: Ord p => Bridge p -> Event' Existing p t -> Bridge p
+bridgeFromExisting (Bridge l r) e = Bridge (fromMaybe l $ replaces l lActs)
+                                           (fromMaybe r $ replaces r rActs)
+  where
+    (lActs,rActs) = partitionExisting (e^.actions)
+    replaces p = alaf Alt foldMap $ \case
+                                        Replace p' q | p' == p -> Just q
+                                        _                      -> Nothing
 
 
 fromExistingEvent               :: Ord p
@@ -188,6 +220,12 @@ filterActions (Bridge l r) = foldr f []
 
     occursLeftOf  a p = rightMost a <= p
     occursRightOf a p = p <= leftMost a
+
+    -- we should not allow deletions when they are not on the actual hull anymore
+    -- more relatedly.
+    -- moreover, I guess we should also delete things that died if the bridge jumped over them,
+    -- i.e. the l -> l' type actions.
+    -- hmm, although currently filterActions is used only for existing events.
 
 ----------------------------------------
 -- ** Finding the Next event
@@ -293,8 +331,8 @@ collect (BA a p) = NonEmpty.fromList . tr "collect" $ case a of
     InsertBefore r r' -> [r',r]
     Delete q          -> case p of Left  l' -> [q,l']
                                    Right r' -> [q,r']
-
-
+    Replace q q'      -> [q,q']      -- both these points  are at the same postion
+                                     -- so left to right is the same as right to left
 
 bridgeFromAction                       :: Bridge p -> BridgeAction p -> Bridge p
 bridgeFromAction (Bridge l r) (BA a p) = case a of
@@ -302,7 +340,8 @@ bridgeFromAction (Bridge l r) (BA a p) = case a of
     InsertBefore _ r' -> Bridge l  r'
     Delete _          -> case p of Left  l' -> Bridge l' r
                                    Right r' -> Bridge l  r'
-
+    Replace _ _       -> case p of Left  l' -> Bridge l' r
+                                   Right r' -> Bridge l  r'
 
 ----------------------------------------
 -- ** Handling an event
@@ -389,8 +428,9 @@ findPointInScene t p q oldS mba acts = case mba of
       InsertAfter  _ z -> Just z
       InsertBefore _ z -> Just z
       Delete _         -> Nothing
+      Replace      _ z -> Just z
 
-    leftMost' = minimum
+    leftMost' = fromMaybe (error "not so non-empty") . minimumOf traverse
     -- TODO: state why this is suposedly safe
     maybeDeleted = leftMost' . filter (areColinearAt t p q) . mapMaybe deletedNeighbour $ acts
     deletedNeighbour = \case
@@ -421,8 +461,10 @@ simulateLeaf = (&_2 %~ toEvents) . lowerEnvelope . fmap (\p -> toDualPoint (asPo
     -- Every point in R^3 maps to a non-vertical line: y' = -y*t + z
     -- which then dualizes to the the point (-y,-z)
     toDualPoint (Point3 _ y z) = Point2 (-1*y) (-1*z)
-    -- at every breakpoint we insert b and delete a.
-    fromBreakPoint (Two a b) = coerce <$> NonEmpty.fromList [InsertAfter a b, Delete a]
+    -- at every breakpoint we replace a by b (insert b and delete a)
+    fromBreakPoint (Two a b) = coerce <$> NonEmpty.fromList [Replace a b]
+
+    -- fromBreakPoint (Two a b) = coerce <$> NonEmpty.fromList [InsertAfter a b, Delete a]
 
 -- | Given a set of lines, represented by their dual points, compute
 -- the lower envelope of those lines. Returns the associated value of

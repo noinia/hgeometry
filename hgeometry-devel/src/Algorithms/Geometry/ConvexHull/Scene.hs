@@ -25,6 +25,9 @@ class Show p => HasScene p where
   insertBefore       :: p -> p -> Scene p -> Scene p
   insertAfter        :: p -> p -> Scene p -> Scene p
   delete             :: p -> Scene p -> Scene p
+
+  replace            :: p -> p -> Scene p -> Scene p
+
   singleton          :: p -> Scene p
 
   fromNonEmpty       :: NonEmpty p -> Scene p
@@ -98,16 +101,18 @@ instance WithExtra (PExt p r) p where
 instance (Ord r, Show p) => HasScene (PExt p r) where
   insertBefore _ p = Map.insert (xC p) p -- we just ingore information about
   insertAfter  _ p = Map.insert (xC p) p -- possible neighbours
-  delete  (PExt p) = Map.update f (p^.core.xCoord)
-    where
-      f pp@(PExt p') | (p'^.core) == (p^.core) = Nothing
-                     | otherwise               = Just pp
-                       -- if some simultaneous event already replaced this thing
-                       -- ignore it
+  replace      _ p = Map.insert (xC p) p -- just ignore the other one
+  delete p         = Map.delete (xC p)
+  -- (PExt p) = Map.update f (p^.core.xCoord)
+  --   where
+  --     f pp@(PExt p') | (p'^.core) == (p^.core) = Nothing
+  --                    | otherwise               = Just pp
+  --                      -- if some simultaneous event already replaced this thing
+  --                      -- ignore it
 
-                       -- this does not work, since at the time of
-                       -- simulaneous events, the points really are at
-                       -- the same position.
+  --                      -- this does not work, since at the time of
+  --                      -- simulaneous events, the points really are at
+  --                      -- the same position.
 
   singleton      p = Map.singleton (xC p) p
 

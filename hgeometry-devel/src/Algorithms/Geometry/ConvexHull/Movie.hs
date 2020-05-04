@@ -53,6 +53,7 @@ actions = extra
 data Action p = InsertAfter p p  -- ^ current Index first, then the Item we insert
               | InsertBefore p p   -- ^ current Index first, then the Item we insert
               | Delete p
+              | Replace p p -- ^ old one first, then new one
               deriving (Show,Eq,Ord)
 
 leftMost :: Action p -> p
@@ -60,12 +61,14 @@ leftMost = \case
   InsertAfter l _  -> l
   InsertBefore _ l -> l
   Delete l         -> l
+  Replace _ p      -> p
 
 rightMost :: Action p -> p
 rightMost = \case
   InsertAfter _ r  -> r
   InsertBefore r _ -> r
   Delete r         -> r
+  Replace _ p      -> p
 
 ----------------------------------------
 
@@ -140,6 +143,7 @@ applyAction' s = \case
     InsertBefore p x -> insertBefore p x s
     InsertAfter  p x -> insertAfter  p x s
     Delete x         -> delete x s
+    Replace      p x -> replace p x s
 
 --------------------------------------------------------------------------------
 
