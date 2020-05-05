@@ -5,10 +5,10 @@ module App.Viewer where
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)
 import           Data.Ext
-import           Data.Geometry.Interactive.ICanvas hiding (update, view)
-import qualified Data.Geometry.Interactive.ICanvas as ICanvas
+import           Data.Geometry.Web.ICanvas hiding (update, view)
+import qualified Data.Geometry.Web.ICanvas as ICanvas
 
-import           Data.Geometry.Interactive.Writer
+import           Data.Geometry.Web.Writer
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List.NonEmpty as NonEmpty

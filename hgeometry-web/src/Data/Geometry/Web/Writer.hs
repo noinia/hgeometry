@@ -1,13 +1,13 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Interactive.Writer where
+module Data.Geometry.Web.Writer where
 
 import           Control.Lens hiding (Const,rmap)
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Ball
 import           Data.Geometry.Box
-import           Data.Geometry.Interactive.OrphanInstances ()
+import           Data.Geometry.Web.OrphanInstances ()
 import qualified Data.Geometry.Ipe as Ipe
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.LineSegment

@@ -9,10 +9,10 @@ import           Control.Concurrent
 import           Control.Lens hiding (view, element)
 import           Control.Monad.IO.Class
 import           Data.Ext
-import qualified Data.Geometry.Interactive.ICanvas as ICanvas
-import           Data.Geometry.Interactive.ICanvas hiding (update, view)
+import qualified Data.Geometry.Web.ICanvas as ICanvas
+import           Data.Geometry.Web.ICanvas hiding (update, view)
 
-import           Data.Geometry.Interactive.Writer
+import           Data.Geometry.Web.Writer
 import           Data.Geometry.Ipe (IpePage, IpeObject, content, readSinglePageFile, _IpePath)
 import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
 import           Data.Geometry.Ipe.Color

@@ -1,0 +1,148 @@
+name:                hgeometry-web
+version:             0.10.0.0
+synopsis:            Interactive web viewer for HGeometry
+description:
+    A GUI To view and play with geometric data using HGeometry
+
+homepage:            https://fstaals.net/software/hgeometry
+license:             BSD3
+license-file:        LICENSE
+author:              Frank Staals
+maintainer:          frank@fstaals.net
+-- copyright:
+
+tested-with:         GHC >= 8.2
+
+category:            Geometry
+build-type:          Simple
+
+data-files:
+                     -- in the future (cabal >=2.4) we can use
+                     -- examples/**/*.in
+                     -- examples/**/*.out
+
+extra-source-files:  README.md
+                     changelog.org
+
+Extra-doc-files:
+                     -- docs/**/*.png
+
+cabal-version:       2.0
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+
+library
+  ghc-options: -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
+
+  exposed-modules:
+                  -- * Generic Geometry
+                  Data.Geometry.Web.StaticCanvas
+                  Data.Geometry.Web.ICanvas
+                  Data.Geometry.Web.Writer
+                  Data.Geometry.Web.OrphanInstances
+
+                  -- * Miso Helper stuff
+
+                  Miso.FFI.Extra
+                  Miso.String.Util
+                  Miso.Subscription.MouseExtra
+
+                  Miso.Component.Menu
+
+                  Miso.Bulma.Generic
+                  Miso.Bulma.Panel
+
+
+                  -- the actual applications
+                  App.ConvexHull
+                  App.Viewer
+                  App.IpeViewer
+                  -- App.ThreeDViewer
+                  App.SubdivisionViewer
+
+  -- other-modules:
+
+
+  -- other-extensions:
+  build-depends:
+                 base                     >= 4.11      &&     < 5
+               , hgeometry                >= 0.10.0.0
+               , hgeometry-combinatorial
+               , hgeometry-svg
+               , hgeometry-ipe
+               , singletons               >= 2.5
+               , lens
+               , aeson                    >= 1.4
+               , containers
+               , vinyl
+               , semigroups
+               , semigroupoids            >= 5.3
+               , optparse-applicative     >= 0.13.0.0
+               , text
+               , hexpat
+               , bytestring
+               , directory
+               , time
+               , random
+               , vector
+               , colour
+               , transformers
+               , linear
+               , miso                   >= 1.5
+               , jsaddle                >= 0.9.5
+               , jsaddle-warp           >= 0.9.5
+               , jsaddle-dom            >= 0.9.2
+               , wai
+               , wai-app-static
+               , warp
+               , websockets
+               , webviewhs
+
+  hs-source-dirs: src
+
+  default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+                    , PatternSynonyms
+                    , TupleSections
+                    , LambdaCase
+                    , ViewPatterns
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+                    , DeriveGeneric
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
+
+
+executable hgeometry-convexhull
+  main-is: ConvexHull.hs
+  build-depends: base
+               , hgeometry-web
+  hs-source-dirs: app_src
+  default-language: Haskell2010
+
+executable hgeometry-viewer
+  main-is: Viewer.hs
+  build-depends: base
+               , hgeometry-web
+  hs-source-dirs: app_src
+  default-language: Haskell2010

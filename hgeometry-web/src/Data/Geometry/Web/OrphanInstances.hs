@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Interactive.OrphanInstances where
+module Data.Geometry.Web.OrphanInstances where
 
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Fixed

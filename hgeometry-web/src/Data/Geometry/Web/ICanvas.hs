@@ -1,25 +1,26 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
-module Data.Geometry.Interactive.ICanvas( module Data.Geometry.Interactive.StaticCanvas
-                                        , ICanvas(ICanvas), blankCanvas
-                                        , canvas, mousePosition, panStatus
-                                        , mouseCoordinates
-                                        , capabilities
-                                        , hasCapability
+module Data.Geometry.Web.ICanvas(
+    module Data.Geometry.Web.StaticCanvas
+  , ICanvas(ICanvas), blankCanvas
+  , canvas, mousePosition, panStatus
+  , mouseCoordinates
+  , capabilities
+  , hasCapability
 
-                                        , CanvasAction(..)
-                                        , update
-                                        , view
+  , CanvasAction(..)
+  , update
+  , view
 
-                                        , iCanvasSubs
+  , iCanvasSubs
 
-                                        , Capability(..)
-                                        ) where
+  , Capability(..)
+  ) where
 
 import           Control.Lens hiding (view, element, rmap, Zoom)
 import           Data.Aeson.Types
-import           Data.Geometry.Interactive.StaticCanvas
+import           Data.Geometry.Web.StaticCanvas
 import           Data.Geometry.Point
 import           Data.Geometry.Vector
 import           Data.Range

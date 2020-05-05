@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module Data.Geometry.Interactive.StaticCanvas( Canvas(..)
-                                             , center, dimensions, zoomLevel, createCanvas
-                                             , staticCanvas_, textAt
-                                             , realWorldCoordinates
-                                             , ToSvgCoordinate
-                                             ) where
+module Data.Geometry.Web.StaticCanvas(
+    Canvas(..)
+    , center, dimensions, zoomLevel, createCanvas
+    , staticCanvas_, textAt
+    , realWorldCoordinates
+    , ToSvgCoordinate
+    ) where
 
 import           Control.Lens
 import qualified Data.ByteString as B
@@ -89,13 +90,13 @@ textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ "translate("
 
 
 
--- class RenderInteractiveSvg t where
+-- class RenderWebSvg t where
 --   renderWith :: t -> [Attribute action] -> [View action] -> View action
 
--- render       :: RenderInteractiveSvg t => t -> [Attribute action] -> View action
+-- render       :: RenderWebSvg t => t -> [Attribute action] -> View action
 -- render x ats = renderWith x ats []
 
--- instance ToSvgCoordinate r => RenderInteractiveSvg (Point 2 r) where
+-- instance ToSvgCoordinate r => RenderWebSvg (Point 2 r) where
 --   renderWith (Point2 x y) ats = ellipse_ $ [ cx_ $ ms x, cy_ $ ms y
 --                                            , rx_ "5", ry_ "5"
 --                                            , fill_ "black"

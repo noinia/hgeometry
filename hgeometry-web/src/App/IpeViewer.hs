@@ -5,10 +5,10 @@ module App.IpeViewer where
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (view, element)
 import           Data.Ext
-import           Data.Geometry.Interactive.ICanvas hiding (update, view)
-import qualified Data.Geometry.Interactive.ICanvas as ICanvas
+import           Data.Geometry.Web.ICanvas hiding (update, view)
+import qualified Data.Geometry.Web.ICanvas as ICanvas
 
-import           Data.Geometry.Interactive.Writer
+import           Data.Geometry.Web.Writer
 import           Data.Geometry.Ipe(IpePage, IpeObject, content, readSinglePageFile)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Convex
