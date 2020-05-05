@@ -70,6 +70,16 @@ rightMost = \case
   Delete r         -> r
   Replace _ p      -> p
 
+
+isADelete :: Action p -> Bool
+isADelete = \case
+  Delete _ -> True
+  _        -> False
+
+isAReplace = \case
+  Replace _ _ -> True
+  _           -> False
+
 ----------------------------------------
 
 data Existing a = Left a | Right a deriving (Show,Eq,Ord,Functor)

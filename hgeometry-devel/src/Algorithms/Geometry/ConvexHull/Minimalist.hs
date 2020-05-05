@@ -35,7 +35,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (minimaOn)
 import           Data.Maybe (mapMaybe, catMaybes, maybeToList, fromMaybe)
 import           Data.Monoid (Alt(..))
-import           Data.Ord (Down(..))
+import           Data.Ord (comparing, Down(..))
 import           Data.Semigroup
 import           Data.Util
 import           Prelude hiding (Either(..))
@@ -44,6 +44,8 @@ import           Prelude hiding (Either(..))
 import           Algorithms.Geometry.ConvexHull.DebugMinimalist
 import           Data.Geometry.Ipe
 import           Data.RealNumber.Rational
+
+import Debug.Trace(traceShow)
 
 --------------------------------------------------------------------------------
 
@@ -61,7 +63,7 @@ lowerHull' pts = outputTriangles
                . NonEmpty.sortBy cmpXYZ
                $ pts
   where
-    t0 = -1000000000000000
+    t0 = -10000000000000000000000000000000000000000000000000000000000000
 
 --------------------------------------------------------------------------------
 -- * Producing the Output
@@ -113,7 +115,7 @@ merge        :: ( Ord t, Ord p, Fractional t, AsPoint p t
              => t -> Movie p t -> Movie p t -> Movie p t
 merge t0 l r = let b :+ h = tr "inital" $ initialBridge t0 (initialScene l) (initialScene r)
                    m@(Movie pts _ _)   = l `sideBySide` r
-               in debugMovieTo ("merge_" <> rangeOfSS l r) $
+               in -- debugMovieTo ("merge_" <> rangeOfSS l r) ((^.eventTime) <$> events m) $
                   movie pts h $ tr ("events " <> rangeOfSS l r) $ traceBridge b (play $ m)
 
 
@@ -126,6 +128,13 @@ pattern Bridge u v = Two u v
 type Hull p = Scene p
 
 type Hulls p = Two (Hull p)
+
+
+-- Given collected existing and bridge events, produce the
+-- outputEvents :: Alternating (Two (Scene p), Bridge p, Scene p) (Event' Existing p t) -> [Event p t]
+
+
+
 
 --------------------------------------------------------------------------------
 -- * Computing the Initial Bridge
@@ -193,39 +202,6 @@ trace'           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
                    )
                 => t -> Bridge p -> Animation p t -> [Event p t]
 trace'  t b anim = trace b anim (nextBridgeChange (> t) (currentScene anim) b)
-
-----------------------------------------
--- Handle  Existing
-
-bridgeFromExisting                :: Ord p => Bridge p -> Event' Existing p t -> Bridge p
-bridgeFromExisting (Bridge l r) e = Bridge (fromMaybe l $ replaces l lActs)
-                                           (fromMaybe r $ replaces r rActs)
-  where
-    (lActs,rActs) = partitionExisting (e^.actions)
-    replaces p = alaf Alt foldMap $ \case
-                                        Replace p' q | p' == p -> Just q
-                                        _                      -> Nothing
-
-
-fromExistingEvent               :: Ord p
-                                => Bridge p -> Event' Existing p t -> Maybe (Event p t)
-fromExistingEvent b (t :+ acts) = fmap (t:+) . NonEmpty.nonEmpty . filterActions b $ acts
-
-filterActions              :: Ord p
-                           => Bridge p -> NonEmpty (Existing (Action p)) -> [Identity (Action p)]
-filterActions (Bridge l r) = foldr f []
-  where
-    f (Left act)  xs = if act `occursLeftOf`  l then (Identity act):xs else xs
-    f (Right act) xs = if act `occursRightOf` r then (Identity act):xs else xs
-
-    occursLeftOf  a p = rightMost a <= p
-    occursRightOf a p = p <= leftMost a
-
-    -- we should not allow deletions when they are not on the actual hull anymore
-    -- more relatedly.
-    -- moreover, I guess we should also delete things that died if the bridge jumped over them,
-    -- i.e. the l -> l' type actions.
-    -- hmm, although currently filterActions is used only for existing events.
 
 ----------------------------------------
 -- ** Finding the Next event
@@ -343,8 +319,47 @@ bridgeFromAction (Bridge l r) (BA a p) = case a of
     Replace _ _       -> case p of Left  l' -> Bridge l' r
                                    Right r' -> Bridge l  r'
 
+--------------------------------------------------------------------------------
+-- * Handling an event
+
 ----------------------------------------
--- ** Handling an event
+-- ** Handle  Existing
+
+bridgeFromExisting                :: Ord p => Bridge p -> Event' Existing p t -> Bridge p
+bridgeFromExisting (Bridge l r) e = Bridge (fromMaybe l $ replaces l lActs)
+                                           (fromMaybe r $ replaces r rActs)
+  where
+    (lActs,rActs) = partitionExisting (e^.actions)
+    replaces p = alaf Alt foldMap $ \case
+                                        Replace p' q | p' == p -> Just q
+                                        _                      -> Nothing
+
+
+fromExistingEvent               :: Ord p
+                                => Bridge p -> Event' Existing p t -> Maybe (Event p t)
+fromExistingEvent b (t :+ acts) = fmap (t:+) . NonEmpty.nonEmpty . filterActions b $ acts
+
+filterActions              :: Ord p
+                           => Bridge p -> NonEmpty (Existing (Action p)) -> [Identity (Action p)]
+filterActions (Bridge l r) = map extract . NonEmpty.filter p
+  where
+    p = \case
+      Left a  -> rightMost a <= l -- action occurs left of l
+      Right a -> r <= leftMost a   -- action occurs right of r
+    extract = Identity . \case
+      Left a  -> a
+      Right a -> a
+
+
+    -- we should not allow deletions when they are not on the actual hull anymore
+    -- more relatedly.
+    -- moreover, I guess we should also delete things that died if the bridge jumped over them,
+    -- i.e. the l -> l' type actions.
+    -- hmm, although currently filterActions is used only for existing events.
+
+
+----------------------------------------
+-- ** Bridge Only
 
 -- | Given the current bridge, and ifnormation about the bridge event,
 -- handles that bridge event. This function assumes that there are no
@@ -363,14 +378,20 @@ bridgeEventOnly b bi@(t :+ acts) = case tr "bridgeEventOnly: acts " $ acts of
   where
     acts' = fmap (Identity . toAction) acts
 
+
+----------------------------------------
+-- ** Combined Events
+
 combinedEvent                                     :: (Fractional t, Ord t, AsPoint p t
-                                                     , HasNeighbours p, Ord p)
+                                                     , HasNeighbours p, Ord p
+                                                     , Show (Scene p), Show p, Show t
+                                                     )
                                                   => Bridge p
                                                   -> NonEmpty (Existing (Action p))
                                                   -> BridgeInfo p t
                                                   -> Hulls p -- ^ old scene
                                                   -> SP (Maybe (Event p t)) (Bridge p)
-combinedEvent (Bridge l r) acts bi@(t :+ bActs) (Two sl sr) = SP (mkNewEvent bi b') b'
+combinedEvent b@(Bridge l r) acts (t :+ bActs) (Two sl sr) = SP e' b'
   where
     b' = findBridge (1 + t) (NonEmpty.reverse ls) rs
     ls = colinears t l r sl lAct leftActs
@@ -378,6 +399,77 @@ combinedEvent (Bridge l r) acts bi@(t :+ bActs) (Two sl sr) = SP (mkNewEvent bi 
 
     (leftActs,rightActs) = partitionExisting acts
     (lAct,rAct)          = partitionBridgeActions bActs
+
+    outputActions = outputBridgeActions b b'<> outputExistingActions b b' leftActs rightActs
+    e' = (t :+ ) <$> NonEmpty.nonEmpty outputActions
+
+outputExistingActions                                   :: (Ord p, AsPoint p t, Ord t)
+                                                        => Bridge p -> Bridge p
+                                                        -> [Action p] -> [Action p]
+                                                        -> [Identity (Action p)]
+outputExistingActions (Bridge l r) (Bridge l' r') ls rs =
+    coerce $ filter pLeft ls <> filter pRight rs
+  where
+    -- the predicate that we need to filter on the left
+    pLeft | l == l'   = occursLeftOf l
+          | otherwise = case l `compareX` l' of
+                          LT -> \a -> occursLeftOf  l a ||
+                                      (occursLeftOf l' a && not (isADelete a))
+                            -- shifted right
+                          EQ -> \a -> occursLeftOf l a && not (isAReplace a)
+                            -- we had a replacement ( in this case
+                            -- there cannot be any deletions in
+                            -- between l and l') The only option is
+                            -- that l itself was replaced by l'. In
+                            -- that case, this is already reported as
+                            -- a bridge event.
+                          GT -> \a -> occursLeftOf l' a ||
+                                      (occursLeftOf l a && isADelete a)
+                            -- shifted to the left, so only events left of l'
+                            -- the smaller one, and deletions between l' and l
+                            --
+                            -- actually, I guess we shoul delete
+                            -- everything between l' and l, but
+                            -- since we already know what the new
+                            -- bridge b' is going to be we know
+                            -- that there cannot be any existing
+                            -- guys in between there. that are not
+                            -- either inserted or removed.
+
+    -- symmetric to pLeft
+    pRight | r == r'   = occursRightOf r
+           | otherwise = case r `compareX` r' of
+                           LT -> \a -> occursRightOf r' a ||
+                                       (occursRightOf r a && isADelete a)
+                                -- shifted right
+                           EQ -> \a -> occursRightOf r a && not (isAReplace a)
+                           GT -> \a -> occursRightOf  r a ||
+                                       (occursRightOf r' a && not (isADelete a))
+                             -- shifted left
+    occursLeftOf  p a = rightMost a <= p
+    occursRightOf p a = p <= leftMost a
+
+
+outputBridgeActions                             :: (Eq p, Ord t, AsPoint p t)
+                                                => Bridge p -> Bridge p -> [Identity (Action p)]
+outputBridgeActions (Bridge l r) (Bridge l' r') = catMaybes [actLeft, actRight]
+  where
+    actLeft  | l == l'   = Nothing
+             | otherwise = Just . Identity
+                          $ case l `compareX` l' of
+                              LT -> InsertAfter l l'
+                              EQ -> Replace  l l'
+                              GT -> Delete l
+    actRight | r == r'   = Nothing
+             | otherwise = Just . Identity
+                         $ case r `compareX` r' of
+                             LT -> Delete r
+                             EQ -> Replace  r r'
+                             GT -> InsertBefore r r'
+
+
+compareX :: (AsPoint p t, Ord t) => p -> p -> Ordering
+compareX = comparing (view xCoord . asPoint)
 
 
 mkNewEvent                :: Eq p => BridgeInfo p t -> Bridge p -> Maybe (Event p t)
@@ -405,7 +497,9 @@ shouldOutput (Bridge l' r') (BA _ p) = case p of
     --                  -- there is no deletion of q already anyway
 
 -- | Find all points in the scene colinear with the bridge and "connected" to p
-colinears                  :: (AsPoint p t, HasNeighbours p, Ord p, Ord t, Fractional t)
+colinears                  :: (AsPoint p t, HasNeighbours p, Ord p, Ord t, Fractional t
+                              , Show t, Show p, Show (Scene p)
+                              )
                            => t
                            -> p -- ^ The bridge point we are processing
                            -> p -- ^ the other birdge point
@@ -415,13 +509,20 @@ colinears                  :: (AsPoint p t, HasNeighbours p, Ord p, Ord t, Fract
                            -> NonEmpty p -- ^ in left to right order
 colinears t p q s mba acts = colinearsFrom (findPointInScene t p q s mba acts) q t s
 
-findPointInScene ::  (HasNeighbours p, AsPoint p t, Ord t, Fractional t, Ord p) =>
+-- | Given a time t, two points: 'p' the bridge point, and q the other
+-- bridge point, the old scene, and the actions occuring at time t
+-- finds a point in the scene that should remain on the scene/will be
+-- in the new scene.
+findPointInScene ::  (HasNeighbours p, AsPoint p t, Ord t, Fractional t, Ord p
+                     , Show p, Show t, Show (Scene p)
+                     ) =>
                      t -> p -> p -> Scene p -> Maybe (Action p) -> [Action p] -> p
+-- findPointInScene t p q oldS mba acts | traceShow ("findPointInscene",t,p,q,oldS,mba,acts)                     False = undefined
 findPointInScene t p q oldS mba acts = case mba of
     Nothing -> p
     Just a  -> case insertedPoint a ?: newOnBridge of
                  (z:_) -> z  -- z is a newly inserted point on the bridge
-                 []    -> maybeDeleted
+                 []    -> maybeDeleted a
   where
     newOnBridge = filter (areColinearAt t p q) . mapMaybe insertedPoint $ acts
     insertedPoint = \case
@@ -432,7 +533,8 @@ findPointInScene t p q oldS mba acts = case mba of
 
     leftMost' = fromMaybe (error "not so non-empty") . minimumOf traverse
     -- TODO: state why this is suposedly safe
-    maybeDeleted = leftMost' . filter (areColinearAt t p q) . mapMaybe deletedNeighbour $ acts
+    maybeDeleted a = leftMost' . filter (areColinearAt t p q) . mapMaybe deletedNeighbour
+                   $ (a:acts)
     deletedNeighbour = \case
       Delete a         -> getPrev a oldS
       _                -> Nothing
