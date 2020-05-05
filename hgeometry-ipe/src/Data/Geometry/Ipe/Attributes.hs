@@ -65,6 +65,10 @@ type PathAttributes = CommonAttributes ++
 type GroupAttributes = CommonAttributes ++ '[ 'Clip]
 
 
+
+--------------------------------------------------------------------------------
+-- * Attr
+
 -- | Attr implements the mapping from labels to types as specified by the
 -- (symbol representing) the type family 'f'
 newtype Attr (f :: TyFun u * -> *) -- Symbol repr. the Type family mapping
@@ -131,6 +135,10 @@ instance Monoid (Attr f l) where
   mempty  = NoAttr
   mappend = (<>)
 
+--------------------------------------------------------------------------------
+-- * Attributes
+
+-- | A collection of Attributes.
 newtype Attributes (f :: TyFun u * -> *) (ats :: [u]) = Attrs (Rec (Attr f) ats)
 
 unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
@@ -166,14 +174,26 @@ zipRecsWith _ RNil      _         = RNil
 zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
 
 
+----------------------------------------
 
-attrLens   :: forall at ats proxy f. (at ∈ ats)
-           => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
-attrLens _ = unAttrs.(rlens @at).getAttr
+-- | Lens into a specific attribute, if it is set.
+ixAttr   :: forall at ats proxy f. (at ∈ ats)
+         => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
+ixAttr _ = unAttrs.(rlens @at).getAttr
 
+-- | Prism into a particular attribute.
+_Attr   :: forall at ats proxy f. (at ∈ ats, RecApplicative ats)
+         => proxy at -> Prism' (Attributes f ats) (Apply f at)
+_Attr a = prism' setA getA
+  where
+    setA x = setAttr a x mempty
+    getA = lookupAttr a
+
+-- | Looks up a particular attribute.
 lookupAttr   :: (at ∈ ats) => proxy at -> Attributes f ats -> Maybe (Apply f at)
-lookupAttr p = view (attrLens p)
+lookupAttr p = view (ixAttr p)
 
+-- | Sets a particular attribute
 setAttr               :: forall proxy at ats f. (at ∈ ats)
                       => proxy at -> Apply f at -> Attributes f ats -> Attributes f ats
 setAttr _ a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
@@ -183,21 +203,17 @@ setAttr _ a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
 takeAttr       :: forall proxy at ats f. (at ∈ ats)
                => proxy at -> Attributes f ats -> ( Maybe (Apply f at)
                                                   , Attributes f ats )
-takeAttr p ats = (lookupAttr p ats, ats&attrLens p .~ Nothing)
-
+takeAttr p ats = (lookupAttr p ats, ats&ixAttr p .~ Nothing)
 
 -- | unsets/Removes an attribute
 unSetAttr   :: forall proxy at ats f. (at ∈ ats)
             => proxy at -> Attributes f ats -> Attributes f ats
 unSetAttr p = snd . takeAttr p
 
-
+-- | Creates a singleton attribute
 attr     :: (at ∈ ats, RecApplicative ats)
          => proxy at -> Apply f at -> Attributes f ats
-attr p x = setAttr p x mempty
-
-
-
+attr p x = x^.re (_Attr p)
 
 --------------------------------------------------------------------------------
 -- | Common Attributes

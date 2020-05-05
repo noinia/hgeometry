@@ -107,4 +107,4 @@ readInput fp = fmap (fmap f . view pages) <$> readIpeFile fp
         g   :: IpeColor Rational -> [Path Rational :+ IpeAttributes Path Rational]
             -> [Line 2 Rational]
         g c = mapMaybe (\p -> p^?core._asLineSegment.to supportingLine)
-            . filter (\p -> p^.extra.attrLens SStroke == Just c)
+            . filter (\p -> p^?extra._Attr SStroke == Just c)

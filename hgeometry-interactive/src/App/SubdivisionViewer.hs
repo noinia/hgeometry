@@ -69,7 +69,7 @@ buildPS    :: Either e (IpePage Rational) -> Maybe (SubDiv Rational)
 buildPS ep = build <$> NonEmpty.nonEmpty (fmap f polies)
   where
     polies = ep^.._Right.content.traverse._withAttrs _IpePath _asSomePolygon
-    f (p :+ ats) = bimap toCounterClockWiseOrder toCounterClockWiseOrder p :+ ats^.attrLens SFill
+    f (p :+ ats) = bimap toCounterClockWiseOrder toCounterClockWiseOrder p :+ ats^?_Attr SFill
 
     build pgs = let ps = fromPolygons' (Identity Screen) (Just $ named "red") pgs
                 in ps&dartData.traverse._2 .~ Just (named "black")

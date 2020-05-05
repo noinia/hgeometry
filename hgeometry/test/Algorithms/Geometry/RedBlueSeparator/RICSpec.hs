@@ -115,4 +115,4 @@ readInput fp = fmap (fmap f . view pages) <$> readIpeFile fp
 
         g c = NonEmpty.fromList
             . map (\p -> ext $ p^.core.symbolPoint)
-            . filter (\p -> p^.extra.attrLens SStroke == Just c)
+            . filter (\p -> p^?extra._Attr SStroke == Just c)

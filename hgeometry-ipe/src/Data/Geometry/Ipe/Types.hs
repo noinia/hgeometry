@@ -120,7 +120,7 @@ makeLenses ''IpePage
 fromContent     :: [IpeObject r] -> IpePage r
 fromContent obs = IpePage layers' [] obs
   where
-    layers' = mapMaybe (^.commonAttributes.attrLens SLayer) obs
+    layers' = mapMaybe (^.commonAttributes.ixAttr SLayer) obs
 
 -- | A complete ipe file
 data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble

@@ -17,7 +17,7 @@ import           Data.Geometry.Ipe (IpePage, IpeObject, content, readSinglePageF
 import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon, _asSimplePolygon, _asMultiPolygon)
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.Value
-import           Data.Geometry.Ipe.Attributes (Sing(..), attrLens, attr)
+import           Data.Geometry.Ipe.Attributes (Sing(..), attr)
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
