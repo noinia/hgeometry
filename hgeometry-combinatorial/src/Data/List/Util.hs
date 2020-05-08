@@ -21,7 +21,7 @@ import           Data.Ord (comparing)
 -- (3,[1,2,4,5])
 -- (4,[1,2,3,5])
 -- (5,[1,2,3,4])
--- >>> leaveOutone []
+-- >>> leaveOutOne []
 -- []
 -- >>> leaveOutOne [1]
 -- [(1,[])]

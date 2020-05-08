@@ -62,7 +62,7 @@ dropNext = fmap snd . extractNext
 
 -- | Computes all list that still have next elements.
 --
--- >>> mapM_ print $ allNexts' $ fromList [1..5]
+-- >>> mapM_ print $ allNonEmptyNexts $ fromList [1..5]
 -- Zipper [] [1,2,3,4,5]
 -- Zipper [1] [2,3,4,5]
 -- Zipper [2,1] [3,4,5]
