@@ -2,7 +2,7 @@ module Algorithms.Geometry.ConvexHull.ConvexHullSpec where
 
 import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
--- import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
+import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
 import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens
@@ -53,9 +53,24 @@ spec = do
           property $ \pts ->
             (PG $ GrahamScan.convexHull pts) == (PG $ QuickHull.convexHull pts)
 
-        -- it "GrahamScan and JarvisMarch are the same" $
-        --   property $ \pts ->
-        --     (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
+        it "JarvisMarch Manual test1" $
+          JarvisMarch.convexHull testPoints
+          `shouldBe`
+          fromPointsUnsafe [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
+                           ,mPoint2 [8,11],mPoint2 [8,6],mPoint2 [7,4]
+                           ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]
+
+        it "JarvisMarch Manual test2" $
+          JarvisMarch.convexHull testPoints2
+          `shouldBe`
+          fromPointsUnsafe [ mPoint2 [0,10], mPoint2 [2,20]
+                           , mPoint2 [6,20], mPoint2 [8,11]
+                           , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]
+
+
+        it "GrahamScan and JarvisMarch are the same" $
+          property $ \pts ->
+            (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
 
 
@@ -83,3 +98,33 @@ myPoints = NonEmpty.fromList . map ext $
            , Point2 31 14
            , Point2 33 5
            ]
+
+
+mPoint2 [x,y] = Point2 x y
+
+testPoints = fmap ext $ NonEmpty.fromList
+  [ mPoint2 [0, 10]
+  , mPoint2 [0, 5]
+  , mPoint2 [1, 5]
+  , mPoint2 [1, 4]
+  , mPoint2 [5, 3]
+  , mPoint2 [7, 4]
+  , mPoint2 [8, 6]
+  , mPoint2 [8, 11]
+  , mPoint2 [6, 20]
+  , mPoint2 [2, 20]
+  ]
+
+testPoints2 = fmap ext $ NonEmpty.fromList
+  [ mPoint2 [0, 10]
+  , mPoint2 [1, 5]
+  , mPoint2 [1, 4]
+  , mPoint2 [5, 3]
+  , mPoint2 [7, 4]
+  , mPoint2 [8, 11]
+  , mPoint2 [6, 20]
+  , mPoint2 [2, 20]
+  ]
+
+
+fromPointsUnsafe = ConvexPolygon . fromPoints . map ext
