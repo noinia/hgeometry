@@ -61,8 +61,8 @@ pChar = char
 pSpace :: Parser Char
 pSpace = pChar ' '
 
-pWhiteSpace :: Parser Char
-pWhiteSpace = space
+pWhiteSpace :: Parser [Char]
+pWhiteSpace = pMany1 (space <|> newline)
 
 pMaybe :: Parser a -> Parser (Maybe a)
 pMaybe = optionMaybe
