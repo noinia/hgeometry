@@ -18,8 +18,10 @@ module Algorithms.Geometry.ConvexHull.Minimalist where
 
 import           Algorithms.DivideAndConquer
 import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
+import           Algorithms.Geometry.ConvexHull.JarvisMarch (steepestCcwFrom)
 import           Algorithms.Geometry.ConvexHull.Movie
 import           Algorithms.Geometry.ConvexHull.Scene
+import           Control.Applicative ((<|>))
 import           Control.Lens
 import           Data.Coerce
 import           Data.Ext
@@ -45,7 +47,8 @@ import           Algorithms.Geometry.ConvexHull.DebugMinimalist
 import           Data.Geometry.Ipe
 import           Data.RealNumber.Rational
 
-import Debug.Trace(traceShow)
+import           Debug.Trace (traceShow)
+-- traceShow _ = id
 
 --------------------------------------------------------------------------------
 
@@ -155,7 +158,10 @@ findBridge' t l r = strip $ lowerTangent' (atTime'' t <$> l) (atTime'' t <$> r)
     strip = fmap (bimap (^.extra) (fmap (^.extra)))
 
 -- | Computes only the bridge (throwing away the remainders)
-findBridge       :: (AsPoint p t, Ord t, Num t) => t -> NonEmpty p -> NonEmpty p -> Bridge p
+findBridge       :: (AsPoint p t, Ord t, Num t
+                    , Show p, Show t
+                    ) => t -> NonEmpty p -> NonEmpty p -> Bridge p
+findBridge t l r | traceShow ("findBridge",t,l,r) False = undefined
 findBridge t l r = (\(Two l' r') -> Bridge (l'^.core) (r'^.core)) $ findBridge' t l r
 
 --------------------------------------------------------------------------------
@@ -184,17 +190,18 @@ trace        :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
               -> [Event p t]
 trace b a mt = case tr "trace, nextEvent: " $ nextEvent a mt of
     Nothing  -> []
-    Just ne  -> let STR evt b' a' = tr "trace, outputting" $ continue (tr "trace, ne: " ne)
+    Just ne  -> let SP (SP evt b') a' = tr "trace, outputting" $ continue (tr "trace, ne: " ne)
                 in evt ?: trace' (nextTime ne) b' a'
   where
     continue = \case
       ExistingEvent e a'    -> let b' = bridgeFromExisting b e
-                               in STR (fromExistingEvent b' e)    b'  a'
+                                   e' = fromExistingEvent b' e
+                               in SP (SP e' b') a'
                                -- if the existing event is a replace, the bridge may change!
-      BridgeEvent e         -> let SP e' b' = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
-                               in STR e'                          b' a
-      CombinedEvent e bi a' -> let SP e' b' = combinedEvent b e bi (currentScene a)
-                               in STR e' b' a'
+      BridgeEvent e         -> let z = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
+                               in SP z a
+      CombinedEvent e bi a' -> let e'b' = combinedEvent b e bi (currentScene a) (currentScene a')
+                               in SP e'b' a'
 
 -- | Continues tracing by finding a new birdge event
 trace'           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
@@ -243,7 +250,7 @@ nextBridgeChange                            :: (Ord t, Fractional t, HasNeighbou
                                             -> Hulls p -> Bridge p -> Maybe (BridgeInfo p t)
 nextBridgeChange p (Two sl sr) (Bridge u v) =
     fmap asEvent . NonEmpty.nonEmpty . minimaOn (^.core) . filter (p . (^.core)) . catMaybes
-    . tr "nextBridgeChange, candidates"
+    . tr ("nextBridgeChange, candidates" <> show (u,v))
     $
       [ getPrev u sl >>= \a -> colinearTime a u v <&> (:+ BA (Delete u)         (Left a))
       , getNext u sl >>= \b -> colinearTime u b v <&> (:+ BA (InsertAfter u b)  (Left b))
@@ -366,13 +373,13 @@ filterActions (Bridge l r) = map extract . NonEmpty.filter p
 -- existing events at the time of teh bridge event. The result is the
 -- event that we should output and the new bridge.
 bridgeEventOnly                  :: (Num t, Ord t, AsPoint p t, Eq p
-                                    , Show p
+                                    , Show p, Show t
                                     )
                                  => Bridge p -> BridgeInfo p t
                                  -> SP (Maybe (Event p t)) (Bridge p)
 bridgeEventOnly b bi@(t :+ acts) = case tr "bridgeEventOnly: acts " $ acts of
     (a  :| [])   -> SP (Just $ t :+ acts') (bridgeFromAction b a)
-    (al :| [ar]) -> let b' = findBridge (1 + t) (collect al) (collect ar)
+    (ar :| [al]) -> let b' = findBridge (1 + t) (collect al) (collect ar)
                     in SP (mkNewEvent bi b') b'
     _            -> error "bridgeEventOnly: absurd, <=2 actions possible"
   where
@@ -390,12 +397,14 @@ combinedEvent                                     :: (Fractional t, Ord t, AsPoi
                                                   -> NonEmpty (Existing (Action p))
                                                   -> BridgeInfo p t
                                                   -> Hulls p -- ^ old scene
+                                                  -> Hulls p -- ^ the new scene
                                                   -> SP (Maybe (Event p t)) (Bridge p)
-combinedEvent b@(Bridge l r) acts (t :+ bActs) (Two sl sr) = SP e' b'
+combinedEvent b@(Bridge l r) acts (t :+ bActs) (Two sl sr)
+                                               (Two sl' sr') = SP e' b'
   where
     b' = findBridge (1 + t) (NonEmpty.reverse ls) rs
-    ls = colinears t l r sl lAct leftActs
-    rs = colinears t r l sr rAct rightActs
+    ls = colinears t l r sl sl' lAct leftActs
+    rs = colinears t r l sr sr' rAct rightActs
 
     (leftActs,rightActs) = partitionExisting acts
     (lAct,rAct)          = partitionBridgeActions bActs
@@ -503,11 +512,15 @@ colinears                  :: (AsPoint p t, HasNeighbours p, Ord p, Ord t, Fract
                            => t
                            -> p -- ^ The bridge point we are processing
                            -> p -- ^ the other birdge point
-                           -> Scene p
+                           -> Scene p -- ^ The old scene
+                           -> Scene p  -- ^ The new scene
                            -> Maybe (Action p) -- ^ the bridge action on p
                            -> [Action p] -- ^ Existing actions related to this side
                            -> NonEmpty p -- ^ in left to right order
-colinears t p q s mba acts = colinearsFrom (findPointInScene t p q s mba acts) q t s
+colinears t p q s s' mba acts | traceShow ("colinears",t,p,q,mba,acts,s,s') False = undefined
+colinears t p q s s' mba acts = colinearsFrom (findPointInScene t p q s mba acts) q t s'
+  -- TODO, we also need the newly inserted points here, i.e. our point 36
+
 
 -- | Given a time t, two points: 'p' the bridge point, and q the other
 -- bridge point, the old scene, and the actions occuring at time t
@@ -517,32 +530,56 @@ findPointInScene ::  (HasNeighbours p, AsPoint p t, Ord t, Fractional t, Ord p
                      , Show p, Show t, Show (Scene p)
                      ) =>
                      t -> p -> p -> Scene p -> Maybe (Action p) -> [Action p] -> p
--- findPointInScene t p q oldS mba acts | traceShow ("findPointInscene",t,p,q,oldS,mba,acts)                     False = undefined
+findPointInScene t p q oldS mba acts | traceShow ("findPointInscene",t,p,q,oldS,mba,acts)                     False = undefined
 findPointInScene t p q oldS mba acts = case mba of
     Nothing -> p
-    Just a  -> case insertedPoint a ?: newOnBridge of
+    Just a  -> case tr "empty?" $ insertedPoint a ?: newOnBridge of
                  (z:_) -> z  -- z is a newly inserted point on the bridge
-                 []    -> maybeDeleted a
+                 []    -> deletedCandidate
   where
-    newOnBridge = filter (areColinearAt t p q) . mapMaybe insertedPoint $ acts
+    newOnBridge = tr "col" . filter (areColinearAt t p q) . tr "pts" . mapMaybe insertedPoint $ acts
     insertedPoint = \case
       InsertAfter  _ z -> Just z
       InsertBefore _ z -> Just z
       Delete _         -> Nothing
       Replace      _ z -> Just z
 
-    leftMost' = fromMaybe (error "not so non-empty") . minimumOf traverse
-    -- TODO: state why this is suposedly safe
-    maybeDeleted a = leftMost' . filter (areColinearAt t p q) . mapMaybe deletedNeighbour
-                   $ (a:acts)
-    deletedNeighbour = \case
-      Delete a         -> getPrev a oldS
-      _                -> Nothing
+    leftMost'  = minimumOf traverse -- = minimum that returns a Maybe
+    rightMost' = maximumOf traverse
 
-areColinearAt         :: (AsPoint p t, Ord t, Fractional t) => t -> p -> p -> p -> Bool
+    -- If our current bridge point p is deleted, and all other events
+    -- are also deletions, then we can find an existing point still on
+    -- the hull, that is colinear with the bridge by starting at p,
+    -- walking to the left and to the right until we find a point in
+    -- the hull that is not deleted (and still colinear with the
+    -- bridge). Since this the time of a bridge event, such a point
+    -- must exist, either on the left or on the right.
+    deletedCandidate  = fromMaybe (error "findPointInScene: absurd")
+                      . uncurry (<|>)
+                      . bimap leftMost' rightMost'
+                      . over both (filter (areColinearAt t p q))
+                      . partitionExisting
+                      . (neighboursOfP <>)
+                      . mapMaybe deletedNeighbour $ acts
+
+    neighboursOfP = catMaybes [Left <$> getPrev p oldS, Right <$> getNext p oldS]
+
+    deletedNeighbour = \case
+      Delete a | a <= p    -> Left  <$> getPrev a oldS
+               | otherwise -> Right <$> getNext a oldS
+      _                    -> Nothing
+
+
+
+
+areColinearAt         :: (AsPoint p t, Ord t, Fractional t, Show t, Show p) => t -> p -> p -> p -> Bool
+areColinearAt t a b c | traceShow ("areColinearAt",t,a,b,c) False = undefined
 areColinearAt t a b c = ccw (atTime t a) (atTime t b) (atTime t c) == CoLinear
 
-colinearsFrom         :: (HasNeighbours p, AsPoint p t, Ord t, Fractional t)
+-- | Starting from point p, find all the maximal consecutive
+-- subsequence in s containing p of points that are colinear with pq
+-- at time t. The result is returned in left-to right order.
+colinearsFrom         :: (HasNeighbours p, AsPoint p t, Ord t, Fractional t, Show p, Show t)
                       => p -> p -> t -> Scene p -> NonEmpty p
 colinearsFrom p q t s = exploreFrom p (areColinearAt t p q) s
 
