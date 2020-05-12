@@ -43,7 +43,7 @@ binarySearch p = go
 -- 0.5625
 -- >>> binarySearchUntil (0.01) (>= 0.51) 0 (1 :: Double)
 -- 0.515625
-binarySearchUntil       :: (Fractional r, Ord r, Show r)
+binarySearchUntil       :: (Fractional r, Ord r)
                         => r
                         -> (r -> Bool) -> r -> r -> r
 binarySearchUntil eps p = go

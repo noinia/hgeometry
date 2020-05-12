@@ -11,7 +11,8 @@
 --------------------------------------------------------------------------------
 module Data.Geometry.Ipe.FromIpe(
   -- * Individual readers
-    _asLineSegment
+    _asPoint
+  , _asLineSegment
   , _asRectangle
   , _asTriangle
 
@@ -64,8 +65,10 @@ import           Data.List.NonEmpty (NonEmpty(..))
 
 
 
-
-
+-- | Extracts the point from a Symbol. When creating a symbol this
+-- creates a disk that supports a stroke color.
+_asPoint :: Prism' (IpeSymbol r) (Point 2 r)
+_asPoint = prism' (flip Symbol "mark/disk(sx)") (Just . view symbolPoint)
 
 -- | Try to convert a path into a line segment, fails if the path is not a line
 -- segment or a polyline with more than two points.
@@ -209,9 +212,10 @@ class HasDefaultFromIpe g where
   defaultFromIpe :: (r ~ NumType g)
                  => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
 
--- instance HasDefaultFromIpe (Point 2 r) where
---   type DefaultFromIpe (Point 2 r) = IpeSymbol
---   defaultFromIpe = _withAttrs _IpeUse symbolPoint
+instance HasDefaultFromIpe (Point 2 r) where
+  type DefaultFromIpe (Point 2 r) = IpeSymbol
+  defaultFromIpe = _withAttrs _IpeUse _asPoint
+    where
 
 
 instance HasDefaultFromIpe (LineSegment 2 () r) where

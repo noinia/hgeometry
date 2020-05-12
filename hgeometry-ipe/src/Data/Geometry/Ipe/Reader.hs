@@ -33,6 +33,7 @@ import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
 import           Data.Geometry.Box
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.Ellipse(ellipseMatrix)
 import           Data.Geometry.Ipe.Attributes
 import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
@@ -205,6 +206,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
+      fromOps' s [CurveTo a b c] = Right [CubicBezierSegment $ Bezier3 s a b c]
       fromOps' _ _ = Left "fromOpts': rest not implemented yet."
 
       span' pr = L.span (not . isn't pr)
