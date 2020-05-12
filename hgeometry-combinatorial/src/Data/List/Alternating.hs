@@ -3,12 +3,15 @@ module Data.List.Alternating(
   , withNeighbours
   , mergeAlternating
   , insertBreakPoints
+  , reverse
   ) where
 
+import Prelude hiding (reverse)
 import Control.Lens
 import Data.Bifoldable
 import Data.Bitraversable
 import Data.Ext
+import qualified Data.List as List
 
 --------------------------------------------------------------------------------
 
@@ -69,3 +72,15 @@ mergeAlternating f (Alternating a00 as0)
 insertBreakPoints                         :: Ord t => [t] -> Alternating a t -> Alternating a t
 insertBreakPoints ts a@(Alternating a0 _) =
   Alternating a0 $ mergeAlternating (\_ _ a' -> a') (Alternating undefined (ext <$> ts)) a
+
+
+-- | Reverses an alternating list.
+--
+-- >>> reverse $ Alternating "a" [3 :+ "c", 5 :+ "e", 7 :+ "g"]
+-- Alternating "g" [7 :+ "e",5 :+ "c",3 :+ "a"]
+reverse                      :: Alternating a b -> Alternating a b
+reverse p@(Alternating s xs) = case xs of
+    []             -> p
+    ((e1 :+ _):tl) -> let ys = (e1 :+ s) : List.zipWith (\(_ :+ v) (e :+ _) -> e :+ v) xs tl
+                          t  = (last xs)^.extra
+                      in Alternating t (List.reverse ys)
