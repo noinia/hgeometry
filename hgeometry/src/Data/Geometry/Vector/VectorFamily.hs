@@ -174,6 +174,9 @@ element' i = unV.(e (C :: C d) i)
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
 
+cons   :: (Arity d, Arity (d+1)) => r -> Vector d r -> Vector (d + 1) r
+cons x = vectorFromListUnsafe . (x:) . F.toList
+
 -- | Add an element at the back of the vector
 snoc     :: (Arity (d + 1), Arity d) => Vector d r -> r -> Vector (d + 1) r
 snoc v x = vectorFromListUnsafe . (++ [x]) $ F.toList v
