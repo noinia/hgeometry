@@ -50,7 +50,9 @@ module Data.Geometry.Ipe.Types(
 
 
   , IpePage(IpePage), layers, views, content
-  , fromContent
+  , emptyPage, fromContent
+  , onLayer, contentInView
+  , withDefaults
 
   , IpeFile(IpeFile), preamble, styles, pages
   , ipeFile, singlePageFile, singlePageFromContent
@@ -64,6 +66,8 @@ import           Data.Geometry.Ipe.Layer
 import           Data.Geometry.Ipe.Literal
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (mapMaybe)
+import           Data.Semigroup (Endo)
+import qualified Data.Set as Set
 import           Data.Text (Text)
 import           Text.XML.Expat.Tree (Node)
 
@@ -116,11 +120,60 @@ data IpePage r = IpePage { _layers  :: [LayerName]
               deriving (Eq,Show)
 makeLenses ''IpePage
 
--- | Creates a simple page with no views.
+-- | Creates an empty page with one layer and view.
+emptyPage :: IpePage r
+emptyPage = fromContent []
+
+-- | Creates a simple page with a single view.
 fromContent     :: [IpeObject r] -> IpePage r
-fromContent obs = IpePage layers' [] obs
+fromContent obs = IpePage layers' [View layers' a] obs
   where
-    layers' = mapMaybe (^.commonAttributes.ixAttr SLayer) obs
+    layers' = Set.toList . Set.fromList $ a : mapMaybe (^.commonAttributes.ixAttr SLayer) obs
+    a       = "alpha"
+
+-- | Makes sure that the page has at least one layer and at least one
+-- view, essentially matching the behaviour of ipe. In particular,
+--
+-- - if the page does not have any layers, it creates a layer named "alpha", and
+-- - if the page does not have any views, it creates a view in which all layers are visible.
+--
+withDefaults :: IpePage r -> IpePage r
+withDefaults = addView . addLayer
+  where
+    whenNull ys = \case
+                    [] -> ys
+                    xs -> xs
+    addLayer p = p&layers %~ whenNull ["alpha"]
+    addView  p = p&views  %~ whenNull [View (p^.layers) (head $ p^.layers)]
+                 -- note that the head is save, since we just made sure
+                 -- with 'addLayer' that there is at least one layer
+
+-- | This allows you to filter the objects on some layer.
+--
+-- >>> let page = IpePage [] [] []
+-- >>> page^..content.onLayer "myLayer"
+-- []
+onLayer   :: LayerName -> Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
+onLayer n = folded.filtered (\o -> o^?commonAttributes._Attr SLayer == Just n)
+
+-- | Gets all objects that are visible in the given view.
+--
+-- Note that views are indexed starting from 0. If the page does not
+-- have any explicit view definitions, this function returns an empty
+-- list.
+--
+-- >>> let page = IpePage [] [] []
+-- >>> page^.contentInView 0
+-- []
+contentInView                     :: Word -> Getter (IpePage r) [IpeObject r]
+contentInView (fromIntegral -> i) = to inView'
+  where
+    inView' p = let lrs = Set.fromList . concatMap (^.layerNames) $ p^..views.ix i
+                in p^..content.folded.filtered (inVisibleLayer lrs)
+
+    inVisibleLayer lrs o = maybe False (`Set.member` lrs) $ o^?commonAttributes._Attr SLayer
+
+--------------------------------------------------------------------------------
 
 -- | A complete ipe file
 data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble

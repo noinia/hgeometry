@@ -48,7 +48,7 @@ import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Polygon as Polygon
 import qualified Data.Geometry.Transformation as Trans
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NE
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
 import qualified Data.LSeq as LSeq
@@ -73,21 +73,26 @@ readRawIpeFile :: (Coordinate r, Eq r)
 readRawIpeFile = fmap fromIpeXML . B.readFile
 
 
--- | Given a file path, tries to read an ipe file. This function applies all
--- matrices to objects.
+-- | Given a file path, tries to read an ipe file.
+--
+-- This function applies all matrices to objects.
 readIpeFile :: (Coordinate r, Eq r)
             => FilePath -> IO (Either ConversionError (IpeFile r))
 readIpeFile = fmap (bimap id applyMatrices) . readRawIpeFile
 
 
 -- | Since most Ipe file contain only one page, we provide a shortcut for that
--- as well. This function applies all matrices.
+-- as well.
+--
+-- This function applies all matrices, and it makes sure there is at
+-- least one layer and view in the page.
+--
 readSinglePageFile :: (Coordinate r, Eq r)
                    => FilePath -> IO (Either ConversionError (IpePage r))
-readSinglePageFile = fmap f . readIpeFile
+readSinglePageFile = fmap (fmap f) . readIpeFile
   where
-    f (Left e)  = Left e
-    f (Right i) = maybe (Left "No Ipe pages found") Right . firstOf (pages.traverse) $ i
+    f   :: IpeFile r -> IpePage r
+    f i = withDefaults . NonEmpty.head $ i^.pages
 
 -- | Given a Bytestring, try to parse the bytestring into anything that is
 -- IpeReadable, i.e. any of the Ipe elements.
@@ -184,13 +189,13 @@ instance Coordinate r => IpeReadText (IpeSize r) where
 instance Coordinate r => IpeReadText [Operation r] where
   ipeReadText = readPathOperations
 
-instance (Coordinate r, Eq r) => IpeReadText (NE.NonEmpty (PathSegment r)) where
+instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r)) where
   ipeReadText t = ipeReadText t >>= fromOpsN
     where
       fromOpsN xs = case fromOps xs of
                       Left l       -> Left l
                       Right []     -> Left "No path segments produced"
-                      Right (p:ps) -> Right $ p NE.:| ps
+                      Right (p:ps) -> Right $ p NonEmpty.:| ps
 
       fromOps []            = Right []
       fromOps [Ellipse m]   = Right [EllipseSegment . view (from ellipseMatrix) $ m]
@@ -414,7 +419,7 @@ readAll   = rights . map ipeRead
 instance (Coordinate r, Eq r) => IpeRead (IpeFile r) where
   ipeRead (Element "ipe" _ chs) = case readAll chs of
                                     []  -> Left "Ipe: no pages found"
-                                    pgs -> Right $ IpeFile Nothing [] (NE.fromList pgs)
+                                    pgs -> Right $ IpeFile Nothing [] (NonEmpty.fromList pgs)
   ipeRead _                     = Left "Ipe: Element expected, text found"
 
 

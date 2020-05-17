@@ -12,6 +12,13 @@
   (IpePage r)
 - Renamed attrLens to ixAttr, and added a prism _Attr to access an
   attribute._
+- added convenience functions (well, Getter's) for getting all Ipe
+  objects on a particular layer, or in a particular view.
+- readSinglePageFile now makes sure there is at least one layer / view
+  in the file, and if not creates it. This matches the behaviour of
+  ipe itself. See the new 'withDefaults' function in the Types module
+  for the details.
+- fromContent now creates these layers and views as well.
 
 ** 0.10
 
