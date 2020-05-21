@@ -12,7 +12,8 @@ import           Control.Monad.ST.Strict
 import           Control.Monad.State.Strict
 import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.Point
+import           Data.Geometry.Point.Internal
+import           Data.Geometry.Point.Class
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector hiding (imap)
@@ -30,6 +31,14 @@ import           Linear.V4 (V4(..))
 
 --------------------------------------------------------------------------------
 
+data Sign = Negative | Positive deriving (Show,Eq,Ord,Enum,Bounded)
+
+flipSign :: Sign -> Sign
+flipSign = \case
+  Negative -> Positive
+  Positive -> Negative
+
+--------------------------------------------------------------------------------
 
 
 
@@ -117,13 +126,6 @@ class HasIndex i where
 
 class HasIndex i => CanAquire i a where
   aquire  :: i -> a
-
-
-class IsAPoint p where
-  asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
-
-  vector' :: Lens (p d r) (p d r) (Vector d r) (Vector d r)
-  vector' = asAPoint.vector
 
 ----------------------------------------
 
@@ -249,15 +251,6 @@ asPointWithIndex (P i) = Point . imap (\j r -> RWithIdx r (indexOf i) j) . toVec
 
 
 --------------------------------------------------------------------------------
-
-
-data Sign = Negative | Positive deriving (Show,Eq,Ord,Enum,Bounded)
-
-flipSign :: Sign -> Sign
-flipSign = \case
-  Negative -> Positive
-  Positive -> Negative
-
 
 -- | To support Simulation of Simplicity a point type p must support:
 --

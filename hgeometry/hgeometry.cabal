@@ -56,6 +56,9 @@ library
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
   exposed-modules:
+                    -- * Primitives; Simulating General Position
+                    Algorithms.Geometry.SoS
+
                     -- * Generic Geometry
                     Data.Geometry
                     Data.Geometry.Properties
@@ -74,6 +77,7 @@ library
                     Data.Geometry.Interval
                     Data.Geometry.Interval.Util
                     Data.Geometry.Point
+
                     Data.Geometry.Line
                     Data.Geometry.Line.Internal
                     Data.Geometry.LineSegment
@@ -193,6 +197,12 @@ library
                     -- * Implementation Internals of Polygons
                     Data.Geometry.Polygon.Core
                     Data.Geometry.Polygon.Extremes
+
+                    Data.Geometry.Point.Internal
+                    Data.Geometry.Point.Orientation
+                    Data.Geometry.Point.Quadrants
+                    Data.Geometry.Point.Orientation.Degenerate
+                    Data.Geometry.Point.Class
 
   -- other-extensions:
   build-depends:
