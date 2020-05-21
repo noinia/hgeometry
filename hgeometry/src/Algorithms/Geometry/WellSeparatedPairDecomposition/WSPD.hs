@@ -50,7 +50,7 @@ fairSplitTree     :: (Fractional r, Ord r, Arity d, 1 <= d
                   => NonEmpty.NonEmpty (Point d r :+ p) -> SplitTree d p r ()
 fairSplitTree pts = foldUp node' Leaf $ fairSplitTree' n pts'
   where
-    pts' = GV.imap sortOn . pure . g $ pts
+    pts' = imap sortOn . pure . g $ pts
     n    = length $ pts'^.GV.element (C :: C 0)
 
     sortOn' i = NonEmpty.sortWith (^.core.unsafeCoord i)
@@ -354,7 +354,7 @@ widths = fmap Range.width . extends
 --
 -- pre: points are sorted according to their dimension
 extends :: Arity d => GV.Vector d (PointSeq d p r) -> GV.Vector d (Range r)
-extends = GV.imap (\i pts ->
+extends = imap (\i pts ->
                      ClosedRange ((LSeq.head pts)^.core.unsafeCoord (i + 1))
                                  ((LSeq.last pts)^.core.unsafeCoord (i + 1)))
 

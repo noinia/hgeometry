@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Transformation where
 
-import           Control.Lens (iso,Lens',set,Iso)
+import           Control.Lens (iso,set,Iso,imap)
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
@@ -34,7 +34,7 @@ mult :: (Arity m, Arity n, Num r) => Matrix n m r -> Vector m r -> Vector n r
 
 -- | Produces the Identity Matrix
 identityMatrix :: (Arity d, Num r) => Matrix d d r
-identityMatrix = Matrix $ V.imap mkRow (pure 1)
+identityMatrix = Matrix $ imap mkRow (pure 1)
 
 class Invertible n r where
   inverse' :: Matrix n n r -> Matrix n n r
@@ -119,12 +119,12 @@ instance (Fractional r, Arity d, Arity (d + 1))
 
 translation   :: (Num r, Arity d, Arity (d + 1))
               => Vector d r -> Transformation d r
-translation v = Transformation . Matrix $ V.imap transRow (snoc v 1)
+translation v = Transformation . Matrix $ imap transRow (snoc v 1)
 
 
 scaling   :: (Num r, Arity d, Arity (d + 1))
           => Vector d r -> Transformation d r
-scaling v = Transformation . Matrix $ V.imap mkRow (snoc v 1)
+scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 
 uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
 uniformScaling = scaling . pure

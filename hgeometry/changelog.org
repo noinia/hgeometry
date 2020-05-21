@@ -30,7 +30,11 @@
   four points should be coplanar.
 - Added a Data.Geometry.Directions module that defines cardinal and
   InterCardinal directions.
-- Added an Ellipse type (mostly so that hgeometry-ipe can read ellipses)
+- Added an Ellipse type (mostly so that hgeometry-ipe can read
+  ellipses)
+- Added FunctorWithIndex, FoldableWithIndex, and TraversableWithIndex
+  instances for Vector, and removed specifically exporting imap; we
+  can now just use those functions from the Lens package.
 
 ** 0.10
 

@@ -73,6 +73,15 @@ deriving instance Arity d => Foldable    (Vector d)
 deriving instance Arity d => Traversable (Vector d)
 deriving instance Arity d => Applicative (Vector d)
 
+
+
+instance Arity d => FunctorWithIndex     Int (Vector d) where
+  imap = V.imap
+instance Arity d => FoldableWithIndex    Int (Vector d)
+instance Arity d => TraversableWithIndex Int (Vector d) where
+  itraverse = V.imapM
+
+
 deriving instance Arity d => Additive (Vector d)
 deriving instance Arity d => Metric (Vector d)
 instance Arity d => Affine (Vector d) where

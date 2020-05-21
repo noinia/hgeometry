@@ -20,7 +20,6 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , scalarMultiple
                            -- reexports
                            , FV.replicate
-                           , FV.imap
                            , xComponent, yComponent, zComponent
                            ) where
 
