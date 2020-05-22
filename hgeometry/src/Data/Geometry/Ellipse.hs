@@ -10,9 +10,10 @@ module Data.Geometry.Ellipse(
 import Control.Lens
 import Data.Ext
 import Data.Geometry.Ball
+import Data.Geometry.Matrix
+import Data.Geometry.Transformation
 import Data.Geometry.Point
 import Data.Geometry.Properties
-import Data.Geometry.Transformation
 import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------

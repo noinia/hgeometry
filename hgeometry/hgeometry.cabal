@@ -73,6 +73,8 @@ library
                     Data.Geometry.Vector.VectorFamily
                     Data.Geometry.Vector.VectorFamilyPeano
 
+                    Data.Geometry.Matrix
+
                     -- Data.Geometry.Vector.Vinyl
                     Data.Geometry.Interval
                     Data.Geometry.Interval.Util
@@ -194,15 +196,22 @@ library
                     Graphics.Render
 
   other-modules:
+                    Data.Geometry.Matrix.Internal
+
                     -- * Implementation Internals of Polygons
                     Data.Geometry.Polygon.Core
                     Data.Geometry.Polygon.Extremes
+
 
                     Data.Geometry.Point.Internal
                     Data.Geometry.Point.Orientation
                     Data.Geometry.Point.Quadrants
                     Data.Geometry.Point.Orientation.Degenerate
                     Data.Geometry.Point.Class
+
+                    Algorithms.Geometry.SoS.Expr
+                    Algorithms.Geometry.SoS.RWithIdx
+
 
   -- other-extensions:
   build-depends:

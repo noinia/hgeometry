@@ -1,10 +1,22 @@
-module Data.Geometry.Point.Orientation.Degenerate where
+module Data.Geometry.Point.Orientation.Degenerate(
+    CCW
+  , pattern CCW, pattern CW, pattern CoLinear
 
-import Data.Geometry.Point.Internal
+  , ccw, ccw'
+
+  , sortAround
+
+  , ccwCmpAroundWith, cwCmpAroundWith
+  , ccwCmpAround, cwCmpAround
+
+  , insertIntoCyclicOrder
+  ) where
+
 import           Control.Lens
 import qualified Data.CircularList as C
 import qualified Data.CircularList.Util as CU
 import           Data.Ext
+import           Data.Geometry.Point.Internal
 import           Data.Geometry.Vector
 import qualified Data.List as L
 
@@ -12,15 +24,32 @@ import qualified Data.List as L
 
 -- | Data type for expressing the orientation of three points, with
 -- the option of allowing Colinearities.
-data CCW = CCW | CoLinear | CW
-         deriving (Show,Eq)
+newtype CCW = CCWWrap Ordering deriving Eq
+
+pattern CCW      :: CCW
+pattern CCW      = CCWWrap GT
+
+pattern CW       :: CCW
+pattern CW       = CCWWrap LT
+
+pattern CoLinear :: CCW
+pattern CoLinear = CCWWrap EQ
+{-# COMPLETE CCW, CW, CoLinear #-}
+
+instance Show CCW where
+  show = \case
+    CCW      -> "CCW"
+    CW       -> "CW"
+    CoLinear -> "CoLinear"
+
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = case z `compare` 0 of
-              LT -> CW
-              GT -> CCW
-              EQ -> CoLinear
+ccw p q r = CCWWrap $ z `compare` 0
+            -- case z `compare` 0 of
+            --   LT -> CW
+            --   GT -> CCW
+            --   EQ -> CoLinear
      where
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p

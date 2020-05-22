@@ -27,8 +27,8 @@ specSort pd = describe ("sorting " <> show d) $ do
                   let vs          = vectorFromListUnsafe @d xs
                       (n,sortedV) = sortI vs
                   describe (show xs) $ do
-                    it "sorted "            $ sortedV `shouldBe` idV
-                    it "number of echanges" $ Just n  `shouldBe` exchangesNeeded idV vs
+                    it "sorted "             $ sortedV `shouldBe` idV
+                    it "number of exchanges" $ Just n  `shouldBe` exchangesNeeded idV vs
   where
     d   = natVal pd
     idV = vectorFromListUnsafe [1..d]

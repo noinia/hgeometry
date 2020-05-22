@@ -4,5 +4,5 @@ import Criterion.Main
 import Demo.TriangulateWorld
 
 
-main = defaultMain [ bench "triangulateWorld" $ nfIO (mainWith $ Options "/home/frank/tmp/antartica.ipe" "/tmp/out.ipe")
+main = defaultMain [ bench "triangulateWorld" $ nfIO (mainWith $ Options "/home/frank/tmp/antarctica.ipe" "/tmp/out.ipe")
                    ]

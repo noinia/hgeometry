@@ -21,7 +21,8 @@ module Data.Geometry.Point( Point(..)
 
                           , PointFunctor(..)
 
-                          , CCW(..), ccw, ccw'
+                          , CCW, ccw, ccw'
+                          , pattern CCW, pattern CW, pattern CoLinear
 
                           , ccwCmpAround, cwCmpAround, ccwCmpAroundWith, cwCmpAroundWith
                           , sortAround, insertIntoCyclicOrder

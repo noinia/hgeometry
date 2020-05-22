@@ -22,9 +22,10 @@ module Graphics.Camera( Camera(Camera)
                       ) where
 
 import Control.Lens
+import Data.Geometry.Matrix
 import Data.Geometry.Point
-import Data.Geometry.Vector
 import Data.Geometry.Transformation
+import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 

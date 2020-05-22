@@ -7,36 +7,37 @@
 -- Herbert Edelsbrunner and Ernst Peter Mucke
 module Algorithms.Geometry.SoS where
 
+import           Algorithms.Geometry.SoS.Expr
+import           Algorithms.Geometry.SoS.RWithIdx
 import           Control.Lens
 import           Control.Monad.ST.Strict
 import           Control.Monad.State.Strict
 import           Data.Bifunctor
 import           Data.Ext
-import           Data.Geometry.Point.Internal
+import           Data.Foldable (toList)
 import           Data.Geometry.Point.Class
+import           Data.Geometry.Point.Internal
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Vector hiding (imap)
 import qualified Data.Geometry.Vector as GV
+import           Data.Geometry.Vector hiding (imap)
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
 import           Data.Maybe
 import           Data.Ord (Down(..))
 import           Data.Reflection
+import           Data.Util
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           GHC.TypeNats
 import           Linear.Matrix
+import           Linear.V2 (V2(..))
 import           Linear.V3 (V3(..))
 import           Linear.V4 (V4(..))
 
 --------------------------------------------------------------------------------
-
-data Sign = Negative | Positive deriving (Show,Eq,Ord,Enum,Bounded)
-
-flipSign :: Sign -> Sign
-flipSign = \case
-  Negative -> Positive
-  Positive -> Negative
 
 --------------------------------------------------------------------------------
 
@@ -78,167 +79,11 @@ simulateSimplicity' alg = runAcquire alg'
 
 --------------------------------------------------------------------------------
 
--- | Run a computation on something that can aquire i's.
-runAcquire         :: forall t a b. Traversable t
-                   => (forall i. CanAquire i a => t i -> b)
-                   -> t a -> b
-runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
-  where
-    (v,ts) = replaceByIndex pts
-
-    coerceTS   :: proxy s -> t Int -> t (I s a)
-    coerceTS _ = fmap I
-      -- Ideally this would just be a coerce. But GHC doesn't want to do that.
-
-
-
-
--- | Replaces every element by an index. Returns the new traversable
--- containing only these indices, as well as a vector with the
--- values. (such that indexing in this value gives the original
--- value).
-replaceByIndex     :: forall t a. Traversable t => t a -> (V.Vector a, t Int)
-replaceByIndex ts' = runST $ do
-                               v <- MV.new n
-                               t <- traverse (lbl v) ts
-                               (,t) <$> V.unsafeFreeze v
-  where
-    (ts, n) = labelWithIndex ts'
-
-    lbl         :: MV.MVector s' a -> (Int,a) -> ST s' Int
-    lbl v (i,x) = MV.write v i x >> pure i
-
--- | Label each element with its index. Returns the new collection as
--- well as its size.
-labelWithIndex :: Traversable t => t a -> (t (Int, a), Int)
-labelWithIndex = flip runState 0 . traverse lbl
-  where
-    lbl   :: a -> State Int (Int,a)
-    lbl x = do i <- get
-               put $ i+1
-               pure (i,x)
-
-
---------------------------------------------------------------------------------
-
-class HasIndex i where
-  indexOf :: i -> Int
-
-class HasIndex i => CanAquire i a where
-  aquire  :: i -> a
 
 ----------------------------------------
-
-newtype I s a = I Int deriving (Eq, Ord, Enum)
-
-instance Show (I s a) where
-  showsPrec i (I j) = showsPrec i j
-
-instance HasIndex (I s a) where
-  indexOf (I i) = i
-
-instance Reifies s (V.Vector a) => (I s a) `CanAquire` a where
-  aquire (I i) = let v = reflect @s undefined in v V.! i
-
-----------------------------------------
-
-class AsPoint p where
-  asPoint :: p -> Point (Dimension p) (NumType p)
-
-instance AsPoint (Point d r) where
-  asPoint = id
-
-instance AsPoint p => AsPoint (p :+ e) where
-  asPoint = asPoint . view core
-  {-# INLINE asPoint #-}
-
 --------------------------------------------------------------------------------
 
--- data R r = Constant !r | Indirect !r {-# UNPACK #-} !Int {-# UNPACK #-} !Int
-
--- instance Show r => Show (R r) where
---   show (Constant r)     = show r
---   show (Indirect r _ _) = show r
-
--- instance Eq r => Eq (R r) where
-
-data RWithIdx r = RWithIdx !r
-                           {-# UNPACK #-} !Int -- ^ index of the point in [0,n]
-                           {-# UNPACK #-} !Int -- ^ index of the coordinate in [0,d-1]
-                deriving (Eq)
-
-instance Show r => Show (RWithIdx r) where
-  showsPrec i (RWithIdx r _ _) = showsPrec i r
-
-instance Ord r => Ord (RWithIdx r) where
-  (RWithIdx x i j) `compare` (RWithIdx y k l) = x `compare` y
-                                             <> (Down i) `compare` (Down k)
-                                             <> j `compare` l
-  -- see the paper, function Smaller, for the slightly weird implementation I guess.
-
-
-
-
--- | Data type that allows us to combine indexed R values and "normal"
--- constant R values.  Two indexed r values are equal if and only if
--- their indices match exactly. That means that values comming form
--- different indices can always be ordered, i.e. we get rid of degeneracies.
---
--- When comparing an indexed value against a constant the
--- equality/ordering is determined only w.r.t. the "real" r value.
---
-data R r = Constant !r
-         | IndexedR !r {-# UNPACK #-} !Int -- ^ index of the point in [0,n]
-                       {-# UNPACK #-} !Int -- ^ index of the coordinate in [0,d-1]
-
-toR :: R r -> r
-toR = \case
-  Constant r      -> r
-  IndexedR r _ _  -> r
-
-fromR :: r -> R r
-fromR = Constant
-
-fromIndexed                  :: RWithIdx r -> R r
-fromIndexed (RWithIdx x i j) = IndexedR x i j
-
-instance Show r => Show (R r) where
-  showsPrec i = showsPrec i . toR
-
-instance Eq r => Eq (R r) where
-  (IndexedR x i j) == (IndexedR y k l) = x == y && i == k && j == l
-  a                == b                = toR a == toR b
-
-instance Ord r => Ord (R r) where
-  (IndexedR x i j) `compare` (IndexedR y k l) = RWithIdx x i j `compare` RWithIdx y k l
-  a                `compare` b                = toR a          `compare` toR b
-
-
--- instance (Num r, Ord r) => Num (R r) where
---   -- +, *, -, abs, signum,fromInteger, negate
---   -- (Constant )
---   signum
---   fromInteger = Constant
-
---   -- negate is prob. troublesome
-
 --------------------------------------------------------------------------------
-
-newtype P i d r = P i deriving (HasIndex, Eq, Show)
-
-instance i `CanAquire` (Point d r) => (P i d r) `CanAquire` (Point d r) where
-  aquire (P i) = aquire i
-
-type instance NumType   (P i d r) = r
-type instance Dimension (P i d r) = d
-
-
-instance i `CanAquire` (Point d r) => AsPoint (P i d r) where
-  asPoint (P i) = aquire i
-
-asPointWithIndex       :: (Arity d, i `CanAquire` Point d r)
-                       => P i d r -> Point d (RWithIdx r)
-asPointWithIndex (P i) = Point . imap (\j r -> RWithIdx r (indexOf i) j) . toVec $ aquire i
 
 
 
@@ -252,292 +97,13 @@ asPointWithIndex (P i) = Point . imap (\j r -> RWithIdx r (indexOf i) j) . toVec
 
 --------------------------------------------------------------------------------
 
--- | To support Simulation of Simplicity a point type p must support:
---
--- - Retrieving the Index of the point
--- - The dimension of p must support SoS
-type SoS p = ( AsPoint p
-             , HasIndex p
-             , SoSD (Dimension p)
-             )
-
--- | A dimension d has support for SoS when we can:
---
--- - sort a vector that has (d+1) entries and count the number of
--- - exchanges made generate the terms of the determinant of the
---   \(\Lambda_{d+1}\) matrix in the right order.
-type SoSD d = ( SortI (d + 1)
-              , ToTerms d
-              )
-
-
-
--- | Given a query point q, and a vector of d points defining a
--- hyperplane test if q lies above or below the hyperplane.
---
-sideTest      :: ( SoS p
-                 , d ~ Dimension p, Arity d, Arity (d+1)
-                 , r ~ NumType p, Num r, Eq r
-                 )
-              => p -> Vector d p -> Sign
-sideTest q ps = case bimap odd signDet $ sort q ps of
-                  (True,  d) -> flipSign d
-                  (False, d) -> d
-
-{-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 1 r), Num r, Eq r) => P i 1 r -> Vector 1 (P i 1 r) -> Sign #-}
-{-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 2 r), Num r, Eq r) => P i 2 r -> Vector 2 (P i 2 r) -> Sign #-}
-{-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 3 r), Num r, Eq r) => P i 3 r -> Vector 3 (P i 3 r) -> Sign #-}
-
-
--- | Returns the number of comparisons and the sorted matrix, in which the rows are
--- sorted in increasing order of the indices.
-sort      :: forall p d r
-          . (d ~ Dimension p, Arity d, Arity (d+1), SortI (d + 1)
-            , r ~ NumType p
-            , AsPoint p, HasIndex p
-            )
-          => p -> Vector d p -> (Int, Vector (d + 1) (Vector d r))
-sort q ps = second (fmap asVec) . sortI . fmap (with indexOf) $ q `GV.cons` ps
-  where
-    asVec (With _ p) = toVec . asPoint $ p
-
-{-# SPECIALIZE sort ::
-  CanAquire i (Point 1 r) => P i 1 r -> Vector 1 (P i 1 r) -> (Int, Vector 2 (Vector 1 r)) #-}
-{-# SPECIALIZE sort ::
-  CanAquire i (Point 2 r) => P i 2 r -> Vector 2 (P i 2 r) -> (Int, Vector 3 (Vector 2 r)) #-}
-{-# SPECIALIZE sort ::
-  CanAquire i (Point 3 r) => P i 3 r -> Vector 3 (P i 3 r) -> (Int, Vector 4 (Vector 3 r)) #-}
-
-
--- | Data type for p values that have an index.
-data With p = With {-# UNPACK #-} !Int p deriving (Show)
-
-with     :: (p -> Int) -> p -> With p
-with f p = With (f p) p
-
-instance Eq (With p) where
-  (With i _) == (With j _) = i == j
-instance Ord (With p) where
-  (With i _) `compare` (With j _) = i `compare` j
-
---------------------------------------------------------------------------------
-
-class SortI d where
-  sortI :: Ord a => Vector d a -> (Int, Vector d a)
-
-instance SortI 1 where
-  sortI v = (0,v)
-  {-# INLINE sortI #-}
-
-instance SortI 2 where
-  sortI v@(Vector2 i j) = case i `compare` j of
-                            GT -> (1, Vector2 j i)
-                            _  -> (0, v)
-  {-# INLINE sortI #-}
-
--- | Based on the optimal sort in vector-algorithms
-instance SortI 3 where
-  sortI v@(Vector3 i j k) =
-    case compare i j of
-      GT -> case compare i k of
-              GT -> case compare k j of
-                      LT -> (1, Vector3 k j i)
-                      _  -> (2, Vector3 j k i)
-              _  -> (1, Vector3 j i k)
-      _  -> case compare j k of
-              GT -> case compare i k of
-                      GT -> (2, Vector3 k i j)
-                      _  -> (1, Vector3 i k j)
-              _  -> (0,v)
-  {-# INLINE sortI #-}
-
-instance SortI 4 where
-  sortI v@(Vector4 i j k l) =
-    case compare i j of
-        GT -> case compare i k of
-                GT -> case compare j k of
-                        GT -> case compare j l of
-                                GT -> case compare k l of
-                                        GT -> (2, Vector4 l k j i)
-                                        _  -> (3, Vector4 k l j i)
-                                _  -> case compare i l of
-                                        GT -> (2, Vector4 k j l i)
-                                        _  -> (1, Vector4 k j i l)
-                        _ -> case compare k l of
-                               GT -> case compare j l of
-                                       GT -> (1, Vector4 l j k i)
-                                       _  -> (2, Vector4 j l k i)
-                               _  -> case compare i l of
-                                       GT -> (3, Vector4 j k l i)
-                                       _  -> (2, Vector4 j k i l)
-                _  -> case compare i l of
-                        GT -> case compare j l of
-                                GT -> (2, Vector4 l j i k)
-                                _  -> (3, Vector4 j l i k)
-                        _  -> case compare k l of
-                                GT -> (2, Vector4 j i l k)
-                                _  -> (1, Vector4 j i k l)
-        _  -> case compare j k of
-                GT -> case compare i k of
-                        GT -> case compare i l of
-                                GT -> case compare k l of
-                                        GT -> (3, Vector4 l k i j)
-                                        _  -> (2, Vector4 k l i j)
-                                _  -> case compare j l of
-                                        GT -> (3, Vector4 k i l j)
-                                        _  -> (2, Vector4 k i j l)
-                        _  -> case compare k l of
-                                GT -> case compare i l of
-                                        GT -> (2, Vector4 l i k j)
-                                        _  -> (1, Vector4 i l k j)
-                                _  -> case compare j l of
-                                        GT -> (2, Vector4 i k l j)
-                                        _  -> (1, Vector4 i k j l)
-                _  -> case compare j l of
-                        GT -> case compare i l of
-                                GT -> (3, Vector4 l i j k)
-                                _  -> (2, Vector4 i l j k)
-                        _  -> case compare k l of
-                                GT -> (1, Vector4 i j l k)
-                                _  -> (0, v)
-  {-# INLINE sortI #-}
-
-
--- | Determines the sign of the Determinant.
---
--- pre: the rows in the input vector are given in increasing index
--- order
-signDet :: (Num r, Eq r, ToTerms d) => Vector (d + 1) (Vector d r) -> Sign
-signDet = signFromTerms . toTerms
-
-{-# SPECIALIZE signDet :: (Num r, Eq r) => Vector 2 (Vector 1 r) -> Sign #-}
-{-# SPECIALIZE signDet :: (Num r, Eq r) => Vector 3 (Vector 2 r) -> Sign #-}
-{-# SPECIALIZE signDet :: (Num r, Eq r) => Vector 4 (Vector 3 r) -> Sign #-}
-
-
--- | Given the terms, in decreasing order of significance, computes the sign
---
--- i.e. expects a list of terms, we base the sign on the sign of the first non-zero term.
---
--- pre: the list contains at least one such a term.
-signFromTerms :: (Num r, Eq r) => [r] -> Sign
-signFromTerms = List.head . mapMaybe signum'
-  where
-    signum' x = case signum x of
-                  -1    -> Just Negative
-                  0     -> Nothing
-                  1     -> Just Positive
-                  _     -> error "signum': absurd"
-
---------------------------------------------------------------------------------
-
-class ToTerms d where
-  toTerms :: Num r => Vector (d + 1) (Vector d r) -> [r]
-
-
-instance ToTerms 1 where
-  -- note this is Lambda_2 from the paper
-  toTerms (Vector2 (Vector1 i)
-                   (Vector1 j)) = [ i - j -- det22 [i 1, j 1] = i*1 - j*1
-                                  , 1
-                                  ]
-  {-# INLINE toTerms #-}
-
-instance ToTerms 2 where
-  -- note this is Lambda_3 from the paper
-  toTerms (Vector3 (Vector2 i1 i2)
-                   (Vector2 j1 j2)
-                   (Vector2 k1 k2)) = [ det33 $ V3 (V3 i1 i2 1)
-                                                   (V3 j1 j2 1)
-                                                   (V3 k1 k2 1)
-                                      , -(j1 - k1) --
-
-                                      , j2 - k2    -- det22 [[j2, 1], [k2, 1]] = j2*1 - k2*1
-                                      , i1 - k1
-                                      , 1
-                                      ]
-  {-# INLINE toTerms #-}
-
-
-instance ToTerms 3 where
-  -- note this is Lambda_4 from the paper
-  toTerms (Vector4 (Vector3 i1 i2 i3)
-                   (Vector3 j1 j2 j3)
-                   (Vector3 k1 k2 k3)
-                   (Vector3 l1 l2 l3)
-          ) = [ det44 $ V4 (V4 i1 i2 i3 1)   -- 0
-                           (V4 j1 j2 j3 1)
-                           (V4 k1 k2 k3 1)
-                           (V4 l1 l2 l3 1)
-              , det33 $ V3 (V3 j1 j2 1)      -- 1
-                           (V3 k1 k2 1)
-                           (V3 l1 l2 1)
-              , ((-1) *) .                   -- 2
-                det33 $ V3 (V3 j1 j3 1)
-                           (V3 k1 k3 1)
-                           (V3 l1 l3 1)
-              , det33 $ V3 (V3 j2 j3 1)      -- 3
-                           (V3 k2 k3 1)
-                           (V3 l2 l3 1)
-              , ((-1) *) .                   -- 4
-                det33 $ V3 (V3 i1 i2 1)
-                           (V3 k1 k2 1)
-                           (V3 l1 l2 1)
-              , k1 - l1                      -- 5
-              , -(k2 - l2)                   -- 6
-              , det33 $ V3 (V3 i1 i3 1)      -- 7
-                           (V3 k1 k3 1)
-                           (V3 l1 l3 1)
-              , k3 - l3                      -- 8
-              , ((-1) *) .                   -- 9
-                det33 $ V3 (V3 i2 i3 1)
-                           (V3 k2 k3 1)
-                           (V3 l2 l3 1)
-              , det33 $ V3 (V3 i1 i2 1)      -- 10
-                           (V3 j1 j2 1)
-                           (V3 l1 l2 1)
-              , -(j1 - l1)                   -- 11
-              , j2 - l2                      -- 12
-              , i1 - l1                      -- 13
-              , 1                            -- 14
-              ]
-  {-# INLINE toTerms #-}
-
---------------------------------------------------------------------------------
-
--- | Determines the sign of the Determinant, assuming the input is
--- given in homogeneous coordinates.
---
--- pre: the rows in the input vector are given in increasing index
--- order
-signDetHom :: (Num r, Eq r, ToTermsHom d) => Matrix d d r -> Sign
-signDetHom = signFromTerms . toTermsHom
-
-class ToTermsHom d where
-  toTermsHom :: Matrix d d r -> [r]
-
-
-
-
--- class ToTermsHom 2 where
---   toTerms m@(Matrix (Vector2 i1 i2)
---                     (Vector2 j1 j2)
---             )                     = [ det22 m
---                                     , -i1
---                                     , j2
---                                     ,
---                                     ]
-
-
--- toTerms   :: Matrix d d r -> [r]
--- toTerms m = undefined
-
 
 
 --------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
 
 -- TODO: Remove this one
 instance HasIndex (Point d r :+ Int) where
@@ -565,3 +131,161 @@ testV = simulateSimplicity sideTest' [ Point2 (-1) 5
                                      , Point2 0 0
                                      , Point2 0 10
                                      ]
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+cmpSignificance                   :: Ord k => Bag k -> Bag k -> Ordering
+cmpSignificance (Bag e1) (Bag e2) = e1e2 `compare` e2e1
+  where
+    e1e2 = fmap fst . Map.lookupMax $ e1 `Map.difference` e2
+    e2e1 = fmap fst . Map.lookupMax $ e2 `Map.difference` e1
+
+
+
+-- | Represents a Sum of terms, i.e. a value that has the form:
+--
+-- \[
+--   \sum c \Pi_{(i,j)} \varepsilon(i,j)
+-- \]
+newtype Symbolic i j r = Symbolic [Term i j r] deriving (Show,Eq,Functor)
+
+instance (Ord i, Ord j, Num r) => Num (Symbolic i j r) where
+  (Symbolic ts) + (Symbolic ts') = Symbolic (ts `addTerms` ts')
+  negate = fmap negate
+  (Symbolic ts) * (Symbolic ts') = Symbolic $ multiplyTerms ts ts'
+  fromInteger x = constant (fromInteger x)
+  -- abs x | signum x == -1 = (-1)*x
+  --       | oterwise       = x
+
+  -- signum = undefined
+
+
+
+
+
+
+
+
+
+
+-- | Adds two lists of terms
+addTerms        :: forall i j r. (Ord i, Ord j, Num r)
+                => [Term i j r] -> [Term i j r] -> [Term i j r]
+addTerms ts ts' = (\(eps,c) -> Term c eps) <$> Map.toList m
+  where
+    m :: Map.Map (EpsFold i j) r
+    m = Map.fromListWith (+) [ (eps,c) | (Term c eps) <- ts <> ts' ]
+
+multiplyTerms        :: forall i j r. (Ord i, Ord j, Num r)
+                     => [Term i j r] -> [Term i j r] -> [Term i j r]
+multiplyTerms ts ts' = (\(eps,c) -> Term c eps) <$> Map.toList m
+  where
+    m :: Map.Map (EpsFold i j) r
+    m = Map.fromListWith (+) [ (es <> es',c*d) | (Term c es) <- ts, (Term d es') <- ts' ]
+
+
+
+
+orderedTerms               :: (Ord i, Ord j) => Symbolic i j r -> [Term i j r]
+orderedTerms (Symbolic ts) = List.sortBy (\(Term _ e1) (Term _ e2) -> cmpSignificance e1 e2) ts
+
+
+
+
+
+lambdaRow   :: (Ord i, Ord j, Num r, Num j, Enum j, Foldable t)
+            => i -> t r -> [Symbolic i j r]
+lambdaRow i = (<> [constant 1]) . zipWith (\j c -> perturb c (i,j)) [0..] . toList
+
+
+
+
+
+
+
+
+
+
+
+
+  -- zipWith (\j x -> Term x $ singleton (i,j)) [0..] . toList
+
+
+
+
+
+
+-- orderTerms               :: (Ord i, Ord j) => Symbolic i j r -> Symbolic i j r
+-- orderTerms (Symbolic ts) = Symbolic $ List.sortBy cmpSignificance ts
+
+
+
+-- fromPoint'   :: Foldable f => i -> f r -> Symbolic i Int r
+-- fromPoint' i = Symbolic . zipWith (\j x -> Term x [(i,j)]) [0..] . toList
+
+
+
+-- testZ :: Symbolic Int Int Int
+-- testZ = (5 + 6) *
+
+
+
+
+
+  --   case sign i of
+  --                   (-1) -> Negative $ fromInteger i
+  --                   0    -> Zero
+  --                   _    -> Positive $ fromInteger i
+  -- negate        = \case
+  --   Negative c -> Positive c
+  --   Positive c -> Negative c
+
+
+newtype N = N String deriving (Show,Eq)
+
+
+instance Num N where
+  (N x) + (N y) = N $ x <> "+" <> y
+  (N x) * (N y) = N $ x <> y
+  negate  (N x) = N ("negate(" <> x <> ")")
+  fromInteger = N . show
+
+
+n       :: (Ord i, Ord j) => String -> i -> j -> Symbolic i j N
+n x i j = Symbolic [Term (N x) mempty, Term 1 (singleton (i,j))]
+
+
+v2 [a,b] = V2 a b
+v3 [a,b,c] = V3 a b c
+v4 [a,b,c,d] = V4 a b c d
+
+print' :: (Show i, Show j, Show r, Ord i, Ord j) => Symbolic i j r -> IO ()
+print' = mapM_ print . orderedTerms
+
+testM :: Symbolic Int Int (Expr String Int)
+testM = det22 $ V2 (v2 $ lambdaRow 2 [Var "p"])
+                   (v2 $ lambdaRow 5 [Var "q"])
+
+testM3 :: Symbolic Int Int (Expr String Int)
+testM3 = det33 $ V3 (v3 $ lambdaRow 2 [Var "i1", Var "i2"])
+                    (v3 $ lambdaRow 5 [Var "j1", Var "j2"])
+                    (v3 $ lambdaRow 8 [Var "k1", Var "k2"])
+
+
+
+-- testM3 = det33 $ V3 (fromPoint' [N "px", N "py"] <> 1)
+--                     (fromPoint' [N "px", N "py"] <> 1)
+--    (fromPoint' [N "px", N "py"] <> 1)
+-- -- (V3 (N "qx") (N "qy") 1)
+-- --                     (V3 (N "rx") (N "ry") 1)
