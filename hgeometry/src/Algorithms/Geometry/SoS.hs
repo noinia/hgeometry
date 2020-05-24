@@ -1,43 +1,28 @@
-{-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SoS
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
 --
 -- Implementation of
 -- Simulation of Simplicity: A Technique to Cope with Degenerate Cases in Geometric Algorithms
 --
 -- By
 -- Herbert Edelsbrunner and Ernst Peter Mucke
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SoS where
 
-import           Algorithms.Geometry.SoS.Sign
-import           Algorithms.Geometry.SoS.Expr
-import           Algorithms.Geometry.SoS.RWithIdx
-import           Control.Lens
-import           Control.CanAquire
-import           Control.Monad.ST.Strict
-import           Control.Monad.State.Strict
-import           Data.Bifunctor
-import           Data.Ext
-import           Data.Foldable (toList)
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import qualified Data.Geometry.Vector as GV
-import           Data.Geometry.Vector hiding (imap)
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import           Data.Maybe
-import           Data.Ord (Down(..))
-import           Data.Reflection
-import           Data.Util
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-import           GHC.TypeNats
-import           Linear.Matrix
-import           Linear.V2 (V2(..))
-import           Linear.V3 (V3(..))
-import           Linear.V4 (V4(..))
+import Algorithms.Geometry.SoS.Internal
+import Algorithms.Geometry.SoS.Orientation
+import Algorithms.Geometry.SoS.Sign
+import Control.CanAquire
+import Control.Lens
+import Data.Ext
+import Data.Geometry.Point.Internal
+import Data.Geometry.Properties
+import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
