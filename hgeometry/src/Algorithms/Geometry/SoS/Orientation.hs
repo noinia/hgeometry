@@ -49,11 +49,11 @@ sideTest q ps = case bimap odd signDet $ sort q ps of
                   (False, d) -> d
 
 {-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 1 r), HasIndex i, Num r, Eq r) => P i 1 r -> Vector 1 (P i 1 r) -> Sign #-}
+  (CanAquire i (Point 1 r), Num r, Eq r) => P i 1 r -> Vector 1 (P i 1 r) -> Sign #-}
 {-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 2 r), HasIndex i, Num r, Eq r) => P i 2 r -> Vector 2 (P i 2 r) -> Sign #-}
+  (CanAquire i (Point 2 r), Num r, Eq r) => P i 2 r -> Vector 2 (P i 2 r) -> Sign #-}
 {-# SPECIALIZE sideTest ::
-  (CanAquire i (Point 3 r), HasIndex i, Num r, Eq r) => P i 3 r -> Vector 3 (P i 3 r) -> Sign #-}
+  (CanAquire i (Point 3 r), Num r, Eq r) => P i 3 r -> Vector 3 (P i 3 r) -> Sign #-}
 
 
 -- | Returns the number of comparisons and the sorted matrix, in which the rows are
@@ -69,11 +69,11 @@ sort q ps = second (fmap asVec) . sortI . fmap (with indexOf) $ q `GV.cons` ps
     asVec (With _ p) = toVec . asPoint $ p
 
 {-# SPECIALIZE sort ::
-  (CanAquire i (Point 1 r), HasIndex i) => P i 1 r -> Vector 1 (P i 1 r) -> (Int, Vector 2 (Vector 1 r)) #-}
+  CanAquire i (Point 1 r) => P i 1 r -> Vector 1 (P i 1 r) -> (Int, Vector 2 (Vector 1 r)) #-}
 {-# SPECIALIZE sort ::
-  (CanAquire i (Point 2 r), HasIndex i) => P i 2 r -> Vector 2 (P i 2 r) -> (Int, Vector 3 (Vector 2 r)) #-}
+  CanAquire i (Point 2 r) => P i 2 r -> Vector 2 (P i 2 r) -> (Int, Vector 3 (Vector 2 r)) #-}
 {-# SPECIALIZE sort ::
-  (CanAquire i (Point 3 r), HasIndex i) => P i 3 r -> Vector 3 (P i 3 r) -> (Int, Vector 4 (Vector 3 r)) #-}
+  CanAquire i (Point 3 r) => P i 3 r -> Vector 3 (P i 3 r) -> (Int, Vector 4 (Vector 3 r)) #-}
 
 
 -- | Data type for p values that have an index.

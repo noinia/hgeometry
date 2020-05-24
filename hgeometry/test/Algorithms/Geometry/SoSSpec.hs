@@ -1,6 +1,6 @@
 module Algorithms.Geometry.SoSSpec where
 
-import           Algorithms.Geometry.SoS
+import           Algorithms.Geometry.SoS.Orientation
 import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Geometry.Vector
