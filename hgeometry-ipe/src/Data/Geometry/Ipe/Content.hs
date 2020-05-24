@@ -34,6 +34,7 @@ import           Data.Geometry.Ipe.Attributes hiding (Matrix)
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.Layer
 import           Data.Geometry.Ipe.Path
+import           Data.Geometry.Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation

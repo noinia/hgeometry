@@ -11,15 +11,18 @@
 --------------------------------------------------------------------------------
 module Data.Ext.Multi where
 
+import Control.DeepSeq
 import Control.Lens
 import Data.Coerce
 import Data.Vinyl
+import GHC.Generics (Generic)
+import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 data family core :+ (extras :: [*]) :: *
 
-newtype instance core :+ '[]    = Only core
+newtype instance core :+ '[]    = Only core deriving (Eq,Ord,NFData,Arbitrary,Generic,Show)
 data    instance core :+ (t:ts) = WithExtra !core (HList (t:ts))
 
 
@@ -27,7 +30,7 @@ infixr 1 :+
 
 pattern (:+)   :: c -> HList (e:extras) -> c :+ (e:extras)
 pattern c :+ r = WithExtra c r
-
+{-# COMPLETE (:+) #-}
 
 ext :: c -> c :+ '[]
 ext = Only
@@ -55,3 +58,5 @@ instance HasExtras (t:ts) '[] where
   extra = lens (\(_ :+ r) -> r) (\(c :+ _) _ -> Only c)
 instance HasExtras (t:ts) (a:as) where
   extra = lens (\(_ :+ r) -> r) (\(c :+ _) r' -> c :+ r')
+
+--------------------------------------------------------------------------------

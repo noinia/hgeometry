@@ -46,7 +46,7 @@ import           Data.Geometry.Ipe.Color(IpeColor(..))
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Polygon as Polygon
-import qualified Data.Geometry.Transformation as Trans
+import qualified Data.Geometry.Matrix as Matrix
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
@@ -125,7 +125,7 @@ instance IpeReadText Int where
 instance Coordinate r => IpeReadText (Point 2 r) where
   ipeReadText = readPoint
 
-instance Coordinate r => IpeReadText (Trans.Matrix 3 3 r) where
+instance Coordinate r => IpeReadText (Matrix.Matrix 3 3 r) where
   ipeReadText = readMatrix
 
 instance IpeReadText LayerName where

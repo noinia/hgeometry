@@ -8,8 +8,8 @@ import           Data.Ext (ext)
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.ParserPrimitives
 import           Data.Geometry.Ipe.Path (Operation(..))
+import           Data.Geometry.Matrix
 import           Data.Geometry.Point
-import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import           Data.Ratio
 import           Data.RealNumber.Rational

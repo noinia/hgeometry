@@ -33,6 +33,7 @@ import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon (SimplePolygon)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Geometry.Matrix
 import qualified Data.LSeq as LSeq
 import           Data.Traversable
 

@@ -42,7 +42,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon (Polygon, outerBoundary, holeList, asSimplePolygon)
-import qualified Data.Geometry.Transformation as GT
+import qualified Data.Geometry.Matrix as Matrix
 import           Data.Geometry.Vector
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -264,8 +264,8 @@ instance IpeWriteText r => IpeWrite (IpeSymbol r) where
 
 --------------------------------------------------------------------------------
 
-instance IpeWriteText r => IpeWriteText (GT.Matrix 3 3 r) where
-  ipeWriteText (GT.Matrix m) = unwords' [a,b,c,d,e,f]
+instance IpeWriteText r => IpeWriteText (Matrix.Matrix 3 3 r) where
+  ipeWriteText (Matrix.Matrix m) = unwords' [a,b,c,d,e,f]
     where
       (Vector3 r1 r2 _) = m
 

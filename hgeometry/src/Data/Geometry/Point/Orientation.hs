@@ -1,7 +1,7 @@
 module Data.Geometry.Point.Orientation where
 
+import Algorithms.Geometry.SoS.Sign
 import Data.Geometry.Point.Class
-import Algorithms.Geometry.SoS
 
 --------------------------------------------------------------------------------
 

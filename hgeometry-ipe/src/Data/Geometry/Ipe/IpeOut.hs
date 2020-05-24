@@ -37,7 +37,6 @@ import           Data.Geometry.PolyLine (PolyLine,fromLineSegment)
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
 import qualified Data.LSeq as LSeq
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
