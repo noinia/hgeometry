@@ -1,37 +1,23 @@
-module Algorithms.Geometry.SoS.Symbolic where
+module Algorithms.Geometry.SoS.Symbolic(
+    EpsFold
+  , eps
+  , hasNoPertubation
 
-import           Algorithms.Geometry.SoS.Expr
-import           Algorithms.Geometry.SoS.RWithIdx
+  , Term(..), term
+
+  , Symbolic
+  , constant, symbolic, perturb
+
+  , toTerms
+  , signOf
+  ) where
+
 import           Algorithms.Geometry.SoS.Sign (Sign(..))
-import           Control.Lens
-import           Control.Monad.ST.Strict
-import           Control.Monad.State.Strict
-import           Data.Bifunctor
-import           Data.Ext
 import           Data.Foldable (toList)
-import           Data.Geometry.Point.Class
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
-import           Data.Geometry.Transformation
-import qualified Data.Geometry.Vector as GV
-import           Data.Geometry.Vector hiding (imap)
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.Merge.Strict as Map
-import           Data.Maybe
-import           Data.Ord (Down(..))
-import           Data.Reflection
-import           Data.Util
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-import           GHC.TypeNats
-import           Linear.Matrix
-import           Linear.V2 (V2(..))
-import           Linear.V3 (V3(..))
-import           Linear.V4 (V4(..))
-
+import           Data.Maybe (isNothing)
 
 --------------------------------------------------------------------------------
 -- * EpsFolds
@@ -56,13 +42,20 @@ import           Linear.V4 (V4(..))
 --  > \Pi_{(a,b) \leq (i,j)} \varepsilon(a,b)
 --  > \varepsilon(k,\ell)
 -- ]
-newtype EpsFold i j = EpsFold (Bag (i,j)) deriving (Show,Semigroup,Monoid)
+newtype EpsFold i j = Pi (Bag (i,j)) deriving (Semigroup,Monoid)
+
+instance (Show i, Show j) => Show (EpsFold i j) where
+  showsPrec d (Pi b) = showParen (d > app_prec) $
+                         showString "Pi " . showsPrec d (toList b)
+    where
+      app_prec = 10
+
 
 instance (Ord i, Ord j) => Eq (EpsFold i j) where
   e1 == e2 = (e1 `compare` e2) == EQ
 
 instance (Ord i, Ord j) => Ord (EpsFold i j) where
-  (EpsFold e1) `compare` (EpsFold e2) = e2e1 `compare` e1e2
+  (Pi e1) `compare` (Pi e2) = e2e1 `compare` e1e2
     where
       e1e2 = maximum' $ e1 `difference` e2
       e2e1 = maximum' $ e2 `difference` e1
@@ -80,15 +73,13 @@ instance (Ord i, Ord j) => Ord (EpsFold i j) where
     --
     --
 
+-- | Creates the term \(\varepsilon(i,j)\)
+eps :: (i,j) -> EpsFold i j
+eps = Pi . singleton
 
-
-singletonEpsFold :: (i,j) -> EpsFold i j
-singletonEpsFold = EpsFold . singleton
-
-
+-- | Test if the epsfold has no pertubation at all (i.e. if it is \(\Pi_{\emptyset}\)
 hasNoPertubation             :: EpsFold i j -> Bool
-hasNoPertubation (EpsFold b) = null b
-
+hasNoPertubation (Pi b) = null b
 
 --------------------------------------------------------------------------------
 -- * Terms
@@ -100,11 +91,20 @@ hasNoPertubation (EpsFold b) = null b
 --
 -- for a constant c and an arbitrarily small value \(eps\), and a
 -- positive value \(\delta\).
-data Term i j r = Term r (EpsFold i j) deriving (Show,Eq,Functor)
+data Term i j r = Term r (EpsFold i j) deriving (Eq,Functor)
+
+instance (Show i, Show j, Show r) => Show (Term i j r) where
+  showsPrec d (Term c es) = showParen (d > up_prec) $
+                               showsPrec (up_prec + 1) c
+                             . showString " * "
+                             . showsPrec (up_prec + 1) es
+    where
+      up_prec = 5
+
 
 -- | Creates a singleton term
 term      :: r -> (i, j) -> Term i j r
-term r ij = Term r $ singletonEpsFold ij
+term r ij = Term r $ eps ij
 
 instance (Ord i, Ord j, Ord r, Num r) => Ord (Term i j r) where
   (Term c e1) `compare` (Term d e2) = case (hasNoPertubation e1, hasNoPertubation e2) of
@@ -132,6 +132,7 @@ instance (Ord i, Ord j, Ord r, Num r) => Ord (Term i j r) where
   -- ordering on that.
 
 --------------------------------------------------------------------------------
+-- * Symbolic
 
 -- | Represents a Sum of terms, i.e. a value that has the form:
 --
@@ -140,18 +141,29 @@ instance (Ord i, Ord j, Ord r, Num r) => Ord (Term i j r) where
 -- \]
 --
 -- The terms are represented in order of decreasing significance.
-newtype Symbolic i j r = Symbolic (Map.Map (EpsFold i j) r) deriving (Show,Eq,Functor)
+--
+-- The main idea in this type is that, if symbolic values contains
+-- \(\varepsilon(i,j)\) terms we can always order them. That is, two
+-- Symbolic terms will be equal only if:
+--
+-- - they contain *only* a constant term (that is equal)
+-- - they contain the exact same \(\varepsilon\)-fold.
+--
+newtype Symbolic i j r = Sum (Map.Map (EpsFold i j) r) deriving (Functor)
 
 -- | Produces a list of terms, in decreasing order of significance
-toTerms              :: Symbolic i j r -> [Term i j r]
-toTerms (Symbolic m) = map (\(ij,c) -> Term c ij) . Map.toAscList $ m
+toTerms         :: Symbolic i j r -> [Term i j r]
+toTerms (Sum m) = map (\(ij,c) -> Term c ij) . Map.toAscList $ m
 
--- | Computing the Sign of an expression.
+-- | Computing the Sign of an expression. (Nothing represents zero)
 signOf   :: (Num r, Eq r) => Symbolic i j r -> Maybe Sign
 signOf e = case List.dropWhile (== 0) . map (\(Term c _) -> signum c) $ toTerms e of
              []     -> Nothing
              (-1:_) -> Just Negative
              _      -> Just Positive
+
+instance (Ord i, Ord j, Eq r, Num r) => Eq (Symbolic i j r) where
+  e1 == e2 = isNothing $ signOf (e1 - e2)
 
 instance (Ord i, Ord j, Ord r, Num r) => Ord (Symbolic i j r) where
   e1 `compare` e2 = case signOf (e1 - e2) of
@@ -160,11 +172,10 @@ instance (Ord i, Ord j, Ord r, Num r) => Ord (Symbolic i j r) where
                       Just Positive -> GT
 
 instance (Ord i, Ord j, Num r, Eq r) => Num (Symbolic i j r) where
-  (Symbolic e1) + (Symbolic e2) =
-      Symbolic $ Map.merge Map.preserveMissing -- insert things only in e1
-                           Map.preserveMissing -- insert things only in e2
-                           combine
-                           e1 e2
+  (Sum e1) + (Sum e2) = Sum $ Map.merge Map.preserveMissing -- insert things only in e1
+                                        Map.preserveMissing -- insert things only in e2
+                                        combine
+                                        e1 e2
     where
       -- if things are in both e1 and e2, we add the constant terms. If they are non-zero
       -- we use this value in the map. Otherwise we drop it.
@@ -174,13 +185,11 @@ instance (Ord i, Ord j, Num r, Eq r) => Num (Symbolic i j r) where
 
   negate = fmap negate
 
-  (Symbolic ts) * (Symbolic ts') = Symbolic $
-    Map.fromListWith (+) [ (es <> es',c*d)
-                         | (es, c) <- Map.toList ts
-                         , (es',d) <- Map.toList ts'
-                         , c*d /= 0
-                         ]
-
+  (Sum ts) * (Sum ts') = Sum $ Map.fromListWith (+) [ (es <> es',c*d)
+                                                    | (es, c) <- Map.toList ts
+                                                    , (es',d) <- Map.toList ts'
+                                                    , c*d /= 0
+                                                    ]
 
   fromInteger x = constant (fromInteger x)
 
@@ -192,20 +201,27 @@ instance (Ord i, Ord j, Num r, Eq r) => Num (Symbolic i j r) where
   abs x | signum x == -1 = (-1)*x
         | otherwise      = x
 
+
+instance (Show i, Show j, Show r) => Show (Symbolic i j r) where
+  showsPrec d s = showParen (d > app_prec) $
+                    showString "Sum " . showsPrec d (toTerms s)
+    where
+      app_prec = 10
+
 ----------------------------------------
 
 -- | Creates a constant symbolic value
 constant   :: (Ord i, Ord j) => r -> Symbolic i j r
-constant c = Symbolic $ Map.singleton mempty c
+constant c = Sum $ Map.singleton mempty c
 
 -- | Creates a symbolic vlaue with a single indexed term. If you just need a constant (i.e. non-indexed), use 'constant'
 symbolic      :: (Ord i, Ord j) => r -> (i, j) -> Symbolic i j r
-symbolic r ij = Symbolic $ Map.singleton (singletonEpsFold ij) r
+symbolic r ij = Sum $ Map.singleton (eps ij) r
 
 -- | given the value c and the index pair ij, creates the perturbed value
 -- \(c + \varepsilon(i,j)\)
 perturb      :: (Num r, Ord i, Ord j) => r -> (i, j) -> Symbolic i j r
-perturb c ij = Symbolic $ Map.fromAscList [ (mempty,c) , (singletonEpsFold ij,1) ]
+perturb c ij = Sum $ Map.fromAscList [ (mempty,c) , (eps ij,1) ]
 
 
 --------------------------------------------------------------------------------
@@ -222,6 +238,7 @@ instance Foldable Bag where
   -- ^ Takes multiplicity into account.
   foldMap f (Bag m) =
     Map.foldMapWithKey (\k d -> foldMap f (List.replicate (fromIntegral d+1) k)) m
+  null (Bag m) = Map.null m
 
 instance Ord k => Semigroup (Bag k) where
   (Bag m) <> (Bag m') = Bag $ Map.unionWith (\d d' -> d + d' + 1) m m'
