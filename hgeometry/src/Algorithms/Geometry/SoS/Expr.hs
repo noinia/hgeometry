@@ -3,6 +3,7 @@ module Algorithms.Geometry.SoS.Expr where
 
 import           Control.Lens
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..),nonEmpty)
 
 --------------------------------------------------------------------------------
 
@@ -14,6 +15,24 @@ data Expr v r = Constant r
               deriving (Show,Eq)
 makePrisms ''Expr
 
+
+foldExpr :: (r -> b) -> (b -> b) -> ([b] -> b) -> ([b] -> b) -> (v -> b) -> Expr v r -> b
+foldExpr con' neg' sum' prod' var' = go
+  where
+    go = \case
+      Constant c -> con' c
+      Negate e   -> neg'  $ go e
+      Sum es     -> sum'  $ map go es
+      Prod es    -> prod' $ map go es
+      Var v      -> var' v
+
+-- | Test if the expression has any variables.
+hasVariables :: Expr v r -> Bool
+hasVariables = foldExpr (const False)
+                        id
+                        or
+                        or
+                        (const True)
 
 instance (Num r) => Num (Expr i r) where
   fromInteger = Constant . fromInteger

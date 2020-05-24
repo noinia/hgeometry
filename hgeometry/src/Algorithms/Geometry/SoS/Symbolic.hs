@@ -3,7 +3,7 @@ module Algorithms.Geometry.SoS.Symbolic(
   , eps
   , hasNoPertubation
 
-  , Term(..), term
+  , Term(..), term, constantFactor
 
   , Symbolic
   , constant, symbolic, perturb
@@ -13,6 +13,7 @@ module Algorithms.Geometry.SoS.Symbolic(
   ) where
 
 import           Algorithms.Geometry.SoS.Sign (Sign(..))
+import           Control.Lens
 import           Data.Foldable (toList)
 import qualified Data.List as List
 import qualified Data.Map as Map
@@ -25,36 +26,36 @@ import           Data.Maybe (isNothing)
 
 -- | An EpsFold represents the term
 --
--- \[\Pi_{(i,j)\in is} \varepsilon(i,j) \]
+-- \[\Pi_{(i)\in is} \varepsilon(i) \]
 --
 -- The functions (\varepsilon\) satisfy the following property:
 --
--- for every pair of indices \( (i,j) \leq (k,\ell) \) we have that:
+-- for every pair of indices \( i) < k \) we have that:
 --
--- \[ \Pi_{(a,b) \leq (i,j)} \varepsilon(a,b) > \varepsilon(k,\ell)
+-- \[ \Pi_{a \leq i} \varepsilon(a) > \varepsilon(k)
 -- \]
 --
 -- Moreover, notice that, since \(\varepsilon \in (0,1)\), this
--- property also holds for any subset \(S\) of the \((a,b)\) pairs,
+-- property also holds for any subset \(S\) of the indices \(a\)
 -- i.e.:
 --
--- \[ \Pi_{(a,b) (a,b) \leq (i,j) \land (a,b) \in S} \varepsilon(a,b)
---  > \Pi_{(a,b) \leq (i,j)} \varepsilon(a,b)
---  > \varepsilon(k,\ell)
+-- \[ \Pi_{a \leq i \land a \in S} \varepsilon(a)
+--  > \Pi_{a \leq i} \varepsilon(a)
+--  > \varepsilon(k)
 -- ]
-newtype EpsFold i j = Pi (Bag (i,j)) deriving (Semigroup,Monoid)
+newtype EpsFold i = Pi (Bag i) deriving (Semigroup,Monoid)
 
-instance (Show i, Show j) => Show (EpsFold i j) where
+instance Show i => Show (EpsFold i) where
   showsPrec d (Pi b) = showParen (d > app_prec) $
                          showString "Pi " . showsPrec d (toList b)
     where
       app_prec = 10
 
 
-instance (Ord i, Ord j) => Eq (EpsFold i j) where
+instance Ord i => Eq (EpsFold i) where
   e1 == e2 = (e1 `compare` e2) == EQ
 
-instance (Ord i, Ord j) => Ord (EpsFold i j) where
+instance Ord i => Ord (EpsFold i) where
   (Pi e1) `compare` (Pi e2) = e2e1 `compare` e1e2
     where
       e1e2 = maximum' $ e1 `difference` e2
@@ -62,10 +63,10 @@ instance (Ord i, Ord j) => Ord (EpsFold i j) where
     -- note: If the terms are all the same, the difference of the bags is empty
     -- and thus both e1e2 and e2e1 are Nothing and thus equal.
 
-    -- otherwise, let (i,j) be the largest term that is in e1 but not in e2.
+    -- otherwise, let i be the largest term that is in e1 but not in e2.
     -- If e2 does not have any terms at all (Nothing) it will be bigger than e1
     --
-    -- if e2 does have a term, let (k,l) be the largest one, then the
+    -- if e2 does have a term, let k be the largest one, then the
     -- biggest of those terms is the pair whose indices comes first.
 
     -- note that the pertubation becomes increasingly smaller for
@@ -73,12 +74,12 @@ instance (Ord i, Ord j) => Ord (EpsFold i j) where
     --
     --
 
--- | Creates the term \(\varepsilon(i,j)\)
-eps :: (i,j) -> EpsFold i j
+-- | Creates the term \(\varepsilon(i)\)
+eps :: i -> EpsFold i
 eps = Pi . singleton
 
 -- | Test if the epsfold has no pertubation at all (i.e. if it is \(\Pi_{\emptyset}\)
-hasNoPertubation             :: EpsFold i j -> Bool
+hasNoPertubation        :: EpsFold i -> Bool
 hasNoPertubation (Pi b) = null b
 
 --------------------------------------------------------------------------------
@@ -86,14 +87,18 @@ hasNoPertubation (Pi b) = null b
 
 -- | A term 'Term c es' represents a term:
 --
--- \[ c \Pi_{(i,j) \in es} \varepsilon(i,j)
+-- \[ c \Pi_{i \in es} \varepsilon(i)
 -- \]
 --
--- for a constant c and an arbitrarily small value \(eps\), and a
--- positive value \(\delta\).
-data Term i j r = Term r (EpsFold i j) deriving (Eq,Functor)
+-- for a constant c and an arbitrarily small value \(\varepsilon\),
+-- parameterized by i.
+data Term i r = Term r (EpsFold i) deriving (Eq,Functor)
 
-instance (Show i, Show j, Show r) => Show (Term i j r) where
+-- | Lens to access the constant 'c' in the term.
+constantFactor :: Lens' (Term i r) r
+constantFactor = lens (\(Term c _) -> c) (\(Term _ es) c -> Term c es)
+
+instance (Show i, Show r) => Show (Term i r) where
   showsPrec d (Term c es) = showParen (d > up_prec) $
                                showsPrec (up_prec + 1) c
                              . showString " * "
@@ -103,10 +108,10 @@ instance (Show i, Show j, Show r) => Show (Term i j r) where
 
 
 -- | Creates a singleton term
-term      :: r -> (i, j) -> Term i j r
-term r ij = Term r $ eps ij
+term      :: r -> i -> Term i r
+term r i = Term r $ eps i
 
-instance (Ord i, Ord j, Ord r, Num r) => Ord (Term i j r) where
+instance (Ord i, Ord r, Num r) => Ord (Term i r) where
   (Term c e1) `compare` (Term d e2) = case (hasNoPertubation e1, hasNoPertubation e2) of
                                         (True,True) -> c    `compare` d
                                         _           -> case (signum c, signum d) of
@@ -137,41 +142,41 @@ instance (Ord i, Ord j, Ord r, Num r) => Ord (Term i j r) where
 -- | Represents a Sum of terms, i.e. a value that has the form:
 --
 -- \[
---   \sum c \Pi_{(i,j)} \varepsilon(i,j)
+--   \sum c \Pi_i \varepsilon(i)
 -- \]
 --
 -- The terms are represented in order of decreasing significance.
 --
 -- The main idea in this type is that, if symbolic values contains
--- \(\varepsilon(i,j)\) terms we can always order them. That is, two
+-- \(\varepsilon(i)\) terms we can always order them. That is, two
 -- Symbolic terms will be equal only if:
 --
 -- - they contain *only* a constant term (that is equal)
 -- - they contain the exact same \(\varepsilon\)-fold.
 --
-newtype Symbolic i j r = Sum (Map.Map (EpsFold i j) r) deriving (Functor)
+newtype Symbolic i r = Sum (Map.Map (EpsFold i) r) deriving (Functor)
 
 -- | Produces a list of terms, in decreasing order of significance
-toTerms         :: Symbolic i j r -> [Term i j r]
-toTerms (Sum m) = map (\(ij,c) -> Term c ij) . Map.toAscList $ m
+toTerms         :: Symbolic i r -> [Term i r]
+toTerms (Sum m) = map (\(i,c) -> Term c i) . Map.toDescList $ m
 
 -- | Computing the Sign of an expression. (Nothing represents zero)
-signOf   :: (Num r, Eq r) => Symbolic i j r -> Maybe Sign
+signOf   :: (Num r, Eq r) => Symbolic i r -> Maybe Sign
 signOf e = case List.dropWhile (== 0) . map (\(Term c _) -> signum c) $ toTerms e of
              []     -> Nothing
              (-1:_) -> Just Negative
              _      -> Just Positive
 
-instance (Ord i, Ord j, Eq r, Num r) => Eq (Symbolic i j r) where
+instance (Ord i, Eq r, Num r) => Eq (Symbolic i r) where
   e1 == e2 = isNothing $ signOf (e1 - e2)
 
-instance (Ord i, Ord j, Ord r, Num r) => Ord (Symbolic i j r) where
+instance (Ord i, Ord r, Num r) => Ord (Symbolic i r) where
   e1 `compare` e2 = case signOf (e1 - e2) of
                       Nothing       -> EQ
                       Just Negative -> LT
                       Just Positive -> GT
 
-instance (Ord i, Ord j, Num r, Eq r) => Num (Symbolic i j r) where
+instance (Ord i, Num r, Eq r) => Num (Symbolic i r) where
   (Sum e1) + (Sum e2) = Sum $ Map.merge Map.preserveMissing -- insert things only in e1
                                         Map.preserveMissing -- insert things only in e2
                                         combine
@@ -202,7 +207,7 @@ instance (Ord i, Ord j, Num r, Eq r) => Num (Symbolic i j r) where
         | otherwise      = x
 
 
-instance (Show i, Show j, Show r) => Show (Symbolic i j r) where
+instance (Show i, Show r) => Show (Symbolic i r) where
   showsPrec d s = showParen (d > app_prec) $
                     showString "Sum " . showsPrec d (toTerms s)
     where
@@ -211,17 +216,17 @@ instance (Show i, Show j, Show r) => Show (Symbolic i j r) where
 ----------------------------------------
 
 -- | Creates a constant symbolic value
-constant   :: (Ord i, Ord j) => r -> Symbolic i j r
+constant   :: Ord i => r -> Symbolic i r
 constant c = Sum $ Map.singleton mempty c
 
 -- | Creates a symbolic vlaue with a single indexed term. If you just need a constant (i.e. non-indexed), use 'constant'
-symbolic      :: (Ord i, Ord j) => r -> (i, j) -> Symbolic i j r
-symbolic r ij = Sum $ Map.singleton (eps ij) r
+symbolic     :: Ord i => r -> i -> Symbolic i r
+symbolic r i = Sum $ Map.singleton (eps i) r
 
--- | given the value c and the index pair ij, creates the perturbed value
--- \(c + \varepsilon(i,j)\)
-perturb      :: (Num r, Ord i, Ord j) => r -> (i, j) -> Symbolic i j r
-perturb c ij = Sum $ Map.fromAscList [ (mempty,c) , (eps ij,1) ]
+-- | given the value c and the index i, creates the perturbed value
+-- \(c + \varepsilon(i)\)
+perturb      :: (Num r, Ord i) => r -> i -> Symbolic i r
+perturb c i = Sum $ Map.fromAscList [ (mempty,c) , (eps i,1) ]
 
 
 --------------------------------------------------------------------------------
