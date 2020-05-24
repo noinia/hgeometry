@@ -33,6 +33,8 @@ spec = do
       dtEdges (take' 1 myPoints) `shouldBe` []
     toSpec (TestCase "myPoints" myPoints)
     toSpec (TestCase "myPoints'" myPoints')
+    -- toSpec (TestCase "maartens points" buggyPoints3)
+
     ipeSpec
 
 ipeSpec :: Spec
@@ -46,7 +48,7 @@ testCases fp = (runIO $ readInput fp) >>= \case
 
 
 -- | Point sets per color, Crosses form the solution
-readInput    :: FilePath -> IO (Either ConversionError [TestCase Rational])
+readInput    :: FilePath -> IO (Either ConversionError [TestCase () Rational])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint :+ ()) pSet
@@ -58,12 +60,12 @@ readInput fp = fmap f <$> readSinglePageFile fp
 
 
 
-data TestCase r = TestCase { _color    :: String
-                           , _pointSet :: NonEmpty.NonEmpty (Point 2 r :+ ())
-                           } deriving (Show,Eq)
+data TestCase p r = TestCase { _color    :: String
+                             , _pointSet :: NonEmpty.NonEmpty (Point 2 r :+ p)
+                             } deriving (Show,Eq)
 
 
-toSpec                    :: (Fractional r, Ord r, Show r) => TestCase r -> Spec
+toSpec                    :: (Fractional r, Ord r, Show r, Show p) => TestCase p r -> Spec
 toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
                             sameAsNaive c pts
 
@@ -138,3 +140,14 @@ buggyPoints2 = NonEmpty.fromList $ [ Point2 217.44781269876754 249.2474154349827
                                    , Point2 172.55365082143922 2.8346743864823387 :+ 'd'
                                    , Point2 250.55083565080437 93.13205719006257  :+ 'e'
                                    ]
+
+
+-- | Maarten reported a problem with the EMST of this set
+buggyPoints3 :: NonEmpty.NonEmpty (Point 2 (RealNumber 18) :+ Int)
+buggyPoints3 = NonEmpty.fromList
+             $ [ Point2 (-128) (-16)                                        :+ 1
+               , Point2 (-64) (-80)                                         :+ 2
+               , Point2 (-2097151243 / 32768000) (-2621440757 / 32768000)   :+ 3
+               , Point2 (-16) (-128)                                        :+ 4
+               , Point2 64 96                                               :+ 5
+               ]
