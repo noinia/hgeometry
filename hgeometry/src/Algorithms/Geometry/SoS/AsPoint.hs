@@ -23,18 +23,21 @@ instance AsPoint p => AsPoint (p :+ e) where
 --------------------------------------------------------------------------------
 
 -- | a P is a 'read only' point in d dimensions
-newtype P i d r = P i deriving (HasIndex, Eq, Show)
+newtype P i d r = P i deriving (Eq, Show)
 
-instance i `CanAquire` (Point d r) => (P i d r) `CanAquire` (Point d r) where
-  aquire (P i) = aquire i
+-- instance HasIndex (P i d r) Int where
+--   indexOf (P i) = indexOf i
 
-type instance NumType   (P i d r) = r
-type instance Dimension (P i d r) = d
+-- instance i `CanAquire` (Point d r) => (P i d r) `CanAquire` (Point d r) where
+--   aquire (P i) = aquire i
+
+-- type instance NumType   (P i d r) = r
+-- type instance Dimension (P i d r) = d
 
 
-instance i `CanAquire` (Point d r) => AsPoint (P i d r) where
-  asPoint (P i) = aquire i
+-- instance i `CanAquire` (Point d r) => AsPoint (P i d r) where
+--   asPoint (P i) = aquire i
 
-asPointWithIndex       :: (Arity d, i `CanAquire` Point d r, HasIndex i)
-                       => P i d r -> Point d (RWithIdx r)
-asPointWithIndex (P i) = Point . imap (\j r -> RWithIdx r (indexOf i) j) . toVec $ aquire i
+-- asPointWithIndex       :: (Arity d, i `CanAquire` Point d r, HasIndex i)
+--                        => P i d r -> Point d (RWithIdx r)
+-- asPointWithIndex (P i) = Point . imap (\j r -> RWithIdx r (indexOf i) j) . toVec $ aquire i

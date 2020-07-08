@@ -12,9 +12,8 @@ class AsAPoint p where
   {-# MINIMAL asAPoint #-}
   asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
 
-
-  vector' :: Lens (p d r) (p d r) (Vector d r) (Vector d r)
-  vector' = asAPoint.Internal.vector
+  vector' :: Lens (p d r) (p d r') (Vector d r) (Vector d r')
+  vector' = asAPoint . lens Internal.toVec (const Internal.Point)
 
   coord   :: (1 <= i, i <= d, KnownNat i, Arity d) => proxy i -> Lens' (p d r) r
   coord i = asAPoint.Internal.coord i

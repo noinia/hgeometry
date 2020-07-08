@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 module Control.CanAquire(
       runAcquire
     , CanAquire(..)
@@ -27,13 +28,13 @@ runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
     coerceTS _ = fmap I
       -- Ideally this would just be a coerce. But GHC doesn't want to do that.
 
-class HasIndex i => CanAquire i a where
+class HasIndex i Int => CanAquire i a where
   -- | A value of type i can obtain something of type 'a'
   aquire  :: i -> a
 
-class HasIndex i where
+class HasIndex t i | t -> i where
   -- | Types that have an instance of this class can act as indices.
-  indexOf :: i -> Int
+  indexOf :: t -> i
 
 --------------------------------------------------------------------------------
 
@@ -71,7 +72,7 @@ newtype I s a = I Int deriving (Eq, Ord, Enum)
 instance Show (I s a) where
   showsPrec i (I j) = showsPrec i j
 
-instance HasIndex (I s a) where
+instance HasIndex (I s a) Int where
   indexOf (I i) = i
 
 instance Reifies s (V.Vector a) => (I s a) `CanAquire` a where

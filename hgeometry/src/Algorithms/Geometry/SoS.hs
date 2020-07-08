@@ -12,9 +12,12 @@
 -- Herbert Edelsbrunner and Ernst Peter Mucke
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SoS where
+module Algorithms.Geometry.SoS
+  ( module Algorithms.Geometry.SoS.Sign
+  , module Algorithms.Geometry.SoS.Orientation
+  ) where
 
-import Algorithms.Geometry.SoS.Internal
+-- import Algorithms.Geometry.SoS.Internal
 import Algorithms.Geometry.SoS.Orientation
 import Algorithms.Geometry.SoS.Sign
 import Control.CanAquire
@@ -30,10 +33,10 @@ import Data.Geometry.Vector
 
 
 
-sideTest'             :: ( SoS p, Dimension p ~ 2, r ~ NumType p
-                         , Eq r, Num r
-                         ) => [p] -> Sign
-sideTest' (q:p1:p2:_) = sideTest q (Vector2 p1 p2)
+-- sideTest'             :: ( SoS p, Dimension p ~ 2, r ~ NumType p
+--                          , Eq r, Num r
+--                          ) => [p] -> Sign
+-- sideTest' (q:p1:p2:_) = sideTest q (Vector2 p1 p2)
 
 
 
@@ -68,32 +71,32 @@ sideTest' (q:p1:p2:_) = sideTest q (Vector2 p1 p2)
 --------------------------------------------------------------------------------
 
 
--- TODO: Remove this one
-instance HasIndex (Point d r :+ Int) where
-  indexOf = view extra
+-- -- TODO: Remove this one
+-- instance HasIndex (Point d r :+ Int) where
+--   indexOf = view extra
 
 
-test1 :: Sign
-test1 = sideTest (Point1 1 :+ 0 :: Point 1 Int :+ Int) (Vector1 $ Point1 5 :+ 1)
+-- test1 :: Sign
+-- test1 = sideTest (Point1 1 :+ 0 :: Point 1 Int :+ Int) (Vector1 $ Point1 5 :+ 1)
 
-test2 :: Sign
-test2 = sideTest (Point1 5 :+ 0 :: Point 1 Int :+ Int) (Vector1 $ Point1 5 :+ 1)
-
-
-test3 :: Sign
-test3 = sideTest (Point2 (-1) 5 :+ 0 :: Point 2 Int :+ Int) (Vector2 (Point2 0 0  :+ 1)
-                                                                     (Point2 0 10 :+ 2)
-                                                            )
+-- test2 :: Sign
+-- test2 = sideTest (Point1 5 :+ 0 :: Point 1 Int :+ Int) (Vector1 $ Point1 5 :+ 1)
 
 
-pattern Point1 x = Point (Vector1 x)
+-- test3 :: Sign
+-- test3 = sideTest (Point2 (-1) 5 :+ 0 :: Point 2 Int :+ Int) (Vector2 (Point2 0 0  :+ 1)
+--                                                                      (Point2 0 10 :+ 2)
+--                                                             )
 
 
-testV :: Sign
-testV = simulateSimplicity sideTest' [ Point2 (-1) 5
-                                     , Point2 0 0
-                                     , Point2 0 10
-                                     ]
+-- pattern Point1 x = Point (Vector1 x)
+
+
+-- testV :: Sign
+-- testV = simulateSimplicity sideTest' [ Point2 (-1) 5
+--                                      , Point2 0 0
+--                                      , Point2 0 10
+--                                      ]
 
 
 

@@ -1,58 +1,48 @@
 module Algorithms.Geometry.SoSSpec where
 
-import           Algorithms.Geometry.SoS.Orientation
+import           Algorithms.Geometry.SoS.Symbolic
 import           Control.Lens
 import           Control.Monad (forM_)
+import           Data.Foldable
 import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.Proxy
+import           Data.RealNumber.Rational
 import           Data.Util
+import           Data.Word
 import           GHC.TypeNats
 import           Test.Hspec
 import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
-spec :: Spec
-spec = do describe "SoS Sorting" $ do
-            specSort (Proxy @1)
-            specSort (Proxy @2)
-            specSort (Proxy @3)
-            specSort (Proxy @4)
 
 
-
-specSort    :: forall proxy d. (Arity d, SortI d) => proxy d -> Spec
-specSort pd = describe ("sorting " <> show d) $ do
-                forM_ (List.permutations [1..d]) $ \xs -> do
-                  let vs          = vectorFromListUnsafe @d xs
-                      (n,sortedV) = sortI vs
-                  describe (show xs) $ do
-                    it "sorted "             $ sortedV `shouldBe` idV
-                    it "number of exchanges" $ Just n  `shouldBe` exchangesNeeded idV vs
-  where
-    d   = natVal pd
-    idV = vectorFromListUnsafe [1..d]
-
-exchangesNeeded     :: forall a d. (Eq a, Arity d) => Vector d a -> Vector d a -> Maybe Int
-exchangesNeeded u v = List.find (\i -> any (== u) $ exchanges i v) [0..d]
-  where
-    d   = fromIntegral $ natVal (Proxy @d)
-
--- | Generates all vectors we can create by i exchanges.
-exchanges                 :: (Eq a, Arity d) => Int -> Vector d a -> [Vector d a]
-exchanges i v | i == 0    = [v]
-              | otherwise = concatMap (exchanges $ i-1) $ singleExchange v
+-- data Eps = Eps
+--
+evalEps           :: (Fractional r, Integral i, Integral j) => j -> r -> EpsFold i -> r
+evalEps d eps' ef = eps' ^ (sum [ d ^ i | i <- toList $ factors ef])
 
 
--- | Generate single echanges
-singleExchange   :: forall a d. (Eq a, Arity d) => Vector d a -> [Vector d a]
-singleExchange v = map (singleSwap v) $ uniquePairs [0..(d-1)]
-  where
-    d   = fromIntegral $ natVal (Proxy @d)
+newtype SmallInt = SI Int deriving (Show,Eq,Ord,Num,Enum,Real,Integral)
 
-singleSwap             :: (Eq a, Arity d) => Vector d a -> Two Int -> Vector d a
-singleSwap v (Two i j) = imap f v
-  where
-    f k x | k == i    = v^?!ix j
-          | k == j    = v^?!ix i
-          | otherwise = x
+instance Bounded SmallInt where
+  minBound = 0
+  maxBound = 10
+
+instance Arbitrary SmallInt where
+  arbitrary = arbitrarySizedBoundedIntegral
+
+-- unfortunately, it seems that this is not really feasilbe to explicitly evaluate thee things.
+
+-- spec :: Spec
+-- spec = describe "SoS Symoblic" $ do
+--          let eps' = (0.1 :: RealNumber 10)
+--          it "comparing eps-folds " $ property $
+--            \(ef1 :: EpsFold SmallInt) ef2 ->
+--              let b = suitableBase ef1 `max` suitableBase ef2
+--              in compare ef1 ef2 == compare (evalEps b eps' ef1) (evalEps b eps' ef2)
+
+         -- forM_ [1..10] $ \(j :: Integer) ->
+         --   forM_ [1..5] $ \c -> it "math" $
+         --   let d = c+1
+         --   in c * sum [ d^i | i <- [0..j]] < d ^ (j+1) `shouldBe` True

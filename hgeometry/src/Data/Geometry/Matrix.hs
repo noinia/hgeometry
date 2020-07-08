@@ -16,12 +16,12 @@ module Data.Geometry.Matrix(
   , mult
 
   , Invertible(..)
+  , HasDeterminant(..)
   ) where
 
-import           Control.Lens (set, imap)
+import           Control.Lens (imap)
+import           Data.Geometry.Matrix.Internal (mkRow)
 import           Data.Geometry.Vector
-import           Data.Geometry.Matrix.Internal(mkRow)
-import qualified Data.Vector.Fixed as FV
 import           Linear.Matrix ((!*),(!*!))
 import qualified Linear.Matrix as Lin
 import           Unsafe.Coerce (unsafeCoerce)
@@ -64,3 +64,16 @@ instance Fractional r => Invertible 3 r where
 
 instance Fractional r => Invertible 4 r where
   inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv44 . unsafeCoerce $ m
+
+
+class HasDeterminant d where
+  det :: Num r => Matrix d d r -> r
+
+instance HasDeterminant 1 where
+  det (Matrix (Vector1 (Vector1 x))) = x
+instance HasDeterminant 2 where
+  det = Lin.det22 . unsafeCoerce
+instance HasDeterminant 3 where
+  det = Lin.det33 . unsafeCoerce
+instance HasDeterminant 4 where
+  det = Lin.det44 . unsafeCoerce
