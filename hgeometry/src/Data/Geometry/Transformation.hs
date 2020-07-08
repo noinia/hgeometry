@@ -93,6 +93,7 @@ scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
 uniformScaling = scaling . pure
 
+
 --------------------------------------------------------------------------------
 -- * Functions that execute transformations
 
@@ -134,3 +135,13 @@ rotateTo (Vector3 u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
                                                              (snoc v        0)
                                                              (snoc w        0)
                                                              (Vector4 0 0 0 1)
+
+--------------------------------------------------------------------------------
+-- * 2D Transformations
+
+-- | Skew transformation that keeps the y-coordinates fixed and shifts
+-- the x coordinates.
+skewX        :: Num r => r -> Transformation 2 r
+skewX lambda = Transformation . Matrix $ Vector3 (Vector3 1 lambda 0)
+                                                 (Vector3 0 1      0)
+                                                 (Vector3 0 0      1)
