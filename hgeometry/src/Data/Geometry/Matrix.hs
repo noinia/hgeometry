@@ -66,7 +66,7 @@ instance Fractional r => Invertible 4 r where
   inverse' (Matrix m) = Matrix . unsafeCoerce . Lin.inv44 . unsafeCoerce $ m
 
 
-class HasDeterminant d where
+class Arity d => HasDeterminant d where
   det :: Num r => Matrix d d r -> r
 
 instance HasDeterminant 1 where

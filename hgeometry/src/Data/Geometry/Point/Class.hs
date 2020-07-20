@@ -1,25 +1,31 @@
 module Data.Geometry.Point.Class where
 
 import           Control.Lens
-import qualified Data.Geometry.Point.Internal as Internal
 import           Data.Geometry.Point.Internal (Point)
+import qualified Data.Geometry.Point.Internal as Internal
+import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
+class ToAPoint point where
+  toPoint   :: Prism' point (Point (Dimension point) (NumType point))
+
 class AsAPoint p where
-  {-# MINIMAL asAPoint #-}
   asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
 
-  vector' :: Lens (p d r) (p d r') (Vector d r) (Vector d r')
-  vector' = asAPoint . lens Internal.toVec (const Internal.Point)
+vector' :: AsAPoint p => Lens (p d r) (p d r') (Vector d r) (Vector d r')
+vector' = asAPoint . lens Internal.toVec (const Internal.Point)
 
-  coord   :: (1 <= i, i <= d, KnownNat i, Arity d) => proxy i -> Lens' (p d r) r
-  coord i = asAPoint.Internal.coord i
+coord   :: (1 <= i, i <= d, KnownNat i, Arity d, AsAPoint p) => proxy i -> Lens' (p d r) r
+coord i = asAPoint.Internal.coord i
 
-  unsafeCoord   :: Arity d => Int -> Lens' (p d r) r
-  unsafeCoord i = asAPoint.Internal.unsafeCoord i
+unsafeCoord   :: (Arity d, AsAPoint p) => Int -> Lens' (p d r) r
+unsafeCoord i = asAPoint.Internal.unsafeCoord i
+
+instance ToAPoint (Point d r) where
+  toPoint = prism' id Just
 
 instance AsAPoint Point where
   asAPoint = id
