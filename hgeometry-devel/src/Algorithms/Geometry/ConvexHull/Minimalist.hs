@@ -31,7 +31,7 @@ import           Data.Geometry.Polygon.Convex (lowerTangent')
 import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
 import qualified Data.List as List
-import           Data.List.Alternating
+import           Data.List.Alternating(Alternating(..), withNeighbours)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.Util (minimaOn)
@@ -56,10 +56,10 @@ type LowerHull d q r = [Triangle 3 q r]
 
 -- | Computes the lower hull, i.e. set of triangles s.t.
 -- the points are above all supporting planes
-lowerHull' :: forall r q. (Ord r, Fractional r
-                          , Show r, IpeWriteText r, q ~ Int
-                          )
-           => NonEmpty (Point 3 r :+ q) -> LowerHull 3 q r
+lowerHull'     :: (Ord r, Fractional r
+                  , Show r, IpeWriteText r, q ~ Int
+                  )
+               => NonEmpty (Point 3 r :+ q) -> LowerHull 3 q r
 lowerHull' pts = outputTriangles
                . divideAndConquer1With (merge t0) baseCase
                . NonEmpty.groupWith1 (^.core.xCoord)
@@ -118,7 +118,7 @@ merge        :: ( Ord t, Ord p, Fractional t, AsPoint p t
              => t -> Movie p t -> Movie p t -> Movie p t
 merge t0 l r = let b :+ h = tr "inital" $ initialBridge t0 (initialScene l) (initialScene r)
                    m@(Movie pts _ _)   = l `sideBySide` r
-               in -- debugMovieTo ("merge_" <> rangeOfSS l r) ((^.eventTime) <$> events m) $
+               in debugMovieTo ("merge_" <> rangeOfSS l r) ((^.eventTime) <$> events m) $
                   movie pts h $ tr ("events " <> rangeOfSS l r) $ traceBridge b (play $ m)
 
 
@@ -194,21 +194,35 @@ trace b a mt = case tr "trace, nextEvent: " $ nextEvent a mt of
                 in evt ?: trace' (nextTime ne) b' a'
   where
     continue = \case
-      ExistingEvent e a'    -> let b' = bridgeFromExisting b e
-                                   e' = fromExistingEvent b' e
-                               in SP (SP e' b') a'
-                               -- if the existing event is a replace, the bridge may change!
-      BridgeEvent e         -> let z = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
-                               in SP z a
-      CombinedEvent e bi a' -> let e'b' = combinedEvent b e bi (currentScene a) (currentScene a')
-                               in SP e'b' a'
+      ExistingEvent (t :+ acts) a'    ->
+          let e'b' = combinedEvent b t acts [] (currentScene a) (currentScene a')
+          in SP e'b' a'
+          -- we need the handling done in combinedEvent since if this
+          -- is a replace then we may actually have a simultaneous bridge event happening anyway.
+          -- see buggy11S
+      BridgeEvent e                   ->
+          let z = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
+          in SP z a
+      CombinedEvent e (t :+ bActs) a' ->
+          let e'b' = combinedEvent b t e bActs (currentScene a) (currentScene a')
+          in SP e'b' a'
+
+      -- ExistingEvent e a'    -> let b' = bridgeFromExisting b e
+      --                              e' = fromExistingEvent b' e
+      --                          in SP (SP e' b') a'
+      --                          -- if the existing event is a replace, the bridge may change!
+      -- BridgeEvent e         -> let z = tr "bridgeOnlyEvent: " $ bridgeEventOnly b e
+      --                          in SP z a
+      -- CombinedEvent e (t :+ bActs) a' ->
+      --     let e'b' = combinedEvent b t e bActs (currentScene a) (currentScene a')
+      --     in SP e'b' a'
 
 -- | Continues tracing by finding a new birdge event
-trace'           :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
-                   , Show p, Show t, Show (Scene p)
-                   )
+trace'          :: (Ord t, Fractional t, HasNeighbours p, AsPoint p t, Ord p
+                  , Show p, Show t, Show (Scene p)
+                  )
                 => t -> Bridge p -> Animation p t -> [Event p t]
-trace'  t b anim = trace b anim (nextBridgeChange (> t) (currentScene anim) b)
+trace' t b anim = trace b anim (nextBridgeChange (> t) (currentScene anim) b)
 
 ----------------------------------------
 -- ** Finding the Next event
@@ -239,6 +253,10 @@ nextEvent (Alternating _ es) = go es
                                         LT -> ExistingEvent e              (Alternating s es')
                                         EQ -> CombinedEvent (e^.actions) b (Alternating s es')
                                         GT -> BridgeEvent b
+
+-- TODO: if the event is a replace, then maybe it coincides with a bridge event after all.
+
+
 
 
 -- | Computes the next bridge change that satisifies the given
@@ -291,7 +309,7 @@ type BridgeInfo p t = t :+ NonEmpty (BridgeAction p)
 bridgeEventTime :: Lens (BridgeInfo p t) (BridgeInfo p t') t t'
 bridgeEventTime = core
 
-partitionBridgeActions :: NonEmpty (BridgeAction p) -> (Maybe (Action p), Maybe (Action p))
+partitionBridgeActions :: Foldable f => f (BridgeAction p) -> (Maybe (Action p), Maybe (Action p))
 partitionBridgeActions = foldr f (Nothing,Nothing)
   where
     f (BA a p) ~(l,r) = case p of
@@ -331,6 +349,17 @@ bridgeFromAction (Bridge l r) (BA a p) = case a of
 
 ----------------------------------------
 -- ** Handle  Existing
+
+
+
+existingEventOnly     :: Bridge p -> Event' Existing p t
+                                 -> SP (Maybe (Event p t)) (Bridge p)
+existingEventOnly b e = undefined -- case NonEmpty.filter isAReplace e^.actions of
+--                           [] -> undefined -- procede as normal
+
+-- handleExisting
+
+
 
 bridgeFromExisting                :: Ord p => Bridge p -> Event' Existing p t -> Bridge p
 bridgeFromExisting (Bridge l r) e = Bridge (fromMaybe l $ replaces l lActs)
@@ -391,16 +420,18 @@ bridgeEventOnly b bi@(t :+ acts) = case tr "bridgeEventOnly: acts " $ acts of
 
 combinedEvent                                     :: (Fractional t, Ord t, AsPoint p t
                                                      , HasNeighbours p, Ord p
+                                                     , Foldable f
                                                      , Show (Scene p), Show p, Show t
                                                      )
                                                   => Bridge p
+                                                  -> t
                                                   -> NonEmpty (Existing (Action p))
-                                                  -> BridgeInfo p t
+                                                  -> f (BridgeAction p)
                                                   -> Hulls p -- ^ old scene
                                                   -> Hulls p -- ^ the new scene
                                                   -> SP (Maybe (Event p t)) (Bridge p)
-combinedEvent b@(Bridge l r) acts (t :+ bActs) (Two sl sr)
-                                               (Two sl' sr') = SP e' b'
+combinedEvent b@(Bridge l r) t acts bActs (Two sl sr)
+                                          (Two sl' sr') = SP e' b'
   where
     b' = findBridge (1 + t) (NonEmpty.reverse ls) rs
     ls = colinears t l r sl sl' lAct leftActs
@@ -699,26 +730,3 @@ rangeOfS m = let (a,b) = bimap (show @Int. askExtra) (show @Int . askExtra) $ ra
 rangeOf   :: (HasNeighbours p, Ord p) => Movie p t -> (p,p)
 rangeOf m = let s = fromLeftMost $ initialScene m
             in (minimum s, maximum s)
-
-
-
---------------------------------------------------------------------------------
-
-myPts :: NonEmpty (Point 3 R :+ Int)
-myPts = NonEmpty.fromList $ [ Point3 5  5  0  :+ 2
-                            , Point3 1  1  10 :+ 1
-                            , Point3 0  10 20 :+ 0
-                            , Point3 12 1  1  :+ 3
-                            , Point3 22 20  1  :+ 4
-                            ]
-
-
-buggyPoints2 :: NonEmpty (Point 3 R :+ Int)
-buggyPoints2 = fmap (bimap (10 *^) id) . NonEmpty.fromList $ [ Point3 (-5) (-3) 4 :+ 0
-                                                             , Point3 (-5) (-2) 5 :+ 1
-                                                             , Point3 (-5) (-1) 4 :+ 2
-                                                             , Point3 (0) (2)   2 :+ 3
-                                                             , Point3 (1) (-5)  4 :+ 4
-                                                             , Point3 (3) (-3)  2 :+ 5
-                                                             , Point3 (3) (-1)  1 :+ 6
-                                                             ]

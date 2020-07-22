@@ -7,7 +7,7 @@ import           Algorithms.Geometry.ConvexHull.Scene
 import           Control.Lens
 import           Data.Ext
 import qualified Data.List as List
-import           Data.List.Alternating
+import           Data.List.Alternating(Alternating(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           Data.Semigroup
@@ -76,6 +76,7 @@ isADelete = \case
   Delete _ -> True
   _        -> False
 
+isAReplace :: Action p -> Bool
 isAReplace = \case
   Replace _ _ -> True
   _           -> False

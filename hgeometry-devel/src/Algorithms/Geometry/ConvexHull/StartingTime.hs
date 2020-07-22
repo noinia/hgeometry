@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Algorithms.Geometry.ConvexHull.Movie where
 
@@ -28,9 +29,8 @@ import           Data.Typeable (TypeRep, Typeable, typeOf)
 import           Data.Util
 import           GHC.TypeNats
 -- import           Data.Witherable.Class
-import           Prelude hiding (Either(..))
 import           Refined (Refined, unrefine, Predicate(..), throwRefine, RefineException(..))
-
+import qualified Refined
 
 --------------------------------------------------------------------------------
 
@@ -101,3 +101,76 @@ instance (Foldable f, Eq r) => Predicate NotAllTheSame (f r) where
 steepestFrom   :: (Ord r, Num r)
                => (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ b)  -> Point 2 r :+ b
 steepestFrom p = List.minimumBy (ccwCmpAroundWith (Vector2 0 (-1)) p)
+
+
+
+data Sized (l :: k) (u :: k')
+
+data Void
+-- data Ops = Void :> Void
+--          | Void :>= Void
+
+
+
+data Exact
+data L
+data U
+
+instance (Predicate (Refined.SizeEqualTo n) t, KnownNat n)
+       => Predicate (Sized Exact n) t where
+  validate _ = validate @(Refined.SizeEqualTo n) undefined
+
+instance ( Predicate (Refined.SizeGreaterThan l') t
+         , KnownNat l, KnownNat l'
+         , l ~ (1 + l')
+         )
+       => Predicate (Sized l U) t where
+  validate _ = validate @(Refined.SizeGreaterThan l') undefined
+
+instance (Predicate (Refined.SizeLessThan (1+u)) t, KnownNat u)
+       => Predicate (Sized L u) t where
+  validate _ = validate @(Refined.SizeLessThan (1+u)) undefined
+
+instance ( Predicate (Refined.SizeGreaterThan l')    t, KnownNat l, KnownNat l', l ~ (1+l')
+         , Predicate (Refined.SizeLessThan    (1+u)) t, KnownNat u)
+         => Predicate (Sized l u) t where
+  validate _ = validate @(Refined.And (Refined.SizeGreaterThan l')
+                                      (Refined.SizeLessThan (1+u))
+                         ) undefined
+
+
+test :: Either RefineException (Refined (Sized 3 10) [Int])
+test = Refined.refine $ [1..10]
+
+test2 :: Either RefineException (Refined (Sized 3 10) [Int])
+test2 = Refined.refine $ [1..3]
+
+test3 :: Either RefineException (Refined (Sized 3 10) [Int])
+test3 = Refined.refine $ [1..100]
+
+test4 :: Either RefineException (Refined (Sized 3 10) [Int])
+test4 = Refined.refine $ [1..2]
+
+
+data Size
+data a <=. b
+data a >=. b
+
+
+instance ( Predicate (Refined.SizeGreaterThan l') t
+         , KnownNat l, KnownNat l'
+         , l ~ (1 + l')
+         )
+       => Predicate (Size >=. l) t where
+  validate _ = validate @(Refined.SizeGreaterThan l') undefined
+
+instance (Predicate (Refined.SizeLessThan (1+u)) t, KnownNat u)
+       => Predicate (Size <=. u) t where
+  validate _ = validate @(Refined.SizeLessThan (1+u)) undefined
+
+
+test5 :: Either RefineException (Refined (Size >=. 20) [Int])
+test5 = Refined.refine $ [1..10]
+
+test6 :: Either RefineException (Refined (Size <=. 4) [Int])
+test6 = Refined.refine $ [1..10]

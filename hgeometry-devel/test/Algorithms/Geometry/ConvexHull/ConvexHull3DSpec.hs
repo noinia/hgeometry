@@ -34,9 +34,9 @@ spec = describe "3D ConvexHull tests" $ do
          it "manual on myPts"  $ (H $ Naive.lowerHull' myPts)  `shouldBe` myHull
          it "manual on myPts'" $ (H $ Naive.lowerHull' myPts') `shouldBe` myHull'
 
-         describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
+         -- describe "Divde & Conquer Implementation" $ specAlg DivAndConc.lowerHull'
 
-         -- describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
+         describe "Minimalist Implementation" $ specAlg Minimalist.lowerHull'
 
          -- it "minimalist and Div&Conc quickcheck" $ property $ \(HI pts) ->
          --     DivAndConc.lowerHull' pts == Minimalist.lowerHull' pts
@@ -51,13 +51,16 @@ spec = describe "3D ConvexHull tests" $ do
               , ("buggyPoints2",buggyPoints2)
               , ("buggyPoints3",buggyPoints3)
               , ("buggyPoints6",buggyPoints6)
-              , ("buggyPoints7S", NonEmpty.fromList buggyPoints7S)
               , ("buggyPointsSpeedup", NonEmpty.fromList buggySpeedup)
-              , ("buggyPoints8",NonEmpty.fromList buggy8)
               , ("buggyPoints9",NonEmpty.fromList buggy9)
+              , ("buggyPoints7SS", NonEmpty.fromList buggyPoints7SS)
+              , ("buggyPoints7S", NonEmpty.fromList buggyPoints7S)
+              , ("buggyPoints8",mkBuggy buggy8)
+              , ("buggy10S",mkBuggy buggy10S)
+              , ("buggy10",mkBuggy buggy10)
+              , ("buggy11",mkBuggy buggy11)
               ] $ \(msg,pts) ->
           it msg $ (sameAsNaive alg) pts
-      it "same as naive on buggyPoints " $ sameAsNaive alg myPts
       modifyMaxSuccess (const 1000) $
         it "same as naive quickcheck" $ property $ \(HI pts) -> sameAsNaive alg pts
 
@@ -67,12 +70,12 @@ spec = describe "3D ConvexHull tests" $ do
 
 
 spec' = describe "test" $ do
-  it "same as naive on buggyPoints " $ sameAsNaive DivAndConc.lowerHull' (mkBuggy buggy8)
+  it "same as naive on buggyPoints " $ sameAsNaive Minimalist.lowerHull' buggyPoints3
 
 specShrink = describe "shrink" $ forM_ sets $ \(_:+i,pts) ->
-               it ("same as Naive " <> show i) $ sameAsNaive DivAndConc.lowerHull' (mkBuggy pts)
+               it ("same as Naive " <> show i) $ sameAsNaive Minimalist.lowerHull' (mkBuggy pts)
   where
-    sets = leaveOutOne buggySpeedup
+    sets = leaveOutOne buggy11S
 
 
 
@@ -220,7 +223,7 @@ buggyPoints5 = mkBuggy $ buggyPoints5'
 mkBuggy = fmap (bimap (10 *^) id) . NonEmpty.fromList
 
 buggyPoints5' :: [Point 3 R :+ Int]
-buggyPoints5' = [ point3 [-21,14,-4]   :+ 0
+buggyPoints5' = [point3 [-21,14,-4]   :+ 0
                 ,point3 [-16,-15,-14] :+ 1
                 ,point3 [-14,12,16]   :+ 2
                 ,point3 [-11,-19,-7]  :+ 3
@@ -372,8 +375,8 @@ buggyPoints7S = [point3 [-82,-27,66]  :+ 0
                 ,point3 [8,89,3]      :+ 31
                 ,point3 [12,-53,-2]   :+ 32
                 ,point3 [13,27,-92]   :+ 33
-                ,point3 [22,-88,-25]  :+ 34
-                ,point3 [26,82,20]    :+ 35
+                -- ,point3 [22,-88,-25]  :+ 34
+                -- ,point3 [26,82,20]    :+ 35
                 ,point3 [27,87,-92]   :+ 36
                 ,point3 [52,-80,-92]  :+ 37
                 ]
@@ -410,7 +413,7 @@ buggy8 = [ point3 [-11,-5,8] :+ 0
          , point3 [-5,10,5] :+ 7
          , point3 [2,5,-7] :+ 8
          , point3 [5,1,8] :+ 9
-         , point3 [10,4,-8] :+ 10
+         -- , point3 [10,4,-8] :+ 10
          ]
 
 buggy9 :: [Point 3 R :+ Int]
@@ -424,3 +427,97 @@ buggy9 = [ point3 [-18,-13,2] :+ 0
          , point3 [14,-5,-17] :+ 7
          , point3 [15,-20,19] :+ 8
          , point3 [16,-11,-14] :+ 9]
+
+
+
+buggyPoints7SS :: [Point 3 R :+ Int]
+buggyPoints7SS = [point3 [-82,-27,66]  :+ 0
+                 ,point3 [-17,-54,-92] :+ 1
+                 ,point3 [-16,-47,26]  :+ 2
+                 ,point3 [13,27,-92]   :+ 3
+                 ,point3 [26,82,20]    :+ 4
+                 ,point3 [27,87,-92]   :+ 5
+                 ,point3 [52,-80,-92]  :+ 6
+                 ]
+
+-- so apparently at -9.589.... 1,3,5, and 6 are colinear
+-- and the bridge remains on 1-6
+buggy10 :: [Point 3 R :+ Int]
+buggy10 = [ point3 [-70,-26,-53] :+ 0
+          , point3 [-70,45,39] :+ 1
+          , point3 [-68,62,8] :+ 2
+          , point3 [-57,39,-55] :+ 3
+          , point3 [-47,8,70] :+ 4
+          , point3 [-45,11,-56] :+ 5
+          , point3 [-44,-40,-54] :+ 6
+          , point3 [-42,57,24] :+ 7
+          , point3 [-40,27,-44] :+ 8
+          , point3 [-39,-29,5] :+ 9
+          , point3 [-33,10,-25] :+ 10
+          , point3 [-33,68,30] :+ 11
+          , point3 [-21,-25,-35] :+ 12
+          , point3 [-20,-71,-34] :+ 13
+          , point3 [-18,-46,27] :+ 14
+          , point3 [-16,45,-28] :+ 15
+          , point3 [-9,22,-25] :+ 16
+          , point3 [4,-55,-16] :+ 17
+          , point3 [8,76,-70] :+ 18
+          , point3 [11,-26,-21] :+ 19
+          , point3 [11,28,-7] :+ 20
+          , point3 [12,-27,-72] :+ 21
+          , point3 [13,-23,-60] :+ 22
+          , point3 [16,-57,41] :+ 23
+          , point3 [22,1,-35] :+ 24
+          , point3 [25,-4,-5] :+ 25
+          , point3 [36,23,-65] :+ 26
+          , point3 [37,38,76] :+ 27
+          , point3 [37,63,-15] :+ 28
+          , point3 [40,-67,24] :+ 29
+          , point3 [44,73,59] :+ 30
+          , point3 [46,-63,-47] :+ 31
+          , point3 [57,-28,46] :+ 32
+          , point3 [60,-32,76] :+ 33
+          , point3 [62,-68,28] :+ 34
+          , point3 [62,30,-52] :+ 35
+          , point3 [68,38,-53] :+ 36
+          , point3 [69,-40,67] :+ 37
+          , point3 [72,-17,-55] :+ 38
+          , point3 [74,51,-13] :+ 39
+          , point3 [74,73,-10] :+ 40
+          , point3 [75,-60,55] :+ 41
+          ]
+
+buggy10S :: [Point 3 R :+ Int]
+buggy10S = [ point3 [-70,-26,-53] :+ 0
+          , point3 [-70,45,39] :+ 1
+          , point3 [-68,62,8] :+ 2
+          , point3 [-57,39,-55] :+ 3
+          , point3 [-47,8,70] :+ 4
+          , point3 [-45,11,-56] :+ 5
+          , point3 [-44,-40,-54] :+ 6
+          , point3 [-42,57,24] :+ 7
+          , point3 [-40,27,-44] :+ 8
+          , point3 [-33,10,-25] :+ 9
+          , point3 [-21,-25,-35] :+ 10
+          , point3 [-20,-71,-34] :+ 11
+          , point3 [4,-55,-16] :+ 12
+          ]
+
+buggy11 :: [Point 3 R :+ Int]
+buggy11 = [ point3 [-4,-2,-1] :+ 0
+          , point3 [-3,-4,-3] :+ 1
+          , point3 [-2,-1,0] :+ 2
+          , point3 [-2,0,-2] :+ 3
+          , point3 [-1,2,3] :+ 4
+          , point3 [1,-4,-4] :+ 5
+          , point3 [3,-2,1] :+ 6
+          , point3 [5,5,-4] :+ 7
+          ]
+
+buggy11S :: [Point 3 R :+ Int]
+buggy11S = [ point3 [-4,-2,-1] :+ 0
+          , point3 [-3,-4,-3] :+ 1
+          , point3 [-2,-1,0] :+ 2
+          , point3 [-2,0,-2] :+ 3
+          , point3 [-1,2,3] :+ 4
+          ]
