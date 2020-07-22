@@ -4,22 +4,21 @@ import           Algorithms.Geometry.SoS.AsPoint
 import           Algorithms.Geometry.SoS.Orientation
 import           Control.CanAquire
 import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
 
 --------------------------------------------------------------------------------
 
-simulateSimplicity :: forall t d r b. (Traversable t, SoSD d)
-                   => (forall p. ( AsPoint p, HasIndex p
-                                 , d ~ Dimension p, r ~ NumType p
-                                 ) => t p -> b)
-                   -> t (Point d r) -> b
-simulateSimplicity = simulateSimplicity'
+-- simulateSimplicity :: forall t d r b. (Traversable t, SoSD d)
+--                    => (forall p. ( AsPoint p, HasIndex p
+--                                  , d ~ Dimension p, r ~ NumType p
+--                                  ) => t p -> b)
+--                    -> t (Point d r) -> b
+-- simulateSimplicity = simulateSimplicity'
 
 
 -- | The actual implementation of SoS
-simulateSimplicity'     :: forall t d r b. (Traversable t, SoSD d)
+simulateSimplicity'     :: forall t d r b. (Traversable t, SoS d)
                         => (forall i. ( CanAquire i (Point d r)
-                                      , SoS (P i d r)
+                                      , SoS d
                                       ) => t (P i d r) -> b)
                         -> t (Point d r) -> b
 simulateSimplicity' alg = runAcquire alg'

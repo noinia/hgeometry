@@ -15,10 +15,12 @@
 module Algorithms.Geometry.SoS
   ( module Algorithms.Geometry.SoS.Sign
   , module Algorithms.Geometry.SoS.Orientation
+  , module Algorithms.Geometry.SoS.Determinant
   ) where
 
 -- import Algorithms.Geometry.SoS.Internal
 import Algorithms.Geometry.SoS.Orientation
+import Algorithms.Geometry.SoS.Determinant
 import Algorithms.Geometry.SoS.Sign
 import Control.CanAquire
 import Control.Lens

@@ -3,14 +3,13 @@ module Data.Geometry.Point.Class where
 import           Control.Lens
 import           Data.Geometry.Point.Internal (Point)
 import qualified Data.Geometry.Point.Internal as Internal
-import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import           GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
-class ToAPoint point where
-  toPoint   :: Prism' point (Point (Dimension point) (NumType point))
+class ToAPoint point d r where
+  toPoint   :: Prism' (point d r) (Point d r)
 
 class AsAPoint p where
   asAPoint :: Lens (p d r) (p d' r') (Point d r) (Point d' r')
@@ -24,11 +23,13 @@ coord i = asAPoint.Internal.coord i
 unsafeCoord   :: (Arity d, AsAPoint p) => Int -> Lens' (p d r) r
 unsafeCoord i = asAPoint.Internal.unsafeCoord i
 
-instance ToAPoint (Point d r) where
+instance ToAPoint Point d r where
   toPoint = prism' id Just
 
 instance AsAPoint Point where
   asAPoint = id
+
+
 
 
 -- | Shorthand to access the first coordinate C 1

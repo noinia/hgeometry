@@ -2,7 +2,8 @@ module Data.Geometry.Point.Orientation where
 
 import Algorithms.Geometry.SoS.Orientation
 import Algorithms.Geometry.SoS.Sign
-import Data.Geometry.Point.Class
+import Data.Ext
+import Data.Geometry.Point.Internal
 import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
@@ -25,6 +26,6 @@ instance Show StrictCCW where
 
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
-ccw       :: (Ord r, Num r, AsAPoint point, SoS point 2 r)
-          => point 2 r -> point 2 r -> point 2 r -> StrictCCW
+ccw       :: (Ord r, Num r, Ord i)
+          => Point 2 r :+ i -> Point 2 r :+ i -> Point 2 r :+ i -> StrictCCW
 ccw p q r = SCCW $ sideTest r (Vector2 p q)

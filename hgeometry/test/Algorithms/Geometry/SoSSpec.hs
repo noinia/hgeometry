@@ -33,6 +33,8 @@ instance Arbitrary SmallInt where
   arbitrary = arbitrarySizedBoundedIntegral
 
 -- unfortunately, it seems that this is not really feasilbe to explicitly evaluate thee things.
+spec :: Spec
+spec = pure ()
 
 -- spec :: Spec
 -- spec = describe "SoS Symoblic" $ do
