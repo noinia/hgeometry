@@ -1,4 +1,16 @@
 {-# LANGUAGE TemplateHaskell   #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.UnBounded
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Add an unbounded/infintity element to a data type. Essentially,
+-- 'Bottom' adds \(-\infty\) (and is pretty much identical to Maybe),
+-- whereas 'Top' adds \(\infty\). The Unbounded type adds both.
+--
+--------------------------------------------------------------------------------
 module Data.UnBounded( Top, topToMaybe
                      , pattern ValT, pattern Top
                      , _ValT, _Top, _TopMaybe
