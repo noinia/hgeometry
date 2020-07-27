@@ -33,7 +33,7 @@ import qualified Test.QuickCheck as QC
 --------------------------------------------------------------------------------
 
 -- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
-newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq n (Point d r) }
+newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq (1+n) (Point d r) }
 makeLenses ''BezierSpline
 
 -- | Quadratic Bezier Spline
@@ -57,7 +57,7 @@ type instance NumType   (BezierSpline n d r) = r
 
 
 instance (Arity n, Arity d, QC.Arbitrary r) => QC.Arbitrary (BezierSpline n d r) where
-  arbitrary = fromPointSeq . Seq.fromList <$> QC.vector (fromIntegral . natVal $ C @n)
+  arbitrary = fromPointSeq . Seq.fromList <$> QC.vector (fromIntegral . (1+) . natVal $ C @n)
 
 -- | Constructs the Bezier Spline from a given sequence of points.
 fromPointSeq :: Seq (Point d r) -> BezierSpline n d r
@@ -87,7 +87,7 @@ instance PointFunctor (BezierSpline n d) where
 -- | Evaluate a BezierSpline curve at time t in [0, 1]
 --
 -- pre: \(t \in [0,1]\)
-evaluate    :: (Arity d, Ord r, Num r) => BezierSpline (1 + n) d r -> r -> Point d r
+evaluate    :: (Arity d, Ord r, Num r) => BezierSpline n d r -> r -> Point d r
 evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
   where
     evaluate' = \case
@@ -98,25 +98,25 @@ evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
     blend p q = p .+^ t *^ (q .-. p)
 
 
-tangent   :: (Arity d, Num r, 2 <= n) => BezierSpline n d r -> Vector d r
+tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r
 tangent b = b^?!controlPoints.ix 1  .-. b^?!controlPoints.ix 0
 
 -- | Restrict a Bezier curve to th,e piece between parameters t < u in [0, 1].
 subBezier     :: (KnownNat n, Arity d, Ord r, Num r)
-              => r -> r -> BezierSpline (1+n) d r -> BezierSpline (1+n) d r
+              => r -> r -> BezierSpline n d r -> BezierSpline n d r
 subBezier t u = fst . split u . snd . split t
 
 -- | Split a Bezier curve at time t in [0, 1] into two pieces.
 split :: forall n d r. (KnownNat n, Arity d, Ord r, Num r)
-      => r -> BezierSpline (1+n) d r -> (BezierSpline (1+n) d r, BezierSpline (1+n) d r)
+      => r -> BezierSpline n d r -> (BezierSpline n d r, BezierSpline n d r)
 split t b | t < 0 || t > 1 = error "Split parameter out of bounds."
           | otherwise      = let n  = fromIntegral $ natVal (C @n)
-                                 ps  = collect t $ b^.controlPoints
+                                 ps = collect t $ b^.controlPoints
                              in ( fromPointSeq . Seq.take (n + 1) $ ps
                                 , fromPointSeq . Seq.drop n       $ ps
                                 )
 
-collect   :: (Arity d, Ord r, Num r) => r -> LSeq (1+n) (Point d r) -> Seq (Point d r)
+collect   :: (Arity d, Ord r, Num r) => r -> LSeq n (Point d r) -> Seq (Point d r)
 collect t = go . LSeq.toSeq
   where
     go = \case
@@ -136,17 +136,20 @@ collect t = go . LSeq.toSeq
 -- -}
 
 -- | Approximate Bezier curve by Polyline with given resolution.
---   TODO: Make collection of points more efficient! Currently quadratic.
-approximate :: (KnownNat n, Arity d, Ord r, Fractional r)
-            => r -> BezierSpline (1+n) d r -> [Point d r]
-approximate r b | qdA (LSeq.head $ _controlPoints b) (LSeq.last $ _controlPoints b) < r ^ 2 = [LSeq.head $ _controlPoints b, LSeq.last $ _controlPoints b]
-                | otherwise = let (b1, b2) = split 0.5 b
-                              in approximate r b1 ++ tail (approximate r b2)
+approximate :: forall n d r. (KnownNat n, Arity d, Ord r, Fractional r)
+            => r -> BezierSpline n d r -> [Point d r]
+approximate eps b
+    | squaredEuclideanDist p q < eps^2 = [p,q]
+    | otherwise                        = let (b1, b2) = split 0.5 b
+                                         in approximate eps b1 ++ tail (approximate eps b2)
+  where
+    p = b^.controlPoints.to LSeq.head
+    q = b^.controlPoints.to LSeq.last
 
 -- | Given a point on (or close to) a Bezier curve, return the corresponding parameter value.
 --   (For points far away from the curve, the function will return the parameter value of
 --   an approximate locally closest point to the input point.)
-parameterOf      :: (Arity d, Ord r, Fractional r) => BezierSpline (1+n) d r -> Point d r -> r
+parameterOf      :: (Arity d, Ord r, Fractional r) => BezierSpline n d r -> Point d r -> r
 parameterOf b p = binarySearch (qdA p . evaluate b) treshold (1 - treshold)
   where treshold = 0.0001
 
@@ -162,5 +165,5 @@ derivative f x = (f (x + delta) - f x) / delta
   where delta = 0.00001
 
 -- | Snap a point close to a Bezier curve to the curve.
-snap   :: (Arity d, Ord r, Fractional r) => BezierSpline (1 + n) d r -> Point d r -> Point d r
+snap   :: (Arity d, Ord r, Fractional r) => BezierSpline n d r -> Point d r -> Point d r
 snap b = evaluate b . parameterOf b
