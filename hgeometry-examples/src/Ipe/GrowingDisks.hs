@@ -10,7 +10,7 @@ import           Data.Geometry.Ellipse (ellipseToCircle)
 import           Data.Geometry.Ipe
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Properties
-import           Data.Geometry.ZeroSet
+-- import           Data.Geometry.ZeroSet
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
