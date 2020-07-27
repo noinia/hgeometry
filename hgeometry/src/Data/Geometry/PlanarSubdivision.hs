@@ -24,7 +24,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.PlanarSubdivision.Merge
 import           Data.Geometry.Polygon
-import qualified Data.PlaneGraph as PG
 import           Data.Proxy
 
 

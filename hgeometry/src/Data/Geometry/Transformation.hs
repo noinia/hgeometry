@@ -1,3 +1,4 @@
+{-# LANGUAGE Unsafe #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Transformation where
 
@@ -9,11 +10,7 @@ import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as V
 import           Data.Proxy
-import qualified Data.Vector.Fixed as FV
 import           GHC.TypeLits
-import           Linear.Matrix ((!*),(!*!))
-import qualified Linear.Matrix as Lin
-import           Unsafe.Coerce (unsafeCoerce)
 
 
 --------------------------------------------------------------------------------

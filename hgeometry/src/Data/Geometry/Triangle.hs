@@ -12,7 +12,6 @@ import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Geometry.Ball (Disk, disk)
 import           Data.Geometry.Boundary
-import           Data.Geometry.HalfSpace
 import           Data.Geometry.HyperPlane
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment

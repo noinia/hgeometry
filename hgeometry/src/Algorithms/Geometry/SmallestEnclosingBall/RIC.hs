@@ -31,6 +31,7 @@ import           Data.Maybe (fromMaybe, mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           System.Random.Shuffle (shuffle)
 
+import Data.RealNumber.Rational
 import Debug.Trace
 
 --------------------------------------------------------------------------------
@@ -149,16 +150,32 @@ minimumOn f = \case
 
 --------------------------------------------------------------------------------
 
-test :: Maybe (DiskResult () Rational)
-test = smallestEnclosingDiskWithPoints p q myPts
-  where
-    p = ext $ Point2 0 (-6)
-    q = ext $ Point2 0 6
+-- test :: Maybe (DiskResult () Rational)
+-- test = smallestEnclosingDiskWithPoints p q myPts
+--   where
+--     p = ext $ Point2 0 (-6)
+--     q = ext $ Point2 0 6
 
 
-myPts = map ext [Point2 5 1, Point2 3 3, Point2 (-2) 2, Point2 (-4) 5]
+-- myPts = map ext [Point2 5 1, Point2 3 3, Point2 (-2) 2, Point2 (-4) 5]
 
-disk'' r = (r:+) <$> disk (p^.core) (q^.core) (r^.core)
-  where
-    p = ext $ Point2 0 (-6)
-    q = ext $ Point2 0 6
+-- disk'' r = (r:+) <$> disk (p^.core) (q^.core) (r^.core)
+--   where
+--     p = ext $ Point2 0 (-6)
+--     q = ext $ Point2 0 6
+
+
+-- maartenBug :: DiskResult () Double
+-- maartenBug = let (p:q:rest) = maartenBug'
+--              in smallestEnclosingDisk' p q rest
+
+-- maartenBug' :: [Point 2 Double :+ ()]
+-- maartenBug' = [ Point2 (7.2784424e-3) (249.23) :+ ()
+--               , Point2 (-5.188493   ) (249.23) :+ ()
+--               , Point2 (-10.382694  ) (249.23) :+ ()
+--               , Point2 (-15.575621  ) (249.23) :+ ()
+--               , Point2 (0.0         ) (249.23) :+ ()
+--               , Point2 (0.0         ) (239.9031) :+ ()
+--               , Point2 (0.0         ) (230.37791) :+ ()
+--               , Point2 (0.0         ) (220.67882) :+ ()
+--               ]

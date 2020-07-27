@@ -153,11 +153,13 @@ fromSignum f = \x -> case signum (f x) of
                        1  -> Positive
                        _  -> error "absurd: fromSignum"
 
+-- | Splitter that determines if we should split a cell based on the
+-- sign of the corners.
 shouldSplitZeros :: forall r sign. (Fractional r, Eq sign)
                  => (Point 2 r -> sign) -- ^ The function we are evaluating
                  -> Splitter r
-                             (Quadrants sign) -- ^ the input are the signs of the corners
-                             (Quadrants sign) -- ^ at internal nodes we store signs of corners
+                             (Quadrants sign) -- the input are the signs of the corners
+                             (Quadrants sign) -- at internal nodes we store signs of corners
                              sign
 shouldSplitZeros f (Cell w' p) qs@(Quadrants nw ne se sw) | all sameSign qs = No ne
                                                           | otherwise       = Yes qs qs'
