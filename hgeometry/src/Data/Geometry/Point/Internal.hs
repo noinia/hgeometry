@@ -19,6 +19,7 @@ module Data.Geometry.Point.Internal
 
   , projectPoint
 
+  , pattern Point1
   , pattern Point2
   , pattern Point3
   , PointFunctor(..)
@@ -173,11 +174,25 @@ projectPoint :: (Arity i, Arity d, i <= d) => Point d r -> Point i r
 projectPoint = Point . prefix . toVec
 
 --------------------------------------------------------------------------------
--- * Convenience functions to construct 2 and 3 dimensional points
+-- * Convenience functions to construct 1, 2 and 3 dimensional points
 
-
--- | We provide pattern synonyms Point2 and Point3 for 2 and 3 dimensional points. i.e.
+-- | We provide pattern synonyms for 1, 2 and 3 dimensional points. i.e.
 -- we can write:
+--
+--
+-- >>> :{
+--   let
+--     f            :: Num r => Point 1 r -> r
+--     f (Point1 x) = x + 1
+--   in f (Point1 1)
+-- :}
+-- 2
+pattern Point1   :: r -> Point 1 r
+pattern Point1 x = Point (Vector1 x)
+{-# COMPLETE Point1 #-}
+
+
+-- | Pattern synonym for 2 dimensional points
 --
 -- >>> :{
 --   let
@@ -186,8 +201,6 @@ projectPoint = Point . prefix . toVec
 --   in f (Point2 1 2)
 -- :}
 -- 1
---
--- if we want.
 pattern Point2       :: r -> r -> Point 2 r
 pattern Point2 x y = Point (Vector2 x y)
 {-# COMPLETE Point2 #-}

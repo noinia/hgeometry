@@ -15,6 +15,7 @@ module Data.Geometry.Point( Point(..)
                           , pointFromList
                           , projectPoint
 
+                          , pattern Point1
                           , pattern Point2
                           , pattern Point3
                           , xCoord, yCoord, zCoord

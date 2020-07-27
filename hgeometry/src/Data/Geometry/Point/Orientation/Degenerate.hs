@@ -1,5 +1,5 @@
 module Data.Geometry.Point.Orientation.Degenerate(
-    CCW
+    CCW(..)
   , pattern CCW, pattern CW, pattern CoLinear
 
   , ccw, ccw'

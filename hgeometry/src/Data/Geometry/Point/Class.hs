@@ -8,6 +8,9 @@ import           GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import Data.Geometry.Point.Internal (pattern Point2, pattern Point3)
+
 class ToAPoint point d r where
   toPoint   :: Prism' (point d r) (Point d r)
 

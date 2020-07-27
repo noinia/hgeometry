@@ -68,4 +68,6 @@ modules =
   -- , "Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval"
   , "Algorithms.Geometry.ConvexHull.Naive"
   , "Algorithms.Geometry.ConvexHull.JarvisMarch"
+
+  , "Algorithms.Geometry.SoS.Orientation"
   ]
