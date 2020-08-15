@@ -99,7 +99,7 @@ instance Show (VertexId s w) where
 --------------------------------------------------------------------------------
 -- * FaceId's
 
--- | The type to reprsent FaceId's
+-- | The type to represent FaceId's
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
                    deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 
@@ -145,7 +145,7 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
 
 -- ** lenses and getters
 
--- | Get the embedding, reprsented as a permutation of the darts, of this
+-- | Get the embedding, represented as a permutation of the darts, of this
 -- graph.
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
