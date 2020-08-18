@@ -222,7 +222,7 @@ reorderEdgeData ds = V.create $ do
 
 -- | Traverse the vertices
 --
--- (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
+-- >>> (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
 -- Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
 -- >>> traverseVertices (\i x -> print (i,x)) myGraph >> pure ()
 -- (VertexId 0,())
