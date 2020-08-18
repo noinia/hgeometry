@@ -3,7 +3,6 @@ module Algorithms.Geometry.SoS.Expr where
 
 import           Control.Lens
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..),nonEmpty)
 
 --------------------------------------------------------------------------------
 
@@ -36,6 +35,8 @@ hasVariables = foldExpr (const False)
 
 instance (Num r) => Num (Expr i r) where
   fromInteger = Constant . fromInteger
+  abs _ = error "'abs' not defined for Algorithms.Geometry.SoS.Expr.Expr"
+  signum _ = error "'signum' not defined for Algorithms.Geometry.SoS.Expr.Expr"
   negate      = \case
     Negate e -> e
     e        -> Negate e

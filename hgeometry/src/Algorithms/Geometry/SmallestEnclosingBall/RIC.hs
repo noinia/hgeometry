@@ -31,8 +31,8 @@ import           Data.Maybe (fromMaybe, mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           System.Random.Shuffle (shuffle)
 
-import Data.RealNumber.Rational
-import Debug.Trace
+-- import Data.RealNumber.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 

@@ -13,8 +13,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Measured.Class
 import           Data.Proxy
 import           Data.Range
-import           Data.Semigroup.Foldable
-import           Data.Vector.Fixed.Cont (Peano, PeanoNum(..))
 import           GHC.TypeLits
 import           Prelude hiding (last,init,head)
 
