@@ -13,10 +13,6 @@ jobs:
       matrix:
         ghc: ['8.4', '8.6', '8.8']
         os: [ubuntu-latest, macOS-latest]
-        # exclude:
-        #   # 8.8.3 on windows throws segfaults when installing deps
-        #   - os: windows-latest
-        #     ghc: '8.8'
     name: GHC ${{ matrix.ghc }} / ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
