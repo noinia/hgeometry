@@ -1,9 +1,7 @@
 module Algorithms.Geometry.SoS.AsPoint where
 
 import           Control.CanAquire
-import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Point.Class
 import           Data.Geometry.Point.Internal
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector

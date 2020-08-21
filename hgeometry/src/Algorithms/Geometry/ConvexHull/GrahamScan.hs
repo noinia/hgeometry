@@ -126,6 +126,9 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
       | rightTurn (x^.core) (y^.core) (z^.core) = h
       | otherwise                               = cleanMiddle (z:x:rest)
     cleanMiddle _                               = error "cleanMiddle: too few points"
+hull' _ = error
+  "Algorithms.Geometry.ConvexHull.GrahamScan.hull' requires a list with at least \
+  \two elements."
 
 rightTurn       :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
 rightTurn a b c = ccw a b c == CW

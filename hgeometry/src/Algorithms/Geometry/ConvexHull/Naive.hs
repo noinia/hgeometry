@@ -14,9 +14,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
 import           Data.Intersection(intersects)
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (listToMaybe, isNothing)
 import           Data.Util
 --------------------------------------------------------------------------------
@@ -50,15 +48,14 @@ lowerHullAll (toList -> pts) = let mkT (Three p q r) = Triangle p q r in
 
 
 
-killOverlapping :: (Ord r, Fractional r) => [Triangle 3 p r] -> [Triangle 3 p r]
-killOverlapping = foldr keepIfNotOverlaps []
+_killOverlapping :: (Ord r, Fractional r) => [Triangle 3 p r] -> [Triangle 3 p r]
+_killOverlapping = foldr keepIfNotOverlaps []
   where
     keepIfNotOverlaps t ts | any (t `overlaps`) ts = ts
                            | otherwise             = t:ts
 
-
-t1@(Triangle p q r) `overlaps` t2@(Triangle a b c) = upperHalfSpaceOf t1 == upperHalfSpaceOf t2
-                                                  && False
+overlaps :: (Fractional r, Ord r) => Triangle 3 p1 r -> Triangle 3 p2 r -> Bool
+t1 `overlaps` t2 = upperHalfSpaceOf t1 == upperHalfSpaceOf t2 && False
 
 
 

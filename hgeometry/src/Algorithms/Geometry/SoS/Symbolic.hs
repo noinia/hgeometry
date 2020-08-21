@@ -21,8 +21,7 @@ import qualified Data.List as List
 import qualified Data.Map as Map
 import qualified Data.Map.Merge.Strict as Map
 import           Data.Maybe (isNothing)
-import           Data.Word
-import           Test.QuickCheck (Arbitrary(..), listOf, suchThat)
+import           Test.QuickCheck (Arbitrary(..), listOf)
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------

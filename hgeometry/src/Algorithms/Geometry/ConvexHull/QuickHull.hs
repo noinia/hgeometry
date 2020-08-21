@@ -1,6 +1,6 @@
 module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
 
-import           Control.Lens ((^.),(&),(.~))
+import           Control.Lens ((^.))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Line

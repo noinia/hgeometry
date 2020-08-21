@@ -22,12 +22,6 @@ module Algorithms.Geometry.SoS
 import Algorithms.Geometry.SoS.Orientation
 import Algorithms.Geometry.SoS.Determinant
 import Algorithms.Geometry.SoS.Sign
-import Control.CanAquire
-import Control.Lens
-import Data.Ext
-import Data.Geometry.Point.Internal
-import Data.Geometry.Properties
-import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
