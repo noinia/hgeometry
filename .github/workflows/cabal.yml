@@ -1,0 +1,46 @@
+name: Cabal build/test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        ghc: ['8.4', '8.6', '8.8']
+        os: [ubuntu-latest, macOS-latest]
+    name: GHC ${{ matrix.ghc }} / ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-haskell@v1
+      with:
+        ghc-version: ${{ matrix.ghc }}
+        cabal-version: 'latest'
+
+    - name: Cache
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-cabal
+      with:
+        path: ~/.cabal
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: |
+        cabal v2-update || cabal v2-update
+        cabal v2-build --only-dependencies --enable-tests --enable-benchmarks hgeometry-test
+    - name: Build
+      run: cabal v2-build hgeometry-test
+    - name: Test
+      run: |
+        cabal v2-test --test-show-details=always hgeometry-test
+    # - name: Check documentation syntax
+    #   run: cabal v2-haddock hgeometry-test
