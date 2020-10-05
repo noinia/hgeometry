@@ -471,14 +471,19 @@ locallyExtremalParameters i curve =
       c = 3 * x2 -  3 * x1
   in filter (\i -> 0 <= i && i <= 1) $ solveQuadraticEquation a b c
 
-solveQuadraticEquation :: (Ord r, Floating r) => r -> r -> r -> [r]
+
+-- | Solve equation of the form ax^2 + bx + c = 0.
+solveQuadraticEquation :: (Ord r, Floating r, Show r) => r -> r -> r -> [r]
+solveQuadraticEquation 0 0 0 = [0] -- error "infinite solutions"
+solveQuadraticEquation 0 0 c = []
+solveQuadraticEquation 0 b c = [-c / b]
 solveQuadraticEquation a b c = 
   let d = b^2 - 4 * a * c
-      result | d <  0 = []
-             | d == 0 = [b]
-             | d >  0 = [b + sqrt d, b - sqrt d]
+      result | d == 0 = [-b / (2 * a)]
+             | d >  0 = [(-b + sqrt d) / (2 * a), (-b - sqrt d) / (2 * a)]
+             | otherwise = []
   in result
-
+  -- trace ("soving equation " ++ show a ++ "x^2 + " ++ show b ++ "x + " ++ show c ++ " = 0") $ result  
 
 
 
