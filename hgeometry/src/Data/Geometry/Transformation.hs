@@ -36,6 +36,9 @@ type instance NumType (Transformation d r) = r
 (|.|) :: (Num r, Arity (d + 1)) => Transformation d r -> Transformation d r -> Transformation d r
 (Transformation f) |.| (Transformation g) = Transformation $ f `multM` g
 
+-- | Identity transformation; i.e. the transformation which does not change anything.
+identity :: (Arity d, Num r) => Transformation d r
+identity = Transformation . identityMatrix
 
 -- if it exists?
 
@@ -142,12 +145,6 @@ skewX        :: Num r => r -> Transformation 2 r
 skewX lambda = Transformation . Matrix $ Vector3 (Vector3 1 lambda 0)
                                                  (Vector3 0 1      0)
                                                  (Vector3 0 0      1)
-
--- | Create an identity transformation.
-identity :: Transformation 2 Float
-identity = Transformation . Matrix $ Vector3 (Vector3 1 0 0)
-                                             (Vector3 0 1 0)
-                                             (Vector3 0 0 1)
 
 -- | Create a matrix that corresponds to a rotation by 'a' radians counter-clockwise 
 --   around the origin.
