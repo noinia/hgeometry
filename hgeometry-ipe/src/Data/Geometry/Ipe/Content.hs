@@ -211,7 +211,7 @@ instance Fractional r => IsTransformable (Group r) where
   transformBy t (Group s) = Group $ fmap (transformBy t) s
 
 
-type family AttributesOf (t :: * -> *) :: [u] where
+type family AttributesOf (t :: * -> *) :: [AttributeUniverse] where
   AttributesOf Group     = GroupAttributes
   AttributesOf Image     = CommonAttributes
   AttributesOf TextLabel = CommonAttributes

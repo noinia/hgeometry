@@ -242,8 +242,8 @@ instance IpeReadText (Apply f at) => IpeReadAttr (Attr f at) where
   ipeReadAttr _ _                 = Left "IpeReadAttr: Element expected, Text found"
 
 -- | Combination of zipRecWith and traverse
-zipTraverseWith                       :: forall f g h i (rs :: [u]). Applicative h
-                                      => (forall (x :: u). f x -> g x -> h (i x))
+zipTraverseWith                       :: forall f g h i (rs :: [AttributeUniverse]). Applicative h
+                                      => (forall (x :: AttributeUniverse). f x -> g x -> h (i x))
                                       -> Rec f rs -> Rec g rs -> h (Rec i rs)
 zipTraverseWith _ RNil      RNil      = pure RNil
 zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs ys
