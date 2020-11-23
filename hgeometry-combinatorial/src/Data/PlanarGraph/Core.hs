@@ -1,5 +1,5 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.PlanarGraph.Core
@@ -13,17 +13,17 @@ module Data.PlanarGraph.Core where
 
 
 import           Control.DeepSeq
-import           Control.Lens hiding ((.=))
+import           Control.Lens               hiding ((.=))
 import           Control.Monad.State.Strict
 import           Data.Aeson
-import qualified Data.Foldable as F
+import qualified Data.Foldable              as F
 import           Data.Permutation
 import           Data.PlanarGraph.Dart
-import           Data.Type.Equality (gcastWith, (:~:)(..))
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-import           GHC.Generics (Generic)
-import           Unsafe.Coerce (unsafeCoerce)
+import           Data.Type.Equality         (gcastWith)
+import qualified Data.Vector                as V
+import qualified Data.Vector.Mutable        as MV
+import           GHC.Generics               (Generic)
+import           Unsafe.Coerce              (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
