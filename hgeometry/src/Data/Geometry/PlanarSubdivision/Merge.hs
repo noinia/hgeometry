@@ -23,9 +23,6 @@ import           Data.Geometry.PlanarSubdivision.Raw
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.PlanarGraph.Dart
-import           Data.PlaneGraph ( Dart, VertexId(..), FaceId(..)
-                                , VertexId', FaceId'
-                                )
 import qualified Data.PlaneGraph as PG
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V

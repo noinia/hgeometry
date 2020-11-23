@@ -8,7 +8,6 @@ module Algorithms.Geometry.ConvexHull.JarvisMarch(
 
 import           Control.Lens ((^.))
 import           Data.Bifunctor
-import           Data.Either (either)
 import           Data.Ext
 import           Data.Foldable
 import           Data.Geometry.Point

@@ -121,7 +121,6 @@ fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType
 fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
   where
     endPoints (asRange -> Range' a b) = [a,b]
-    endPoints _ = error "Unreachable, but cannot prove it in Haskell"
     pts = nub' . NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
     nub' = fmap NonEmpty.head . NonEmpty.group1
 

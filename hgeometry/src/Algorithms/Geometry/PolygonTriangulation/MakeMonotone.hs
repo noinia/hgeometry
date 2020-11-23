@@ -12,7 +12,6 @@ import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xC
                                                                             , ordAt)
 import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
-import           Control.Monad (forM_, when)
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
 import           Control.Monad.Writer (WriterT, execWriterT,tell)

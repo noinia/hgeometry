@@ -56,7 +56,6 @@ fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
 fromIntervals is = foldr insert (createTree pts) is
   where
     endPoints (asRange -> Range' a b) = [a,b]
-    endPoints _ = error "Unreachable, but cannot prove it in Haskell"
     pts = List.sort . concatMap endPoints $ is
 
 -- | Lists the intervals. We don't guarantee anything about the order
