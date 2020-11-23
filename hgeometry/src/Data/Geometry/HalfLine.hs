@@ -1,13 +1,13 @@
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE DeriveAnyClass       #-}
+{-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveAnyClass #-}
 module Data.Geometry.HalfLine where
 
 
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                as F
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -16,9 +16,11 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.Traversable as T
+import qualified Data.Traversable             as T
 import           Data.UnBounded
-import           GHC.Generics (Generic)
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
+import           GHC.Generics                 (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -63,6 +65,9 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (HalfLine d r
 
 --------------------------------------------------------------------------------
 
+halfLineToLine :: HalfLine d r -> Line d r
+halfLineToLine (HalfLine anchor dir) = Line anchor dir
+
 halfLineToSubLine                :: (Arity d, Num r)
                                  => HalfLine d r -> SubLine d () (UnBounded r) r
 halfLineToSubLine (HalfLine p v) = let l = Line p v
@@ -93,6 +98,8 @@ type instance IntersectionOf (HalfLine 2 r) (LineSegment 2 p r) = [ NoIntersecti
                                                                   , LineSegment 2 () r
                                                                   ]
 
+-- type instance IntersectionOf  (LineSegment 2 p r) (HalfLine 2 r)
+--   = IntersectionOf (HalfLine 2 r) (LineSegment 2 p r)
 
 -- instance (Ord r, Fractional r) => (HalfLine 2 r) `IsIntersectableWith` (Line 2 r) where
   -- hl `intersect` l = match (halfLineToSubLine hl, l)
