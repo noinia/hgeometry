@@ -125,7 +125,7 @@ fromAdjacencyLists      :: forall s w h. (Foldable h, Functor h)
 fromAdjacencyLists adjM = planarGraph' . toCycleRep n $ perm
   where
     n    = sum . fmap length $ perm
-    perm = map toOrbit  $ adjM'
+    perm = map toOrbit adjM'
 
     adjM' = fmap (second F.toList) adjM
 

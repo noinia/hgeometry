@@ -18,7 +18,7 @@ data TreeNavigator k a = Nav { goLeft     :: a -> k -> Bool
                              }
 
 instance Contravariant (TreeNavigator k) where
-  contramap f (Nav gL eK) = Nav (\a k -> gL (f a) k) (\x y -> eK (f x) (f y))
+  contramap f (Nav gL eK) = Nav (gL . f) (\x y -> eK (f x) (f y))
 
 
 ordNav :: Ord a => TreeNavigator a a
@@ -312,7 +312,7 @@ toRoseTree (Node c h l k r) = Just $ T.Node (Internal c h k) (mapMaybe toRoseTre
 
 
 showTree :: (Show k, Show a) => BalBST k a -> String
-showTree = maybe "Empty" T.drawTree . fmap (fmap show) . toRoseTree . toTree
+showTree = maybe "Empty" (T.drawTree . fmap show) . toRoseTree . toTree
 
 -- | Get the minimum in the tree. Errors when the tree is empty
 --

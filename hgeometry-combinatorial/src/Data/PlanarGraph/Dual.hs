@@ -138,7 +138,7 @@ boundary' d g = fromMaybe (error "boundary'")  . rotateTo d $ boundary (rightFac
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices     :: FaceId s w -> PlanarGraph s w v e f -> V.Vector (VertexId s w)
-boundaryVertices f g = fmap (flip tailOf g) $ boundary f g
+boundaryVertices f g = flip tailOf g <$> boundary f g
 
 -- -- | Gets the next dart along the face
 -- nextDart     :: Dart s -> PlanarGraph s w v e f -> Dart s

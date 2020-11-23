@@ -43,8 +43,8 @@ insertOrdBy cmp x = C.fromList . insertOrdBy' cmp x . C.rightElements
 insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
 insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     ([],  _)   -> L.insertBy cmp x pref
-    (z:zs, GT) -> (z : L.insertBy cmp x zs) ++ pref
-    (_:_,  EQ) -> (x : xs) -- == x : rest ++ pref
+    (z:zs, GT) -> z : L.insertBy cmp x zs ++ pref
+    (_:_,  EQ) -> x : xs -- == x : rest ++ pref
     (_:_,  LT) -> rest ++ L.insertBy cmp x pref
   where
     -- split the list at its maximum.

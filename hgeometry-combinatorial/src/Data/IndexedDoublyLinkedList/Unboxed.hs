@@ -62,7 +62,7 @@ emptyCell = Cell NoIndex NoIndex
 -- efficiently be concatenated and split.
 --
 -- Supports O(1) indexing, and O(1) insertions, deletions
-newtype DLList s = DLList { llist  :: (UMV.MVector s Cell) }
+newtype DLList s = DLList { llist :: UMV.MVector s Cell }
 
 
 -- instance Functor (DLList s) where
@@ -117,8 +117,7 @@ newtype DLList s = DLList { llist  :: (UMV.MVector s Cell) }
 
 -- getNext   :: PrimMonad m => Index -> m MaybeIndex
 getNext i = do v <- asks llist
-               x <- UMV.read v i
-               pure x
+               UMV.read v i
                -- next <$> UMV.read v i
 
 -- -- | Previous Element in the List

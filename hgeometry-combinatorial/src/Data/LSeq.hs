@@ -163,7 +163,7 @@ forceLSeq n = promise . go (fromInteger $ natVal n)
 -- | appends two sequences.
 --
 append         :: LSeq n a -> LSeq m a -> LSeq (n + m) a
-sa `append` sb = LSeq $ (toSeq sa) <> toSeq sb
+sa `append` sb = LSeq $ toSeq sa <> toSeq sb
 
 --------------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ unstableSortBy   :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 unstableSortBy f = wrapUnsafe (S.unstableSortBy f)
 
 unstableSort :: Ord a => LSeq n a -> LSeq n a
-unstableSort = wrapUnsafe (S.unstableSort)
+unstableSort = wrapUnsafe S.unstableSort
 
 
 wrapUnsafe :: (S.Seq a -> S.Seq b) -> LSeq n a -> LSeq m b

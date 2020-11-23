@@ -63,7 +63,7 @@ instance PrimMonad (DLListMonad s b) where
 
 instance MonadReader (DLList s b) (DLListMonad s b) where
   local f = DLListMonad . local f . runDLListMonad'
-  ask = DLListMonad $ ask
+  ask = DLListMonad ask
 
 -- | Runs a DLList Computation, starting with singleton values, crated
 -- from the input vector.

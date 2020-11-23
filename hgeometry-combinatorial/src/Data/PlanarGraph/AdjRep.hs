@@ -11,9 +11,10 @@
 --------------------------------------------------------------------------------
 module Data.PlanarGraph.AdjRep where
 
-import Data.Aeson
-import GHC.Generics (Generic)
-import Control.Lens(Bifunctor(..))
+import           Control.Lens   (Bifunctor (..))
+import           Data.Aeson
+import           Data.Bifunctor (second)
+import           GHC.Generics   (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -46,7 +47,7 @@ data Vtx v e = Vtx { id    :: Int
                    } deriving (Generic)
 
 instance Bifunctor Vtx where
-  bimap f g (Vtx i as x) = Vtx i (map (\(j,y) -> (j,g y)) as) (f x)
+  bimap f g (Vtx i as x) = Vtx i (map (second g) as) (f x)
 
 instance (ToJSON v, ToJSON e)     => ToJSON   (Vtx v e) where
   toEncoding = genericToEncoding defaultOptions

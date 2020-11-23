@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell     #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.PlanarGraph.Core
@@ -233,7 +232,7 @@ traverseVertices   :: Applicative m
                    => (VertexId s w -> v -> m v')
                    -> PlanarGraph s w v e f
                    -> m (PlanarGraph s w v' e f)
-traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+traverseVertices f = itraverseOf (vertexData.itraversed) (f . VertexId)
 
 -- | Traverses the darts
 --
@@ -254,7 +253,7 @@ traverseDarts   :: Applicative m
                 => (Dart s -> e -> m e')
                 -> PlanarGraph s w v e f
                 -> m (PlanarGraph s w v e' f)
-traverseDarts f = itraverseOf (rawDartData.itraversed) (\i -> f (toEnum i))
+traverseDarts f = itraverseOf (rawDartData.itraversed) (f . toEnum)
 
 -- | Traverses the faces
 --
@@ -294,7 +293,7 @@ planarGraph' perm = pg
 --
 -- running time: \(O(n)\).
 planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal () e ()
-planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
+planarGraph ds = planarGraph' perm & dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
     perm  = toCycleRep n $ map (map fst) ds

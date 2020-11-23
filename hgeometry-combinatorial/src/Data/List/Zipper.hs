@@ -51,7 +51,7 @@ allNexts = List.unfoldr (fmap (\z -> (z,goNext z))) . Just
 extractNext                :: Zipper a -> Maybe (a, Zipper a)
 extractNext (Zipper xs ys) = case ys of
                                []      -> Nothing
-                               (y:ys') -> Just $ (y,Zipper xs ys')
+                               (y:ys') -> Just (y,Zipper xs ys')
 
 
 -- | Drops the next element in the zipper.

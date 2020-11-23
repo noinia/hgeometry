@@ -62,8 +62,7 @@ cameraTransform c =  toViewPort c
 
 -- | Translates world coordinates into view coordinates
 worldToView   :: Fractional r => Camera r -> Transformation 3 r
-worldToView c =  rotateCoordSystem c
-             |.| (translation $ (-1) *^ c^.cameraPosition.vector)
+worldToView c = rotateCoordSystem c |.| translation ((-1) *^ c^.cameraPosition.vector)
 
 -- | Transformation into viewport coordinates
 toViewPort   :: Fractional r => Camera r -> Transformation 3 r
