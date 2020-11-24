@@ -216,13 +216,13 @@ element' = case (implicitPeano :: SingPeano d) of
 {-# INLINE element' #-}
 
 elem0   :: Int -> Traversal' (VectorFamily Z r) r
-elem0 _ = \_ v -> pure v
+elem0 _ _ = pure
 {-# INLINE elem0 #-}
 -- zero length vectors don't store any elements
 
 elem1 :: Int -> Traversal' (VectorFamily One r) r
 elem1 = \case
-           0 -> unVF.(lens runIdentity (\_ -> Identity))
+           0 -> unVF.lens runIdentity (const Identity)
            _ -> \_ v -> pure v
 {-# INLINE elem1 #-}
 

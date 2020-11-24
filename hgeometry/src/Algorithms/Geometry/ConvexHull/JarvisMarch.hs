@@ -125,7 +125,7 @@ foldr1With f b = go . toNonEmpty
   where
     go (x :| xs) = case NonEmpty.nonEmpty xs of
                      Nothing  -> b x
-                     Just xs' -> x `f` (go xs')
+                     Just xs' -> x `f` go xs'
 
 -- | extracts all minima from the list. The result consists of the
 -- list of minima, and all remaining points. Both lists are returned

@@ -44,6 +44,7 @@ triplets     :: (Ord r, Fractional r) => [Point 2 r :+ p] -> [DiskResult p r]
 triplets pts = [DiskResult (disk' a b c) (Three a b c)
                | Util.Three a b c <- uniqueTriplets pts]
 
+{- HLINT ignore disk' -}
 disk'       :: (Ord r, Fractional r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Disk () r
 disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)
@@ -56,7 +57,7 @@ disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)
 smallestEnclosingDisk'     :: (Ord r, Num r)
                            => [Point 2 r :+ p] -> [DiskResult p r] -> DiskResult p r
 smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))
-                           . filter (flip enclosesAll pts)
+                           . filter (`enclosesAll` pts)
 
 -- | check if a disk encloses all points
 enclosesAll   :: (Num r, Ord r) => DiskResult p r -> [Point 2 r :+ q] -> Bool

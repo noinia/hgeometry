@@ -100,7 +100,7 @@ instance RecApplicative (DimRange d) => Affine (Vector d) where
 instance RecApplicative (DimRange d) => Metric (Vector d)
 
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
-u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
+u `cross` v = fromV3 $ toV3 u `L3.cross` toV3 v
   where
     toV3 (Vector v) = let a = getConst . rget (C :: C 1) $ v
                           b = getConst . rget (C :: C 2) $ v

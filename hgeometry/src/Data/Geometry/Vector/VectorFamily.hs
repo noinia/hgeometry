@@ -174,7 +174,7 @@ element _ = singular . element' . fromInteger $ natVal (C :: C i)
 -- | Similar to 'element' above. Except that we don't have a static guarantee
 -- that the index is in bounds. Hence, we can only return a Traversal
 element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
-element' i = unV.(e (C :: C d) i)
+element' i = unV.e (C :: C d) i
   where
     e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
     e _ = Fam.element'

@@ -62,8 +62,8 @@ isSingle l r = size l < gamma * size r
 ----------------------------------------
 -- | Smart constructors
 
-empty     :: (a -> a -> Ordering) -> SBTree a
-empty cmp = Tip cmp
+empty :: (a -> a -> Ordering) -> SBTree a
+empty = Tip
 
 bin       :: SBTree a -> a -> SBTree a -> SBTree a
 bin l x r = Bin (compareBy l) (1 + size l + size r) l x r

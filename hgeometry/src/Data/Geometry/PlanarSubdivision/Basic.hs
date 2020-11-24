@@ -155,6 +155,7 @@ fromPlaneGraph   :: forall s v e f r. (Ord r, Fractional r)
                       => PlaneGraph s v e f r -> PlanarSubdivision s v e f r
 fromPlaneGraph g = fromPlaneGraph' g (PG.outerFaceDart g)
 
+{- HLINT ignore fromPlaneGraph' -}
 -- | Given a (connected) PlaneGraph and a dart that has the outerface on its left
 -- | Constructs a planarsubdivision
 --
@@ -492,7 +493,7 @@ asLocalF (FaceId (VertexId f)) ps = case ps^?!rawFaceData.ix f of
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices      :: FaceId' s -> PlanarSubdivision s v e f r
                       -> V.Vector (VertexId' s)
-boundaryVertices f ps = (\d -> headOf d ps) <$> outerBoundaryDarts f ps
+boundaryVertices f ps = (`headOf` ps) <$> outerBoundaryDarts f ps
 
 
 -- | Lists the holes in this face, given as a list of darts to arbitrary darts
@@ -657,7 +658,7 @@ rawFacePolygon i ps = case F.toList $ holesOf i ps of
                         hs -> Right (MultiPolygon vs $ map toHole hs) :+ x
   where
     res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
-    toHole d = (rawFaceBoundary (leftFace d ps) ps)^.core
+    toHole d = rawFaceBoundary (leftFace d ps) ps ^. core
 
 -- | Lists all *internal* faces of the planar subdivision.
 rawFacePolygons    :: PlanarSubdivision s v e f r

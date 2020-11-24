@@ -78,6 +78,7 @@ fromPoints pts = buildOn c Tree.fromPoints (F.toList pts)
   where
     c = fitsRectangle $ boundingBoxList (view core <$> pts)
 
+{- HLINT ignore findLeaf -}
 -- | Locates the cell containing the given point, if it exists.
 --
 -- running time: \(O(h)\), where \(h\) is the height of the quadTree
@@ -147,7 +148,7 @@ fromOrdering = \case
     GT -> Positive
 
 fromSignum   :: (Num a, Eq a) => (b -> a) -> b -> Sign
-fromSignum f = \x -> case signum (f x) of
+fromSignum f x = case signum (f x) of
                        -1 -> Negative
                        0  -> Zero
                        1  -> Positive

@@ -189,7 +189,7 @@ insert                   :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
 insert i (SegmentTree t) = SegmentTree $ insertRoot t
   where
     ri@(Range a b) = asRange i
-    insertRoot t' = maybe t' (flip insert' t') $ getRange t'
+    insertRoot t' = maybe t' (`insert'` t') $ getRange t'
 
     insert' inR         lf@(Leaf nd@(LeafData rr _))
       | coversAtomic ri inR rr = Leaf $ nd&leafAssoc %~ insertAssoc i

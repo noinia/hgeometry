@@ -44,8 +44,8 @@ instance (NFData i, NFData r) => NFData (IntervalTree i r)
 --
 -- \(O(n)\)
 createTree     :: Ord r => [r] -> IntervalTree i r
-createTree pts = IntervalTree . asBalancedBinTree
-               . map (\m -> NodeData m mempty mempty) $ pts
+createTree = IntervalTree . asBalancedBinTree
+             . map (\m -> NodeData m mempty mempty)
 
 
 -- | Build an interval tree

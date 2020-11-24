@@ -62,14 +62,14 @@ numRows = V.length . rows
 numCols = V.length . cols
 
 isFree             :: FreeSpaceDiagram a -> SP Int Int -> Bool
-isFree (FreeSpaceDiagram ta tb f) (SP r c) = fromMaybe False $
-                                               f <$> ta !? r
-                                                 <*> tb !? c
+isFree (FreeSpaceDiagram ta tb f) (SP r c) = Just True ==
+                                              (f <$> ta !? r
+                                                 <*> tb !? c)
 
 -- | Computes the reachable neighbours in a free space diagram
 neighbours             :: Loc -> FreeSpaceDiagram a -> [Loc]
 neighbours (SP r c) fd = filter (isFree fd)
-                       $ [ SP (r + 1) c, SP (r + 1) (c + 1), SP r (c + 1)]
+                       [ SP (r + 1) c, SP (r + 1) (c + 1), SP r (c + 1)]
                        -- we can either go up, go up and right, or go right
 
 --------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ data DFSState s = DFSState Int Int (UMV.MVector s Bool)
 
 reachable    :: FreeSpaceDiagram a -> Bool
 reachable fd = runST $ do
-                      v <- (UMV.new $ n*m)
+                      v <- UMV.new $ n*m
                       let st = DFSState n m v
                       reachableFrom (SP 0 0) fd st
                       visited (SP (n-1) (m-1)) st

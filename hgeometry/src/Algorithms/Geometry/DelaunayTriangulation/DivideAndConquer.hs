@@ -138,8 +138,8 @@ moveUp ut l r
   | otherwise   = do
                      insert l r
                      -- Get the neighbours of r and l along the convex hull
-                     r1 <- pred' . rotateTo l . lookup'' r <$> get
-                     l1 <- succ' . rotateTo r . lookup'' l <$> get
+                     r1 <- gets (pred' . rotateTo l . lookup'' r)
+                     l1 <- gets (succ' . rotateTo r . lookup'' l)
 
                      (r1',a) <- rotateR l r r1
                      (l1',b) <- rotateL l r l1
@@ -199,12 +199,12 @@ rotateL' l r = go
 -- by the first three points.
 qTest         :: (Ord r, Fractional r)
               => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Bool
-qTest h i j k = withPtMap . snd . fst <$> ask
+qTest h i j k = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = let h' = ptMap V.! h
                           i' = ptMap V.! i
-                          j' = ptMap V.! (focus' j)
-                          k' = ptMap V.! (focus' k)
+                          j' = ptMap V.! focus' j
+                          k' = ptMap V.! focus' k
                       in not . maybe True ((k'^.core) `insideBall`) $ disk' h' i' j'
     disk' p q r = disk (p^.core) (q^.core) (r^.core)
 
@@ -247,7 +247,7 @@ delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
 -- | Lifted version of Convex.IsLeftOf
 isLeftOf           :: (Ord r, Num r)
                    => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
+p `isLeftOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isLeftOf'` (ptMap V.! l, ptMap V.! r)
     a `isLeftOf'` (b,c) = ccw' b c a == CCW
@@ -255,7 +255,7 @@ p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
 -- | Lifted version of Convex.IsRightOf
 isRightOf           :: (Ord r, Num r)
                     => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isRightOf` (l,r) = withPtMap . snd . fst <$> ask
+p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isRightOf'` (ptMap V.! l, ptMap V.! r)
     a `isRightOf'` (b,c) = ccw' b c a == CW
@@ -296,4 +296,4 @@ withID     :: c :+ e -> e' -> c :+ (e :+ e')
 withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
-lookup'' k m = fromJust . IM.lookup k $ m
+lookup'' k = fromJust . IM.lookup k

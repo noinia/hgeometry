@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Geometry.Triangle where
 
@@ -144,8 +143,8 @@ fromBarricentric (Vector3 a b c) (Triangle p q r) = let f = view (core.vector) i
 inTriangle     :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> PointLocationResult
 inTriangle q t
-    | all (`inRange` (OpenRange   0 1)) [a,b,c] = Inside
-    | all (`inRange` (ClosedRange 0 1)) [a,b,c] = OnBoundary
+    | all (`inRange` OpenRange   0 1) [a,b,c] = Inside
+    | all (`inRange` ClosedRange 0 1) [a,b,c] = OnBoundary
     | otherwise                                 = Outside
   where
     Vector3 a b c = toBarricentric q t
@@ -154,7 +153,7 @@ inTriangle q t
 onTriangle       :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> Bool
 q `onTriangle` t = let Vector3 a b c = toBarricentric q t
-                   in all (`inRange` (ClosedRange 0 1)) [a,b,c]
+                   in all (`inRange` ClosedRange 0 1) [a,b,c]
 
 
 -- myQ :: Point 2 Rational
@@ -165,7 +164,7 @@ q `onTriangle` t = let Vector3 a b c = toBarricentric q t
 type instance IntersectionOf (Line 2 r) (Triangle 2 p r) =
   [ NoIntersection, Point 2 r, LineSegment 2 () r ]
 
-instance (Fractional r, Ord r) => (Line 2 r) `IsIntersectableWith` (Triangle 2 p r) where
+instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` Triangle 2 p r where
    nonEmptyIntersection = defaultNonEmptyIntersection
 
    l `intersect` (Triangle p q r) =
@@ -180,9 +179,9 @@ instance (Fractional r, Ord r) => (Line 2 r) `IsIntersectableWith` (Triangle 2 p
 
        collect   :: LineSegment 2 p r -> Maybe (Either (Point 2 r) (LineSegment 2 p r))
        collect s = match (s `intersect` l) $
-                        (H $ \NoIntersection           -> Nothing)
-                     :& (H $ \(a :: Point 2 r)         -> Just $ Left a)
-                     :& (H $ \(e :: LineSegment 2 p r) -> Just $ Right e)
+                        H (\NoIntersection           -> Nothing)
+                     :& H (\(a :: Point 2 r)         -> Just $ Left a)
+                     :& H (\(e :: LineSegment 2 p r) -> Just $ Right e)
                      :& RNil
 
 
@@ -190,14 +189,15 @@ instance (Fractional r, Ord r) => (Line 2 r) `IsIntersectableWith` (Triangle 2 p
 type instance IntersectionOf (Line 3 r) (Triangle 3 p r) =
   [ NoIntersection, Point 3 r, LineSegment 3 () r ]
 
-instance (Fractional r, Ord r) => (Line 3 r) `IsIntersectableWith` (Triangle 3 p r) where
+{- HLINT ignore "Use const" -}
+instance (Fractional r, Ord r) => Line 3 r `IsIntersectableWith` Triangle 3 p r where
    nonEmptyIntersection = defaultNonEmptyIntersection
 
    l@(Line a v) `intersect` t@(Triangle (p :+ _) (q :+ _) (r :+ _)) =
        match (l `intersect` h) $
-            (H $ \NoIntersection   -> coRec NoIntersection)
-         :& (H $ \i@(Point3 _ _ _) -> if onTriangle' i then coRec i else coRec NoIntersection)
-         :& (H $ \_                -> intersect2d)
+            H (\NoIntersection -> coRec NoIntersection)
+         :& H (\i@Point3{}     -> if onTriangle' i then coRec i else coRec NoIntersection)
+         :& H (\_              -> intersect2d)
          :& RNil
      where
        h@(Plane _ n) = supportingPlane t
@@ -210,13 +210,13 @@ instance (Fractional r, Ord r) => (Line 3 r) `IsIntersectableWith` (Triangle 3 p
 
        -- test if the point in terms of its 2d coords lies in side the projected triangle
        onTriangle'                :: Point 3 r -> Bool
-       onTriangle' i = (project i) `onTriangle` t'
+       onTriangle' i = project i `onTriangle` t'
 
        -- FIXME! these vectors may not be unit vectors. How do we deal with
        -- that? (and does that really matter here?)
        transf :: Transformation 3 r
        transf = let u = p .-. q
-                in rotateTo (Vector3 u (n `cross` u) n) |.| translation ((-1) *^ (toVec q))
+                in rotateTo (Vector3 u (n `cross` u) n) |.| translation ((-1) *^ toVec q)
        -- inverse of the transformation above.
        invTrans :: Transformation 3 r
        invTrans = inverseOf transf
@@ -233,8 +233,8 @@ instance (Fractional r, Ord r) => (Line 3 r) `IsIntersectableWith` (Triangle 3 p
 
        intersect2d :: Intersection (Line 3 r) (Triangle 3 p r)
        intersect2d = match (l' `intersect` t') $
-            (H $ \NoIntersection    -> coRec NoIntersection)
-         :& (H $ \i@(Point2 _ _)    -> coRec $ lift i)
-         :& (H $ \(LineSegment s e) -> coRec $ LineSegment (s&unEndPoint.core %~ lift)
-                                                           (e&unEndPoint.core %~ lift))
+            H (\NoIntersection    -> coRec NoIntersection)
+         :& H (\i@(Point2 _ _)    -> coRec $ lift i)
+         :& H (\(LineSegment s e) -> coRec $ LineSegment (s&unEndPoint.core %~ lift)
+                                                         (e&unEndPoint.core %~ lift))
          :& RNil

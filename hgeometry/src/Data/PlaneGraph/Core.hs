@@ -565,7 +565,7 @@ traverseVertices   :: Applicative m
                    => (VertexId' s -> v -> m v')
                    -> PlaneGraph s v e f r
                    -> m (PlaneGraph s v' e f r)
-traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+traverseVertices f = itraverseOf (vertexData.itraversed) (f . VertexId)
 
 -- | Traverses the darts
 --
@@ -636,7 +636,7 @@ outerFaceDart ps = d
            -- compare lexicographically; i.e. if same x-coord prefer the one with the
            -- smallest y-coord
     d :+ _ = V.maximumBy (cmpSlope `on` (^.extra))
-           .  fmap (\d' -> d' :+ (edgeSegment d' ps)^.core.to supportingLine)
+           .  fmap (\d' -> d' :+ edgeSegment d' ps ^. core.to supportingLine)
            $ incidentEdges v ps
     -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
     -- basically: find the leftmost vertex, find the incident edge with the largest slope

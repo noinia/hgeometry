@@ -61,7 +61,7 @@ type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
 showDT = mapM_ print . triangulationEdges
 
-
+{- HLINT ignore triangulationEdges -}
 triangulationEdges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
 triangulationEdges t = let pts = _positions t
                        in map (\(u,v) -> (pts V.! u, pts V.! v)) . tEdges $ t

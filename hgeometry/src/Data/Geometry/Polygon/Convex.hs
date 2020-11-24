@@ -121,7 +121,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp p = findMaxStart . C.rightElements . getVertices $ p
+findMaxWith cmp = findMaxStart . C.rightElements . getVertices
   where
     p' >=. q = (p' `cmp` q) /= LT
 
@@ -339,10 +339,10 @@ minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
   where
     f p' = let xs@(S.viewl -> (v :< _)) = C.asSeq . bottomMost . getVertices $ p'
            in F.toList $ xs |> v
-    (v :+ ve) .+. (w :+ we) = v .+^ (toVec w) :+ (ve,we)
+    (v :+ ve) .+. (w :+ we) = v .+^ toVec w :+ (ve,we)
 
     cmpAngle v v' w w' =
-      ccwCmpAround (ext $ origin) (ext . Point $ v' .-. v) (ext . Point $ w' .-. w)
+      ccwCmpAround (ext origin) (ext . Point $ v' .-. v) (ext . Point $ w' .-. w)
 
     merge' [_]       [_]       = []
     merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
@@ -352,7 +352,7 @@ minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
         LT -> merge' (v':vs)   (w:w':ws)
         GT -> merge' (v:v':vs) (w':ws)
         EQ -> merge' (v':vs)   (w':ws)
-    merge' _         _         = error $ "minkowskiSum: Should not happen"
+    merge' _         _         = error "minkowskiSum: Should not happen"
 
 
 

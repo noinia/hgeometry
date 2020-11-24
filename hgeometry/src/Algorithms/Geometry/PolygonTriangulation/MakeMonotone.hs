@@ -97,7 +97,7 @@ p `cmpSweep` q =
 
 --------------------------------------------------------------------------------
 
-type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
+type Event r = Point 2 r :+ Two (LineSegment 2 Int r)
 
 data StatusStruct r = SS { _statusStruct :: !(SS.Set (LineSegment 2 Int r))
                          , _helper       :: !(IntMap.IntMap Int)
@@ -108,6 +108,7 @@ makeLenses ''StatusStruct
 ix'   :: Int -> Lens' (V.Vector a) a
 ix' i = singular (ix i)
 
+{- HLINT ignore computeDiagonals -}
 -- | Given a polygon, find a set of non-intersecting diagonals that partition
 -- the polygon into y-monotone pieces.
 --

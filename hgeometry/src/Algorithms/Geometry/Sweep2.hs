@@ -71,10 +71,10 @@ instance Show MyLine where
   show (L (_,s)) = s
 
 line1 :: MyLine
-line1 = L $ (\x -> x, "Line 1")
+line1 = L (id, "Line 1")
 
 line2 :: MyLine
-line2 = L $ (\x -> 10 - x, "Line 2")
+line2 = L (10 - , "Line 2")
 
 
 
@@ -85,7 +85,7 @@ newtype Tagged (s :: *) a = Tagged a
 
 
 myIT :: Reifies s Double => ITimed s (Map (Timed s Double Double) MyLine)
-myIT = Timed $ construct
+myIT = Timed construct
 
 
 construct   :: forall (s :: *). Reifies s Double
@@ -119,7 +119,7 @@ with x _ = pure x
 
 
 query'   ::  forall s.Reifies s Double => Double -> Timed s Double (Maybe MyLine)
-query' y = (fmap snd . Map.lookupGE (with y construct00)) <$> wrapMap construct00
+query' y = fmap snd . Map.lookupGE (with y construct00) <$> wrapMap construct00
   where
     construct00 = construct0 (Proxy :: Proxy s)
 
