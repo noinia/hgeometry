@@ -26,7 +26,7 @@ jobs:
           ~/.stack-work
           ~/.dist-newstyle
           ~/.ghc
-        key: ${{ runner.os }}-${{ hashFiles('**/*.cabal') }}-cache
+        key: ${{ runner.os }}-${{ hashFiles('**/*.cabal') }}-cache-stack
 
     - name: Build dependencies
       run: |
