@@ -98,10 +98,10 @@ connectHoles = connectHolesLinear (Vector2 0 1)
 connectHolesLinear :: (Ord r, Num r, Fractional r)
   => Vector 2 r -> MultiPolygon p r -> SimplePolygon () r
 connectHolesLinear vec (MultiPolygon border holes) =
-    connectHolesLinear' vec (lower $ SimplePolygon border) sorted
+    connectHolesLinear' vec (trunc $ SimplePolygon border) sorted
   where
-    lower = first (const ())
-    extremes = map (snd . extremesLinearSeq vec) (map lower holes)
+    trunc = first (const ())
+    extremes = map (snd . extremesLinearSeq vec) (map trunc holes)
     sorted = sortBy (cmpExtreme vec `on` focus) extremes
 
 connectHolesLinear' :: (Ord r, Num r, Fractional r)
@@ -113,20 +113,11 @@ connectHolesLinear' vec border (hole:holes) =
   where
     newBorder = SimplePolygon (C.fromList (openBorder ++ F.toList hole ++ [focus hole]))
     line = undefined
-    (pt, openBorder) =
+    (_pt, openBorder) =
       F.minimumBy (cmpExtreme vec `on` fst)
       [ (pt, outer)
       | (pt, outer) <- cutPolygon border line
       , cmpExtreme vec (focus hole) pt == LT ]
-    worker acc [] = []
-    -- worker acc (l:ls)
-    --   | line intersects = mkPoly (reverse acc ++ lBegin ++ lEnd ++ ls) intersect_point : worker (l:acc) ls
-
--- openAt :: (Eq r, Eq p) => SimplePolygon p r -> Point 2 r :+ p -> [Point 2 r :+ p]
--- openAt p pt =
---   case rotateTo pt (p^.outerBoundary) of
---     Nothing -> error "openAt: Invalid point"
---     Just seq -> F.toList (rightElements seq)
 
 -- for each hole, find extreme point
 -- pick hole with largest extreme
