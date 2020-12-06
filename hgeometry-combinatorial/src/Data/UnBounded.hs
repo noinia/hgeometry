@@ -1,4 +1,5 @@
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.UnBounded
@@ -26,9 +27,9 @@ module Data.UnBounded( Top, topToMaybe
                      ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
-import qualified Data.Traversable as T
+import qualified Data.Foldable        as F
 import           Data.Functor.Classes
+import qualified Data.Traversable     as T
 
 --------------------------------------------------------------------------------
 -- * Top and Bottom
@@ -63,10 +64,10 @@ instance Show a => Show (Top a) where
   show ~(ValT x) = "ValT " ++ show x
 
 _ValT :: Prism (Top a) (Top b) a b
-_ValT = prism ValT (\ta -> case ta of Top -> Left Top ; ValT x -> Right x)
+_ValT = prism ValT (\case Top -> Left Top ; ValT x -> Right x)
 
 _Top :: Prism' (Top a) ()
-_Top = prism' (const Top) (\ta -> case ta of Top -> Just () ; ValT _ -> Nothing)
+_Top = prism' (const Top) (\case Top -> Just () ; ValT _ -> Nothing)
 
 -- | Iso between a 'Top a' and a 'Maybe a', interpreting a Top as a
 -- Nothing and vice versa. Note that this reverses the ordering of
@@ -106,10 +107,10 @@ instance Show a => Show (Bottom a) where
   show ~(ValB x) = "ValB " ++ show x
 
 _ValB :: Prism (Bottom a) (Bottom b) a b
-_ValB = prism ValB (\ba -> case ba of Bottom -> Left Bottom ; ValB x -> Right x)
+_ValB = prism ValB (\case Bottom -> Left Bottom ; ValB x -> Right x)
 
 _Bottom :: Prism' (Bottom a) ()
-_Bottom = prism' (const Bottom) (\ba -> case ba of Bottom -> Just () ; ValB _ -> Nothing)
+_Bottom = prism' (const Bottom) (\case Bottom -> Just () ; ValB _ -> Nothing)
 
 -- | Iso between a 'Bottom a' and a 'Maybe a', interpreting a Bottom as a
 -- Nothing and vice versa.

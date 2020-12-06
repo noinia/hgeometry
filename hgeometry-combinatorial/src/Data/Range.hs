@@ -156,7 +156,7 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
 
 type instance IntersectionOf (Range a) (Range a) = [ NoIntersection, Range a]
 
-instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
+instance Ord a => Range a `IsIntersectableWith` Range a where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -213,14 +213,14 @@ clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothi
 
 -- | Wether or not the first range completely covers the second one
 covers       :: forall a. Ord a => Range a -> Range a -> Bool
-x `covers` y = maybe False (== y) . asA @(Range a) $ x `intersect` y
+x `covers` y = (== Just y) . asA @(Range a) $ x `intersect` y
 
 
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is
 -- indeed smaller than the right endpoint. Note that we treat empty open-ranges
 -- as invalid as well.
 isValid             :: Ord a => Range a -> Bool
-isValid (Range l u) = case (_unEndPoint l) `compare` (_unEndPoint u) of
+isValid (Range l u) = case _unEndPoint l `compare` _unEndPoint u of
                           LT                            -> True
                           EQ | isClosed l || isClosed u -> True
                           _                             -> False
@@ -238,7 +238,7 @@ clipUpper' u' r@(Range l u) = case u' `cmpUpper` u of
 
 -- | Compare end points, Closed < Open
 cmpLower     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpLower a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
+cmpLower a b = case _unEndPoint a `compare` _unEndPoint b of
                  LT -> LT
                  GT -> GT
                  EQ -> case (a,b) of
@@ -250,7 +250,7 @@ cmpLower a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
 
 -- | Compare the end points, Open < Closed
 cmpUpper     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpUpper a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
+cmpUpper a b = case _unEndPoint a `compare` _unEndPoint b of
                  LT -> LT
                  GT -> GT
                  EQ -> case (a,b) of

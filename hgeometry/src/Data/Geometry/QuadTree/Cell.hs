@@ -41,7 +41,7 @@ type instance NumType   (Cell r) = r
 
 type instance IntersectionOf (Point 2 r) (Cell r) = '[ NoIntersection, Point 2 r]
 
-instance (Ord r, Fractional r) => (Point 2 r) `IsIntersectableWith` (Cell r) where
+instance (Ord r, Fractional r) => Point 2 r `IsIntersectableWith` Cell r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` c = p `intersect` toBox c
 
@@ -55,7 +55,7 @@ cellWidth            :: Fractional r => Cell r -> r
 cellWidth (Cell w _) = pow w
 
 toBox            :: Fractional r => Cell r -> Box 2 () r
-toBox (Cell w p) = box (ext $ p) (ext $ p .+^ Vector2 (pow w) (pow w))
+toBox (Cell w p) = box (ext p) (ext $ p .+^ Vector2 (pow w) (pow w))
 
 inCell            :: (Fractional r, Ord r) => Point 2 r :+ p -> Cell r -> Bool
 inCell (p :+ _) c = p `inBox` toBox c

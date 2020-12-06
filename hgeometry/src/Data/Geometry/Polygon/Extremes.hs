@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon.Extremes
@@ -22,6 +21,7 @@ import           Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
+{- HLINT ignore cmpExtreme -}
 -- | Comparison that compares which point is 'larger' in the direction given by
 -- the vector u.
 cmpExtreme       :: (Num r, Ord r)

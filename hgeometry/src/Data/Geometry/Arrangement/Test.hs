@@ -30,6 +30,7 @@ readArr fp = do  Right ls <- fmap f <$> readSinglePageFile fp
 readArr' :: IO (Arrangement Test () () () Rational)
 readArr' = readArr "test/Data/Geometry/arrangement.ipe"
 
+{- HLINT ignore test -}
 test :: IO ()
 test = do
          let outFile = "/tmp/out.ipe"

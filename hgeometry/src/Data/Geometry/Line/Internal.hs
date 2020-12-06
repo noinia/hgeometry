@@ -154,7 +154,7 @@ type instance IntersectionOf (Line 2 r) (Line 2 r) = [ NoIntersection
                                                      , Line 2 r
                                                      ]
 
-instance (Eq r, Fractional r) => (Line 2 r) `IsIntersectableWith` (Line 2 r) where
+instance (Eq r, Fractional r) => Line 2 r `IsIntersectableWith` Line 2 r where
 
 
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -207,6 +207,7 @@ instance HasSupportingLine (Line d r) where
 fromLinearFunction     :: Num r => r -> r -> Line 2 r
 fromLinearFunction a b = Line (Point2 0 b) (Vector2 1 a)
 
+{- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical
 toLinearFunction                             :: forall r. (Fractional r, Eq r)

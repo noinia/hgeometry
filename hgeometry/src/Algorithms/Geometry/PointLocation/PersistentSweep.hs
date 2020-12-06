@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Algorithms.Geometry.PointLocation.PersistentSweep where
 
 import           Control.Lens hiding (contains, below)
@@ -43,7 +42,7 @@ pointLocationDS   :: (Ord r, Fractional r)
                    => PlanarSubdivision s v e f r -> PointLocationDS s v e f r
 pointLocationDS ps = PointLocationDS (sweep ps) ps (outerFaceId ps)
   where
-    vtxes = L.sortBy (comparing (^._2.location.xCoord)) . V.toList . vertices
+    vtxes = L.sortOn (^._2.location.xCoord) . V.toList . vertices
     sweep = V.fromList . trim . L.scanl' (handle ps) (Bottom :+ mempty) . vtxes
     -- drop consecutive itmems at the same x-coordinates
     trim  = map L.last . L.groupBy ((==) `on` (^.core))
@@ -89,7 +88,7 @@ handle                     :: (Ord r, Fractional r)
                            -> Bottom r :+ StatusStructure s
                            -> (VertexId' s, VertexData r v)
                            -> Bottom r :+ StatusStructure s
-handle ps (_ :+ ss) (v,vd) = (ValB x) :+ replace ps (vd^.location) rs ss
+handle ps (_ :+ ss) (v,vd) = ValB x :+ replace ps (vd^.location) rs ss
   where
     x       = vd^.location.xCoord
     (_,rs)  = partition ps v x . V.toList $ incidentEdges v ps
@@ -137,12 +136,14 @@ ordAt   :: (Fractional r, Ord r) => r -> SS.Compare (LineSegment 2 p r)
 ordAt x = comparing (yCoordAt x)
 
 
+{- HLINT ignore ordAt' -}
 -- | Orders two darts by y-coordinate at the given x-coordinate
 ordAt'      :: (Fractional r, Ord r) => PlanarSubdivision s v e f r -> r -> SS.Compare (Dart s)
 ordAt' ps x = let g d = (edgeSegment d ps)^.core
               in \e f -> ordAt x (g e) (g f)
 
 
+{- HLINT ignore yCoordAt' -}
 yCoordAt'        :: (Fractional r, Ord r)
                  => PlanarSubdivision s v e f r
                  -> r -> Dart s -> r

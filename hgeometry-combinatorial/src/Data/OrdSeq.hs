@@ -93,6 +93,7 @@ splitBy cmp x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
     (m',r) = split (\v -> liftCmp cmp v (Key x) == GT) m
 
 
+{- HLINT ignore splitOn -}
 -- | Given a monotonic function f that maps a to b, split the sequence s
 -- depending on the b values. I.e. the result (l,m,r) is such that
 -- * all (< x) . fmap f $ l

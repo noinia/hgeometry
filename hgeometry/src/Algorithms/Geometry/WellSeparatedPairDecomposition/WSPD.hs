@@ -167,7 +167,6 @@ distributePoints'              :: Int                      -- ^ number of classe
                                -> PointSeq d (Idx :+ p) r  -- ^ input points
                                -> V.Vector (PointSeq d (Idx :+ p) r)
 distributePoints' k levels pts
-  | otherwise
   = fmap fromSeqUnsafe $ V.create $ do
     v <- MV.replicate k mempty
     forM_ pts $ \p ->
@@ -207,6 +206,7 @@ reIndexPoints ptsV = fmap reIndex ptsV
 -- | ST monad with access to the vector storign the level of the points.
 type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
 
+{- HLINT ignore assignLevels -}
 -- | Assigns the points to a level. Returns the list of levels used. The first
 -- level in the list is the level assigned to the rest of the nodes. Their
 -- level is actually still set to Nothing in the underlying array.
@@ -234,7 +234,7 @@ assignLevels h m pts l prevLvls
     -- from L_j.
     (lvlJPts,deletePts) <- findAndCompact j (pts'^.ix' i) mid
     let pts''     = pts'&ix' i .~ lvlJPts
-        l'        = l&widestDim .~ Just j
+        l'        = l&widestDim ?~ j
     forM_ deletePts $ \p ->
       assignLevel p l'
     assignLevels h (m + length deletePts) pts'' (nextLevel l) (l' : prevLvls)
@@ -351,7 +351,7 @@ widths :: (Num r, Arity d) => GV.Vector d (PointSeq d p r) -> GV.Vector d r
 widths = fmap Range.width . extends
 
 
-
+{- HLINT ignore extends -}
 -- | get the extends of the set of points in every dimension, i.e. the left and
 -- right boundaries.
 --
@@ -387,7 +387,7 @@ areWellSeparated s l        r        = boxBox s (bbOf l)   (bbOf r)
 -- areWellSeparated s (Node _ nd _) (Leaf p)      = pointBox s (p^.core) (nd^.bBox)
 -- areWellSeparated s (Node _ ld _) (Node _ rd _) = boxBox   s (ld^.bBox) (rd^.bBox)
 
-
+{- HLINT ignore boxBox -}
 -- -- | Test if the point and the box are far enough appart
 -- pointBox       :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
 --                => r -> Point d r -> Box d p r -> Bool

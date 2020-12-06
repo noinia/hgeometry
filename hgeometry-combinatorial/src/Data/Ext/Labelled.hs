@@ -42,7 +42,7 @@ instance (Show core, Show extra) => Show (core :+ Just extra) where
 
 infixr 1 :+, :+., :+|
 
-pattern (:+)          :: core -> extra -> core :+ (Just extra)
+pattern (:+)          :: core -> extra -> core :+ Just extra
 pattern core :+ extra = WithExtra (core,extra)
 {-# COMPLETE (:+) #-}
 

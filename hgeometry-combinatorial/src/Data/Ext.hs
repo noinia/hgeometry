@@ -83,11 +83,11 @@ _extra (_ :+ e) = e
 {-# INLINABLE _extra #-}
 
 core :: Lens (core :+ extra) (core' :+ extra) core core'
-core = lens _core (\(_ :+ e) c -> (c :+ e))
+core = lens _core (\(_ :+ e) c -> c :+ e)
 {-# INLINABLE core #-}
 
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
-extra = lens _extra (\(c :+ _) e -> (c :+ e))
+extra = lens _extra (\(c :+ _) e -> c :+ e)
 {-# INLINABLE extra #-}
 
 ext   :: a -> a :+ ()

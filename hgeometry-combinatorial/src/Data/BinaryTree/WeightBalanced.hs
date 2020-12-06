@@ -129,6 +129,7 @@ minView = \case
                       mv     = deleteA m v
                   in (m, (\l' v' -> balance l' v' r) <$> ml <*> mv)
 
+{- HLINT ignore maxView -}
 maxView :: (CanRoute v a, CanDelete v a) => Tree v a -> (a, Maybe (Tree v a))
 maxView = \case
   Leaf y       -> (y, Nothing)
@@ -157,6 +158,7 @@ insert x = go
 -- * Deletions
 
 
+{- HLINT ignore delete -}
 -- | Returns a maybe since the tree may now be empty
 delete   :: (Eq a, CanRoute v a, Measured v a, CanDelete v a) => a -> Tree v a
          -> Maybe (Tree v a)

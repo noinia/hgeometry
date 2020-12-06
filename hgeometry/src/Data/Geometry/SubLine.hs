@@ -57,7 +57,7 @@ fixEndPoints    :: (Num r, Arity d) => SubLine d p r r -> SubLine d (Point d r :
 fixEndPoints sl = sl&subRange %~ f
   where
     ptAt              = flip pointAt (sl^.line)
-    label (c :+ e)    = (c :+ (ptAt c :+ e))
+    label (c :+ e)    = c :+ (ptAt c :+ e)
     f ~(Interval l u) = Interval (l&unEndPoint %~ label)
                                  (u&unEndPoint %~ label)
 
@@ -118,19 +118,20 @@ type instance IntersectionOf (SubLine 2 p s r) (SubLine 2 q s r) = [ NoIntersect
                                                                    , SubLine 2 p s r
                                                                    ]
 
+{- HLINT ignore "Redundant bracket" -}
 instance (Ord r, Fractional r) =>
-         (SubLine 2 p r r) `IsIntersectableWith` (SubLine 2 p r r) where
+         SubLine 2 p r r `IsIntersectableWith` SubLine 2 p r r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \_             -> match (r `intersect` s'') $
-                                      (H $ \NoIntersection -> coRec NoIntersection)
-                                   :& (H $ \i              -> coRec $ SubLine l i)
+      :& H (\_             -> match (r `intersect` s'') $
+                                      H coRec -- NoIntersection
+                                   :& H (coRec . SubLine l)
                                    :& RNil
            )
       :& RNil
@@ -141,17 +142,17 @@ instance (Ord r, Fractional r) =>
               &end.core   .~ toOffset' (s'^.end.extra.core)   l
 
 instance (Ord r, Fractional r) =>
-         (SubLine 2 p (UnBounded r) r) `IsIntersectableWith` (SubLine 2 p (UnBounded r) r) where
+         SubLine 2 p (UnBounded r) r `IsIntersectableWith` SubLine 2 p (UnBounded r) r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \p@(Point _)    -> if onSubLine2UB p sl && onSubLine2UB p sm
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\p@(Point _)    -> if onSubLine2UB p sl && onSubLine2UB p sm
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \_             -> match (r `intersect` s'') $
-                                      (H $ \NoIntersection -> coRec NoIntersection)
-                                   :& (H $ \i              -> coRec $ SubLine l i)
+      :& H (\_              -> match (r `intersect` s'') $
+                                      H coRec -- NoIntersection
+                                   :& H (coRec . SubLine l)
                                    :& RNil
            )
       :& RNil

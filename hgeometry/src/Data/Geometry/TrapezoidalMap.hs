@@ -118,13 +118,13 @@ bottomLeftCorner t = bottom t ^? _Just.core.start
 
 atXCoord     :: (Ord r, Fractional r) => r -> LineSegment 2 p r -> Point 2 r
 atXCoord x s = match (s `intersect` verticalLine x) $
-     (H $ \NoIntersection -> error "atXCoord")
+     H (\NoIntersection -> error "atXCoord")
                              -- s was in the trapezoidal decompostion
                              -- for xCoord x so by definition s
                              -- should intersect the vertical line
                              -- through x. Hence, this case should not occur.
-  :& (H $ id)                -- propper intersection point
-  :& (H $ \s -> (s^.start.core) `min` (s^.end.core))
+  :& H id                    -- propper intersection point
+  :& H (\s -> (s^.start.core) `min` (s^.end.core))
                              -- s is a vertical segment, so report
                                        -- the lower endpoint
   :& RNil
@@ -317,7 +317,7 @@ compareAt x a b = compareAt' x (a^.core) (b^.core)
 
 -- | pre: First element is a Start
 buildTrapezoidalMap'                         :: (Ord r, Fractional r)
-                                             => NonEmpty ((Point 2 r, EventData e p r))
+                                             => NonEmpty (Point 2 r, EventData e p r)
                                              -> (TrapezoidRep e p r -> t)
                                              -> ([VSlab t e p r], Map TrapezoidId r, r)
 buildTrapezoidalMap' ((p,Start s) :| es) mkT = f $ runPersistentState act initialState

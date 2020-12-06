@@ -11,7 +11,6 @@ import qualified Data.Foldable as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Polygon
-import           Data.PlaneGraph (PlaneGraph)
 
 --------------------------------------------------------------------------------
 

@@ -56,7 +56,7 @@ instance PrimMonad (IDLListMonad s) where
 
 instance MonadReader (IDLList s) (IDLListMonad s) where
   local f = IDLListMonad . local f . runIDLListMonad'
-  ask = IDLListMonad $ ask
+  ask = IDLListMonad ask
 
 -- | Runs a DLList Computation, starting with n singleton values
 runIDLListMonad        :: Int -> (forall s. IDLListMonad s a) -> a
@@ -184,5 +184,4 @@ modify v i f = MV.modify v f i
 -- | For debugging purposes, dump the values and the cells
 dump :: IDLListMonad s (V.Vector Cell)
 dump = do IDLList cs <- ask
-          cs' <- V.freeze cs
-          pure cs'
+          V.freeze cs

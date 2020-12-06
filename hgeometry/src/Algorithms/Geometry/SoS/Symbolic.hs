@@ -149,7 +149,7 @@ instance Ord i => Ord (EpsFold i) where
     -- biggest of those terms is the pair whose indices comes first.
 
 instance (Arbitrary i, Ord i) => Arbitrary (EpsFold i) where
-  arbitrary = (mkEpsFold . take 4) <$> listOf arbitrary
+  arbitrary = mkEpsFold . take 4 <$> listOf arbitrary
 
 
 -- | Test if the epsfold has no pertubation at all (i.e. if it is \(\Pi_{\emptyset}\)
@@ -331,7 +331,7 @@ instance Ord k => Semigroup (Bag k) where
   (Bag m) <> (Bag m') = Bag $ Map.unionWith (\d d' -> d + d' + 1) m m'
 
 instance Ord k => Monoid (Bag k) where
-  mempty = Bag $ Map.empty
+  mempty = Bag Map.empty
 
 -- | Computes the difference of the two maps
 difference                   :: Ord a => Bag a -> Bag a -> Bag a
