@@ -39,7 +39,11 @@ jobs:
         cabal v2-build --only-dependencies --enable-tests --enable-benchmarks hgeometry-test
     - name: Build
       run: cabal v2-build hgeometry-test
-    - name: Test
+    - name: Test hgeometry
+      run: |
+        cabal v2-build hgeometry
+        cabal v2-test --test-show-details=always hgeometry
+    - name: Test integration
       run: |
         cabal v2-test --test-show-details=always hgeometry-test
     # - name: Check documentation syntax
