@@ -44,7 +44,7 @@ type Ixed'' f a = (Ixed (f a), Index (f a) ~ Int, IxValue (f a) ~ a)
 type Ixed' f p r = Ixed'' f (Point 2 r :+ p)
 
 (!)   :: Ixed' f p r => Status f p r -> Int -> Point 2 r :+ p
-p ! i = fromJust $ p^?polygon.ix (i `mod` p^.size)
+p ! i = p^?!polygon.ix (i `mod` p^.size)
 
 infix 1 !
 
@@ -86,6 +86,7 @@ upperTangent' (pP,pQ)
   | not $ isDone pQ   = upperTangent' . refine $ (pQ,pP)
   | otherwise         = ClosedLineSegment (pP ! pP^.end) (pQ ! pQ^.end)
 
+{- HLINT ignore initialize -}
 initialize                 :: (Ixed' f p r, Num r, Ord r, Foldable f)
                            => (f (Point 2 r :+ p), f (Point 2 r :+ p))
                            -> (Point 2 r :+ p, Point 2 r :+ p)
@@ -108,7 +109,7 @@ data Action = DiscStart | DiscEnd | NoDisc deriving (Show,Eq)
 
 refine         :: (Ixed' f p r, Num r, Ord r)
                => (Status f p r, Status f p r) -> (Status f p r, Status f p r)
-refine (pP,pQ) = refineP $ tryCertifyQ
+refine (pP,pQ) = refineP tryCertifyQ
   where
     mid = pP^.tent + (pP^.end - pP^.tent) `div` 2
     pm  = pP ! mid
@@ -138,7 +139,7 @@ refine (pP,pQ) = refineP $ tryCertifyQ
 
   --   -- action = case (p^.wrap && )
 
-
+{-
 refine' (pP,pQ)
     taum `intersectsAfter` p0q0 || (pP^.wrap && mid > pP^.size)
                 = DiscEnd --pP&end .~ mid  -- nothing ccw of mid in Ip
@@ -162,7 +163,7 @@ refine' (pP,pQ)
 
 
     -- refine' p q =
-
+-}
 
 
 

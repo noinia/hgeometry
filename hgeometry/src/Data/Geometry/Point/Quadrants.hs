@@ -7,7 +7,6 @@ import           Data.Geometry.Point.Internal
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           GHC.TypeLits
-import           Text.Read (Read(..))
 
 --------------------------------------------------------------------------------
 

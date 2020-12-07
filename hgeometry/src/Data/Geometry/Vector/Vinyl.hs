@@ -1,36 +1,28 @@
-{-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving         #-}
+{-# LANGUAGE UndecidableInstances       #-}
 module Data.Geometry.Vector.Vinyl where
 
-import           Data.Traversable
-
-
-import           Control.Applicative hiding (Const(..))
+import           Control.Applicative          hiding (Const (..))
 import           Data.Foldable
 import           Data.Traversable
 import           Data.Typeable
 
-import qualified Data.Vinyl as V
-import           Data.Vinyl hiding (Nat)
-import qualified Data.Vinyl.TypeLevel as TV
+import           Data.Vinyl                   hiding (Nat)
+import qualified Data.Vinyl                   as V
+import qualified Data.Vinyl.TypeLevel         as TV
 
 import           Data.Vinyl.Functor
 
 
 import           Data.Singletons
+import           Data.Singletons.Prelude.Base (IdSym0)
+import           Data.Singletons.Prelude.Bool (If, (:&&))
 import           Data.Singletons.TH
-import           Data.Singletons.Prelude.Bool(If, (:&&))
-import           Data.Singletons.Prelude.Base(IdSym0)
 import           GHC.TypeLits
 
-import qualified Linear.V3 as L3
 import           Linear.Affine
 import           Linear.Metric
+import qualified Linear.V3                    as L3
 import           Linear.Vector
 
 
@@ -108,7 +100,7 @@ instance RecApplicative (DimRange d) => Affine (Vector d) where
 instance RecApplicative (DimRange d) => Metric (Vector d)
 
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
-u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
+u `cross` v = fromV3 $ toV3 u `L3.cross` toV3 v
   where
     toV3 (Vector v) = let a = getConst . rget (C :: C 1) $ v
                           b = getConst . rget (C :: C 2) $ v

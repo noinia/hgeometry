@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Arrangement.Internal
@@ -13,9 +13,10 @@ module Data.Geometry.Arrangement.Internal where
 
 import           Algorithms.BinarySearch
 import           Control.Lens
-import qualified Data.CircularSeq as CSeq
+import           Data.Bifunctor
+import qualified Data.CircularSeq                as CSeq
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                   as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line
@@ -23,10 +24,10 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
-import qualified Data.List as List
+import qualified Data.List                       as List
 import           Data.Maybe
-import           Data.Ord (Down(..))
-import qualified Data.Vector as V
+import           Data.Ord                        (Down (..))
+import qualified Data.Vector                     as V
 import           Data.Vinyl.CoRec
 
 --------------------------------------------------------------------------------
@@ -97,7 +98,7 @@ computeSegsAndParts         :: forall r l. (Ord r, Fractional r)
 computeSegsAndParts rect ls = ( segs <> boundarySegs, parts')
   where
     segs         = map (&extra %~ Just)
-                 . concatMap (\(l,ls') -> perLine rect l ls') $ makePairs ls
+                 . concatMap (uncurry (perLine rect)) $ makePairs ls
     boundarySegs = map (:+ Nothing) . toSegments . dupFirst $ map fst parts'
     dupFirst = \case []       -> []
                      xs@(x:_) -> xs ++ [x]
@@ -112,7 +113,7 @@ perLine b m ls = map (:+ m^.extra) . toSegments . rmDuplicates . List.sort $ vs 
     rmDuplicates = map head . List.group
     vs  = mapMaybe (m `intersectionPoint`) ls
     vs' = maybe [] (\(p,q) -> [p,q]) . asA @(Point 2 r, Point 2 r)
-        $ (m^.core) `intersect` (Boundary b)
+        $ (m^.core) `intersect` Boundary b
 
 
 intersectionPoint                   :: forall r l. (Ord r, Fractional r)
@@ -121,7 +122,7 @@ intersectionPoint (l :+ _) (m :+ _) = asA @(Point 2 r) $ l `intersect` m
 
 
 toSegments      :: Ord r => [Point 2 r] -> [LineSegment 2 () r]
-toSegments ps = let pts = map ext $ ps in
+toSegments ps = let pts = map ext ps in
   zipWith ClosedLineSegment pts (tail pts)
 
 
@@ -192,8 +193,8 @@ unBoundedParts         :: (Ord r, Fractional r)
 unBoundedParts rect ls = [tl] <> t <> [tr] <> reverse r <> [br] <> reverse b <> [bl] <> l
   where
     sideIntersections' = over (traverse._2) Just . sideIntersections ls
-    Sides t r b l       = fmap sideIntersections'      $ sides   rect
-    Corners tl tr br bl = fmap ((,Nothing) . (^.core)) $ corners rect
+    Sides t r b l       = sideIntersections'    <$> sides   rect
+    Corners tl tr br bl = (,Nothing) . (^.core) <$> corners rect
 
 
 -- | Links the vertices  of the outer boundary with those in the subdivision
@@ -212,10 +213,10 @@ makePairs :: [a] -> [(a,[a])]
 makePairs = go
   where
     go []     = []
-    go (x:xs) = (x,xs) : map (\(y,ys) -> (y,x:ys)) (go xs)
+    go (x:xs) = (x,xs) : map (second (x:)) (go xs)
 
-allPairs    :: [a] -> [(a,a)]
-allPairs ys = go ys
+allPairs :: [a] -> [(a,a)]
+allPairs = go
   where
     go []     = []
     go (x:xs) = map (x,) xs ++ go xs
@@ -244,7 +245,7 @@ findStart       :: forall s l v e f r. (Ord r, Fractional r)
                 => Line 2 r -> Arrangement s l v (Maybe e) f r -> Maybe (Dart s)
 findStart l arr = do
     (p,_)   <- asA @(Point 2 r, Point 2 r) $
-                 l `intersect` (Boundary $ arr^.boundedArea)
+                 l `intersect` Boundary (arr^.boundedArea)
     (_,v,_) <- findStartVertex p arr
     findStartDart (arr^.subdivision) v
 

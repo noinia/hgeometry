@@ -73,14 +73,14 @@ beforeMe :: DLList s a -> ST s [a]
 beforeMe = unfoldrM1 (\l -> (\c -> (_elem c,)) <$> readSTRef l <*> getPrev l)
 
 toList   :: DLList s a -> ST s [a]
-toList c = (\xs ys -> (reverse $ tail xs) <> ys) <$> beforeMe c <*> toListFrom c
+toList c = (\xs ys -> reverse (tail xs) <> ys) <$> beforeMe c <*> toListFrom c
 
 -- | Convert a list into a doubly linked list. The result is a list,
 -- with for every element a pointer to the list, focussed on that
 -- element.
 fromList    :: [a] -> ST s [DLList s a]
 fromList xs = do refs <- mapM singleton xs
-                 sequence_ $ zipWith concat refs (tail refs)
+                 zipWithM_ concat refs (tail refs)
                  pure refs
 
 -- | Make this the last element in the list

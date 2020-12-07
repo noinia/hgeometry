@@ -89,6 +89,7 @@ fromCenter c ws = let f x r = R.ClosedRange (x-r) (x+r)
                   in fromExtent $ FV.zipWith f (toVec c) ((/2) <$> ws)
 
 
+{- HLINT ignore centerPoint -}
 -- | Center of the box
 centerPoint   :: (Arity d, Fractional r) => Box d p r -> Point d r
 centerPoint b = Point $ w V.^/ 2
@@ -105,7 +106,7 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
-instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
+instance (Ord r, Arity d) => Box d p r `IsIntersectableWith` Box d q r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   bx `intersect` bx' = f . sequence $ FV.zipWith intersect' (extent bx) (extent bx')
@@ -144,7 +145,7 @@ instance Arity d => Bitraversable (Box d) where
 
 type instance IntersectionOf (Point d r) (Box d p r) = '[ NoIntersection, Point d r]
 
-instance (Arity d, Ord r) => (Point d r) `IsIntersectableWith` (Box d p r) where
+instance (Arity d, Ord r) => Point d r `IsIntersectableWith` Box d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` b
     | not $ p `inBox` b = coRec NoIntersection

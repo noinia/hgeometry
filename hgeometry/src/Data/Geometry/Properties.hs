@@ -1,6 +1,5 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
-{-# LANGUAGE DefaultSignatures #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Properties

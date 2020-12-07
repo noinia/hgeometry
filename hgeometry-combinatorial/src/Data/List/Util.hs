@@ -26,7 +26,7 @@ import           Data.Ord (comparing)
 -- >>> leaveOutOne [1]
 -- [(1,[])]
 leaveOutOne    :: [a] -> [(a,[a])]
-leaveOutOne xs = (second F.toList . fromJust . extractNext)
+leaveOutOne xs = second F.toList . fromJust . extractNext
               <$> allNonEmptyNexts (Zipper.fromList xs)
 
 
@@ -53,8 +53,8 @@ minimaBy cmp = \case
   []     -> []
   (x:xs) -> NonEmpty.toList $ List.foldl' (\mins@(m:|_) y -> case m `cmp` y of
                                                                LT -> mins
-                                                               EQ -> (y NonEmpty.<| mins)
-                                                               GT -> (y:|[])
+                                                               EQ -> y NonEmpty.<| mins
+                                                               GT -> y:|[]
                                           ) (x:|[]) xs
 
 -- | extracts all minima from the list. The result consists of the

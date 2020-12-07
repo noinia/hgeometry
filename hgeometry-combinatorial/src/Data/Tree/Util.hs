@@ -79,16 +79,16 @@ firstChild (Zipper (Node x chs) as) = case chs of
 -- Just (Zipper {focus = Node {rootLabel = 2, subForest = []}, ancestors = [([Node {rootLabel = 1, subForest = []}],0,[Node {rootLabel = 3, subForest = [Node {rootLabel = 4, subForest = []}]}])]})
 nextSibling               :: Zipper a -> Maybe (Zipper a)
 nextSibling (Zipper t as) = case as of
-                              []                  -> Nothing -- no parent
-                              ((_,_,[]):_)        -> Nothing -- no next sibling
-                              ((ls,p,(r:rs)):as') -> Just $ Zipper r ((t:ls,p,rs):as')
+                              []                -> Nothing -- no parent
+                              ((_,_,[]):_)      -> Nothing -- no next sibling
+                              ((ls,p,r:rs):as') -> Just $ Zipper r ((t:ls,p,rs):as')
 
 -- | Move the focus to the next sibling of this node
 prevSibling               :: Zipper a -> Maybe (Zipper a)
 prevSibling (Zipper t as) = case as of
-                              []                  -> Nothing -- no parent
-                              (([],_,_):_)        -> Nothing -- no prev sibling
-                              (((l:ls),p,rs):as') -> Just $ Zipper l ((ls,p,t:rs):as')
+                              []                -> Nothing -- no parent
+                              (([],_,_):_)      -> Nothing -- no prev sibling
+                              ((l:ls,p,rs):as') -> Just $ Zipper l ((ls,p,t:rs):as')
 
 -- | Given a zipper that focussses on some subtree t, construct a list with
 -- zippers that focus on each child.
@@ -132,7 +132,7 @@ findEvert p = findEvert' (p . rootLabel)
 -- running time: \(O(nT(n))\) where \(n\) is the size of the tree, and \(T(m)\) is
 -- the time to evaluate a predicate on a subtree of size \(m\).
 findEvert'   :: (Tree a -> Bool) -> Tree a -> Maybe (Tree a)
-findEvert' p = fmap unZipperLocal . listToMaybe . filter (p . focus) . allTrees . root
+findEvert' p = fmap unZipperLocal . List.find (p . focus) . allTrees . root
 
 -- | Function to extract a path between a start node and an end node (if such a
 --path exists). If there are multiple paths, no guarantees are given about
@@ -179,7 +179,7 @@ findNode p = listToMaybe . findNodes (p . rootLabel)
 findNodes   :: (Tree a -> Bool) -> Tree a -> [[a]]
 findNodes p = go
   where
-    go t = let mh = if p t then [[]] else []
+    go t = let mh = [ [] | p t ] -- [[]] iff 'p t'
            in map (rootLabel t:) $ mh <> concatMap go (children t)
 
 

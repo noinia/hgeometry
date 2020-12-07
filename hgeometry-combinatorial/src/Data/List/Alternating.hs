@@ -32,7 +32,7 @@ instance Bitraversable Alternating where
 -- [(0,'a' :+ 1),(1,'b' :+ 2),(2,'c' :+ 3)]
 withNeighbours                     :: Alternating a b -> [(a,b :+ a)]
 withNeighbours (Alternating a0 xs) = let as = a0 : map (^.extra) xs
-                                     in zipWith (\a ba -> (a,ba)) as xs
+                                     in zip as xs
 
 
 
@@ -82,5 +82,5 @@ reverse                      :: Alternating a b -> Alternating a b
 reverse p@(Alternating s xs) = case xs of
     []             -> p
     ((e1 :+ _):tl) -> let ys = (e1 :+ s) : List.zipWith (\(_ :+ v) (e :+ _) -> e :+ v) xs tl
-                          t  = (last xs)^.extra
+                          t  = last xs ^. extra
                       in Alternating t (List.reverse ys)

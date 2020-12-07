@@ -63,7 +63,7 @@ emptyOrdSet = empty compare
 
 -- | Insert element
 insert   :: a -> ExpSet a -> ExpSet a
-insert x = withTree (flip insertT x)
+insert x = withTree (`insertT` x)
 
 insertAll      :: [a] -> ExpSet a -> ExpSet a
 insertAll xs t = F.foldr insert t xs
@@ -71,7 +71,7 @@ insertAll xs t = F.foldr insert t xs
 
 -- | Delete an element from the set
 delete :: a -> ExpSet a -> ExpSet a
-delete x = withTree (flip deleteT x)
+delete x = withTree (`deleteT` x)
 
 -- | Split the Set in (elements < x, elements == x, elements > x)
 split                  :: a -> ExpSet a -> (ExpSet a, Maybe a, ExpSet a)
@@ -88,7 +88,7 @@ viewL = F.toList
 
 -- | Elements in right to left order
 viewR :: ExpSet a -> [a]
-viewR = reverseFoldMap (\x -> [x]) . tree
+viewR = reverseFoldMap (: []) . tree
 
 -- | O(log n)
 minimum :: ExpSet a -> Maybe a
@@ -143,7 +143,7 @@ splitMonotoneT cmp p (Bin _ l y r)
 
 extractMin                     :: Cmp a -> Tree a -> (Maybe a, Tree a)
 extractMin cmp (Bin _ Tip x r) = (Just x, insertT cmp x r)
-extractMin cmp (Bin _ l   x r) = fmap (\l' -> join3 cmp l' x r) $ extractMin cmp l
+extractMin cmp (Bin _ l   x r) = (\l' -> join3 cmp l' x r) <$> extractMin cmp l
 extractMin _   t               = (Nothing,t)
 
 join2             :: Cmp a -> Tree a -> Tree a -> Tree a

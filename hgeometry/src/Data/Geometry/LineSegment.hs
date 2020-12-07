@@ -109,6 +109,7 @@ instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) wh
 deriving instance (Arity d, NFData r, NFData p) => NFData (LineSegment d p r)
 
 
+{- HLINT ignore endPoints -}
 -- | Traversal to access the endpoints. Note that this traversal
 -- allows you to change more or less everything, even the dimension
 -- and the numeric type used, but it preservers if the segment is open
@@ -132,8 +133,9 @@ segment2SubLine ss = SubLine (Line p (q .-. p)) (Interval s e)
     s = a&unEndPoint.core .~ 0
     e = b&unEndPoint.core .~ 1
 
+{- HLINT ignore subLineToSegment -}
 subLineToSegment    :: (Num r, Arity d) => SubLine d p r r -> LineSegment d p r
-subLineToSegment sl = let (Interval s' e') = (fixEndPoints sl)^.subRange
+subLineToSegment sl = let Interval s' e' = (fixEndPoints sl)^.subRange
                           s = s'&unEndPoint %~ (^.extra)
                           e = e'&unEndPoint %~ (^.extra)
                       in LineSegment s e
@@ -185,24 +187,24 @@ type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
 
 
 instance (Ord r, Fractional r) =>
-         (LineSegment 2 p r) `IsIntersectableWith` (LineSegment 2 p r) where
+         LineSegment 2 p r `IsIntersectableWith` LineSegment 2 p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   a `intersect` b = match ((a^._SubLine) `intersect` (b^._SubLine)) $
-         (H coRec)
-      :& (H coRec)
-      :& (H $ coRec . subLineToSegment)
+         H coRec
+      :& H coRec
+      :& H (coRec . subLineToSegment)
       :& RNil
 
 instance (Ord r, Fractional r) =>
-         (LineSegment 2 p r) `IsIntersectableWith` (Line 2 r) where
+         LineSegment 2 p r `IsIntersectableWith` Line 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   s `intersect` l = let ubSL = s^._SubLine.re _unBounded.to dropExtra
-                    in match (ubSL `intersect` (fromLine l)) $
-                            (H   coRec)
-                         :& (H $ coRec)
-                         :& (H $ const (coRec s))
+                    in match (ubSL `intersect` fromLine l) $
+                            H  coRec
+                         :& H  coRec
+                         :& H (const (coRec s))
                          :& RNil
 
 -- * Functions on LineSegments

@@ -15,7 +15,8 @@ import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
 import           Data.Intersection(intersects)
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (listToMaybe, isNothing)
+import           Data.List (find)
+import           Data.Maybe (isNothing)
 import           Data.Util
 --------------------------------------------------------------------------------
 
@@ -72,7 +73,7 @@ t1 `overlaps` t2 = upperHalfSpaceOf t1 == upperHalfSpaceOf t2 && False
 -- Just (Point3 [5,5,-10] :+ ())
 isValidTriangle   :: (Num r, Ord r)
                   => Triangle 3 p r -> [Point 3 r :+ q] -> Maybe (Point 3 r :+ q)
-isValidTriangle t = listToMaybe . filter (\a -> not $ (a^.core) `intersects` h)
+isValidTriangle t = find (\a -> not $ (a^.core) `intersects` h)
   where
     h = upperHalfSpaceOf t
 

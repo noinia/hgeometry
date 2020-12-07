@@ -44,8 +44,8 @@ instance (NFData i, NFData r) => NFData (IntervalTree i r)
 --
 -- \(O(n)\)
 createTree     :: Ord r => [r] -> IntervalTree i r
-createTree pts = IntervalTree . asBalancedBinTree
-               . map (\m -> NodeData m mempty mempty) $ pts
+createTree = IntervalTree . asBalancedBinTree
+             . map (\m -> NodeData m mempty mempty)
 
 
 -- | Build an interval tree
@@ -56,7 +56,6 @@ fromIntervals    :: (Ord r, IntervalLike i, NumType i ~ r)
 fromIntervals is = foldr insert (createTree pts) is
   where
     endPoints (asRange -> Range' a b) = [a,b]
-    endPoints _ = error "Unreachable, but cannot prove it in Haskell"
     pts = List.sort . concatMap endPoints $ is
 
 -- | Lists the intervals. We don't guarantee anything about the order

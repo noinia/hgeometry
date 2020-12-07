@@ -38,14 +38,14 @@ makeLenses ''BezierSpline
 
 -- | Quadratic Bezier Spline
 pattern Bezier2      :: Point d r -> Point d r -> Point d r -> BezierSpline 2 d r
-pattern Bezier2 p q r <- ((F.toList . LSeq.take 3 . _controlPoints) -> [p,q,r])
+pattern Bezier2 p q r <- (F.toList . LSeq.take 3 . _controlPoints -> [p,q,r])
   where
     Bezier2 p q r = fromPointSeq . Seq.fromList $ [p,q,r]
 {-# COMPLETE Bezier2 #-}
 
 -- | Cubic Bezier Spline
 pattern Bezier3         :: Point d r -> Point d r -> Point d r -> Point d r -> BezierSpline 3 d r
-pattern Bezier3 p q r s <- ((F.toList . LSeq.take 4 . _controlPoints) -> [p,q,r,s])
+pattern Bezier3 p q r s <- (F.toList . LSeq.take 4 . _controlPoints -> [p,q,r,s])
   where
     Bezier3 p q r s = fromPointSeq . Seq.fromList $ [p,q,r,s]
 {-# COMPLETE Bezier3 #-}

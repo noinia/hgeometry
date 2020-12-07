@@ -46,7 +46,7 @@ element _ = V.elementTy (Proxy :: Proxy i)
 element'   :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 element' i f v
   | 0 <= i && i < fromInteger (natVal (C :: C d)) = f (v V.! i)
-                                                 <&> \a -> (v&V.element i .~ a)
+                                                 <&> \a -> v&V.element i .~ a
        -- Implementation based on that of Ixed Vector in Control.Lens.At
   | otherwise                                     = pure v
 
@@ -125,7 +125,7 @@ destruct (Vector v) = (V.head v, Vector $ V.tail v)
 
 -- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
-u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
+u `cross` v = fromV3 $ toV3 u `L3.cross` toV3 v
 
 
 --------------------------------------------------------------------------------

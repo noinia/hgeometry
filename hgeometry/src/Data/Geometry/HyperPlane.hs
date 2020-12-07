@@ -97,7 +97,7 @@ instance OnSideUpDownTest (Plane r) where
 
 type instance IntersectionOf (Line 3 r) (Plane r) = [NoIntersection, Point 3 r, Line 3 r]
 
-instance (Eq r, Fractional r) => (Line 3 r) `IsIntersectableWith` (Plane r) where
+instance (Eq r, Fractional r) => Line 3 r `IsIntersectableWith` Plane r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   l@(Line p v) `intersect` (HyperPlane q n)
       | denum == 0 = if num == 0 then coRec l else coRec NoIntersection

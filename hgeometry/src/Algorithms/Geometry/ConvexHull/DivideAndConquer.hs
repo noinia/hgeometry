@@ -72,10 +72,10 @@ instance (Num r, Ord r) => Semigroup (UH r p) where
 hull               :: (NonEmpty p -> NonEmpty p -> Two (p :+ [p]))
                    -> NonEmpty p -> NonEmpty p -> NonEmpty p
 hull tangent lh rh = let Two (l :+ lh') (r :+ rh') = tangent (NonEmpty.reverse lh) rh
-                     in NonEmpty.fromList $ (reverse lh') <> [l,r] <> rh'
+                     in NonEmpty.fromList $ reverse lh' <> [l,r] <> rh'
 
 --------------------------------------------------------------------------------
 
-incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
