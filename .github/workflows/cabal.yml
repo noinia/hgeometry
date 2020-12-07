@@ -40,6 +40,7 @@ jobs:
     - name: Build
       run: cabal v2-build hgeometry-test
     - name: Test hgeometry
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
       run: |
         cabal v2-build hgeometry
         cabal v2-test --test-show-details=always hgeometry
