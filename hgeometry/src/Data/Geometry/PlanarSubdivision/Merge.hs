@@ -23,9 +23,6 @@ import           Data.Geometry.PlanarSubdivision.Raw
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.PlanarGraph.Dart
-import           Data.PlaneGraph ( Dart, VertexId(..), FaceId(..)
-                                , VertexId', FaceId'
-                                )
 import qualified Data.PlaneGraph as PG
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
@@ -215,34 +212,39 @@ shift nc nv nd nf (PlanarSubdivision cs vd rd rf) = PlanarSubdivision cs' vd' rd
 --------------------------------------------------------------------------------
 
 data Test = Test
-data Id a = Id a
+newtype Id a = Id a
 
 
 triangle1 :: PlanarSubdivision Test () () Int Rational
 triangle1 = (\pg -> fromSimplePolygon (Id Test) pg 1 0)
-          $ trianglePG1
+          trianglePG1
+trianglePG1 :: SimplePolygon () Rational
 trianglePG1 = fromPoints . map ext $ [origin, Point2 200 0, Point2 200 200]
 
 
 triangle2 :: PlanarSubdivision Test () () Int Rational
 triangle2 = (\pg -> fromSimplePolygon (Id Test) pg 2 0)
-          $ trianglePG2
+          trianglePG2
+trianglePG2 :: SimplePolygon () Rational
 trianglePG2 = fromPoints . map ext $ [Point2 0 30, Point2 10 30, Point2 10 40]
 
 
 
 triangle4 :: PlanarSubdivision Test () () Int Rational
 triangle4 = (\pg -> fromSimplePolygon (Id Test) pg 1 0)
-          $ trianglePG4
+          trianglePG4
+trianglePG4 :: SimplePolygon () Rational
 trianglePG4 = fromPoints . map ext $ [Point2 400 400, Point2 600 400, Point2 600 600]
 
 triangle3 :: PlanarSubdivision Test () () Int Rational
 triangle3 = (\pg -> fromSimplePolygon (Id Test) pg 3 0)
-          $ trianglePG3
+          trianglePG3
+trianglePG3 :: SimplePolygon () Rational
 trianglePG3 = fromPoints . map ext $ [Point2 401 530, Point2 410 530, Point2 410 540]
 
 
-myPS = embedAsHoleIn triangle2 const (mkFI 1) triangle1
+_myPS :: PlanarSubdivision Test () () Int Rational
+_myPS = embedAsHoleIn triangle2 const (mkFI 1) triangle1
        `merge`
        embedAsHoleIn triangle3 const (mkFI 1) triangle4
 

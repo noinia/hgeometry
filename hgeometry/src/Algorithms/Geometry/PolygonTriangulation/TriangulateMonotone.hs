@@ -1,7 +1,6 @@
 module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone where
 
 import           Control.Lens
-import           Data.Bifunctor
 import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -126,8 +125,7 @@ mergeBy cmp = go
 -- running time: \(O(n)\)
 splitPolygon    :: Ord r => MonotonePolygon p r
                 -> ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
-splitPolygon pg = bimap (f L) (f R)
-                . second reverse
+splitPolygon pg = bimap (f L) (f R . reverse)
                 . L.break (\v -> v^.core == vMinY)
                 . F.toList . C.rightElements $ vs'
   where
@@ -157,14 +155,14 @@ splitPolygon pg = bimap (f L) (f R)
 
 
 testPoly5 :: SimplePolygon () Rational
-testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 176 736
-                                                             , Point2 240 688
-                                                             , Point2 240 608
-                                                             , Point2 128 576
-                                                             , Point2 64 640
-                                                             , Point2 80 720
-                                                             , Point2 128 752
-                                                             ]
+testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext [ Point2 176 736
+                                                           , Point2 240 688
+                                                           , Point2 240 608
+                                                           , Point2 128 576
+                                                           , Point2 64 640
+                                                           , Point2 80 720
+                                                           , Point2 128 752
+                                                           ]
 
 
 -- testPoly5 :: SimplePolygon () Rational

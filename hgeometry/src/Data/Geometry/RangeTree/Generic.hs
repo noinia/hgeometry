@@ -3,7 +3,6 @@ module Data.Geometry.RangeTree.Generic where
 import           Control.Lens
 import           Data.BinaryTree
 import           Data.Ext
-import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.RangeTree.Measure
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -13,7 +12,6 @@ import           Data.Measured.Class
 import           Data.Measured.Size
 import           Data.Semigroup
 import           Data.Semigroup.Foldable
-import qualified Data.Set as Set
 import           Data.Util
 
 --------------------------------------------------------------------------------

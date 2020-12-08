@@ -1,26 +1,12 @@
 module Data.Geometry.Point.Quadrants where
 
-import           Control.DeepSeq
 import           Control.Lens
-import           Data.Aeson
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Point.Class
 import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as Vec
-import           Data.Hashable
 import qualified Data.List as L
-import           Data.Ord (comparing)
-import           Data.Proxy
-import           GHC.Generics (Generic)
 import           GHC.TypeLits
-import           System.Random (Random(..))
-import           Test.QuickCheck (Arbitrary)
-import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
-import           Text.ParserCombinators.ReadPrec (lift)
-import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
 
 --------------------------------------------------------------------------------
 

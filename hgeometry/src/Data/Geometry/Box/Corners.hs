@@ -51,6 +51,7 @@ instance Monoid a => Monoid (Corners a) where
 
 --------------------------------------------------------------------------------
 
+{- HLINT ignore corners -}
 -- | Get the corners of a rectangle, the order is:
 -- (TopLeft, TopRight, BottomRight, BottomLeft).
 -- The extra values in the Top points are taken from the Top point,
@@ -59,8 +60,8 @@ corners :: Num r => Rectangle p r -> Corners (Point 2 r :+ p)
 corners r     = let w = width r
                     p = (_maxP r)&core %~ _cwMax
                     q = (_minP r)&core %~ _cwMin
-                in Corners (p&core.xCoord %~ (subtract w)) p
-                           (q&core.xCoord %~ (+ w))        q
+                in Corners (p&core.xCoord %~ subtract w) p
+                           (q&core.xCoord %~ (+ w))      q
 
 
 --------------------------------------------------------------------------------

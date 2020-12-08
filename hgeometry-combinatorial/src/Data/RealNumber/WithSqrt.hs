@@ -31,12 +31,12 @@ instance (Show r, Reifies root r) => Show (WithSqrt root r) where
 instance (Eq r, Num r, Reifies root r) => Eq (WithSqrt root r) where
   (WithSqrt a b) == (WithSqrt c d) = let r    = reflect $ Root @root
                                          sq x = x * x
-                                     in (sq $ a - c) == (sq r)*(sq $ b + d)
+                                     in sq (a - c) == sq r * sq (b + d)
 
 instance (Ord r, Num r, Reifies root r) => Ord (WithSqrt root r) where
   (WithSqrt a b) `compare` (WithSqrt c d) = let r    = reflect $ Root @root
                                                 sq x = x * x
-                                            in (sq $ a - c) `compare` ((sq r)*(sq $ b + d))
+                                            in sq (a - c) `compare` (sq r * sq (b + d))
 
 instance (Ord r, Num r, Reifies root r) => Num (WithSqrt root r) where
   (WithSqrt a b) + (WithSqrt c d) = WithSqrt (a + c) (b + d)

@@ -59,7 +59,7 @@ deriving instance (Arity d, Arity (d + 1), Fractional r) => IsTransformable (Hal
 instance (Arity d, Eq r, Fractional r) => Eq (HalfSpace d r) where
   (HalfSpace h) == (HalfSpace h') = let u = h^.normalVec
                                         v = h'^.normalVec
-                                        d = quadrance (u ^+^ v) - (quadrance u)
+                                        d = quadrance (u ^+^ v) - quadrance u
                                     in h == h' && signum d == 1
 
 --------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ instance (Arity d, Eq r, Fractional r) => Eq (HalfSpace d r) where
 type HalfPlane = HalfSpace 2
 
 
-
+{- HLINT ignore leftOf -}
 -- | Get the halfplane left of a line (i.e. "above") a line
 --
 -- >>> leftOf $ horizontalLine 4
@@ -116,13 +116,13 @@ instance (Fractional r, Ord r) => Line 2 r `IsIntersectableWith` HalfSpace 2 r w
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   l@(Line o v) `intersect` h = match (l `intersect` m) $
-         (H $ \NoIntersection -> if o `intersects` h
+         H (\NoIntersection -> if o `intersects` h
                                    then coRec l
                                    else coRec NoIntersection)
-      :& (H $ \p              -> if (p .+^ v) `intersects` h
+      :& H (\p              -> if (p .+^ v) `intersects` h
                                    then coRec $ HalfLine p v
                                    else coRec $ HalfLine p ((-1) *^ v))
-      :& (H $ \_l             -> coRec l)
+      :& H (\_l             -> coRec l)
       :& RNil
     where
       m = h^.boundingPlane._asLine

@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -13,17 +12,17 @@ module Data.PlanarGraph.Core where
 
 
 import           Control.DeepSeq
-import           Control.Lens hiding ((.=))
+import           Control.Lens               hiding ((.=))
 import           Control.Monad.State.Strict
 import           Data.Aeson
-import qualified Data.Foldable as F
+import qualified Data.Foldable              as F
 import           Data.Permutation
 import           Data.PlanarGraph.Dart
-import           Data.Type.Equality (gcastWith, (:~:)(..))
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-import           GHC.Generics (Generic)
-import           Unsafe.Coerce (unsafeCoerce)
+import           Data.Type.Equality         (gcastWith)
+import qualified Data.Vector                as V
+import qualified Data.Vector.Mutable        as MV
+import           GHC.Generics               (Generic)
+import           Unsafe.Coerce              (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
@@ -99,7 +98,7 @@ instance Show (VertexId s w) where
 --------------------------------------------------------------------------------
 -- * FaceId's
 
--- | The type to reprsent FaceId's
+-- | The type to represent FaceId's
 newtype FaceId s w = FaceId { _unFaceId :: VertexId s (DualOf w) }
                    deriving (Eq,Ord,Enum,ToJSON,FromJSON)
 
@@ -145,7 +144,7 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
 
 -- ** lenses and getters
 
--- | Get the embedding, reprsented as a permutation of the darts, of this
+-- | Get the embedding, represented as a permutation of the darts, of this
 -- graph.
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
@@ -222,7 +221,7 @@ reorderEdgeData ds = V.create $ do
 
 -- | Traverse the vertices
 --
--- (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
+-- >>> (^.vertexData) <$> traverseVertices (\i x -> Just (i,x)) myGraph
 -- Just [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
 -- >>> traverseVertices (\i x -> print (i,x)) myGraph >> pure ()
 -- (VertexId 0,())
@@ -233,7 +232,7 @@ traverseVertices   :: Applicative m
                    => (VertexId s w -> v -> m v')
                    -> PlanarGraph s w v e f
                    -> m (PlanarGraph s w v' e f)
-traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+traverseVertices f = itraverseOf (vertexData.itraversed) (f . VertexId)
 
 -- | Traverses the darts
 --
@@ -254,7 +253,7 @@ traverseDarts   :: Applicative m
                 => (Dart s -> e -> m e')
                 -> PlanarGraph s w v e f
                 -> m (PlanarGraph s w v e' f)
-traverseDarts f = itraverseOf (rawDartData.itraversed) (\i -> f (toEnum i))
+traverseDarts f = itraverseOf (rawDartData.itraversed) (f . toEnum)
 
 -- | Traverses the faces
 --
@@ -294,7 +293,7 @@ planarGraph' perm = pg
 --
 -- running time: \(O(n)\).
 planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal () e ()
-planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
+planarGraph ds = planarGraph' perm & dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
     perm  = toCycleRep n $ map (map fst) ds

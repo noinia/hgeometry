@@ -32,19 +32,20 @@ module Data.CircularSeq( CSeq
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
-import           Control.Lens (lens, Lens', bimap)
-import qualified Data.Foldable as F
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (listToMaybe, isJust)
+import           Control.Lens                (Lens', bimap, lens)
+import qualified Data.Foldable               as F
+import qualified Data.List                   as L
+import qualified Data.List.NonEmpty          as NonEmpty
+import           Data.Maybe                  (isJust)
 import           Data.Semigroup.Foldable
-import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
-import qualified Data.Sequence as S
-import qualified Data.Traversable as T
-import           Data.Tuple (swap)
-import           GHC.Generics (Generic)
-import           Test.QuickCheck(Arbitrary(..))
-import           Test.QuickCheck.Instances ()
+import           Data.Sequence               (Seq, ViewL (..), ViewR (..), (<|),
+                                              (|>))
+import qualified Data.Sequence               as S
+import qualified Data.Traversable            as T
+import           Data.Tuple                  (swap)
+import           GHC.Generics                (Generic)
+import           Test.QuickCheck             (Arbitrary (..))
+import           Test.QuickCheck.Instances   ()
 
 --------------------------------------------------------------------------------
 
@@ -137,7 +138,7 @@ adjust f i' s@(CSeq l x r) = let i  = i' `mod` length s
 
 -- | Access te ith item in the CSeq (w.r.t the focus) as a lens
 item   :: Int -> Lens' (CSeq a) a
-item i = lens (flip index i) (\s x -> adjust (const x) i s)
+item i = lens (`index` i) (\s x -> adjust (const x) i s)
 
 
 resplit   :: Seq a -> (Seq a, Seq a)
@@ -194,8 +195,8 @@ rotateR s@(CSeq l x r) = case S.viewl r of
 rotateL                :: CSeq a -> CSeq a
 rotateL s@(CSeq l x r) = case S.viewr l of
                            EmptyR    -> case S.viewr r of
-                             EmptyR     -> s
-                             (r' :> y)  -> cseq r' y (S.singleton x)
+                             EmptyR    -> s
+                             (r' :> y) -> cseq r' y (S.singleton x)
                            (l' :> y) -> cseq l' y (x <| r)
 
 
@@ -223,6 +224,7 @@ leftElements (CSeq l x r) = x <| S.reverse l <> S.reverse r
 fromNonEmpty                    :: NonEmpty.NonEmpty a -> CSeq a
 fromNonEmpty (x NonEmpty.:| xs) = withFocus x $ S.fromList xs
 
+{- HLINT ignore fromList -}
 fromList        :: [a] -> CSeq a
 fromList (x:xs) = withFocus x $ S.fromList xs
 fromList []     = error "fromList: Empty list"
@@ -283,7 +285,7 @@ reverseDirection (CSeq l x r) = CSeq (S.reverse r) x (S.reverse l)
 -- >>> findRotateTo (== 7) $ fromList [1..5]
 -- Nothing
 findRotateTo   :: (a -> Bool) -> CSeq a -> Maybe (CSeq a)
-findRotateTo p = listToMaybe . filter (p . focus) . allRotations'
+findRotateTo p = L.find (p . focus) . allRotations'
 
 
 rotateTo   :: Eq a => a -> CSeq a -> Maybe (CSeq a)
@@ -354,8 +356,8 @@ insertOrdBy cmp x = fromList . insertOrdBy' cmp x . F.toList . rightElements
 insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
 insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     ([],  _)   -> L.insertBy cmp x pref
-    (z:zs, GT) -> (z : L.insertBy cmp x zs) ++ pref
-    (_:_,  EQ) -> (x : xs) -- == x : rest ++ pref
+    (z:zs, GT) -> z : L.insertBy cmp x zs ++ pref
+    (_:_,  EQ) -> x : xs -- == x : rest ++ pref
     (_:_,  LT) -> rest ++ L.insertBy cmp x pref
   where
     -- split the list at its maximum.

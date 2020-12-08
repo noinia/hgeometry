@@ -83,7 +83,7 @@ hull _ h@(_ :| []) = h
 hull f pts         = hull' .  f
                    . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
-incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
 
@@ -126,6 +126,9 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
       | rightTurn (x^.core) (y^.core) (z^.core) = h
       | otherwise                               = cleanMiddle (z:x:rest)
     cleanMiddle _                               = error "cleanMiddle: too few points"
+hull' _ = error
+  "Algorithms.Geometry.ConvexHull.GrahamScan.hull' requires a list with at least \
+  \two elements."
 
 rightTurn       :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
 rightTurn a b c = ccw a b c == CW

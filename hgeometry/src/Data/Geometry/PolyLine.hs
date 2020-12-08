@@ -81,7 +81,7 @@ fromPointsUnsafe = PolyLine . LSeq.forceLSeq (C @ 2) . LSeq.fromList
 -- | pre: The input list contains at least two points. All extra vields are
 -- initialized with mempty.
 fromPointsUnsafe' :: (Monoid p) => [Point d r] -> PolyLine d p r
-fromPointsUnsafe' = fromPointsUnsafe . map (\p -> p :+ mempty)
+fromPointsUnsafe' = fromPointsUnsafe . map (:+ mempty)
 
 
 -- | We consider the line-segment as closed.

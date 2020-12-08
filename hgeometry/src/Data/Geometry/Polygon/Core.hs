@@ -169,7 +169,7 @@ type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
 
 type instance IntersectionOf (Point 2 r) (Polygon t p r) = [NoIntersection, Point 2 r]
 
-instance (Fractional r, Ord r) => (Point 2 r) `IsIntersectableWith` (Polygon t p r) where
+instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   q `intersects` pg = q `inPolygon` pg /= Outside
   q `intersect` pg | q `intersects` pg = coRec q
@@ -213,10 +213,11 @@ polygonHoles = lens g s
                           -> Polygon Multi p r
     s (MultiPolygon vs _) = MultiPolygon vs
 
+{- HLINT ignore polygonHoles' -}
 polygonHoles' :: Traversal' (Polygon t p r) [Polygon Simple p r]
 polygonHoles' = \f -> \case
-  p@(SimplePolygon _)  -> pure p
-  (MultiPolygon vs hs) -> MultiPolygon vs <$> f hs
+  p@SimplePolygon{}  -> pure p
+  MultiPolygon vs hs -> MultiPolygon vs <$> f hs
 
 -- | Access the i^th vertex on the outer boundary
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
@@ -526,7 +527,7 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
 -- running time: \(O(n)\)
 -- | Orient the outer boundary of the polygon to clockwise order
 toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
-toClockwiseOrder p = (toClockwiseOrder' p)&polygonHoles'.traverse %~ toCounterClockWiseOrder'
+toClockwiseOrder p = toClockwiseOrder' p & polygonHoles'.traverse %~ toCounterClockWiseOrder'
 
 -- | Orient the outer boundary into clockwise order. Leaves any holes
 -- as they are.
@@ -543,7 +544,7 @@ toClockwiseOrder' pg
 -- running time: \(O(n)\)
 toCounterClockWiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder p =
-  (toCounterClockWiseOrder' p)&polygonHoles'.traverse %~ toClockwiseOrder'
+  toCounterClockWiseOrder' p & polygonHoles'.traverse %~ toClockwiseOrder'
 
 -- | Orient the outer boundary into counter-clockwise order. Leaves
 -- any holes as they are.
@@ -570,5 +571,5 @@ asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
 -- >>> numberVertices simplePoly
 -- SimplePolygon (CSeq [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()])
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
-numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (\a r -> (a,r)) 0
+numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'

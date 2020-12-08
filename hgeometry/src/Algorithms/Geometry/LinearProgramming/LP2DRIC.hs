@@ -42,8 +42,8 @@ import           System.Random.Shuffle
 --------------------------------------------------------------------------------
 
 -- | Solve a linear program
-solveLinearProgram :: MonadRandom m => LinearProgram 2 r -> m (LPSolution 2 r)
-solveLinearProgram = undefined
+_solveLinearProgram :: MonadRandom m => LinearProgram 2 r -> m (LPSolution 2 r)
+_solveLinearProgram = undefined
 
 
 -- | Solves a bounded linear program in 2d. Returns Nothing if there is no
@@ -115,20 +115,20 @@ collectOn     :: (Ord r, Fractional r)
               => Line 2 r
               -> [HalfSpace 2 r]
               -> Maybe [HalfLine 2 r]
-collectOn l = sequence . mapMaybe collect . map (l `intersect`)
+collectOn l = sequence . mapMaybe (collect . (l `intersect`))
   where
     collect   :: Intersection (Line 2 r) (HalfSpace 2 r) -> Maybe (Maybe (HalfLine 2 r))
     collect r = match r $
-         (H $ \NoIntersection -> Just Nothing)
-      :& (H $ \hl             -> Just $ Just hl)
-      :& (H $ \_              -> Nothing)
+         H (const $ Just Nothing) -- NoIntersection
+      :& H (Just . Just)          -- HalfLine
+      :& H (const Nothing)        -- Line
       :& RNil
 
 
 -- | Given a vector v and two points a and b, determine which is smaller in direction v.
 cmpHalfPlane       :: (Ord r, Num r, Arity d)
                    => Vector d r -> Point d r -> Point d r -> Ordering
-cmpHalfPlane v a b = case a `inHalfSpace` (HalfSpace $ HyperPlane b $ v) of
+cmpHalfPlane v a b = case a `inHalfSpace` HalfSpace (HyperPlane b v) of
                        Inside     -> GT
                        OnBoundary -> EQ
                        Outside    -> LT
@@ -147,7 +147,7 @@ flatten = either (:[]) (\(Two a b) -> [a,b])
 commonIntersection                :: (Ord r, Num r, Arity d)
                                   => Line d r
                                   -> NonEmpty.NonEmpty (HalfLine d r :+ a)
-                                  -> Either (Two ((HalfLine d r :+ a)))
+                                  -> Either (Two (HalfLine d r :+ a))
                                             (OneOrTwo (Point d r :+ a))
 commonIntersection (Line _ v) hls = case (nh,ph) of
      (Nothing,Nothing) -> error "absurd; this case cannot occur"
@@ -159,7 +159,7 @@ commonIntersection (Line _ v) hls = case (nh,ph) of
                             GT -> Right . Right $ Two (extract p) (extract n)
   where
     extract = over core (^.startPoint)
-    (pos,neg) = NonEmpty.partition (\hl -> hl^.core.halfLineDirection == v) $ hls
+    (pos,neg) = NonEmpty.partition (\hl -> hl^.core.halfLineDirection == v) hls
     ph = maximumBy' (cmpHalfPlane' v) pos
     nh = maximumBy' (flip $ cmpHalfPlane' v) neg
 
@@ -219,7 +219,9 @@ initialize (LinearProgram c (m1:m2:hs)) = (LPState c [m1,m2] p, hs)
   where
     Just p = asA @(Point 2 r)
            $ (m1^.boundingPlane._asLine) `intersect` (m2^.boundingPlane._asLine)
-
+initialize _ = error
+  "Algorithms.Geometry.LinearProgramming.LP2DRIC.initialize requires \
+  \at least two constraints."
 
 
 --------------------------------------------------------------------------------
@@ -234,13 +236,13 @@ initialize (LinearProgram c (m1:m2:hs)) = (LPState c [m1,m2] p, hs)
 -- - \(c \cdot d > 0\), and
 -- - \(d \cdot n(h) \geq 0\), wherefor every half space \(h\).
 --
-findD                      :: (Ord r, Fractional r)
+_findD                      :: (Ord r, Fractional r)
                            => LinearProgram 2 r -> Maybe (Vector 2 r)
-findD (LinearProgram c hs) = do hls <- collectOn nl hs'
-                                d   <- toVec <$> oneDLinearProgramming v nl hls
-                                       -- the direction v here does not really matter
-                                if c `dot` d > 0 then pure d
-                                                 else Nothing
+_findD (LinearProgram c hs) = do hls <- collectOn nl hs'
+                                 d   <- toVec <$> oneDLinearProgramming v nl hls
+                                        -- the direction v here does not really matter
+                                 if c `dot` d > 0 then pure d
+                                                  else Nothing
   where
     -- we interpret the points on nl as directions w.r.t the origin
     nl@(Line _ v) = perpendicularTo (Line (origin .+^ c) c)
@@ -248,14 +250,14 @@ findD (LinearProgram c hs) = do hls <- collectOn nl hs'
 
     -- every halfspace creates an allowed set of directions, modelled by a
     -- half-line on nl
-    toHL h = let n              = h^.boundingPlane.normalVec
+    toHL h = let _n              = h^.boundingPlane.normalVec
              in undefined
 
 
 -- | Either finds an unbounded Haflline, or evidence the two halfspaces that provide
 -- evidence that no solution exists
-findUnBoundedHalfLine :: LinearProgram 2 r -> Either (Two (HalfSpace 2 r)) (HalfLine 2 r)
-findUnBoundedHalfLine = undefined -- use findD then find the starting point
+_findUnBoundedHalfLine :: LinearProgram 2 r -> Either (Two (HalfSpace 2 r)) (HalfLine 2 r)
+_findUnBoundedHalfLine = undefined -- use findD then find the starting point
 
 
 

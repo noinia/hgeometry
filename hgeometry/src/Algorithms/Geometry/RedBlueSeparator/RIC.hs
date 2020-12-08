@@ -65,11 +65,11 @@ separatingLine' :: (MonadRandom m, Foldable1 f, Foldable1 g, Fractional r, Ord r
                 -> g (Point 2 r :+ blueData)
                 -> m (Maybe (Line 2 r))
 separatingLine' reds blues = case verticalSeparatingLine reds blues of
-    SP Nothing ((r:+_),(b :+ _)) -> separatingLine'' r b reds blues
+    SP Nothing (r:+_,b :+ _) -> separatingLine'' r b reds blues
       -- observe that if r and b were vertically above each other then we would
       -- have found a separating line. So r and b are not vertically
       -- aligned. Hence we satisfy the precondition.
-    SP ml@(Just _) _             -> pure ml  -- already found a line
+    SP ml@(Just _) _         -> pure ml  -- already found a line
 
 
 -- | given a red and blue point that are *NOT* vertically alligned, and all red

@@ -41,7 +41,7 @@ data NodeData p r = NodeData { _splitPoint :: !r
                              } deriving (Show,Eq)
 
 instance Bifunctor NodeData where
-  bimap f g (NodeData x m) = NodeData (g x) ((bimap (fmap g) f) <$> m)
+  bimap f g (NodeData x m) = NodeData (g x) (bimap (fmap g) f <$> m)
 
 maxVal :: Lens' (NodeData p r) (Maybe (Point 2 r :+ p))
 maxVal = lens _maxVal (\(NodeData x _) m -> NodeData x m)
@@ -97,7 +97,7 @@ insert p = \case
       -- TODO: In case we have multiple points with the same x-coord, these points
       -- are not really in decreasing y-order.
     Node l d r | py > d^?maxVal._Just.core.yCoord ->
-                   node' l (d&maxVal .~ Just p) r (d^.maxVal)
+                   node' l (d&maxVal ?~ p) r (d^.maxVal)
                    -- push the existing point down
                | otherwise                 ->
                    node' l d                             r (Just p)

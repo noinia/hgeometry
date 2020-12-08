@@ -76,5 +76,5 @@ instance Show (I s a) where
 instance HasIndex (I s a) Int where
   indexOf (I i) = i
 
-instance Reifies s (V.Vector a) => (I s a) `CanAquire` a where
+instance Reifies s (V.Vector a) => I s a `CanAquire` a where
   aquire (I i) = let v = reflect @s undefined in v V.! i

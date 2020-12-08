@@ -25,7 +25,7 @@ import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector as GV
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.LSeq as LSeq
-import           Data.LSeq (LSeq,toSeq,ViewL(..),ViewR(..),pattern (:<|))
+import           Data.LSeq (LSeq, toSeq,pattern (:<|))
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
@@ -37,7 +37,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           GHC.TypeLits
 
-import           Debug.Trace
+-- import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -167,7 +167,6 @@ distributePoints'              :: Int                      -- ^ number of classe
                                -> PointSeq d (Idx :+ p) r  -- ^ input points
                                -> V.Vector (PointSeq d (Idx :+ p) r)
 distributePoints' k levels pts
-  | otherwise
   = fmap fromSeqUnsafe $ V.create $ do
     v <- MV.replicate k mempty
     forM_ pts $ \p ->
@@ -177,6 +176,7 @@ distributePoints' k levels pts
     level p = maybe (k-1) _unLevel $ levels V.! (p^.extra.core)
     append v i p = MV.read v i >>= MV.write v i . (S.|> p)
 
+fromSeqUnsafe :: S.Seq a -> LSeq n a
 fromSeqUnsafe = LSeq.promise . LSeq.fromSeq
 
 -- | Given a sequence of points, whose index is increasing in the first
@@ -206,6 +206,7 @@ reIndexPoints ptsV = fmap reIndex ptsV
 -- | ST monad with access to the vector storign the level of the points.
 type RST s = ReaderT (MV.MVector s (Maybe Level)) (ST s)
 
+{- HLINT ignore assignLevels -}
 -- | Assigns the points to a level. Returns the list of levels used. The first
 -- level in the list is the level assigned to the rest of the nodes. Their
 -- level is actually still set to Nothing in the underlying array.
@@ -233,7 +234,7 @@ assignLevels h m pts l prevLvls
     -- from L_j.
     (lvlJPts,deletePts) <- findAndCompact j (pts'^.ix' i) mid
     let pts''     = pts'&ix' i .~ lvlJPts
-        l'        = l&widestDim .~ Just j
+        l'        = l&widestDim ?~ j
     forM_ deletePts $ \p ->
       assignLevel p l'
     assignLevels h (m + length deletePts) pts'' (nextLevel l) (l' : prevLvls)
@@ -266,9 +267,11 @@ compactEnds' (l0 :<| s0) = fmap fromSeqUnsafe . goL $ l0 S.<| toSeq s0
     goL s@(S.viewl -> l S.:< s') = hasLevel l >>= \case
                                      False -> goR s
                                      True  -> goL s'
+    goL _ = error "Unreachable, but cannot prove it in Haskell"
     goR s@(S.viewr -> s' S.:> r) = hasLevel r >>= \case
                                      False -> pure s
                                      True  -> goR s'
+    goR _ = error "Unreachable, but cannot prove it in Haskell"
 
 
 -- | Given the points, ordered by their j^th coordinate, split the point set
@@ -348,7 +351,7 @@ widths :: (Num r, Arity d) => GV.Vector d (PointSeq d p r) -> GV.Vector d r
 widths = fmap Range.width . extends
 
 
-
+{- HLINT ignore extends -}
 -- | get the extends of the set of points in every dimension, i.e. the left and
 -- right boundaries.
 --
@@ -384,7 +387,7 @@ areWellSeparated s l        r        = boxBox s (bbOf l)   (bbOf r)
 -- areWellSeparated s (Node _ nd _) (Leaf p)      = pointBox s (p^.core) (nd^.bBox)
 -- areWellSeparated s (Node _ ld _) (Node _ rd _) = boxBox   s (ld^.bBox) (rd^.bBox)
 
-
+{- HLINT ignore boxBox -}
 -- -- | Test if the point and the box are far enough appart
 -- pointBox       :: (Fractional r, Ord r, AlwaysTruePFT d, AlwaysTrueTransformation d)
 --                => r -> Point d r -> Box d p r -> Bool

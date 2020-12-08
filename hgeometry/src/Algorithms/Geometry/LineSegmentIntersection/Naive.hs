@@ -25,9 +25,9 @@ collect          :: (Ord r, Fractional r)
                  => (LineSegment 2 p r, LineSegment 2 p r)
                  -> Intersections p r -> Intersections p r
 collect (s,s') m = match (s `intersect` s') $
-     (H $ \NoIntersection -> m)
-  :& (H $ \p              -> handlePoint s s' p $ m)
-  :& (H $ \s''            -> foldr (handlePoint s s') m [s''^.start.core, s''^.end.core])
+     H (\NoIntersection -> m)
+  :& H (\p              -> handlePoint s s' p m)
+  :& H (\s''            -> foldr (handlePoint s s') m [s''^.start.core, s''^.end.core])
   :& RNil
 
 -- | Add s and s' to the map with key p

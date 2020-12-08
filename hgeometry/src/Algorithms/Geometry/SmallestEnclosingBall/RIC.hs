@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor  #-}
-{-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.SmallestEnclosingBall.RIC
@@ -31,8 +29,8 @@ import           Data.Maybe (fromMaybe, mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           System.Random.Shuffle (shuffle)
 
-import Data.RealNumber.Rational
-import Debug.Trace
+-- import Data.RealNumber.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -48,8 +46,8 @@ smallestEnclosingDisk           :: (Ord r, Fractional r, MonadRandom m
                                 => [Point 2 r :+ p]
                                 -> m (DiskResult p r)
 
-smallestEnclosingDisk pts@(_:_:_) = ((\(p:q:pts') -> smallestEnclosingDisk' p q pts')
-                                    . F.toList) <$> shuffle pts
+smallestEnclosingDisk pts@(_:_:_) = (\(p:q:pts') -> smallestEnclosingDisk' p q pts')
+                                    . F.toList <$> shuffle pts
 smallestEnclosingDisk _           = error "smallestEnclosingDisk: Too few points"
 
 -- | Smallest enclosing disk.

@@ -230,9 +230,9 @@ findNewEvent       :: (Ord r, Fractional r)
                    => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r
                    -> Maybe (Event p r)
 findNewEvent p l r = match (l `intersect` r) $
-     (H $ \NoIntersection -> Nothing)
-  :& (H $ \q              -> if ordPoints q p == GT then Just (Event q Intersection)
-                                      else Nothing)
-  :& (H $ \_              -> Nothing) -- full segment intersectsions are handled
-                                      -- at insertion time
+     H (const Nothing) -- NoIntersection
+  :& H (\q -> if ordPoints q p == GT then Just (Event q Intersection)
+                                     else Nothing)
+  :& H (const Nothing) -- full segment intersectsions are handled
+                       -- at insertion time
   :& RNil

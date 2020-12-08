@@ -100,8 +100,8 @@ run          :: (Ord r, Num r)
              -> CP (Point 2 r :+ p) r
 run cp'' r ls =
       runWhile cp'' ls
-               (\cp l -> (ValT $ sqVertDist r l) < getDist cp) -- r and l inverted
-                                                               -- by design
+               (\cp l -> ValT (sqVertDist r l) < getDist cp) -- r and l inverted
+                                                             -- by design
                (\cp l -> minBy getDist cp (ValT $ SP (Two l r) (dist l r)))
   where
     dist (p :+ _) (q :+ _) = squaredEuclideanDist p q

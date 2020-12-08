@@ -1,6 +1,6 @@
 module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
 
-import           Control.Lens ((^.),(&),(.~))
+import           Control.Lens ((^.))
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Line
@@ -28,7 +28,7 @@ convexHull            :: (Ord r, Fractional r, Show r, Show p)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
 convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
 convexHull ps        = ConvexPolygon . fromPoints
-                     $ [l] <> hull l r above <> [r] <> (reverse $ hull l r below)
+                     $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
   where
     STR l r mids  = findExtremes ps
     m             = lineThrough (l^.core) (r^.core)
@@ -59,7 +59,7 @@ findExtremes (p :| pts ) = foldr f (STR p p []) pts
 --                          in STR l r [p | p <- F.toList pts, p /=. l, p /=. r]
 
 
-incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
 

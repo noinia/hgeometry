@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
@@ -122,13 +121,13 @@ fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
 
 data HoleData f p = Outer !f | Hole !f !p deriving (Show,Eq)
 
-holeData            :: HoleData f p -> f
-holeData (Outer f)  = f
-holeData (Hole f _) = f
+_holeData            :: HoleData f p -> f
+_holeData (Outer f)  = f
+_holeData (Hole f _) = f
 
-getP            :: HoleData f p -> Maybe p
-getP (Outer _)  = Nothing
-getP (Hole _ p) = Just p
+_getP            :: HoleData f p -> Maybe p
+_getP (Outer _)  = Nothing
+_getP (Hole _ p) = Just p
 
 --------------------------------------------------------------------------------
 

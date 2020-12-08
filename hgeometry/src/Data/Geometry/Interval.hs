@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 module Data.Geometry.Interval(
                              -- * 1 dimensional Intervals
                                Interval
@@ -78,7 +77,7 @@ instance Bifunctor Interval where
 --  inInterval and inRange is that the extra value is *not* used in the
 --  comparison with inInterval, whereas it is in inRange.
 inInterval       :: Ord r => r -> Interval a r -> Bool
-x `inInterval` r = x `inRange` (fmap (^.core) $ r^._Range )
+x `inInterval` r = x `inRange` fmap (^.core) (r^._Range )
 
 
 pattern OpenInterval       :: (r :+ a) -> (r :+ a) -> Interval a r
@@ -122,14 +121,14 @@ type instance NumType   (Interval a r) = r
 
 type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
 
-instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
+instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (GInterval r) `intersect` (GInterval s) = match (r' `intersect` s') $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
-                                                           (u&unEndPoint %~ g) )
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
+                                                         (u&unEndPoint %~ g) )
       :& RNil
     where
       f x = Arg (x^.core) x
