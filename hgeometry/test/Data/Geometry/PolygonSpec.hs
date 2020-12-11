@@ -17,9 +17,14 @@ import           Test.QuickCheck.Instances ()
 spec :: Spec
 spec = do
   testCases "test/Data/Geometry/pointInPolygon.ipe"
-  -- it "read . show = id" $ do
-  --   property $ \(lst :: [Point 2 Rational :+ ()]) ->
-  --     read (show lst) == lst
+  it "read . show = id (SimplePolygon)" $ do
+    property $ \(seq :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = SimplePolygon seq in
+      read (show p) == p
+  it "read . show = id (MultiPolygon)" $ do
+    property $ \(seq :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = MultiPolygon seq [SimplePolygon seq] in
+      read (show p) == p
 
 
 testCases    :: FilePath -> Spec
