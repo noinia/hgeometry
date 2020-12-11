@@ -87,6 +87,9 @@ isStarShaped (toClockwiseOrder -> pg) =
     -- bounding it, so the first two edges bound the shape in this sirection
     hs = fmap (rightOf . supportingLine) . outerBoundaryEdges $ pg
 
+-- Properties:
+--   \poly -> selfIntersections poly == selfIntersections (connectHoles poly)
+--   \poly -> area poly == area (connectHoles poly)
 connectHoles :: (Ord r, Num r, Fractional r) =>
   MultiPolygon p r -> SimplePolygon () r
 connectHoles = connectHolesLinear (Vector2 0 1)
