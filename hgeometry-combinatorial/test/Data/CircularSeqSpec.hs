@@ -39,6 +39,9 @@ spec = do
       --              let cs  = fromNonEmpty xs
       --                  cs' = rotateNR i cs
       --              in
+    it "read . show = id" $ do
+      property $ \(lst :: CSeq Rational) ->
+        read (show lst) == lst
 
 
 

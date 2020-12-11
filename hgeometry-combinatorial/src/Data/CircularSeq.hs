@@ -68,6 +68,11 @@ instance Show a => Show (CSeq a) where
                     showString (("CSeq " <>) . show . F.toList . rightElements $ s)
     where app_prec = 10
 
+instance Read a => Read (CSeq a) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (fromList lst, t) | ("CSeq", s) <- lex r, (lst, t) <- reads s ]
+    where app_prec = 10
+
 -- traverses starting at the focus, going to the right.
 instance T.Traversable CSeq where
   traverse f (CSeq l x r) = (\x' r' l' -> CSeq l' x' r')

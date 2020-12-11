@@ -1,18 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.PolygonSpec where
 
-import Data.Traversable(traverse)
-import Data.Ext
-import Control.Lens
-import Control.Applicative
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Ipe
-import Data.Proxy
-import Test.Hspec
+import           Control.Applicative
+import           Control.Lens
+import qualified Data.CircularSeq          as C
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Boundary
+import           Data.Geometry.Ipe
+import           Data.Proxy
+import           Data.Traversable          (traverse)
+import           Test.Hspec
+import           Test.QuickCheck
+import           Test.QuickCheck.Instances ()
 
 spec :: Spec
-spec = testCases "test/Data/Geometry/pointInPolygon.ipe"
+spec = do
+  testCases "test/Data/Geometry/pointInPolygon.ipe"
+  -- it "read . show = id" $ do
+  --   property $ \(lst :: [Point 2 Rational :+ ()]) ->
+  --     read (show lst) == lst
 
 
 testCases    :: FilePath -> Spec
