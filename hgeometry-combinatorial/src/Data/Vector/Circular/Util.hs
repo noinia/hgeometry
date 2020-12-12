@@ -1,0 +1,64 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Data.Vector.Circular.Util where
+
+import           Control.DeepSeq
+import           Control.Lens
+import           Data.Semigroup.Foldable
+import qualified Data.Vector          as V
+import           Data.Vector.Circular as CV
+import qualified Data.Vector.NonEmpty as NV
+import           GHC.Generics         (Generic)
+
+deriving instance Generic (CircularVector a)
+
+instance NFData a => NFData (CircularVector a)
+
+instance Traversable CircularVector where
+  traverse f (CircularVector v rot) =
+    CircularVector <$> traverse f v <*> pure rot
+
+instance Foldable1 NV.NonEmptyVector
+
+-- type instance Index (CircularVector a) = Int
+-- type instance IxValue (CircularVector a) = a
+
+-- instance Ixed (CircularVector a) where
+--   ix i f v = f (CV.index v i) <&> \a -> unsafeFromVector (toVector v V.// [(i,a)])
+
+item   :: Int -> Lens' (CircularVector a) a
+item i = lens (`CV.index` i) (\s x -> unsafeFromVector (toVector s V.// [(i,x)]))
+
+-- FIXME: Will stream fusion make this efficient? Try expression this function
+-- with Data.Vector.Fusion.Bundle.
+zipWith :: (a -> b -> c) -> CircularVector a -> CircularVector b -> CircularVector c
+zipWith f a b = unsafeFromVector $ V.zipWith f (toVector a) (toVector b)
+
+zipWith3 :: (a -> b -> c -> d) -> CircularVector a -> CircularVector b -> CircularVector c
+  -> CircularVector d
+zipWith3 f a b c = unsafeFromVector $ V.zipWith3 f (toVector a) (toVector b) (toVector c)
+
+reverseDirection :: CircularVector a -> CircularVector a
+reverseDirection = unsafeFromVector . V.reverse . toVector
+
+-- minIndexBy :: (a -> a -> Ordering) -> CircularVector a -> Int
+-- minIndexBy fn (CircularVector v rot) = (NV.minIndexBy fn v - rot) `mod` NV.length v
+
+toNonEmptyVector :: CircularVector a -> NV.NonEmptyVector a
+toNonEmptyVector v = NV.generate1 (length v) (CV.index v)
+
+rotateToMinimumBy :: (a -> a -> Ordering) -> CircularVector a -> CircularVector a
+rotateToMinimumBy fn (CircularVector v _rot) =
+  CircularVector v (NV.minIndexBy fn v)
+
+rotateToMaximumBy :: (a -> a -> Ordering) -> CircularVector a -> CircularVector a
+rotateToMaximumBy fn (CircularVector v _rot) =
+  CircularVector v (NV.maxIndexBy fn v)
+
+rightElements :: CircularVector a -> NV.NonEmptyVector a
+rightElements = toNonEmptyVector
+
+leftElements :: CircularVector a -> NV.NonEmptyVector a
+leftElements v = NV.generate1 (length v) (\i -> CV.index v (length v-1-i))
+
+findRotateTo   :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
+findRotateTo p (CircularVector v _rot) = CircularVector v <$> NV.findIndex p v

@@ -1,30 +1,30 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
+import           Algorithms.Geometry.ConvexHull.GrahamScan       as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.BinaryTree
-import qualified Data.CircularList as CL
-import qualified Data.CircularList.Util as CU
-import qualified Data.CircularSeq as CS
+import qualified Data.CircularList                               as CL
+import qualified Data.CircularList.Util                          as CU
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry hiding (rotateTo)
-import           Data.Geometry.Ball (disk, insideBall)
+import qualified Data.Foldable                                   as F
+import           Data.Function                                   (on)
+import           Data.Geometry                                   hiding (rotateTo)
+import           Data.Geometry.Ball                              (disk, insideBall)
 import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..), simplePolygon)
-import qualified Data.Geometry.Polygon.Convex as Convex
-import qualified Data.IntMap.Strict as IM
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Maybe (fromJust, fromMaybe)
+import           Data.Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
+import qualified Data.Geometry.Polygon.Convex                    as Convex
+import qualified Data.IntMap.Strict                              as IM
+import qualified Data.List                                       as L
+import qualified Data.List.NonEmpty                              as NonEmpty
+import qualified Data.Map                                        as M
+import           Data.Maybe                                      (fromJust, fromMaybe)
 import           Data.Measured.Size
-import qualified Data.Vector as V
+import qualified Data.Vector                                     as V
+import qualified Data.Vector.Circular.Util                       as CV
 
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
@@ -99,7 +99,7 @@ firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
 -- pre: at least two elements
 fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . F.toList . CS.rightElements
+                                         . F.toList . CV.rightElements
                                          $ p^.simplePolygon.outerBoundary
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])

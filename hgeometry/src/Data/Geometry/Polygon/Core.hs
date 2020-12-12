@@ -50,7 +50,6 @@ import           Control.Lens hiding (Simple)
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
-import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
@@ -65,6 +64,8 @@ import           Data.Geometry.Vector
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
 import           Data.Maybe (mapMaybe, catMaybes)
 import           Data.Ord (comparing)
 import           Data.Semigroup (sconcat)
@@ -95,15 +96,15 @@ data PolygonType = Simple | Multi
 
 
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: CV.CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: CV.CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 
 -- | Prism to 'test' if we are a simple polygon
-_SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
+_SimplePolygon :: Prism' (Polygon Simple p r) (CV.CircularVector (Point 2 r :+ p))
 _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 
 -- | Prism to 'test' if we are a Multi polygon
-_MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
+_MultiPolygon :: Prism' (Polygon Multi p r) (CV.CircularVector (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
 instance Bifunctor (Polygon t) where
@@ -192,14 +193,14 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
-outerBoundary :: forall t p r. Lens' (Polygon t p r) (C.CSeq (Point 2 r :+ p))
+outerBoundary :: forall t p r. Lens' (Polygon t p r) (CV.CircularVector (Point 2 r :+ p))
 outerBoundary = lens g s
   where
-    g                     :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
+    g                     :: Polygon t p r -> CV.CircularVector (Point 2 r :+ p)
     g (SimplePolygon vs)  = vs
     g (MultiPolygon vs _) = vs
 
-    s                           :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
+    s                           :: Polygon t p r -> CV.CircularVector (Point 2 r :+ p)
                                 -> Polygon t p r
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
@@ -221,7 +222,7 @@ polygonHoles' = \f -> \case
 
 -- | Access the i^th vertex on the outer boundary
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
-outerVertex i = outerBoundary.C.item i
+outerVertex i = outerBoundary . CV.item i
 
 -- running time: \(O(\log i)\)
 outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
@@ -249,13 +250,13 @@ polygonVertices (MultiPolygon vs hs) =
 --
 -- pre: the input list constains no repeated vertices.
 fromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
-fromPoints = SimplePolygon . C.fromList
+fromPoints = SimplePolygon . CV.unsafeFromList
 
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --
 -- running time: \(O(n)\)
-outerBoundaryEdges :: Polygon t p r -> C.CSeq (LineSegment 2 p r)
+outerBoundaryEdges :: Polygon t p r -> CV.CircularVector (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
 -- | Lists all edges. The edges on the outer boundary are given before the ones
@@ -280,12 +281,12 @@ listEdges pg = let f = F.toList . outerBoundaryEdges
 withIncidentEdges                    :: Polygon t p r
                                      -> Polygon t (Two (LineSegment 2 p r)) r
 withIncidentEdges (SimplePolygon vs) =
-      SimplePolygon $ C.zip3LWith f (C.rotateL vs) vs (C.rotateR vs)
+      SimplePolygon $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
     f p c n = c&extra .~ Two (ClosedLineSegment p c) (ClosedLineSegment c n)
 withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
   where
-    (SimplePolygon vs') = withIncidentEdges $ SimplePolygon vs
+    SimplePolygon vs' = withIncidentEdges $ SimplePolygon vs
     hs' = map withIncidentEdges hs
 
 -- -- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
@@ -293,12 +294,11 @@ withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
 -- -- modulo n.
 -- --
 
+-- FIXME: Test that \poly -> fromEdges (toEdges poly) == poly
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.
-toEdges    :: C.CSeq (Point 2 r :+ p) -> C.CSeq (LineSegment 2 p r)
-toEdges vs = C.zipLWith (\p q -> LineSegment (Closed p) (Open q)) vs (C.rotateR vs)
-  -- let vs' = F.toList vs in
-  -- C.fromList $ zipWith (\p q -> LineSegment (Closed p) (Open q)) vs' (tail vs' ++ vs')
+toEdges    :: CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (LineSegment 2 p r)
+toEdges vs = CV.zipWith (\p q -> LineSegment (Closed p) (Open q)) vs (CV.rotateRight 1 vs)
 
 
 -- | Test if q lies on the boundary of the polygon. Running time: O(n)
@@ -476,7 +476,7 @@ findDiagonal pg = List.head . catMaybes . F.toList $ diags
      -- note that a diagonal is guaranteed to exist, so the usage of head is safe.
   where
     vs      = pg^.outerBoundary
-    diags   = C.zip3LWith f (C.rotateL vs) vs (C.rotateR vs)
+    diags   = CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
     f u v w = case ccw (u^.core) (v^.core) (w^.core) of
                 CCW      -> Just $ findDiag u v w
                             -- v is a convex vertex, so find a diagonal
@@ -555,7 +555,7 @@ toCounterClockWiseOrder' p
       | otherwise                  = p
 
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
-reverseOuterBoundary p = p&outerBoundary %~ C.reverseDirection
+reverseOuterBoundary p = p&outerBoundary %~ CV.reverseDirection
 
 
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.

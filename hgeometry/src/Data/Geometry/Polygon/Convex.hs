@@ -1,5 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell     #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon.Convex
@@ -25,28 +25,30 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
                                    ) where
 
 import           Control.DeepSeq
-import           Control.Lens hiding ((:<), (:>))
-import           Data.CircularSeq (CSeq)
-import qualified Data.CircularSeq as C
+import           Control.Lens                   hiding ((:<), (:>))
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry.Box (IsBoxable(..))
+import qualified Data.Foldable                  as F
+import           Data.Function                  (on)
+import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core (fromPoints, SimplePolygon, outerBoundary)
-import           Data.Geometry.Polygon.Extremes(cmpExtreme)
+import           Data.Geometry.Polygon.Core     (SimplePolygon, fromPoints,
+                                                 outerBoundary)
+import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
-import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable (Foldable1(..))
-import           Data.Sequence (viewl,viewr, ViewL(..), ViewR(..))
-import qualified Data.Sequence as S
+import           Data.List.NonEmpty             (NonEmpty (..))
+import qualified Data.List.NonEmpty             as NonEmpty
+import           Data.Maybe                     (fromJust)
+import           Data.Ord                       (comparing)
+import           Data.Semigroup.Foldable        (Foldable1 (..))
+import           Data.Sequence                  (ViewL (..), ViewR (..), viewl,
+                                                 viewr)
+import qualified Data.Sequence                  as S
 import           Data.Util
+import qualified Data.Vector.Circular           as CV
+import qualified Data.Vector.Circular.Util      as CV
 
 -- import           Data.Geometry.Ipe
 -- import           Debug.Trace
@@ -121,7 +123,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp = findMaxStart . C.rightElements . getVertices
+findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
   where
     p' >=. q = (p' `cmp` q) /= LT
 
@@ -215,15 +217,15 @@ merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
     ut@(ClosedLineSegment c d) = upperTangent lp rp
 
     takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
-    rightElems  = F.toList . C.rightElements
+    rightElems  = F.toList . CV.rightElements
     takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
 
     r' = takeAndRotate b d rp
     l' = takeAndRotate c a lp
 
 
-rotateTo'   :: Eq a => (a :+ b) -> CSeq (a :+ b) -> CSeq (a :+ b)
-rotateTo' x = fromJust . C.findRotateTo (coreEq x)
+rotateTo'   :: Eq a => (a :+ b) -> CV.CircularVector (a :+ b) -> CV.CircularVector (a :+ b)
+rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
 
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
 coreEq = (==) `on` (^.core)
@@ -247,8 +249,8 @@ lowerTangent       :: (Num r, Ord r)
 lowerTangent lp rp = ClosedLineSegment l r
   where
     mkH f = NonEmpty.fromList . F.toList . f . getVertices
-    lh = mkH (C.rightElements . rightMost) lp
-    rh = mkH (C.leftElements  . leftMost)  rp
+    lh = mkH (CV.rightElements . rightMost) lp
+    rh = mkH (CV.leftElements  . leftMost)  rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Compute the lower tangent of the two convex chains lp and rp
@@ -293,9 +295,9 @@ upperTangent       :: (Num r, Ord r)
                    -> LineSegment 2 p r
 upperTangent lp rp = ClosedLineSegment l r
   where
-    mkH f = NonEmpty.fromList . F.toList . f . getVertices
-    lh = mkH (C.leftElements  . rightMost) lp
-    rh = mkH (C.rightElements . leftMost)  rp
+    mkH f = f . getVertices
+    lh = mkH (CV.leftElements  . rightMost) lp
+    rh = mkH (CV.rightElements . leftMost)  rp
     (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
@@ -337,8 +339,8 @@ minkowskiSum     :: (Ord r, Num r)
                  => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
 minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
   where
-    f p' = let xs@(S.viewl -> (v :< _)) = C.asSeq . bottomMost . getVertices $ p'
-           in F.toList $ xs |> v
+    f p' = let (v:xs) = F.toList . bottomMost . getVertices $ p'
+           in v:xs++[v]
     (v :+ ve) .+. (w :+ we) = v .+^ toVec w :+ (ve,we)
 
     cmpAngle v v' w w' =
@@ -360,23 +362,22 @@ minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
 --------------------------------------------------------------------------------
 
 -- | Rotate to the rightmost point (rightmost and topmost in case of ties)
-rightMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
-rightMost xs = let m = F.maximumBy (comparing (^.core)) xs in rotateTo' m xs
+rightMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
+rightMost xs = CV.rotateToMaximumBy (comparing (^.core)) xs
 
 -- | Rotate to the leftmost point (and bottommost in case of ties)
-leftMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
-leftMost xs = let m = F.minimumBy (comparing (^.core)) xs in rotateTo' m xs
+leftMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
+leftMost xs = CV.rotateToMinimumBy (comparing (^.core)) xs
 
 -- | Rotate to the bottommost point (and leftmost in case of ties)
-bottomMost    :: Ord r => CSeq (Point 2 r :+ p) -> CSeq (Point 2 r :+ p)
+bottomMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
 bottomMost xs = let f p = (p^.core.yCoord,p^.core.xCoord)
-                    m   = F.minimumBy (comparing f) xs
-                in rotateTo' m xs
+                in CV.rotateToMinimumBy (comparing f) xs
 
 
 
 -- | Helper to get the vertices of a convex polygon
-getVertices :: ConvexPolygon p r -> CSeq (Point 2 r :+ p)
+getVertices :: ConvexPolygon p r -> CV.CircularVector (Point 2 r :+ p)
 getVertices = view (simplePolygon.outerBoundary)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true

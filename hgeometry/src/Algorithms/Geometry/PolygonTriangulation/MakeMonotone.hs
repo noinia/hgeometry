@@ -1,5 +1,5 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , computeDiagonals
 
@@ -8,30 +8,31 @@ module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , classifyVertices
                                                             ) where
 
-import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xCoordAt
-                                                                            , ordAt)
+import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
 import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
-import           Control.Monad.Writer (WriterT, execWriterT,tell)
+import           Control.Monad.Writer                                       (WriterT, execWriterT,
+                                                                             tell)
 import           Data.Bifunctor
-import           Data.CircularSeq (rotateL, rotateR, zip3LWith)
-import qualified Data.DList as DList
+import qualified Data.DList                                                 as DList
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                                              as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.IntMap as IntMap
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing, Down(..))
-import qualified Data.Set as SS
-import qualified Data.Set.Util as SS
+import qualified Data.IntMap                                                as IntMap
+import qualified Data.List.NonEmpty                                         as NonEmpty
+import           Data.Ord                                                   (Down (..), comparing)
+import qualified Data.Set                                                   as SS
+import qualified Data.Set.Util                                              as SS
 import           Data.Util
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector                                                as V
+import qualified Data.Vector.Circular                                       as CV
+import qualified Data.Vector.Circular.Util                                  as CV
+import qualified Data.Vector.Mutable                                        as MV
 
 
 -- import Debug.Trace
@@ -70,7 +71,7 @@ classifyVertices'                    :: (Num r, Ord r)
                                      => SimplePolygon p r
                                      -> SimplePolygon (p :+ VertexType) r
 classifyVertices' (SimplePolygon vs) =
-    SimplePolygon $ zip3LWith f (rotateL vs) vs (rotateR vs)
+    SimplePolygon $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
     -- is the angle larger than > 180 degrees
     largeInteriorAngle p c n = case ccw (p^.core) (c^.core) (n^.core) of
