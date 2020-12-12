@@ -26,7 +26,7 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
 
                                  , inPolygon, insidePolygon, onBoundary
 
-                                 , area, signedArea
+                                 , area, signedArea, doubleSignedArea
 
                                  , centroid
                                  , pickPoint
@@ -43,6 +43,7 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
                                  , withIncidentEdges, numberVertices
 
                                  , asSimplePolygon
+                                 , reflexVertices, convexVertices
                                  ) where
 
 import           Control.DeepSeq
@@ -82,12 +83,12 @@ import           Data.Vinyl.CoRec (asA)
 >>> :{
 -- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () (RealNumber 10)
-    simplePoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
-                                                        , Point2 10 0
-                                                        , Point2 10 10
-                                                        , Point2 5 15
-                                                        , Point2 1 11
-                                                        ]
+    simplePoly = fromPoints. map ext $ [ Point2 0 0
+                                       , Point2 10 0
+                                       , Point2 10 10
+                                       , Point2 5 15
+                                       , Point2 1 11
+                                       ]
 :} -}
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
@@ -105,6 +106,11 @@ _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 -- | Prism to 'test' if we are a Multi polygon
 _MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
+
+-- | Produces a simple polygon whose vertices are in
+-- counter-isCounterClockwise orientation
+simplePolygon :: (Eq r, Num r, Foldable f) => f (Point 2 r :+ p) -> SimplePolygon p r
+simplePolygon = toCounterClockWiseOrder' . C.fromList . F.toList
 
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
@@ -219,7 +225,13 @@ polygonHoles' = \f -> \case
   p@SimplePolygon{}  -> pure p
   MultiPolygon vs hs -> MultiPolygon vs <$> f hs
 
--- | Access the i^th vertex on the outer boundary
+-- -- | Access the i^th vertex of the polygon. Indices are taken modulo
+-- -- n.
+-- vertex :: Int -> Lens' (Pollygon t p r) (Point 2 r :+ p)
+-- vertex i =
+
+-- | Access the i^th vertex on the outer boundary. Indices are taken
+-- modulo the size of the outer boundary.
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
 outerVertex i = outerBoundary.C.item i
 
@@ -424,11 +436,15 @@ area (MultiPolygon vs hs)   = area (SimplePolygon vs) - sum [area h | h <- hs]
 -- clockwise order, the signed area will be negative, if the verices are given
 -- in counter clockwise order, the area will be positive.
 signedArea      :: Fractional r => SimplePolygon p r -> r
-signedArea poly = x / 2
-  where
-    x = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
-            | LineSegment' p q <- F.toList $ outerBoundaryEdges poly  ]
+signedArea poly = doubleSignedArea poly / 2
 
+-- | Compute 2*signed area of a simple polygon. The the vertices are
+-- in clockwise order, the signed area will be negative, if the
+-- verices are given in counter clockwise order, the area will be
+-- positive.
+doubleSignedArea      :: Num r => SimplePolygon p r -> r
+doubleSignedArea poly = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
+                            | LineSegment' p q <- F.toList $ outerBoundaryEdges poly  ]
 
 -- | Compute the centroid of a simple polygon.
 centroid      :: Fractional r => SimplePolygon p r -> Point 2 r
@@ -514,8 +530,8 @@ safeMaximumOn f = \case
 --
 -- running time: \(O(n)\)
 --
-isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
-isCounterClockwise = (\x -> x == abs x) . signedArea
+isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
+isCounterClockwise = (\x -> x == abs x) . doubleSignedArea
                    . fromPoints . F.toList . (^.outerBoundary)
 
 
@@ -526,13 +542,13 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
 --
 -- running time: \(O(n)\)
 -- | Orient the outer boundary of the polygon to clockwise order
-toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder p = toClockwiseOrder' p & polygonHoles'.traverse %~ toCounterClockWiseOrder'
 
 -- | Orient the outer boundary into clockwise order. Leaves any holes
 -- as they are.
 --
-toClockwiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder'   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder' pg
       | isCounterClockwise pg = reverseOuterBoundary pg
       | otherwise             = pg
@@ -542,14 +558,14 @@ toClockwiseOrder' pg
 -- the inner borders (i.e. any holes, if they exist) into clockwise order.
 --
 -- running time: \(O(n)\)
-toCounterClockWiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder p =
   toCounterClockWiseOrder' p & polygonHoles'.traverse %~ toClockwiseOrder'
 
 -- | Orient the outer boundary into counter-clockwise order. Leaves
 -- any holes as they are.
 --
-toCounterClockWiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder'   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder' p
       | not $ isCounterClockwise p = reverseOuterBoundary p
       | otherwise                  = p
@@ -573,3 +589,80 @@ asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+isReflexVertex   :: (Ord r, Num r) => Int -> Polygon t p r -> Bool
+isReflexVertex i = undefined
+
+-- | Returns whether the 'currently focussed' vertex on the outer
+-- boundary is a reflex vertex
+--
+-- O(1)
+isReflexVertex' :: (Ord r, Num r) => Polygon t p r -> Bool
+isReflexVertex' = \case
+    SimplePolygon vs  -> f vs
+    MultiPolygon vs _ -> f vs
+  where
+    f vs = let us = C.rotateL vs
+               ws = C.rotateR vs
+           in ccw' (C.focus us) (C.focus vs) (C.focus ws) == CW
+    -- FIXME: this assumes the boundary is in CW order
+
+
+-- | Computes all reflex vertices of the polygon.
+--
+-- \(O(n)\)
+reflexVertices  :: (Ord r, Num r) => Polygon t p r -> [Int :+ (Point 2 r :+ p)]
+reflexVertices p@(SimplePolygon _)                    = reflexVertices' p
+reflexVertices (numberVertices -> MultiPolygon vs hs) =
+  map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
+    reflexVertices' (SimplePolygon vs) <> concatMap convexVertices' hs
+
+-- | Computes all convex (i.e. non-reflex) vertices of the polygon.
+--
+-- \(O(n)\)
+convexVertices :: (Ord r, Num r) => Polygon t p r -> [Int :+ (Point 2 r :+ p)]
+convexVertices = \case
+  p@(SimplePolygon _)                    -> convexVertices' p
+  (numberVertices -> MultiPolygon vs hs) ->
+    map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
+      convexVertices' (SimplePolygon vs) <> concatMap reflexVertices' hs
+
+-- | All non-reflex vertices
+convexVertices'                      :: (Ord r, Num r)
+                                     => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+convexVertices' p@(SimplePolygon vs) = go (zipWith (:+) [0..] $ F.toList vs) (reflexVertices' p)
+  where
+    go []      _          = []
+    go us      []         = us
+    go (u:us') rs@(r:rs') = case (u^.core) `compare` (r^.core) of
+                                 LT -> u : go us' rs  -- not a reflex vertex
+                                 EQ -> go us' rs'     -- reflex vertex
+                                 GT -> error "convexVertices': this is a bug"
+
+
+-- | reflex vertices, in increasing order along the boundary
+reflexVertices'                     :: (Ord r, Num r)
+                                    => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+reflexVertices' (SimplePolygon vs') =
+    catMaybes . F.toList $ C.zip3LWith asReflex (C.rotateL vs) vs (C.rotateR vs)
+  where
+    vs = C.withIndices vs'
+    asReflex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) == CW = Just v
+                   | otherwise                                   = Nothing

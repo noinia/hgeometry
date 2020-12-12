@@ -15,6 +15,7 @@ module Data.CircularSeq( CSeq
                        , rightElements
                        , leftElements
                        , asSeq
+                       , withIndices
 
                        , reverseDirection
                        , allRotations
@@ -32,20 +33,21 @@ module Data.CircularSeq( CSeq
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
-import           Control.Lens                (Lens', bimap, lens)
-import qualified Data.Foldable               as F
-import qualified Data.List                   as L
-import qualified Data.List.NonEmpty          as NonEmpty
-import           Data.Maybe                  (isJust)
+import           Control.Lens (Lens', bimap, lens)
+import           Data.Ext
+import qualified Data.Foldable as F
+import qualified Data.List as L
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
 import           Data.Sequence               (Seq, ViewL (..), ViewR (..), (<|),
                                               (|>))
-import qualified Data.Sequence               as S
-import qualified Data.Traversable            as T
-import           Data.Tuple                  (swap)
-import           GHC.Generics                (Generic)
-import           Test.QuickCheck             (Arbitrary (..))
-import           Test.QuickCheck.Instances   ()
+import qualified Data.Sequence as S
+import qualified Data.Traversable as T
+import           Data.Tuple (swap)
+import           GHC.Generics (Generic)
+import           Test.QuickCheck (Arbitrary (..))
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -96,7 +98,8 @@ singleton x = CSeq S.empty x S.empty
 focus              :: CSeq a -> a
 focus (CSeq _ x _) = x
 
--- | Access the i^th item  (w.r.t the focus) in the CSeq (indices modulo n).
+-- | Access the i^th item (w.r.t the focus; elements numbered in
+-- increasing order towards the right) in the CSeq (indices modulo n).
 --
 -- running time: \(O(\log (i \mod n))\)
 --
@@ -120,6 +123,15 @@ index s@(CSeq l x r) i' = let i  = i' `mod` length s
                           in if i == 0 then x
                                else if i - 1 < rn then S.index r (i - 1)
                                                   else S.index l (i - rn - 1)
+
+-- | Label the elements with indices.
+--
+-- >>> withIndices $ fromList [0..5]
+-- CSeq [0 :+ 0,1 :+ 1,2 :+ 2,3 :+ 3,4 :+ 4,5 :+ 5]
+withIndices              :: CSeq a -> CSeq (Int :+ a)
+withIndices (CSeq l x r) = let s = 1 + length r in
+  CSeq (S.mapWithIndex (\i y -> i + s :+ y) l) (0 :+ x) (S.mapWithIndex (\i y -> i+1 :+ y) r)
+
 
 -- | Adjusts the i^th element w.r.t the focus in the CSeq
 --
