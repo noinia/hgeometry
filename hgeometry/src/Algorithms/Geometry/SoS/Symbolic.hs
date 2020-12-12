@@ -12,17 +12,23 @@ module Algorithms.Geometry.SoS.Symbolic(
 
   , toTerms
   , signOf
+
+  , toSymbolic
   ) where
 
 import           Algorithms.Geometry.SoS.Sign (Sign(..))
 import           Control.Lens
+import           Data.Ext
 import           Data.Foldable (toList)
+import           Data.Geometry.Point
+import           Data.Geometry.Vector
 import qualified Data.List as List
 import qualified Data.Map as Map
 import qualified Data.Map.Merge.Strict as Map
 import           Data.Maybe (isNothing)
 import           Test.QuickCheck (Arbitrary(..), listOf)
 import           Test.QuickCheck.Instances ()
+
 
 --------------------------------------------------------------------------------
 -- * EpsFolds
@@ -349,3 +355,11 @@ maximum' (Bag m) = fmap fst . Map.lookupMax $ m
 -- | maximum multiplicity of an element in the bag
 maxMultiplicity         :: Bag a -> Int
 maxMultiplicity (Bag m) = maximum . (0:) . map (1+) . Map.elems $ m
+
+
+--------------------------------------------------------------------------------
+
+-- | Given an input point, transform its number type to include
+-- symbolic $\varepsilon$ expressions so that we can use SoS.
+toSymbolic          :: (Ord i, Arity d) => Point d r :+ i -> Point d (Symbolic (i,Int) r)
+toSymbolic (p :+ i) = p&vector' %~ imap (\j x -> symbolic x (i,j))

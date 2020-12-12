@@ -1,9 +1,6 @@
 module Algorithms.Geometry.SoS.Orientation( SoS
-
                                           , sideTest
                                           , sideTest'
-
-                                          , toSymbolic
                                           ) where
 
 import Algorithms.Geometry.SoS.Determinant
@@ -23,6 +20,7 @@ import GHC.TypeNats
 -- | A dimension d has support for SoS when we can: compute a
 -- dterminant of a d+1 by d+1 dimensional matrix.
 type SoS d = (Arity d, HasDeterminant (d+1))
+
 
 -- | Given a query point q, and a vector of d points defining a
 -- hyperplane test if q lies above or below the hyperplane. Each point
@@ -56,16 +54,11 @@ sideTest      :: (SoS d, Num r, Ord r, Ord i)
               => Point d r :+ i -> Vector d (Point d r :+ i) -> Sign
 sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 
--- | Given an input point, transform its number type to include
--- symbolic $\varepsilon$ expressions so that we can use SoS.
-toSymbolic          :: (Ord i, Arity d) => Point d r :+ i -> Point d (Symbolic (i,Int) r)
-toSymbolic (p :+ i) = p&vector' %~ imap (\j x -> symbolic x (i,j))
-
 -- | Given a point q and a vector of d points defining a hyperplane,
 -- test on which side of the hyperplane q lies.
 --
 -- TODO: Specify what the sign means
-sideTest'      :: (Num r, Ord r, Ord i, HasDeterminant (d+1), Arity d, Arity (d+1))
+sideTest'      :: (Num r, Ord r, Ord i, SoS d, Arity (d+1))
                => Point d (Symbolic i r) -> Vector d (Point d (Symbolic i r)) -> Sign
 sideTest' q ps = sideTest'' $ cons q ps
 

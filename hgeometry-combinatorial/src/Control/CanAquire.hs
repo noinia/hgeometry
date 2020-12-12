@@ -2,7 +2,6 @@
 module Control.CanAquire(
       runAcquire
     , CanAquire(..)
-    , HasIndex(..)
 
     , replaceByIndex, labelWithIndex
     , I
@@ -13,13 +12,13 @@ import           Control.Monad.State.Strict
 import           Data.Reflection
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
-import Unsafe.Coerce(unsafeCoerce)
+import           Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
 -- | Run a computation on something that can aquire i's.
 runAcquire         :: forall t a b. Traversable t
-                   => (forall s. CanAquire (I s a) a => t (I s a) -> b)
+                   => (forall s. CanAquire (I s a) => t (I s a) -> b)
                    -> t a -> b
 runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
   where
@@ -29,13 +28,10 @@ runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
     coerceTS _ = unsafeCoerce -- fmap I
       -- Ideally this would just be a coerce. But GHC doesn't want to do that.
 
-class HasIndex i Int => CanAquire i a where
+class CanAquire i where
+  type AquiredVal i
   -- | A value of type i can obtain something of type 'a'
-  aquire  :: i -> a
-
-class HasIndex t i | t -> i where
-  -- | Types that have an instance of this class can act as indices.
-  indexOf :: t -> i
+  aquire  :: i -> AquiredVal i
 
 --------------------------------------------------------------------------------
 
@@ -67,14 +63,12 @@ labelWithIndex = flip runState 0 . traverse lbl
 
 --------------------------------------------------------------------------------
 
--- | A type that can act as an Index.
+-- | A type that can act as an Index/Pointer
 newtype I (s :: *) a = I Int deriving (Eq, Ord, Enum)
 
 instance Show (I s a) where
   showsPrec i (I j) = showsPrec i j
 
-instance HasIndex (I s a) Int where
-  indexOf (I i) = i
-
-instance Reifies s (V.Vector a) => I s a `CanAquire` a where
+instance Reifies s (V.Vector a) => CanAquire (I s a) where
+  type AquiredVal (I s a) = a
   aquire (I i) = let v = reflect @s undefined in v V.! i
