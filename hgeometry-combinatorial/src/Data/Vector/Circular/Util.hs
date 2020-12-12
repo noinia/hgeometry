@@ -4,6 +4,7 @@ module Data.Vector.Circular.Util where
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
 import           Control.Lens
+import qualified Data.List.NonEmpty          as NonEmpty
 import           Data.Maybe
 import           Data.Semigroup.Foldable
 import qualified Data.Vector                 as V
@@ -37,7 +38,7 @@ zipWith f a b = unsafeFromVector $ V.zipWith f (toVector a) (toVector b)
 
 zipWith3 :: (a -> b -> c -> d) -> CircularVector a -> CircularVector b -> CircularVector c
   -> CircularVector d
-zipWith3 f a b c = unsafeFromVector $ V.zipWith3 f (toVector a) (toVector b) (toVector c)
+zipWith3 f a b c = fromVector $ NV.zipWith3 f (toNonEmptyVector a) (toNonEmptyVector b) (toNonEmptyVector c)
 
 reverseDirection :: CircularVector a -> CircularVector a
 reverseDirection = unsafeFromVector . V.reverse . toVector
@@ -64,6 +65,10 @@ leftElements v = NV.generate1 (length v) (\i -> CV.index v (length v-1-i))
 
 findRotateTo   :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 findRotateTo p (CircularVector v _rot) = CircularVector v <$> NV.findIndex p v
+
+-- Delete once circular-vector has been fixed.
+safeToNonEmpty :: CircularVector a -> NonEmpty.NonEmpty a
+safeToNonEmpty = NV.toNonEmpty . toNonEmptyVector
 
 -- | Test if the circular list is a cyclic shift of the second
 -- list.

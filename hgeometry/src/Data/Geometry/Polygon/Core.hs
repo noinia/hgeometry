@@ -81,14 +81,15 @@ import           Data.Vinyl.CoRec (asA)
 {- $setup
 >>> import Data.RealNumber.Rational
 >>> :{
--- import qualified Data.CircularSeq as C
+-- import qualified Data.Vector.Circular as CV
 let simplePoly :: SimplePolygon () (RealNumber 10)
-    simplePoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
-                                                        , Point2 10 0
-                                                        , Point2 10 10
-                                                        , Point2 5 15
-                                                        , Point2 1 11
-                                                        ]
+    simplePoly = SimplePolygon . CV.unsafeFromList . map ext $
+      [ Point2 0 0
+      , Point2 10 0
+      , Point2 10 10
+      , Point2 5 15
+      , Point2 1 11
+      ]
 :} -}
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
@@ -241,9 +242,9 @@ holeList (MultiPolygon _ hs) = hs
 -- they appear!
 polygonVertices                      :: Polygon t p r
                                      -> NonEmpty.NonEmpty (Point 2 r :+ p)
-polygonVertices (SimplePolygon vs)   = toNonEmpty vs
+polygonVertices (SimplePolygon vs)   = CV.safeToNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
-  sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
+  sconcat $ CV.safeToNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
 -- | Creates a simple polygon from the given list of vertices.
@@ -462,7 +463,7 @@ isTriangle = \case
     MultiPolygon vs [] -> go vs
     MultiPolygon _  _  -> False
   where
-    go vs = case toNonEmpty vs of
+    go vs = case CV.safeToNonEmpty vs of
               (_ :| [_,_]) -> True
               _            -> False
 
@@ -569,7 +570,7 @@ asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
 -- will be numbered last, in the same order.
 --
 -- >>> numberVertices simplePoly
--- SimplePolygon (CSeq [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()])
+-- SimplePolygon (CircularVector {vector = [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()], rotation = 0})
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
