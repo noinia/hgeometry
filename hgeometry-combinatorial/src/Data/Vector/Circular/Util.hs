@@ -1,13 +1,15 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Data.Vector.Circular.Util where
 
+import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
 import           Control.Lens
+import           Data.Maybe
 import           Data.Semigroup.Foldable
-import qualified Data.Vector          as V
-import           Data.Vector.Circular as CV
-import qualified Data.Vector.NonEmpty as NV
-import           GHC.Generics         (Generic)
+import qualified Data.Vector                 as V
+import           Data.Vector.Circular        as CV
+import qualified Data.Vector.NonEmpty        as NV
+import           GHC.Generics                (Generic)
 
 deriving instance Generic (CircularVector a)
 
@@ -62,3 +64,14 @@ leftElements v = NV.generate1 (length v) (\i -> CV.index v (length v-1-i))
 
 findRotateTo   :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 findRotateTo p (CircularVector v _rot) = CircularVector v <$> NV.findIndex p v
+
+-- | Test if the circular list is a cyclic shift of the second
+-- list.
+--
+-- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of
+-- the lists.
+isShiftOf         :: Eq a => CircularVector a -> CircularVector a -> Bool
+xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
+                        once        = leftElements
+                        check as bs = isJust $ once as `isSubStringOf` twice bs
+                    in length xs == length ys && check xs ys
