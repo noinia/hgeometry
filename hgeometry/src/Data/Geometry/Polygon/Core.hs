@@ -9,12 +9,14 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Core( PolygonType(..)
+                                 , Winding(..)
                                  , Polygon(..)
                                  , _SimplePolygon, _MultiPolygon
                                  , SimplePolygon, MultiPolygon, SomePolygon
 
 
                                  , fromPoints
+                                 , winding
 
                                  , polygonVertices, listEdges
 
@@ -93,6 +95,7 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
 data PolygonType = Simple | Multi
 
+data Winding = CounterClockwise | Clockwise
 
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
@@ -424,11 +427,16 @@ area (MultiPolygon vs hs)   = area (SimplePolygon vs) - sum [area h | h <- hs]
 -- clockwise order, the signed area will be negative, if the verices are given
 -- in counter clockwise order, the area will be positive.
 signedArea      :: Fractional r => SimplePolygon p r -> r
-signedArea poly = x / 2
+signedArea poly = signedArea2X poly / 2
+
+-- | Compute the signed area times 2 of a simple polygon. The the vertices are in
+-- clockwise order, the signed area will be negative, if the verices are given
+-- in counter clockwise order, the area will be positive.
+signedArea2X      :: Num r => SimplePolygon p r -> r
+signedArea2X poly = x
   where
     x = sum [ p^.core.xCoord * q^.core.yCoord - q^.core.xCoord * p^.core.yCoord
             | LineSegment' p q <- F.toList $ outerBoundaryEdges poly  ]
-
 
 -- | Compute the centroid of a simple polygon.
 centroid      :: Fractional r => SimplePolygon p r -> Point 2 r
@@ -509,14 +517,21 @@ safeMaximumOn f = \case
   xs -> Just $ List.maximumBy (comparing f) xs
 
 
+winding :: (Eq r, Num r) => Polygon t p r -> Winding
+winding p =
+    if a == abs a
+      then CounterClockwise
+      else Clockwise
+  where
+    a = signedArea2X (asSimplePolygon p)
+
 -- | Test if the outer boundary of the polygon is in clockwise or counter
 -- clockwise order.
 --
 -- running time: \(O(n)\)
 --
-isCounterClockwise :: (Eq r, Fractional r) => Polygon t p r -> Bool
-isCounterClockwise = (\x -> x == abs x) . signedArea
-                   . fromPoints . F.toList . (^.outerBoundary)
+isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
+isCounterClockwise = (\x -> x == abs x) . signedArea2X . asSimplePolygon
 
 
 -- | Make sure that every edge has the polygon's interior on its
@@ -526,13 +541,13 @@ isCounterClockwise = (\x -> x == abs x) . signedArea
 --
 -- running time: \(O(n)\)
 -- | Orient the outer boundary of the polygon to clockwise order
-toClockwiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder p = toClockwiseOrder' p & polygonHoles'.traverse %~ toCounterClockWiseOrder'
 
 -- | Orient the outer boundary into clockwise order. Leaves any holes
 -- as they are.
 --
-toClockwiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toClockwiseOrder'   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toClockwiseOrder' pg
       | isCounterClockwise pg = reverseOuterBoundary pg
       | otherwise             = pg
@@ -542,14 +557,14 @@ toClockwiseOrder' pg
 -- the inner borders (i.e. any holes, if they exist) into clockwise order.
 --
 -- running time: \(O(n)\)
-toCounterClockWiseOrder   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder p =
   toCounterClockWiseOrder' p & polygonHoles'.traverse %~ toClockwiseOrder'
 
 -- | Orient the outer boundary into counter-clockwise order. Leaves
 -- any holes as they are.
 --
-toCounterClockWiseOrder'   :: (Eq r, Fractional r) => Polygon t p r -> Polygon t p r
+toCounterClockWiseOrder'   :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 toCounterClockWiseOrder' p
       | not $ isCounterClockwise p = reverseOuterBoundary p
       | otherwise                  = p
