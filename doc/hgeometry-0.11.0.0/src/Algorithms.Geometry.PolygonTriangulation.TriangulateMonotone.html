@@ -1,0 +1,775 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.CircularSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Down</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html"><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.Types</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlaneGraph.html"><span class="hs-identifier">Data.PlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier">PlaneGraph</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Basic</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier">PolygonFaceData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier">PlanarSubdivision</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">--</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">type</span><span> </span><span id="MonotonePolygon"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#MonotonePolygon"><span class="hs-identifier hs-var">MonotonePolygon</span></a></span></span><span> </span><span id="local-6989586621679987624"><span class="annot"><a href="#local-6989586621679987624"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679987623"><span class="annot"><a href="#local-6989586621679987623"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987624"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987623"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">data</span><span> </span><span id="LR"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-var">LR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="L"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="R"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679987615"><span id="local-6989586621679987617"><span id="local-6989586621679987619"><span class="annot"><span class="annottext">Int -&gt; LR -&gt; ShowS
+[LR] -&gt; ShowS
+LR -&gt; String
+(Int -&gt; LR -&gt; ShowS)
+-&gt; (LR -&gt; String) -&gt; ([LR] -&gt; ShowS) -&gt; Show LR
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [LR] -&gt; ShowS
+$cshowList :: [LR] -&gt; ShowS
+show :: LR -&gt; String
+$cshow :: LR -&gt; String
+showsPrec :: Int -&gt; LR -&gt; ShowS
+$cshowsPrec :: Int -&gt; LR -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679987610"><span id="local-6989586621679987612"><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+(LR -&gt; LR -&gt; Bool) -&gt; (LR -&gt; LR -&gt; Bool) -&gt; Eq LR
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: LR -&gt; LR -&gt; Bool
+$c/= :: LR -&gt; LR -&gt; Bool
+== :: LR -&gt; LR -&gt; Bool
+$c== :: LR -&gt; LR -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-27"></span><span id="local-6989586621679987605"><span id="local-6989586621679987606"><span id="local-6989586621679987607"><span id="local-6989586621679987608"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#triangulate"><span class="hs-identifier hs-type">triangulate</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987608"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987608"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679987607"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987606"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987605"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987608"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-29"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987606"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987605"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987608"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span><span>
+</span><span id="line-30"></span><span id="triangulate"><span class="annot"><span class="annottext">triangulate :: proxy s
+-&gt; MonotonePolygon p r
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#triangulate"><span class="hs-identifier hs-var hs-var">triangulate</span></a></span></span><span> </span><span id="local-6989586621679987603"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679987603"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679987602"><span class="annot"><span class="annottext">pg' :: MonotonePolygon p r
+</span><a href="#local-6989586621679987602"><span class="hs-identifier hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+forall k (proxy :: k -&gt; *) r (s :: k) p.
+(Fractional r, Ord r) =&gt;
+proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-var">constructSubdivision</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679987603"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679987600"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987599"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; [LineSegment 2 p r]
+forall r p.
+(Ord r, Num r) =&gt;
+MonotonePolygon p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var">computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987597"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621679987597"><span class="annot"><span class="annottext">pg :: MonotonePolygon p r
+</span><a href="#local-6989586621679987597"><span class="hs-identifier hs-var hs-var">pg</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; MonotonePolygon p r
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier hs-var">toCounterClockWiseOrder</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987602"><span class="hs-identifier hs-var">pg'</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987600"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679987600"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987599"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987599"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987597"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-comment">-- TODO: Find a way to construct the graph in O(n) time.</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-39"></span><span id="local-6989586621679987591"><span id="local-6989586621679987592"><span id="local-6989586621679987593"><span id="local-6989586621679987594"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#triangulate%27"><span class="hs-identifier hs-type">triangulate'</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679987593"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987592"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987591"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987594"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-41"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987592"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987591"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987594"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span><span>
+</span><span id="line-42"></span><span id="triangulate%27"><span class="annot"><span class="annottext">triangulate' :: proxy s
+-&gt; MonotonePolygon p r
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#triangulate%27"><span class="hs-identifier hs-var hs-var">triangulate'</span></a></span></span><span> </span><span id="local-6989586621679987589"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679987589"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679987588"><span class="annot"><span class="annottext">pg' :: MonotonePolygon p r
+</span><a href="#local-6989586621679987588"><span class="hs-identifier hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+forall k (proxy :: k -&gt; *) r (s :: k) p.
+(Fractional r, Ord r) =&gt;
+proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-var">constructGraph</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679987589"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679987586"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987585"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; [LineSegment 2 p r]
+forall r p.
+(Ord r, Num r) =&gt;
+MonotonePolygon p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var">computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987584"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679987584"><span class="annot"><span class="annottext">pg :: MonotonePolygon p r
+</span><a href="#local-6989586621679987584"><span class="hs-identifier hs-var hs-var">pg</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; MonotonePolygon p r
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier hs-var">toCounterClockWiseOrder</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987588"><span class="hs-identifier hs-var">pg'</span></a></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987586"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679987586"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987585"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987585"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987584"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-comment">-- TODO: Find a way to construct the graph in O(n) time.</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- | Given a y-monotone polygon in counter clockwise order computes the diagonals</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- to add to triangulate the polygon</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- pre: the input polygon is y-monotone and has \(n \geq 3\) vertices</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679987778"><span id="local-6989586621679987779"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-type">computeDiagonals</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987779"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679987779"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987778"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987779"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987778"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987779"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-57"></span><span id="computeDiagonals"><span class="annot"><span class="annottext">computeDiagonals :: MonotonePolygon p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var hs-var">computeDiagonals</span></a></span></span><span> </span><span id="local-6989586621679987583"><span class="annot"><span class="annottext">pg :: MonotonePolygon p r
+</span><a href="#local-6989586621679987583"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987582"><span class="hs-identifier hs-var">diags''</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987581"><span class="hs-identifier hs-var">diags'</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-comment">-- | run the stack computation</span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987579"><span class="annot"><span class="annottext">stack' :: [P p r]
+</span><a href="#local-6989586621679987579"><span class="hs-identifier hs-var">stack'</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679987581"><span class="annot"><span class="annottext">diags' :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987581"><span class="hs-identifier hs-var">diags'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SP [P p r] [LineSegment 2 p r]
+ -&gt; P p r -&gt; SP [P p r] [LineSegment 2 p r])
+-&gt; SP [P p r] [LineSegment 2 p r]
+-&gt; [P p r]
+-&gt; SP [P p r] [LineSegment 2 p r]
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">L.foldl'</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621679987577"><span class="annot"><span class="annottext">stack :: [P p r]
+</span><a href="#local-6989586621679987577"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span id="local-6989586621679987576"><span class="annot"><span class="annottext">acc :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987576"><span class="hs-identifier hs-var">acc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679987575"><span class="annot"><span class="annottext">v' :: P p r
+</span><a href="#local-6989586621679987575"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987576"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; [LineSegment 2 p r])
+-&gt; SP [P p r] [LineSegment 2 p r] -&gt; SP [P p r] [LineSegment 2 p r]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">P p r -&gt; [P p r] -&gt; SP [P p r] [LineSegment 2 p r]
+forall r p.
+(Ord r, Num r) =&gt;
+P p r -&gt; Stack (P p r) -&gt; SP (Stack (P p r)) [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987575"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">[P p r]
+</span><a href="#local-6989586621679987577"><span class="hs-identifier hs-var">stack</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>                                    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[P p r] -&gt; [LineSegment 2 p r] -&gt; SP [P p r] [LineSegment 2 p r]
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987572"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987571"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[P p r]
+</span><a href="#local-6989586621679987570"><span class="hs-identifier hs-var">vs'</span></a></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- add vertices from the last guy w to all 'middle' guys of the final stack</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679987582"><span class="annot"><span class="annottext">diags'' :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987582"><span class="hs-identifier hs-var hs-var">diags''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(P p r -&gt; LineSegment 2 p r) -&gt; [P p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; P p r -&gt; LineSegment 2 p r
+forall p r. P p r -&gt; P p r -&gt; LineSegment 2 p r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987568"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([P p r] -&gt; [LineSegment 2 p r]) -&gt; [P p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[P p r] -&gt; [P p r]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">init</span></span><span> </span><span class="annot"><span class="annottext">[P p r]
+</span><a href="#local-6989586621679987579"><span class="hs-identifier hs-var">stack'</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-comment">-- extract the last vertex</span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679987570"><span class="annot"><span class="annottext">vs' :: [P p r]
+</span><a href="#local-6989586621679987570"><span class="hs-identifier hs-var">vs'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679987568"><span class="annot"><span class="annottext">w :: P p r
+</span><a href="#local-6989586621679987568"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[P p r] -&gt; Maybe ([P p r], P p r)
+forall s a. Snoc s s a a =&gt; s -&gt; Maybe (s, a)
+</span><span class="hs-identifier hs-var">unsnoc</span></span><span> </span><span class="annot"><span class="annottext">[P p r]
+</span><a href="#local-6989586621679987565"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-comment">-- merge the two lists into one list for procerssing</span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987571"><span class="annot"><span class="annottext">u :: P p r
+</span><a href="#local-6989586621679987571"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987572"><span class="annot"><span class="annottext">v :: P p r
+</span><a href="#local-6989586621679987572"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987565"><span class="annot"><span class="annottext">vs :: [P p r]
+</span><a href="#local-6989586621679987565"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([P p r] -&gt; [P p r] -&gt; [P p r]) -&gt; ([P p r], [P p r]) -&gt; [P p r]
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(P p r -&gt; P p r -&gt; Ordering) -&gt; [P p r] -&gt; [P p r] -&gt; [P p r]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a] -&gt; [a]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#mergeBy"><span class="hs-identifier hs-var">mergeBy</span></a></span><span> </span><span class="annot"><span class="annottext">((P p r -&gt; P p r -&gt; Ordering) -&gt; [P p r] -&gt; [P p r] -&gt; [P p r])
+-&gt; (P p r -&gt; P p r -&gt; Ordering) -&gt; [P p r] -&gt; [P p r] -&gt; [P p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(P p r -&gt; (Down r, r)) -&gt; P p r -&gt; P p r -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679987561"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679987561"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679987560"><span class="annot"><span class="annottext">y :: r
+</span><a href="#local-6989586621679987560"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Down r
+forall a. a -&gt; Down a
+</span><span class="hs-identifier hs-var">Down</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679987560"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679987561"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>             </span><span class="annot"><span class="annottext">(([P p r], [P p r]) -&gt; [P p r]) -&gt; ([P p r], [P p r]) -&gt; [P p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r -&gt; ([P p r], [P p r])
+forall r p.
+Ord r =&gt;
+MonotonePolygon p r
+-&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-var">splitPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987583"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">type</span><span> </span><span id="P"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-var">P</span></a></span></span><span> </span><span id="local-6989586621679987556"><span class="annot"><a href="#local-6989586621679987556"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679987555"><span class="annot"><a href="#local-6989586621679987555"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987555"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679987556"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">type</span><span> </span><span id="Stack"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-var">Stack</span></a></span></span><span> </span><span id="local-6989586621679987554"><span class="annot"><a href="#local-6989586621679987554"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679987554"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- type Scan p r = State (Stack (P p r))</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679987680"><span id="local-6989586621679987681"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-type">chainOf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987681"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987680"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span></span></span><span>
+</span><span id="line-81"></span><span id="chainOf"><span class="annot"><span class="annottext">chainOf :: P p r -&gt; LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var hs-var">chainOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; Getting LR (P p r) LR -&gt; LR
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((LR :+ p) -&gt; Const LR (LR :+ p)) -&gt; P p r -&gt; Const LR (P p r)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span class="annot"><span class="annottext">(((LR :+ p) -&gt; Const LR (LR :+ p)) -&gt; P p r -&gt; Const LR (P p r))
+-&gt; ((LR -&gt; Const LR LR) -&gt; (LR :+ p) -&gt; Const LR (LR :+ p))
+-&gt; Getting LR (P p r) LR
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(LR -&gt; Const LR LR) -&gt; (LR :+ p) -&gt; Const LR (LR :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span id="local-6989586621679987687"><span id="local-6989586621679987688"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#toVtx"><span class="hs-identifier hs-type">toVtx</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987688"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987687"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987687"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679987688"><span class="hs-identifier hs-type">p</span></a></span></span></span><span>
+</span><span id="line-84"></span><span id="toVtx"><span class="annot"><span class="annottext">toVtx :: P p r -&gt; Point 2 r :+ p
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#toVtx"><span class="hs-identifier hs-var hs-var">toVtx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; (P p r -&gt; Point 2 r :+ p) -&gt; Point 2 r :+ p
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">((LR :+ p) -&gt; Identity p) -&gt; P p r -&gt; Identity (Point 2 r :+ p)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">(((LR :+ p) -&gt; Identity p) -&gt; P p r -&gt; Identity (Point 2 r :+ p))
+-&gt; ((LR :+ p) -&gt; p) -&gt; P p r -&gt; Point 2 r :+ p
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(LR :+ p) -&gt; Getting p (LR :+ p) p -&gt; p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting p (LR :+ p) p
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span id="local-6989586621679987739"><span id="local-6989586621679987740"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-type">seg</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987740"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987739"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987740"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987739"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987740"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987739"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-87"></span><span id="seg"><span class="annot"><span class="annottext">seg :: P p r -&gt; P p r -&gt; LineSegment 2 p r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var hs-var">seg</span></a></span></span><span> </span><span id="local-6989586621679987545"><span class="annot"><span class="annottext">u :: P p r
+</span><a href="#local-6989586621679987545"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679987544"><span class="annot"><span class="annottext">v :: P p r
+</span><a href="#local-6989586621679987544"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall (d :: Nat) r p.
+(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; Point 2 r :+ p
+forall p r. P p r -&gt; Point 2 r :+ p
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#toVtx"><span class="hs-identifier hs-var">toVtx</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987545"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; Point 2 r :+ p
+forall p r. P p r -&gt; Point 2 r :+ p
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#toVtx"><span class="hs-identifier hs-var">toVtx</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987544"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679987746"><span id="local-6989586621679987747"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-type">process</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-type">Stack</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-type">Stack</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-92"></span><span id="process"><span class="annot"><span class="annottext">process :: P p r -&gt; Stack (P p r) -&gt; SP (Stack (P p r)) [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-var hs-var">process</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SP (Stack (P p r)) [LineSegment 2 p r]
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;TriangulateMonotone.process: absurd. empty stack&quot;</span></span><span>
+</span><span id="line-93"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span id="local-6989586621679987541"><span class="annot"><span class="annottext">v :: P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679987540"><span class="annot"><span class="annottext">stack :: Stack (P p r)
+</span><a href="#local-6989586621679987540"><span class="hs-identifier hs-var">stack</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679987539"><span class="annot"><span class="annottext">u :: P p r
+</span><a href="#local-6989586621679987539"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987538"><span class="annot"><span class="annottext">ws :: Stack (P p r)
+</span><a href="#local-6989586621679987538"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">P p r -&gt; LR
+forall p r. P p r -&gt; LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">P p r -&gt; LR
+forall p r. P p r -&gt; LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987539"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+-&gt; [LineSegment 2 p r] -&gt; SP (Stack (P p r)) [LineSegment 2 p r]
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987539"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(P p r -&gt; LineSegment 2 p r)
+-&gt; Stack (P p r) -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; P p r -&gt; LineSegment 2 p r
+forall p r. P p r -&gt; P p r -&gt; LineSegment 2 p r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Stack (P p r) -&gt; [LineSegment 2 p r])
+-&gt; (Stack (P p r) -&gt; Stack (P p r))
+-&gt; Stack (P p r)
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Stack (P p r) -&gt; Stack (P p r)
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">init</span></span><span> </span><span class="annot"><span class="annottext">(Stack (P p r) -&gt; [LineSegment 2 p r])
+-&gt; Stack (P p r) -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987540"><span class="hs-identifier hs-var">stack</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+-&gt; [LineSegment 2 p r] -&gt; SP (Stack (P p r)) [LineSegment 2 p r]
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">P p r -&gt; Stack (P p r) -&gt; Stack (P p r)
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987536"><span class="hs-identifier hs-var">w</span></a></span><span class="annot"><span class="annottext">P p r -&gt; Stack (P p r) -&gt; Stack (P p r)
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987535"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(P p r -&gt; LineSegment 2 p r)
+-&gt; Stack (P p r) -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; P p r -&gt; LineSegment 2 p r
+forall p r. P p r -&gt; P p r -&gt; LineSegment 2 p r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987534"><span class="hs-identifier hs-var">popped</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679987534"><span class="annot"><span class="annottext">popped :: Stack (P p r)
+</span><a href="#local-6989586621679987534"><span class="hs-identifier hs-var">popped</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679987535"><span class="annot"><span class="annottext">rest :: Stack (P p r)
+</span><a href="#local-6989586621679987535"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([(P p r, P p r)] -&gt; Stack (P p r))
+-&gt; ([(P p r, P p r)] -&gt; Stack (P p r))
+-&gt; ([(P p r, P p r)], [(P p r, P p r)])
+-&gt; (Stack (P p r), Stack (P p r))
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((P p r, P p r) -&gt; P p r) -&gt; [(P p r, P p r)] -&gt; Stack (P p r)
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(P p r, P p r) -&gt; P p r
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((P p r, P p r) -&gt; P p r) -&gt; [(P p r, P p r)] -&gt; Stack (P p r)
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(P p r, P p r) -&gt; P p r
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([(P p r, P p r)], [(P p r, P p r)])
+ -&gt; (Stack (P p r), Stack (P p r)))
+-&gt; ([(P p r, P p r)] -&gt; ([(P p r, P p r)], [(P p r, P p r)]))
+-&gt; [(P p r, P p r)]
+-&gt; (Stack (P p r), Stack (P p r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((P p r, P p r) -&gt; Bool)
+-&gt; [(P p r, P p r)] -&gt; ([(P p r, P p r)], [(P p r, P p r)])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">L.span</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P p r -&gt; (P p r, P p r) -&gt; Bool
+forall r p. (Ord r, Num r) =&gt; P p r -&gt; (P p r, P p r) -&gt; Bool
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-var">isInside</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987541"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(P p r, P p r)] -&gt; (Stack (P p r), Stack (P p r)))
+-&gt; [(P p r, P p r)] -&gt; (Stack (P p r), Stack (P p r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Stack (P p r) -&gt; Stack (P p r) -&gt; [(P p r, P p r)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987538"><span class="hs-identifier hs-var">ws</span></a></span><span> </span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987540"><span class="hs-identifier hs-var">stack</span></a></span><span>
+</span><span id="line-98"></span><span>        </span><span id="local-6989586621679987536"><span class="annot"><span class="annottext">w :: P p r
+</span><a href="#local-6989586621679987536"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P p r) -&gt; P p r
+forall a. [a] -&gt; a
+</span><span class="hs-identifier hs-var">last</span></span><span> </span><span class="annot"><span class="annottext">(Stack (P p r) -&gt; P p r) -&gt; Stack (P p r) -&gt; P p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987539"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">P p r -&gt; Stack (P p r) -&gt; Stack (P p r)
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">Stack (P p r)
+</span><a href="#local-6989586621679987534"><span class="hs-identifier hs-var">popped</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- | test if m does not block the line segment from v to u</span><span>
+</span><span id="line-102"></span><span id="local-6989586621679987668"><span id="local-6989586621679987669"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-type">isInside</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987669"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679987669"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987668"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987669"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987668"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987669"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987668"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987669"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-103"></span><span id="isInside"><span class="annot"><span class="annottext">isInside :: P p r -&gt; (P p r, P p r) -&gt; Bool
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-var hs-var">isInside</span></a></span></span><span> </span><span id="local-6989586621679987529"><span class="annot"><span class="annottext">v :: P p r
+</span><a href="#local-6989586621679987529"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679987528"><span class="annot"><span class="annottext">u :: P p r
+</span><a href="#local-6989586621679987528"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679987527"><span class="annot"><span class="annottext">m :: P p r
+</span><a href="#local-6989586621679987527"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">P p r -&gt; P p r -&gt; P p r -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987529"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987527"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987528"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-104"></span><span>                     </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-105"></span><span>                     </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">P p r -&gt; LR
+forall p r. P p r -&gt; LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987529"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span><span>
+</span><span id="line-106"></span><span>                     </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">P p r -&gt; LR
+forall p r. P p r -&gt; LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P p r
+</span><a href="#local-6989586621679987529"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- | given a comparison function, merge the two ordered lists</span><span>
+</span><span id="line-109"></span><span id="local-6989586621679987728"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#mergeBy"><span class="hs-identifier hs-type">mergeBy</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679987728"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679987728"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679987728"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679987728"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679987728"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-110"></span><span id="mergeBy"><span class="annot"><span class="annottext">mergeBy :: (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a] -&gt; [a]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#mergeBy"><span class="hs-identifier hs-var hs-var">mergeBy</span></a></span></span><span> </span><span id="local-6989586621679987522"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
+</span><a href="#local-6989586621679987522"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679987521"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679987521"><span class="annot"><span class="annottext">go :: [a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679987521"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span id="local-6989586621679987520"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679987520"><span class="hs-identifier hs-var">ys</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987520"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><a href="#local-6989586621679987521"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679987519"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679987519"><span class="hs-identifier hs-var">xs</span></a></span></span><span>     </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987519"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="annot"><a href="#local-6989586621679987521"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679987518"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679987518"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987517"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679987517"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679987516"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679987516"><span class="hs-identifier hs-var">y</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987515"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679987515"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987518"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
+</span><a href="#local-6989586621679987522"><span class="hs-operator hs-var">`cmp`</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987516"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-115"></span><span>                         </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987516"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679987521"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987518"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987517"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987515"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-116"></span><span>                         </span><span class="hs-identifier">_</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987518"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679987521"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987517"><span class="hs-identifier hs-var">xs</span></a></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679987516"><span class="hs-identifier hs-var">y</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679987515"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- | When the polygon is in counter clockwise order we return (leftChain,rightChain)</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- ordered from the top-down.</span><span>
+</span><span id="line-121"></span><span class="hs-comment">--</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- if there are multiple points with the maximum yCoord we pick the rightmost one,</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- if there are multiple point with the minimum yCoord we pick the leftmost one.</span><span>
+</span><span id="line-124"></span><span class="hs-comment">--</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-126"></span><span id="local-6989586621679987722"><span id="local-6989586621679987723"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-type">splitPolygon</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987722"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987723"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-127"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679987722"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679987722"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-128"></span><span id="splitPolygon"><span class="annot"><span class="annottext">splitPolygon :: MonotonePolygon p r
+-&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-var hs-var">splitPolygon</span></a></span></span><span> </span><span id="local-6989586621679987514"><span class="annot"><span class="annottext">pg :: MonotonePolygon p r
+</span><a href="#local-6989586621679987514"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; [Point 2 r :+ (LR :+ p)])
+-&gt; ([Point 2 r :+ p] -&gt; [Point 2 r :+ (LR :+ p)])
+-&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+-&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LR -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ (LR :+ p)]
+forall core core extra.
+core -&gt; [core :+ extra] -&gt; [core :+ (core :+ extra)]
+</span><a href="#local-6989586621679987513"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LR -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ (LR :+ p)]
+forall core core extra.
+core -&gt; [core :+ extra] -&gt; [core :+ (core :+ extra)]
+</span><a href="#local-6989586621679987513"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; [Point 2 r :+ (LR :+ p)])
+-&gt; ([Point 2 r :+ p] -&gt; [Point 2 r :+ p])
+-&gt; [Point 2 r :+ p]
+-&gt; [Point 2 r :+ (LR :+ p)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>                </span><span class="annot"><span class="annottext">(([Point 2 r :+ p], [Point 2 r :+ p])
+ -&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)]))
+-&gt; (CSeq (Point 2 r :+ p) -&gt; ([Point 2 r :+ p], [Point 2 r :+ p]))
+-&gt; CSeq (Point 2 r :+ p)
+-&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool)
+-&gt; [Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">L.break</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679987510"><span class="annot"><span class="annottext">v :: Point 2 r :+ p
+</span><a href="#local-6989586621679987510"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679987510"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679987509"><span class="hs-identifier hs-var">vMinY</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>                </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p]))
+-&gt; (CSeq (Point 2 r :+ p) -&gt; [Point 2 r :+ p])
+-&gt; CSeq (Point 2 r :+ p)
+-&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Seq (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Seq (Point 2 r :+ p) -&gt; [Point 2 r :+ p])
+-&gt; (CSeq (Point 2 r :+ p) -&gt; Seq (Point 2 r :+ p))
+-&gt; CSeq (Point 2 r :+ p)
+-&gt; [Point 2 r :+ p]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CSeq (Point 2 r :+ p) -&gt; Seq (Point 2 r :+ p)
+forall a. CSeq a -&gt; Seq a
+</span><span class="hs-identifier hs-var">C.rightElements</span></span><span> </span><span class="annot"><span class="annottext">(CSeq (Point 2 r :+ p)
+ -&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)]))
+-&gt; CSeq (Point 2 r :+ p)
+-&gt; ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CSeq (Point 2 r :+ p)
+</span><a href="#local-6989586621679987506"><span class="hs-identifier hs-var">vs'</span></a></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621679987513"><span class="annot"><span class="annottext">f :: core -&gt; [core :+ extra] -&gt; [core :+ (core :+ extra)]
+</span><a href="#local-6989586621679987513"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679987505"><span class="annot"><span class="annottext">x :: core
+</span><a href="#local-6989586621679987505"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((core :+ extra) -&gt; core :+ (core :+ extra))
+-&gt; [core :+ extra] -&gt; [core :+ (core :+ extra)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(core :+ extra)
+-&gt; ((core :+ extra) -&gt; core :+ (core :+ extra))
+-&gt; core :+ (core :+ extra)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(extra -&gt; Identity (core :+ extra))
+-&gt; (core :+ extra) -&gt; Identity (core :+ (core :+ extra))
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">((extra -&gt; Identity (core :+ extra))
+ -&gt; (core :+ extra) -&gt; Identity (core :+ (core :+ extra)))
+-&gt; (extra -&gt; core :+ extra)
+-&gt; (core :+ extra)
+-&gt; core :+ (core :+ extra)
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679987505"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; extra -&gt; core :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-comment">-- rotates the list to the vtx with max ycoord</span><span>
+</span><span id="line-134"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679987506"><span class="annot"><span class="annottext">vs' :: CSeq (Point 2 r :+ p)
+</span><a href="#local-6989586621679987506"><span class="hs-identifier hs-var">vs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Maybe (CSeq (Point 2 r :+ p))
+forall a. (a -&gt; Bool) -&gt; CSeq a -&gt; Maybe (CSeq a)
+</span><span class="hs-identifier hs-var">C.findRotateTo</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679987503"><span class="annot"><span class="annottext">v :: Point 2 r :+ p
+</span><a href="#local-6989586621679987503"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679987503"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679987502"><span class="hs-identifier hs-var">vMaxY</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>             </span><span class="annot"><span class="annottext">(CSeq (Point 2 r :+ p) -&gt; Maybe (CSeq (Point 2 r :+ p)))
+-&gt; CSeq (Point 2 r :+ p) -&gt; Maybe (CSeq (Point 2 r :+ p))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987514"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">MonotonePolygon p r
+-&gt; Getting
+     (CSeq (Point 2 r :+ p))
+     (MonotonePolygon p r)
+     (CSeq (Point 2 r :+ p))
+-&gt; CSeq (Point 2 r :+ p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (CSeq (Point 2 r :+ p))
+  (MonotonePolygon p r)
+  (CSeq (Point 2 r :+ p))
+forall (t :: PolygonType) p r.
+Lens' (Polygon t p r) (CSeq (Point 2 r :+ p))
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679987502"><span class="annot"><span class="annottext">vMaxY :: Point 2 r
+</span><a href="#local-6989586621679987502"><span class="hs-identifier hs-var hs-var">vMaxY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+ -&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p)
+-&gt; Point 2 r
+</span><a href="#local-6989586621679987500"><span class="hs-identifier hs-var">getY</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.maximumBy</span></span><span>
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679987509"><span class="annot"><span class="annottext">vMinY :: Point 2 r
+</span><a href="#local-6989586621679987509"><span class="hs-identifier hs-var hs-var">vMinY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+ -&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p)
+-&gt; Point 2 r
+</span><a href="#local-6989586621679987500"><span class="hs-identifier hs-var">getY</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.minimumBy</span></span><span>
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621679987497"><span class="annot"><span class="annottext">swap' :: Point 2 r -&gt; Point 2 r
+</span><a href="#local-6989586621679987497"><span class="hs-identifier hs-var hs-var">swap'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679987496"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679987496"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679987495"><span class="annot"><span class="annottext">y :: r
+</span><a href="#local-6989586621679987495"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679987495"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679987496"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-139"></span><span>    </span><span id="local-6989586621679987500"><span class="annot"><span class="annottext">getY :: (((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+ -&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p)
+-&gt; Point 2 r
+</span><a href="#local-6989586621679987500"><span class="hs-identifier hs-var hs-var">getY</span></a></span></span><span> </span><span id="local-6989586621679987494"><span class="annot"><span class="annottext">ff :: ((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p
+</span><a href="#local-6989586621679987494"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679987493"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679987493"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p
+</span><a href="#local-6989586621679987494"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Point 2 r)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r)
+-&gt; (Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; Point 2 r
+-&gt; Const (Point 2 r) (Point 2 r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r
+forall r. Point 2 r -&gt; Point 2 r
+</span><a href="#local-6989586621679987497"><span class="hs-identifier hs-var">swap'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p)
+-&gt; CSeq (Point 2 r :+ p) -&gt; Point 2 r :+ p
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MonotonePolygon p r
+</span><a href="#local-6989586621679987514"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">MonotonePolygon p r
+-&gt; Getting
+     (CSeq (Point 2 r :+ p))
+     (MonotonePolygon p r)
+     (CSeq (Point 2 r :+ p))
+-&gt; CSeq (Point 2 r :+ p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (CSeq (Point 2 r :+ p))
+  (MonotonePolygon p r)
+  (CSeq (Point 2 r :+ p))
+forall (t :: PolygonType) p r.
+Lens' (Polygon t p r) (CSeq (Point 2 r :+ p))
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
+</span><span id="line-140"></span><span>              </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679987493"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- testPolygon = fromPoints . map ext $ [ Point2 10 10</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--                                      , Point2 5 20</span><span>
+</span><span id="line-148"></span><span class="hs-comment">--                                      , Point2 3 14</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--                                      , Point2 1 1</span><span>
+</span><span id="line-150"></span><span class="hs-comment">--                                      , Point2 8 8 ]</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#testPoly5"><span class="hs-identifier hs-type">testPoly5</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-158"></span><span id="testPoly5"><span class="annot"><span class="annottext">testPoly5 :: SimplePolygon () Rational
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#testPoly5"><span class="hs-identifier hs-var hs-var">testPoly5</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon () Rational -&gt; SimplePolygon () Rational
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier hs-var">toCounterClockWiseOrder</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon () Rational -&gt; SimplePolygon () Rational)
+-&gt; ([Point 2 Rational :+ ()] -&gt; SimplePolygon () Rational)
+-&gt; [Point 2 Rational :+ ()]
+-&gt; SimplePolygon () Rational
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational :+ ()] -&gt; SimplePolygon () Rational
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#fromPoints"><span class="hs-identifier hs-var">fromPoints</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 Rational :+ ()] -&gt; SimplePolygon () Rational)
+-&gt; [Point 2 Rational :+ ()] -&gt; SimplePolygon () Rational
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 Rational -&gt; Point 2 Rational :+ ())
+-&gt; [Point 2 Rational] -&gt; [Point 2 Rational :+ ()]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">176</span></span><span> </span><span class="annot"><span class="hs-number">736</span></span><span>
+</span><span id="line-159"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">240</span></span><span> </span><span class="annot"><span class="hs-number">688</span></span><span>
+</span><span id="line-160"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">240</span></span><span> </span><span class="annot"><span class="hs-number">608</span></span><span>
+</span><span id="line-161"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">128</span></span><span> </span><span class="annot"><span class="hs-number">576</span></span><span>
+</span><span id="line-162"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">64</span></span><span> </span><span class="annot"><span class="hs-number">640</span></span><span>
+</span><span id="line-163"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">80</span></span><span> </span><span class="annot"><span class="hs-number">720</span></span><span>
+</span><span id="line-164"></span><span>                                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="hs-number">128</span></span><span> </span><span class="annot"><span class="hs-number">752</span></span><span>
+</span><span id="line-165"></span><span>                                                           </span><span class="hs-special">]</span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="hs-comment">-- testPoly5 :: SimplePolygon () Rational</span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 320 320</span><span>
+</span><span id="line-170"></span><span class="hs-comment">--                                                              , Point2 256 320</span><span>
+</span><span id="line-171"></span><span class="hs-comment">--                                                              , Point2 224 320</span><span>
+</span><span id="line-172"></span><span class="hs-comment">--                                                              , Point2 128 240</span><span>
+</span><span id="line-173"></span><span class="hs-comment">--                                                              , Point2 64 224</span><span>
+</span><span id="line-174"></span><span class="hs-comment">--                                                              , Point2 256 192</span><span>
+</span><span id="line-175"></span><span class="hs-comment">--                                                              ]</span><span>
+</span><span id="line-176"></span></pre></body></html>

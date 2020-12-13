@@ -1,0 +1,958 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.IndexedDoublyLinkedList</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier">DLList</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-2"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier">Cell</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#emptyCell"><span class="hs-identifier">emptyCell</span></a></span><span>
+</span><span id="line-3"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier">DLListMonad</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad"><span class="hs-identifier">runDLListMonad</span></a></span><span>
+</span><span id="line-4"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier">Index</span></a></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#singletons"><span class="hs-identifier">singletons</span></a></span><span>
+</span><span id="line-7"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#writeList"><span class="hs-identifier">writeList</span></a></span><span>
+</span><span id="line-8"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#valueAt"><span class="hs-identifier">valueAt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier">getNext</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier">getPrev</span></a></span><span>
+</span><span id="line-9"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFrom"><span class="hs-identifier">toListFrom</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromR"><span class="hs-identifier">toListFromR</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListContains"><span class="hs-identifier">toListContains</span></a></span><span>
+</span><span id="line-10"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromK"><span class="hs-identifier">toListFromK</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromRK"><span class="hs-identifier">toListFromRK</span></a></span><span>
+</span><span id="line-11"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#insertAfter"><span class="hs-identifier">insertAfter</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#insertBefore"><span class="hs-identifier">insertBefore</span></a></span><span>
+</span><span id="line-12"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#delete"><span class="hs-identifier">delete</span></a></span><span>
+</span><span id="line-13"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#dump"><span class="hs-identifier">dump</span></a></span><span>
+</span><span id="line-14"></span><span>                                   </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Primitive</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PrimMonad</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ReaderT</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">runReaderT</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader.Class</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.ST</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">forM_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Util.html"><span class="hs-identifier">Data.Util</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Mutable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">MV</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">type</span><span> </span><span id="Index"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-var">Index</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- TODO: Switch to unobxed sums for these!</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Cells in the Linked List</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">data</span><span> </span><span id="Cell"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Cell"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="prev"><span class="annot"><span class="annottext">Cell -&gt; Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var hs-var">prev</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>
+</span><span id="line-35"></span><span>                 </span><span class="hs-special">,</span><span> </span><span id="next"><span class="annot"><span class="annottext">Cell -&gt; Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>
+</span><span id="line-36"></span><span>                 </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328862"><span id="local-6989586621679328864"><span id="local-6989586621679328866"><span class="annot"><span class="annottext">Index -&gt; Cell -&gt; ShowS
+[Cell] -&gt; ShowS
+Cell -&gt; String
+(Index -&gt; Cell -&gt; ShowS)
+-&gt; (Cell -&gt; String) -&gt; ([Cell] -&gt; ShowS) -&gt; Show Cell
+forall a.
+(Index -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Cell] -&gt; ShowS
+$cshowList :: [Cell] -&gt; ShowS
+show :: Cell -&gt; String
+$cshow :: Cell -&gt; String
+showsPrec :: Index -&gt; Cell -&gt; ShowS
+$cshowsPrec :: Index -&gt; Cell -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328857"><span id="local-6989586621679328859"><span class="annot"><span class="annottext">Cell -&gt; Cell -&gt; Bool
+(Cell -&gt; Cell -&gt; Bool) -&gt; (Cell -&gt; Cell -&gt; Bool) -&gt; Eq Cell
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Cell -&gt; Cell -&gt; Bool
+$c/= :: Cell -&gt; Cell -&gt; Bool
+== :: Cell -&gt; Cell -&gt; Bool
+$c== :: Cell -&gt; Cell -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#emptyCell"><span class="hs-identifier hs-type">emptyCell</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span>
+</span><span id="line-39"></span><span id="emptyCell"><span class="annot"><span class="annottext">emptyCell :: Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#emptyCell"><span class="hs-identifier hs-var hs-var">emptyCell</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index -&gt; Maybe Index -&gt; Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-var">Cell</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | Doubly linked list implemented by a mutable vector. So actually</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- this data type can represent a collection of Linked Lists that can</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- efficiently be concatenated and split.</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- Supports O(1) indexing, and O(1) insertions, deletions</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="DLList"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-var">DLList</span></a></span></span><span> </span><span id="local-6989586621679329063"><span class="annot"><a href="#local-6989586621679329063"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679329064"><span class="annot"><a href="#local-6989586621679329064"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DLList"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-var">DLList</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="values"><span class="annot"><span class="annottext">DLList s a -&gt; Vector a
+</span><a href="Data.IndexedDoublyLinkedList.html#values"><span class="hs-identifier hs-var hs-var">values</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679329064"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="llist"><span class="annot"><span class="annottext">DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679329063"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>                         </span><span class="hs-special">}</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679328852"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679328849"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328852"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679328847"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; DLList s a -&gt; DLList s b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679328846"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679328846"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span id="local-6989586621679328845"><span class="annot"><span class="annottext">v :: Vector a
+</span><a href="#local-6989586621679328845"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679328844"><span class="annot"><span class="annottext">l :: MVector s Cell
+</span><a href="#local-6989586621679328844"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; MVector s Cell -&gt; DLList s b
+forall s a. Vector a -&gt; MVector s Cell -&gt; DLList s a
+</span><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-var">DLList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Vector a -&gt; Vector b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679328846"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679328845"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328844"><span class="hs-identifier hs-var">l</span></a></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- | Monad in which we can use the IndexedDoublyLinkedList.</span><span>
+</span><span id="line-57"></span><span class="hs-keyword">newtype</span><span> </span><span id="DLListMonad"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-var">DLListMonad</span></a></span></span><span> </span><span id="local-6989586621679329007"><span class="annot"><a href="#local-6989586621679329007"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679329006"><span class="annot"><a href="#local-6989586621679329006"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679329005"><span class="annot"><a href="#local-6989586621679329005"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DLListMonad"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-var">DLListMonad</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="runDLListMonad%27"><span class="annot"><span class="annottext">DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a
+</span><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad%27"><span class="hs-identifier hs-var hs-var">runDLListMonad'</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329007"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329006"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679329007"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679329005"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-58"></span><span>                         </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328838"><span id="local-6989586621679328840"><span class="annot"><span class="annottext">a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+(a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+(forall a b. (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b)
+-&gt; (forall a b. a -&gt; DLListMonad s b b -&gt; DLListMonad s b a)
+-&gt; Functor (DLListMonad s b)
+forall a b. a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+forall a b. (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+forall s b a b. a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+forall s b a b. (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+$c&lt;$ :: forall s b a b. a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+fmap :: (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+$cfmap :: forall s b a b. (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328827"><span id="local-6989586621679328829"><span id="local-6989586621679328831"><span id="local-6989586621679328833"><span id="local-6989586621679328835"><span class="annot"><span class="annottext">Functor (DLListMonad s b)
+a -&gt; DLListMonad s b a
+Functor (DLListMonad s b) =&gt;
+(forall a. a -&gt; DLListMonad s b a)
+-&gt; (forall a b.
+    DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c)
+    -&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c)
+-&gt; (forall a b.
+    DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b)
+-&gt; (forall a b.
+    DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a)
+-&gt; Applicative (DLListMonad s b)
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+(a -&gt; b -&gt; c)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c
+forall a. a -&gt; DLListMonad s b a
+forall s b. Functor (DLListMonad s b)
+forall a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+forall a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+forall a b.
+DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+forall s b a. a -&gt; DLListMonad s b a
+forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c
+forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+forall s b a b.
+DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+forall s b a b c.
+(a -&gt; b -&gt; c)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+&lt;* :: DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+$c&lt;* :: forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b a
+*&gt; :: DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+$c*&gt; :: forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+liftA2 :: (a -&gt; b -&gt; c)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c
+$cliftA2 :: forall s b a b c.
+(a -&gt; b -&gt; c)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b c
+&lt;*&gt; :: DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+$c&lt;*&gt; :: forall s b a b.
+DLListMonad s b (a -&gt; b) -&gt; DLListMonad s b a -&gt; DLListMonad s b b
+pure :: a -&gt; DLListMonad s b a
+$cpure :: forall s b a. a -&gt; DLListMonad s b a
+$cp1Applicative :: forall s b. Functor (DLListMonad s b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328819"><span id="local-6989586621679328821"><span id="local-6989586621679328823"><span class="annot"><span class="annottext">Applicative (DLListMonad s b)
+a -&gt; DLListMonad s b a
+Applicative (DLListMonad s b) =&gt;
+(forall a b.
+ DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b)
+-&gt; (forall a b.
+    DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b)
+-&gt; (forall a. a -&gt; DLListMonad s b a)
+-&gt; Monad (DLListMonad s b)
+DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+forall a. a -&gt; DLListMonad s b a
+forall s b. Applicative (DLListMonad s b)
+forall a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+forall a b.
+DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b
+forall s b a. a -&gt; DLListMonad s b a
+forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+forall s b a b.
+DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+return :: a -&gt; DLListMonad s b a
+$creturn :: forall s b a. a -&gt; DLListMonad s b a
+&gt;&gt; :: DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+$c&gt;&gt; :: forall s b a b.
+DLListMonad s b a -&gt; DLListMonad s b b -&gt; DLListMonad s b b
+&gt;&gt;= :: DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b
+$c&gt;&gt;= :: forall s b a b.
+DLListMonad s b a -&gt; (a -&gt; DLListMonad s b b) -&gt; DLListMonad s b b
+$cp1Monad :: forall s b. Applicative (DLListMonad s b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679328816"><span id="local-6989586621679328817"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328817"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328816"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="PrimState"><span class="annot"><span class="hs-identifier hs-var">PrimState</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328817"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328816"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679328817"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679328812"><span class="annot"><span class="annottext">primitive :: (State# (PrimState (DLListMonad s b))
+ -&gt; (# State# (PrimState (DLListMonad s b)), a #))
+-&gt; DLListMonad s b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">primitive</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a
+forall s b a. ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a
+</span><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-var">DLListMonad</span></a></span><span> </span><span class="annot"><span class="annottext">(ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a)
+-&gt; ((State# s -&gt; (# State# s, a #))
+    -&gt; ReaderT (DLList s b) (ST s) a)
+-&gt; (State# s -&gt; (# State# s, a #))
+-&gt; DLListMonad s b a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(State# s -&gt; (# State# s, a #)) -&gt; ReaderT (DLList s b) (ST s) a
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+(State# (PrimState m) -&gt; (# State# (PrimState m), a #)) -&gt; m a
+</span><span class="hs-identifier hs-var">primitive</span></span></span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679328808"><span id="local-6989586621679328809"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679328803"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328809"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328808"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328809"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328808"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679328801"><span class="annot"><span class="annottext">local :: (DLList s b -&gt; DLList s b)
+-&gt; DLListMonad s b a -&gt; DLListMonad s b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">local</span></span></span><span> </span><span id="local-6989586621679328799"><span class="annot"><span class="annottext">f :: DLList s b -&gt; DLList s b
+</span><a href="#local-6989586621679328799"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a
+forall s b a. ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a
+</span><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-var">DLListMonad</span></a></span><span> </span><span class="annot"><span class="annottext">(ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a)
+-&gt; (DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a)
+-&gt; DLListMonad s b a
+-&gt; DLListMonad s b a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; DLList s b)
+-&gt; ReaderT (DLList s b) (ST s) a -&gt; ReaderT (DLList s b) (ST s) a
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; r) -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">local</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; DLList s b
+</span><a href="#local-6989586621679328799"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(ReaderT (DLList s b) (ST s) a -&gt; ReaderT (DLList s b) (ST s) a)
+-&gt; (DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a)
+-&gt; DLListMonad s b a
+-&gt; ReaderT (DLList s b) (ST s) a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a
+forall s b a. DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a
+</span><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad%27"><span class="hs-identifier hs-var hs-var">runDLListMonad'</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679328798"><span class="annot"><span class="annottext">ask :: DLListMonad s b (DLList s b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">ask</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (DLList s b) (ST s) (DLList s b)
+-&gt; DLListMonad s b (DLList s b)
+forall s b a. ReaderT (DLList s b) (ST s) a -&gt; DLListMonad s b a
+</span><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-var">DLListMonad</span></a></span><span> </span><span class="annot"><span class="annottext">ReaderT (DLList s b) (ST s) (DLList s b)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span></span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- | Runs a DLList Computation, starting with singleton values, crated</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- from the input vector.</span><span>
+</span><span id="line-70"></span><span id="local-6989586621679328795"><span id="local-6989586621679328796"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad"><span class="hs-identifier hs-type">runDLListMonad</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679328796"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679328991"><span class="annot"><a href="#local-6989586621679328991"><span class="hs-identifier hs-type">s</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328991"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328796"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328795"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328795"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-71"></span><span id="runDLListMonad"><span class="annot"><span class="annottext">runDLListMonad :: Vector b -&gt; (forall s. DLListMonad s b a) -&gt; a
+</span><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad"><span class="hs-identifier hs-var hs-var">runDLListMonad</span></a></span></span><span> </span><span id="local-6989586621679328794"><span class="annot"><span class="annottext">vs :: Vector b
+</span><a href="#local-6989586621679328794"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679328793"><span class="annot"><span class="annottext">comp :: forall s. DLListMonad s b a
+</span><a href="#local-6989586621679328793"><span class="hs-identifier hs-var">comp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s a) -&gt; a
+forall a. (forall s. ST s a) -&gt; a
+</span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s a) -&gt; a) -&gt; (forall s. ST s a) -&gt; a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; ST s (DLList s b)
+forall (m :: * -&gt; *) s b.
+(PrimMonad m, s ~ PrimState m) =&gt;
+Vector b -&gt; m (DLList s b)
+</span><a href="Data.IndexedDoublyLinkedList.html#singletons"><span class="hs-identifier hs-var">singletons</span></a></span><span> </span><span class="annot"><span class="annottext">Vector b
+</span><a href="#local-6989586621679328794"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">ST s (DLList s b) -&gt; (DLList s b -&gt; ST s a) -&gt; ST s a
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">ReaderT (DLList s b) (ST s) a -&gt; DLList s b -&gt; ST s a
+forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var hs-var">runReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a
+forall s b a. DLListMonad s b a -&gt; ReaderT (DLList s b) (ST s) a
+</span><a href="Data.IndexedDoublyLinkedList.html#runDLListMonad%27"><span class="hs-identifier hs-var hs-var">runDLListMonad'</span></a></span><span> </span><span class="annot"><span class="annottext">DLListMonad s b a
+forall s. DLListMonad s b a
+</span><a href="#local-6989586621679328793"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- | Constructs a new DoublyLinkedList. Every element is its own singleton list</span><span>
+</span><span id="line-76"></span><span id="local-6989586621679328981"><span id="local-6989586621679328982"><span id="local-6989586621679328983"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#singletons"><span class="hs-identifier hs-type">singletons</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679328983"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679328982"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679328983"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679328981"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328983"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328982"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328981"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-77"></span><span id="singletons"><span class="annot"><span class="annottext">singletons :: Vector b -&gt; m (DLList s b)
+</span><a href="Data.IndexedDoublyLinkedList.html#singletons"><span class="hs-identifier hs-var hs-var">singletons</span></a></span></span><span> </span><span id="local-6989586621679328791"><span class="annot"><span class="annottext">vs :: Vector b
+</span><a href="#local-6989586621679328791"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector b -&gt; MVector s Cell -&gt; DLList s b
+forall s a. Vector a -&gt; MVector s Cell -&gt; DLList s a
+</span><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-var">DLList</span></a></span><span> </span><span class="annot"><span class="annottext">Vector b
+</span><a href="#local-6989586621679328791"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">(MVector s Cell -&gt; DLList s b)
+-&gt; m (MVector s Cell) -&gt; m (DLList s b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; Cell -&gt; m (MVector (PrimState m) Cell)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Index -&gt; a -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">MV.replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector b -&gt; Index
+forall a. Vector a -&gt; Index
+</span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector b
+</span><a href="#local-6989586621679328791"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#emptyCell"><span class="hs-identifier hs-var">emptyCell</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- | Sets the DoublyLinkedList to the given List.</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- Indices that do not occur in the list are not touched.</span><span>
+</span><span id="line-82"></span><span id="local-6989586621679328786"><span id="local-6989586621679328787"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#writeList"><span class="hs-identifier hs-type">writeList</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328787"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328786"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-83"></span><span id="writeList"><span class="annot"><span class="annottext">writeList :: NonEmpty Index -&gt; DLListMonad s b ()
+</span><a href="Data.IndexedDoublyLinkedList.html#writeList"><span class="hs-identifier hs-var hs-var">writeList</span></a></span></span><span> </span><span id="local-6989586621679328785"><span class="annot"><span class="annottext">h :: NonEmpty Index
+</span><a href="#local-6989586621679328785"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328784"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328784"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-84"></span><span>                 </span><span class="annot"><span class="annottext">[STR (Maybe Index) Index (Maybe Index)]
+-&gt; (STR (Maybe Index) Index (Maybe Index) -&gt; DLListMonad s b ())
+-&gt; DLListMonad s b ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+t a -&gt; (a -&gt; m b) -&gt; m ()
+</span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty Index -&gt; [STR (Maybe Index) Index (Maybe Index)]
+forall a. NonEmpty a -&gt; [STR (Maybe a) a (Maybe a)]
+</span><a href="#local-6989586621679328782"><span class="hs-identifier hs-var">withNeighs</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty Index
+</span><a href="#local-6989586621679328785"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((STR (Maybe Index) Index (Maybe Index) -&gt; DLListMonad s b ())
+ -&gt; DLListMonad s b ())
+-&gt; (STR (Maybe Index) Index (Maybe Index) -&gt; DLListMonad s b ())
+-&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Util.html#STR"><span class="hs-identifier hs-type">STR</span></a></span><span> </span><span id="local-6989586621679328780"><span class="annot"><span class="annottext">p :: Maybe Index
+</span><a href="#local-6989586621679328780"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679328779"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328779"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328778"><span class="annot"><span class="annottext">s :: Maybe Index
+</span><a href="#local-6989586621679328778"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-85"></span><span>                   </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328784"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328779"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328776"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328776"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328776"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328780"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328778"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679328782"><span class="annot"><span class="annottext">withNeighs :: NonEmpty a -&gt; [STR (Maybe a) a (Maybe a)]
+</span><a href="#local-6989586621679328782"><span class="hs-identifier hs-var hs-var">withNeighs</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328775"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679328775"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679328773"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679328773"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679328772"><span class="annot"><span class="annottext">l :: [a]
+</span><a href="#local-6989586621679328772"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328775"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679328773"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-88"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">(Maybe a -&gt; a -&gt; Maybe a -&gt; STR (Maybe a) a (Maybe a))
+-&gt; [Maybe a] -&gt; [a] -&gt; [Maybe a] -&gt; [STR (Maybe a) a (Maybe a)]
+forall a b c d. (a -&gt; b -&gt; c -&gt; d) -&gt; [a] -&gt; [b] -&gt; [c] -&gt; [d]
+</span><span class="hs-identifier hs-var">zipWith3</span></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; a -&gt; Maybe a -&gt; STR (Maybe a) a (Maybe a)
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><a href="Data.Util.html#STR"><span class="hs-identifier hs-var">STR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; [Maybe a] -&gt; [Maybe a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe a) -&gt; [a] -&gt; [Maybe a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679328772"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679328772"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; Maybe a) -&gt; [a] -&gt; [Maybe a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679328773"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[Maybe a] -&gt; [Maybe a] -&gt; [Maybe a]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- * Queries</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- | Gets the value at Index i</span><span>
+</span><span id="line-94"></span><span id="local-6989586621679328769"><span id="local-6989586621679328770"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#valueAt"><span class="hs-identifier hs-type">valueAt</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328770"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328769"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328769"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-95"></span><span id="valueAt"><span class="annot"><span class="annottext">valueAt :: Index -&gt; DLListMonad s b b
+</span><a href="Data.IndexedDoublyLinkedList.html#valueAt"><span class="hs-identifier hs-var hs-var">valueAt</span></a></span></span><span>  </span><span id="local-6989586621679328768"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328768"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; b) -&gt; DLListMonad s b b
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector b -&gt; Index -&gt; b
+forall a. Vector a -&gt; Index -&gt; a
+</span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328768"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector b -&gt; b) -&gt; (DLList s b -&gt; Vector b) -&gt; DLList s b -&gt; b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; Vector b
+forall s a. DLList s a -&gt; Vector a
+</span><a href="Data.IndexedDoublyLinkedList.html#values"><span class="hs-identifier hs-var hs-var">values</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- | Next element in the List</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679328929"><span id="local-6989586621679328930"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-type">getNext</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328930"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328929"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-99"></span><span id="getNext"><span class="annot"><span class="annottext">getNext :: Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-var hs-var">getNext</span></a></span></span><span> </span><span id="local-6989586621679328766"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328766"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328765"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328765"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-100"></span><span>               </span><span class="annot"><span class="annottext">Cell -&gt; Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">(Cell -&gt; Maybe Index)
+-&gt; DLListMonad s b Cell -&gt; DLListMonad s b (Maybe Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; DLListMonad s b Cell
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; m a
+</span><span class="hs-identifier hs-var">MV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328765"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328766"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- | Previous Element in the List</span><span>
+</span><span id="line-103"></span><span id="local-6989586621679328762"><span id="local-6989586621679328763"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-type">getPrev</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328763"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328762"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-104"></span><span id="getPrev"><span class="annot"><span class="annottext">getPrev :: Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-var hs-var">getPrev</span></a></span></span><span> </span><span id="local-6989586621679328761"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328761"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328760"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328760"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-105"></span><span>               </span><span class="annot"><span class="annottext">Cell -&gt; Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">(Cell -&gt; Maybe Index)
+-&gt; DLListMonad s b Cell -&gt; DLListMonad s b (Maybe Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; DLListMonad s b Cell
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; m a
+</span><span class="hs-identifier hs-var">MV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328760"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328761"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Computes a maximal length list starting from the Given index</span><span>
+</span><span id="line-108"></span><span class="hs-comment">--</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- running time: \(O(k)\), where \(k\) is the length of the output list</span><span>
+</span><span id="line-110"></span><span id="local-6989586621679328758"><span id="local-6989586621679328759"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFrom"><span class="hs-identifier hs-type">toListFrom</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328759"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328758"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-111"></span><span id="toListFrom"><span class="annot"><span class="annottext">toListFrom :: Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFrom"><span class="hs-identifier hs-var hs-var">toListFrom</span></a></span></span><span> </span><span id="local-6989586621679328757"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328757"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328757"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; [Index] -&gt; NonEmpty Index
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Index] -&gt; NonEmpty Index)
+-&gt; DLListMonad s b [Index] -&gt; DLListMonad s b (NonEmpty Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Index -&gt; DLListMonad s b (Maybe Index))
+-&gt; Index -&gt; DLListMonad s b [Index]
+forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#iterateM"><span class="hs-identifier hs-var">iterateM</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-var">getNext</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328757"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- | Takes the current element and its k next's</span><span>
+</span><span id="line-114"></span><span id="local-6989586621679328754"><span id="local-6989586621679328755"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromK"><span class="hs-identifier hs-type">toListFromK</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328755"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328754"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-115"></span><span id="toListFromK"><span class="annot"><span class="annottext">toListFromK :: Index -&gt; Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFromK"><span class="hs-identifier hs-var hs-var">toListFromK</span></a></span></span><span> </span><span id="local-6989586621679328753"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328753"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328752"><span class="annot"><span class="annottext">k :: Index
+</span><a href="#local-6989586621679328752"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328753"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; [Index] -&gt; NonEmpty Index
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Index] -&gt; NonEmpty Index)
+-&gt; DLListMonad s b [Index] -&gt; DLListMonad s b (NonEmpty Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index
+-&gt; (Index -&gt; DLListMonad s b (Maybe Index))
+-&gt; Index
+-&gt; DLListMonad s b [Index]
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+Index -&gt; (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#replicateM"><span class="hs-identifier hs-var">replicateM</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328752"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-var">getNext</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328753"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- | Computes a maximal length list by walking backwards in the</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- DoublyLinkedList, starting from the Given index</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- running time: \(O(k)\), where \(k\) is the length of the output list</span><span>
+</span><span id="line-121"></span><span id="local-6989586621679328916"><span id="local-6989586621679328917"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromR"><span class="hs-identifier hs-type">toListFromR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328917"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328916"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-122"></span><span id="toListFromR"><span class="annot"><span class="annottext">toListFromR :: Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFromR"><span class="hs-identifier hs-var hs-var">toListFromR</span></a></span></span><span> </span><span id="local-6989586621679328750"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328750"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328750"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; [Index] -&gt; NonEmpty Index
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Index] -&gt; NonEmpty Index)
+-&gt; DLListMonad s b [Index] -&gt; DLListMonad s b (NonEmpty Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Index -&gt; DLListMonad s b (Maybe Index))
+-&gt; Index -&gt; DLListMonad s b [Index]
+forall (m :: * -&gt; *) a. Monad m =&gt; (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#iterateM"><span class="hs-identifier hs-var">iterateM</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-var">getPrev</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328750"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span id="local-6989586621679328748"><span id="local-6989586621679328749"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListFromRK"><span class="hs-identifier hs-type">toListFromRK</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328749"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328748"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-125"></span><span id="toListFromRK"><span class="annot"><span class="annottext">toListFromRK :: Index -&gt; Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFromRK"><span class="hs-identifier hs-var hs-var">toListFromRK</span></a></span></span><span> </span><span id="local-6989586621679328747"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328747"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328746"><span class="annot"><span class="annottext">k :: Index
+</span><a href="#local-6989586621679328746"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328747"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; [Index] -&gt; NonEmpty Index
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Index] -&gt; NonEmpty Index)
+-&gt; DLListMonad s b [Index] -&gt; DLListMonad s b (NonEmpty Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index
+-&gt; (Index -&gt; DLListMonad s b (Maybe Index))
+-&gt; Index
+-&gt; DLListMonad s b [Index]
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+Index -&gt; (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#replicateM"><span class="hs-identifier hs-var">replicateM</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328746"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-var">getPrev</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328747"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | Computes a maximal length list that contains the element i.</span><span>
+</span><span id="line-128"></span><span class="hs-comment">--</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- running time: \(O(k)\), where \(k\) is the length of the output</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- list</span><span>
+</span><span id="line-131"></span><span id="local-6989586621679328744"><span id="local-6989586621679328745"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#toListContains"><span class="hs-identifier hs-type">toListContains</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328745"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328744"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-132"></span><span id="toListContains"><span class="annot"><span class="annottext">toListContains :: Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListContains"><span class="hs-identifier hs-var hs-var">toListContains</span></a></span></span><span> </span><span id="local-6989586621679328743"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328743"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty Index -&gt; NonEmpty Index -&gt; NonEmpty Index
+forall a. NonEmpty a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><a href="#local-6989586621679328742"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty Index -&gt; NonEmpty Index -&gt; NonEmpty Index)
+-&gt; DLListMonad s b (NonEmpty Index)
+-&gt; DLListMonad s b (NonEmpty Index -&gt; NonEmpty Index)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (NonEmpty Index)
+forall s b. Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFromR"><span class="hs-identifier hs-var">toListFromR</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328743"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">DLListMonad s b (NonEmpty Index -&gt; NonEmpty Index)
+-&gt; DLListMonad s b (NonEmpty Index)
+-&gt; DLListMonad s b (NonEmpty Index)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (NonEmpty Index)
+forall s b. Index -&gt; DLListMonad s b (NonEmpty Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#toListFrom"><span class="hs-identifier hs-var">toListFrom</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328743"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679328742"><span class="annot"><span class="annottext">f :: NonEmpty a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><a href="#local-6989586621679328742"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679328741"><span class="annot"><span class="annottext">l :: NonEmpty a
+</span><a href="#local-6989586621679328741"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679328740"><span class="annot"><span class="annottext">r :: NonEmpty a
+</span><a href="#local-6989586621679328740"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; NonEmpty a
+forall a. [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; NonEmpty a) -&gt; [a] -&gt; NonEmpty a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a
+</span><a href="#local-6989586621679328741"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.tail</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a
+</span><a href="#local-6989586621679328740"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- * Updates</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- | Inserts the second argument after the first one into the linked list</span><span>
+</span><span id="line-141"></span><span id="local-6989586621679328734"><span id="local-6989586621679328735"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#insertAfter"><span class="hs-identifier hs-type">insertAfter</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328735"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328734"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-142"></span><span id="insertAfter"><span class="annot"><span class="annottext">insertAfter :: Index -&gt; Index -&gt; DLListMonad s b ()
+</span><a href="Data.IndexedDoublyLinkedList.html#insertAfter"><span class="hs-identifier hs-var hs-var">insertAfter</span></a></span></span><span> </span><span id="local-6989586621679328733"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328733"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328732"><span class="annot"><span class="annottext">j :: Index
+</span><a href="#local-6989586621679328732"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328731"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328731"><span class="hs-identifier hs-var">v</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-143"></span><span>                     </span><span id="local-6989586621679328730"><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328730"><span class="hs-identifier hs-var">mr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-var">getNext</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328733"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-144"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span>  </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328731"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328733"><span class="hs-identifier hs-var">i</span></a></span><span>  </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328729"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328729"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328729"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328732"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-145"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span>  </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328731"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328732"><span class="hs-identifier hs-var">j</span></a></span><span>  </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328728"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328728"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328728"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328733"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328730"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-146"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Maybe Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Maybe Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-var">mModify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328731"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328730"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328726"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328726"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328726"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328732"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- | Inserts the second argument before the first one into the linked list</span><span>
+</span><span id="line-149"></span><span id="local-6989586621679328724"><span id="local-6989586621679328725"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#insertBefore"><span class="hs-identifier hs-type">insertBefore</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328725"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328724"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-150"></span><span id="insertBefore"><span class="annot"><span class="annottext">insertBefore :: Index -&gt; Index -&gt; DLListMonad s b ()
+</span><a href="Data.IndexedDoublyLinkedList.html#insertBefore"><span class="hs-identifier hs-var hs-var">insertBefore</span></a></span></span><span> </span><span id="local-6989586621679328723"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328723"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328722"><span class="annot"><span class="annottext">h :: Index
+</span><a href="#local-6989586621679328722"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328721"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328721"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-151"></span><span>                      </span><span id="local-6989586621679328720"><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328720"><span class="hs-identifier hs-var">ml</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-var">getPrev</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328723"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-152"></span><span>                      </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Maybe Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Maybe Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-var">mModify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328721"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328720"><span class="hs-identifier hs-var">ml</span></a></span><span> </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328719"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328719"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328719"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328722"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-153"></span><span>                      </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span>  </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328721"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328722"><span class="hs-identifier hs-var">h</span></a></span><span>  </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328718"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328718"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328718"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328720"><span class="hs-identifier hs-var">ml</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328723"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-154"></span><span>                      </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span>  </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328721"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328723"><span class="hs-identifier hs-var">i</span></a></span><span>  </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328717"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328717"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328717"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Maybe Index
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328722"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- | Deletes the element from the linked list. This element thus</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- essentially becomes a singleton list. Returns the pair of indices</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- that now have become neighbours (i.e. the predecessor and successor</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- of j just before we deleted j).</span><span>
+</span><span id="line-160"></span><span id="local-6989586621679328715"><span id="local-6989586621679328716"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#delete"><span class="hs-identifier hs-type">delete</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328716"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328715"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-161"></span><span id="delete"><span class="annot"><span class="annottext">delete :: Index -&gt; DLListMonad s b (Maybe Index, Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#delete"><span class="hs-identifier hs-var hs-var">delete</span></a></span></span><span> </span><span id="local-6989586621679328714"><span class="annot"><span class="annottext">j :: Index
+</span><a href="#local-6989586621679328714"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679328713"><span class="annot"><span class="annottext">MVector s Cell
+</span><a href="#local-6989586621679328713"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(DLList s b -&gt; MVector s Cell) -&gt; DLListMonad s b (MVector s Cell)
+forall r (m :: * -&gt; *) a. MonadReader r m =&gt; (r -&gt; a) -&gt; m a
+</span><span class="hs-identifier hs-var">asks</span></span><span> </span><span class="annot"><span class="annottext">DLList s b -&gt; MVector s Cell
+forall s a. DLList s a -&gt; MVector s Cell
+</span><a href="Data.IndexedDoublyLinkedList.html#llist"><span class="hs-identifier hs-var hs-var">llist</span></a></span><span>
+</span><span id="line-162"></span><span>              </span><span id="local-6989586621679328712"><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328712"><span class="hs-identifier hs-var">ml</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getPrev"><span class="hs-identifier hs-var">getPrev</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328714"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-163"></span><span>              </span><span id="local-6989586621679328711"><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328711"><span class="hs-identifier hs-var">mr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Index -&gt; DLListMonad s b (Maybe Index)
+forall s b. Index -&gt; DLListMonad s b (Maybe Index)
+</span><a href="Data.IndexedDoublyLinkedList.html#getNext"><span class="hs-identifier hs-var">getNext</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328714"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-164"></span><span>              </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span>  </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328713"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328714"><span class="hs-identifier hs-var">j</span></a></span><span>  </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328710"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328710"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328710"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-165"></span><span>              </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Maybe Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Maybe Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-var">mModify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328713"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328712"><span class="hs-identifier hs-var">ml</span></a></span><span> </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328709"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328709"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328709"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">next :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328711"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-166"></span><span>              </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s b)) Cell
+-&gt; Maybe Index -&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Maybe Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-var">mModify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s b)) Cell
+</span><a href="#local-6989586621679328713"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328711"><span class="hs-identifier hs-var">mr</span></a></span><span> </span><span class="annot"><span class="annottext">((Cell -&gt; Cell) -&gt; DLListMonad s b ())
+-&gt; (Cell -&gt; Cell) -&gt; DLListMonad s b ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679328708"><span class="annot"><span class="annottext">c :: Cell
+</span><a href="#local-6989586621679328708"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cell
+</span><a href="#local-6989586621679328708"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">prev :: Maybe Index
+</span><a href="Data.IndexedDoublyLinkedList.html#prev"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328712"><span class="hs-identifier hs-var">ml</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-167"></span><span>              </span><span class="annot"><span class="annottext">(Maybe Index, Maybe Index)
+-&gt; DLListMonad s b (Maybe Index, Maybe Index)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328712"><span class="hs-identifier hs-var">ml</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328711"><span class="hs-identifier hs-var">mr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- * Helper functions</span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- | Applies the action at most n times.</span><span>
+</span><span id="line-176"></span><span id="local-6989586621679328925"><span id="local-6989586621679328926"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#replicateM"><span class="hs-identifier hs-type">replicateM</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679328926"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679328925"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328926"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679328925"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328925"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328926"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679328925"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-177"></span><span id="replicateM"><span class="annot"><span class="annottext">replicateM :: Index -&gt; (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#replicateM"><span class="hs-identifier hs-var hs-var">replicateM</span></a></span></span><span> </span><span id="local-6989586621679328707"><span class="annot"><span class="annottext">n :: Index
+</span><a href="#local-6989586621679328707"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679328706"><span class="annot"><span class="annottext">f :: a -&gt; m (Maybe a)
+</span><a href="#local-6989586621679328706"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; a -&gt; m [a]
+</span><a href="#local-6989586621679328705"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328707"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-178"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-179"></span><span>    </span><span id="local-6989586621679328705"><span class="annot"><span class="annottext">go :: Index -&gt; a -&gt; m [a]
+</span><a href="#local-6989586621679328705"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-number">0</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-180"></span><span>    </span><span class="annot"><a href="#local-6989586621679328705"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679328704"><span class="annot"><span class="annottext">k :: Index
+</span><a href="#local-6989586621679328704"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679328703"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679328703"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m (Maybe a)
+</span><a href="#local-6989586621679328706"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328703"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m (Maybe a) -&gt; (Maybe a -&gt; m [a]) -&gt; m [a]
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-181"></span><span>               </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-182"></span><span>               </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679328702"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679328702"><span class="hs-identifier hs-var">y</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328702"><span class="hs-identifier hs-var">y</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; a -&gt; m [a]
+</span><a href="#local-6989586621679328705"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328704"><span class="hs-identifier hs-var">k</span></a></span><span class="annot"><span class="annottext">Index -&gt; Index -&gt; Index
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328702"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span id="local-6989586621679328931"><span id="local-6989586621679328932"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#iterateM"><span class="hs-identifier hs-type">iterateM</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679328932"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679328931"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328932"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679328931"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328931"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328932"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679328931"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-185"></span><span id="iterateM"><span class="annot"><span class="annottext">iterateM :: (a -&gt; m (Maybe a)) -&gt; a -&gt; m [a]
+</span><a href="Data.IndexedDoublyLinkedList.html#iterateM"><span class="hs-identifier hs-var hs-var">iterateM</span></a></span></span><span> </span><span id="local-6989586621679328701"><span class="annot"><span class="annottext">f :: a -&gt; m (Maybe a)
+</span><a href="#local-6989586621679328701"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m [a]
+</span><a href="#local-6989586621679328700"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-186"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-187"></span><span>    </span><span id="local-6989586621679328700"><span class="annot"><span class="annottext">go :: a -&gt; m [a]
+</span><a href="#local-6989586621679328700"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679328699"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679328699"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m (Maybe a)
+</span><a href="#local-6989586621679328701"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328699"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m (Maybe a) -&gt; (Maybe a -&gt; m [a]) -&gt; m [a]
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-188"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-189"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679328698"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679328698"><span class="hs-identifier hs-var">y</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328698"><span class="hs-identifier hs-var">y</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m [a]
+</span><a href="#local-6989586621679328700"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679328698"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span id="local-6989586621679328908"><span id="local-6989586621679328909"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-type">mModify</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679328909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679328909"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679328908"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679328908"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-192"></span><span id="mModify"><span class="annot"><span class="annottext">mModify :: MVector (PrimState m) a -&gt; Maybe Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#mModify"><span class="hs-identifier hs-var hs-var">mModify</span></a></span></span><span> </span><span id="local-6989586621679328697"><span class="annot"><span class="annottext">v :: MVector (PrimState m) a
+</span><a href="#local-6989586621679328697"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679328696"><span class="annot"><span class="annottext">mi :: Maybe Index
+</span><a href="#local-6989586621679328696"><span class="hs-identifier hs-var">mi</span></a></span></span><span> </span><span id="local-6989586621679328695"><span class="annot"><span class="annottext">f :: a -&gt; a
+</span><a href="#local-6989586621679328695"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Index
+</span><a href="#local-6989586621679328696"><span class="hs-identifier hs-var">mi</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-193"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; m ()
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-194"></span><span>                   </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679328694"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328694"><span class="hs-identifier hs-var">i</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var">modify</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a
+</span><a href="#local-6989586621679328697"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328694"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679328695"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span id="local-6989586621679328955"><span id="local-6989586621679328956"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-type">modify</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679328956"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679328956"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679328955"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679328955"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328955"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679328956"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-197"></span><span id="modify"><span class="annot"><span class="annottext">modify :: MVector (PrimState m) a -&gt; Index -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="Data.IndexedDoublyLinkedList.html#modify"><span class="hs-identifier hs-var hs-var">modify</span></a></span></span><span> </span><span id="local-6989586621679328693"><span class="annot"><span class="annottext">v :: MVector (PrimState m) a
+</span><a href="#local-6989586621679328693"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679328692"><span class="annot"><span class="annottext">i :: Index
+</span><a href="#local-6989586621679328692"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679328691"><span class="annot"><span class="annottext">f :: a -&gt; a
+</span><a href="#local-6989586621679328691"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; (a -&gt; a) -&gt; Index -&gt; m ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; (a -&gt; a) -&gt; Index -&gt; m ()
+</span><span class="hs-identifier hs-var">MV.modify</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a
+</span><a href="#local-6989586621679328693"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679328691"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679328692"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span>
+</span><span id="line-200"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span class="hs-comment">-- | For debugging purposes, dump the values and the cells</span><span>
+</span><span id="line-203"></span><span id="local-6989586621679328688"><span id="local-6989586621679328689"><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#dump"><span class="hs-identifier hs-type">dump</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLListMonad"><span class="hs-identifier hs-type">DLListMonad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328689"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328688"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679328688"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-204"></span><span id="dump"><span class="annot"><span class="annottext">dump :: DLListMonad s a (Vector a, Vector Cell)
+</span><a href="Data.IndexedDoublyLinkedList.html#dump"><span class="hs-identifier hs-var hs-var">dump</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><a href="Data.IndexedDoublyLinkedList.html#DLList"><span class="hs-identifier hs-type">DLList</span></a></span><span> </span><span id="local-6989586621679328687"><span class="annot"><span class="annottext">v :: Vector a
+</span><a href="#local-6989586621679328687"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679328686"><span class="annot"><span class="annottext">cs :: MVector s Cell
+</span><a href="#local-6989586621679328686"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DLListMonad s a (DLList s a)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-205"></span><span>          </span><span id="local-6989586621679328685"><span class="annot"><span class="annottext">Vector Cell
+</span><a href="#local-6989586621679328685"><span class="hs-identifier hs-var">cs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (DLListMonad s a)) Cell
+-&gt; DLListMonad s a (Vector Cell)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; m (Vector a)
+</span><span class="hs-identifier hs-var">V.freeze</span></span><span> </span><span class="annot"><span class="annottext">MVector s Cell
+MVector (PrimState (DLListMonad s a)) Cell
+</span><a href="#local-6989586621679328686"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-206"></span><span>          </span><span class="annot"><span class="annottext">(Vector a, Vector Cell) -&gt; DLListMonad s a (Vector a, Vector Cell)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679328687"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Vector Cell
+</span><a href="#local-6989586621679328685"><span class="hs-identifier hs-var">cs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span></pre></body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-|
+MonadPlus utilities.
+For instance, they can be applied with parsing libraries.
+-}</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">VectorBuilder.MonadPlus</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="VectorBuilder.Prelude.html"><span class="hs-identifier">VectorBuilder.Prelude</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="VectorBuilder.Builder.html"><span class="hs-identifier">VectorBuilder.Builder</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="VectorBuilder.Vector.html"><span class="hs-identifier">VectorBuilder.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.MonadPlus.html#many"><span class="hs-pragma hs-type">many</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-16"></span><span id="local-6989586621679077379"><span id="local-6989586621679077380"><span id="local-6989586621679077381"><span class="annot"><a href="VectorBuilder.MonadPlus.html#many"><span class="hs-identifier hs-type">many</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679077381"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077380"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077379"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077381"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077379"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077381"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077380"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077379"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-17"></span><span id="many"><span class="annot"><span class="annottext">many :: m element -&gt; m (vector element)
+</span><a href="VectorBuilder.MonadPlus.html#many"><span class="hs-identifier hs-var hs-var">many</span></a></span></span><span> </span><span id="local-6989586621679077378"><span class="annot"><span class="annottext">m :: m element
+</span><a href="#local-6989586621679077378"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-18"></span><span>  </span><span class="annot"><span class="annottext">(Builder element -&gt; vector element)
+-&gt; m (Builder element) -&gt; m (vector element)
+forall (m :: * -&gt; *) a1 r. Monad m =&gt; (a1 -&gt; r) -&gt; m a1 -&gt; m r
+</span><span class="hs-identifier hs-var">liftM</span></span><span> </span><span class="annot"><span class="annottext">Builder element -&gt; vector element
+forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">B.build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m element -&gt; m (Builder element)
+forall (m :: * -&gt; *) element.
+MonadPlus m =&gt;
+m element -&gt; m (Builder element)
+</span><a href="VectorBuilder.MonadPlus.html#manyBuilder"><span class="hs-identifier hs-var">manyBuilder</span></a></span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077378"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.MonadPlus.html#manyBuilder"><span class="hs-pragma hs-type">manyBuilder</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-21"></span><span id="local-6989586621679077410"><span id="local-6989586621679077412"><span class="annot"><a href="VectorBuilder.MonadPlus.html#manyBuilder"><span class="hs-identifier hs-type">manyBuilder</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679077412"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077412"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077410"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077412"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">A.Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077410"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-22"></span><span id="manyBuilder"><span class="annot"><span class="annottext">manyBuilder :: m element -&gt; m (Builder element)
+</span><a href="VectorBuilder.MonadPlus.html#manyBuilder"><span class="hs-identifier hs-var hs-var">manyBuilder</span></a></span></span><span> </span><span id="local-6989586621679077374"><span class="annot"><span class="annottext">m :: m element
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">Builder element
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>    </span><span id="local-6989586621679077373"><span class="annot"><span class="annottext">loop :: Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679077372"><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077372"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-26"></span><span>      </span><span class="annot"><span class="annottext">m (Builder element) -&gt; m (Builder element) -&gt; m (Builder element)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">mplus</span></span><span>
+</span><span id="line-27"></span><span>        </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span>
+</span><span id="line-28"></span><span>          </span><span class="hs-glyph">!</span><span id="local-6989586621679077370"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077370"><span class="hs-identifier hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077374"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-29"></span><span>          </span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077373"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077372"><span class="hs-identifier hs-var">builder</span></a></span><span> </span><span class="annot"><span class="annottext">Builder element -&gt; Builder element -&gt; Builder element
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">element -&gt; Builder element
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077370"><span class="hs-identifier hs-var">element</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077372"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.MonadPlus.html#many1"><span class="hs-pragma hs-type">many1</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679077365"><span id="local-6989586621679077366"><span id="local-6989586621679077367"><span class="annot"><a href="VectorBuilder.MonadPlus.html#many1"><span class="hs-identifier hs-type">many1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679077367"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077366"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077365"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077367"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077365"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077367"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077366"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077365"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-34"></span><span id="many1"><span class="annot"><span class="annottext">many1 :: m element -&gt; m (vector element)
+</span><a href="VectorBuilder.MonadPlus.html#many1"><span class="hs-identifier hs-var hs-var">many1</span></a></span></span><span> </span><span id="local-6989586621679077364"><span class="annot"><span class="annottext">m :: m element
+</span><a href="#local-6989586621679077364"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">do</span><span>
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621679077363"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077363"><span class="hs-identifier hs-var">firstElement</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077364"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679077362"><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077362"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m element -&gt; m (Builder element)
+forall (m :: * -&gt; *) element.
+MonadPlus m =&gt;
+m element -&gt; m (Builder element)
+</span><a href="VectorBuilder.MonadPlus.html#manyBuilder"><span class="hs-identifier hs-var">manyBuilder</span></a></span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077364"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><span class="annottext">vector element -&gt; m (vector element)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element -&gt; vector element
+forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">B.build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">element -&gt; Builder element
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077363"><span class="hs-identifier hs-var">firstElement</span></a></span><span> </span><span class="annot"><span class="annottext">Builder element -&gt; Builder element -&gt; Builder element
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077362"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.MonadPlus.html#sepBy"><span class="hs-pragma hs-type">sepBy</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-41"></span><span id="local-6989586621679077357"><span id="local-6989586621679077358"><span id="local-6989586621679077359"><span id="local-6989586621679077360"><span class="annot"><a href="VectorBuilder.MonadPlus.html#sepBy"><span class="hs-identifier hs-type">sepBy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077359"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077358"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077358"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077357"><span class="hs-identifier hs-type">separator</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077359"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077358"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-42"></span><span id="sepBy"><span class="annot"><span class="annottext">sepBy :: m element -&gt; m separator -&gt; m (vector element)
+</span><a href="VectorBuilder.MonadPlus.html#sepBy"><span class="hs-identifier hs-var hs-var">sepBy</span></a></span></span><span> </span><span id="local-6989586621679077356"><span class="annot"><span class="annottext">elementM :: m element
+</span><a href="#local-6989586621679077356"><span class="hs-identifier hs-var">elementM</span></a></span></span><span> </span><span id="local-6989586621679077355"><span class="annot"><span class="annottext">separatorM :: m separator
+</span><a href="#local-6989586621679077355"><span class="hs-identifier hs-var">separatorM</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">m (vector element) -&gt; m (vector element) -&gt; m (vector element)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">mplus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m element -&gt; m separator -&gt; m (vector element)
+forall (m :: * -&gt; *) (vector :: * -&gt; *) element separator.
+(MonadPlus m, Vector vector element) =&gt;
+m element -&gt; m separator -&gt; m (vector element)
+</span><a href="VectorBuilder.MonadPlus.html#sepBy1"><span class="hs-identifier hs-var">sepBy1</span></a></span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077356"><span class="hs-identifier hs-var">elementM</span></a></span><span> </span><span class="annot"><span class="annottext">m separator
+</span><a href="#local-6989586621679077355"><span class="hs-identifier hs-var">separatorM</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vector element -&gt; m (vector element)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">vector element
+forall (v :: * -&gt; *) a. Vector v a =&gt; v a
+</span><span class="hs-identifier hs-var">C.empty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.MonadPlus.html#sepBy1"><span class="hs-pragma hs-type">sepBy1</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-46"></span><span id="local-6989586621679077390"><span id="local-6989586621679077391"><span id="local-6989586621679077392"><span id="local-6989586621679077393"><span class="annot"><a href="VectorBuilder.MonadPlus.html#sepBy1"><span class="hs-identifier hs-type">sepBy1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679077393"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077392"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077391"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077391"><span class="hs-identifier hs-type">element</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077390"><span class="hs-identifier hs-type">separator</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077392"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077391"><span class="hs-identifier hs-type">element</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-47"></span><span id="sepBy1"><span class="annot"><span class="annottext">sepBy1 :: m element -&gt; m separator -&gt; m (vector element)
+</span><a href="VectorBuilder.MonadPlus.html#sepBy1"><span class="hs-identifier hs-var hs-var">sepBy1</span></a></span></span><span> </span><span id="local-6989586621679077352"><span class="annot"><span class="annottext">elementM :: m element
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">elementM</span></a></span></span><span> </span><span id="local-6989586621679077351"><span class="annot"><span class="annottext">separatorM :: m separator
+</span><a href="#local-6989586621679077351"><span class="hs-identifier hs-var">separatorM</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-keyword">do</span><span>
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679077350"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077350"><span class="hs-identifier hs-var">firstElement</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">elementM</span></a></span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679077349"><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077349"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077348"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">element -&gt; Builder element
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077350"><span class="hs-identifier hs-var">firstElement</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><span class="annottext">vector element -&gt; m (vector element)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element -&gt; vector element
+forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">B.build</span></a></span><span> </span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077349"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679077348"><span class="annot"><span class="annottext">loop :: Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077348"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621679077347"><span class="annot"><span class="annottext">builder :: Builder element
+</span><a href="#local-6989586621679077347"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-54"></span><span>      </span><span class="annot"><span class="annottext">m (Builder element) -&gt; m (Builder element) -&gt; m (Builder element)
+forall (m :: * -&gt; *) a. MonadPlus m =&gt; m a -&gt; m a -&gt; m a
+</span><span class="hs-identifier hs-var">mplus</span></span><span>
+</span><span id="line-55"></span><span>        </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span>
+</span><span id="line-56"></span><span>          </span><span class="annot"><span class="annottext">m separator
+</span><a href="#local-6989586621679077351"><span class="hs-identifier hs-var">separatorM</span></a></span><span>
+</span><span id="line-57"></span><span>          </span><span class="hs-glyph">!</span><span id="local-6989586621679077346"><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077346"><span class="hs-identifier hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m element
+</span><a href="#local-6989586621679077352"><span class="hs-identifier hs-var">elementM</span></a></span><span>
+</span><span id="line-58"></span><span>          </span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+</span><a href="#local-6989586621679077348"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077347"><span class="hs-identifier hs-var">builder</span></a></span><span> </span><span class="annot"><span class="annottext">Builder element -&gt; Builder element -&gt; Builder element
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">element -&gt; Builder element
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">element
+</span><a href="#local-6989586621679077346"><span class="hs-identifier hs-var">element</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder element -&gt; m (Builder element)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Builder element
+</span><a href="#local-6989586621679077347"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span></pre></body></html>

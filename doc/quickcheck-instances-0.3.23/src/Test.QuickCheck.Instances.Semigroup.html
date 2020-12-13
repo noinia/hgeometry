@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP              #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Test.QuickCheck.Instances.Semigroup</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude.Compat</span></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftA2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">nonEmpty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Semi</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- semigroups</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621679110520"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (NonEmpty a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></span></span><span> </span><span id="local-6989586621679110518"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110518"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a] -&gt; NonEmpty a) -&gt; Gen a -&gt; Gen [a] -&gt; Gen (NonEmpty a)
+forall (f :: * -&gt; *) a b c.
+Applicative f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">liftA2</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">(:|)</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110518"><span class="hs-identifier hs-var">arb</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Gen a -&gt; Gen [a]
+forall (f :: * -&gt; *) a. Arbitrary1 f =&gt; Gen a -&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">liftArbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110518"><span class="hs-identifier hs-var">arb</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679110516"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; NonEmpty a -&gt; [NonEmpty a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></span></span><span> </span><span id="local-6989586621679110514"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110514"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110513"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679110513"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679110512"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679110512"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Maybe (NonEmpty a)) -&gt; [[a]] -&gt; [NonEmpty a]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Maybe (NonEmpty a)
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; [NonEmpty a]) -&gt; ([a] -&gt; [[a]]) -&gt; [a] -&gt; [NonEmpty a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; [a] -&gt; [[a]]
+forall (f :: * -&gt; *) a. Arbitrary1 f =&gt; (a -&gt; [a]) -&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">liftShrink</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110514"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [NonEmpty a]) -&gt; [a] -&gt; [NonEmpty a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110513"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679110512"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679110510"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110510"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679110510"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>  </span><span id="local-6989586621679110506"><span class="annot"><span class="annottext">arbitrary :: Gen (NonEmpty a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (NonEmpty a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679110503"><span class="annot"><span class="annottext">shrink :: NonEmpty a -&gt; [NonEmpty a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [NonEmpty a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679110500"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110500"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679110500"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679110497"><span class="annot"><span class="annottext">coarbitrary :: NonEmpty a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110495"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679110495"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679110494"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679110494"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, [a]) -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110495"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679110494"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679110493"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110493"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679110493"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679110490"><span class="annot"><span class="annottext">function :: (NonEmpty a -&gt; b) -&gt; NonEmpty a :-&gt; b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; (a, [a]))
+-&gt; ((a, [a]) -&gt; NonEmpty a)
+-&gt; (NonEmpty a -&gt; b)
+-&gt; NonEmpty a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; (a, [a])
+forall a. NonEmpty a -&gt; (a, [a])
+</span><a href="#local-6989586621679110487"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">(a, [a]) -&gt; NonEmpty a
+forall a. (a, [a]) -&gt; NonEmpty a
+</span><a href="#local-6989586621679110486"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-34"></span><span>   </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>     </span><span id="local-6989586621679110487"><span class="annot"><span class="annottext">g :: NonEmpty a -&gt; (a, [a])
+</span><a href="#local-6989586621679110487"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110485"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679110485"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679110484"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679110484"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679110484"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>     </span><span id="local-6989586621679110486"><span class="annot"><span class="annottext">h :: (a, [a]) -&gt; NonEmpty a
+</span><a href="#local-6989586621679110486"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110483"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679110483"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621679110482"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679110482"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679110483"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679110482"><span class="hs-identifier hs-var">xs</span></a></span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.Min</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679110479"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Min a)
+</span><a href="#local-6989586621679110479"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110478"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110478"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Min a
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Semi.Min</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Min a) -&gt; Gen a -&gt; Gen (Min a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110478"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621679110475"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Min a -&gt; [Min a]
+</span><a href="#local-6989586621679110475"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110474"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110474"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Min a) -&gt; [a] -&gt; [Min a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Min a
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Semi.Min</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [Min a]) -&gt; (Min a -&gt; [a]) -&gt; Min a -&gt; [Min a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110474"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; (Min a -&gt; a) -&gt; Min a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Min a -&gt; a
+forall a. Min a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMin</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679110472"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110472"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Min</span></span><span> </span><span class="annot"><a href="#local-6989586621679110472"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679110469"><span class="annot"><span class="annottext">arbitrary :: Gen (Min a)
+</span><a href="#local-6989586621679110469"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Min a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679110468"><span class="annot"><span class="annottext">shrink :: Min a -&gt; [Min a]
+</span><a href="#local-6989586621679110468"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Min a -&gt; [Min a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679110467"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110467"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Min</span></span><span> </span><span class="annot"><a href="#local-6989586621679110467"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679110465"><span class="annot"><span class="annottext">coarbitrary :: Min a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110465"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Gen b -&gt; Gen b) -&gt; (Min a -&gt; a) -&gt; Min a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Min a -&gt; a
+forall a. Min a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMin</span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679110464"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Min</span></span><span> </span><span class="annot"><a href="#local-6989586621679110464"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679110462"><span class="annot"><span class="annottext">function :: (Min a -&gt; b) -&gt; Min a :-&gt; b
+</span><a href="#local-6989586621679110462"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Min a -&gt; a) -&gt; (a -&gt; Min a) -&gt; (Min a -&gt; b) -&gt; Min a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">Min a -&gt; a
+forall a. Min a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMin</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Min a
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Semi.Min</span></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.Max</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679110459"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Max a)
+</span><a href="#local-6989586621679110459"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110458"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110458"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Max a
+forall a. a -&gt; Max a
+</span><span class="hs-identifier hs-var">Semi.Max</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Max a) -&gt; Gen a -&gt; Gen (Max a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110458"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679110456"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Max a -&gt; [Max a]
+</span><a href="#local-6989586621679110456"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110455"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110455"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Max a) -&gt; [a] -&gt; [Max a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Max a
+forall a. a -&gt; Max a
+</span><span class="hs-identifier hs-var">Semi.Max</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [Max a]) -&gt; (Max a -&gt; [a]) -&gt; Max a -&gt; [Max a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110455"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; (Max a -&gt; a) -&gt; Max a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Max a -&gt; a
+forall a. Max a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMax</span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679110453"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110453"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679110453"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679110450"><span class="annot"><span class="annottext">arbitrary :: Gen (Max a)
+</span><a href="#local-6989586621679110450"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Max a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621679110449"><span class="annot"><span class="annottext">shrink :: Max a -&gt; [Max a]
+</span><a href="#local-6989586621679110449"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Max a -&gt; [Max a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span id="local-6989586621679110448"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110448"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679110448"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679110446"><span class="annot"><span class="annottext">coarbitrary :: Max a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110446"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Gen b -&gt; Gen b) -&gt; (Max a -&gt; a) -&gt; Max a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Max a -&gt; a
+forall a. Max a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMax</span></span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span id="local-6989586621679110445"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110445"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679110445"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679110443"><span class="annot"><span class="annottext">function :: (Max a -&gt; b) -&gt; Max a :-&gt; b
+</span><a href="#local-6989586621679110443"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Max a -&gt; a) -&gt; (a -&gt; Max a) -&gt; (Max a -&gt; b) -&gt; Max a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">Max a -&gt; a
+forall a. Max a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getMax</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Max a
+forall a. a -&gt; Max a
+</span><span class="hs-identifier hs-var">Semi.Max</span></span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.First</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679110440"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (First a)
+</span><a href="#local-6989586621679110440"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110439"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110439"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; First a
+forall a. a -&gt; First a
+</span><span class="hs-identifier hs-var">Semi.First</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; First a) -&gt; Gen a -&gt; Gen (First a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110439"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679110437"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; First a -&gt; [First a]
+</span><a href="#local-6989586621679110437"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110436"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110436"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; First a) -&gt; [a] -&gt; [First a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; First a
+forall a. a -&gt; First a
+</span><span class="hs-identifier hs-var">Semi.First</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [First a]) -&gt; (First a -&gt; [a]) -&gt; First a -&gt; [First a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110436"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; (First a -&gt; a) -&gt; First a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">First a -&gt; a
+forall a. First a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getFirst</span></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="local-6989586621679110434"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.First</span></span><span> </span><span class="annot"><a href="#local-6989586621679110434"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679110431"><span class="annot"><span class="annottext">arbitrary :: Gen (First a)
+</span><a href="#local-6989586621679110431"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (First a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621679110430"><span class="annot"><span class="annottext">shrink :: First a -&gt; [First a]
+</span><a href="#local-6989586621679110430"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">First a -&gt; [First a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679110429"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110429"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.First</span></span><span> </span><span class="annot"><a href="#local-6989586621679110429"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679110427"><span class="annot"><span class="annottext">coarbitrary :: First a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110427"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Gen b -&gt; Gen b)
+-&gt; (First a -&gt; a) -&gt; First a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">First a -&gt; a
+forall a. First a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getFirst</span></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679110426"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110426"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.First</span></span><span> </span><span class="annot"><a href="#local-6989586621679110426"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679110424"><span class="annot"><span class="annottext">function :: (First a -&gt; b) -&gt; First a :-&gt; b
+</span><a href="#local-6989586621679110424"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(First a -&gt; a) -&gt; (a -&gt; First a) -&gt; (First a -&gt; b) -&gt; First a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">First a -&gt; a
+forall a. First a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getFirst</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; First a
+forall a. a -&gt; First a
+</span><span class="hs-identifier hs-var">Semi.First</span></span></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.Last</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679110421"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Last a)
+</span><a href="#local-6989586621679110421"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110420"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110420"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Last a
+forall a. a -&gt; Last a
+</span><span class="hs-identifier hs-var">Semi.Last</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Last a) -&gt; Gen a -&gt; Gen (Last a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110420"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679110418"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Last a -&gt; [Last a]
+</span><a href="#local-6989586621679110418"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110417"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110417"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Last a) -&gt; [a] -&gt; [Last a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Last a
+forall a. a -&gt; Last a
+</span><span class="hs-identifier hs-var">Semi.Last</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [Last a]) -&gt; (Last a -&gt; [a]) -&gt; Last a -&gt; [Last a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110417"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; (Last a -&gt; a) -&gt; Last a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Last a -&gt; a
+forall a. Last a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getLast</span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679110415"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110415"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Last</span></span><span> </span><span class="annot"><a href="#local-6989586621679110415"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679110412"><span class="annot"><span class="annottext">arbitrary :: Gen (Last a)
+</span><a href="#local-6989586621679110412"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Last a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679110411"><span class="annot"><span class="annottext">shrink :: Last a -&gt; [Last a]
+</span><a href="#local-6989586621679110411"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Last a -&gt; [Last a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span id="local-6989586621679110410"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110410"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Last</span></span><span> </span><span class="annot"><a href="#local-6989586621679110410"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>    </span><span id="local-6989586621679110408"><span class="annot"><span class="annottext">coarbitrary :: Last a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110408"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Gen b -&gt; Gen b) -&gt; (Last a -&gt; a) -&gt; Last a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Last a -&gt; a
+forall a. Last a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getLast</span></span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span id="local-6989586621679110407"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110407"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Last</span></span><span> </span><span class="annot"><a href="#local-6989586621679110407"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679110405"><span class="annot"><span class="annottext">function :: (Last a -&gt; b) -&gt; Last a :-&gt; b
+</span><a href="#local-6989586621679110405"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Last a -&gt; a) -&gt; (a -&gt; Last a) -&gt; (Last a -&gt; b) -&gt; Last a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">Last a -&gt; a
+forall a. Last a -&gt; a
+</span><span class="hs-identifier hs-var hs-var">Semi.getLast</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Last a
+forall a. a -&gt; Last a
+</span><span class="hs-identifier hs-var">Semi.Last</span></span></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.WrappedMonoid</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>    </span><span id="local-6989586621679110402"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (WrappedMonoid a)
+</span><a href="#local-6989586621679110402"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110401"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110401"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; WrappedMonoid a
+forall m. m -&gt; WrappedMonoid m
+</span><span class="hs-identifier hs-var">Semi.WrapMonoid</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; WrappedMonoid a) -&gt; Gen a -&gt; Gen (WrappedMonoid a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110401"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679110399"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; WrappedMonoid a -&gt; [WrappedMonoid a]
+</span><a href="#local-6989586621679110399"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110398"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110398"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; WrappedMonoid a) -&gt; [a] -&gt; [WrappedMonoid a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; WrappedMonoid a
+forall m. m -&gt; WrappedMonoid m
+</span><span class="hs-identifier hs-var">Semi.WrapMonoid</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [WrappedMonoid a])
+-&gt; (WrappedMonoid a -&gt; [a]) -&gt; WrappedMonoid a -&gt; [WrappedMonoid a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110398"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; (WrappedMonoid a -&gt; a) -&gt; WrappedMonoid a -&gt; [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">WrappedMonoid a -&gt; a
+forall m. WrappedMonoid m -&gt; m
+</span><span class="hs-identifier hs-var hs-var">Semi.unwrapMonoid</span></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679110396"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110396"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.WrappedMonoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679110396"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679110393"><span class="annot"><span class="annottext">arbitrary :: Gen (WrappedMonoid a)
+</span><a href="#local-6989586621679110393"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (WrappedMonoid a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679110392"><span class="annot"><span class="annottext">shrink :: WrappedMonoid a -&gt; [WrappedMonoid a]
+</span><a href="#local-6989586621679110392"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WrappedMonoid a -&gt; [WrappedMonoid a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679110391"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110391"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.WrappedMonoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679110391"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679110389"><span class="annot"><span class="annottext">coarbitrary :: WrappedMonoid a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110389"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Gen b -&gt; Gen b)
+-&gt; (WrappedMonoid a -&gt; a) -&gt; WrappedMonoid a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">WrappedMonoid a -&gt; a
+forall m. WrappedMonoid m -&gt; m
+</span><span class="hs-identifier hs-var hs-var">Semi.unwrapMonoid</span></span></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span id="local-6989586621679110388"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110388"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.WrappedMonoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679110388"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-111"></span><span>    </span><span id="local-6989586621679110386"><span class="annot"><span class="annottext">function :: (WrappedMonoid a -&gt; b) -&gt; WrappedMonoid a :-&gt; b
+</span><a href="#local-6989586621679110386"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(WrappedMonoid a -&gt; a)
+-&gt; (a -&gt; WrappedMonoid a)
+-&gt; (WrappedMonoid a -&gt; b)
+-&gt; WrappedMonoid a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">WrappedMonoid a -&gt; a
+forall m. WrappedMonoid m -&gt; m
+</span><span class="hs-identifier hs-var hs-var">Semi.unwrapMonoid</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; WrappedMonoid a
+forall m. m -&gt; WrappedMonoid m
+</span><span class="hs-identifier hs-var">Semi.WrapMonoid</span></span></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semi.Option</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679110383"><span class="annot"><span class="annottext">liftArbitrary :: Gen a -&gt; Gen (Option a)
+</span><a href="#local-6989586621679110383"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftArbitrary</span></a></span></span><span> </span><span id="local-6989586621679110382"><span class="annot"><span class="annottext">arb :: Gen a
+</span><a href="#local-6989586621679110382"><span class="hs-identifier hs-var">arb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Option a
+forall a. Maybe a -&gt; Option a
+</span><span class="hs-identifier hs-var">Semi.Option</span></span><span> </span><span class="annot"><span class="annottext">(Maybe a -&gt; Option a) -&gt; Gen (Maybe a) -&gt; Gen (Option a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen a -&gt; Gen (Maybe a)
+forall (f :: * -&gt; *) a. Arbitrary1 f =&gt; Gen a -&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">liftArbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen a
+</span><a href="#local-6989586621679110382"><span class="hs-identifier hs-var">arb</span></a></span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679110380"><span class="annot"><span class="annottext">liftShrink :: (a -&gt; [a]) -&gt; Option a -&gt; [Option a]
+</span><a href="#local-6989586621679110380"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShrink</span></a></span></span><span> </span><span id="local-6989586621679110379"><span class="annot"><span class="annottext">shr :: a -&gt; [a]
+</span><a href="#local-6989586621679110379"><span class="hs-identifier hs-var">shr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Maybe a -&gt; Option a) -&gt; [Maybe a] -&gt; [Option a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Option a
+forall a. Maybe a -&gt; Option a
+</span><span class="hs-identifier hs-var">Semi.Option</span></span><span> </span><span class="annot"><span class="annottext">([Maybe a] -&gt; [Option a])
+-&gt; (Option a -&gt; [Maybe a]) -&gt; Option a -&gt; [Option a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a]) -&gt; Maybe a -&gt; [Maybe a]
+forall (f :: * -&gt; *) a. Arbitrary1 f =&gt; (a -&gt; [a]) -&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">liftShrink</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a]
+</span><a href="#local-6989586621679110379"><span class="hs-identifier hs-var">shr</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe a -&gt; [Maybe a])
+-&gt; (Option a -&gt; Maybe a) -&gt; Option a -&gt; [Maybe a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Option a -&gt; Maybe a
+forall a. Option a -&gt; Maybe a
+</span><span class="hs-identifier hs-var hs-var">Semi.getOption</span></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span id="local-6989586621679110377"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110377"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Option</span></span><span> </span><span class="annot"><a href="#local-6989586621679110377"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621679110374"><span class="annot"><span class="annottext">arbitrary :: Gen (Option a)
+</span><a href="#local-6989586621679110374"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen (Option a)
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; Gen (f a)
+</span><span class="hs-identifier hs-var">arbitrary1</span></span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679110373"><span class="annot"><span class="annottext">shrink :: Option a -&gt; [Option a]
+</span><a href="#local-6989586621679110373"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Option a -&gt; [Option a]
+forall (f :: * -&gt; *) a. (Arbitrary1 f, Arbitrary a) =&gt; f a -&gt; [f a]
+</span><span class="hs-identifier hs-var">shrink1</span></span></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span id="local-6989586621679110372"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679110372"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Option</span></span><span> </span><span class="annot"><a href="#local-6989586621679110372"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621679110370"><span class="annot"><span class="annottext">coarbitrary :: Option a -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110370"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">(Maybe a -&gt; Gen b -&gt; Gen b)
+-&gt; (Option a -&gt; Maybe a) -&gt; Option a -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Option a -&gt; Maybe a
+forall a. Option a -&gt; Maybe a
+</span><span class="hs-identifier hs-var hs-var">Semi.getOption</span></span></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span id="local-6989586621679110369"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="annot"><a href="#local-6989586621679110369"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semi.Option</span></span><span> </span><span class="annot"><a href="#local-6989586621679110369"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679110367"><span class="annot"><span class="annottext">function :: (Option a -&gt; b) -&gt; Option a :-&gt; b
+</span><a href="#local-6989586621679110367"><span class="hs-identifier hs-var hs-var hs-var hs-var">function</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Option a -&gt; Maybe a)
+-&gt; (Maybe a -&gt; Option a) -&gt; (Option a -&gt; b) -&gt; Option a :-&gt; b
+forall b a c.
+Function b =&gt;
+(a -&gt; b) -&gt; (b -&gt; a) -&gt; (a -&gt; c) -&gt; a :-&gt; c
+</span><span class="hs-identifier hs-var">functionMap</span></span><span> </span><span class="annot"><span class="annottext">Option a -&gt; Maybe a
+forall a. Option a -&gt; Maybe a
+</span><span class="hs-identifier hs-var hs-var">Semi.getOption</span></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Option a
+forall a. Maybe a -&gt; Option a
+</span><span class="hs-identifier hs-var">Semi.Option</span></span></span><span>
+</span><span id="line-127"></span></pre></body></html>

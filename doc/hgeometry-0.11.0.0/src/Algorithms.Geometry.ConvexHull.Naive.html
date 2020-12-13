@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.ConvexHull.Naive</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#ConvexHull"><span class="hs-identifier">ConvexHull</span></a></span><span>
+</span><span id="line-2"></span><span>                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHull%27"><span class="hs-identifier">lowerHull'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHullAll"><span class="hs-identifier">lowerHullAll</span></a></span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span>                                           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#isValidTriangle"><span class="hs-identifier">isValidTriangle</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier">upperHalfSpaceOf</span></a></span><span>
+</span><span id="line-5"></span><span>                                           </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toList</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.HalfSpace.html"><span class="hs-identifier">Data.Geometry.HalfSpace</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.HyperPlane.html"><span class="hs-identifier">Data.Geometry.HyperPlane</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Triangle.html"><span class="hs-identifier">Data.Geometry.Triangle</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Intersection</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intersects</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">find</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isNothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">type</span><span> </span><span id="ConvexHull"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#ConvexHull"><span class="hs-identifier hs-var">ConvexHull</span></a></span></span><span> </span><span id="local-6989586621679980344"><span class="annot"><a href="#local-6989586621679980344"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679980343"><span class="annot"><a href="#local-6989586621679980343"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679980342"><span class="annot"><a href="#local-6989586621679980342"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980343"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980342"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | Computes the lower hull without its vertical triangles.</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- pre: The points are in general position. In particular, no four</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- points should be coplanar.</span><span>
+</span><span id="line-29"></span><span class="hs-comment">--</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- running time: \(O(n^4)\)</span><span>
+</span><span id="line-31"></span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHull%27"><span class="hs-identifier hs-type">lowerHull'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679980341"><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679980340"><span class="annot"><a href="#local-6989586621679980340"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980340"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#ConvexHull"><span class="hs-identifier hs-type">ConvexHull</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980340"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980341"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-33"></span><span id="lowerHull%27"><span class="annot"><span class="annottext">lowerHull' :: NonEmpty (Point 3 r :+ p) -&gt; ConvexHull 3 p r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHull%27"><span class="hs-identifier hs-var hs-var">lowerHull'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Triangle 3 p r -&gt; Bool) -&gt; ConvexHull 3 p r -&gt; ConvexHull 3 p r
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
+-&gt; (Triangle 3 p r -&gt; Bool) -&gt; Triangle 3 p r -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r -&gt; Bool
+forall (d :: Nat) r c.
+(ImplicitPeano (Peano d), Num r, Ord r,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ KnownNat (FromPeano (Peano d)), KnownNat d, (2 &lt;=? d) ~ 'True,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+Triangle d c r -&gt; Bool
+</span><a href="#local-6989586621679980337"><span class="hs-identifier hs-var">isVertical</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ConvexHull 3 p r -&gt; ConvexHull 3 p r)
+-&gt; (NonEmpty (Point 3 r :+ p) -&gt; ConvexHull 3 p r)
+-&gt; NonEmpty (Point 3 r :+ p)
+-&gt; ConvexHull 3 p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 3 r :+ p) -&gt; ConvexHull 3 p r
+forall r p.
+(Ord r, Fractional r, Show r) =&gt;
+NonEmpty (Point 3 r :+ p) -&gt; ConvexHull 3 p r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHullAll"><span class="hs-identifier hs-var">lowerHullAll</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679980337"><span class="annot"><span class="annottext">isVertical :: Triangle d c r -&gt; Bool
+</span><a href="#local-6989586621679980337"><span class="hs-identifier hs-var hs-var">isVertical</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span id="local-6989586621679980335"><span class="annot"><span class="annottext">p :: Point d r :+ c
+</span><a href="#local-6989586621679980335"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679980334"><span class="annot"><span class="annottext">q :: Point d r :+ c
+</span><a href="#local-6989586621679980334"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679980333"><span class="annot"><span class="annottext">r :: Point d r :+ c
+</span><a href="#local-6989586621679980333"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>      </span><span class="annot"><span class="annottext">(Point 2 r :+ c) -&gt; (Point 2 r :+ c) -&gt; (Point 2 r :+ c) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ c
+</span><a href="#local-6989586621679980335"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point d r :+ c)
+-&gt; ((Point d r :+ c) -&gt; Point 2 r :+ c) -&gt; Point 2 r :+ c
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point d r -&gt; Identity (Point 2 r))
+-&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">((Point d r -&gt; Identity (Point 2 r))
+ -&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c))
+-&gt; (Point d r -&gt; Point 2 r) -&gt; (Point d r :+ c) -&gt; Point 2 r :+ c
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point 2 r
+forall (i :: Nat) (d :: Nat) r.
+(Arity i, Arity d, i &lt;= d) =&gt;
+Point d r -&gt; Point i r
+</span><a href="Data.Geometry.Point.Internal.html#projectPoint"><span class="hs-identifier hs-var">projectPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ c
+</span><a href="#local-6989586621679980334"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point d r :+ c)
+-&gt; ((Point d r :+ c) -&gt; Point 2 r :+ c) -&gt; Point 2 r :+ c
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point d r -&gt; Identity (Point 2 r))
+-&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">((Point d r -&gt; Identity (Point 2 r))
+ -&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c))
+-&gt; (Point d r -&gt; Point 2 r) -&gt; (Point d r :+ c) -&gt; Point 2 r :+ c
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point 2 r
+forall (i :: Nat) (d :: Nat) r.
+(Arity i, Arity d, i &lt;= d) =&gt;
+Point d r -&gt; Point i r
+</span><a href="Data.Geometry.Point.Internal.html#projectPoint"><span class="hs-identifier hs-var">projectPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ c
+</span><a href="#local-6989586621679980333"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point d r :+ c)
+-&gt; ((Point d r :+ c) -&gt; Point 2 r :+ c) -&gt; Point 2 r :+ c
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point d r -&gt; Identity (Point 2 r))
+-&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">((Point d r -&gt; Identity (Point 2 r))
+ -&gt; (Point d r :+ c) -&gt; Identity (Point 2 r :+ c))
+-&gt; (Point d r -&gt; Point 2 r) -&gt; (Point d r :+ c) -&gt; Point 2 r :+ c
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point 2 r
+forall (i :: Nat) (d :: Nat) r.
+(Arity i, Arity d, i &lt;= d) =&gt;
+Point d r -&gt; Point i r
+</span><a href="Data.Geometry.Point.Internal.html#projectPoint"><span class="hs-identifier hs-var">projectPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-var">CoLinear</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | Generates a set of triangles to be used to construct a complete</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- convex hull. In particular, it may contain vertical triangles.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- pre: The points are in general position. In particular, no four</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- points should be coplanar.</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- running time: \(O(n^4)\)</span><span>
+</span><span id="line-45"></span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHullAll"><span class="hs-identifier hs-type">lowerHullAll</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679980455"><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679980454"><span class="annot"><a href="#local-6989586621679980454"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980454"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#ConvexHull"><span class="hs-identifier hs-type">ConvexHull</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980454"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980455"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-47"></span><span id="lowerHullAll"><span class="annot"><span class="annottext">lowerHullAll :: NonEmpty (Point 3 r :+ p) -&gt; ConvexHull 3 p r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#lowerHullAll"><span class="hs-identifier hs-var hs-var">lowerHullAll</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (Point 3 r :+ p) -&gt; [Point 3 r :+ p]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679980326"><span class="annot"><span class="annottext">[Point 3 r :+ p]
+</span><a href="#local-6989586621679980326"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679980325"><span class="annot"><span class="annottext">mkT :: Three (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="#local-6989586621679980325"><span class="hs-identifier hs-var hs-var">mkT</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Three</span></span><span> </span><span id="local-6989586621679980323"><span class="annot"><span class="annottext">p :: Point d r :+ p
+</span><a href="#local-6989586621679980323"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679980322"><span class="annot"><span class="annottext">q :: Point d r :+ p
+</span><a href="#local-6989586621679980322"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679980321"><span class="annot"><span class="annottext">r :: Point d r :+ p
+</span><a href="#local-6989586621679980321"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+forall (d :: Nat) p r.
+(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679980323"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679980322"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679980321"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">in</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r
+</span><a href="#local-6989586621679980320"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679980320"><span class="annot"><span class="annottext">Triangle 3 p r
+</span><a href="#local-6989586621679980320"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Three (Point 3 r :+ p) -&gt; Triangle 3 p r
+forall (d :: Nat) r p. Three (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="#local-6989586621679980325"><span class="hs-identifier hs-var">mkT</span></a></span><span> </span><span class="annot"><span class="annottext">(Three (Point 3 r :+ p) -&gt; Triangle 3 p r)
+-&gt; [Three (Point 3 r :+ p)] -&gt; ConvexHull 3 p r
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Point 3 r :+ p] -&gt; [Three (Point 3 r :+ p)]
+forall a. [a] -&gt; [Three a]
+</span><span class="hs-identifier hs-var">uniqueTriplets</span></span><span> </span><span class="annot"><span class="annottext">[Point 3 r :+ p]
+</span><a href="#local-6989586621679980326"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 3 r :+ p) -&gt; Bool
+forall a. Maybe a -&gt; Bool
+</span><span class="hs-identifier hs-var">isNothing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Triangle 3 p r -&gt; [Point 3 r :+ p] -&gt; Maybe (Point 3 r :+ p)
+forall r p q.
+(Num r, Ord r) =&gt;
+Triangle 3 p r -&gt; [Point 3 r :+ q] -&gt; Maybe (Point 3 r :+ q)
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#isValidTriangle"><span class="hs-identifier hs-var">isValidTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r
+</span><a href="#local-6989586621679980320"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 3 r :+ p]
+</span><a href="#local-6989586621679980326"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679980316"><span id="local-6989586621679980317"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#_killOverlapping"><span class="hs-identifier hs-type">_killOverlapping</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980316"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980316"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-53"></span><span id="_killOverlapping"><span class="annot"><span class="annottext">_killOverlapping :: [Triangle 3 p r] -&gt; [Triangle 3 p r]
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#_killOverlapping"><span class="hs-identifier hs-var hs-var">_killOverlapping</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Triangle 3 p r -&gt; [Triangle 3 p r] -&gt; [Triangle 3 p r])
+-&gt; [Triangle 3 p r] -&gt; [Triangle 3 p r] -&gt; [Triangle 3 p r]
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r -&gt; [Triangle 3 p r] -&gt; [Triangle 3 p r]
+forall r p1.
+(Fractional r, Ord r) =&gt;
+Triangle 3 p1 r -&gt; [Triangle 3 p1 r] -&gt; [Triangle 3 p1 r]
+</span><a href="#local-6989586621679980313"><span class="hs-identifier hs-var">keepIfNotOverlaps</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679980313"><span class="annot"><span class="annottext">keepIfNotOverlaps :: Triangle 3 p1 r -&gt; [Triangle 3 p1 r] -&gt; [Triangle 3 p1 r]
+</span><a href="#local-6989586621679980313"><span class="hs-identifier hs-var hs-var">keepIfNotOverlaps</span></a></span></span><span> </span><span id="local-6989586621679980312"><span class="annot"><span class="annottext">t :: Triangle 3 p1 r
+</span><a href="#local-6989586621679980312"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679980311"><span class="annot"><span class="annottext">ts :: [Triangle 3 p1 r]
+</span><a href="#local-6989586621679980311"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Triangle 3 p1 r -&gt; Bool) -&gt; [Triangle 3 p1 r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">any</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Triangle 3 p1 r
+</span><a href="#local-6989586621679980312"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p1 r -&gt; Triangle 3 p1 r -&gt; Bool
+forall r p1 p2.
+(Fractional r, Ord r) =&gt;
+Triangle 3 p1 r -&gt; Triangle 3 p2 r -&gt; Bool
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#overlaps"><span class="hs-operator hs-var">`overlaps`</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Triangle 3 p1 r]
+</span><a href="#local-6989586621679980311"><span class="hs-identifier hs-var">ts</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Triangle 3 p1 r]
+</span><a href="#local-6989586621679980311"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-56"></span><span>                           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Triangle 3 p1 r
+</span><a href="#local-6989586621679980312"><span class="hs-identifier hs-var">t</span></a></span><span class="annot"><span class="annottext">Triangle 3 p1 r -&gt; [Triangle 3 p1 r] -&gt; [Triangle 3 p1 r]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Triangle 3 p1 r]
+</span><a href="#local-6989586621679980311"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679980401"><span id="local-6989586621679980402"><span id="local-6989586621679980403"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#overlaps"><span class="hs-identifier hs-type">overlaps</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980403"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980403"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980402"><span class="hs-identifier hs-type">p1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980403"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980401"><span class="hs-identifier hs-type">p2</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980403"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679980308"><span class="annot"><span class="annottext">t1 :: Triangle 3 p1 r
+</span><a href="#local-6989586621679980308"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="overlaps"><span class="annot"><span class="annottext">overlaps :: Triangle 3 p1 r -&gt; Triangle 3 p2 r -&gt; Bool
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#overlaps"><span class="hs-operator hs-var hs-var">`overlaps`</span></a></span></span><span> </span><span id="local-6989586621679980307"><span class="annot"><span class="annottext">t2 :: Triangle 3 p2 r
+</span><a href="#local-6989586621679980307"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Triangle 3 p1 r -&gt; HalfSpace 3 r
+forall r p. (Ord r, Num r) =&gt; Triangle 3 p r -&gt; HalfSpace 3 r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier hs-var">upperHalfSpaceOf</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p1 r
+</span><a href="#local-6989586621679980308"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpace 3 r -&gt; HalfSpace 3 r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p2 r -&gt; HalfSpace 3 r
+forall r p. (Ord r, Num r) =&gt; Triangle 3 p r -&gt; HalfSpace 3 r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier hs-var">upperHalfSpaceOf</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p2 r
+</span><a href="#local-6989586621679980307"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- | Tests if this is a valid triangle for the lower envelope. That</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- is, if all point lie above the plane through these points. Returns</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- a Maybe; if the result is a Nothing the triangle is valid, if not</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- it returns a counter example.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- &gt;&gt;&gt; let t = (Triangle (ext origin) (ext $ Point3 1 0 0) (ext $ Point3 0 1 0))</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &gt;&gt;&gt; isValidTriangle t [ext $ Point3 5 5 0]</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- &gt;&gt;&gt; let t = (Triangle (ext origin) (ext $ Point3 1 0 0) (ext $ Point3 0 1 0))</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- &gt;&gt;&gt; isValidTriangle t [ext $ Point3 5 5 (-10)]</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- Just (Point3 [5,5,-10] :+ ())</span><span>
+</span><span id="line-74"></span><span id="local-6989586621679980412"><span id="local-6989586621679980413"><span id="local-6989586621679980414"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#isValidTriangle"><span class="hs-identifier hs-type">isValidTriangle</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679980414"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980414"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980413"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980414"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980414"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980412"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980414"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980412"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-76"></span><span id="isValidTriangle"><span class="annot"><span class="annottext">isValidTriangle :: Triangle 3 p r -&gt; [Point 3 r :+ q] -&gt; Maybe (Point 3 r :+ q)
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#isValidTriangle"><span class="hs-identifier hs-var hs-var">isValidTriangle</span></a></span></span><span> </span><span id="local-6989586621679980305"><span class="annot"><span class="annottext">t :: Triangle 3 p r
+</span><a href="#local-6989586621679980305"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 3 r :+ q) -&gt; Bool)
+-&gt; [Point 3 r :+ q] -&gt; Maybe (Point 3 r :+ q)
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">find</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679980304"><span class="annot"><span class="annottext">a :: Point 3 r :+ q
+</span><a href="#local-6989586621679980304"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; Bool -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r :+ q
+</span><a href="#local-6989586621679980304"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ q)
+-&gt; Getting (Point 3 r) (Point 3 r :+ q) (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 3 r) (Point 3 r :+ q) (Point 3 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; HalfSpace 3 r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfSpace 3 r
+</span><a href="#local-6989586621679980302"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679980302"><span class="annot"><span class="annottext">h :: HalfSpace 3 r
+</span><a href="#local-6989586621679980302"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r -&gt; HalfSpace 3 r
+forall r p. (Ord r, Num r) =&gt; Triangle 3 p r -&gt; HalfSpace 3 r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier hs-var">upperHalfSpaceOf</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 3 p r
+</span><a href="#local-6989586621679980305"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- | Computes the halfspace above the triangle.</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- &gt;&gt;&gt; upperHalfSpaceOf (Triangle (ext $ origin) (ext $ Point3 10 0 0) (ext $ Point3 0 10 0))</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 [0,0,0], _normalVec = Vector3 [0,0,100]}}</span><span>
+</span><span id="line-85"></span><span id="local-6989586621679980394"><span id="local-6989586621679980395"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier hs-type">upperHalfSpaceOf</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980395"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679980395"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980394"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679980395"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679980395"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-86"></span><span id="upperHalfSpaceOf"><span class="annot"><span class="annottext">upperHalfSpaceOf :: Triangle 3 p r -&gt; HalfSpace 3 r
+</span><a href="Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf"><span class="hs-identifier hs-var hs-var">upperHalfSpaceOf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span id="local-6989586621679980301"><span class="annot"><span class="annottext">p :: Point 3 r :+ p
+</span><a href="#local-6989586621679980301"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679980300"><span class="annot"><span class="annottext">q :: Point 3 r :+ p
+</span><a href="#local-6989586621679980300"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679980299"><span class="annot"><span class="annottext">r :: Point 3 r :+ p
+</span><a href="#local-6989586621679980299"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HyperPlane 3 r -&gt; HalfSpace 3 r
+forall (d :: Nat) r. HyperPlane d r -&gt; HalfSpace d r
+</span><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane 3 r
+</span><a href="#local-6989586621679980297"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679980296"><span class="annot"><span class="annottext">h' :: HyperPlane 3 r
+</span><a href="#local-6989586621679980296"><span class="hs-identifier hs-var hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 3 r -&gt; Point 3 r -&gt; HyperPlane 3 r
+forall r.
+Num r =&gt;
+Point 3 r -&gt; Point 3 r -&gt; Point 3 r -&gt; HyperPlane 3 r
+</span><a href="Data.Geometry.HyperPlane.html#from3Points"><span class="hs-identifier hs-var">from3Points</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r :+ p
+</span><a href="#local-6989586621679980301"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ p)
+-&gt; Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r :+ p
+</span><a href="#local-6989586621679980300"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ p)
+-&gt; Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r :+ p
+</span><a href="#local-6989586621679980299"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ p)
+-&gt; Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679980294"><span class="annot"><span class="annottext">c :: Point 3 r :+ p
+</span><a href="#local-6989586621679980294"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r :+ p
+</span><a href="#local-6989586621679980301"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ p)
+-&gt; ((Point 3 r :+ p) -&gt; Point 3 r :+ p) -&gt; Point 3 r :+ p
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point 3 r -&gt; Identity (Point 3 r))
+-&gt; (Point 3 r :+ p) -&gt; Identity (Point 3 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 3 r -&gt; Identity (Point 3 r))
+ -&gt; (Point 3 r :+ p) -&gt; Identity (Point 3 r :+ p))
+-&gt; ((r -&gt; Identity r) -&gt; Point 3 r -&gt; Identity (Point 3 r))
+-&gt; (r -&gt; Identity r)
+-&gt; (Point 3 r :+ p)
+-&gt; Identity (Point 3 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; Point 3 r -&gt; Identity (Point 3 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(3 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#zCoord"><span class="hs-identifier hs-var">zCoord</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r)
+ -&gt; (Point 3 r :+ p) -&gt; Identity (Point 3 r :+ p))
+-&gt; r -&gt; (Point 3 r :+ p) -&gt; Point 3 r :+ p
+forall a s t. Num a =&gt; ASetter s t a a -&gt; a -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">-~</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679980297"><span class="annot"><span class="annottext">h :: HyperPlane 3 r
+</span><a href="#local-6989586621679980297"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r :+ p
+</span><a href="#local-6989586621679980294"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ p)
+-&gt; Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 3 r) (Point 3 r :+ p) (Point 3 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point (Dimension (HyperPlane 3 r)) (NumType (HyperPlane 3 r))
+-&gt; HyperPlane 3 r -&gt; Bool
+forall t.
+(OnSideUpDownTest t, Ord (NumType t), Num (NumType t)) =&gt;
+Point (Dimension t) (NumType t) -&gt; t -&gt; Bool
+</span><a href="#local-6989586621679980291"><span class="hs-operator hs-var">`liesBelow`</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane 3 r
+</span><a href="#local-6989586621679980296"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">HyperPlane 3 r
+</span><a href="#local-6989586621679980296"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">HyperPlane 3 r
+</span><a href="#local-6989586621679980296"><span class="hs-identifier hs-var">h'</span></a></span><span class="annot"><span class="annottext">HyperPlane 3 r
+-&gt; (HyperPlane 3 r -&gt; HyperPlane 3 r) -&gt; HyperPlane 3 r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector 3 r -&gt; Identity (Vector 3 r))
+-&gt; HyperPlane 3 r -&gt; Identity (HyperPlane 3 r)
+forall (d :: Nat) r. Lens' (HyperPlane d r) (Vector d r)
+</span><a href="Data.Geometry.HyperPlane.html#normalVec"><span class="hs-identifier hs-var">normalVec</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector 3 r -&gt; Identity (Vector 3 r))
+ -&gt; HyperPlane 3 r -&gt; Identity (HyperPlane 3 r))
+-&gt; (Vector 3 r -&gt; Vector 3 r) -&gt; HyperPlane 3 r -&gt; HyperPlane 3 r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 3 r -&gt; Vector 3 r
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">*^</span></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679980288"><span class="annot"><span class="annottext">a :: Point (Dimension t) (NumType t)
+</span><a href="#local-6989586621679980288"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679980291"><span class="annot"><span class="annottext">liesBelow :: Point (Dimension t) (NumType t) -&gt; t -&gt; Bool
+</span><a href="#local-6989586621679980291"><span class="hs-operator hs-var hs-var">`liesBelow`</span></a></span></span><span> </span><span id="local-6989586621679980287"><span class="annot"><span class="annottext">plane :: t
+</span><a href="#local-6989586621679980287"><span class="hs-identifier hs-var">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point (Dimension t) (NumType t)
+</span><a href="#local-6989586621679980288"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point (Dimension t) (NumType t) -&gt; t -&gt; SideTestUpDown
+forall t (d :: Nat) r.
+(OnSideUpDownTest t, d ~ Dimension t, r ~ NumType t, Ord r,
+ Num r) =&gt;
+Point d r -&gt; t -&gt; SideTestUpDown
+</span><a href="Data.Geometry.Line.Internal.html#onSideUpDown"><span class="hs-operator hs-var">`onSideUpDown`</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679980287"><span class="hs-identifier hs-var">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SideTestUpDown -&gt; SideTestUpDown -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTestUpDown
+</span><a href="Data.Geometry.Line.Internal.html#Below"><span class="hs-identifier hs-var">Below</span></a></span><span>
+</span><span id="line-92"></span></pre></body></html>

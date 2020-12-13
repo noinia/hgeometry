@@ -1,0 +1,1053 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.Geometry.PlnarSubdivision.Raw</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Description :  The 'Raw' building block used in a Planar Subdivision</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Raw</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlaneGraph.html"><span class="hs-identifier">Data.PlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FaceId'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Dart</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- | Helper data type and type family to Wrap a proxy type.</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">data</span><span> </span><span id="Wrap%27"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap%27"><span class="hs-identifier hs-var">Wrap'</span></a></span></span><span> </span><span id="local-6989586621679983269"><span class="annot"><a href="#local-6989586621679983269"><span class="hs-identifier hs-type">s</span></a></span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="Wrap"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap"><span class="hs-identifier hs-var">Wrap</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679983268"><span class="annot"><a href="#local-6989586621679983268"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679983267"><span class="annot"><a href="#local-6989586621679983267"><span class="hs-identifier hs-type hs-type">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679983267"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="Wrap"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap"><span class="hs-identifier hs-var">Wrap</span></a></span></span><span> </span><span id="local-6989586621679983266"><span class="annot"><a href="#local-6989586621679983266"><span class="hs-identifier hs-type hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap%27"><span class="hs-identifier hs-type">Wrap'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983266"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | ComponentId type</span><span>
+</span><span id="line-27"></span><span id="local-6989586621679983264"><span id="local-6989586621679983265"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="ComponentId"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#ComponentId"><span class="hs-identifier hs-var">ComponentId</span></a></span></span><span> </span><span id="local-6989586621679983263"><span class="annot"><a href="#local-6989586621679983263"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ComponentId"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#ComponentId"><span class="hs-identifier hs-var">ComponentId</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="unCI"><span class="annot"><span class="annottext">ComponentId s -&gt; Int
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#unCI"><span class="hs-identifier hs-var hs-var">unCI</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679983255"><span id="local-6989586621679983257"><span id="local-6989586621679983259"><span class="annot"><span class="annottext">Int -&gt; ComponentId s -&gt; ShowS
+[ComponentId s] -&gt; ShowS
+ComponentId s -&gt; String
+(Int -&gt; ComponentId s -&gt; ShowS)
+-&gt; (ComponentId s -&gt; String)
+-&gt; ([ComponentId s] -&gt; ShowS)
+-&gt; Show (ComponentId s)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (s :: k). Int -&gt; ComponentId s -&gt; ShowS
+forall k (s :: k). [ComponentId s] -&gt; ShowS
+forall k (s :: k). ComponentId s -&gt; String
+showList :: [ComponentId s] -&gt; ShowS
+$cshowList :: forall k (s :: k). [ComponentId s] -&gt; ShowS
+show :: ComponentId s -&gt; String
+$cshow :: forall k (s :: k). ComponentId s -&gt; String
+showsPrec :: Int -&gt; ComponentId s -&gt; ShowS
+$cshowsPrec :: forall k (s :: k). Int -&gt; ComponentId s -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983250"><span id="local-6989586621679983252"><span class="annot"><span class="annottext">ComponentId s -&gt; ComponentId s -&gt; Bool
+(ComponentId s -&gt; ComponentId s -&gt; Bool)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; Bool) -&gt; Eq (ComponentId s)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+/= :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c/= :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+== :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c== :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983234"><span id="local-6989586621679983236"><span id="local-6989586621679983238"><span id="local-6989586621679983240"><span id="local-6989586621679983242"><span id="local-6989586621679983244"><span id="local-6989586621679983246"><span class="annot"><span class="annottext">Eq (ComponentId s)
+Eq (ComponentId s) =&gt;
+(ComponentId s -&gt; ComponentId s -&gt; Ordering)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; Bool)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; Bool)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; Bool)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; Bool)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; ComponentId s)
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; ComponentId s)
+-&gt; Ord (ComponentId s)
+ComponentId s -&gt; ComponentId s -&gt; Bool
+ComponentId s -&gt; ComponentId s -&gt; Ordering
+ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (s :: k). Eq (ComponentId s)
+forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Ordering
+forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+min :: ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+$cmin :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+max :: ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+$cmax :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; ComponentId s
+&gt;= :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c&gt;= :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+&gt; :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c&gt; :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+&lt;= :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c&lt;= :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+&lt; :: ComponentId s -&gt; ComponentId s -&gt; Bool
+$c&lt; :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Bool
+compare :: ComponentId s -&gt; ComponentId s -&gt; Ordering
+$ccompare :: forall k (s :: k). ComponentId s -&gt; ComponentId s -&gt; Ordering
+$cp1Ord :: forall k (s :: k). Eq (ComponentId s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. ComponentId s -&gt; Rep (ComponentId s) x)
+-&gt; (forall x. Rep (ComponentId s) x -&gt; ComponentId s)
+-&gt; Generic (ComponentId s)
+forall x. Rep (ComponentId s) x -&gt; ComponentId s
+forall x. ComponentId s -&gt; Rep (ComponentId s) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (s :: k) x. Rep (ComponentId s) x -&gt; ComponentId s
+forall k (s :: k) x. ComponentId s -&gt; Rep (ComponentId s) x
+$cto :: forall k (s :: k) x. Rep (ComponentId s) x -&gt; ComponentId s
+$cfrom :: forall k (s :: k) x. ComponentId s -&gt; Rep (ComponentId s) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679983226"><span id="local-6989586621679983228"><span class="annot"><span class="annottext">ComponentId s
+ComponentId s -&gt; ComponentId s -&gt; Bounded (ComponentId s)
+forall a. a -&gt; a -&gt; Bounded a
+forall k (s :: k). ComponentId s
+maxBound :: ComponentId s
+$cmaxBound :: forall k (s :: k). ComponentId s
+minBound :: ComponentId s
+$cminBound :: forall k (s :: k). ComponentId s
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983209"><span id="local-6989586621679983211"><span id="local-6989586621679983213"><span id="local-6989586621679983215"><span id="local-6989586621679983217"><span id="local-6989586621679983219"><span id="local-6989586621679983221"><span id="local-6989586621679983223"><span class="annot"><span class="annottext">Int -&gt; ComponentId s
+ComponentId s -&gt; Int
+ComponentId s -&gt; [ComponentId s]
+ComponentId s -&gt; ComponentId s
+ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+ComponentId s -&gt; ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+(ComponentId s -&gt; ComponentId s)
+-&gt; (ComponentId s -&gt; ComponentId s)
+-&gt; (Int -&gt; ComponentId s)
+-&gt; (ComponentId s -&gt; Int)
+-&gt; (ComponentId s -&gt; [ComponentId s])
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; [ComponentId s])
+-&gt; (ComponentId s -&gt; ComponentId s -&gt; [ComponentId s])
+-&gt; (ComponentId s
+    -&gt; ComponentId s -&gt; ComponentId s -&gt; [ComponentId s])
+-&gt; Enum (ComponentId s)
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+forall k (s :: k). Int -&gt; ComponentId s
+forall k (s :: k). ComponentId s -&gt; Int
+forall k (s :: k). ComponentId s -&gt; [ComponentId s]
+forall k (s :: k). ComponentId s -&gt; ComponentId s
+forall k (s :: k).
+ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+forall k (s :: k).
+ComponentId s -&gt; ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+enumFromThenTo :: ComponentId s -&gt; ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+$cenumFromThenTo :: forall k (s :: k).
+ComponentId s -&gt; ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+enumFromTo :: ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+$cenumFromTo :: forall k (s :: k).
+ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+enumFromThen :: ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+$cenumFromThen :: forall k (s :: k).
+ComponentId s -&gt; ComponentId s -&gt; [ComponentId s]
+enumFrom :: ComponentId s -&gt; [ComponentId s]
+$cenumFrom :: forall k (s :: k). ComponentId s -&gt; [ComponentId s]
+fromEnum :: ComponentId s -&gt; Int
+$cfromEnum :: forall k (s :: k). ComponentId s -&gt; Int
+toEnum :: Int -&gt; ComponentId s
+$ctoEnum :: forall k (s :: k). Int -&gt; ComponentId s
+pred :: ComponentId s -&gt; ComponentId s
+$cpred :: forall k (s :: k). ComponentId s -&gt; ComponentId s
+succ :: ComponentId s -&gt; ComponentId s
+$csucc :: forall k (s :: k). ComponentId s -&gt; ComponentId s
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983200"><span id="local-6989586621679983202"><span id="local-6989586621679983204"><span id="local-6989586621679983206"><span class="annot"><span class="annottext">[ComponentId s] -&gt; Encoding
+[ComponentId s] -&gt; Value
+ComponentId s -&gt; Encoding
+ComponentId s -&gt; Value
+(ComponentId s -&gt; Value)
+-&gt; (ComponentId s -&gt; Encoding)
+-&gt; ([ComponentId s] -&gt; Value)
+-&gt; ([ComponentId s] -&gt; Encoding)
+-&gt; ToJSON (ComponentId s)
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; ToJSON a
+forall k (s :: k). [ComponentId s] -&gt; Encoding
+forall k (s :: k). [ComponentId s] -&gt; Value
+forall k (s :: k). ComponentId s -&gt; Encoding
+forall k (s :: k). ComponentId s -&gt; Value
+toEncodingList :: [ComponentId s] -&gt; Encoding
+$ctoEncodingList :: forall k (s :: k). [ComponentId s] -&gt; Encoding
+toJSONList :: [ComponentId s] -&gt; Value
+$ctoJSONList :: forall k (s :: k). [ComponentId s] -&gt; Value
+toEncoding :: ComponentId s -&gt; Encoding
+$ctoEncoding :: forall k (s :: k). ComponentId s -&gt; Encoding
+toJSON :: ComponentId s -&gt; Value
+$ctoJSON :: forall k (s :: k). ComponentId s -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983195"><span id="local-6989586621679983197"><span class="annot"><span class="annottext">Value -&gt; Parser [ComponentId s]
+Value -&gt; Parser (ComponentId s)
+(Value -&gt; Parser (ComponentId s))
+-&gt; (Value -&gt; Parser [ComponentId s]) -&gt; FromJSON (ComponentId s)
+forall a.
+(Value -&gt; Parser a) -&gt; (Value -&gt; Parser [a]) -&gt; FromJSON a
+forall k (s :: k). Value -&gt; Parser [ComponentId s]
+forall k (s :: k). Value -&gt; Parser (ComponentId s)
+parseJSONList :: Value -&gt; Parser [ComponentId s]
+$cparseJSONList :: forall k (s :: k). Value -&gt; Parser [ComponentId s]
+parseJSON :: Value -&gt; Parser (ComponentId s)
+$cparseJSON :: forall k (s :: k). Value -&gt; Parser (ComponentId s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Helper type for the data that we store in a planar subdivision</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679983192"><span id="local-6989586621679983193"></span></span><span class="hs-keyword">data</span><span> </span><span id="Raw"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-var">Raw</span></a></span></span><span> </span><span id="local-6989586621679983438"><span class="annot"><a href="#local-6989586621679983438"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679983437"><span class="annot"><a href="#local-6989586621679983437"><span class="hs-identifier hs-type">ia</span></a></span></span><span> </span><span id="local-6989586621679983436"><span class="annot"><a href="#local-6989586621679983436"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Raw"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-var">Raw</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_compId"><span class="annot"><span class="annottext">Raw s ia a -&gt; ComponentId s
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_compId"><span class="hs-identifier hs-var hs-var">_compId</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983438"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>                      </span><span class="hs-special">,</span><span> </span><span id="_idxVal"><span class="annot"><span class="annottext">Raw s ia a -&gt; ia
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_idxVal"><span class="hs-identifier hs-var hs-var">_idxVal</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679983437"><span class="hs-identifier hs-type">ia</span></a></span><span>
+</span><span id="line-35"></span><span>                      </span><span class="hs-special">,</span><span> </span><span id="_dataVal"><span class="annot"><span class="annottext">Raw s ia a -&gt; a
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_dataVal"><span class="hs-identifier hs-var hs-var">_dataVal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679983436"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-36"></span><span>                      </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679983184"><span id="local-6989586621679983186"><span class="annot"><span class="annottext">Raw s ia a -&gt; Raw s ia a -&gt; Bool
+(Raw s ia a -&gt; Raw s ia a -&gt; Bool)
+-&gt; (Raw s ia a -&gt; Raw s ia a -&gt; Bool) -&gt; Eq (Raw s ia a)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k) ia a.
+(Eq ia, Eq a) =&gt;
+Raw s ia a -&gt; Raw s ia a -&gt; Bool
+/= :: Raw s ia a -&gt; Raw s ia a -&gt; Bool
+$c/= :: forall k (s :: k) ia a.
+(Eq ia, Eq a) =&gt;
+Raw s ia a -&gt; Raw s ia a -&gt; Bool
+== :: Raw s ia a -&gt; Raw s ia a -&gt; Bool
+$c== :: forall k (s :: k) ia a.
+(Eq ia, Eq a) =&gt;
+Raw s ia a -&gt; Raw s ia a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983178"><span id="local-6989586621679983180"><span id="local-6989586621679983182"><span class="annot"><span class="annottext">Int -&gt; Raw s ia a -&gt; ShowS
+[Raw s ia a] -&gt; ShowS
+Raw s ia a -&gt; String
+(Int -&gt; Raw s ia a -&gt; ShowS)
+-&gt; (Raw s ia a -&gt; String)
+-&gt; ([Raw s ia a] -&gt; ShowS)
+-&gt; Show (Raw s ia a)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (s :: k) ia a.
+(Show ia, Show a) =&gt;
+Int -&gt; Raw s ia a -&gt; ShowS
+forall k (s :: k) ia a. (Show ia, Show a) =&gt; [Raw s ia a] -&gt; ShowS
+forall k (s :: k) ia a. (Show ia, Show a) =&gt; Raw s ia a -&gt; String
+showList :: [Raw s ia a] -&gt; ShowS
+$cshowList :: forall k (s :: k) ia a. (Show ia, Show a) =&gt; [Raw s ia a] -&gt; ShowS
+show :: Raw s ia a -&gt; String
+$cshow :: forall k (s :: k) ia a. (Show ia, Show a) =&gt; Raw s ia a -&gt; String
+showsPrec :: Int -&gt; Raw s ia a -&gt; ShowS
+$cshowsPrec :: forall k (s :: k) ia a.
+(Show ia, Show a) =&gt;
+Int -&gt; Raw s ia a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983174"><span id="local-6989586621679983176"><span class="annot"><span class="annottext">a -&gt; Raw s ia b -&gt; Raw s ia a
+(a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b
+(forall a b. (a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b)
+-&gt; (forall a b. a -&gt; Raw s ia b -&gt; Raw s ia a)
+-&gt; Functor (Raw s ia)
+forall k (s :: k) ia a b. a -&gt; Raw s ia b -&gt; Raw s ia a
+forall k (s :: k) ia a b. (a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b
+forall a b. a -&gt; Raw s ia b -&gt; Raw s ia a
+forall a b. (a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Raw s ia b -&gt; Raw s ia a
+$c&lt;$ :: forall k (s :: k) ia a b. a -&gt; Raw s ia b -&gt; Raw s ia a
+fmap :: (a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b
+$cfmap :: forall k (s :: k) ia a b. (a -&gt; b) -&gt; Raw s ia a -&gt; Raw s ia b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983139"><span id="local-6989586621679983141"><span id="local-6989586621679983143"><span id="local-6989586621679983145"><span id="local-6989586621679983147"><span id="local-6989586621679983149"><span id="local-6989586621679983151"><span id="local-6989586621679983153"><span id="local-6989586621679983155"><span id="local-6989586621679983157"><span id="local-6989586621679983159"><span id="local-6989586621679983161"><span id="local-6989586621679983163"><span id="local-6989586621679983165"><span id="local-6989586621679983167"><span id="local-6989586621679983169"><span id="local-6989586621679983171"><span class="annot"><span class="annottext">Raw s ia a -&gt; Bool
+(a -&gt; m) -&gt; Raw s ia a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+(forall m. Monoid m =&gt; Raw s ia m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a)
+-&gt; (forall a. Raw s ia a -&gt; [a])
+-&gt; (forall a. Raw s ia a -&gt; Bool)
+-&gt; (forall a. Raw s ia a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Raw s ia a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Raw s ia a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Raw s ia a -&gt; a)
+-&gt; (forall a. Num a =&gt; Raw s ia a -&gt; a)
+-&gt; (forall a. Num a =&gt; Raw s ia a -&gt; a)
+-&gt; Foldable (Raw s ia)
+forall a. Eq a =&gt; a -&gt; Raw s ia a -&gt; Bool
+forall a. Num a =&gt; Raw s ia a -&gt; a
+forall a. Ord a =&gt; Raw s ia a -&gt; a
+forall m. Monoid m =&gt; Raw s ia m -&gt; m
+forall a. Raw s ia a -&gt; Bool
+forall a. Raw s ia a -&gt; Int
+forall a. Raw s ia a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+forall k (s :: k) ia a. Eq a =&gt; a -&gt; Raw s ia a -&gt; Bool
+forall k (s :: k) ia a. Num a =&gt; Raw s ia a -&gt; a
+forall k (s :: k) ia a. Ord a =&gt; Raw s ia a -&gt; a
+forall k (s :: k) ia m. Monoid m =&gt; Raw s ia m -&gt; m
+forall k (s :: k) ia a. Raw s ia a -&gt; Bool
+forall k (s :: k) ia a. Raw s ia a -&gt; Int
+forall k (s :: k) ia a. Raw s ia a -&gt; [a]
+forall k (s :: k) ia a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+forall k (s :: k) ia m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m
+forall k (s :: k) ia b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+forall k (s :: k) ia a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Raw s ia a -&gt; a
+$cproduct :: forall k (s :: k) ia a. Num a =&gt; Raw s ia a -&gt; a
+sum :: Raw s ia a -&gt; a
+$csum :: forall k (s :: k) ia a. Num a =&gt; Raw s ia a -&gt; a
+minimum :: Raw s ia a -&gt; a
+$cminimum :: forall k (s :: k) ia a. Ord a =&gt; Raw s ia a -&gt; a
+maximum :: Raw s ia a -&gt; a
+$cmaximum :: forall k (s :: k) ia a. Ord a =&gt; Raw s ia a -&gt; a
+elem :: a -&gt; Raw s ia a -&gt; Bool
+$celem :: forall k (s :: k) ia a. Eq a =&gt; a -&gt; Raw s ia a -&gt; Bool
+length :: Raw s ia a -&gt; Int
+$clength :: forall k (s :: k) ia a. Raw s ia a -&gt; Int
+null :: Raw s ia a -&gt; Bool
+$cnull :: forall k (s :: k) ia a. Raw s ia a -&gt; Bool
+toList :: Raw s ia a -&gt; [a]
+$ctoList :: forall k (s :: k) ia a. Raw s ia a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+$cfoldl1 :: forall k (s :: k) ia a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+$cfoldr1 :: forall k (s :: k) ia a. (a -&gt; a -&gt; a) -&gt; Raw s ia a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+$cfoldl' :: forall k (s :: k) ia b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+$cfoldl :: forall k (s :: k) ia b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+$cfoldr' :: forall k (s :: k) ia a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+$cfoldr :: forall k (s :: k) ia a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Raw s ia a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Raw s ia a -&gt; m
+$cfoldMap' :: forall k (s :: k) ia m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Raw s ia a -&gt; m
+$cfoldMap :: forall k (s :: k) ia m a. Monoid m =&gt; (a -&gt; m) -&gt; Raw s ia a -&gt; m
+fold :: Raw s ia m -&gt; m
+$cfold :: forall k (s :: k) ia m. Monoid m =&gt; Raw s ia m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983128"><span id="local-6989586621679983130"><span id="local-6989586621679983132"><span id="local-6989586621679983134"><span class="annot"><span class="annottext">Functor (Raw s ia)
+Foldable (Raw s ia)
+(Functor (Raw s ia), Foldable (Raw s ia)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Raw s ia (f a) -&gt; f (Raw s ia a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Raw s ia a -&gt; m (Raw s ia b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Raw s ia (m a) -&gt; m (Raw s ia a))
+-&gt; Traversable (Raw s ia)
+(a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+forall k (s :: k) ia. Functor (Raw s ia)
+forall k (s :: k) ia. Foldable (Raw s ia)
+forall k (s :: k) ia (m :: * -&gt; *) a.
+Monad m =&gt;
+Raw s ia (m a) -&gt; m (Raw s ia a)
+forall k (s :: k) ia (f :: * -&gt; *) a.
+Applicative f =&gt;
+Raw s ia (f a) -&gt; f (Raw s ia a)
+forall k (s :: k) ia (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Raw s ia a -&gt; m (Raw s ia b)
+forall k (s :: k) ia (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Raw s ia (m a) -&gt; m (Raw s ia a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Raw s ia (f a) -&gt; f (Raw s ia a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Raw s ia a -&gt; m (Raw s ia b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+sequence :: Raw s ia (m a) -&gt; m (Raw s ia a)
+$csequence :: forall k (s :: k) ia (m :: * -&gt; *) a.
+Monad m =&gt;
+Raw s ia (m a) -&gt; m (Raw s ia a)
+mapM :: (a -&gt; m b) -&gt; Raw s ia a -&gt; m (Raw s ia b)
+$cmapM :: forall k (s :: k) ia (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Raw s ia a -&gt; m (Raw s ia b)
+sequenceA :: Raw s ia (f a) -&gt; f (Raw s ia a)
+$csequenceA :: forall k (s :: k) ia (f :: * -&gt; *) a.
+Applicative f =&gt;
+Raw s ia (f a) -&gt; f (Raw s ia a)
+traverse :: (a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+$ctraverse :: forall k (s :: k) ia (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+$cp2Traversable :: forall k (s :: k) ia. Foldable (Raw s ia)
+$cp1Traversable :: forall k (s :: k) ia. Functor (Raw s ia)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. Raw s ia a -&gt; Rep (Raw s ia a) x)
+-&gt; (forall x. Rep (Raw s ia a) x -&gt; Raw s ia a)
+-&gt; Generic (Raw s ia a)
+forall x. Rep (Raw s ia a) x -&gt; Raw s ia a
+forall x. Raw s ia a -&gt; Rep (Raw s ia a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (s :: k) ia a x. Rep (Raw s ia a) x -&gt; Raw s ia a
+forall k (s :: k) ia a x. Raw s ia a -&gt; Rep (Raw s ia a) x
+$cto :: forall k (s :: k) ia a x. Rep (Raw s ia a) x -&gt; Raw s ia a
+$cfrom :: forall k (s :: k) ia a x. Raw s ia a -&gt; Rep (Raw s ia a) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679983122"><span id="local-6989586621679983123"><span id="local-6989586621679983124"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679983118"><span id="local-6989586621679983120"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679983124"><span class="hs-identifier hs-type">ia</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679983123"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983122"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983124"><span class="hs-identifier hs-type">ia</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983123"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679983115"><span id="local-6989586621679983116"><span id="local-6989586621679983117"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679983108"><span id="local-6989586621679983110"><span id="local-6989586621679983113"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679983117"><span class="hs-identifier hs-type">ia</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679983116"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983115"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983117"><span class="hs-identifier hs-type">ia</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983116"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679983107"><span class="annot"><span class="annottext">toEncoding :: Raw s ia a -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; Raw s ia a -&gt; Encoding
+forall a.
+(Generic a, GToJSON Encoding Zero (Rep a)) =&gt;
+Options -&gt; a -&gt; Encoding
+</span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | get the dataVal of a Raw</span><span>
+</span><span id="line-43"></span><span id="local-6989586621679983100"><span id="local-6989586621679983101"><span id="local-6989586621679983102"><span id="local-6989586621679983103"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#dataVal"><span class="hs-identifier hs-type">dataVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983103"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983102"><span class="hs-identifier hs-type">ia</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983101"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983103"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983102"><span class="hs-identifier hs-type">ia</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983100"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679983101"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679983100"><span class="hs-identifier hs-type">b</span></a></span></span></span></span></span><span>
+</span><span id="line-44"></span><span id="dataVal"><span class="annot"><span class="annottext">dataVal :: (a -&gt; f b) -&gt; Raw s ia a -&gt; f (Raw s ia b)
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#dataVal"><span class="hs-identifier hs-var hs-var">dataVal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Raw s ia a -&gt; a)
+-&gt; (Raw s ia a -&gt; b -&gt; Raw s ia b)
+-&gt; Lens (Raw s ia a) (Raw s ia b) a b
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679983097"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679983097"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679983097"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span id="local-6989586621679983096"><span class="annot"><span class="annottext">c :: ComponentId s
+</span><a href="#local-6989586621679983096"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679983095"><span class="annot"><span class="annottext">i :: ia
+</span><a href="#local-6989586621679983095"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679983094"><span class="annot"><span class="annottext">y :: b
+</span><a href="#local-6989586621679983094"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ComponentId s -&gt; ia -&gt; b -&gt; Raw s ia b
+forall k (s :: k) ia a. ComponentId s -&gt; ia -&gt; a -&gt; Raw s ia a
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#Raw"><span class="hs-identifier hs-var">Raw</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentId s
+</span><a href="#local-6989586621679983096"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">ia
+</span><a href="#local-6989586621679983095"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679983094"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | The Face data consists of the data itself and a list of holes</span><span>
+</span><span id="line-49"></span><span id="local-6989586621679983092"><span id="local-6989586621679983093"></span></span><span class="hs-keyword">data</span><span> </span><span id="FaceData"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-var">FaceData</span></a></span></span><span> </span><span id="local-6989586621679983349"><span class="annot"><a href="#local-6989586621679983349"><span class="hs-identifier hs-type">h</span></a></span></span><span> </span><span id="local-6989586621679983348"><span class="annot"><a href="#local-6989586621679983348"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FaceData"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-var">FaceData</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_holes"><span class="annot"><span class="annottext">FaceData h f -&gt; Seq h
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_holes"><span class="hs-identifier hs-var hs-var">_holes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679983349"><span class="hs-identifier hs-type">h</span></a></span><span>
+</span><span id="line-50"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_fData"><span class="annot"><span class="annottext">FaceData h f -&gt; f
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_fData"><span class="hs-identifier hs-var hs-var">_fData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679983348"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-51"></span><span>                             </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679983083"><span id="local-6989586621679983085"><span id="local-6989586621679983087"><span class="annot"><span class="annottext">Int -&gt; FaceData h f -&gt; ShowS
+[FaceData h f] -&gt; ShowS
+FaceData h f -&gt; String
+(Int -&gt; FaceData h f -&gt; ShowS)
+-&gt; (FaceData h f -&gt; String)
+-&gt; ([FaceData h f] -&gt; ShowS)
+-&gt; Show (FaceData h f)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall h f. (Show h, Show f) =&gt; Int -&gt; FaceData h f -&gt; ShowS
+forall h f. (Show h, Show f) =&gt; [FaceData h f] -&gt; ShowS
+forall h f. (Show h, Show f) =&gt; FaceData h f -&gt; String
+showList :: [FaceData h f] -&gt; ShowS
+$cshowList :: forall h f. (Show h, Show f) =&gt; [FaceData h f] -&gt; ShowS
+show :: FaceData h f -&gt; String
+$cshow :: forall h f. (Show h, Show f) =&gt; FaceData h f -&gt; String
+showsPrec :: Int -&gt; FaceData h f -&gt; ShowS
+$cshowsPrec :: forall h f. (Show h, Show f) =&gt; Int -&gt; FaceData h f -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983079"><span id="local-6989586621679983081"><span class="annot"><span class="annottext">FaceData h f -&gt; FaceData h f -&gt; Bool
+(FaceData h f -&gt; FaceData h f -&gt; Bool)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; Bool) -&gt; Eq (FaceData h f)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall h f. (Eq h, Eq f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+/= :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c/= :: forall h f. (Eq h, Eq f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+== :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c== :: forall h f. (Eq h, Eq f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983064"><span id="local-6989586621679983066"><span id="local-6989586621679983068"><span id="local-6989586621679983070"><span id="local-6989586621679983072"><span id="local-6989586621679983074"><span id="local-6989586621679983076"><span class="annot"><span class="annottext">Eq (FaceData h f)
+Eq (FaceData h f) =&gt;
+(FaceData h f -&gt; FaceData h f -&gt; Ordering)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; Bool)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; Bool)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; Bool)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; Bool)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; FaceData h f)
+-&gt; (FaceData h f -&gt; FaceData h f -&gt; FaceData h f)
+-&gt; Ord (FaceData h f)
+FaceData h f -&gt; FaceData h f -&gt; Bool
+FaceData h f -&gt; FaceData h f -&gt; Ordering
+FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall h f. (Ord h, Ord f) =&gt; Eq (FaceData h f)
+forall h f. (Ord h, Ord f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+forall h f.
+(Ord h, Ord f) =&gt;
+FaceData h f -&gt; FaceData h f -&gt; Ordering
+forall h f.
+(Ord h, Ord f) =&gt;
+FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+min :: FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+$cmin :: forall h f.
+(Ord h, Ord f) =&gt;
+FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+max :: FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+$cmax :: forall h f.
+(Ord h, Ord f) =&gt;
+FaceData h f -&gt; FaceData h f -&gt; FaceData h f
+&gt;= :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c&gt;= :: forall h f. (Ord h, Ord f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+&gt; :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c&gt; :: forall h f. (Ord h, Ord f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+&lt;= :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c&lt;= :: forall h f. (Ord h, Ord f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+&lt; :: FaceData h f -&gt; FaceData h f -&gt; Bool
+$c&lt; :: forall h f. (Ord h, Ord f) =&gt; FaceData h f -&gt; FaceData h f -&gt; Bool
+compare :: FaceData h f -&gt; FaceData h f -&gt; Ordering
+$ccompare :: forall h f.
+(Ord h, Ord f) =&gt;
+FaceData h f -&gt; FaceData h f -&gt; Ordering
+$cp1Ord :: forall h f. (Ord h, Ord f) =&gt; Eq (FaceData h f)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983060"><span id="local-6989586621679983062"><span class="annot"><span class="annottext">a -&gt; FaceData h b -&gt; FaceData h a
+(a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b
+(forall a b. (a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b)
+-&gt; (forall a b. a -&gt; FaceData h b -&gt; FaceData h a)
+-&gt; Functor (FaceData h)
+forall a b. a -&gt; FaceData h b -&gt; FaceData h a
+forall a b. (a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b
+forall h a b. a -&gt; FaceData h b -&gt; FaceData h a
+forall h a b. (a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; FaceData h b -&gt; FaceData h a
+$c&lt;$ :: forall h a b. a -&gt; FaceData h b -&gt; FaceData h a
+fmap :: (a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b
+$cfmap :: forall h a b. (a -&gt; b) -&gt; FaceData h a -&gt; FaceData h b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983026"><span id="local-6989586621679983028"><span id="local-6989586621679983030"><span id="local-6989586621679983032"><span id="local-6989586621679983034"><span id="local-6989586621679983036"><span id="local-6989586621679983038"><span id="local-6989586621679983040"><span id="local-6989586621679983042"><span id="local-6989586621679983044"><span id="local-6989586621679983046"><span id="local-6989586621679983048"><span id="local-6989586621679983050"><span id="local-6989586621679983052"><span id="local-6989586621679983054"><span id="local-6989586621679983056"><span id="local-6989586621679983058"><span class="annot"><span class="annottext">FaceData h a -&gt; Bool
+(a -&gt; m) -&gt; FaceData h a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+(forall m. Monoid m =&gt; FaceData h m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a)
+-&gt; (forall a. FaceData h a -&gt; [a])
+-&gt; (forall a. FaceData h a -&gt; Bool)
+-&gt; (forall a. FaceData h a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; FaceData h a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; FaceData h a -&gt; a)
+-&gt; (forall a. Ord a =&gt; FaceData h a -&gt; a)
+-&gt; (forall a. Num a =&gt; FaceData h a -&gt; a)
+-&gt; (forall a. Num a =&gt; FaceData h a -&gt; a)
+-&gt; Foldable (FaceData h)
+forall a. Eq a =&gt; a -&gt; FaceData h a -&gt; Bool
+forall a. Num a =&gt; FaceData h a -&gt; a
+forall a. Ord a =&gt; FaceData h a -&gt; a
+forall m. Monoid m =&gt; FaceData h m -&gt; m
+forall a. FaceData h a -&gt; Bool
+forall a. FaceData h a -&gt; Int
+forall a. FaceData h a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+forall h a. Eq a =&gt; a -&gt; FaceData h a -&gt; Bool
+forall h a. Num a =&gt; FaceData h a -&gt; a
+forall h a. Ord a =&gt; FaceData h a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m
+forall h m. Monoid m =&gt; FaceData h m -&gt; m
+forall h a. FaceData h a -&gt; Bool
+forall h a. FaceData h a -&gt; Int
+forall h a. FaceData h a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+forall h a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+forall h m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m
+forall h b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+forall h a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: FaceData h a -&gt; a
+$cproduct :: forall h a. Num a =&gt; FaceData h a -&gt; a
+sum :: FaceData h a -&gt; a
+$csum :: forall h a. Num a =&gt; FaceData h a -&gt; a
+minimum :: FaceData h a -&gt; a
+$cminimum :: forall h a. Ord a =&gt; FaceData h a -&gt; a
+maximum :: FaceData h a -&gt; a
+$cmaximum :: forall h a. Ord a =&gt; FaceData h a -&gt; a
+elem :: a -&gt; FaceData h a -&gt; Bool
+$celem :: forall h a. Eq a =&gt; a -&gt; FaceData h a -&gt; Bool
+length :: FaceData h a -&gt; Int
+$clength :: forall h a. FaceData h a -&gt; Int
+null :: FaceData h a -&gt; Bool
+$cnull :: forall h a. FaceData h a -&gt; Bool
+toList :: FaceData h a -&gt; [a]
+$ctoList :: forall h a. FaceData h a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+$cfoldl1 :: forall h a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+$cfoldr1 :: forall h a. (a -&gt; a -&gt; a) -&gt; FaceData h a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+$cfoldl' :: forall h b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+$cfoldl :: forall h b a. (b -&gt; a -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+$cfoldr' :: forall h a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+$cfoldr :: forall h a b. (a -&gt; b -&gt; b) -&gt; b -&gt; FaceData h a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; FaceData h a -&gt; m
+$cfoldMap' :: forall h m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m
+foldMap :: (a -&gt; m) -&gt; FaceData h a -&gt; m
+$cfoldMap :: forall h m a. Monoid m =&gt; (a -&gt; m) -&gt; FaceData h a -&gt; m
+fold :: FaceData h m -&gt; m
+$cfold :: forall h m. Monoid m =&gt; FaceData h m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679983016"><span id="local-6989586621679983018"><span id="local-6989586621679983020"><span id="local-6989586621679983022"><span class="annot"><span class="annottext">Functor (FaceData h)
+Foldable (FaceData h)
+(Functor (FaceData h), Foldable (FaceData h)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    FaceData h (f a) -&gt; f (FaceData h a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; FaceData h a -&gt; m (FaceData h b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    FaceData h (m a) -&gt; m (FaceData h a))
+-&gt; Traversable (FaceData h)
+(a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b)
+forall h. Functor (FaceData h)
+forall h. Foldable (FaceData h)
+forall h (m :: * -&gt; *) a.
+Monad m =&gt;
+FaceData h (m a) -&gt; m (FaceData h a)
+forall h (f :: * -&gt; *) a.
+Applicative f =&gt;
+FaceData h (f a) -&gt; f (FaceData h a)
+forall h (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; FaceData h a -&gt; m (FaceData h b)
+forall h (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+FaceData h (m a) -&gt; m (FaceData h a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+FaceData h (f a) -&gt; f (FaceData h a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; FaceData h a -&gt; m (FaceData h b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b)
+sequence :: FaceData h (m a) -&gt; m (FaceData h a)
+$csequence :: forall h (m :: * -&gt; *) a.
+Monad m =&gt;
+FaceData h (m a) -&gt; m (FaceData h a)
+mapM :: (a -&gt; m b) -&gt; FaceData h a -&gt; m (FaceData h b)
+$cmapM :: forall h (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; FaceData h a -&gt; m (FaceData h b)
+sequenceA :: FaceData h (f a) -&gt; f (FaceData h a)
+$csequenceA :: forall h (f :: * -&gt; *) a.
+Applicative f =&gt;
+FaceData h (f a) -&gt; f (FaceData h a)
+traverse :: (a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b)
+$ctraverse :: forall h (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; FaceData h a -&gt; f (FaceData h b)
+$cp2Traversable :: forall h. Foldable (FaceData h)
+$cp1Traversable :: forall h. Functor (FaceData h)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. FaceData h f -&gt; Rep (FaceData h f) x)
+-&gt; (forall x. Rep (FaceData h f) x -&gt; FaceData h f)
+-&gt; Generic (FaceData h f)
+forall x. Rep (FaceData h f) x -&gt; FaceData h f
+forall x. FaceData h f -&gt; Rep (FaceData h f) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall h f x. Rep (FaceData h f) x -&gt; FaceData h f
+forall h f x. FaceData h f -&gt; Rep (FaceData h f) x
+$cto :: forall h f x. Rep (FaceData h f) x -&gt; FaceData h f
+$cfrom :: forall h f x. FaceData h f -&gt; Rep (FaceData h f) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span id="holes"><span id="fData"><span id="local-6989586621679983012"><span id="local-6989586621679983013"><span id="local-6989586621679983348"><span id="local-6989586621679983349"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">FaceData</span></span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679983005"><span id="local-6989586621679983007"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-type">FaceData</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679983003"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; FaceData a c -&gt; FaceData b d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679983001"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679983001"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679983000"><span class="annot"><span class="annottext">g :: c -&gt; d
+</span><a href="#local-6989586621679983000"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-type">FaceData</span></a></span><span> </span><span id="local-6989586621679982999"><span class="annot"><span class="annottext">hs :: Seq a
+</span><a href="#local-6989586621679982999"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679982998"><span class="annot"><span class="annottext">x :: c
+</span><a href="#local-6989586621679982998"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq b -&gt; d -&gt; FaceData b d
+forall h f. Seq h -&gt; f -&gt; FaceData h f
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-var">FaceData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Seq a -&gt; Seq b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679983001"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679982999"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679983000"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679982998"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679982996"><span id="local-6989586621679982997"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679982992"><span id="local-6989586621679982994"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679982997"><span class="hs-identifier hs-type">h</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679982996"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-type">FaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982997"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982996"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679982990"><span id="local-6989586621679982991"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679982983"><span id="local-6989586621679982985"><span id="local-6989586621679982988"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679982991"><span class="hs-identifier hs-type">h</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679982990"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-type">FaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982991"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982990"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679982982"><span class="annot"><span class="annottext">toEncoding :: FaceData h f -&gt; Encoding
+</span><a href="#local-6989586621679982982"><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Options -&gt; FaceData h f -&gt; Encoding
+forall a.
+(Generic a, GToJSON Encoding Zero (Rep a)) =&gt;
+Options -&gt; a -&gt; Encoding
+</span><span class="hs-identifier hs-var">genericToEncoding</span></span><span> </span><span class="annot"><span class="annottext">Options
+</span><span class="hs-identifier hs-var">defaultOptions</span></span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Face data, if the face is an inner face, store the component and</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- faceId of it.  If not, this face must be the outer face (and thus</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- we can find all the face id's it correponds to through the</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- FaceData).</span><span>
+</span><span id="line-70"></span><span id="local-6989586621679982980"><span id="local-6989586621679982981"></span></span><span class="hs-keyword">data</span><span> </span><span id="RawFace"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#RawFace"><span class="hs-identifier hs-var">RawFace</span></a></span></span><span> </span><span id="local-6989586621679982979"><span class="annot"><a href="#local-6989586621679982979"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679982978"><span class="annot"><a href="#local-6989586621679982978"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RawFace"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#RawFace"><span class="hs-identifier hs-var">RawFace</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_faceIdx"><span class="annot"><span class="annottext">RawFace s f -&gt; Maybe (ComponentId s, FaceId' (Wrap s))
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_faceIdx"><span class="hs-identifier hs-var hs-var">_faceIdx</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982979"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FaceId'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap"><span class="hs-identifier hs-type">Wrap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679982979"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>                           </span><span class="hs-special">,</span><span> </span><span id="_faceDataVal"><span class="annot"><span class="annottext">RawFace s f -&gt; FaceData (Dart s) f
+</span><a href="Data.Geometry.PlanarSubdivision.Raw.html#_faceDataVal"><span class="hs-identifier hs-var hs-var">_faceDataVal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#FaceData"><span class="hs-identifier hs-type">FaceData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dart</span></span><span> </span><span class="annot"><a href="#local-6989586621679982979"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679982978"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>                           </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679982971"><span id="local-6989586621679982973"><span class="annot"><span class="annottext">RawFace s f -&gt; RawFace s f -&gt; Bool
+(RawFace s f -&gt; RawFace s f -&gt; Bool)
+-&gt; (RawFace s f -&gt; RawFace s f -&gt; Bool) -&gt; Eq (RawFace s f)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (s :: k) f. Eq f =&gt; RawFace s f -&gt; RawFace s f -&gt; Bool
+/= :: RawFace s f -&gt; RawFace s f -&gt; Bool
+$c/= :: forall k (s :: k) f. Eq f =&gt; RawFace s f -&gt; RawFace s f -&gt; Bool
+== :: RawFace s f -&gt; RawFace s f -&gt; Bool
+$c== :: forall k (s :: k) f. Eq f =&gt; RawFace s f -&gt; RawFace s f -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679982965"><span id="local-6989586621679982967"><span id="local-6989586621679982969"><span class="annot"><span class="annottext">Int -&gt; RawFace s f -&gt; ShowS
+[RawFace s f] -&gt; ShowS
+RawFace s f -&gt; String
+(Int -&gt; RawFace s f -&gt; ShowS)
+-&gt; (RawFace s f -&gt; String)
+-&gt; ([RawFace s f] -&gt; ShowS)
+-&gt; Show (RawFace s f)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (s :: k) f. Show f =&gt; Int -&gt; RawFace s f -&gt; ShowS
+forall k (s :: k) f. Show f =&gt; [RawFace s f] -&gt; ShowS
+forall k (s :: k) f. Show f =&gt; RawFace s f -&gt; String
+showList :: [RawFace s f] -&gt; ShowS
+$cshowList :: forall k (s :: k) f. Show f =&gt; [RawFace s f] -&gt; ShowS
+show :: RawFace s f -&gt; String
+$cshow :: forall k (s :: k) f. Show f =&gt; RawFace s f -&gt; String
+showsPrec :: Int -&gt; RawFace s f -&gt; ShowS
+$cshowsPrec :: forall k (s :: k) f. Show f =&gt; Int -&gt; RawFace s f -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679982961"><span id="local-6989586621679982963"><span class="annot"><span class="annottext">a -&gt; RawFace s b -&gt; RawFace s a
+(a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b
+(forall a b. (a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b)
+-&gt; (forall a b. a -&gt; RawFace s b -&gt; RawFace s a)
+-&gt; Functor (RawFace s)
+forall k (s :: k) a b. a -&gt; RawFace s b -&gt; RawFace s a
+forall k (s :: k) a b. (a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b
+forall a b. a -&gt; RawFace s b -&gt; RawFace s a
+forall a b. (a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; RawFace s b -&gt; RawFace s a
+$c&lt;$ :: forall k (s :: k) a b. a -&gt; RawFace s b -&gt; RawFace s a
+fmap :: (a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b
+$cfmap :: forall k (s :: k) a b. (a -&gt; b) -&gt; RawFace s a -&gt; RawFace s b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679982927"><span id="local-6989586621679982929"><span id="local-6989586621679982931"><span id="local-6989586621679982933"><span id="local-6989586621679982935"><span id="local-6989586621679982937"><span id="local-6989586621679982939"><span id="local-6989586621679982941"><span id="local-6989586621679982943"><span id="local-6989586621679982945"><span id="local-6989586621679982947"><span id="local-6989586621679982949"><span id="local-6989586621679982951"><span id="local-6989586621679982953"><span id="local-6989586621679982955"><span id="local-6989586621679982957"><span id="local-6989586621679982959"><span class="annot"><span class="annottext">RawFace s a -&gt; Bool
+(a -&gt; m) -&gt; RawFace s a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+(forall m. Monoid m =&gt; RawFace s m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a)
+-&gt; (forall a. RawFace s a -&gt; [a])
+-&gt; (forall a. RawFace s a -&gt; Bool)
+-&gt; (forall a. RawFace s a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; RawFace s a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; RawFace s a -&gt; a)
+-&gt; (forall a. Ord a =&gt; RawFace s a -&gt; a)
+-&gt; (forall a. Num a =&gt; RawFace s a -&gt; a)
+-&gt; (forall a. Num a =&gt; RawFace s a -&gt; a)
+-&gt; Foldable (RawFace s)
+forall a. Eq a =&gt; a -&gt; RawFace s a -&gt; Bool
+forall a. Num a =&gt; RawFace s a -&gt; a
+forall a. Ord a =&gt; RawFace s a -&gt; a
+forall m. Monoid m =&gt; RawFace s m -&gt; m
+forall a. RawFace s a -&gt; Bool
+forall a. RawFace s a -&gt; Int
+forall a. RawFace s a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+forall k (s :: k) a. Eq a =&gt; a -&gt; RawFace s a -&gt; Bool
+forall k (s :: k) a. Num a =&gt; RawFace s a -&gt; a
+forall k (s :: k) a. Ord a =&gt; RawFace s a -&gt; a
+forall k (s :: k) m. Monoid m =&gt; RawFace s m -&gt; m
+forall k (s :: k) a. RawFace s a -&gt; Bool
+forall k (s :: k) a. RawFace s a -&gt; Int
+forall k (s :: k) a. RawFace s a -&gt; [a]
+forall k (s :: k) a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+forall k (s :: k) m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m
+forall k (s :: k) b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+forall k (s :: k) a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: RawFace s a -&gt; a
+$cproduct :: forall k (s :: k) a. Num a =&gt; RawFace s a -&gt; a
+sum :: RawFace s a -&gt; a
+$csum :: forall k (s :: k) a. Num a =&gt; RawFace s a -&gt; a
+minimum :: RawFace s a -&gt; a
+$cminimum :: forall k (s :: k) a. Ord a =&gt; RawFace s a -&gt; a
+maximum :: RawFace s a -&gt; a
+$cmaximum :: forall k (s :: k) a. Ord a =&gt; RawFace s a -&gt; a
+elem :: a -&gt; RawFace s a -&gt; Bool
+$celem :: forall k (s :: k) a. Eq a =&gt; a -&gt; RawFace s a -&gt; Bool
+length :: RawFace s a -&gt; Int
+$clength :: forall k (s :: k) a. RawFace s a -&gt; Int
+null :: RawFace s a -&gt; Bool
+$cnull :: forall k (s :: k) a. RawFace s a -&gt; Bool
+toList :: RawFace s a -&gt; [a]
+$ctoList :: forall k (s :: k) a. RawFace s a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+$cfoldl1 :: forall k (s :: k) a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+$cfoldr1 :: forall k (s :: k) a. (a -&gt; a -&gt; a) -&gt; RawFace s a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+$cfoldl' :: forall k (s :: k) b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+$cfoldl :: forall k (s :: k) b a. (b -&gt; a -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+$cfoldr' :: forall k (s :: k) a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+$cfoldr :: forall k (s :: k) a b. (a -&gt; b -&gt; b) -&gt; b -&gt; RawFace s a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; RawFace s a -&gt; m
+$cfoldMap' :: forall k (s :: k) m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m
+foldMap :: (a -&gt; m) -&gt; RawFace s a -&gt; m
+$cfoldMap :: forall k (s :: k) m a. Monoid m =&gt; (a -&gt; m) -&gt; RawFace s a -&gt; m
+fold :: RawFace s m -&gt; m
+$cfold :: forall k (s :: k) m. Monoid m =&gt; RawFace s m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679982917"><span id="local-6989586621679982919"><span id="local-6989586621679982921"><span id="local-6989586621679982923"><span class="annot"><span class="annottext">Functor (RawFace s)
+Foldable (RawFace s)
+(Functor (RawFace s), Foldable (RawFace s)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    RawFace s (f a) -&gt; f (RawFace s a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; RawFace s a -&gt; m (RawFace s b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    RawFace s (m a) -&gt; m (RawFace s a))
+-&gt; Traversable (RawFace s)
+(a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b)
+forall k (s :: k). Functor (RawFace s)
+forall k (s :: k). Foldable (RawFace s)
+forall k (s :: k) (m :: * -&gt; *) a.
+Monad m =&gt;
+RawFace s (m a) -&gt; m (RawFace s a)
+forall k (s :: k) (f :: * -&gt; *) a.
+Applicative f =&gt;
+RawFace s (f a) -&gt; f (RawFace s a)
+forall k (s :: k) (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; RawFace s a -&gt; m (RawFace s b)
+forall k (s :: k) (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+RawFace s (m a) -&gt; m (RawFace s a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+RawFace s (f a) -&gt; f (RawFace s a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; RawFace s a -&gt; m (RawFace s b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b)
+sequence :: RawFace s (m a) -&gt; m (RawFace s a)
+$csequence :: forall k (s :: k) (m :: * -&gt; *) a.
+Monad m =&gt;
+RawFace s (m a) -&gt; m (RawFace s a)
+mapM :: (a -&gt; m b) -&gt; RawFace s a -&gt; m (RawFace s b)
+$cmapM :: forall k (s :: k) (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; RawFace s a -&gt; m (RawFace s b)
+sequenceA :: RawFace s (f a) -&gt; f (RawFace s a)
+$csequenceA :: forall k (s :: k) (f :: * -&gt; *) a.
+Applicative f =&gt;
+RawFace s (f a) -&gt; f (RawFace s a)
+traverse :: (a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b)
+$ctraverse :: forall k (s :: k) (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; RawFace s a -&gt; f (RawFace s b)
+$cp2Traversable :: forall k (s :: k). Foldable (RawFace s)
+$cp1Traversable :: forall k (s :: k). Functor (RawFace s)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. RawFace s f -&gt; Rep (RawFace s f) x)
+-&gt; (forall x. Rep (RawFace s f) x -&gt; RawFace s f)
+-&gt; Generic (RawFace s f)
+forall x. Rep (RawFace s f) x -&gt; RawFace s f
+forall x. RawFace s f -&gt; Rep (RawFace s f) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (s :: k) f x. Rep (RawFace s f) x -&gt; RawFace s f
+forall k (s :: k) f x. RawFace s f -&gt; Rep (RawFace s f) x
+$cto :: forall k (s :: k) f x. Rep (RawFace s f) x -&gt; RawFace s f
+$cfrom :: forall k (s :: k) f x. RawFace s f -&gt; Rep (RawFace s f) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span id="faceIdx"><span id="faceDataVal"><span id="local-6989586621679982914"><span id="local-6989586621679982978"><span id="local-6989586621679982979"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">RawFace</span></span></span></span></span></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- -- | A FaceIdx is a pair of componentId and FaceId</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- data FaceIdx s = RawIdx !(ComponentId s) -- ^ component Id</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--                         !(FaceId' (Wrap s)) -- ^ Face index inside the component</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--                deriving (Eq,Show,Generic)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- instance FromJSON (FaceIdx s)</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- instance ToJSON (FaceIdx s) where</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--   toEncoding = genericToEncoding defaultOptions</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- data RawFace s a = RawFace { _internalFaceIn :: !(Maybe (FaceIdx s))</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--                            , _externalFaceIn :: ![FaceIdx s]</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--                            , _faceDataValue  :: !a</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--                            } deriving (Eq,Show,Functor,Foldable,Traversable,Generic)</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- instance FromJSON f =&gt; FromJSON (RawFace s f)</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- instance ToJSON f =&gt; ToJSON (RawFace s f) where</span><span>
+</span><span id="line-94"></span><span class="hs-comment">--   toEncoding = genericToEncoding defaultOptions</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- -- | get the data value of a raw face.</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- faceDataVal :: Lens (RawFace s a) (RawFace s b) a b</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- faceDataVal = lens _faceDataValue (\(RawFace i es _) x -&gt; RawFace i es x)</span><span>
+</span><span id="line-99"></span></pre></body></html>

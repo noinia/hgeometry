@@ -1,0 +1,741 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_2mJenE2Mq2I0qXtRucMmaB"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.BinaryTree.Zipper</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.BinaryTree.html"><span class="hs-identifier">Data.BinaryTree</span></a></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">data</span><span> </span><span id="Ctx"><span class="annot"><a href="Data.BinaryTree.Zipper.html#Ctx"><span class="hs-identifier hs-var">Ctx</span></a></span></span><span> </span><span id="local-6989586621679327138"><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Top"><span class="annot"><a href="Data.BinaryTree.Zipper.html#Top"><span class="hs-identifier hs-var">Top</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="L"><span class="annot"><a href="Data.BinaryTree.Zipper.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Ctx"><span class="hs-identifier hs-type">Ctx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="R"><span class="annot"><a href="Data.BinaryTree.Zipper.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Ctx"><span class="hs-identifier hs-type">Ctx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span>           </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327105"><span id="local-6989586621679327107"><span id="local-6989586621679327109"><span class="annot"><span class="annottext">Int -&gt; Ctx a -&gt; ShowS
+[Ctx a] -&gt; ShowS
+Ctx a -&gt; String
+(Int -&gt; Ctx a -&gt; ShowS)
+-&gt; (Ctx a -&gt; String) -&gt; ([Ctx a] -&gt; ShowS) -&gt; Show (Ctx a)
+forall a. Show a =&gt; Int -&gt; Ctx a -&gt; ShowS
+forall a. Show a =&gt; [Ctx a] -&gt; ShowS
+forall a. Show a =&gt; Ctx a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Ctx a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [Ctx a] -&gt; ShowS
+show :: Ctx a -&gt; String
+$cshow :: forall a. Show a =&gt; Ctx a -&gt; String
+showsPrec :: Int -&gt; Ctx a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Ctx a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327096"><span id="local-6989586621679327098"><span id="local-6989586621679327100"><span id="local-6989586621679327102"><span class="annot"><span class="annottext">ReadPrec [Ctx a]
+ReadPrec (Ctx a)
+Int -&gt; ReadS (Ctx a)
+ReadS [Ctx a]
+(Int -&gt; ReadS (Ctx a))
+-&gt; ReadS [Ctx a]
+-&gt; ReadPrec (Ctx a)
+-&gt; ReadPrec [Ctx a]
+-&gt; Read (Ctx a)
+forall a. Read a =&gt; ReadPrec [Ctx a]
+forall a. Read a =&gt; ReadPrec (Ctx a)
+forall a. Read a =&gt; Int -&gt; ReadS (Ctx a)
+forall a. Read a =&gt; ReadS [Ctx a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [Ctx a]
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [Ctx a]
+readPrec :: ReadPrec (Ctx a)
+$creadPrec :: forall a. Read a =&gt; ReadPrec (Ctx a)
+readList :: ReadS [Ctx a]
+$creadList :: forall a. Read a =&gt; ReadS [Ctx a]
+readsPrec :: Int -&gt; ReadS (Ctx a)
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (Ctx a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327091"><span id="local-6989586621679327093"><span class="annot"><span class="annottext">Ctx a -&gt; Ctx a -&gt; Bool
+(Ctx a -&gt; Ctx a -&gt; Bool) -&gt; (Ctx a -&gt; Ctx a -&gt; Bool) -&gt; Eq (Ctx a)
+forall a. Eq a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Ctx a -&gt; Ctx a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+== :: Ctx a -&gt; Ctx a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327075"><span id="local-6989586621679327077"><span id="local-6989586621679327079"><span id="local-6989586621679327081"><span id="local-6989586621679327083"><span id="local-6989586621679327085"><span id="local-6989586621679327087"><span class="annot"><span class="annottext">Eq (Ctx a)
+Eq (Ctx a) =&gt;
+(Ctx a -&gt; Ctx a -&gt; Ordering)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Bool)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Bool)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Bool)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Bool)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Ctx a)
+-&gt; (Ctx a -&gt; Ctx a -&gt; Ctx a)
+-&gt; Ord (Ctx a)
+Ctx a -&gt; Ctx a -&gt; Bool
+Ctx a -&gt; Ctx a -&gt; Ordering
+Ctx a -&gt; Ctx a -&gt; Ctx a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Ctx a)
+forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Ordering
+forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Ctx a
+min :: Ctx a -&gt; Ctx a -&gt; Ctx a
+$cmin :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Ctx a
+max :: Ctx a -&gt; Ctx a -&gt; Ctx a
+$cmax :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Ctx a
+&gt;= :: Ctx a -&gt; Ctx a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+&gt; :: Ctx a -&gt; Ctx a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+&lt;= :: Ctx a -&gt; Ctx a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+&lt; :: Ctx a -&gt; Ctx a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Bool
+compare :: Ctx a -&gt; Ctx a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; Ctx a -&gt; Ctx a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (Ctx a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327070"><span id="local-6989586621679327072"><span class="annot"><span class="annottext">a -&gt; Ctx b -&gt; Ctx a
+(a -&gt; b) -&gt; Ctx a -&gt; Ctx b
+(forall a b. (a -&gt; b) -&gt; Ctx a -&gt; Ctx b)
+-&gt; (forall a b. a -&gt; Ctx b -&gt; Ctx a) -&gt; Functor Ctx
+forall a b. a -&gt; Ctx b -&gt; Ctx a
+forall a b. (a -&gt; b) -&gt; Ctx a -&gt; Ctx b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Ctx b -&gt; Ctx a
+$c&lt;$ :: forall a b. a -&gt; Ctx b -&gt; Ctx a
+fmap :: (a -&gt; b) -&gt; Ctx a -&gt; Ctx b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Ctx a -&gt; Ctx b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327035"><span id="local-6989586621679327037"><span id="local-6989586621679327039"><span id="local-6989586621679327041"><span id="local-6989586621679327043"><span id="local-6989586621679327045"><span id="local-6989586621679327047"><span id="local-6989586621679327049"><span id="local-6989586621679327051"><span id="local-6989586621679327053"><span id="local-6989586621679327055"><span id="local-6989586621679327057"><span id="local-6989586621679327059"><span id="local-6989586621679327061"><span id="local-6989586621679327063"><span id="local-6989586621679327065"><span id="local-6989586621679327067"><span class="annot"><span class="annottext">Ctx a -&gt; Bool
+(a -&gt; m) -&gt; Ctx a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+(forall m. Monoid m =&gt; Ctx m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ctx a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ctx a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a)
+-&gt; (forall a. Ctx a -&gt; [a])
+-&gt; (forall a. Ctx a -&gt; Bool)
+-&gt; (forall a. Ctx a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Ctx a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Ctx a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Ctx a -&gt; a)
+-&gt; (forall a. Num a =&gt; Ctx a -&gt; a)
+-&gt; (forall a. Num a =&gt; Ctx a -&gt; a)
+-&gt; Foldable Ctx
+forall a. Eq a =&gt; a -&gt; Ctx a -&gt; Bool
+forall a. Num a =&gt; Ctx a -&gt; a
+forall a. Ord a =&gt; Ctx a -&gt; a
+forall m. Monoid m =&gt; Ctx m -&gt; m
+forall a. Ctx a -&gt; Bool
+forall a. Ctx a -&gt; Int
+forall a. Ctx a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ctx a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Ctx a -&gt; a
+$cproduct :: forall a. Num a =&gt; Ctx a -&gt; a
+sum :: Ctx a -&gt; a
+$csum :: forall a. Num a =&gt; Ctx a -&gt; a
+minimum :: Ctx a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Ctx a -&gt; a
+maximum :: Ctx a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Ctx a -&gt; a
+elem :: a -&gt; Ctx a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Ctx a -&gt; Bool
+length :: Ctx a -&gt; Int
+$clength :: forall a. Ctx a -&gt; Int
+null :: Ctx a -&gt; Bool
+$cnull :: forall a. Ctx a -&gt; Bool
+toList :: Ctx a -&gt; [a]
+$ctoList :: forall a. Ctx a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Ctx a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Ctx a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Ctx a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ctx a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Ctx a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Ctx a -&gt; m
+fold :: Ctx m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Ctx m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327024"><span id="local-6989586621679327026"><span id="local-6989586621679327028"><span id="local-6989586621679327030"><span class="annot"><span class="annottext">Functor Ctx
+Foldable Ctx
+(Functor Ctx, Foldable Ctx) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Ctx a -&gt; f (Ctx b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Ctx (f a) -&gt; f (Ctx a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Ctx a -&gt; m (Ctx b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Ctx (m a) -&gt; m (Ctx a))
+-&gt; Traversable Ctx
+(a -&gt; f b) -&gt; Ctx a -&gt; f (Ctx b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Ctx (m a) -&gt; m (Ctx a)
+forall (f :: * -&gt; *) a. Applicative f =&gt; Ctx (f a) -&gt; f (Ctx a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Ctx a -&gt; m (Ctx b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Ctx a -&gt; f (Ctx b)
+sequence :: Ctx (m a) -&gt; m (Ctx a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Ctx (m a) -&gt; m (Ctx a)
+mapM :: (a -&gt; m b) -&gt; Ctx a -&gt; m (Ctx b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Ctx a -&gt; m (Ctx b)
+sequenceA :: Ctx (f a) -&gt; f (Ctx a)
+$csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Ctx (f a) -&gt; f (Ctx a)
+traverse :: (a -&gt; f b) -&gt; Ctx a -&gt; f (Ctx b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Ctx a -&gt; f (Ctx b)
+$cp2Traversable :: Foldable Ctx
+$cp1Traversable :: Functor Ctx
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">data</span><span> </span><span id="BinaryTreeZipper"><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-var">BinaryTreeZipper</span></a></span></span><span> </span><span id="local-6989586621679327139"><span class="annot"><a href="#local-6989586621679327139"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Loc"><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327139"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Ctx"><span class="hs-identifier hs-type">Ctx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327139"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>           </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327016"><span id="local-6989586621679327018"><span id="local-6989586621679327020"><span class="annot"><span class="annottext">Int -&gt; BinaryTreeZipper a -&gt; ShowS
+[BinaryTreeZipper a] -&gt; ShowS
+BinaryTreeZipper a -&gt; String
+(Int -&gt; BinaryTreeZipper a -&gt; ShowS)
+-&gt; (BinaryTreeZipper a -&gt; String)
+-&gt; ([BinaryTreeZipper a] -&gt; ShowS)
+-&gt; Show (BinaryTreeZipper a)
+forall a. Show a =&gt; Int -&gt; BinaryTreeZipper a -&gt; ShowS
+forall a. Show a =&gt; [BinaryTreeZipper a] -&gt; ShowS
+forall a. Show a =&gt; BinaryTreeZipper a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [BinaryTreeZipper a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [BinaryTreeZipper a] -&gt; ShowS
+show :: BinaryTreeZipper a -&gt; String
+$cshow :: forall a. Show a =&gt; BinaryTreeZipper a -&gt; String
+showsPrec :: Int -&gt; BinaryTreeZipper a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; BinaryTreeZipper a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327008"><span id="local-6989586621679327010"><span id="local-6989586621679327012"><span id="local-6989586621679327014"><span class="annot"><span class="annottext">ReadPrec [BinaryTreeZipper a]
+ReadPrec (BinaryTreeZipper a)
+Int -&gt; ReadS (BinaryTreeZipper a)
+ReadS [BinaryTreeZipper a]
+(Int -&gt; ReadS (BinaryTreeZipper a))
+-&gt; ReadS [BinaryTreeZipper a]
+-&gt; ReadPrec (BinaryTreeZipper a)
+-&gt; ReadPrec [BinaryTreeZipper a]
+-&gt; Read (BinaryTreeZipper a)
+forall a. Read a =&gt; ReadPrec [BinaryTreeZipper a]
+forall a. Read a =&gt; ReadPrec (BinaryTreeZipper a)
+forall a. Read a =&gt; Int -&gt; ReadS (BinaryTreeZipper a)
+forall a. Read a =&gt; ReadS [BinaryTreeZipper a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+readListPrec :: ReadPrec [BinaryTreeZipper a]
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [BinaryTreeZipper a]
+readPrec :: ReadPrec (BinaryTreeZipper a)
+$creadPrec :: forall a. Read a =&gt; ReadPrec (BinaryTreeZipper a)
+readList :: ReadS [BinaryTreeZipper a]
+$creadList :: forall a. Read a =&gt; ReadS [BinaryTreeZipper a]
+readsPrec :: Int -&gt; ReadS (BinaryTreeZipper a)
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (BinaryTreeZipper a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327004"><span id="local-6989586621679327006"><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+(BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; Eq (BinaryTreeZipper a)
+forall a. Eq a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+== :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c== :: forall a. Eq a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679326989"><span id="local-6989586621679326991"><span id="local-6989586621679326993"><span id="local-6989586621679326995"><span id="local-6989586621679326997"><span id="local-6989586621679326999"><span id="local-6989586621679327001"><span class="annot"><span class="annottext">Eq (BinaryTreeZipper a)
+Eq (BinaryTreeZipper a) =&gt;
+(BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Ordering)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a)
+-&gt; (BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a)
+-&gt; Ord (BinaryTreeZipper a)
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Ordering
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (BinaryTreeZipper a)
+forall a. Ord a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+forall a.
+Ord a =&gt;
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Ordering
+forall a.
+Ord a =&gt;
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+min :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+$cmin :: forall a.
+Ord a =&gt;
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+max :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+$cmax :: forall a.
+Ord a =&gt;
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+&gt;= :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+&gt; :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+&lt;= :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+&lt; :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Bool
+compare :: BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Ordering
+$ccompare :: forall a.
+Ord a =&gt;
+BinaryTreeZipper a -&gt; BinaryTreeZipper a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (BinaryTreeZipper a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679326985"><span id="local-6989586621679326987"><span class="annot"><span class="annottext">a -&gt; BinaryTreeZipper b -&gt; BinaryTreeZipper a
+(a -&gt; b) -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper b
+(forall a b. (a -&gt; b) -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper b)
+-&gt; (forall a b. a -&gt; BinaryTreeZipper b -&gt; BinaryTreeZipper a)
+-&gt; Functor BinaryTreeZipper
+forall a b. a -&gt; BinaryTreeZipper b -&gt; BinaryTreeZipper a
+forall a b. (a -&gt; b) -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; BinaryTreeZipper b -&gt; BinaryTreeZipper a
+$c&lt;$ :: forall a b. a -&gt; BinaryTreeZipper b -&gt; BinaryTreeZipper a
+fmap :: (a -&gt; b) -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper b
+$cfmap :: forall a b. (a -&gt; b) -&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679326951"><span id="local-6989586621679326953"><span id="local-6989586621679326955"><span id="local-6989586621679326957"><span id="local-6989586621679326959"><span id="local-6989586621679326961"><span id="local-6989586621679326963"><span id="local-6989586621679326965"><span id="local-6989586621679326967"><span id="local-6989586621679326969"><span id="local-6989586621679326971"><span id="local-6989586621679326973"><span id="local-6989586621679326975"><span id="local-6989586621679326977"><span id="local-6989586621679326979"><span id="local-6989586621679326981"><span id="local-6989586621679326983"><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Bool
+(a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+(forall m. Monoid m =&gt; BinaryTreeZipper m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a)
+-&gt; (forall a. BinaryTreeZipper a -&gt; [a])
+-&gt; (forall a. BinaryTreeZipper a -&gt; Bool)
+-&gt; (forall a. BinaryTreeZipper a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; BinaryTreeZipper a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; BinaryTreeZipper a -&gt; a)
+-&gt; (forall a. Ord a =&gt; BinaryTreeZipper a -&gt; a)
+-&gt; (forall a. Num a =&gt; BinaryTreeZipper a -&gt; a)
+-&gt; (forall a. Num a =&gt; BinaryTreeZipper a -&gt; a)
+-&gt; Foldable BinaryTreeZipper
+forall a. Eq a =&gt; a -&gt; BinaryTreeZipper a -&gt; Bool
+forall a. Num a =&gt; BinaryTreeZipper a -&gt; a
+forall a. Ord a =&gt; BinaryTreeZipper a -&gt; a
+forall m. Monoid m =&gt; BinaryTreeZipper m -&gt; m
+forall a. BinaryTreeZipper a -&gt; Bool
+forall a. BinaryTreeZipper a -&gt; Int
+forall a. BinaryTreeZipper a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: BinaryTreeZipper a -&gt; a
+$cproduct :: forall a. Num a =&gt; BinaryTreeZipper a -&gt; a
+sum :: BinaryTreeZipper a -&gt; a
+$csum :: forall a. Num a =&gt; BinaryTreeZipper a -&gt; a
+minimum :: BinaryTreeZipper a -&gt; a
+$cminimum :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; a
+maximum :: BinaryTreeZipper a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; BinaryTreeZipper a -&gt; a
+elem :: a -&gt; BinaryTreeZipper a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; BinaryTreeZipper a -&gt; Bool
+length :: BinaryTreeZipper a -&gt; Int
+$clength :: forall a. BinaryTreeZipper a -&gt; Int
+null :: BinaryTreeZipper a -&gt; Bool
+$cnull :: forall a. BinaryTreeZipper a -&gt; Bool
+toList :: BinaryTreeZipper a -&gt; [a]
+$ctoList :: forall a. BinaryTreeZipper a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; BinaryTreeZipper a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; BinaryTreeZipper a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+foldMap :: (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinaryTreeZipper a -&gt; m
+fold :: BinaryTreeZipper m -&gt; m
+$cfold :: forall m. Monoid m =&gt; BinaryTreeZipper m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679326941"><span id="local-6989586621679326943"><span id="local-6989586621679326945"><span id="local-6989586621679326947"><span class="annot"><span class="annottext">Functor BinaryTreeZipper
+Foldable BinaryTreeZipper
+(Functor BinaryTreeZipper, Foldable BinaryTreeZipper) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; BinaryTreeZipper a -&gt; f (BinaryTreeZipper b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    BinaryTreeZipper (f a) -&gt; f (BinaryTreeZipper a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; BinaryTreeZipper a -&gt; m (BinaryTreeZipper b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    BinaryTreeZipper (m a) -&gt; m (BinaryTreeZipper a))
+-&gt; Traversable BinaryTreeZipper
+(a -&gt; f b) -&gt; BinaryTreeZipper a -&gt; f (BinaryTreeZipper b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+BinaryTreeZipper (m a) -&gt; m (BinaryTreeZipper a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+BinaryTreeZipper (f a) -&gt; f (BinaryTreeZipper a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; BinaryTreeZipper a -&gt; m (BinaryTreeZipper b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; BinaryTreeZipper a -&gt; f (BinaryTreeZipper b)
+sequence :: BinaryTreeZipper (m a) -&gt; m (BinaryTreeZipper a)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+BinaryTreeZipper (m a) -&gt; m (BinaryTreeZipper a)
+mapM :: (a -&gt; m b) -&gt; BinaryTreeZipper a -&gt; m (BinaryTreeZipper b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; BinaryTreeZipper a -&gt; m (BinaryTreeZipper b)
+sequenceA :: BinaryTreeZipper (f a) -&gt; f (BinaryTreeZipper a)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+BinaryTreeZipper (f a) -&gt; f (BinaryTreeZipper a)
+traverse :: (a -&gt; f b) -&gt; BinaryTreeZipper a -&gt; f (BinaryTreeZipper b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; BinaryTreeZipper a -&gt; f (BinaryTreeZipper b)
+$cp2Traversable :: Foldable BinaryTreeZipper
+$cp1Traversable :: Functor BinaryTreeZipper
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- | Focus on the root</span><span>
+</span><span id="line-14"></span><span id="local-6989586621679327124"><span class="annot"><a href="Data.BinaryTree.Zipper.html#top"><span class="hs-identifier hs-type">top</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327124"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327124"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-15"></span><span id="top"><span class="annot"><span class="annottext">top :: BinaryTree a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#top"><span class="hs-identifier hs-var hs-var">top</span></a></span></span><span> </span><span id="local-6989586621679326939"><span class="annot"><span class="annottext">t :: BinaryTree a
+</span><a href="#local-6989586621679326939"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326939"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Ctx a
+forall a. Ctx a
+</span><a href="Data.BinaryTree.Zipper.html#Top"><span class="hs-identifier hs-var">Top</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- | Go to the left child</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679326938"><span class="annot"><a href="Data.BinaryTree.Zipper.html#left"><span class="hs-identifier hs-type">left</span></a></span><span>                            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326938"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326938"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-19"></span><span id="left"><span class="annot"><span class="annottext">left :: BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#left"><span class="hs-identifier hs-var hs-var">left</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#Internal"><span class="hs-identifier hs-type">Internal</span></a></span><span> </span><span id="local-6989586621679326935"><span class="annot"><span class="annottext">l :: BinaryTree a
+</span><a href="#local-6989586621679326935"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679326934"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326934"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679326933"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326933"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679326932"><span class="annot"><span class="annottext">ctx :: Ctx a
+</span><a href="#local-6989586621679326932"><span class="hs-identifier hs-var">ctx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a))
+-&gt; BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326935"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ctx a -&gt; a -&gt; BinaryTree a -&gt; Ctx a
+forall a. Ctx a -&gt; a -&gt; BinaryTree a -&gt; Ctx a
+</span><a href="Data.BinaryTree.Zipper.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="annot"><span class="annottext">Ctx a
+</span><a href="#local-6989586621679326932"><span class="hs-identifier hs-var">ctx</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326934"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326933"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="annot"><a href="Data.BinaryTree.Zipper.html#left"><span class="hs-identifier hs-var">left</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="annot"><a href="Data.BinaryTree.html#Nil"><span class="hs-identifier hs-type">Nil</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (BinaryTreeZipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- | Go to the right child</span><span>
+</span><span id="line-23"></span><span id="local-6989586621679326930"><span class="annot"><a href="Data.BinaryTree.Zipper.html#right"><span class="hs-identifier hs-type">right</span></a></span><span>                            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326930"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326930"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-24"></span><span id="right"><span class="annot"><span class="annottext">right :: BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#right"><span class="hs-identifier hs-var hs-var">right</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#Internal"><span class="hs-identifier hs-type">Internal</span></a></span><span> </span><span id="local-6989586621679326928"><span class="annot"><span class="annottext">l :: BinaryTree a
+</span><a href="#local-6989586621679326928"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679326927"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326927"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679326926"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326926"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679326925"><span class="annot"><span class="annottext">ctx :: Ctx a
+</span><a href="#local-6989586621679326925"><span class="hs-identifier hs-var">ctx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a))
+-&gt; BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326926"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree a -&gt; a -&gt; Ctx a -&gt; Ctx a
+forall a. BinaryTree a -&gt; a -&gt; Ctx a -&gt; Ctx a
+</span><a href="Data.BinaryTree.Zipper.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326928"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326927"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ctx a
+</span><a href="#local-6989586621679326925"><span class="hs-identifier hs-var">ctx</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="annot"><a href="Data.BinaryTree.Zipper.html#right"><span class="hs-identifier hs-var">right</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="annot"><a href="Data.BinaryTree.html#Nil"><span class="hs-identifier hs-type">Nil</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (BinaryTreeZipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | Move to the parent</span><span>
+</span><span id="line-28"></span><span id="local-6989586621679327127"><span class="annot"><a href="Data.BinaryTree.Zipper.html#up"><span class="hs-identifier hs-type">up</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327127"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327127"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-29"></span><span id="up"><span class="annot"><span class="annottext">up :: BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#up"><span class="hs-identifier hs-var hs-var">up</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (BinaryTreeZipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-30"></span><span class="annot"><a href="Data.BinaryTree.Zipper.html#up"><span class="hs-identifier hs-var">up</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span id="local-6989586621679326923"><span class="annot"><span class="annottext">l :: BinaryTree a
+</span><a href="#local-6989586621679326923"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#L"><span class="hs-identifier hs-type">L</span></a></span><span> </span><span id="local-6989586621679326922"><span class="annot"><span class="annottext">ctx :: Ctx a
+</span><a href="#local-6989586621679326922"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span id="local-6989586621679326921"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326921"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679326920"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326920"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a))
+-&gt; BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><a href="Data.BinaryTree.html#Internal"><span class="hs-identifier hs-var">Internal</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326923"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326921"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326920"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ctx a
+</span><a href="#local-6989586621679326922"><span class="hs-identifier hs-var">ctx</span></a></span><span>
+</span><span id="line-31"></span><span class="annot"><a href="Data.BinaryTree.Zipper.html#up"><span class="hs-identifier hs-var">up</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span id="local-6989586621679326919"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326919"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#R"><span class="hs-identifier hs-type">R</span></a></span><span> </span><span id="local-6989586621679326918"><span class="annot"><span class="annottext">l :: BinaryTree a
+</span><a href="#local-6989586621679326918"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679326917"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326917"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679326916"><span class="annot"><span class="annottext">ctx :: Ctx a
+</span><a href="#local-6989586621679326916"><span class="hs-identifier hs-var">ctx</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a))
+-&gt; BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><a href="Data.BinaryTree.html#Internal"><span class="hs-identifier hs-var">Internal</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326918"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326917"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326919"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ctx a
+</span><a href="#local-6989586621679326916"><span class="hs-identifier hs-var">ctx</span></a></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Navigate to the root</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679327115"><span class="annot"><a href="Data.BinaryTree.Zipper.html#toRoot"><span class="hs-identifier hs-type">toRoot</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327115"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327115"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-35"></span><span id="toRoot"><span class="annot"><span class="annottext">toRoot :: BinaryTreeZipper a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#toRoot"><span class="hs-identifier hs-var hs-var">toRoot</span></a></span></span><span> </span><span id="local-6989586621679326914"><span class="annot"><span class="annottext">z :: BinaryTreeZipper a
+</span><a href="#local-6989586621679326914"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+-&gt; Maybe (BinaryTreeZipper a) -&gt; BinaryTreeZipper a
+forall a.
+BinaryTreeZipper a
+-&gt; Maybe (BinaryTreeZipper a) -&gt; BinaryTreeZipper a
+</span><a href="#local-6989586621679326913"><span class="hs-identifier hs-var">toRoot'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326914"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326914"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679326913"><span class="annot"><span class="annottext">toRoot' :: BinaryTreeZipper a
+-&gt; Maybe (BinaryTreeZipper a) -&gt; BinaryTreeZipper a
+</span><a href="#local-6989586621679326913"><span class="hs-identifier hs-var hs-var">toRoot'</span></a></span></span><span> </span><span id="local-6989586621679326912"><span class="annot"><span class="annottext">z' :: BinaryTreeZipper a
+</span><a href="#local-6989586621679326912"><span class="hs-identifier hs-var">z'</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326912"><span class="hs-identifier hs-var">z'</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><a href="#local-6989586621679326913"><span class="hs-identifier hs-var">toRoot'</span></a></span><span> </span><span class="hs-identifier">_</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679326911"><span class="annot"><span class="annottext">z' :: BinaryTreeZipper a
+</span><a href="#local-6989586621679326911"><span class="hs-identifier hs-var">z'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+-&gt; Maybe (BinaryTreeZipper a) -&gt; BinaryTreeZipper a
+</span><a href="#local-6989586621679326913"><span class="hs-identifier hs-var">toRoot'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326911"><span class="hs-identifier hs-var">z'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#up"><span class="hs-identifier hs-var">up</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326911"><span class="hs-identifier hs-var">z'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | Returns a list of zippers; one focussed on each node in the tree</span><span>
+</span><span id="line-42"></span><span id="local-6989586621679326910"><span class="annot"><a href="Data.BinaryTree.Zipper.html#visitAll"><span class="hs-identifier hs-type">visitAll</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326910"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326910"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-43"></span><span id="visitAll"><span class="annot"><span class="annottext">visitAll :: BinaryTree a -&gt; [BinaryTreeZipper a]
+</span><a href="Data.BinaryTree.Zipper.html#visitAll"><span class="hs-identifier hs-var hs-var">visitAll</span></a></span></span><span> </span><span id="local-6989586621679326908"><span class="annot"><span class="annottext">t :: BinaryTree a
+</span><a href="#local-6989586621679326908"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; [BinaryTreeZipper a]
+forall a. BinaryTreeZipper a -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326907"><span class="hs-identifier hs-var">visitAll'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#top"><span class="hs-identifier hs-var">top</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326908"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679326906"><span class="annot"><span class="annottext">f :: Maybe (BinaryTreeZipper a) -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326906"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[BinaryTreeZipper a]
+-&gt; (BinaryTreeZipper a -&gt; [BinaryTreeZipper a])
+-&gt; Maybe (BinaryTreeZipper a)
+-&gt; [BinaryTreeZipper a]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326907"><span class="hs-identifier hs-var">visitAll'</span></a></span><span>
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679326907"><span class="annot"><span class="annottext">visitAll' :: BinaryTreeZipper a -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326907"><span class="hs-identifier hs-var hs-var">visitAll'</span></a></span></span><span> </span><span id="local-6989586621679326904"><span class="annot"><span class="annottext">z :: BinaryTreeZipper a
+</span><a href="#local-6989586621679326904"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326904"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; [BinaryTreeZipper a] -&gt; [BinaryTreeZipper a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Maybe (BinaryTreeZipper a) -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326906"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#left"><span class="hs-identifier hs-var">left</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326904"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[BinaryTreeZipper a]
+-&gt; [BinaryTreeZipper a] -&gt; [BinaryTreeZipper a]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (BinaryTreeZipper a) -&gt; [BinaryTreeZipper a]
+</span><a href="#local-6989586621679326906"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+forall a. BinaryTreeZipper a -&gt; Maybe (BinaryTreeZipper a)
+</span><a href="Data.BinaryTree.Zipper.html#right"><span class="hs-identifier hs-var">right</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a
+</span><a href="#local-6989586621679326904"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | Get the value stored at the current node</span><span>
+</span><span id="line-49"></span><span id="local-6989586621679326903"><span class="annot"><a href="Data.BinaryTree.Zipper.html#accessZ"><span class="hs-identifier hs-type">accessZ</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326903"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679326903"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-50"></span><span id="accessZ"><span class="annot"><span class="annottext">accessZ :: BinaryTreeZipper a -&gt; Maybe a
+</span><a href="Data.BinaryTree.Zipper.html#accessZ"><span class="hs-identifier hs-var hs-var">accessZ</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span id="local-6989586621679326901"><span class="annot"><span class="annottext">t :: BinaryTree a
+</span><a href="#local-6989586621679326901"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Maybe a
+forall a. BinaryTree a -&gt; Maybe a
+</span><a href="Data.BinaryTree.html#access"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326901"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Returns all subtrees; i.e. every node with all its decendents</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679326899"><span class="annot"><a href="Data.BinaryTree.Zipper.html#subTrees"><span class="hs-identifier hs-type">subTrees</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326899"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326899"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-55"></span><span id="subTrees"><span class="annot"><span class="annottext">subTrees :: BinaryTree a -&gt; [BinaryTree a]
+</span><a href="Data.BinaryTree.Zipper.html#subTrees"><span class="hs-identifier hs-var hs-var">subTrees</span></a></span></span><span> </span><span id="local-6989586621679326897"><span class="annot"><span class="annottext">t :: BinaryTree a
+</span><a href="#local-6989586621679326897"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+forall a. BinaryTree a
+</span><a href="Data.BinaryTree.html#Nil"><span class="hs-identifier hs-var">Nil</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; [BinaryTree a] -&gt; [BinaryTree a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; [BinaryTree a]
+forall a. BinaryTree a -&gt; [BinaryTree a]
+</span><a href="#local-6989586621679326896"><span class="hs-identifier hs-var">subTrees'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326897"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679326896"><span class="annot"><span class="annottext">subTrees' :: BinaryTree a -&gt; [BinaryTree a]
+</span><a href="#local-6989586621679326896"><span class="hs-identifier hs-var hs-var">subTrees'</span></a></span></span><span> </span><span class="annot"><a href="Data.BinaryTree.html#Nil"><span class="hs-identifier hs-type">Nil</span></a></span><span>                 </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><a href="#local-6989586621679326896"><span class="hs-identifier hs-var">subTrees'</span></a></span><span> </span><span id="local-6989586621679326895"><span class="annot"><span class="annottext">tt :: BinaryTree a
+</span><a href="#local-6989586621679326895"><span class="hs-identifier hs-var">tt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#Internal"><span class="hs-identifier hs-type">Internal</span></a></span><span> </span><span id="local-6989586621679326894"><span class="annot"><span class="annottext">l :: BinaryTree a
+</span><a href="#local-6989586621679326894"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679326893"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326893"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326895"><span class="hs-identifier hs-var">tt</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; [BinaryTree a] -&gt; [BinaryTree a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; [BinaryTree a]
+</span><a href="#local-6989586621679326896"><span class="hs-identifier hs-var">subTrees'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326894"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">[BinaryTree a] -&gt; [BinaryTree a] -&gt; [BinaryTree a]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; [BinaryTree a]
+</span><a href="#local-6989586621679326896"><span class="hs-identifier hs-var">subTrees'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326893"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Splits the tree here, returns a pair (innerTree,outerTree)</span><span>
+</span><span id="line-62"></span><span id="local-6989586621679326892"><span class="annot"><a href="Data.BinaryTree.Zipper.html#splitTree"><span class="hs-identifier hs-type">splitTree</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.BinaryTree.Zipper.html#BinaryTreeZipper"><span class="hs-identifier hs-type">BinaryTreeZipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326892"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326892"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.BinaryTree.html#BinaryTree"><span class="hs-identifier hs-type">BinaryTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326892"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-63"></span><span id="splitTree"><span class="annot"><span class="annottext">splitTree :: BinaryTreeZipper a -&gt; (BinaryTree a, BinaryTree a)
+</span><a href="Data.BinaryTree.Zipper.html#splitTree"><span class="hs-identifier hs-var hs-var">splitTree</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span id="local-6989586621679326890"><span class="annot"><span class="annottext">t :: BinaryTree a
+</span><a href="#local-6989586621679326890"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679326889"><span class="annot"><span class="annottext">ctx :: Ctx a
+</span><a href="#local-6989586621679326889"><span class="hs-identifier hs-var">ctx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span id="local-6989586621679326888"><span class="annot"><span class="annottext">r :: BinaryTree a
+</span><a href="#local-6989586621679326888"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTreeZipper a -&gt; BinaryTreeZipper a
+forall a. BinaryTreeZipper a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#toRoot"><span class="hs-identifier hs-var">toRoot</span></a></span><span> </span><span class="annot"><span class="annottext">(BinaryTreeZipper a -&gt; BinaryTreeZipper a)
+-&gt; BinaryTreeZipper a -&gt; BinaryTreeZipper a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+forall a. BinaryTree a -&gt; Ctx a -&gt; BinaryTreeZipper a
+</span><a href="Data.BinaryTree.Zipper.html#Loc"><span class="hs-identifier hs-var">Loc</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+forall a. BinaryTree a
+</span><a href="Data.BinaryTree.html#Nil"><span class="hs-identifier hs-var">Nil</span></a></span><span> </span><span class="annot"><span class="annottext">Ctx a
+</span><a href="#local-6989586621679326889"><span class="hs-identifier hs-var">ctx</span></a></span><span>
+</span><span id="line-64"></span><span>                        </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326890"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">BinaryTree a
+</span><a href="#local-6989586621679326888"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span></pre></body></html>

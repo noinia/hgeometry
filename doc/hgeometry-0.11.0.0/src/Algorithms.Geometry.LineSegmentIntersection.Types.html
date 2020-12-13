@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.LineSegmentIntersection.Types</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Interval.html"><span class="hs-identifier">Data.Geometry.Interval</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">type</span><span> </span><span id="Compare"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Compare"><span class="hs-identifier hs-var">Compare</span></a></span></span><span> </span><span id="local-6989586621679966700"><span class="annot"><a href="#local-6989586621679966700"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679966700"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679966700"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- get the endpoints of a line segment</span><span>
+</span><span id="line-22"></span><span id="local-6989586621679966739"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#endPoints%27"><span class="hs-identifier hs-type">endPoints'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.html#HasEnd"><span class="hs-identifier hs-type">HasEnd</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966739"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Interval.html#HasStart"><span class="hs-identifier hs-type">HasStart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966739"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679966739"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.html#StartCore"><span class="hs-identifier hs-type">StartCore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966739"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Interval.html#EndCore"><span class="hs-identifier hs-type">EndCore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966739"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-23"></span><span id="endPoints%27"><span class="annot"><span class="annottext">endPoints' :: s -&gt; (StartCore s, EndCore s)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#endPoints%27"><span class="hs-identifier hs-var hs-var">endPoints'</span></a></span></span><span> </span><span id="local-6989586621679966698"><span class="annot"><span class="annottext">s :: s
+</span><a href="#local-6989586621679966698"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679966698"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (StartCore s) s (StartCore s) -&gt; StartCore s
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((StartCore s :+ StartExtra s)
+ -&gt; Const (StartCore s) (StartCore s :+ StartExtra s))
+-&gt; s -&gt; Const (StartCore s) s
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((StartCore s :+ StartExtra s)
+  -&gt; Const (StartCore s) (StartCore s :+ StartExtra s))
+ -&gt; s -&gt; Const (StartCore s) s)
+-&gt; ((StartCore s -&gt; Const (StartCore s) (StartCore s))
+    -&gt; (StartCore s :+ StartExtra s)
+    -&gt; Const (StartCore s) (StartCore s :+ StartExtra s))
+-&gt; Getting (StartCore s) s (StartCore s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(StartCore s -&gt; Const (StartCore s) (StartCore s))
+-&gt; (StartCore s :+ StartExtra s)
+-&gt; Const (StartCore s) (StartCore s :+ StartExtra s)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679966698"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (EndCore s) s (EndCore s) -&gt; EndCore s
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((EndCore s :+ EndExtra s)
+ -&gt; Const (EndCore s) (EndCore s :+ EndExtra s))
+-&gt; s -&gt; Const (EndCore s) s
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((EndCore s :+ EndExtra s)
+  -&gt; Const (EndCore s) (EndCore s :+ EndExtra s))
+ -&gt; s -&gt; Const (EndCore s) s)
+-&gt; ((EndCore s -&gt; Const (EndCore s) (EndCore s))
+    -&gt; (EndCore s :+ EndExtra s)
+    -&gt; Const (EndCore s) (EndCore s :+ EndExtra s))
+-&gt; Getting (EndCore s) s (EndCore s)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(EndCore s -&gt; Const (EndCore s) (EndCore s))
+-&gt; (EndCore s :+ EndExtra s)
+-&gt; Const (EndCore s) (EndCore s :+ EndExtra s)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">type</span><span> </span><span id="Set%27"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Set%27"><span class="hs-identifier hs-var">Set'</span></a></span></span><span> </span><span id="local-6989586621679966692"><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679966692"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span id="local-6989586621679966688"><span id="local-6989586621679966689"></span></span><span class="hs-keyword">data</span><span> </span><span id="Associated"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-var">Associated</span></a></span></span><span> </span><span id="local-6989586621679966746"><span class="annot"><a href="#local-6989586621679966746"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679966745"><span class="annot"><a href="#local-6989586621679966745"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Associated"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-var">Associated</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_endPointOf"><span class="annot"><span class="annottext">Associated p r -&gt; Set' (LineSegment 2 p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_endPointOf"><span class="hs-identifier hs-var hs-var">_endPointOf</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Set%27"><span class="hs-identifier hs-type">Set'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span id="_interiorTo"><span class="annot"><span class="annottext">Associated p r -&gt; Set' (LineSegment 2 p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_interiorTo"><span class="hs-identifier hs-var hs-var">_interiorTo</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Set%27"><span class="hs-identifier hs-type">Set'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966746"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>                                 </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679966679"><span id="local-6989586621679966681"><span id="local-6989586621679966683"><span class="annot"><span class="annottext">Int -&gt; Associated p r -&gt; ShowS
+[Associated p r] -&gt; ShowS
+Associated p r -&gt; String
+(Int -&gt; Associated p r -&gt; ShowS)
+-&gt; (Associated p r -&gt; String)
+-&gt; ([Associated p r] -&gt; ShowS)
+-&gt; Show (Associated p r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall p r. (Show r, Show p) =&gt; Int -&gt; Associated p r -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; [Associated p r] -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; Associated p r -&gt; String
+showList :: [Associated p r] -&gt; ShowS
+$cshowList :: forall p r. (Show r, Show p) =&gt; [Associated p r] -&gt; ShowS
+show :: Associated p r -&gt; String
+$cshow :: forall p r. (Show r, Show p) =&gt; Associated p r -&gt; String
+showsPrec :: Int -&gt; Associated p r -&gt; ShowS
+$cshowsPrec :: forall p r. (Show r, Show p) =&gt; Int -&gt; Associated p r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(forall x. Associated p r -&gt; Rep (Associated p r) x)
+-&gt; (forall x. Rep (Associated p r) x -&gt; Associated p r)
+-&gt; Generic (Associated p r)
+forall x. Rep (Associated p r) x -&gt; Associated p r
+forall x. Associated p r -&gt; Rep (Associated p r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall p r x. Rep (Associated p r) x -&gt; Associated p r
+forall p r x. Associated p r -&gt; Rep (Associated p r) x
+$cto :: forall p r x. Rep (Associated p r) x -&gt; Associated p r
+$cfrom :: forall p r x. Associated p r -&gt; Rep (Associated p r) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span id="local-6989586621679966673"><span id="local-6989586621679966674"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679966670"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679966674"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679966673"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966674"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966673"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span id="local-6989586621679966668"><span class="annot"><span class="annottext">es :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966668"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span id="local-6989586621679966667"><span class="annot"><span class="annottext">is :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966667"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679966666"><span class="annot"><span class="annottext">== :: Associated p r -&gt; Associated p r -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span id="local-6989586621679966665"><span class="annot"><span class="annottext">es' :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966665"><span class="hs-identifier hs-var">es'</span></a></span></span><span> </span><span id="local-6989586621679966664"><span class="annot"><span class="annottext">is' :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966664"><span class="hs-identifier hs-var">is'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Bool
+</span><a href="#local-6989586621679966663"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966668"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966665"><span class="hs-identifier hs-var">es'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Bool
+</span><a href="#local-6989586621679966663"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966667"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966664"><span class="hs-identifier hs-var">is'</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>      </span><span id="local-6989586621679966663"><span class="annot"><span class="annottext">f :: Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Bool
+</span><a href="#local-6989586621679966663"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679966661"><span class="annot"><span class="annottext">xs :: Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966661"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679966660"><span class="annot"><span class="annottext">ys :: Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966660"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
+forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="annot"><span class="annottext">([Bool] -&gt; Bool) -&gt; [Bool] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r))
+ -&gt; ((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r)) -&gt; Bool)
+-&gt; [((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r))]
+-&gt; [((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r))]
+-&gt; [Bool]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679966657"><span class="annot"><span class="annottext">p :: (Point 2 r, Point 2 r)
+</span><a href="#local-6989586621679966657"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679966656"><span class="annot"><span class="annottext">pa :: NonEmpty (LineSegment 2 p r)
+</span><a href="#local-6989586621679966656"><span class="hs-identifier hs-var">pa</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679966655"><span class="annot"><span class="annottext">q :: (Point 2 r, Point 2 r)
+</span><a href="#local-6989586621679966655"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679966654"><span class="annot"><span class="annottext">qa :: NonEmpty (LineSegment 2 p r)
+</span><a href="#local-6989586621679966654"><span class="hs-identifier hs-var">qa</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r, Point 2 r)
+</span><a href="#local-6989586621679966657"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r, Point 2 r) -&gt; (Point 2 r, Point 2 r) -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r, Point 2 r)
+</span><a href="#local-6989586621679966655"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r)
+</span><a href="#local-6989586621679966656"><span class="hs-identifier hs-var">pa</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r)
+-&gt; NonEmpty (LineSegment 2 p r) -&gt; Bool
+</span><a href="#local-6989586621679966653"><span class="hs-operator hs-var">`sameElements`</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r)
+</span><a href="#local-6989586621679966654"><span class="hs-identifier hs-var">qa</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; [((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r))]
+forall k a. Map k a -&gt; [(k, a)]
+</span><span class="hs-identifier hs-var">Map.toAscList</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966661"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; [((Point 2 r, Point 2 r), NonEmpty (LineSegment 2 p r))]
+forall k a. Map k a -&gt; [(k, a)]
+</span><span class="hs-identifier hs-var">Map.toAscList</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966660"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>      </span><span id="local-6989586621679966651"><span class="annot"><span class="annottext">g :: NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+</span><a href="#local-6989586621679966651"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Eq a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.nub</span></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; [LineSegment 2 p r])
+-&gt; (NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r])
+-&gt; NonEmpty (LineSegment 2 p r)
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span>
+</span><span id="line-41"></span><span>      </span><span id="local-6989586621679966653"><span class="annot"><span class="annottext">sameElements :: NonEmpty (LineSegment 2 p r)
+-&gt; NonEmpty (LineSegment 2 p r) -&gt; Bool
+</span><a href="#local-6989586621679966653"><span class="hs-identifier hs-var hs-var">sameElements</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+</span><a href="#local-6989586621679966651"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679966648"><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966648"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+</span><a href="#local-6989586621679966651"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679966647"><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966647"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">L.null</span></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; Bool) -&gt; [LineSegment 2 p r] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966648"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Eq a =&gt; [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">L.\\</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966647"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966647"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Eq a =&gt; [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">L.\\</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966648"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679966643"><span id="local-6989586621679966644"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679966641"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679966644"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679966643"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966644"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966643"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679966638"><span id="local-6989586621679966639"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#associated"><span class="hs-identifier hs-type">associated</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679966639"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-50"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966638"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966639"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966638"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966639"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966638"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966639"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-51"></span><span id="associated"><span class="annot"><span class="annottext">associated :: [LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; Associated p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#associated"><span class="hs-identifier hs-var hs-var">associated</span></a></span></span><span> </span><span id="local-6989586621679966636"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679966636"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span id="local-6989586621679966635"><span class="annot"><span class="annottext">is :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679966635"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+forall p r.
+Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-var">Associated</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966634"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966636"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966634"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679966635"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679966634"><span class="annot"><span class="annottext">f :: [LineSegment 2 p r]
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+</span><a href="#local-6989586621679966634"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r
+ -&gt; Map
+      (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+      (NonEmpty (LineSegment 2 p r))
+ -&gt; Map
+      (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+      (NonEmpty (LineSegment 2 p r)))
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+-&gt; [LineSegment 2 p r]
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679966632"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621679966632"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (LineSegment 2 p r)
+ -&gt; NonEmpty (LineSegment 2 p r) -&gt; NonEmpty (LineSegment 2 p r))
+-&gt; (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+-&gt; NonEmpty (LineSegment 2 p r)
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+-&gt; Map
+     (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+     (NonEmpty (LineSegment 2 p r))
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.insertWith</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r)
+-&gt; NonEmpty (LineSegment 2 p r) -&gt; NonEmpty (LineSegment 2 p r)
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+forall s. (HasEnd s, HasStart s) =&gt; s -&gt; (StartCore s, EndCore s)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#endPoints%27"><span class="hs-identifier hs-var">endPoints'</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679966632"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679966632"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; [LineSegment 2 p r] -&gt; NonEmpty (LineSegment 2 p r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Map
+  (StartCore (LineSegment 2 p r), EndCore (LineSegment 2 p r))
+  (NonEmpty (LineSegment 2 p r))
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679966628"><span id="local-6989586621679966629"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#endPointOf"><span class="hs-identifier hs-type">endPointOf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966629"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966628"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966629"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966628"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-57"></span><span id="endPointOf"><span class="annot"><span class="annottext">endPointOf :: Associated p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#endPointOf"><span class="hs-identifier hs-var hs-var">endPointOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r])
+-&gt; [NonEmpty (LineSegment 2 p r)] -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">([NonEmpty (LineSegment 2 p r)] -&gt; [LineSegment 2 p r])
+-&gt; (Associated p r -&gt; [NonEmpty (LineSegment 2 p r)])
+-&gt; Associated p r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; [NonEmpty (LineSegment 2 p r)]
+forall k a. Map k a -&gt; [a]
+</span><span class="hs-identifier hs-var">Map.elems</span></span><span> </span><span class="annot"><span class="annottext">(Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+ -&gt; [NonEmpty (LineSegment 2 p r)])
+-&gt; (Associated p r
+    -&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r)))
+-&gt; Associated p r
+-&gt; [NonEmpty (LineSegment 2 p r)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Associated p r
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+forall p r. Associated p r -&gt; Set' (LineSegment 2 p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_endPointOf"><span class="hs-identifier hs-var hs-var">_endPointOf</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679966623"><span id="local-6989586621679966624"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#interiorTo"><span class="hs-identifier hs-type">interiorTo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966624"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966623"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966624"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966623"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-60"></span><span id="interiorTo"><span class="annot"><span class="annottext">interiorTo :: Associated p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#interiorTo"><span class="hs-identifier hs-var hs-var">interiorTo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r])
+-&gt; [NonEmpty (LineSegment 2 p r)] -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">([NonEmpty (LineSegment 2 p r)] -&gt; [LineSegment 2 p r])
+-&gt; (Associated p r -&gt; [NonEmpty (LineSegment 2 p r)])
+-&gt; Associated p r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; [NonEmpty (LineSegment 2 p r)]
+forall k a. Map k a -&gt; [a]
+</span><span class="hs-identifier hs-var">Map.elems</span></span><span> </span><span class="annot"><span class="annottext">(Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+ -&gt; [NonEmpty (LineSegment 2 p r)])
+-&gt; (Associated p r
+    -&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r)))
+-&gt; Associated p r
+-&gt; [NonEmpty (LineSegment 2 p r)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Associated p r
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+forall p r. Associated p r -&gt; Set' (LineSegment 2 p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_interiorTo"><span class="hs-identifier hs-var hs-var">_interiorTo</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679966620"><span id="local-6989586621679966621"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679966615"><span id="local-6989586621679966617"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679966621"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966620"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966621"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span id="local-6989586621679966613"><span class="annot"><span class="annottext">es :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966613"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span id="local-6989586621679966612"><span class="annot"><span class="annottext">is :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966612"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679966611"><span class="annot"><span class="annottext">&lt;&gt; :: Associated p r -&gt; Associated p r -&gt; Associated p r
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span id="local-6989586621679966610"><span class="annot"><span class="annottext">es' :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966610"><span class="hs-identifier hs-var">es'</span></a></span></span><span> </span><span id="local-6989586621679966609"><span class="annot"><span class="annottext">is' :: Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966609"><span class="hs-identifier hs-var">is'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+forall p r.
+Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-var">Associated</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966613"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966610"><span class="hs-identifier hs-var">es'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966612"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+Set' (LineSegment 2 p r)
+</span><a href="#local-6989586621679966609"><span class="hs-identifier hs-var">is'</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679966607"><span id="local-6989586621679966608"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679966602"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679966608"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966607"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966608"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679966600"><span class="annot"><span class="annottext">mempty :: Associated p r
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+forall p r.
+Set' (LineSegment 2 p r)
+-&gt; Set' (LineSegment 2 p r) -&gt; Associated p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-var">Associated</span></a></span><span> </span><span class="annot"><span class="annottext">Set' (LineSegment 2 p r)
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">Set' (LineSegment 2 p r)
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679966599"><span class="annot"><span class="annottext">mappend :: Associated p r -&gt; Associated p r -&gt; Associated p r
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Associated p r -&gt; Associated p r -&gt; Associated p r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span></span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">type</span><span> </span><span id="Intersections"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Intersections"><span class="hs-identifier hs-var">Intersections</span></a></span></span><span> </span><span id="local-6989586621679966597"><span class="annot"><a href="#local-6989586621679966597"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679966596"><span class="annot"><a href="#local-6989586621679966596"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966597"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">data</span><span> </span><span id="IntersectionPoint"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#IntersectionPoint"><span class="hs-identifier hs-var">IntersectionPoint</span></a></span></span><span> </span><span id="local-6989586621679966595"><span class="annot"><a href="#local-6989586621679966595"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679966594"><span class="annot"><a href="#local-6989586621679966594"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-73"></span><span>  </span><span id="IntersectionPoint"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#IntersectionPoint"><span class="hs-identifier hs-var">IntersectionPoint</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_intersectionPoint"><span class="annot"><span class="annottext">IntersectionPoint p r -&gt; Point 2 r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_intersectionPoint"><span class="hs-identifier hs-var hs-var">_intersectionPoint</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679966594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>                    </span><span class="hs-special">,</span><span> </span><span id="_associatedSegs"><span class="annot"><span class="annottext">IntersectionPoint p r -&gt; Associated p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_associatedSegs"><span class="hs-identifier hs-var hs-var">_associatedSegs</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966595"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966594"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>                    </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679966585"><span id="local-6989586621679966587"><span id="local-6989586621679966589"><span class="annot"><span class="annottext">Int -&gt; IntersectionPoint p r -&gt; ShowS
+[IntersectionPoint p r] -&gt; ShowS
+IntersectionPoint p r -&gt; String
+(Int -&gt; IntersectionPoint p r -&gt; ShowS)
+-&gt; (IntersectionPoint p r -&gt; String)
+-&gt; ([IntersectionPoint p r] -&gt; ShowS)
+-&gt; Show (IntersectionPoint p r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall p r.
+(Show r, Show p) =&gt;
+Int -&gt; IntersectionPoint p r -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; [IntersectionPoint p r] -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; IntersectionPoint p r -&gt; String
+showList :: [IntersectionPoint p r] -&gt; ShowS
+$cshowList :: forall p r. (Show r, Show p) =&gt; [IntersectionPoint p r] -&gt; ShowS
+show :: IntersectionPoint p r -&gt; String
+$cshow :: forall p r. (Show r, Show p) =&gt; IntersectionPoint p r -&gt; String
+showsPrec :: Int -&gt; IntersectionPoint p r -&gt; ShowS
+$cshowsPrec :: forall p r.
+(Show r, Show p) =&gt;
+Int -&gt; IntersectionPoint p r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679966581"><span id="local-6989586621679966583"><span class="annot"><span class="annottext">IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+(IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool)
+-&gt; (IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool)
+-&gt; Eq (IntersectionPoint p r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall p r.
+(Eq r, Eq p) =&gt;
+IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+/= :: IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+$c/= :: forall p r.
+(Eq r, Eq p) =&gt;
+IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+== :: IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+$c== :: forall p r.
+(Eq r, Eq p) =&gt;
+IntersectionPoint p r -&gt; IntersectionPoint p r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span id="intersectionPoint"><span id="associatedSegs"><span id="local-6989586621679966580"><span id="local-6989586621679966594"><span id="local-6989586621679966595"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IntersectionPoint</span></span></span></span></span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- | reports true if there is at least one segment for which this intersection</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- point is interior.</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- \(O(1)\)</span><span>
+</span><span id="line-83"></span><span id="local-6989586621679966576"><span id="local-6989586621679966577"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#isEndPointIntersection"><span class="hs-identifier hs-type">isEndPointIntersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#Associated"><span class="hs-identifier hs-type">Associated</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966577"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679966576"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-84"></span><span id="isEndPointIntersection"><span class="annot"><span class="annottext">isEndPointIntersection :: Associated p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#isEndPointIntersection"><span class="hs-identifier hs-var hs-var">isEndPointIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r)) -&gt; Bool
+forall k a. Map k a -&gt; Bool
+</span><span class="hs-identifier hs-var">Map.null</span></span><span> </span><span class="annot"><span class="annottext">(Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r)) -&gt; Bool)
+-&gt; (Associated p r
+    -&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r)))
+-&gt; Associated p r
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Associated p r
+-&gt; Map (Point 2 r, Point 2 r) (NonEmpty (LineSegment 2 p r))
+forall p r. Associated p r -&gt; Set' (LineSegment 2 p r)
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.Types.html#_interiorTo"><span class="hs-identifier hs-var hs-var">_interiorTo</span></a></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- newtype E a b = E (a -&gt; b)</span><span>
+</span><span id="line-88"></span></pre></body></html>

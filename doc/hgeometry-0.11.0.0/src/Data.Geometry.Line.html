@@ -1,0 +1,593 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE UnicodeSyntax #-}</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Module      :  Data.Geometry.Line</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- \(d\)-dimensional lines.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Line</span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html"><span class="hs-identifier">Data.Geometry.Line.Internal</span></a></span><span>
+</span><span id="line-16"></span><span>                         </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Boundary.html"><span class="hs-identifier">Data.Geometry.Boundary</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Box.html"><span class="hs-identifier">Data.Geometry.Box</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.Internal.html"><span class="hs-identifier">Data.Geometry.Line.Internal</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.SubLine.html"><span class="hs-identifier">Data.Geometry.SubLine</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Transformation.html"><span class="hs-identifier">Data.Geometry.Transformation</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.UnBounded</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl.CoRec</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl.Core</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl.Lens</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | Lines are transformable, via line segments</span><span>
+</span><span id="line-42"></span><span id="local-6989586621679970303"><span id="local-6989586621679970304"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679970304"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970304"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679970300"><span class="annot"><span class="annottext">transformBy :: Transformation (Dimension (Line d r)) (NumType (Line d r))
+-&gt; Line d r -&gt; Line d r
+</span><a href="Data.Geometry.Transformation.html#transformBy"><span class="hs-identifier hs-var hs-var hs-var hs-var">transformBy</span></a></span></span><span> </span><span id="local-6989586621679970298"><span class="annot"><span class="annottext">t :: Transformation (Dimension (Line d r)) (NumType (Line d r))
+</span><a href="#local-6989586621679970298"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment d () r -&gt; Line d r
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; Line (Dimension t) (NumType t)
+</span><a href="Data.Geometry.Line.Internal.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment d () r -&gt; Line d r)
+-&gt; (Line d r -&gt; LineSegment d () r) -&gt; Line d r -&gt; Line d r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Transformation d r -&gt; LineSegment d () r -&gt; LineSegment d () r
+forall (g :: * -&gt; *) r (d :: Nat).
+(PointFunctor g, Fractional r, d ~ Dimension (g r), Arity d,
+ Arity (d + 1)) =&gt;
+Transformation d r -&gt; g r -&gt; g r
+</span><a href="Data.Geometry.Transformation.html#transformPointFunctor"><span class="hs-identifier hs-var">transformPointFunctor</span></a></span><span> </span><span class="annot"><span class="annottext">Transformation d r
+Transformation (Dimension (Line d r)) (NumType (Line d r))
+</span><a href="#local-6989586621679970298"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment d () r -&gt; LineSegment d () r)
+-&gt; (Line d r -&gt; LineSegment d () r)
+-&gt; Line d r
+-&gt; LineSegment d () r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Num r, Arity d) =&gt; Line d r -&gt; LineSegment d () r
+Line d r -&gt; LineSegment d () r
+</span><a href="#local-6989586621679970294"><span class="hs-identifier hs-var">toLineSegment'</span></a></span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>      </span><span class="annot"><a href="#local-6989586621679970294"><span class="hs-identifier hs-type">toLineSegment'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679970304"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970304"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970303"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970304"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-46"></span><span>      </span><span id="local-6989586621679970294"><span class="annot"><span class="annottext">toLineSegment' :: Line d r -&gt; LineSegment d () r
+</span><a href="#local-6989586621679970294"><span class="hs-identifier hs-var hs-var">toLineSegment'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line d r -&gt; LineSegment d () r
+forall p r (d :: Nat).
+(Monoid p, Num r, Arity d) =&gt;
+Line d r -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.html#toLineSegment"><span class="hs-identifier hs-var">toLineSegment</span></a></span></span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679970292"><span class="annot"><a href="#local-6989586621679970292"><span class="hs-identifier hs-type hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679970291"><span class="annot"><a href="#local-6989586621679970291"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970292"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970291"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970292"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970291"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679970289"><span id="local-6989586621679970290"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679970290"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679970290"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970289"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970289"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970290"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970289"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970290"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679970284"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Point d r)
+-&gt; proxy (Line d r) -&gt; Intersection (Point d r) (Line d r) -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Point d r)
+-&gt; proxy (Line d r) -&gt; Intersection (Point d r) (Line d r) -&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679970281"><span class="annot"><span class="annottext">intersects :: Point d r -&gt; Line d r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">intersects</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Line d r -&gt; Bool
+forall r (d :: Nat).
+(Eq r, Fractional r, Arity d) =&gt;
+Point d r -&gt; Line d r -&gt; Bool
+</span><a href="Data.Geometry.Line.Internal.html#onLine"><span class="hs-identifier hs-var">onLine</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679970278"><span class="annot"><span class="annottext">p :: Point d r
+</span><a href="#local-6989586621679970278"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679970277"><span class="annot"><span class="annottext">intersect :: Point d r -&gt; Line d r -&gt; Intersection (Point d r) (Line d r)
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></span></span><span> </span><span id="local-6989586621679970275"><span class="annot"><span class="annottext">l :: Line d r
+</span><a href="#local-6989586621679970275"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679970278"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Line d r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">Line d r
+</span><a href="#local-6989586621679970275"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; CoRec Identity '[NoIntersection, Point d r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679970278"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-55"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NoIntersection -&gt; CoRec Identity '[NoIntersection, Point d r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+</span><span class="hs-identifier hs-var">NoIntersection</span></span></span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679970272"><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPPING</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679970272"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679970272"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970272"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970272"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679970268"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Point 2 r)
+-&gt; proxy (Line 2 r) -&gt; Intersection (Point 2 r) (Line 2 r) -&gt; Bool
+</span><a href="#local-6989586621679970268"><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Point 2 r)
+-&gt; proxy (Line 2 r) -&gt; Intersection (Point 2 r) (Line 2 r) -&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679970267"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; Line 2 r -&gt; Bool
+</span><a href="#local-6989586621679970267"><span class="hs-identifier hs-var hs-var hs-var hs-var">intersects</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; Bool
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; Bool
+</span><a href="Data.Geometry.Line.Internal.html#onLine2"><span class="hs-identifier hs-var">onLine2</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679970265"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679970265"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679970264"><span class="annot"><span class="annottext">intersect :: Point 2 r -&gt; Line 2 r -&gt; Intersection (Point 2 r) (Line 2 r)
+</span><a href="#local-6989586621679970264"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679970263"><span class="annot"><span class="annottext">l :: Line 2 r
+</span><a href="#local-6989586621679970263"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970265"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679970263"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; CoRec Identity '[NoIntersection, Point 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970265"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-62"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NoIntersection -&gt; CoRec Identity '[NoIntersection, Point 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+</span><span class="hs-identifier hs-var">NoIntersection</span></span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span id="local-6989586621679970262"><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span id="local-6989586621679970261"><span class="annot"><a href="#local-6989586621679970261"><span class="hs-identifier hs-type hs-type">p</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970262"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679970259"><span id="local-6989586621679970260"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679970256"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970259"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679970254"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Line 2 r)
+-&gt; proxy (Boundary (Rectangle p r))
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+-&gt; Bool
+</span><a href="#local-6989586621679970254"><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Line 2 r)
+-&gt; proxy (Boundary (Rectangle p r))
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+-&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679970253"><span class="annot"><span class="annottext">line' :: Line 2 r
+</span><a href="#local-6989586621679970253"><span class="hs-identifier hs-var">line'</span></a></span></span><span> </span><span id="local-6989586621679970252"><span class="annot"><span class="annottext">intersect :: Line 2 r
+-&gt; Boundary (Rectangle p r)
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+</span><a href="#local-6989586621679970252"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-type">Boundary</span></a></span><span> </span><span id="local-6989586621679970250"><span class="annot"><span class="annottext">rect :: Rectangle p r
+</span><a href="#local-6989586621679970250"><span class="hs-identifier hs-var">rect</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Proxy (SubLine 2 () (UnBounded r) r)
+-&gt; [SubLine 2 () (UnBounded r) r]
+forall (proxy :: * -&gt; *) t.
+(t
+ &#8712; IntersectionOf
+     (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r)) =&gt;
+proxy t -&gt; [t]
+</span><a href="#local-6989586621679970249"><span class="hs-identifier hs-var">asAP</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy (SubLine 2 () (UnBounded r) r)
+</span><a href="#local-6989586621679970248"><span class="hs-identifier hs-var">segP</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-74"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679970247"><span class="annot"><span class="annottext">sl' :: SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970247"><span class="hs-identifier hs-var">sl'</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SubLine 2 () (UnBounded r) r -&gt; Maybe (SubLine 2 () r r)
+forall (d :: Nat) p r.
+SubLine d p (UnBounded r) r -&gt; Maybe (SubLine d p r r)
+</span><a href="Data.Geometry.SubLine.html#fromUnbounded"><span class="hs-identifier hs-var">fromUnbounded</span></a></span><span> </span><span class="annot"><span class="annottext">SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970247"><span class="hs-identifier hs-var">sl'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-75"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char]
+-&gt; CoRec
+     Identity
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;intersect: line x boundary rect; unbounded line? absurd&quot;</span></span><span>
+</span><span id="line-76"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679970244"><span class="annot"><span class="annottext">sl'' :: SubLine 2 () r r
+</span><a href="#local-6989586621679970244"><span class="hs-identifier hs-var">sl''</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r
+ -&gt; Intersection (Line 2 r) (Boundary (Rectangle p r)))
+-&gt; LineSegment 2 () r
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SubLine 2 () r r
+</span><a href="#local-6989586621679970244"><span class="hs-identifier hs-var">sl''</span></a></span><span class="annot"><span class="annottext">SubLine 2 () r r
+-&gt; Getting
+     (LineSegment 2 () r) (SubLine 2 () r r) (LineSegment 2 () r)
+-&gt; LineSegment 2 () r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">AReview (LineSegment 2 () r) (SubLine 2 () r r)
+-&gt; Getter (SubLine 2 () r r) (LineSegment 2 () r)
+forall t b. AReview t b -&gt; Getter b t
+</span><span class="hs-identifier hs-var">re</span></span><span> </span><span class="annot"><span class="annottext">AReview (LineSegment 2 () r) (SubLine 2 () r r)
+forall r (d :: Nat) p.
+(Num r, Arity d) =&gt;
+Iso' (LineSegment d p r) (SubLine d p r r)
+</span><a href="Data.Geometry.LineSegment.html#_SubLine"><span class="hs-identifier hs-var">_SubLine</span></a></span><span>
+</span><span id="line-77"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [Point 2 r]
+</span><a href="#local-6989586621679970240"><span class="hs-identifier hs-var">nub'</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; [Point 2 r]) -&gt; [Point 2 r] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Proxy (Point 2 r) -&gt; [Point 2 r]
+forall (proxy :: * -&gt; *) t.
+(t
+ &#8712; IntersectionOf
+     (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r)) =&gt;
+proxy t -&gt; [t]
+</span><a href="#local-6989586621679970249"><span class="hs-identifier hs-var">asAP</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy (Point 2 r)
+</span><a href="#local-6989586621679970239"><span class="hs-identifier hs-var">pointP</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-78"></span><span>        </span><span class="hs-special">[</span><span id="local-6989586621679970238"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679970238"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">]</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; CoRec
+     Identity
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970238"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-special">[</span><span id="local-6989586621679970237"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679970237"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679970236"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621679970236"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r, Point 2 r)
+-&gt; CoRec
+     Identity
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970237"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970236"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-identifier">_</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NoIntersection
+-&gt; CoRec
+     Identity
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+</span><span class="hs-identifier hs-var">NoIntersection</span></span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-identifier">_</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char]
+-&gt; CoRec
+     Identity
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;intersect; line x boundary rect; absurd&quot;</span></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>      </span><span class="annot"><a href="Data.Geometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621679970234"><span class="annot"><span class="annottext">t :: LineSegment 2 p r
+</span><a href="#local-6989586621679970234"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679970233"><span class="annot"><span class="annottext">r :: LineSegment 2 p r
+</span><a href="#local-6989586621679970233"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679970232"><span class="annot"><span class="annottext">b :: LineSegment 2 p r
+</span><a href="#local-6989586621679970232"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679970231"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621679970231"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle p r -&gt; Sides (LineSegment 2 p r)
+forall r p. Num r =&gt; Rectangle p r -&gt; Sides (LineSegment 2 p r)
+</span><a href="Data.Geometry.Box.Sides.html#sides%27"><span class="hs-identifier hs-var">sides'</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
+</span><a href="#local-6989586621679970250"><span class="hs-identifier hs-var">rect</span></a></span><span>
+</span><span id="line-84"></span><span>      </span><span id="local-6989586621679970229"><span class="annot"><span class="annottext">ints :: [CoRec
+   Identity
+   '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r]]
+</span><a href="#local-6989586621679970229"><span class="hs-identifier hs-var hs-var">ints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r
+ -&gt; CoRec
+      Identity
+      '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r])
+-&gt; [LineSegment 2 p r]
+-&gt; [CoRec
+      Identity
+      '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679970228"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621679970228"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970227"><span class="hs-identifier hs-var">sl</span></a></span><span> </span><span class="annot"><span class="annottext">SubLine 2 () (UnBounded r) r
+-&gt; SubLine 2 () (UnBounded r) r
+-&gt; Intersection
+     (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970226"><span class="hs-identifier hs-var">toSL</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970228"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970234"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970233"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970232"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970231"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span>      </span><span id="local-6989586621679970240"><span class="annot"><span class="annottext">nub' :: [Point 2 r] -&gt; [Point 2 r]
+</span><a href="#local-6989586621679970240"><span class="hs-identifier hs-var hs-var">nub'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; Point 2 r) -&gt; [[Point 2 r]] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; Point 2 r
+forall a. [a] -&gt; a
+</span><span class="hs-identifier hs-var">L.head</span></span><span> </span><span class="annot"><span class="annottext">([[Point 2 r]] -&gt; [Point 2 r])
+-&gt; ([Point 2 r] -&gt; [[Point 2 r]]) -&gt; [Point 2 r] -&gt; [Point 2 r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [[Point 2 r]]
+forall a. Eq a =&gt; [a] -&gt; [[a]]
+</span><span class="hs-identifier hs-var">L.group</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; [[Point 2 r]])
+-&gt; ([Point 2 r] -&gt; [Point 2 r]) -&gt; [Point 2 r] -&gt; [[Point 2 r]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [Point 2 r]
+forall a. Ord a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.sort</span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621679970227"><span class="annot"><span class="annottext">sl :: SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970227"><span class="hs-identifier hs-var hs-var">sl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; SubLine 2 () (UnBounded r) r
+forall (d :: Nat) r.
+Arity d =&gt;
+Line d r -&gt; SubLine d () (UnBounded r) r
+</span><a href="Data.Geometry.SubLine.html#fromLine"><span class="hs-identifier hs-var">fromLine</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679970253"><span class="hs-identifier hs-var">line'</span></a></span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-comment">-- wrap a segment into an potentially unbounded subline</span><span>
+</span><span id="line-90"></span><span>      </span><span class="annot"><a href="#local-6989586621679970226"><span class="hs-identifier hs-type">toSL</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970259"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.SubLine.html#SubLine"><span class="hs-identifier hs-type">SubLine</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnBounded</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-91"></span><span>      </span><span id="local-6989586621679970226"><span class="annot"><span class="annottext">toSL :: LineSegment 2 p r -&gt; SubLine 2 () (UnBounded r) r
+</span><a href="#local-6989586621679970226"><span class="hs-identifier hs-var hs-var">toSL</span></a></span></span><span> </span><span id="local-6989586621679970221"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621679970221"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679970221"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Getting
+     (SubLine 2 () (UnBounded r) r)
+     (LineSegment 2 p r)
+     (SubLine 2 () (UnBounded r) r)
+-&gt; SubLine 2 () (UnBounded r) r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(SubLine 2 p r r
+ -&gt; Const (SubLine 2 () (UnBounded r) r) (SubLine 2 p r r))
+-&gt; LineSegment 2 p r
+-&gt; Const (SubLine 2 () (UnBounded r) r) (LineSegment 2 p r)
+forall r (d :: Nat) p.
+(Num r, Arity d) =&gt;
+Iso' (LineSegment d p r) (SubLine d p r r)
+</span><a href="Data.Geometry.LineSegment.html#_SubLine"><span class="hs-identifier hs-var">_SubLine</span></a></span><span class="annot"><span class="annottext">((SubLine 2 p r r
+  -&gt; Const (SubLine 2 () (UnBounded r) r) (SubLine 2 p r r))
+ -&gt; LineSegment 2 p r
+ -&gt; Const (SubLine 2 () (UnBounded r) r) (LineSegment 2 p r))
+-&gt; ((SubLine 2 () (UnBounded r) r
+     -&gt; Const
+          (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r))
+    -&gt; SubLine 2 p r r
+    -&gt; Const (SubLine 2 () (UnBounded r) r) (SubLine 2 p r r))
+-&gt; Getting
+     (SubLine 2 () (UnBounded r) r)
+     (LineSegment 2 p r)
+     (SubLine 2 () (UnBounded r) r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">AReview (SubLine 2 p (UnBounded r) r) (SubLine 2 p r r)
+-&gt; Getter (SubLine 2 p r r) (SubLine 2 p (UnBounded r) r)
+forall t b. AReview t b -&gt; Getter b t
+</span><span class="hs-identifier hs-var">re</span></span><span> </span><span class="annot"><span class="annottext">AReview (SubLine 2 p (UnBounded r) r) (SubLine 2 p r r)
+forall (d :: Nat) p r.
+Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
+</span><a href="Data.Geometry.SubLine.html#_unBounded"><span class="hs-identifier hs-var">_unBounded</span></a></span><span class="annot"><span class="annottext">((SubLine 2 p (UnBounded r) r
+  -&gt; Const
+       (SubLine 2 () (UnBounded r) r) (SubLine 2 p (UnBounded r) r))
+ -&gt; SubLine 2 p r r
+ -&gt; Const (SubLine 2 () (UnBounded r) r) (SubLine 2 p r r))
+-&gt; ((SubLine 2 () (UnBounded r) r
+     -&gt; Const
+          (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r))
+    -&gt; SubLine 2 p (UnBounded r) r
+    -&gt; Const
+         (SubLine 2 () (UnBounded r) r) (SubLine 2 p (UnBounded r) r))
+-&gt; (SubLine 2 () (UnBounded r) r
+    -&gt; Const
+         (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r))
+-&gt; SubLine 2 p r r
+-&gt; Const (SubLine 2 () (UnBounded r) r) (SubLine 2 p r r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(SubLine 2 p (UnBounded r) r -&gt; SubLine 2 () (UnBounded r) r)
+-&gt; (SubLine 2 () (UnBounded r) r
+    -&gt; Const
+         (SubLine 2 () (UnBounded r) r) (SubLine 2 () (UnBounded r) r))
+-&gt; SubLine 2 p (UnBounded r) r
+-&gt; Const
+     (SubLine 2 () (UnBounded r) r) (SubLine 2 p (UnBounded r) r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">SubLine 2 p (UnBounded r) r -&gt; SubLine 2 () (UnBounded r) r
+forall (d :: Nat) p s r. SubLine d p s r -&gt; SubLine d () s r
+</span><a href="Data.Geometry.SubLine.html#dropExtra"><span class="hs-identifier hs-var">dropExtra</span></a></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span>      </span><span class="annot"><a href="#local-6989586621679970249"><span class="hs-identifier hs-type">asAP</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679970382"><span class="annot"><a href="#local-6989586621679970382"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679970383"><span class="annot"><a href="#local-6989586621679970383"><span class="hs-identifier hs-type">t</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679970383"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&#8712;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntersectionOf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.SubLine.html#SubLine"><span class="hs-identifier hs-type">SubLine</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnBounded</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>                                                   </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.SubLine.html#SubLine"><span class="hs-identifier hs-type">SubLine</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnBounded</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679970382"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970383"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679970383"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-96"></span><span>      </span><span id="local-6989586621679970249"><span class="annot"><span class="annottext">asAP :: proxy t -&gt; [t]
+</span><a href="#local-6989586621679970249"><span class="hs-identifier hs-var hs-var">asAP</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(CoRec
+   Identity '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r]
+ -&gt; Maybe t)
+-&gt; [CoRec
+      Identity
+      '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r]]
+-&gt; [t]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (ts :: [*]).
+NatToInt (RIndex t ts) =&gt;
+CoRec Identity ts -&gt; Maybe t
+forall t (ts :: [*]).
+NatToInt (RIndex t ts) =&gt;
+CoRec Identity ts -&gt; Maybe t
+</span><span class="hs-identifier hs-var">asA</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679970383"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[CoRec
+   Identity
+   '[NoIntersection, Point 2 r, SubLine 2 () (UnBounded r) r]]
+</span><a href="#local-6989586621679970229"><span class="hs-identifier hs-var">ints</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>      </span><span id="local-6989586621679970248"><span class="annot"><span class="annottext">segP :: Proxy (SubLine 2 () (UnBounded r) r)
+</span><a href="#local-6989586621679970248"><span class="hs-identifier hs-var hs-var">segP</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy (SubLine 2 () (UnBounded r) r)
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.SubLine.html#SubLine"><span class="hs-identifier hs-type">SubLine</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnBounded</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>      </span><span id="local-6989586621679970239"><span class="annot"><span class="annottext">pointP :: Proxy (Point 2 r)
+</span><a href="#local-6989586621679970239"><span class="hs-identifier hs-var hs-var">pointP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy (Point 2 r)
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970260"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span id="local-6989586621679970215"><span class="annot"><a href="#local-6989586621679970215"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span id="local-6989586621679970214"><span class="annot"><a href="#local-6989586621679970214"><span class="hs-identifier hs-type hs-type">p</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679970215"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970215"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679970215"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span id="local-6989586621679970212"><span id="local-6989586621679970213"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679970209"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679970213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679970213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679970213"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970212"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679970213"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621679970207"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Line 2 r)
+-&gt; proxy (Rectangle p r)
+-&gt; Intersection (Line 2 r) (Rectangle p r)
+-&gt; Bool
+</span><a href="#local-6989586621679970207"><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Line 2 r)
+-&gt; proxy (Rectangle p r)
+-&gt; Intersection (Line 2 r) (Rectangle p r)
+-&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>  </span><span id="local-6989586621679970206"><span class="annot"><span class="annottext">line' :: Line 2 r
+</span><a href="#local-6989586621679970206"><span class="hs-identifier hs-var">line'</span></a></span></span><span> </span><span id="local-6989586621679970205"><span class="annot"><span class="annottext">intersect :: Line 2 r
+-&gt; Rectangle p r -&gt; Intersection (Line 2 r) (Rectangle p r)
+</span><a href="#local-6989586621679970205"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679970204"><span class="annot"><span class="annottext">rect :: Rectangle p r
+</span><a href="#local-6989586621679970204"><span class="hs-identifier hs-var">rect</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CoRec
+  Identity
+  '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+    LineSegment 2 () r]
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall (ts :: [*]) b. CoRec Identity ts -&gt; Handlers ts b -&gt; b
+</span><span class="hs-identifier hs-var">match</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679970206"><span class="hs-identifier hs-var">line'</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+-&gt; Boundary (Rectangle p r)
+-&gt; Intersection (Line 2 r) (Boundary (Rectangle p r))
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">Rectangle p r -&gt; Boundary (Rectangle p r)
+forall g. g -&gt; Boundary g
+</span><a href="Data.Geometry.Boundary.html#Boundary"><span class="hs-identifier hs-var">Boundary</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle p r
+</span><a href="#local-6989586621679970204"><span class="hs-identifier hs-var">rect</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Handlers
+   '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+     LineSegment 2 () r]
+   (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+ -&gt; Intersection (Line 2 r) (Rectangle p r))
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; Intersection (Line 2 r) (Rectangle p r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-111"></span><span>       </span><span class="annot"><span class="annottext">(NoIntersection
+ -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+     NoIntersection
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="hs-comment">-- NoIntersection</span><span>
+</span><span id="line-112"></span><span>    </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+  NoIntersection
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[Point 2 r, (Point 2 r, Point 2 r), LineSegment 2 () r]
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, (Point 2 r, Point 2 r),
+       LineSegment 2 () r]
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r
+ -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+     (Point 2 r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="hs-comment">-- Point2</span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+  (Point 2 r)
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[(Point 2 r, Point 2 r), LineSegment 2 () r]
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[Point 2 r, (Point 2 r, Point 2 r), LineSegment 2 () r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r, Point 2 r)
+ -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+     (Point 2 r, Point 2 r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679970200"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679970200"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679970199"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621679970199"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r
+ -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; LineSegment 2 () r
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; LineSegment 2 () r
+forall (d :: Nat) r p.
+(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970200"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r :+ ()
+forall a. a -&gt; a :+ ()
+</span><span class="hs-identifier hs-var">ext</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679970199"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>    </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+  (Point 2 r, Point 2 r)
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[LineSegment 2 () r]
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[(Point 2 r, Point 2 r), LineSegment 2 () r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 () r
+ -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+     (LineSegment 2 () r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 () r
+-&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="hs-comment">-- LineSegment</span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r])
+  (LineSegment 2 () r)
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[]
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+     '[LineSegment 2 () r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">Rec
+  (Handler
+     (CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 () r]))
+  '[]
+forall u (a :: u -&gt; *). Rec a '[]
+</span><span class="hs-identifier hs-var">RNil</span></span></span></span><span>
+</span><span id="line-116"></span></pre></body></html>

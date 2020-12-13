@@ -1,0 +1,872 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.RangeTree.Generic</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.BinaryTree</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html"><span class="hs-identifier">Data.Geometry.RangeTree.Measure</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Range</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Measured.Class</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Measured.Size</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Foldable</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="NodeData"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span id="local-6989586621679957182"><span class="annot"><a href="#local-6989586621679957182"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679957183"><span class="annot"><a href="#local-6989586621679957183"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NodeData"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_minVal"><span class="annot"><span class="annottext">NodeData v r -&gt; Min r
+</span><a href="Data.Geometry.RangeTree.Generic.html#_minVal"><span class="hs-identifier hs-var hs-var">_minVal</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span class="annot"><a href="#local-6989586621679957183"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_maxVal"><span class="annot"><span class="annottext">NodeData v r -&gt; Max r
+</span><a href="Data.Geometry.RangeTree.Generic.html#_maxVal"><span class="hs-identifier hs-var hs-var">_maxVal</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span class="annot"><a href="#local-6989586621679957183"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_assoc"><span class="annot"><span class="annottext">NodeData v r -&gt; v
+</span><a href="Data.Geometry.RangeTree.Generic.html#_assoc"><span class="hs-identifier hs-var hs-var">_assoc</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679957182"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-22"></span><span>                             </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679956974"><span id="local-6989586621679956976"><span id="local-6989586621679956978"><span class="annot"><span class="annottext">Int -&gt; NodeData v r -&gt; ShowS
+[NodeData v r] -&gt; ShowS
+NodeData v r -&gt; String
+(Int -&gt; NodeData v r -&gt; ShowS)
+-&gt; (NodeData v r -&gt; String)
+-&gt; ([NodeData v r] -&gt; ShowS)
+-&gt; Show (NodeData v r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall v r. (Show r, Show v) =&gt; Int -&gt; NodeData v r -&gt; ShowS
+forall v r. (Show r, Show v) =&gt; [NodeData v r] -&gt; ShowS
+forall v r. (Show r, Show v) =&gt; NodeData v r -&gt; String
+showList :: [NodeData v r] -&gt; ShowS
+$cshowList :: forall v r. (Show r, Show v) =&gt; [NodeData v r] -&gt; ShowS
+show :: NodeData v r -&gt; String
+$cshow :: forall v r. (Show r, Show v) =&gt; NodeData v r -&gt; String
+showsPrec :: Int -&gt; NodeData v r -&gt; ShowS
+$cshowsPrec :: forall v r. (Show r, Show v) =&gt; Int -&gt; NodeData v r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956969"><span id="local-6989586621679956971"><span class="annot"><span class="annottext">NodeData v r -&gt; NodeData v r -&gt; Bool
+(NodeData v r -&gt; NodeData v r -&gt; Bool)
+-&gt; (NodeData v r -&gt; NodeData v r -&gt; Bool) -&gt; Eq (NodeData v r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall v r. (Eq r, Eq v) =&gt; NodeData v r -&gt; NodeData v r -&gt; Bool
+/= :: NodeData v r -&gt; NodeData v r -&gt; Bool
+$c/= :: forall v r. (Eq r, Eq v) =&gt; NodeData v r -&gt; NodeData v r -&gt; Bool
+== :: NodeData v r -&gt; NodeData v r -&gt; Bool
+$c== :: forall v r. (Eq r, Eq v) =&gt; NodeData v r -&gt; NodeData v r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956964"><span id="local-6989586621679956966"><span class="annot"><span class="annottext">a -&gt; NodeData v b -&gt; NodeData v a
+(a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b
+(forall a b. (a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b)
+-&gt; (forall a b. a -&gt; NodeData v b -&gt; NodeData v a)
+-&gt; Functor (NodeData v)
+forall a b. a -&gt; NodeData v b -&gt; NodeData v a
+forall a b. (a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b
+forall v a b. a -&gt; NodeData v b -&gt; NodeData v a
+forall v a b. (a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; NodeData v b -&gt; NodeData v a
+$c&lt;$ :: forall v a b. a -&gt; NodeData v b -&gt; NodeData v a
+fmap :: (a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b
+$cfmap :: forall v a b. (a -&gt; b) -&gt; NodeData v a -&gt; NodeData v b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span id="local-6989586621679956961"><span id="local-6989586621679956962"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679956956"><span id="local-6989586621679956958"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679956962"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679956961"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956962"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956961"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621679956954"><span class="annot"><span class="annottext">mi :: Min r
+</span><a href="#local-6989586621679956954"><span class="hs-identifier hs-var">mi</span></a></span></span><span> </span><span id="local-6989586621679956953"><span class="annot"><span class="annottext">ma :: Max r
+</span><a href="#local-6989586621679956953"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span id="local-6989586621679956952"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679956952"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679956951"><span class="annot"><span class="annottext">&lt;&gt; :: NodeData v r -&gt; NodeData v r -&gt; NodeData v r
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621679956950"><span class="annot"><span class="annottext">mi' :: Min r
+</span><a href="#local-6989586621679956950"><span class="hs-identifier hs-var">mi'</span></a></span></span><span> </span><span id="local-6989586621679956949"><span class="annot"><span class="annottext">ma' :: Max r
+</span><a href="#local-6989586621679956949"><span class="hs-identifier hs-var">ma'</span></a></span></span><span> </span><span id="local-6989586621679956948"><span class="annot"><span class="annottext">v' :: v
+</span><a href="#local-6989586621679956948"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Min r -&gt; Max r -&gt; v -&gt; NodeData v r
+forall v r. Min r -&gt; Max r -&gt; v -&gt; NodeData v r
+</span><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Min r
+</span><a href="#local-6989586621679956954"><span class="hs-identifier hs-var">mi</span></a></span><span> </span><span class="annot"><span class="annottext">Min r -&gt; Min r -&gt; Min r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Min r
+</span><a href="#local-6989586621679956950"><span class="hs-identifier hs-var">mi'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Max r
+</span><a href="#local-6989586621679956953"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">Max r -&gt; Max r -&gt; Max r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Max r
+</span><a href="#local-6989586621679956949"><span class="hs-identifier hs-var">ma'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956952"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">v -&gt; v -&gt; v
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956948"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- | A generic (1D) range tree. The 'r' parameter indicates the type</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- of the coordinates of the points. The 'q' represents any associated</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- data values with those points (stored in the leaves), and the 'v'</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- types represents the data stored at internal nodes.</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">newtype</span><span> </span><span id="RangeTree"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-var">RangeTree</span></a></span></span><span> </span><span id="local-6989586621679957130"><span class="annot"><a href="#local-6989586621679957130"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679957128"><span class="annot"><a href="#local-6989586621679957128"><span class="hs-identifier hs-type">q</span></a></span></span><span> </span><span id="local-6989586621679957129"><span class="annot"><a href="#local-6989586621679957129"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-33"></span><span>  </span><span id="RangeTree"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-var">RangeTree</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unRangeTree"><span class="annot"><span class="annottext">RangeTree v q r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="Data.Geometry.RangeTree.Generic.html#_unRangeTree"><span class="hs-identifier hs-var hs-var">_unRangeTree</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957130"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957129"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679957130"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679957128"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679957129"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679956940"><span id="local-6989586621679956942"><span id="local-6989586621679956944"><span class="annot"><span class="annottext">Int -&gt; RangeTree v q r -&gt; ShowS
+[RangeTree v q r] -&gt; ShowS
+RangeTree v q r -&gt; String
+(Int -&gt; RangeTree v q r -&gt; ShowS)
+-&gt; (RangeTree v q r -&gt; String)
+-&gt; ([RangeTree v q r] -&gt; ShowS)
+-&gt; Show (RangeTree v q r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall v q r.
+(Show r, Show v, Show q) =&gt;
+Int -&gt; RangeTree v q r -&gt; ShowS
+forall v q r.
+(Show r, Show v, Show q) =&gt;
+[RangeTree v q r] -&gt; ShowS
+forall v q r. (Show r, Show v, Show q) =&gt; RangeTree v q r -&gt; String
+showList :: [RangeTree v q r] -&gt; ShowS
+$cshowList :: forall v q r.
+(Show r, Show v, Show q) =&gt;
+[RangeTree v q r] -&gt; ShowS
+show :: RangeTree v q r -&gt; String
+$cshow :: forall v q r. (Show r, Show v, Show q) =&gt; RangeTree v q r -&gt; String
+showsPrec :: Int -&gt; RangeTree v q r -&gt; ShowS
+$cshowsPrec :: forall v q r.
+(Show r, Show v, Show q) =&gt;
+Int -&gt; RangeTree v q r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956936"><span id="local-6989586621679956938"><span class="annot"><span class="annottext">RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+(RangeTree v q r -&gt; RangeTree v q r -&gt; Bool)
+-&gt; (RangeTree v q r -&gt; RangeTree v q r -&gt; Bool)
+-&gt; Eq (RangeTree v q r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall v q r.
+(Eq r, Eq v, Eq q) =&gt;
+RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+/= :: RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+$c/= :: forall v q r.
+(Eq r, Eq v, Eq q) =&gt;
+RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+== :: RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+$c== :: forall v q r.
+(Eq r, Eq v, Eq q) =&gt;
+RangeTree v q r -&gt; RangeTree v q r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- | Creates a range tree</span><span>
+</span><span id="line-41"></span><span id="local-6989586621679957060"><span id="local-6989586621679957061"><span id="local-6989586621679957062"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#createTree"><span class="hs-identifier hs-type">createTree</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679957062"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-42"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Measured</span></span><span> </span><span class="annot"><a href="#local-6989586621679957061"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957060"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-43"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679957060"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-44"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679957062"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679957060"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957061"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957060"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957062"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-47"></span><span id="createTree"><span class="annot"><span class="annottext">createTree :: NonEmpty (r :+ p) -&gt; RangeTree v p r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createTree"><span class="hs-identifier hs-var hs-var">createTree</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ p) -&gt; RangeTree v p r
+forall r v p.
+(Ord r, Measured v p) =&gt;
+NonEmpty (r :+ p) -&gt; RangeTree v p r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createTree%27"><span class="hs-identifier hs-var">createTree'</span></a></span><span>
+</span><span id="line-48"></span><span>           </span><span class="annot"><span class="annottext">(NonEmpty (r :+ p) -&gt; RangeTree v p r)
+-&gt; (NonEmpty (r :+ p) -&gt; NonEmpty (r :+ p))
+-&gt; NonEmpty (r :+ p)
+-&gt; RangeTree v p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (r :+ p) -&gt; r :+ p)
+-&gt; NonEmpty (NonEmpty (r :+ p)) -&gt; NonEmpty (r :+ p)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679956932"><span class="annot"><span class="annottext">pts :: NonEmpty (r :+ p)
+</span><a href="#local-6989586621679956932"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679956931"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679956931"><span class="hs-identifier hs-var hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">NonEmpty (r :+ p)
+</span><a href="#local-6989586621679956932"><span class="hs-identifier hs-var">pts</span></a></span><span class="annot"><span class="annottext">NonEmpty (r :+ p) -&gt; Getting r (NonEmpty (r :+ p)) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(NonEmpty (r :+ p) -&gt; r :+ p)
+-&gt; Optic' (-&gt;) (Const r) (NonEmpty (r :+ p)) (r :+ p)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><span class="hs-identifier hs-var">to</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ p) -&gt; r :+ p
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NonEmpty.head</span></span><span class="annot"><span class="annottext">Optic' (-&gt;) (Const r) (NonEmpty (r :+ p)) (r :+ p)
+-&gt; ((r -&gt; Const r r) -&gt; (r :+ p) -&gt; Const r (r :+ p))
+-&gt; Getting r (NonEmpty (r :+ p)) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; (r :+ p) -&gt; Const r (r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span>
+</span><span id="line-49"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956931"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; p -&gt; r :+ p
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty p -&gt; p
+forall a. Semigroup a =&gt; NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">sconcat</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty p -&gt; p)
+-&gt; (NonEmpty (r :+ p) -&gt; NonEmpty p) -&gt; NonEmpty (r :+ p) -&gt; p
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((r :+ p) -&gt; p) -&gt; NonEmpty (r :+ p) -&gt; NonEmpty p
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r :+ p) -&gt; Getting p (r :+ p) p -&gt; p
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting p (r :+ p) p
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (r :+ p) -&gt; p) -&gt; NonEmpty (r :+ p) -&gt; p
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ p)
+</span><a href="#local-6989586621679956932"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>           </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty (r :+ p)) -&gt; NonEmpty (r :+ p))
+-&gt; (NonEmpty (r :+ p) -&gt; NonEmpty (NonEmpty (r :+ p)))
+-&gt; NonEmpty (r :+ p)
+-&gt; NonEmpty (r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((r :+ p) -&gt; r)
+-&gt; NonEmpty (r :+ p) -&gt; NonEmpty (NonEmpty (r :+ p))
+forall b a.
+Ord b =&gt;
+(a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.groupAllWith1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r :+ p) -&gt; ((r -&gt; Const r r) -&gt; (r :+ p) -&gt; Const r (r :+ p)) -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; (r :+ p) -&gt; Const r (r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- sort and group on r value</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | pre: input is sorted and grouped by x-coord</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679957164"><span id="local-6989586621679957165"><span id="local-6989586621679957166"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#createTree%27"><span class="hs-identifier hs-type">createTree'</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679957166"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Measured</span></span><span> </span><span class="annot"><a href="#local-6989586621679957165"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957164"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679957166"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679957164"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957165"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957164"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957166"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-56"></span><span id="createTree%27"><span class="annot"><span class="annottext">createTree' :: NonEmpty (r :+ p) -&gt; RangeTree v p r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createTree%27"><span class="hs-identifier hs-var hs-var">createTree'</span></a></span></span><span> </span><span id="local-6989586621679956922"><span class="annot"><span class="annottext">pts :: NonEmpty (r :+ p)
+</span><a href="#local-6989586621679956922"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r) -&gt; RangeTree v p r
+forall v q r.
+BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; RangeTree v q r
+</span><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-var">RangeTree</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956921"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679956921"><span class="annot"><span class="annottext">t :: BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956921"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+  (BinLeafTree (NodeData v r) (NodeData (v, p) r))
+  (SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+  (BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (BinLeafTree (NodeData v r) (NodeData (v, p) r))
+  (SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+  (BinLeafTree (NodeData v r) (NodeData (v, p) r))
+forall s t a b. Field1 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_1</span></span><span>
+</span><span id="line-59"></span><span>      </span><span class="annot"><span class="annottext">(SP (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+ -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; (NonEmpty (r :+ p)
+    -&gt; SP
+         (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+-&gt; NonEmpty (r :+ p)
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(SP (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+ -&gt; Size
+ -&gt; SP
+      (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+ -&gt; SP
+      (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+-&gt; (Elem (r :+ p)
+    -&gt; SP
+         (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+-&gt; BinLeafTree Size (Elem (r :+ p))
+-&gt; SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+forall b v a.
+(b -&gt; v -&gt; b -&gt; b) -&gt; (a -&gt; b) -&gt; BinLeafTree v a -&gt; b
+</span><span class="hs-identifier hs-var">foldUp</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621679956916"><span class="annot"><span class="annottext">l :: BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956916"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679956915"><span class="annot"><span class="annottext">dl :: NodeData v r
+</span><a href="#local-6989586621679956915"><span class="hs-identifier hs-var">dl</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621679956914"><span class="annot"><span class="annottext">r :: BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956914"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679956913"><span class="annot"><span class="annottext">dr :: NodeData v r
+</span><a href="#local-6989586621679956913"><span class="hs-identifier hs-var">dr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679956912"><span class="annot"><span class="annottext">d :: NodeData v r
+</span><a href="#local-6989586621679956912"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeData v r
+</span><a href="#local-6989586621679956915"><span class="hs-identifier hs-var">dl</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData v r -&gt; NodeData v r -&gt; NodeData v r
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">NodeData v r
+</span><a href="#local-6989586621679956913"><span class="hs-identifier hs-var">dr</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+-&gt; NodeData v r
+-&gt; SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+-&gt; NodeData v r
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall v a.
+BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
+</span><span class="hs-identifier hs-var">Node</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956916"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData v r
+</span><a href="#local-6989586621679956912"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+</span><a href="#local-6989586621679956914"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeData v r
+</span><a href="#local-6989586621679956912"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-60"></span><span>               </span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>               </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Elem</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679956909"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679956909"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679956908"><span class="annot"><span class="annottext">ld :: p
+</span><a href="#local-6989586621679956908"><span class="hs-identifier hs-var">ld</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679956907"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679956907"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; v
+forall v a. Measured v a =&gt; a -&gt; v
+</span><span class="hs-identifier hs-var">measure</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679956908"><span class="hs-identifier hs-var">ld</span></a></span><span>
+</span><span id="line-62"></span><span>                                     </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+-&gt; NodeData v r
+-&gt; SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData (v, p) r -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall v a. a -&gt; BinLeafTree v a
+</span><span class="hs-identifier hs-var">Leaf</span></span><span> </span><span class="annot"><span class="annottext">(NodeData (v, p) r
+ -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; NodeData (v, p) r
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Min r -&gt; Max r -&gt; (v, p) -&gt; NodeData (v, p) r
+forall v r. Min r -&gt; Max r -&gt; v -&gt; NodeData v r
+</span><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Min r
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Min</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956909"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Max r
+forall a. a -&gt; Max a
+</span><span class="hs-identifier hs-var">Max</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956909"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956907"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679956908"><span class="hs-identifier hs-var">ld</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>                                           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Min r -&gt; Max r -&gt; v -&gt; NodeData v r
+forall v r. Min r -&gt; Max r -&gt; v -&gt; NodeData v r
+</span><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Min r
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Min</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956909"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Max r
+forall a. a -&gt; Max a
+</span><span class="hs-identifier hs-var">Max</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956909"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956907"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>               </span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="annottext">(BinLeafTree Size (Elem (r :+ p))
+ -&gt; SP
+      (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r))
+-&gt; (NonEmpty (r :+ p) -&gt; BinLeafTree Size (Elem (r :+ p)))
+-&gt; NonEmpty (r :+ p)
+-&gt; SP
+     (BinLeafTree (NodeData v r) (NodeData (v, p) r)) (NodeData v r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ p) -&gt; BinLeafTree Size (Elem (r :+ p))
+forall a. NonEmpty a -&gt; BinLeafTree Size (Elem a)
+</span><span class="hs-identifier hs-var">asBalancedBinLeafTree</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (r :+ p)
+ -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; NonEmpty (r :+ p)
+-&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ p)
+</span><a href="#local-6989586621679956922"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- * Converting to a List</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- | Lists all points in increasing order</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-73"></span><span id="local-6989586621679956899"><span id="local-6989586621679956900"><span id="local-6989586621679956901"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#toAscList"><span class="hs-identifier hs-type">toAscList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956901"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956900"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956899"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679956899"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679956900"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-74"></span><span id="toAscList"><span class="annot"><span class="annottext">toAscList :: RangeTree v p r -&gt; NonEmpty (r :+ p)
+</span><a href="Data.Geometry.RangeTree.Generic.html#toAscList"><span class="hs-identifier hs-var hs-var">toAscList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NodeData (v, p) r -&gt; r :+ p)
+-&gt; NonEmpty (NodeData (v, p) r) -&gt; NonEmpty (r :+ p)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span id="local-6989586621679956897"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679956897"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679956896"><span class="annot"><span class="annottext">d :: p
+</span><a href="#local-6989586621679956896"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956897"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; p -&gt; r :+ p
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679956896"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NodeData (v, p) r) -&gt; NonEmpty (r :+ p))
+-&gt; (RangeTree v p r -&gt; NonEmpty (NodeData (v, p) r))
+-&gt; RangeTree v p r
+-&gt; NonEmpty (r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, p) r)
+-&gt; NonEmpty (NodeData (v, p) r)
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData v r) (NodeData (v, p) r)
+ -&gt; NonEmpty (NodeData (v, p) r))
+-&gt; (RangeTree v p r
+    -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; RangeTree v p r
+-&gt; NonEmpty (NodeData (v, p) r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">RangeTree v p r -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall v q r.
+RangeTree v q r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="Data.Geometry.RangeTree.Generic.html#_unRangeTree"><span class="hs-identifier hs-var hs-var">_unRangeTree</span></a></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- * Querying x</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- | Range search</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-82"></span><span id="local-6989586621679957045"><span id="local-6989586621679957046"><span id="local-6989586621679957047"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#search"><span class="hs-identifier hs-type">search</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679957047"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679957046"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679957047"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957046"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957045"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957047"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679957046"><span class="hs-identifier hs-type">v</span></a></span></span></span></span><span>
+</span><span id="line-83"></span><span id="search"><span class="annot"><span class="annottext">search :: Range r -&gt; RangeTree v p r -&gt; v
+</span><a href="Data.Geometry.RangeTree.Generic.html#search"><span class="hs-identifier hs-var hs-var">search</span></a></span></span><span> </span><span id="local-6989586621679956893"><span class="annot"><span class="annottext">qr :: Range r
+</span><a href="#local-6989586621679956893"><span class="hs-identifier hs-var">qr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[v] -&gt; v
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span> </span><span class="annot"><span class="annottext">([v] -&gt; v) -&gt; (RangeTree v p r -&gt; [v]) -&gt; RangeTree v p r -&gt; v
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; RangeTree v p r -&gt; [v]
+forall r v p. Ord r =&gt; Range r -&gt; RangeTree v p r -&gt; [v]
+</span><a href="Data.Geometry.RangeTree.Generic.html#search%27"><span class="hs-identifier hs-var">search'</span></a></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956893"><span class="hs-identifier hs-var">qr</span></a></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- | Range search, report the (associated data structures of the)</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- \(O(\log n)\) nodes that form the disjoint union of the range we</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- are querying with.</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-90"></span><span id="local-6989586621679957090"><span id="local-6989586621679957091"><span id="local-6989586621679957092"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#search%27"><span class="hs-identifier hs-type">search'</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679957092"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-91"></span><span>           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679957092"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957091"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957090"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957092"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679957091"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-92"></span><span id="search%27"><span class="annot"><span class="annottext">search' :: Range r -&gt; RangeTree v p r -&gt; [v]
+</span><a href="Data.Geometry.RangeTree.Generic.html#search%27"><span class="hs-identifier hs-var hs-var">search'</span></a></span></span><span> </span><span id="local-6989586621679956891"><span class="annot"><span class="annottext">qr :: Range r
+</span><a href="#local-6989586621679956891"><span class="hs-identifier hs-var">qr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Range r -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r) -&gt; [v]
+forall r v q.
+Ord r =&gt;
+Range r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="Data.Geometry.RangeTree.Generic.html#search%27%27"><span class="hs-identifier hs-var">search''</span></a></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956891"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (NodeData v r) (NodeData (v, p) r) -&gt; [v])
+-&gt; (RangeTree v p r
+    -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r))
+-&gt; RangeTree v p r
+-&gt; [v]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">RangeTree v p r -&gt; BinLeafTree (NodeData v r) (NodeData (v, p) r)
+forall v q r.
+RangeTree v q r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="Data.Geometry.RangeTree.Generic.html#_unRangeTree"><span class="hs-identifier hs-var hs-var">_unRangeTree</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- | The actual search</span><span>
+</span><span id="line-95"></span><span id="local-6989586621679957084"><span id="local-6989586621679957085"><span id="local-6989586621679957086"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#search%27%27"><span class="hs-identifier hs-type">search''</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679957086"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-96"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679957086"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-97"></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957085"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957086"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679957085"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679957084"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679957086"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679957085"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-99"></span><span id="search%27%27"><span class="annot"><span class="annottext">search'' :: Range r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="Data.Geometry.RangeTree.Generic.html#search%27%27"><span class="hs-identifier hs-var hs-var">search''</span></a></span></span><span> </span><span id="local-6989586621679956889"><span class="annot"><span class="annottext">qr :: Range r
+</span><a href="#local-6989586621679956889"><span class="hs-identifier hs-var">qr</span></a></span></span><span> </span><span id="local-6989586621679956888"><span class="annot"><span class="annottext">t :: BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956888"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956888"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-100"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679956887"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679956887"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="hs-identifier">_</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956889"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; Range r -&gt; Bool
+forall a. Ord a =&gt; Range a -&gt; Range a -&gt; Bool
+</span><span class="hs-operator hs-var">`covers`</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; Range r
+forall v r v'.
+BinLeafTree (NodeData v r) (NodeData v' r) -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-var">rangeOf</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956888"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956887"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-101"></span><span>                              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-102"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679956884"><span class="annot"><span class="annottext">l :: BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956884"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679956883"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679956883"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679956882"><span class="annot"><span class="annottext">r :: BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956882"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956889"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; Range r -&gt; Bool
+forall a. Ord a =&gt; Range a -&gt; Range a -&gt; Bool
+</span><span class="hs-operator hs-var">`covers`</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; Range r
+forall v r v'.
+BinLeafTree (NodeData v r) (NodeData v' r) -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-var">rangeOf</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956888"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679956883"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>                              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="#local-6989586621679956881"><span class="hs-identifier hs-var">msearch</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956884"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">[v] -&gt; [v] -&gt; [v]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="#local-6989586621679956881"><span class="hs-identifier hs-var">msearch</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956882"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679956881"><span class="annot"><span class="annottext">msearch :: BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="#local-6989586621679956881"><span class="hs-identifier hs-var hs-var">msearch</span></a></span></span><span> </span><span id="local-6989586621679956880"><span class="annot"><span class="annottext">t' :: BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956880"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956889"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; Range r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; Range r
+forall v r v'.
+BinLeafTree (NodeData v r) (NodeData v' r) -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-var">rangeOf</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956880"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Range r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+forall r v q.
+Ord r =&gt;
+Range r -&gt; BinLeafTree (NodeData v r) (NodeData (v, q) r) -&gt; [v]
+</span><a href="Data.Geometry.RangeTree.Generic.html#search%27%27"><span class="hs-identifier hs-var">search''</span></a></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956889"><span class="hs-identifier hs-var">qr</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (NodeData v r) (NodeData (v, q) r)
+</span><a href="#local-6989586621679956880"><span class="hs-identifier hs-var">t'</span></a></span><span>
+</span><span id="line-106"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- | Helper function to get the range of  a binary leaf tree</span><span>
+</span><span id="line-110"></span><span id="local-6989586621679957077"><span id="local-6989586621679957078"><span id="local-6989586621679957079"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-type">rangeOf</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinLeafTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957079"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957078"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957077"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957078"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679957078"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-111"></span><span id="rangeOf"><span class="annot"><span class="annottext">rangeOf :: BinLeafTree (NodeData v r) (NodeData v' r) -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-var hs-var">rangeOf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Leaf</span></span><span> </span><span id="local-6989586621679956878"><span class="annot"><span class="annottext">d :: NodeData v' r
+</span><a href="#local-6989586621679956878"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeData v' r -&gt; Range r
+forall v r. NodeData v r -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf%27"><span class="hs-identifier hs-var">rangeOf'</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData v' r
+</span><a href="#local-6989586621679956878"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-112"></span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#rangeOf"><span class="hs-identifier hs-var">rangeOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679956876"><span class="annot"><span class="annottext">d :: NodeData v r
+</span><a href="#local-6989586621679956876"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NodeData v r -&gt; Range r
+forall v r. NodeData v r -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf%27"><span class="hs-identifier hs-var">rangeOf'</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData v r
+</span><a href="#local-6989586621679956876"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- | Get the range of a node</span><span>
+</span><span id="line-115"></span><span id="local-6989586621679957069"><span id="local-6989586621679957070"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#rangeOf%27"><span class="hs-identifier hs-type">rangeOf'</span></a></span><span>                                </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957070"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679957069"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679957069"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-116"></span><span id="rangeOf%27"><span class="annot"><span class="annottext">rangeOf' :: NodeData v r -&gt; Range r
+</span><a href="Data.Geometry.RangeTree.Generic.html#rangeOf%27"><span class="hs-identifier hs-var hs-var">rangeOf'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span id="local-6989586621679956875"><span class="annot"><span class="annottext">mi :: r
+</span><a href="#local-6989586621679956875"><span class="hs-identifier hs-var">mi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Max</span></span><span> </span><span id="local-6989586621679956874"><span class="annot"><span class="annottext">ma :: r
+</span><a href="#local-6989586621679956874"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Range r
+forall a. a -&gt; a -&gt; Range a
+</span><span class="hs-identifier hs-var">ClosedRange</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956875"><span class="hs-identifier hs-var">mi</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679956874"><span class="hs-identifier hs-var">ma</span></a></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- * Updates</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- support inserting and deleting points, assuming that the x-coord already exists.</span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span id="local-6989586621679956871"><span id="local-6989586621679956872"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#createReportingTree"><span class="hs-identifier hs-type">createReportingTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679956872"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679956872"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679956871"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956871"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956871"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679956872"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-129"></span><span id="createReportingTree"><span class="annot"><span class="annottext">createReportingTree :: NonEmpty (r :+ [p]) -&gt; RangeTree (Report p) (Report p) r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createReportingTree"><span class="hs-identifier hs-var hs-var">createReportingTree</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ Report p) -&gt; RangeTree (Report p) (Report p) r
+forall r v p.
+(Ord r, Measured v p, Semigroup p) =&gt;
+NonEmpty (r :+ p) -&gt; RangeTree v p r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createTree"><span class="hs-identifier hs-var">createTree</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (r :+ Report p) -&gt; RangeTree (Report p) (Report p) r)
+-&gt; (NonEmpty (r :+ [p]) -&gt; NonEmpty (r :+ Report p))
+-&gt; NonEmpty (r :+ [p])
+-&gt; RangeTree (Report p) (Report p) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((r :+ [p]) -&gt; r :+ Report p)
+-&gt; NonEmpty (r :+ [p]) -&gt; NonEmpty (r :+ Report p)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r :+ [p]) -&gt; ((r :+ [p]) -&gt; r :+ Report p) -&gt; r :+ Report p
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">([p] -&gt; Identity (Report p))
+-&gt; (r :+ [p]) -&gt; Identity (r :+ Report p)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">(([p] -&gt; Identity (Report p))
+ -&gt; (r :+ [p]) -&gt; Identity (r :+ Report p))
+-&gt; ([p] -&gt; Report p) -&gt; (r :+ [p]) -&gt; r :+ Report p
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">[p] -&gt; Report p
+forall p. [p] -&gt; Report p
+</span><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-var">Report</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span id="local-6989586621679956864"><span id="local-6989586621679956865"><span id="local-6989586621679956866"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#report"><span class="hs-identifier hs-type">report</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679956866"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679956866"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956865"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679956864"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956866"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679956865"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-132"></span><span id="report"><span class="annot"><span class="annottext">report :: Range r -&gt; RangeTree (Report p) q r -&gt; [p]
+</span><a href="Data.Geometry.RangeTree.Generic.html#report"><span class="hs-identifier hs-var hs-var">report</span></a></span></span><span> </span><span id="local-6989586621679956862"><span class="annot"><span class="annottext">qr :: Range r
+</span><a href="#local-6989586621679956862"><span class="hs-identifier hs-var">qr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Report p -&gt; [p]
+forall p. Report p -&gt; [p]
+</span><a href="Data.Geometry.RangeTree.Measure.html#reportList"><span class="hs-identifier hs-var hs-var">reportList</span></a></span><span> </span><span class="annot"><span class="annottext">(Report p -&gt; [p])
+-&gt; (RangeTree (Report p) q r -&gt; Report p)
+-&gt; RangeTree (Report p) q r
+-&gt; [p]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; RangeTree (Report p) q r -&gt; Report p
+forall r v p. (Ord r, Monoid v) =&gt; Range r -&gt; RangeTree v p r -&gt; v
+</span><a href="Data.Geometry.RangeTree.Generic.html#search"><span class="hs-identifier hs-var">search</span></a></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956862"><span class="hs-identifier hs-var">qr</span></a></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-keyword">newtype</span><span> </span><span id="CountOf"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-var">CountOf</span></a></span></span><span> </span><span id="local-6989586621679956988"><span class="annot"><a href="#local-6989586621679956988"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CountOf"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-var">CountOf</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679956988"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679956854"><span id="local-6989586621679956856"><span id="local-6989586621679956858"><span class="annot"><span class="annottext">Int -&gt; CountOf p -&gt; ShowS
+[CountOf p] -&gt; ShowS
+CountOf p -&gt; String
+(Int -&gt; CountOf p -&gt; ShowS)
+-&gt; (CountOf p -&gt; String)
+-&gt; ([CountOf p] -&gt; ShowS)
+-&gt; Show (CountOf p)
+forall p. Show p =&gt; Int -&gt; CountOf p -&gt; ShowS
+forall p. Show p =&gt; [CountOf p] -&gt; ShowS
+forall p. Show p =&gt; CountOf p -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [CountOf p] -&gt; ShowS
+$cshowList :: forall p. Show p =&gt; [CountOf p] -&gt; ShowS
+show :: CountOf p -&gt; String
+$cshow :: forall p. Show p =&gt; CountOf p -&gt; String
+showsPrec :: Int -&gt; CountOf p -&gt; ShowS
+$cshowsPrec :: forall p. Show p =&gt; Int -&gt; CountOf p -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956850"><span id="local-6989586621679956852"><span class="annot"><span class="annottext">CountOf p -&gt; CountOf p -&gt; Bool
+(CountOf p -&gt; CountOf p -&gt; Bool)
+-&gt; (CountOf p -&gt; CountOf p -&gt; Bool) -&gt; Eq (CountOf p)
+forall p. Eq p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: CountOf p -&gt; CountOf p -&gt; Bool
+$c/= :: forall p. Eq p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+== :: CountOf p -&gt; CountOf p -&gt; Bool
+$c== :: forall p. Eq p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956835"><span id="local-6989586621679956837"><span id="local-6989586621679956839"><span id="local-6989586621679956841"><span id="local-6989586621679956843"><span id="local-6989586621679956845"><span id="local-6989586621679956847"><span class="annot"><span class="annottext">Eq (CountOf p)
+Eq (CountOf p) =&gt;
+(CountOf p -&gt; CountOf p -&gt; Ordering)
+-&gt; (CountOf p -&gt; CountOf p -&gt; Bool)
+-&gt; (CountOf p -&gt; CountOf p -&gt; Bool)
+-&gt; (CountOf p -&gt; CountOf p -&gt; Bool)
+-&gt; (CountOf p -&gt; CountOf p -&gt; Bool)
+-&gt; (CountOf p -&gt; CountOf p -&gt; CountOf p)
+-&gt; (CountOf p -&gt; CountOf p -&gt; CountOf p)
+-&gt; Ord (CountOf p)
+CountOf p -&gt; CountOf p -&gt; Bool
+CountOf p -&gt; CountOf p -&gt; Ordering
+CountOf p -&gt; CountOf p -&gt; CountOf p
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall p. Ord p =&gt; Eq (CountOf p)
+forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Ordering
+forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; CountOf p
+min :: CountOf p -&gt; CountOf p -&gt; CountOf p
+$cmin :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; CountOf p
+max :: CountOf p -&gt; CountOf p -&gt; CountOf p
+$cmax :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; CountOf p
+&gt;= :: CountOf p -&gt; CountOf p -&gt; Bool
+$c&gt;= :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+&gt; :: CountOf p -&gt; CountOf p -&gt; Bool
+$c&gt; :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+&lt;= :: CountOf p -&gt; CountOf p -&gt; Bool
+$c&lt;= :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+&lt; :: CountOf p -&gt; CountOf p -&gt; Bool
+$c&lt; :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Bool
+compare :: CountOf p -&gt; CountOf p -&gt; Ordering
+$ccompare :: forall p. Ord p =&gt; CountOf p -&gt; CountOf p -&gt; Ordering
+$cp1Ord :: forall p. Ord p =&gt; Eq (CountOf p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956830"><span id="local-6989586621679956832"><span class="annot"><span class="annottext">a -&gt; CountOf b -&gt; CountOf a
+(a -&gt; b) -&gt; CountOf a -&gt; CountOf b
+(forall a b. (a -&gt; b) -&gt; CountOf a -&gt; CountOf b)
+-&gt; (forall a b. a -&gt; CountOf b -&gt; CountOf a) -&gt; Functor CountOf
+forall a b. a -&gt; CountOf b -&gt; CountOf a
+forall a b. (a -&gt; b) -&gt; CountOf a -&gt; CountOf b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; CountOf b -&gt; CountOf a
+$c&lt;$ :: forall a b. a -&gt; CountOf b -&gt; CountOf a
+fmap :: (a -&gt; b) -&gt; CountOf a -&gt; CountOf b
+$cfmap :: forall a b. (a -&gt; b) -&gt; CountOf a -&gt; CountOf b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956796"><span id="local-6989586621679956798"><span id="local-6989586621679956800"><span id="local-6989586621679956802"><span id="local-6989586621679956804"><span id="local-6989586621679956806"><span id="local-6989586621679956808"><span id="local-6989586621679956810"><span id="local-6989586621679956812"><span id="local-6989586621679956814"><span id="local-6989586621679956816"><span id="local-6989586621679956818"><span id="local-6989586621679956820"><span id="local-6989586621679956822"><span id="local-6989586621679956824"><span id="local-6989586621679956826"><span id="local-6989586621679956828"><span class="annot"><span class="annottext">a -&gt; CountOf a -&gt; Bool
+CountOf m -&gt; m
+CountOf a -&gt; [a]
+CountOf a -&gt; Bool
+CountOf a -&gt; Int
+CountOf a -&gt; a
+CountOf a -&gt; a
+CountOf a -&gt; a
+CountOf a -&gt; a
+(a -&gt; m) -&gt; CountOf a -&gt; m
+(a -&gt; m) -&gt; CountOf a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+(a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+(a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+(a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+(forall m. Monoid m =&gt; CountOf m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; CountOf a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; CountOf a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a)
+-&gt; (forall a. CountOf a -&gt; [a])
+-&gt; (forall a. CountOf a -&gt; Bool)
+-&gt; (forall a. CountOf a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; CountOf a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; CountOf a -&gt; a)
+-&gt; (forall a. Ord a =&gt; CountOf a -&gt; a)
+-&gt; (forall a. Num a =&gt; CountOf a -&gt; a)
+-&gt; (forall a. Num a =&gt; CountOf a -&gt; a)
+-&gt; Foldable CountOf
+forall a. Eq a =&gt; a -&gt; CountOf a -&gt; Bool
+forall a. Num a =&gt; CountOf a -&gt; a
+forall a. Ord a =&gt; CountOf a -&gt; a
+forall m. Monoid m =&gt; CountOf m -&gt; m
+forall a. CountOf a -&gt; Bool
+forall a. CountOf a -&gt; Int
+forall a. CountOf a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; CountOf a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: CountOf a -&gt; a
+$cproduct :: forall a. Num a =&gt; CountOf a -&gt; a
+sum :: CountOf a -&gt; a
+$csum :: forall a. Num a =&gt; CountOf a -&gt; a
+minimum :: CountOf a -&gt; a
+$cminimum :: forall a. Ord a =&gt; CountOf a -&gt; a
+maximum :: CountOf a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; CountOf a -&gt; a
+elem :: a -&gt; CountOf a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; CountOf a -&gt; Bool
+length :: CountOf a -&gt; Int
+$clength :: forall a. CountOf a -&gt; Int
+null :: CountOf a -&gt; Bool
+$cnull :: forall a. CountOf a -&gt; Bool
+toList :: CountOf a -&gt; [a]
+$ctoList :: forall a. CountOf a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; CountOf a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; CountOf a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; CountOf a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; CountOf a -&gt; m
+foldMap :: (a -&gt; m) -&gt; CountOf a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; CountOf a -&gt; m
+fold :: CountOf m -&gt; m
+$cfold :: forall m. Monoid m =&gt; CountOf m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956789"><span id="local-6989586621679956791"><span id="local-6989586621679956793"><span class="annot"><span class="annottext">b -&gt; CountOf p -&gt; CountOf p
+NonEmpty (CountOf p) -&gt; CountOf p
+CountOf p -&gt; CountOf p -&gt; CountOf p
+(CountOf p -&gt; CountOf p -&gt; CountOf p)
+-&gt; (NonEmpty (CountOf p) -&gt; CountOf p)
+-&gt; (forall b. Integral b =&gt; b -&gt; CountOf p -&gt; CountOf p)
+-&gt; Semigroup (CountOf p)
+forall b. Integral b =&gt; b -&gt; CountOf p -&gt; CountOf p
+forall p. NonEmpty (CountOf p) -&gt; CountOf p
+forall p. CountOf p -&gt; CountOf p -&gt; CountOf p
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (NonEmpty a -&gt; a)
+-&gt; (forall b. Integral b =&gt; b -&gt; a -&gt; a)
+-&gt; Semigroup a
+forall p b. Integral b =&gt; b -&gt; CountOf p -&gt; CountOf p
+stimes :: b -&gt; CountOf p -&gt; CountOf p
+$cstimes :: forall p b. Integral b =&gt; b -&gt; CountOf p -&gt; CountOf p
+sconcat :: NonEmpty (CountOf p) -&gt; CountOf p
+$csconcat :: forall p. NonEmpty (CountOf p) -&gt; CountOf p
+&lt;&gt; :: CountOf p -&gt; CountOf p -&gt; CountOf p
+$c&lt;&gt; :: forall p. CountOf p -&gt; CountOf p -&gt; CountOf p
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679956782"><span id="local-6989586621679956784"><span id="local-6989586621679956786"><span class="annot"><span class="annottext">Semigroup (CountOf p)
+CountOf p
+Semigroup (CountOf p) =&gt;
+CountOf p
+-&gt; (CountOf p -&gt; CountOf p -&gt; CountOf p)
+-&gt; ([CountOf p] -&gt; CountOf p)
+-&gt; Monoid (CountOf p)
+[CountOf p] -&gt; CountOf p
+CountOf p -&gt; CountOf p -&gt; CountOf p
+forall p. Semigroup (CountOf p)
+forall p. CountOf p
+forall a.
+Semigroup a =&gt;
+a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+forall p. [CountOf p] -&gt; CountOf p
+forall p. CountOf p -&gt; CountOf p -&gt; CountOf p
+mconcat :: [CountOf p] -&gt; CountOf p
+$cmconcat :: forall p. [CountOf p] -&gt; CountOf p
+mappend :: CountOf p -&gt; CountOf p -&gt; CountOf p
+$cmappend :: forall p. CountOf p -&gt; CountOf p -&gt; CountOf p
+mempty :: CountOf p
+$cmempty :: forall p. CountOf p
+$cp1Monoid :: forall p. Semigroup (CountOf p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monoid</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span id="local-6989586621679956780"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Measured</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956780"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-type">CountOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956780"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-141"></span><span>  </span><span id="local-6989586621679956776"><span class="annot"><span class="annottext">measure :: CountOf p -&gt; Count p
+</span><a href="#local-6989586621679956776"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-type">CountOf</span></a></span><span> </span><span id="local-6989586621679956775"><span class="annot"><span class="annottext">xs :: [p]
+</span><a href="#local-6989586621679956775"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Count p
+forall k (a :: k). Int -&gt; Count a
+</span><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Count p) -&gt; Int -&gt; Count p
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[p] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[p]
+</span><a href="#local-6989586621679956775"><span class="hs-identifier hs-var">xs</span></a></span></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span id="local-6989586621679956771"><span id="local-6989586621679956772"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#createCountingTree"><span class="hs-identifier hs-type">createCountingTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679956772"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679956772"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679956771"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956771"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-type">CountOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956771"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679956772"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-144"></span><span id="createCountingTree"><span class="annot"><span class="annottext">createCountingTree :: NonEmpty (r :+ [p]) -&gt; RangeTree (Count p) (CountOf p) r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createCountingTree"><span class="hs-identifier hs-var hs-var">createCountingTree</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (r :+ CountOf p) -&gt; RangeTree (Count p) (CountOf p) r
+forall r v p.
+(Ord r, Measured v p, Semigroup p) =&gt;
+NonEmpty (r :+ p) -&gt; RangeTree v p r
+</span><a href="Data.Geometry.RangeTree.Generic.html#createTree"><span class="hs-identifier hs-var">createTree</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (r :+ CountOf p) -&gt; RangeTree (Count p) (CountOf p) r)
+-&gt; (NonEmpty (r :+ [p]) -&gt; NonEmpty (r :+ CountOf p))
+-&gt; NonEmpty (r :+ [p])
+-&gt; RangeTree (Count p) (CountOf p) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((r :+ [p]) -&gt; r :+ CountOf p)
+-&gt; NonEmpty (r :+ [p]) -&gt; NonEmpty (r :+ CountOf p)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r :+ [p]) -&gt; ((r :+ [p]) -&gt; r :+ CountOf p) -&gt; r :+ CountOf p
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">([p] -&gt; Identity (CountOf p))
+-&gt; (r :+ [p]) -&gt; Identity (r :+ CountOf p)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">(([p] -&gt; Identity (CountOf p))
+ -&gt; (r :+ [p]) -&gt; Identity (r :+ CountOf p))
+-&gt; ([p] -&gt; CountOf p) -&gt; (r :+ [p]) -&gt; r :+ CountOf p
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="annot"><span class="annottext">[p] -&gt; CountOf p
+forall p. [p] -&gt; CountOf p
+</span><a href="Data.Geometry.RangeTree.Generic.html#CountOf"><span class="hs-identifier hs-var">CountOf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- | Perform a counting query</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--</span><span>
+</span><span id="line-148"></span><span id="local-6989586621679956767"><span id="local-6989586621679956768"><span id="local-6989586621679956769"><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#count"><span class="hs-identifier hs-type">count</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679956769"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679956769"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Generic.html#RangeTree"><span class="hs-identifier hs-type">RangeTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956768"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679956767"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679956769"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span></span></span><span>
+</span><span id="line-149"></span><span id="count"><span class="annot"><span class="annottext">count :: Range r -&gt; RangeTree (Count p) q r -&gt; Int
+</span><a href="Data.Geometry.RangeTree.Generic.html#count"><span class="hs-identifier hs-var hs-var">count</span></a></span></span><span> </span><span id="local-6989586621679956765"><span class="annot"><span class="annottext">qr :: Range r
+</span><a href="#local-6989586621679956765"><span class="hs-identifier hs-var">qr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count p -&gt; Int
+forall k (a :: k). Count a -&gt; Int
+</span><a href="Data.Geometry.RangeTree.Measure.html#getCount"><span class="hs-identifier hs-var hs-var">getCount</span></a></span><span> </span><span class="annot"><span class="annottext">(Count p -&gt; Int)
+-&gt; (RangeTree (Count p) q r -&gt; Count p)
+-&gt; RangeTree (Count p) q r
+-&gt; Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Range r -&gt; RangeTree (Count p) q r -&gt; Count p
+forall r v p. (Ord r, Monoid v) =&gt; Range r -&gt; RangeTree v p r -&gt; v
+</span><a href="Data.Geometry.RangeTree.Generic.html#search"><span class="hs-identifier hs-var">search</span></a></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679956765"><span class="hs-identifier hs-var">qr</span></a></span><span>
+</span><span id="line-150"></span></pre></body></html>

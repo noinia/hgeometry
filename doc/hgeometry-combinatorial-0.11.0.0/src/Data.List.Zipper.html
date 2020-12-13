@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.List.Zipper</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- | Simple Zipper for Lists.</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">data</span><span> </span><span id="Zipper"><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span></span><span> </span><span id="local-6989586621679320105"><span class="annot"><a href="#local-6989586621679320105"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Zipper"><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679320105"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679320105"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679320076"><span id="local-6989586621679320078"><span id="local-6989586621679320080"><span class="annot"><span class="annottext">Int -&gt; Zipper a -&gt; ShowS
+[Zipper a] -&gt; ShowS
+Zipper a -&gt; String
+(Int -&gt; Zipper a -&gt; ShowS)
+-&gt; (Zipper a -&gt; String) -&gt; ([Zipper a] -&gt; ShowS) -&gt; Show (Zipper a)
+forall a. Show a =&gt; Int -&gt; Zipper a -&gt; ShowS
+forall a. Show a =&gt; [Zipper a] -&gt; ShowS
+forall a. Show a =&gt; Zipper a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Zipper a] -&gt; ShowS
+$cshowList :: forall a. Show a =&gt; [Zipper a] -&gt; ShowS
+show :: Zipper a -&gt; String
+$cshow :: forall a. Show a =&gt; Zipper a -&gt; String
+showsPrec :: Int -&gt; Zipper a -&gt; ShowS
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Zipper a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679320071"><span id="local-6989586621679320073"><span class="annot"><span class="annottext">Zipper a -&gt; Zipper a -&gt; Bool
+(Zipper a -&gt; Zipper a -&gt; Bool)
+-&gt; (Zipper a -&gt; Zipper a -&gt; Bool) -&gt; Eq (Zipper a)
+forall a. Eq a =&gt; Zipper a -&gt; Zipper a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Zipper a -&gt; Zipper a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Zipper a -&gt; Zipper a -&gt; Bool
+== :: Zipper a -&gt; Zipper a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Zipper a -&gt; Zipper a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679320066"><span id="local-6989586621679320068"><span class="annot"><span class="annottext">a -&gt; Zipper b -&gt; Zipper a
+(a -&gt; b) -&gt; Zipper a -&gt; Zipper b
+(forall a b. (a -&gt; b) -&gt; Zipper a -&gt; Zipper b)
+-&gt; (forall a b. a -&gt; Zipper b -&gt; Zipper a) -&gt; Functor Zipper
+forall a b. a -&gt; Zipper b -&gt; Zipper a
+forall a b. (a -&gt; b) -&gt; Zipper a -&gt; Zipper b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Zipper b -&gt; Zipper a
+$c&lt;$ :: forall a b. a -&gt; Zipper b -&gt; Zipper a
+fmap :: (a -&gt; b) -&gt; Zipper a -&gt; Zipper b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Zipper a -&gt; Zipper b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679320032"><span id="local-6989586621679320034"><span id="local-6989586621679320036"><span id="local-6989586621679320038"><span id="local-6989586621679320040"><span id="local-6989586621679320042"><span id="local-6989586621679320044"><span id="local-6989586621679320046"><span id="local-6989586621679320048"><span id="local-6989586621679320050"><span id="local-6989586621679320052"><span id="local-6989586621679320054"><span id="local-6989586621679320056"><span id="local-6989586621679320058"><span id="local-6989586621679320060"><span id="local-6989586621679320063"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-comment">-- Folds like it it is a normal list</span><span>
+</span><span id="line-12"></span><span>  </span><span id="local-6989586621679320030"><span class="annot"><span class="annottext">foldMap :: (a -&gt; m) -&gt; Zipper a -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></span></span><span> </span><span id="local-6989586621679320028"><span class="annot"><span class="annottext">f :: a -&gt; m
+</span><a href="#local-6989586621679320028"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span id="local-6989586621679320027"><span class="annot"><span class="annottext">ls :: [a]
+</span><a href="#local-6989586621679320027"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span id="local-6989586621679320026"><span class="annot"><span class="annottext">rs :: [a]
+</span><a href="#local-6989586621679320026"><span class="hs-identifier hs-var">rs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; [a] -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679320028"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320027"><span class="hs-identifier hs-var">ls</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; [a] -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679320028"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320026"><span class="hs-identifier hs-var">rs</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- | Construct a Zipper from a list</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679320024"><span class="annot"><a href="Data.List.Zipper.html#fromList"><span class="hs-identifier hs-type">fromList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679320024"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320024"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-19"></span><span id="fromList"><span class="annot"><span class="annottext">fromList :: [a] -&gt; Zipper a
+</span><a href="Data.List.Zipper.html#fromList"><span class="hs-identifier hs-var hs-var">fromList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; Zipper a
+forall a. [a] -&gt; [a] -&gt; Zipper a
+</span><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- | Go to the Next Element</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
+</span><span id="line-24"></span><span id="local-6989586621679320095"><span class="annot"><a href="Data.List.Zipper.html#goNext"><span class="hs-identifier hs-type">goNext</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320095"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320095"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-25"></span><span id="goNext"><span class="annot"><span class="annottext">goNext :: Zipper a -&gt; Maybe (Zipper a)
+</span><a href="Data.List.Zipper.html#goNext"><span class="hs-identifier hs-var hs-var">goNext</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span id="local-6989586621679320021"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679320021"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679320020"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679320020"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320020"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-26"></span><span>                          </span><span class="hs-special">[</span><span class="hs-special">]</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Zipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-27"></span><span>                          </span><span id="local-6989586621679320019"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679320019"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679320018"><span class="annot"><span class="annottext">ys' :: [a]
+</span><a href="#local-6989586621679320018"><span class="hs-identifier hs-var">ys'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (Zipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Zipper a -&gt; Maybe (Zipper a)) -&gt; Zipper a -&gt; Maybe (Zipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; Zipper a
+forall a. [a] -&gt; [a] -&gt; Zipper a
+</span><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679320019"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320021"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320018"><span class="hs-identifier hs-var">ys'</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | Go to the previous Element</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
+</span><span id="line-32"></span><span id="local-6989586621679320017"><span class="annot"><a href="Data.List.Zipper.html#goPrev"><span class="hs-identifier hs-type">goPrev</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320017"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320017"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-33"></span><span id="goPrev"><span class="annot"><span class="annottext">goPrev :: Zipper a -&gt; Maybe (Zipper a)
+</span><a href="Data.List.Zipper.html#goPrev"><span class="hs-identifier hs-var hs-var">goPrev</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span id="local-6989586621679320015"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679320015"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679320014"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679320014"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320015"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-34"></span><span>                          </span><span class="hs-special">[</span><span class="hs-special">]</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Zipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-35"></span><span>                          </span><span id="local-6989586621679320013"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679320013"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679320012"><span class="annot"><span class="annottext">xs' :: [a]
+</span><a href="#local-6989586621679320012"><span class="hs-identifier hs-var">xs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (Zipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Zipper a -&gt; Maybe (Zipper a)) -&gt; Zipper a -&gt; Maybe (Zipper a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; Zipper a
+forall a. [a] -&gt; [a] -&gt; Zipper a
+</span><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320012"><span class="hs-identifier hs-var">xs'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679320013"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320014"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Computes all nexts, even one that has no elements initially or at</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- the end.</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- &gt;&gt;&gt; mapM_ print $ allNexts $ fromList [1..5]</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- Zipper [] [1,2,3,4,5]</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- Zipper [1] [2,3,4,5]</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- Zipper [2,1] [3,4,5]</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- Zipper [3,2,1] [4,5]</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- Zipper [4,3,2,1] [5]</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- Zipper [5,4,3,2,1] []</span><span>
+</span><span id="line-47"></span><span id="local-6989586621679320011"><span class="annot"><a href="Data.List.Zipper.html#allNexts"><span class="hs-identifier hs-type">allNexts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320011"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320011"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-48"></span><span id="allNexts"><span class="annot"><span class="annottext">allNexts :: Zipper a -&gt; [Zipper a]
+</span><a href="Data.List.Zipper.html#allNexts"><span class="hs-identifier hs-var hs-var">allNexts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Maybe (Zipper a) -&gt; Maybe (Zipper a, Maybe (Zipper a)))
+-&gt; Maybe (Zipper a) -&gt; [Zipper a]
+forall b a. (b -&gt; Maybe (a, b)) -&gt; b -&gt; [a]
+</span><span class="hs-identifier hs-var">List.unfoldr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Zipper a -&gt; (Zipper a, Maybe (Zipper a)))
+-&gt; Maybe (Zipper a) -&gt; Maybe (Zipper a, Maybe (Zipper a))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679320008"><span class="annot"><span class="annottext">z :: Zipper a
+</span><a href="#local-6989586621679320008"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Zipper a
+</span><a href="#local-6989586621679320008"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (Zipper a)
+forall a. Zipper a -&gt; Maybe (Zipper a)
+</span><a href="Data.List.Zipper.html#goNext"><span class="hs-identifier hs-var">goNext</span></a></span><span> </span><span class="annot"><span class="annottext">Zipper a
+</span><a href="#local-6989586621679320008"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Zipper a) -&gt; [Zipper a])
+-&gt; (Zipper a -&gt; Maybe (Zipper a)) -&gt; Zipper a -&gt; [Zipper a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (Zipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- | Returns the next element, and the zipper without it</span><span>
+</span><span id="line-51"></span><span id="local-6989586621679320087"><span class="annot"><a href="Data.List.Zipper.html#extractNext"><span class="hs-identifier hs-type">extractNext</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320087"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679320087"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320087"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-52"></span><span id="extractNext"><span class="annot"><span class="annottext">extractNext :: Zipper a -&gt; Maybe (a, Zipper a)
+</span><a href="Data.List.Zipper.html#extractNext"><span class="hs-identifier hs-var hs-var">extractNext</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span id="local-6989586621679320005"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679320005"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679320004"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679320004"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320004"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-53"></span><span>                               </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (a, Zipper a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-54"></span><span>                               </span><span class="hs-special">(</span><span id="local-6989586621679320003"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679320003"><span class="hs-identifier hs-var">y</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679320002"><span class="annot"><span class="annottext">ys' :: [a]
+</span><a href="#local-6989586621679320002"><span class="hs-identifier hs-var">ys'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a, Zipper a) -&gt; Maybe (a, Zipper a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679320003"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; Zipper a
+forall a. [a] -&gt; [a] -&gt; Zipper a
+</span><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-var">Zipper</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320005"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679320002"><span class="hs-identifier hs-var">ys'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- | Drops the next element in the zipper.</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
+</span><span id="line-60"></span><span id="local-6989586621679320001"><span class="annot"><a href="Data.List.Zipper.html#dropNext"><span class="hs-identifier hs-type">dropNext</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320001"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320001"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-61"></span><span id="dropNext"><span class="annot"><span class="annottext">dropNext :: Zipper a -&gt; Maybe (Zipper a)
+</span><a href="Data.List.Zipper.html#dropNext"><span class="hs-identifier hs-var hs-var">dropNext</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, Zipper a) -&gt; Zipper a)
+-&gt; Maybe (a, Zipper a) -&gt; Maybe (Zipper a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(a, Zipper a) -&gt; Zipper a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (a, Zipper a) -&gt; Maybe (Zipper a))
+-&gt; (Zipper a -&gt; Maybe (a, Zipper a))
+-&gt; Zipper a
+-&gt; Maybe (Zipper a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (a, Zipper a)
+forall a. Zipper a -&gt; Maybe (a, Zipper a)
+</span><a href="Data.List.Zipper.html#extractNext"><span class="hs-identifier hs-var">extractNext</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- | Computes all list that still have next elements.</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- &gt;&gt;&gt; mapM_ print $ allNonEmptyNexts $ fromList [1..5]</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- Zipper [] [1,2,3,4,5]</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- Zipper [1] [2,3,4,5]</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- Zipper [2,1] [3,4,5]</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- Zipper [3,2,1] [4,5]</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- Zipper [4,3,2,1] [5]</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679319999"><span class="annot"><a href="Data.List.Zipper.html#allNonEmptyNexts"><span class="hs-identifier hs-type">allNonEmptyNexts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679319999"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.List.Zipper.html#Zipper"><span class="hs-identifier hs-type">Zipper</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679319999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-72"></span><span id="allNonEmptyNexts"><span class="annot"><span class="annottext">allNonEmptyNexts :: Zipper a -&gt; [Zipper a]
+</span><a href="Data.List.Zipper.html#allNonEmptyNexts"><span class="hs-identifier hs-var hs-var">allNonEmptyNexts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Zipper a -&gt; Maybe (Zipper a, Zipper a)) -&gt; Zipper a -&gt; [Zipper a]
+forall b a. (b -&gt; Maybe (a, b)) -&gt; b -&gt; [a]
+</span><span class="hs-identifier hs-var">List.unfoldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679319997"><span class="annot"><span class="annottext">z :: Zipper a
+</span><a href="#local-6989586621679319997"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Zipper a
+</span><a href="#local-6989586621679319997"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Zipper a -&gt; (Zipper a, Zipper a))
+-&gt; Maybe (Zipper a) -&gt; Maybe (Zipper a, Zipper a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Zipper a -&gt; Maybe (Zipper a)
+forall a. Zipper a -&gt; Maybe (Zipper a)
+</span><a href="Data.List.Zipper.html#goNext"><span class="hs-identifier hs-var">goNext</span></a></span><span> </span><span class="annot"><span class="annottext">Zipper a
+</span><a href="#local-6989586621679319997"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span></pre></body></html>

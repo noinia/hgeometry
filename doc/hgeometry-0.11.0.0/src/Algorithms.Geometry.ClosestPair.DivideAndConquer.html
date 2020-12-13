@@ -1,0 +1,537 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.ClosestPair.DivideAndConquer</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Classical \(O(n\log n)\) time divide and conquer algorithm to compute the</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- closest pair among a set of \(n\) points in \(\mathbb{R}^2\).</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.ClosestPair.DivideAndConquer</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#closestPair"><span class="hs-identifier">closestPair</span></a></span><span>
+</span><span id="line-14"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier">CP</span></a></span><span>
+</span><span id="line-15"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier">CCP</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#mergePairs"><span class="hs-identifier">mergePairs</span></a></span><span>
+</span><span id="line-17"></span><span>                                                       </span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Algorithms.DivideAndConquer</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">LSeq</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LSeq</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toNonEmpty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.UnBounded</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Classical divide and conquer algorithm to compute the closest pair among</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- \(n\) points.</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679962608"><span id="local-6989586621679962609"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#closestPair"><span class="hs-identifier hs-type">closestPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962609"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962609"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962609"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962608"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Two</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962609"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962608"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-41"></span><span id="closestPair"><span class="annot"><span class="annottext">closestPair :: LSeq 2 (Point 2 r :+ p) -&gt; Two (Point 2 r :+ p)
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#closestPair"><span class="hs-identifier hs-var hs-var">closestPair</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CCP p r -&gt; Two (Point 2 r :+ p)
+forall p r. CCP p r -&gt; Two (Point 2 r :+ p)
+</span><a href="#local-6989586621679962607"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(CCP p r -&gt; Two (Point 2 r :+ p))
+-&gt; (LSeq 2 (Point 2 r :+ p) -&gt; CCP p r)
+-&gt; LSeq 2 (Point 2 r :+ p)
+-&gt; Two (Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; CCP p r)
+-&gt; NonEmpty (Point 2 r :+ p) -&gt; CCP p r
+forall (f :: * -&gt; *) s a.
+(Foldable1 f, Semigroup s) =&gt;
+(a -&gt; s) -&gt; f a -&gt; s
+</span><span class="hs-identifier hs-var">divideAndConquer1</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; CCP p r
+forall r p. (Point 2 r :+ p) -&gt; CCP p r
+</span><a href="#local-6989586621679962604"><span class="hs-identifier hs-var">mkCCP</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r :+ p) -&gt; CCP p r)
+-&gt; (LSeq 2 (Point 2 r :+ p) -&gt; NonEmpty (Point 2 r :+ p))
+-&gt; LSeq 2 (Point 2 r :+ p)
+-&gt; CCP p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point 2 r :+ p) -&gt; NonEmpty (Point 2 r :+ p)
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-42"></span><span>            </span><span class="annot"><span class="annottext">(LSeq 2 (Point 2 r :+ p) -&gt; NonEmpty (Point 2 r :+ p))
+-&gt; (LSeq 2 (Point 2 r :+ p) -&gt; LSeq 2 (Point 2 r :+ p))
+-&gt; LSeq 2 (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; LSeq 2 (Point 2 r :+ p) -&gt; LSeq 2 (Point 2 r :+ p)
+forall a (n :: Nat). (a -&gt; a -&gt; Ordering) -&gt; LSeq n a -&gt; LSeq n a
+</span><span class="hs-identifier hs-var">LSeq.unstableSortBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Point 2 r)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679962604"><span class="annot"><span class="annottext">mkCCP :: (Point 2 r :+ p) -&gt; CCP p r
+</span><a href="#local-6989586621679962604"><span class="hs-identifier hs-var hs-var">mkCCP</span></a></span></span><span> </span><span id="local-6989586621679962600"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679962600"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p) -&gt; CP (Point 2 r :+ p) r -&gt; CCP p r
+forall p r.
+NonEmpty (Point 2 r :+ p) -&gt; CP (Point 2 r :+ p) r -&gt; CCP p r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-var">CCP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962600"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; NonEmpty (Point 2 r :+ p)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+forall a. Top a
+</span><span class="hs-identifier hs-var">Top</span></span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679962607"><span class="annot"><span class="annottext">f :: CCP p r -&gt; Two (Point 2 r :+ p)
+</span><a href="#local-6989586621679962607"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-46"></span><span>          </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-type">CCP</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ValT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621679962594"><span class="annot"><span class="annottext">cp :: Two (Point 2 r :+ p)
+</span><a href="#local-6989586621679962594"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Two (Point 2 r :+ p)
+</span><a href="#local-6989586621679962594"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-47"></span><span>          </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-type">CCP</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Top</span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Two (Point 2 r :+ p)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;closestPair: absurd.&quot;</span></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- | the closest pair and its (squared) distance</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">type</span><span> </span><span id="CP"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-var">CP</span></a></span></span><span> </span><span id="local-6989586621679962592"><span class="annot"><a href="#local-6989586621679962592"><span class="hs-identifier hs-type">q</span></a></span></span><span> </span><span id="local-6989586621679962591"><span class="annot"><a href="#local-6989586621679962591"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Top</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Two</span></span><span> </span><span class="annot"><a href="#local-6989586621679962592"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962591"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Type used in the closest pair computation. The fields represent the points</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- ordered on increasing y-order and the closest pair (if we know it)</span><span>
+</span><span id="line-55"></span><span class="hs-keyword">data</span><span> </span><span id="CCP"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-var">CCP</span></a></span></span><span> </span><span id="local-6989586621679962712"><span class="annot"><a href="#local-6989586621679962712"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679962713"><span class="annot"><a href="#local-6989586621679962713"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CCP"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-var">CCP</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962713"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962712"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>                   </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962713"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962712"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962713"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>            </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679962585"><span id="local-6989586621679962587"><span id="local-6989586621679962589"><span class="annot"><span class="annottext">Int -&gt; CCP p r -&gt; ShowS
+[CCP p r] -&gt; ShowS
+CCP p r -&gt; [Char]
+(Int -&gt; CCP p r -&gt; ShowS)
+-&gt; (CCP p r -&gt; [Char]) -&gt; ([CCP p r] -&gt; ShowS) -&gt; Show (CCP p r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; [Char]) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall p r. (Show r, Show p) =&gt; Int -&gt; CCP p r -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; [CCP p r] -&gt; ShowS
+forall p r. (Show r, Show p) =&gt; CCP p r -&gt; [Char]
+showList :: [CCP p r] -&gt; ShowS
+$cshowList :: forall p r. (Show r, Show p) =&gt; [CCP p r] -&gt; ShowS
+show :: CCP p r -&gt; [Char]
+$cshow :: forall p r. (Show r, Show p) =&gt; CCP p r -&gt; [Char]
+showsPrec :: Int -&gt; CCP p r -&gt; ShowS
+$cshowsPrec :: forall p r. (Show r, Show p) =&gt; Int -&gt; CCP p r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679962580"><span id="local-6989586621679962582"><span class="annot"><span class="annottext">CCP p r -&gt; CCP p r -&gt; Bool
+(CCP p r -&gt; CCP p r -&gt; Bool)
+-&gt; (CCP p r -&gt; CCP p r -&gt; Bool) -&gt; Eq (CCP p r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall p r. (Eq r, Eq p) =&gt; CCP p r -&gt; CCP p r -&gt; Bool
+/= :: CCP p r -&gt; CCP p r -&gt; Bool
+$c/= :: forall p r. (Eq r, Eq p) =&gt; CCP p r -&gt; CCP p r -&gt; Bool
+== :: CCP p r -&gt; CCP p r -&gt; Bool
+$c== :: forall p r. (Eq r, Eq p) =&gt; CCP p r -&gt; CCP p r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679962577"><span id="local-6989586621679962578"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679962572"><span id="local-6989586621679962574"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962578"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962578"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-type">CCP</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679962577"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679962578"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-type">CCP</span></a></span><span> </span><span id="local-6989586621679962570"><span class="annot"><span class="annottext">ptsl :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962570"><span class="hs-identifier hs-var">ptsl</span></a></span></span><span> </span><span id="local-6989586621679962569"><span class="annot"><span class="annottext">cpl :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962569"><span class="hs-identifier hs-var">cpl</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679962568"><span class="annot"><span class="annottext">&lt;&gt; :: CCP p r -&gt; CCP p r -&gt; CCP p r
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-type">CCP</span></a></span><span> </span><span id="local-6989586621679962567"><span class="annot"><span class="annottext">ptsr :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962567"><span class="hs-identifier hs-var">ptsr</span></a></span></span><span> </span><span id="local-6989586621679962566"><span class="annot"><span class="annottext">cpr :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962566"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p) -&gt; CP (Point 2 r :+ p) r -&gt; CCP p r
+forall p r.
+NonEmpty (Point 2 r :+ p) -&gt; CP (Point 2 r :+ p) r -&gt; CCP p r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CCP"><span class="hs-identifier hs-var">CCP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+forall a.
+(a -&gt; a -&gt; Ordering) -&gt; NonEmpty a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">mergeSortedBy</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679962564"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962570"><span class="hs-identifier hs-var">ptsl</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962567"><span class="hs-identifier hs-var">ptsr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>                                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; CP (Point 2 r :+ p) r
+forall p r.
+(Ord r, Num r) =&gt;
+CP (Point 2 r :+ p) r
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; CP (Point 2 r :+ p) r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#mergePairs"><span class="hs-identifier hs-var">mergePairs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(CP (Point 2 r :+ p) r -&gt; Top r)
+-&gt; CP (Point 2 r :+ p) r
+-&gt; CP (Point 2 r :+ p) r
+-&gt; CP (Point 2 r :+ p) r
+forall b a. Ord b =&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; a
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#minBy"><span class="hs-identifier hs-var">minBy</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r -&gt; Top r
+forall a r. CP a r -&gt; Top r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-var">getDist</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962569"><span class="hs-identifier hs-var">cpl</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962566"><span class="hs-identifier hs-var">cpr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962570"><span class="hs-identifier hs-var">ptsl</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962567"><span class="hs-identifier hs-var">ptsr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-comment">-- compare on y first then on x</span><span>
+</span><span id="line-64"></span><span>      </span><span class="annot"><a href="#local-6989586621679962564"><span class="hs-identifier hs-type">cmp</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962578"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962577"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962578"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962577"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span>
+</span><span id="line-65"></span><span>      </span><span id="local-6989586621679962564"><span class="annot"><span class="annottext">cmp :: (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679962564"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679962561"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679962561"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679962560"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679962560"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; r)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ p) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962561"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962560"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; r)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ p) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962561"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962560"><span class="hs-identifier hs-var">q</span></a></span></span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Function that does the actual merging work</span><span>
+</span><span id="line-70"></span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#mergePairs"><span class="hs-identifier hs-type">mergePairs</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679962690"><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679962691"><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ current closest pair and its dist</span><span>
+</span><span id="line-72"></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ pts on the left</span><span>
+</span><span id="line-73"></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ pts on the right</span><span>
+</span><span id="line-74"></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-75"></span><span id="mergePairs"><span class="annot"><span class="annottext">mergePairs :: CP (Point 2 r :+ p) r
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p)
+-&gt; CP (Point 2 r :+ p) r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#mergePairs"><span class="hs-identifier hs-var hs-var">mergePairs</span></a></span></span><span> </span><span id="local-6989586621679962557"><span class="annot"><span class="annottext">cp' :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962557"><span class="hs-identifier hs-var">cp'</span></a></span></span><span> </span><span id="local-6989586621679962556"><span class="annot"><span class="annottext">ls' :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962556"><span class="hs-identifier hs-var">ls'</span></a></span></span><span> </span><span id="local-6989586621679962555"><span class="annot"><span class="annottext">rs' :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962555"><span class="hs-identifier hs-var">rs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+-&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962554"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962557"><span class="hs-identifier hs-var">cp'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962556"><span class="hs-identifier hs-var">ls'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679962555"><span class="hs-identifier hs-var">rs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-comment">-- scan through the points on the right in increasing order.</span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="#local-6989586621679962554"><span class="hs-identifier hs-type">go</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-79"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962691"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679962554"><span class="annot"><span class="annottext">go :: CP (Point 2 r :+ p) r
+-&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962554"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679962552"><span class="annot"><span class="annottext">cp :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962552"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span class="hs-identifier">_</span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962552"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="#local-6989586621679962554"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679962551"><span class="annot"><span class="annottext">cp :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962551"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span id="local-6989586621679962550"><span class="annot"><span class="annottext">ls :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679962550"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679962549"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679962549"><span class="hs-identifier hs-var">r</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679962548"><span class="annot"><span class="annottext">rs :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679962548"><span class="hs-identifier hs-var">rs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679962547"><span class="annot"><span class="annottext">ls'' :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679962547"><span class="hs-identifier hs-var hs-var">ls''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Top r -&gt; [Point 2 r :+ p] -&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+forall r q a.
+(Ord r, Num r) =&gt;
+Top r -&gt; [Point 2 r :+ q] -&gt; (Point 2 r :+ a) -&gt; [Point 2 r :+ q]
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r -&gt; Top r
+forall a r. CP a r -&gt; Top r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-var">getDist</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962551"><span class="hs-identifier hs-var">cp</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679962550"><span class="hs-identifier hs-var">ls</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962549"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-82"></span><span>                          </span><span id="local-6989586621679962545"><span class="annot"><span class="annottext">cp'' :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962545"><span class="hs-identifier hs-var hs-var">cp''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+forall r p.
+(Ord r, Num r) =&gt;
+CP (Point 2 r :+ p) r
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#run"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962551"><span class="hs-identifier hs-var">cp</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962549"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679962547"><span class="hs-identifier hs-var">ls''</span></a></span><span> </span><span class="hs-comment">-- try to find a new closer pair with r.</span><span>
+</span><span id="line-83"></span><span>                      </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+-&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962554"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962545"><span class="hs-identifier hs-var">cp''</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679962547"><span class="hs-identifier hs-var">ls''</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679962548"><span class="hs-identifier hs-var">rs</span></a></span><span>   </span><span class="hs-comment">-- and then process the remaining points</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- | ditch the points on the left that are too low anyway</span><span>
+</span><span id="line-86"></span><span id="local-6989586621679962669"><span id="local-6989586621679962670"><span id="local-6989586621679962671"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#trim"><span class="hs-identifier hs-type">trim</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Top</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962670"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962669"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-88"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962671"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962670"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-89"></span><span id="trim"><span class="annot"><span class="annottext">trim :: Top r -&gt; [Point 2 r :+ q] -&gt; (Point 2 r :+ a) -&gt; [Point 2 r :+ q]
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#trim"><span class="hs-identifier hs-var hs-var">trim</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ValT</span></span><span> </span><span id="local-6989586621679962543"><span class="annot"><span class="annottext">d :: r
+</span><a href="#local-6989586621679962543"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679962542"><span class="annot"><span class="annottext">ls :: [Point 2 r :+ q]
+</span><a href="#local-6989586621679962542"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span id="local-6989586621679962541"><span class="annot"><span class="annottext">r :: Point 2 r :+ a
+</span><a href="#local-6989586621679962541"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ q) -&gt; Bool) -&gt; [Point 2 r :+ q] -&gt; [Point 2 r :+ q]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.dropWhile</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679962539"><span class="annot"><span class="annottext">l :: Point 2 r :+ q
+</span><a href="#local-6989586621679962539"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ q) -&gt; (Point 2 r :+ a) -&gt; r
+forall r p q.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#sqVertDist"><span class="hs-identifier hs-var">sqVertDist</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679962539"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679962541"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679962543"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ q]
+</span><a href="#local-6989586621679962542"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-90"></span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span> </span><span class="hs-identifier">_</span><span>        </span><span id="local-6989586621679962536"><span class="annot"><span class="annottext">ls :: [Point 2 r :+ q]
+</span><a href="#local-6989586621679962536"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ q]
+</span><a href="#local-6989586621679962536"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- | the squared vertical distance (in case r lies above l) or 0 otherwise</span><span>
+</span><span id="line-93"></span><span id="local-6989586621679962660"><span id="local-6989586621679962661"><span id="local-6989586621679962662"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#sqVertDist"><span class="hs-identifier hs-type">sqVertDist</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962662"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962662"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962662"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962661"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962662"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962660"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962662"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-94"></span><span id="sqVertDist"><span class="annot"><span class="annottext">sqVertDist :: (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#sqVertDist"><span class="hs-identifier hs-var hs-var">sqVertDist</span></a></span></span><span> </span><span id="local-6989586621679962535"><span class="annot"><span class="annottext">l :: Point 2 r :+ p
+</span><a href="#local-6989586621679962535"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679962534"><span class="annot"><span class="annottext">r :: Point 2 r :+ q
+</span><a href="#local-6989586621679962534"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679962533"><span class="annot"><span class="annottext">d :: r
+</span><a href="#local-6989586621679962533"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`max`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679962534"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ q) -&gt; Getting r (Point 2 r :+ q) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ q) -&gt; Const r (Point 2 r :+ q)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ q) -&gt; Const r (Point 2 r :+ q))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ q) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962535"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Getting r (Point 2 r :+ p) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const r (Point 2 r :+ p))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ p) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679962533"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679962533"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- | try and find a new closest pair with r. If we get to points that are too</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- far above r we stop (since none of those points will be closer to r anyway)</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679962667"><span id="local-6989586621679962668"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#run"><span class="hs-identifier hs-type">run</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962667"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962667"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962667"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-100"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679962667"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679962668"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-101"></span><span id="run"><span class="annot"><span class="annottext">run :: CP (Point 2 r :+ p) r
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; CP (Point 2 r :+ p) r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#run"><span class="hs-identifier hs-var hs-var">run</span></a></span></span><span> </span><span id="local-6989586621679962530"><span class="annot"><span class="annottext">cp'' :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962530"><span class="hs-identifier hs-var">cp''</span></a></span></span><span> </span><span id="local-6989586621679962529"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679962529"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679962528"><span class="annot"><span class="annottext">ls :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679962528"><span class="hs-identifier hs-var">ls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-102"></span><span>      </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+-&gt; [Point 2 r :+ p]
+-&gt; (CP (Point 2 r :+ p) r -&gt; (Point 2 r :+ p) -&gt; Bool)
+-&gt; (CP (Point 2 r :+ p) r
+    -&gt; (Point 2 r :+ p) -&gt; CP (Point 2 r :+ p) r)
+-&gt; CP (Point 2 r :+ p) r
+forall s a. s -&gt; [a] -&gt; (s -&gt; a -&gt; Bool) -&gt; (s -&gt; a -&gt; s) -&gt; s
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#runWhile"><span class="hs-identifier hs-var">runWhile</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962530"><span class="hs-identifier hs-var">cp''</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679962528"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-103"></span><span>               </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679962526"><span class="annot"><span class="annottext">cp :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962526"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span id="local-6989586621679962525"><span class="annot"><span class="annottext">l :: Point 2 r :+ p
+</span><a href="#local-6989586621679962525"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; Top r
+forall a. a -&gt; Top a
+</span><span class="hs-identifier hs-var">ValT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; r
+forall r p q.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#sqVertDist"><span class="hs-identifier hs-var">sqVertDist</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962529"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962525"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Top r -&gt; Top r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r -&gt; Top r
+forall a r. CP a r -&gt; Top r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-var">getDist</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962526"><span class="hs-identifier hs-var">cp</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- r and l inverted</span><span>
+</span><span id="line-104"></span><span>                                                             </span><span class="hs-comment">-- by design</span><span>
+</span><span id="line-105"></span><span>               </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679962523"><span class="annot"><span class="annottext">cp :: CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962523"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span id="local-6989586621679962522"><span class="annot"><span class="annottext">l :: Point 2 r :+ p
+</span><a href="#local-6989586621679962522"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(CP (Point 2 r :+ p) r -&gt; Top r)
+-&gt; CP (Point 2 r :+ p) r
+-&gt; CP (Point 2 r :+ p) r
+-&gt; CP (Point 2 r :+ p) r
+forall b a. Ord b =&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; a
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#minBy"><span class="hs-identifier hs-var">minBy</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r -&gt; Top r
+forall a r. CP a r -&gt; Top r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-var">getDist</span></a></span><span> </span><span class="annot"><span class="annottext">CP (Point 2 r :+ p) r
+</span><a href="#local-6989586621679962523"><span class="hs-identifier hs-var">cp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SP (Two (Point 2 r :+ p)) r -&gt; CP (Point 2 r :+ p) r
+forall a. a -&gt; Top a
+</span><span class="hs-identifier hs-var">ValT</span></span><span> </span><span class="annot"><span class="annottext">(SP (Two (Point 2 r :+ p)) r -&gt; CP (Point 2 r :+ p) r)
+-&gt; SP (Two (Point 2 r :+ p)) r -&gt; CP (Point 2 r :+ p) r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Two (Point 2 r :+ p) -&gt; r -&gt; SP (Two (Point 2 r :+ p)) r
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Two (Point 2 r :+ p)
+forall a. a -&gt; a -&gt; Two a
+</span><span class="hs-identifier hs-var">Two</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962522"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962529"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; r
+forall (d :: Nat) r extra extra.
+(ImplicitPeano (Peano d), Num r,
+ ArityPeano (Peano (FromPeano (Peano d))),
+ KnownNat (FromPeano (Peano d)), KnownNat d,
+ Peano (FromPeano (Peano d) + 1)
+ ~ 'S (Peano (FromPeano (Peano d)))) =&gt;
+(Point d r :+ extra) -&gt; (Point d r :+ extra) -&gt; r
+</span><a href="#local-6989586621679962520"><span class="hs-identifier hs-var">dist</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962522"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679962529"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-107"></span><span>    </span><span id="local-6989586621679962520"><span class="annot"><span class="annottext">dist :: (Point d r :+ extra) -&gt; (Point d r :+ extra) -&gt; r
+</span><a href="#local-6989586621679962520"><span class="hs-identifier hs-var hs-var">dist</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679962519"><span class="annot"><span class="annottext">p :: Point d r
+</span><a href="#local-6989586621679962519"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679962517"><span class="annot"><span class="annottext">q :: Point d r
+</span><a href="#local-6989586621679962517"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; r
+</span><a href="Data.Geometry.Point.Internal.html#squaredEuclideanDist"><span class="hs-identifier hs-var">squaredEuclideanDist</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679962519"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679962517"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | Given some function that decides when to keep things while maintaining some state.</span><span>
+</span><span id="line-111"></span><span id="local-6989586621679962651"><span id="local-6989586621679962652"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#runWhile"><span class="hs-identifier hs-type">runWhile</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679962652"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679962651"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679962652"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962651"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679962652"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962651"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962652"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962652"><span class="hs-identifier hs-type">s</span></a></span></span></span><span>
+</span><span id="line-112"></span><span id="runWhile"><span class="annot"><span class="annottext">runWhile :: s -&gt; [a] -&gt; (s -&gt; a -&gt; Bool) -&gt; (s -&gt; a -&gt; s) -&gt; s
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#runWhile"><span class="hs-identifier hs-var hs-var">runWhile</span></a></span></span><span> </span><span id="local-6989586621679962515"><span class="annot"><span class="annottext">s' :: s
+</span><a href="#local-6989586621679962515"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span id="local-6989586621679962514"><span class="annot"><span class="annottext">ys :: [a]
+</span><a href="#local-6989586621679962514"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span id="local-6989586621679962513"><span class="annot"><span class="annottext">p :: s -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679962513"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679962512"><span class="annot"><span class="annottext">f :: s -&gt; a -&gt; s
+</span><a href="#local-6989586621679962512"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; [a] -&gt; s
+</span><a href="#local-6989586621679962511"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679962515"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679962514"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679962511"><span class="annot"><span class="annottext">go :: s -&gt; [a] -&gt; s
+</span><a href="#local-6989586621679962511"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679962510"><span class="annot"><span class="annottext">s :: s
+</span><a href="#local-6989586621679962510"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>                 </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679962510"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><a href="#local-6989586621679962511"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679962509"><span class="annot"><span class="annottext">s :: s
+</span><a href="#local-6989586621679962509"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679962508"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679962508"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679962507"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679962507"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">s -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679962513"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679962509"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962508"><span class="hs-identifier hs-var">x</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; [a] -&gt; s
+</span><a href="#local-6989586621679962511"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; a -&gt; s
+</span><a href="#local-6989586621679962512"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679962509"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962508"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679962507"><span class="hs-identifier hs-var">xs</span></a></span><span>  </span><span class="hs-comment">-- continue with new state</span><span>
+</span><span id="line-116"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679962509"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-comment">-- stop, return the current state</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- | returns the minimum element according to some function.</span><span>
+</span><span id="line-119"></span><span id="local-6989586621679962688"><span id="local-6989586621679962689"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#minBy"><span class="hs-identifier hs-type">minBy</span></a></span><span>                   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679962689"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679962688"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962689"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962688"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962688"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679962688"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-120"></span><span id="minBy"><span class="annot"><span class="annottext">minBy :: (a -&gt; b) -&gt; a -&gt; a -&gt; a
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#minBy"><span class="hs-identifier hs-var hs-var">minBy</span></a></span></span><span> </span><span id="local-6989586621679962506"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679962506"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679962505"><span class="annot"><span class="annottext">a :: a
+</span><a href="#local-6989586621679962505"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679962504"><span class="annot"><span class="annottext">b :: a
+</span><a href="#local-6989586621679962504"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679962506"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962505"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679962506"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962504"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962505"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-121"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679962504"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- | Get the distance of a (candidate) closest pair</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679962686"><span id="local-6989586621679962687"><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-type">getDist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#CP"><span class="hs-identifier hs-type">CP</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679962687"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679962686"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Top</span></span><span> </span><span class="annot"><a href="#local-6989586621679962686"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-125"></span><span id="getDist"><span class="annot"><span class="annottext">getDist :: CP a r -&gt; Top r
+</span><a href="Algorithms.Geometry.ClosestPair.DivideAndConquer.html#getDist"><span class="hs-identifier hs-var hs-var">getDist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SP (Two a) r -&gt; r) -&gt; CP a r -&gt; Top r
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting r (SP (Two a) r) r -&gt; SP (Two a) r -&gt; r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><span class="hs-identifier hs-var">view</span></span><span> </span><span class="annot"><span class="annottext">Getting r (SP (Two a) r) r
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- test4 = [Point2 (479109173120836 % 8353334321025) (5100576283797 % 96072829279) :+ ()</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--         ,Point2 (58405408826671 % 1010204299645) (416491493323834 % 7859181827347) :+ ()</span><span>
+</span><span id="line-133"></span><span class="hs-comment">--         ,Point2 (497723773632392 % 8797511756605) (484251118551575 % 9452820868018) :+ ()</span><span>
+</span><span id="line-134"></span><span class="hs-comment">--         ,Point2 (71823625388220 % 1256943286753) (211467894699900 % 3952412568913) :+ ()</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--         ]</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- myTree = asBalancedBinLeafTree . LSeq.toNonEmpty . LSeq.promise . LSeq.unstableSortBy (comparing (^.core)). LSeq.fromList $ test4</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- myTree2 = let mkCCP (Elem p) = CCP (p :| []) Top in mkCCP &lt;$&gt; myTree</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- ans2p = Point2 (479109173120836 % 8353334321025) (5100576283797 % 96072829279)</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- ans2q = Point2 (71823625388220 % 1256943286753) (211467894699900 % 3952412568913)</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- temp =Two (test4 !! 1) (test4 !! 0)</span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- tempX = ValT (SP temp $ squaredEuclideanDist (temp^._1.core) (temp^._2.core))</span><span>
+</span><span id="line-150"></span></pre></body></html>

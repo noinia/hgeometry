@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass  #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings  #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Ext</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- A pair-like data type to represent a 'core' type that has extra information</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- as well.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Ext</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">typeMismatch</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Biapplicative</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifoldable</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor.Apply</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bitraversable</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Apply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftF2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Bifoldable</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Bitraversable</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Our Ext type that represents the core datatype core extended with extra</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- information of type 'extra'.</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679318058"><span id="local-6989586621679318059"></span></span><span class="hs-keyword">data</span><span> </span><span id="local-6989586621679318259"><span class="annot"><a href="#local-6989586621679318259"><span class="hs-identifier hs-type">core</span></a></span></span><span> </span><span id="%3A%2B"><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span></span><span> </span><span id="local-6989586621679318258"><span class="annot"><a href="#local-6989586621679318258"><span class="hs-identifier hs-type">extra</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679318259"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span id="%3A%2B"><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679318258"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679318051"><span id="local-6989586621679318053"><span id="local-6989586621679318055"><span class="annot"><span class="annottext">Int -&gt; (core :+ extra) -&gt; ShowS
+[core :+ extra] -&gt; ShowS
+(core :+ extra) -&gt; String
+(Int -&gt; (core :+ extra) -&gt; ShowS)
+-&gt; ((core :+ extra) -&gt; String)
+-&gt; ([core :+ extra] -&gt; ShowS)
+-&gt; Show (core :+ extra)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall core extra.
+(Show core, Show extra) =&gt;
+Int -&gt; (core :+ extra) -&gt; ShowS
+forall core extra.
+(Show core, Show extra) =&gt;
+[core :+ extra] -&gt; ShowS
+forall core extra.
+(Show core, Show extra) =&gt;
+(core :+ extra) -&gt; String
+showList :: [core :+ extra] -&gt; ShowS
+$cshowList :: forall core extra.
+(Show core, Show extra) =&gt;
+[core :+ extra] -&gt; ShowS
+show :: (core :+ extra) -&gt; String
+$cshow :: forall core extra.
+(Show core, Show extra) =&gt;
+(core :+ extra) -&gt; String
+showsPrec :: Int -&gt; (core :+ extra) -&gt; ShowS
+$cshowsPrec :: forall core extra.
+(Show core, Show extra) =&gt;
+Int -&gt; (core :+ extra) -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679318042"><span id="local-6989586621679318044"><span id="local-6989586621679318046"><span id="local-6989586621679318048"><span class="annot"><span class="annottext">ReadPrec [core :+ extra]
+ReadPrec (core :+ extra)
+Int -&gt; ReadS (core :+ extra)
+ReadS [core :+ extra]
+(Int -&gt; ReadS (core :+ extra))
+-&gt; ReadS [core :+ extra]
+-&gt; ReadPrec (core :+ extra)
+-&gt; ReadPrec [core :+ extra]
+-&gt; Read (core :+ extra)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall core extra.
+(Read core, Read extra) =&gt;
+ReadPrec [core :+ extra]
+forall core extra.
+(Read core, Read extra) =&gt;
+ReadPrec (core :+ extra)
+forall core extra.
+(Read core, Read extra) =&gt;
+Int -&gt; ReadS (core :+ extra)
+forall core extra. (Read core, Read extra) =&gt; ReadS [core :+ extra]
+readListPrec :: ReadPrec [core :+ extra]
+$creadListPrec :: forall core extra.
+(Read core, Read extra) =&gt;
+ReadPrec [core :+ extra]
+readPrec :: ReadPrec (core :+ extra)
+$creadPrec :: forall core extra.
+(Read core, Read extra) =&gt;
+ReadPrec (core :+ extra)
+readList :: ReadS [core :+ extra]
+$creadList :: forall core extra. (Read core, Read extra) =&gt; ReadS [core :+ extra]
+readsPrec :: Int -&gt; ReadS (core :+ extra)
+$creadsPrec :: forall core extra.
+(Read core, Read extra) =&gt;
+Int -&gt; ReadS (core :+ extra)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679318037"><span id="local-6989586621679318039"><span class="annot"><span class="annottext">(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; Eq (core :+ extra)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall core extra.
+(Eq core, Eq extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+/= :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c/= :: forall core extra.
+(Eq core, Eq extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+== :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c== :: forall core extra.
+(Eq core, Eq extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679318021"><span id="local-6989586621679318023"><span id="local-6989586621679318025"><span id="local-6989586621679318027"><span id="local-6989586621679318029"><span id="local-6989586621679318031"><span id="local-6989586621679318033"><span class="annot"><span class="annottext">Eq (core :+ extra)
+Eq (core :+ extra) =&gt;
+((core :+ extra) -&gt; (core :+ extra) -&gt; Ordering)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; Bool)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra)
+-&gt; ((core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra)
+-&gt; Ord (core :+ extra)
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+(core :+ extra) -&gt; (core :+ extra) -&gt; Ordering
+(core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall core extra. (Ord core, Ord extra) =&gt; Eq (core :+ extra)
+forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Ordering
+forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+min :: (core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+$cmin :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+max :: (core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+$cmax :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+&gt;= :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c&gt;= :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+&gt; :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c&gt; :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+&lt;= :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c&lt;= :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+&lt; :: (core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+$c&lt; :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bool
+compare :: (core :+ extra) -&gt; (core :+ extra) -&gt; Ordering
+$ccompare :: forall core extra.
+(Ord core, Ord extra) =&gt;
+(core :+ extra) -&gt; (core :+ extra) -&gt; Ordering
+$cp1Ord :: forall core extra. (Ord core, Ord extra) =&gt; Eq (core :+ extra)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679318016"><span id="local-6989586621679318018"><span class="annot"><span class="annottext">core :+ extra
+(core :+ extra) -&gt; (core :+ extra) -&gt; Bounded (core :+ extra)
+forall a. a -&gt; a -&gt; Bounded a
+forall core extra. (Bounded core, Bounded extra) =&gt; core :+ extra
+maxBound :: core :+ extra
+$cmaxBound :: forall core extra. (Bounded core, Bounded extra) =&gt; core :+ extra
+minBound :: core :+ extra
+$cminBound :: forall core extra. (Bounded core, Bounded extra) =&gt; core :+ extra
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. (core :+ extra) -&gt; Rep (core :+ extra) x)
+-&gt; (forall x. Rep (core :+ extra) x -&gt; core :+ extra)
+-&gt; Generic (core :+ extra)
+forall x. Rep (core :+ extra) x -&gt; core :+ extra
+forall x. (core :+ extra) -&gt; Rep (core :+ extra) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall core extra x. Rep (core :+ extra) x -&gt; core :+ extra
+forall core extra x. (core :+ extra) -&gt; Rep (core :+ extra) x
+$cto :: forall core extra x. Rep (core :+ extra) x -&gt; core :+ extra
+$cfrom :: forall core extra x. (core :+ extra) -&gt; Rep (core :+ extra) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679318010"><span class="annot"><span class="annottext">(core :+ extra) -&gt; ()
+((core :+ extra) -&gt; ()) -&gt; NFData (core :+ extra)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall core extra.
+(NFData core, NFData extra) =&gt;
+(core :+ extra) -&gt; ()
+rnf :: (core :+ extra) -&gt; ()
+$crnf :: forall core extra.
+(NFData core, NFData extra) =&gt;
+(core :+ extra) -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">infixr</span><span> </span><span class="hs-number">1</span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type hs-type">:+</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679318004"><span id="local-6989586621679318006"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679318002"><span class="annot"><span class="annottext">bimap :: (a -&gt; b) -&gt; (c -&gt; d) -&gt; (a :+ c) -&gt; b :+ d
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679318000"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679318000"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679317999"><span class="annot"><span class="annottext">g :: c -&gt; d
+</span><a href="#local-6989586621679317999"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317998"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317998"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317997"><span class="annot"><span class="annottext">e :: c
+</span><a href="#local-6989586621679317997"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679318000"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317998"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; d -&gt; b :+ d
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679317999"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679317997"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317991"><span id="local-6989586621679317993"><span class="annot"><span class="hs-identifier hs-type">Biapply</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679317989"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679317989"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317988"><span class="annot"><span class="annottext">g :: c -&gt; d
+</span><a href="#local-6989586621679317988"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679317987"><span class="annot"><span class="annottext">&lt;&lt;.&gt;&gt; :: ((a -&gt; b) :+ (c -&gt; d)) -&gt; (a :+ c) -&gt; b :+ d
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&lt;.&gt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317985"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317985"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317984"><span class="annot"><span class="annottext">e :: c
+</span><a href="#local-6989586621679317984"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679317989"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317985"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; d -&gt; b :+ d
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679317988"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679317984"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317975"><span id="local-6989586621679317977"><span id="local-6989586621679317979"><span class="annot"><span class="hs-identifier hs-type">Biapplicative</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679317973"><span class="annot"><span class="annottext">bipure :: a -&gt; b -&gt; a :+ b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bipure</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; a :+ b
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">(:+)</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679317971"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679317971"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317970"><span class="annot"><span class="annottext">g :: c -&gt; d
+</span><a href="#local-6989586621679317970"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679317969"><span class="annot"><span class="annottext">&lt;&lt;*&gt;&gt; :: ((a -&gt; b) :+ (c -&gt; d)) -&gt; (a :+ c) -&gt; b :+ d
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&lt;*&gt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317967"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317967"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317966"><span class="annot"><span class="annottext">e :: c
+</span><a href="#local-6989586621679317966"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679317971"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317967"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; d -&gt; b :+ d
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679317970"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679317966"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317959"><span id="local-6989586621679317961"><span id="local-6989586621679317964"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621679317957"><span class="annot"><span class="annottext">bifoldMap :: (a -&gt; m) -&gt; (b -&gt; m) -&gt; (a :+ b) -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></span></span><span> </span><span id="local-6989586621679317955"><span class="annot"><span class="annottext">f :: a -&gt; m
+</span><a href="#local-6989586621679317955"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679317954"><span class="annot"><span class="annottext">g :: b -&gt; m
+</span><a href="#local-6989586621679317954"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317953"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317953"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317952"><span class="annot"><span class="annottext">e :: b
+</span><a href="#local-6989586621679317952"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679317955"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317953"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Monoid a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679317954"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679317952"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679317947"><span class="annot"><span class="annottext">bitraverse :: (a -&gt; f c) -&gt; (b -&gt; f d) -&gt; (a :+ b) -&gt; f (c :+ d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></span></span><span> </span><span id="local-6989586621679317945"><span class="annot"><span class="annottext">f :: a -&gt; f c
+</span><a href="#local-6989586621679317945"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679317944"><span class="annot"><span class="annottext">g :: b -&gt; f d
+</span><a href="#local-6989586621679317944"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317943"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317943"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317942"><span class="annot"><span class="annottext">e :: b
+</span><a href="#local-6989586621679317942"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c -&gt; d -&gt; c :+ d
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">(:+)</span></a></span><span> </span><span class="annot"><span class="annottext">(c -&gt; d -&gt; c :+ d) -&gt; f c -&gt; f (d -&gt; c :+ d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679317945"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317943"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">f (d -&gt; c :+ d) -&gt; f d -&gt; f (c :+ d)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679317944"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679317942"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317936"><span id="local-6989586621679317938"><span class="annot"><span class="hs-identifier hs-type">Bifoldable1</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317930"><span class="annot"><span class="hs-identifier hs-type">Bitraversable1</span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">(:+)</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679317928"><span class="annot"><span class="annottext">bitraverse1 :: (a -&gt; f b) -&gt; (c -&gt; f d) -&gt; (a :+ c) -&gt; f (b :+ d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse1</span></span></span><span> </span><span id="local-6989586621679317926"><span class="annot"><span class="annottext">f :: a -&gt; f b
+</span><a href="#local-6989586621679317926"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679317925"><span class="annot"><span class="annottext">g :: c -&gt; f d
+</span><a href="#local-6989586621679317925"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317924"><span class="annot"><span class="annottext">c :: a
+</span><a href="#local-6989586621679317924"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317923"><span class="annot"><span class="annottext">e :: c
+</span><a href="#local-6989586621679317923"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; d -&gt; b :+ d) -&gt; f b -&gt; f d -&gt; f (b :+ d)
+forall (f :: * -&gt; *) a b c.
+Apply f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">liftF2</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; d -&gt; b :+ d
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">(:+)</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679317926"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317924"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; f d
+</span><a href="#local-6989586621679317925"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679317923"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679317921"><span id="local-6989586621679317922"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317916"><span id="local-6989586621679317918"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679317922"><span class="hs-identifier hs-type">core</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679317921"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317922"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317921"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679317914"><span class="annot"><span class="annottext">c :: core
+</span><a href="#local-6989586621679317914"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317913"><span class="annot"><span class="annottext">e :: extra
+</span><a href="#local-6989586621679317913"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679317912"><span class="annot"><span class="annottext">&lt;&gt; :: (core :+ extra) -&gt; (core :+ extra) -&gt; core :+ extra
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317911"><span class="annot"><span class="annottext">c' :: core
+</span><a href="#local-6989586621679317911"><span class="hs-identifier hs-var">c'</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317910"><span class="annot"><span class="annottext">e' :: extra
+</span><a href="#local-6989586621679317910"><span class="hs-identifier hs-var">e'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317914"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; core -&gt; core
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317911"><span class="hs-identifier hs-var">c'</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; extra -&gt; core :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317913"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">extra -&gt; extra -&gt; extra
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317910"><span class="hs-identifier hs-var">e'</span></a></span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679317908"><span id="local-6989586621679317909"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317902"><span id="local-6989586621679317904"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679317909"><span class="hs-identifier hs-type">core</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679317908"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317909"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317908"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-comment">-- toJSON     (c :+ e) = toJSON     (c,e)</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-comment">-- toEncoding (c :+ e) = toEncoding (c,e)</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679317900"><span class="annot"><span class="annottext">toJSON :: (core :+ extra) -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span>     </span><span class="hs-special">(</span><span id="local-6989586621679317898"><span class="annot"><span class="annottext">c :: core
+</span><a href="#local-6989586621679317898"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317897"><span class="annot"><span class="annottext">e :: extra
+</span><a href="#local-6989586621679317897"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-string">&quot;core&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; core -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Text -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317898"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;extra&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; extra -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Text -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317897"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679317894"><span class="annot"><span class="annottext">toEncoding :: (core :+ extra) -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317892"><span class="annot"><span class="annottext">c :: core
+</span><a href="#local-6989586621679317892"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317891"><span class="annot"><span class="annottext">e :: extra
+</span><a href="#local-6989586621679317891"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Series -&gt; Encoding
+</span><span class="hs-identifier hs-var">pairs</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;core&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; core -&gt; Series
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Text -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317892"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;extra&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; extra -&gt; Series
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Text -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317891"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679317888"><span id="local-6989586621679317889"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317885"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679317889"><span class="hs-identifier hs-type">core</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="#local-6989586621679317888"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317889"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317888"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-comment">-- parseJSON = fmap (\(c,e) -&gt; c :+ e) . parseJSON</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679317883"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser (core :+ extra)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Object</span></span><span> </span><span id="local-6989586621679317880"><span class="annot"><span class="annottext">v :: Object
+</span><a href="#local-6989586621679317880"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">core -&gt; extra -&gt; core :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">(:+)</span></a></span><span> </span><span class="annot"><span class="annottext">(core -&gt; extra -&gt; core :+ extra)
+-&gt; Parser core -&gt; Parser (extra -&gt; core :+ extra)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679317880"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Text -&gt; Parser core
+forall a. FromJSON a =&gt; Object -&gt; Text -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="hs-string">&quot;core&quot;</span></span><span> </span><span class="annot"><span class="annottext">Parser (extra -&gt; core :+ extra)
+-&gt; Parser extra -&gt; Parser (core :+ extra)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679317880"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Text -&gt; Parser extra
+forall a. FromJSON a =&gt; Object -&gt; Text -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="hs-string">&quot;extra&quot;</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">parseJSON</span></span><span> </span><span id="local-6989586621679317878"><span class="annot"><span class="annottext">invalid :: Value
+</span><a href="#local-6989586621679317878"><span class="hs-identifier hs-var">invalid</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Value -&gt; Parser (core :+ extra)
+forall a. String -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">typeMismatch</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Ext (:+)&quot;</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679317878"><span class="hs-identifier hs-var">invalid</span></a></span></span></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span id="local-6989586621679317876"><span id="local-6989586621679317877"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679317873"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679317877"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><a href="#local-6989586621679317876"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317877"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317876"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679317871"><span class="annot"><span class="annottext">arbitrary :: Gen (c :+ e)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c -&gt; e -&gt; c :+ e
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">(:+)</span></a></span><span> </span><span class="annot"><span class="annottext">(c -&gt; e -&gt; c :+ e) -&gt; Gen c -&gt; Gen (e -&gt; c :+ e)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen c
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen (e -&gt; c :+ e) -&gt; Gen e -&gt; Gen (c :+ e)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen e
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span></span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679318070"><span id="local-6989586621679318071"><span class="annot"><a href="Data.Ext.html#_core"><span class="hs-identifier hs-type">_core</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679318071"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679318070"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679318071"><span class="hs-identifier hs-type">core</span></a></span></span></span><span>
+</span><span id="line-78"></span><span id="_core"><span class="annot"><span class="annottext">_core :: (core :+ extra) -&gt; core
+</span><a href="Data.Ext.html#_core"><span class="hs-identifier hs-var hs-var">_core</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679317868"><span class="annot"><span class="annottext">c :: core
+</span><a href="#local-6989586621679317868"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317868"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-79"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#_core"><span class="hs-pragma hs-type">_core</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679318064"><span id="local-6989586621679318065"><span class="annot"><a href="Data.Ext.html#_extra"><span class="hs-identifier hs-type">_extra</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679318065"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679318064"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679318064"><span class="hs-identifier hs-type">extra</span></a></span></span></span><span>
+</span><span id="line-82"></span><span id="_extra"><span class="annot"><span class="annottext">_extra :: (core :+ extra) -&gt; extra
+</span><a href="Data.Ext.html#_extra"><span class="hs-identifier hs-var hs-var">_extra</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317866"><span class="annot"><span class="annottext">e :: extra
+</span><a href="#local-6989586621679317866"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317866"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-83"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#_extra"><span class="hs-pragma hs-type">_extra</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679317863"><span id="local-6989586621679317864"><span id="local-6989586621679317865"><span class="annot"><a href="Data.Ext.html#core"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317865"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317864"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317863"><span class="hs-identifier hs-type">core'</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317864"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679317865"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317863"><span class="hs-identifier hs-type">core'</span></a></span></span></span></span><span>
+</span><span id="line-86"></span><span id="core"><span class="annot"><span class="annottext">core :: (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="Data.Ext.html#core"><span class="hs-identifier hs-var hs-var">core</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((core :+ extra) -&gt; core)
+-&gt; ((core :+ extra) -&gt; core' -&gt; core' :+ extra)
+-&gt; Lens (core :+ extra) (core' :+ extra) core core'
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">(core :+ extra) -&gt; core
+forall core extra. (core :+ extra) -&gt; core
+</span><a href="Data.Ext.html#_core"><span class="hs-identifier hs-var">_core</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679317860"><span class="annot"><span class="annottext">e :: extra
+</span><a href="#local-6989586621679317860"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679317859"><span class="annot"><span class="annottext">c :: core'
+</span><a href="#local-6989586621679317859"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">core'
+</span><a href="#local-6989586621679317859"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">core' -&gt; extra -&gt; core' :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679317860"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#core"><span class="hs-pragma hs-type">core</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679317856"><span id="local-6989586621679317857"><span id="local-6989586621679317858"><span class="annot"><a href="Data.Ext.html#extra"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317858"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317857"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317858"><span class="hs-identifier hs-type">core</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317856"><span class="hs-identifier hs-type">extra'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679317857"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679317856"><span class="hs-identifier hs-type">extra'</span></a></span></span></span></span><span>
+</span><span id="line-90"></span><span id="extra"><span class="annot"><span class="annottext">extra :: (extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="Data.Ext.html#extra"><span class="hs-identifier hs-var hs-var">extra</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((core :+ extra) -&gt; extra)
+-&gt; ((core :+ extra) -&gt; extra' -&gt; core :+ extra')
+-&gt; Lens (core :+ extra) (core :+ extra') extra extra'
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">(core :+ extra) -&gt; extra
+forall core extra. (core :+ extra) -&gt; extra
+</span><a href="Data.Ext.html#_extra"><span class="hs-identifier hs-var">_extra</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679317854"><span class="annot"><span class="annottext">c :: core
+</span><a href="#local-6989586621679317854"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679317853"><span class="annot"><span class="annottext">e :: extra'
+</span><a href="#local-6989586621679317853"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679317854"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; extra' -&gt; core :+ extra'
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra'
+</span><a href="#local-6989586621679317853"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#extra"><span class="hs-pragma hs-type">extra</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span id="local-6989586621679317852"><span class="annot"><a href="Data.Ext.html#ext"><span class="hs-identifier hs-type">ext</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679317852"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317852"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-94"></span><span id="ext"><span class="annot"><span class="annottext">ext :: a -&gt; a :+ ()
+</span><a href="Data.Ext.html#ext"><span class="hs-identifier hs-var hs-var">ext</span></a></span></span><span> </span><span id="local-6989586621679317850"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679317850"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679317850"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; () -&gt; a :+ ()
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="Data.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Ext.html#ext"><span class="hs-pragma hs-type">ext</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-96"></span></pre></body></html>

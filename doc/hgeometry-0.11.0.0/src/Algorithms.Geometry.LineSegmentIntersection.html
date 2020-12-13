@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.LineSegmentIntersection</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann.html"><span class="hs-identifier">Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BO</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Tests if there are any interior intersections.</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- | \(O(n \log n)\)</span><span>
+</span><span id="line-10"></span><span id="local-6989586621679979477"><span id="local-6989586621679979478"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.html#hasInteriorIntersections"><span class="hs-identifier hs-type">hasInteriorIntersections</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679979478"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679979478"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679979477"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979478"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-12"></span><span id="hasInteriorIntersections"><span class="annot"><span class="annottext">hasInteriorIntersections :: [LineSegment 2 p r] -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.html#hasInteriorIntersections"><span class="hs-identifier hs-var hs-var">hasInteriorIntersections</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
+-&gt; ([LineSegment 2 p r] -&gt; Bool) -&gt; [LineSegment 2 p r] -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r) (Associated p r) -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">(Map (Point 2 r) (Associated p r) -&gt; Bool)
+-&gt; ([LineSegment 2 p r] -&gt; Map (Point 2 r) (Associated p r))
+-&gt; [LineSegment 2 p r]
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; Map (Point 2 r) (Associated p r)
+forall r p.
+(Ord r, Fractional r) =&gt;
+[LineSegment 2 p r] -&gt; Intersections p r
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann.html#interiorIntersections"><span class="hs-identifier hs-var">BO.interiorIntersections</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- | \(O(n \log n)\)</span><span>
+</span><span id="line-15"></span><span id="local-6989586621679979465"><span id="local-6989586621679979466"><span id="local-6989586621679979467"><span class="annot"><a href="Algorithms.Geometry.LineSegmentIntersection.html#hasSelfIntersections"><span class="hs-identifier hs-type">hasSelfIntersections</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679979467"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679979467"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979466"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979465"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979467"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span><span>
+</span><span id="line-16"></span><span id="hasSelfIntersections"><span class="annot"><span class="annottext">hasSelfIntersections :: Polygon t p r -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.html#hasSelfIntersections"><span class="hs-identifier hs-var hs-var">hasSelfIntersections</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; Bool
+forall r p. (Ord r, Fractional r) =&gt; [LineSegment 2 p r] -&gt; Bool
+</span><a href="Algorithms.Geometry.LineSegmentIntersection.html#hasInteriorIntersections"><span class="hs-identifier hs-var">hasInteriorIntersections</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; Bool)
+-&gt; (Polygon t p r -&gt; [LineSegment 2 p r]) -&gt; Polygon t p r -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span>
+</span><span id="line-17"></span></pre></body></html>

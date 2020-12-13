@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP              #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Test.QuickCheck.Instances.OldTime</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude.Compat</span></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Int32</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">System.Time</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">OldTime</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- old-time</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110277"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.Month</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>    </span><span id="local-6989586621679110275"><span class="annot"><span class="annottext">arbitrary :: Gen Month
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen Month
+forall a. (Bounded a, Enum a) =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitraryBoundedEnum</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.Month</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>    </span><span id="local-6989586621679110270"><span class="annot"><span class="annottext">coarbitrary :: Month -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Month -&gt; Gen b -&gt; Gen b
+forall a b. Enum a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitraryEnum</span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110265"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.Day</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>    </span><span id="local-6989586621679110264"><span class="annot"><span class="annottext">arbitrary :: Gen Day
+</span><a href="#local-6989586621679110264"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Gen Day
+forall a. (Bounded a, Enum a) =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitraryBoundedEnum</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.Day</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679110262"><span class="annot"><span class="annottext">coarbitrary :: Day -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110262"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Day -&gt; Gen b -&gt; Gen b
+forall a b. Enum a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitraryEnum</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.ClockTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621679110259"><span class="annot"><span class="annottext">arbitrary :: Gen ClockTime
+</span><a href="#local-6989586621679110259"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-33"></span><span>        </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; ClockTime
+</span><span class="hs-identifier hs-var">OldTime.TOD</span></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer -&gt; ClockTime)
+-&gt; Gen Integer -&gt; Gen (Integer -&gt; ClockTime)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Integer, Integer) -&gt; Gen Integer
+forall a. Random a =&gt; (a, a) -&gt; Gen a
+</span><span class="hs-identifier hs-var">choose</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Integer
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32
+forall a. Bounded a =&gt; a
+</span><span class="hs-identifier hs-var">maxBound</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int32</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>                    </span><span class="annot"><span class="annottext">Gen (Integer -&gt; ClockTime) -&gt; Gen Integer -&gt; Gen ClockTime
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Integer, Integer) -&gt; Gen Integer
+forall a. Random a =&gt; (a, a) -&gt; Gen a
+</span><span class="hs-identifier hs-var">choose</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1000000000000</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679110254"><span class="annot"><span class="annottext">shrink :: ClockTime -&gt; [ClockTime]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OldTime.TOD</span></span><span> </span><span id="local-6989586621679110252"><span class="annot"><span class="annottext">s :: Integer
+</span><a href="#local-6989586621679110252"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679110251"><span class="annot"><span class="annottext">p :: Integer
+</span><a href="#local-6989586621679110251"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; ClockTime
+</span><span class="hs-identifier hs-var">OldTime.TOD</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110250"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110251"><span class="hs-identifier hs-var">p</span></a></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110250"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110250"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110252"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[ClockTime] -&gt; [ClockTime] -&gt; [ClockTime]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-37"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; ClockTime
+</span><span class="hs-identifier hs-var">OldTime.TOD</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110252"><span class="hs-identifier hs-var">s</span></a></span><span>  </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110249"><span class="hs-identifier hs-var">p'</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110249"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110249"><span class="hs-identifier hs-var">p'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110251"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.ClockTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679110247"><span class="annot"><span class="annottext">coarbitrary :: ClockTime -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110247"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OldTime.TOD</span></span><span> </span><span id="local-6989586621679110246"><span class="annot"><span class="annottext">s :: Integer
+</span><a href="#local-6989586621679110246"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679110245"><span class="annot"><span class="annottext">p :: Integer
+</span><a href="#local-6989586621679110245"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-41"></span><span>        </span><span class="annot"><span class="annottext">Integer -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110246"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110245"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.TimeDiff</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-comment">-- a bit of a cheat ...</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679110241"><span class="annot"><span class="annottext">arbitrary :: Gen TimeDiff
+</span><a href="#local-6989586621679110241"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-46"></span><span>        </span><span class="annot"><span class="annottext">TimeDiff -&gt; TimeDiff
+</span><span class="hs-identifier hs-var">OldTime.normalizeTimeDiff</span></span><span> </span><span class="annot"><span class="annottext">(TimeDiff -&gt; TimeDiff) -&gt; Gen TimeDiff -&gt; Gen TimeDiff
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span>
+</span><span id="line-47"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClockTime -&gt; ClockTime -&gt; TimeDiff
+</span><span class="hs-identifier hs-var">OldTime.diffClockTimes</span></span><span> </span><span class="annot"><span class="annottext">(ClockTime -&gt; ClockTime -&gt; TimeDiff)
+-&gt; Gen ClockTime -&gt; Gen (ClockTime -&gt; TimeDiff)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen ClockTime
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span> </span><span class="annot"><span class="annottext">Gen (ClockTime -&gt; TimeDiff) -&gt; Gen ClockTime -&gt; Gen TimeDiff
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen ClockTime
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679110238"><span class="annot"><span class="annottext">shrink :: TimeDiff -&gt; [TimeDiff]
+</span><a href="#local-6989586621679110238"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span id="local-6989586621679110237"><span class="annot"><span class="annottext">td :: TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OldTime.TimeDiff</span></span><span> </span><span id="local-6989586621679110235"><span class="annot"><span class="annottext">year :: Int
+</span><a href="#local-6989586621679110235"><span class="hs-identifier hs-var">year</span></a></span></span><span> </span><span id="local-6989586621679110234"><span class="annot"><span class="annottext">month :: Int
+</span><a href="#local-6989586621679110234"><span class="hs-identifier hs-var">month</span></a></span></span><span> </span><span id="local-6989586621679110233"><span class="annot"><span class="annottext">day :: Int
+</span><a href="#local-6989586621679110233"><span class="hs-identifier hs-var">day</span></a></span></span><span> </span><span id="local-6989586621679110232"><span class="annot"><span class="annottext">hour :: Int
+</span><a href="#local-6989586621679110232"><span class="hs-identifier hs-var">hour</span></a></span></span><span> </span><span id="local-6989586621679110231"><span class="annot"><span class="annottext">minute :: Int
+</span><a href="#local-6989586621679110231"><span class="hs-identifier hs-var">minute</span></a></span></span><span> </span><span id="local-6989586621679110230"><span class="annot"><span class="annottext">sec :: Int
+</span><a href="#local-6989586621679110230"><span class="hs-identifier hs-var">sec</span></a></span></span><span> </span><span id="local-6989586621679110229"><span class="annot"><span class="annottext">picosec :: Integer
+</span><a href="#local-6989586621679110229"><span class="hs-identifier hs-var">picosec</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-49"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdYear :: Int
+</span><a href="#local-6989586621679110228"><span class="hs-identifier hs-var">OldTime.tdYear</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110227"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110227"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110227"><span class="hs-identifier hs-var">y'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110235"><span class="hs-identifier hs-var">year</span></a></span><span>    </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-50"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdMonth :: Int
+</span><a href="#local-6989586621679110226"><span class="hs-identifier hs-var">OldTime.tdMonth</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110225"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110225"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110225"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110234"><span class="hs-identifier hs-var">month</span></a></span><span>   </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-51"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdDay :: Int
+</span><a href="#local-6989586621679110224"><span class="hs-identifier hs-var">OldTime.tdDay</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110223"><span class="hs-identifier hs-var">d'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110223"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110223"><span class="hs-identifier hs-var">d'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110233"><span class="hs-identifier hs-var">day</span></a></span><span>     </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-52"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdHour :: Int
+</span><a href="#local-6989586621679110222"><span class="hs-identifier hs-var">OldTime.tdHour</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110221"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110221"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110221"><span class="hs-identifier hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110232"><span class="hs-identifier hs-var">hour</span></a></span><span>    </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-53"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdMin :: Int
+</span><a href="#local-6989586621679110220"><span class="hs-identifier hs-var">OldTime.tdMin</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110219"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110219"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110219"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110231"><span class="hs-identifier hs-var">minute</span></a></span><span>  </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-54"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdSec :: Int
+</span><a href="#local-6989586621679110218"><span class="hs-identifier hs-var">OldTime.tdSec</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110217"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110217"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110217"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110230"><span class="hs-identifier hs-var">sec</span></a></span><span>     </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[TimeDiff] -&gt; [TimeDiff] -&gt; [TimeDiff]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span>
+</span><span id="line-55"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TimeDiff
+</span><a href="#local-6989586621679110237"><span class="hs-identifier hs-var">td</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">tdPicosec :: Integer
+</span><a href="#local-6989586621679110216"><span class="hs-identifier hs-var">OldTime.tdPicosec</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110215"><span class="hs-identifier hs-var">p'</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679110215"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110215"><span class="hs-identifier hs-var">p'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer]
+forall a. Arbitrary a =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">shrink</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110229"><span class="hs-identifier hs-var">picosec</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.TimeDiff</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679110213"><span class="annot"><span class="annottext">coarbitrary :: TimeDiff -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110213"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OldTime.TimeDiff</span></span><span> </span><span id="local-6989586621679110212"><span class="annot"><span class="annottext">year :: Int
+</span><a href="#local-6989586621679110212"><span class="hs-identifier hs-var">year</span></a></span></span><span> </span><span id="local-6989586621679110211"><span class="annot"><span class="annottext">month :: Int
+</span><a href="#local-6989586621679110211"><span class="hs-identifier hs-var">month</span></a></span></span><span> </span><span id="local-6989586621679110210"><span class="annot"><span class="annottext">day :: Int
+</span><a href="#local-6989586621679110210"><span class="hs-identifier hs-var">day</span></a></span></span><span> </span><span id="local-6989586621679110209"><span class="annot"><span class="annottext">hour :: Int
+</span><a href="#local-6989586621679110209"><span class="hs-identifier hs-var">hour</span></a></span></span><span> </span><span id="local-6989586621679110208"><span class="annot"><span class="annottext">minute :: Int
+</span><a href="#local-6989586621679110208"><span class="hs-identifier hs-var">minute</span></a></span></span><span> </span><span id="local-6989586621679110207"><span class="annot"><span class="annottext">sec :: Int
+</span><a href="#local-6989586621679110207"><span class="hs-identifier hs-var">sec</span></a></span></span><span> </span><span id="local-6989586621679110206"><span class="annot"><span class="annottext">picosec :: Integer
+</span><a href="#local-6989586621679110206"><span class="hs-identifier hs-var">picosec</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-59"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110212"><span class="hs-identifier hs-var">year</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-60"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110211"><span class="hs-identifier hs-var">month</span></a></span><span>   </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-61"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110210"><span class="hs-identifier hs-var">day</span></a></span><span>     </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-62"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110209"><span class="hs-identifier hs-var">hour</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-63"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110208"><span class="hs-identifier hs-var">minute</span></a></span><span>  </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-64"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110207"><span class="hs-identifier hs-var">sec</span></a></span><span>     </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-65"></span><span>        </span><span class="annot"><span class="annottext">Integer -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110206"><span class="hs-identifier hs-var">picosec</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- UTC only</span><span>
+</span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110203"><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.CalendarTime</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621679110202"><span class="annot"><span class="annottext">arbitrary :: Gen CalendarTime
+</span><a href="#local-6989586621679110202"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClockTime -&gt; CalendarTime
+</span><span class="hs-identifier hs-var">OldTime.toUTCTime</span></span><span> </span><span class="annot"><span class="annottext">(ClockTime -&gt; CalendarTime) -&gt; Gen ClockTime -&gt; Gen CalendarTime
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen ClockTime
+forall a. Arbitrary a =&gt; Gen a
+</span><span class="hs-identifier hs-var">arbitrary</span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CoArbitrary</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">OldTime.CalendarTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679110199"><span class="annot"><span class="annottext">coarbitrary :: CalendarTime -&gt; Gen b -&gt; Gen b
+</span><a href="#local-6989586621679110199"><span class="hs-identifier hs-var hs-var hs-var hs-var">coarbitrary</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OldTime.CalendarTime</span></span><span>
+</span><span id="line-73"></span><span>                        </span><span id="local-6989586621679110197"><span class="annot"><span class="annottext">year :: Int
+</span><a href="#local-6989586621679110197"><span class="hs-identifier hs-var">year</span></a></span></span><span> </span><span id="local-6989586621679110196"><span class="annot"><span class="annottext">month :: Month
+</span><a href="#local-6989586621679110196"><span class="hs-identifier hs-var">month</span></a></span></span><span> </span><span id="local-6989586621679110195"><span class="annot"><span class="annottext">day :: Int
+</span><a href="#local-6989586621679110195"><span class="hs-identifier hs-var">day</span></a></span></span><span> </span><span id="local-6989586621679110194"><span class="annot"><span class="annottext">hour :: Int
+</span><a href="#local-6989586621679110194"><span class="hs-identifier hs-var">hour</span></a></span></span><span> </span><span id="local-6989586621679110193"><span class="annot"><span class="annottext">minute :: Int
+</span><a href="#local-6989586621679110193"><span class="hs-identifier hs-var">minute</span></a></span></span><span> </span><span id="local-6989586621679110192"><span class="annot"><span class="annottext">sec :: Int
+</span><a href="#local-6989586621679110192"><span class="hs-identifier hs-var">sec</span></a></span></span><span> </span><span id="local-6989586621679110191"><span class="annot"><span class="annottext">picosec :: Integer
+</span><a href="#local-6989586621679110191"><span class="hs-identifier hs-var">picosec</span></a></span></span><span>
+</span><span id="line-74"></span><span>                        </span><span id="local-6989586621679110190"><span class="annot"><span class="annottext">wDay :: Day
+</span><a href="#local-6989586621679110190"><span class="hs-identifier hs-var">wDay</span></a></span></span><span> </span><span id="local-6989586621679110189"><span class="annot"><span class="annottext">yDay :: Int
+</span><a href="#local-6989586621679110189"><span class="hs-identifier hs-var">yDay</span></a></span></span><span> </span><span id="local-6989586621679110188"><span class="annot"><span class="annottext">tzName :: String
+</span><a href="#local-6989586621679110188"><span class="hs-identifier hs-var">tzName</span></a></span></span><span> </span><span id="local-6989586621679110187"><span class="annot"><span class="annottext">tz :: Int
+</span><a href="#local-6989586621679110187"><span class="hs-identifier hs-var">tz</span></a></span></span><span> </span><span id="local-6989586621679110186"><span class="annot"><span class="annottext">isDST :: Bool
+</span><a href="#local-6989586621679110186"><span class="hs-identifier hs-var">isDST</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-75"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110197"><span class="hs-identifier hs-var">year</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-76"></span><span>        </span><span class="annot"><span class="annottext">Month -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Month
+</span><a href="#local-6989586621679110196"><span class="hs-identifier hs-var">month</span></a></span><span>   </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-77"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110195"><span class="hs-identifier hs-var">day</span></a></span><span>     </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-78"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110194"><span class="hs-identifier hs-var">hour</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110193"><span class="hs-identifier hs-var">minute</span></a></span><span>  </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110192"><span class="hs-identifier hs-var">sec</span></a></span><span>     </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-81"></span><span>        </span><span class="annot"><span class="annottext">Integer -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679110191"><span class="hs-identifier hs-var">picosec</span></a></span><span> </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-82"></span><span>        </span><span class="annot"><span class="annottext">Day -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679110190"><span class="hs-identifier hs-var">wDay</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-83"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110189"><span class="hs-identifier hs-var">yDay</span></a></span><span>    </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-84"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679110188"><span class="hs-identifier hs-var">tzName</span></a></span><span>  </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-85"></span><span>        </span><span class="annot"><span class="annottext">Int -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679110187"><span class="hs-identifier hs-var">tz</span></a></span><span>      </span><span class="annot"><span class="annottext">(Gen b -&gt; Gen b) -&gt; (Gen b -&gt; Gen b) -&gt; Gen b -&gt; Gen b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span>
+</span><span id="line-86"></span><span>        </span><span class="annot"><span class="annottext">Bool -&gt; Gen b -&gt; Gen b
+forall a b. CoArbitrary a =&gt; a -&gt; Gen b -&gt; Gen b
+</span><span class="hs-identifier hs-var">coarbitrary</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679110186"><span class="hs-identifier hs-var">isDST</span></a></span><span>
+</span><span id="line-87"></span></pre></body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_5Ev0S7a4rtgKExXYq5LnuJ"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.QuadTree.Split</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">makePrisms</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Cell.html"><span class="hs-identifier">Data.Geometry.QuadTree.Cell</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Quadrants.html"><span class="hs-identifier">Data.Geometry.QuadTree.Quadrants</span></a></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- | Data Type to Decide if we should continue splitting the current cell</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">data</span><span> </span><span id="Split"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Split"><span class="hs-identifier hs-var">Split</span></a></span></span><span> </span><span id="local-6989586621679968774"><span class="annot"><a href="#local-6989586621679968774"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679968773"><span class="annot"><a href="#local-6989586621679968773"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679968775"><span class="annot"><a href="#local-6989586621679968775"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="No"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#No"><span class="hs-identifier hs-var">No</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679968775"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Yes"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Yes"><span class="hs-identifier hs-var">Yes</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679968773"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.QuadTree.Quadrants.html#Quadrants"><span class="hs-identifier hs-type">Quadrants</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968774"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679968755"><span id="local-6989586621679968757"><span id="local-6989586621679968759"><span class="annot"><span class="annottext">Int -&gt; Split i v p -&gt; ShowS
+[Split i v p] -&gt; ShowS
+Split i v p -&gt; String
+(Int -&gt; Split i v p -&gt; ShowS)
+-&gt; (Split i v p -&gt; String)
+-&gt; ([Split i v p] -&gt; ShowS)
+-&gt; Show (Split i v p)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall i v p.
+(Show p, Show v, Show i) =&gt;
+Int -&gt; Split i v p -&gt; ShowS
+forall i v p. (Show p, Show v, Show i) =&gt; [Split i v p] -&gt; ShowS
+forall i v p. (Show p, Show v, Show i) =&gt; Split i v p -&gt; String
+showList :: [Split i v p] -&gt; ShowS
+$cshowList :: forall i v p. (Show p, Show v, Show i) =&gt; [Split i v p] -&gt; ShowS
+show :: Split i v p -&gt; String
+$cshow :: forall i v p. (Show p, Show v, Show i) =&gt; Split i v p -&gt; String
+showsPrec :: Int -&gt; Split i v p -&gt; ShowS
+$cshowsPrec :: forall i v p.
+(Show p, Show v, Show i) =&gt;
+Int -&gt; Split i v p -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679968750"><span id="local-6989586621679968752"><span class="annot"><span class="annottext">Split i v p -&gt; Split i v p -&gt; Bool
+(Split i v p -&gt; Split i v p -&gt; Bool)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Bool) -&gt; Eq (Split i v p)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall i v p.
+(Eq p, Eq v, Eq i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+/= :: Split i v p -&gt; Split i v p -&gt; Bool
+$c/= :: forall i v p.
+(Eq p, Eq v, Eq i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+== :: Split i v p -&gt; Split i v p -&gt; Bool
+$c== :: forall i v p.
+(Eq p, Eq v, Eq i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679968734"><span id="local-6989586621679968736"><span id="local-6989586621679968738"><span id="local-6989586621679968740"><span id="local-6989586621679968742"><span id="local-6989586621679968744"><span id="local-6989586621679968746"><span class="annot"><span class="annottext">Eq (Split i v p)
+Eq (Split i v p) =&gt;
+(Split i v p -&gt; Split i v p -&gt; Ordering)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Bool)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Bool)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Bool)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Bool)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Split i v p)
+-&gt; (Split i v p -&gt; Split i v p -&gt; Split i v p)
+-&gt; Ord (Split i v p)
+Split i v p -&gt; Split i v p -&gt; Bool
+Split i v p -&gt; Split i v p -&gt; Ordering
+Split i v p -&gt; Split i v p -&gt; Split i v p
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall i v p. (Ord p, Ord v, Ord i) =&gt; Eq (Split i v p)
+forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Ordering
+forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Split i v p
+min :: Split i v p -&gt; Split i v p -&gt; Split i v p
+$cmin :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Split i v p
+max :: Split i v p -&gt; Split i v p -&gt; Split i v p
+$cmax :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Split i v p
+&gt;= :: Split i v p -&gt; Split i v p -&gt; Bool
+$c&gt;= :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+&gt; :: Split i v p -&gt; Split i v p -&gt; Bool
+$c&gt; :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+&lt;= :: Split i v p -&gt; Split i v p -&gt; Bool
+$c&lt;= :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+&lt; :: Split i v p -&gt; Split i v p -&gt; Bool
+$c&lt; :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Bool
+compare :: Split i v p -&gt; Split i v p -&gt; Ordering
+$ccompare :: forall i v p.
+(Ord p, Ord v, Ord i) =&gt;
+Split i v p -&gt; Split i v p -&gt; Ordering
+$cp1Ord :: forall i v p. (Ord p, Ord v, Ord i) =&gt; Eq (Split i v p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span id="_Yes"><span id="_No"><span id="local-6989586621679968730"><span id="local-6989586621679968731"><span id="local-6989586621679968732"><span id="local-6989586621679968773"><span id="local-6989586621679968774"><span id="local-6989586621679968775"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Split</span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- | A splitter is a function that determines weather or not we should the given cell</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- corresponding to the given input (i).</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">type</span><span> </span><span id="Splitter"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Splitter"><span class="hs-identifier hs-var">Splitter</span></a></span></span><span> </span><span id="local-6989586621679968727"><span class="annot"><a href="#local-6989586621679968727"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679968726"><span class="annot"><a href="#local-6989586621679968726"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679968725"><span class="annot"><a href="#local-6989586621679968725"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679968724"><span class="annot"><a href="#local-6989586621679968724"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Cell.html#Cell"><span class="hs-identifier hs-type">Cell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968727"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679968726"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Split"><span class="hs-identifier hs-type">Split</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968726"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968725"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968724"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- | Transformer that limits the depth of a splitter</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">type</span><span> </span><span id="Limiter"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Limiter"><span class="hs-identifier hs-var">Limiter</span></a></span></span><span> </span><span id="local-6989586621679968723"><span class="annot"><a href="#local-6989586621679968723"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679968722"><span class="annot"><a href="#local-6989586621679968722"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679968721"><span class="annot"><a href="#local-6989586621679968721"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679968720"><span class="annot"><a href="#local-6989586621679968720"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Splitter"><span class="hs-identifier hs-type">Splitter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968721"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968720"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-20"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Splitter"><span class="hs-identifier hs-type">Splitter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968721"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679968722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968720"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- | Split only when the Cell-width is at least wMin</span><span>
+</span><span id="line-23"></span><span id="local-6989586621679968716"><span id="local-6989586621679968717"><span id="local-6989586621679968718"><span id="local-6989586621679968719"><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#limitWidthTo"><span class="hs-identifier hs-type">limitWidthTo</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Cell.html#WidthIndex"><span class="hs-identifier hs-type">WidthIndex</span></a></span><span> </span><span class="hs-comment">-- ^ smallest allowed width of a cell (i.e. width of a leaf)</span><span>
+</span><span id="line-24"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Limiter"><span class="hs-identifier hs-type">Limiter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968719"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968718"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968717"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679968716"><span class="hs-identifier hs-type">p</span></a></span></span></span></span></span><span>
+</span><span id="line-25"></span><span id="limitWidthTo"><span class="annot"><span class="annottext">limitWidthTo :: Int -&gt; Limiter r i v p
+</span><a href="Data.Geometry.QuadTree.Split.html#limitWidthTo"><span class="hs-identifier hs-var hs-var">limitWidthTo</span></a></span></span><span> </span><span id="local-6989586621679968713"><span class="annot"><span class="annottext">wMin :: Int
+</span><a href="#local-6989586621679968713"><span class="hs-identifier hs-var">wMin</span></a></span></span><span> </span><span id="local-6989586621679968712"><span class="annot"><span class="annottext">f :: Splitter r i v p
+</span><a href="#local-6989586621679968712"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679968711"><span class="annot"><span class="annottext">c :: Cell r
+</span><a href="#local-6989586621679968711"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679968710"><span class="annot"><span class="annottext">pts :: i
+</span><a href="#local-6989586621679968710"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Splitter r i v p
+</span><a href="#local-6989586621679968712"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621679968711"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679968710"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-27"></span><span>      </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#No"><span class="hs-identifier hs-type">No</span></a></span><span> </span><span id="local-6989586621679968709"><span class="annot"><span class="annottext">p :: p
+</span><a href="#local-6989586621679968709"><span class="hs-identifier hs-var">p</span></a></span></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either i p -&gt; Split i v (Either i p)
+forall i v p. p -&gt; Split i v p
+</span><a href="Data.Geometry.QuadTree.Split.html#No"><span class="hs-identifier hs-var">No</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p -&gt; Either i p
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679968709"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>      </span><span class="annot"><a href="Data.Geometry.QuadTree.Split.html#Yes"><span class="hs-identifier hs-type">Yes</span></a></span><span> </span><span id="local-6989586621679968708"><span class="annot"><span class="annottext">v :: v
+</span><a href="#local-6989586621679968708"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679968707"><span class="annot"><span class="annottext">qs :: Quadrants i
+</span><a href="#local-6989586621679968707"><span class="hs-identifier hs-var">qs</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679968713"><span class="hs-identifier hs-var">wMin</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Cell r
+</span><a href="#local-6989586621679968711"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Cell r -&gt; Getting Int (Cell r) Int -&gt; Int
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting Int (Cell r) Int
+forall r. Lens' (Cell r) Int
+</span><a href="Data.Geometry.QuadTree.Cell.html#cellWidthIndex"><span class="hs-identifier hs-var">cellWidthIndex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">v -&gt; Quadrants i -&gt; Split i v (Either i p)
+forall i v p. v -&gt; Quadrants i -&gt; Split i v p
+</span><a href="Data.Geometry.QuadTree.Split.html#Yes"><span class="hs-identifier hs-var">Yes</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679968708"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Quadrants i
+</span><a href="#local-6989586621679968707"><span class="hs-identifier hs-var">qs</span></a></span><span>
+</span><span id="line-29"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either i p -&gt; Split i v (Either i p)
+forall i v p. p -&gt; Split i v p
+</span><a href="Data.Geometry.QuadTree.Split.html#No"><span class="hs-identifier hs-var">No</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; Either i p
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679968710"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-comment">-- note that it is important that we still evaluate the function so</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-comment">-- that we can distinguish at the last level i.e. between a regular</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-comment">-- &quot; we are done splitting (No (Right p))&quot; and a &quot;we are no longer</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-comment">-- allowed to split further (No (Left p))&quot;</span><span>
+</span><span id="line-34"></span></pre></body></html>

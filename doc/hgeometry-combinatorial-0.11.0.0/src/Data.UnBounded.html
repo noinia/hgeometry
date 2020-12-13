@@ -1,0 +1,1164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_ASTpRVQvnKqCfVrHvhbDbw"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase      #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.UnBounded</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Add an unbounded/infintity element to a data type. Essentially,</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- 'Bottom' adds \(-\infty\) (and is pretty much identical to Maybe),</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- whereas 'Top' adds \(\infty\). The Unbounded type adds both.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.UnBounded</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier">Top</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#topToMaybe"><span class="hs-identifier">topToMaybe</span></a></span><span>
+</span><span id="line-16"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier">ValT</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier">Top</span></a></span><span>
+</span><span id="line-17"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_ValT"><span class="hs-identifier">_ValT</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_Top"><span class="hs-identifier">_Top</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_TopMaybe"><span class="hs-identifier">_TopMaybe</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier">Bottom</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#bottomToMaybe"><span class="hs-identifier">bottomToMaybe</span></a></span><span>
+</span><span id="line-20"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier">Bottom</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-identifier">ValB</span></a></span><span>
+</span><span id="line-21"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_ValB"><span class="hs-identifier">_ValB</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_Bottom"><span class="hs-identifier">_Bottom</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_BottomMaybe"><span class="hs-identifier">_BottomMaybe</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier">UnBounded</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#unUnBounded"><span class="hs-identifier">unUnBounded</span></a></span><span>
+</span><span id="line-25"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_MinInfinity"><span class="hs-identifier">_MinInfinity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_Val"><span class="hs-identifier">_Val</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#_MaxInfinity"><span class="hs-identifier">_MaxInfinity</span></a></span><span>
+</span><span id="line-26"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#unBoundedToMaybe"><span class="hs-identifier">unBoundedToMaybe</span></a></span><span>
+</span><span id="line-27"></span><span>                     </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Functor.Classes</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Traversable</span></span><span>     </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- * Top and Bottom</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | `Top a` represents the type a, together with a 'Top' element, i.e. an element</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- that is greater than any other element. We can think of `Top a` being defined as:</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- &gt;&gt;&gt; data Top a = ValT a | Top</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span id="Top"><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-var">Top</span></a></span></span><span> </span><span id="local-6989586621679327794"><span class="annot"><a href="#local-6989586621679327794"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GTop"><span class="annot"><a href="Data.UnBounded.html#GTop"><span class="hs-identifier hs-var">GTop</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="topToMaybe"><span class="annot"><span class="annottext">Top a -&gt; Maybe a
+</span><a href="Data.UnBounded.html#topToMaybe"><span class="hs-identifier hs-var hs-var">topToMaybe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679327794"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-42"></span><span>                </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327625"><span id="local-6989586621679327627"><span class="annot"><span class="annottext">Top a -&gt; Top a -&gt; Bool
+(Top a -&gt; Top a -&gt; Bool) -&gt; (Top a -&gt; Top a -&gt; Bool) -&gt; Eq (Top a)
+forall a. Eq a =&gt; Top a -&gt; Top a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Top a -&gt; Top a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Top a -&gt; Top a -&gt; Bool
+== :: Top a -&gt; Top a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Top a -&gt; Top a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327620"><span id="local-6989586621679327622"><span class="annot"><span class="annottext">a -&gt; Top b -&gt; Top a
+(a -&gt; b) -&gt; Top a -&gt; Top b
+(forall a b. (a -&gt; b) -&gt; Top a -&gt; Top b)
+-&gt; (forall a b. a -&gt; Top b -&gt; Top a) -&gt; Functor Top
+forall a b. a -&gt; Top b -&gt; Top a
+forall a b. (a -&gt; b) -&gt; Top a -&gt; Top b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Top b -&gt; Top a
+$c&lt;$ :: forall a b. a -&gt; Top b -&gt; Top a
+fmap :: (a -&gt; b) -&gt; Top a -&gt; Top b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Top a -&gt; Top b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327585"><span id="local-6989586621679327587"><span id="local-6989586621679327589"><span id="local-6989586621679327591"><span id="local-6989586621679327593"><span id="local-6989586621679327595"><span id="local-6989586621679327597"><span id="local-6989586621679327599"><span id="local-6989586621679327601"><span id="local-6989586621679327603"><span id="local-6989586621679327605"><span id="local-6989586621679327607"><span id="local-6989586621679327609"><span id="local-6989586621679327611"><span id="local-6989586621679327613"><span id="local-6989586621679327615"><span id="local-6989586621679327617"><span class="annot"><span class="annottext">a -&gt; Top a -&gt; Bool
+Top m -&gt; m
+Top a -&gt; [a]
+Top a -&gt; Bool
+Top a -&gt; Int
+Top a -&gt; a
+Top a -&gt; a
+Top a -&gt; a
+Top a -&gt; a
+(a -&gt; m) -&gt; Top a -&gt; m
+(a -&gt; m) -&gt; Top a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+(a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+(a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+(a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+(forall m. Monoid m =&gt; Top m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Top a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Top a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Top a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Top a -&gt; a)
+-&gt; (forall a. Top a -&gt; [a])
+-&gt; (forall a. Top a -&gt; Bool)
+-&gt; (forall a. Top a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Top a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Top a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Top a -&gt; a)
+-&gt; (forall a. Num a =&gt; Top a -&gt; a)
+-&gt; (forall a. Num a =&gt; Top a -&gt; a)
+-&gt; Foldable Top
+forall a. Eq a =&gt; a -&gt; Top a -&gt; Bool
+forall a. Num a =&gt; Top a -&gt; a
+forall a. Ord a =&gt; Top a -&gt; a
+forall m. Monoid m =&gt; Top m -&gt; m
+forall a. Top a -&gt; Bool
+forall a. Top a -&gt; Int
+forall a. Top a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Top a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Top a -&gt; a
+$cproduct :: forall a. Num a =&gt; Top a -&gt; a
+sum :: Top a -&gt; a
+$csum :: forall a. Num a =&gt; Top a -&gt; a
+minimum :: Top a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Top a -&gt; a
+maximum :: Top a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Top a -&gt; a
+elem :: a -&gt; Top a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Top a -&gt; Bool
+length :: Top a -&gt; Int
+$clength :: forall a. Top a -&gt; Int
+null :: Top a -&gt; Bool
+$cnull :: forall a. Top a -&gt; Bool
+toList :: Top a -&gt; [a]
+$ctoList :: forall a. Top a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Top a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Top a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Top a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Top a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Top a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Top a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Top a -&gt; m
+fold :: Top m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Top m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">F.Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327574"><span id="local-6989586621679327576"><span id="local-6989586621679327578"><span id="local-6989586621679327580"><span class="annot"><span class="annottext">Functor Top
+Foldable Top
+(Functor Top, Foldable Top) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Top a -&gt; f (Top b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Top (f a) -&gt; f (Top a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Top a -&gt; m (Top b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Top (m a) -&gt; m (Top a))
+-&gt; Traversable Top
+(a -&gt; f b) -&gt; Top a -&gt; f (Top b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Top (m a) -&gt; m (Top a)
+forall (f :: * -&gt; *) a. Applicative f =&gt; Top (f a) -&gt; f (Top a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Top a -&gt; m (Top b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Top a -&gt; f (Top b)
+sequence :: Top (m a) -&gt; m (Top a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Top (m a) -&gt; m (Top a)
+mapM :: (a -&gt; m b) -&gt; Top a -&gt; m (Top b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Top a -&gt; m (Top b)
+sequenceA :: Top (f a) -&gt; f (Top a)
+$csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Top (f a) -&gt; f (Top a)
+traverse :: (a -&gt; f b) -&gt; Top a -&gt; f (Top b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Top a -&gt; f (Top b)
+$cp2Traversable :: Foldable Top
+$cp1Traversable :: Functor Top
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">T.Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327562"><span id="local-6989586621679327564"><span id="local-6989586621679327566"><span id="local-6989586621679327568"><span id="local-6989586621679327570"><span class="annot"><span class="annottext">Functor Top
+a -&gt; Top a
+Functor Top =&gt;
+(forall a. a -&gt; Top a)
+-&gt; (forall a b. Top (a -&gt; b) -&gt; Top a -&gt; Top b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; Top a -&gt; Top b -&gt; Top c)
+-&gt; (forall a b. Top a -&gt; Top b -&gt; Top b)
+-&gt; (forall a b. Top a -&gt; Top b -&gt; Top a)
+-&gt; Applicative Top
+Top a -&gt; Top b -&gt; Top b
+Top a -&gt; Top b -&gt; Top a
+Top (a -&gt; b) -&gt; Top a -&gt; Top b
+(a -&gt; b -&gt; c) -&gt; Top a -&gt; Top b -&gt; Top c
+forall a. a -&gt; Top a
+forall a b. Top a -&gt; Top b -&gt; Top a
+forall a b. Top a -&gt; Top b -&gt; Top b
+forall a b. Top (a -&gt; b) -&gt; Top a -&gt; Top b
+forall a b c. (a -&gt; b -&gt; c) -&gt; Top a -&gt; Top b -&gt; Top c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+&lt;* :: Top a -&gt; Top b -&gt; Top a
+$c&lt;* :: forall a b. Top a -&gt; Top b -&gt; Top a
+*&gt; :: Top a -&gt; Top b -&gt; Top b
+$c*&gt; :: forall a b. Top a -&gt; Top b -&gt; Top b
+liftA2 :: (a -&gt; b -&gt; c) -&gt; Top a -&gt; Top b -&gt; Top c
+$cliftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; Top a -&gt; Top b -&gt; Top c
+&lt;*&gt; :: Top (a -&gt; b) -&gt; Top a -&gt; Top b
+$c&lt;*&gt; :: forall a b. Top (a -&gt; b) -&gt; Top a -&gt; Top b
+pure :: a -&gt; Top a
+$cpure :: forall a. a -&gt; Top a
+$cp1Applicative :: Functor Top
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327554"><span id="local-6989586621679327556"><span id="local-6989586621679327558"><span class="annot"><span class="annottext">Applicative Top
+a -&gt; Top a
+Applicative Top =&gt;
+(forall a b. Top a -&gt; (a -&gt; Top b) -&gt; Top b)
+-&gt; (forall a b. Top a -&gt; Top b -&gt; Top b)
+-&gt; (forall a. a -&gt; Top a)
+-&gt; Monad Top
+Top a -&gt; (a -&gt; Top b) -&gt; Top b
+Top a -&gt; Top b -&gt; Top b
+forall a. a -&gt; Top a
+forall a b. Top a -&gt; Top b -&gt; Top b
+forall a b. Top a -&gt; (a -&gt; Top b) -&gt; Top b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+return :: a -&gt; Top a
+$creturn :: forall a. a -&gt; Top a
+&gt;&gt; :: Top a -&gt; Top b -&gt; Top b
+$c&gt;&gt; :: forall a b. Top a -&gt; Top b -&gt; Top b
+&gt;&gt;= :: Top a -&gt; (a -&gt; Top b) -&gt; Top b
+$c&gt;&gt;= :: forall a b. Top a -&gt; (a -&gt; Top b) -&gt; Top b
+$cp1Monad :: Applicative Top
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327551"><span class="annot"><span class="annottext">(a -&gt; b -&gt; Bool) -&gt; Top a -&gt; Top b -&gt; Bool
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; Top a -&gt; Top b -&gt; Bool) -&gt; Eq1 Top
+forall a b. (a -&gt; b -&gt; Bool) -&gt; Top a -&gt; Top b -&gt; Bool
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; f a -&gt; f b -&gt; Bool) -&gt; Eq1 f
+liftEq :: (a -&gt; b -&gt; Bool) -&gt; Top a -&gt; Top b -&gt; Bool
+$cliftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; Top a -&gt; Top b -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Eq1</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679327844"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679327844"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327844"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bValT"><span id="%24mValT"><span id="ValT"><span class="annot"><span class="annottext">$bValT :: a -&gt; Top a
+$mValT :: forall r a. Top a -&gt; (a -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.UnBounded.html#%24bValT"><span class="hs-identifier hs-var hs-var hs-var">ValT</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679327547"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.UnBounded.html#GTop"><span class="hs-identifier hs-type">GTop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679327547"><span class="annot"><a href="#local-6989586621679327547"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679327840"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327840"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bTop"><span id="%24mTop"><span id="Top"><span class="annot"><span class="annottext">$bTop :: Top a
+$mTop :: forall r a. Top a -&gt; (Void# -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.UnBounded.html#%24bTop"><span class="hs-identifier hs-var hs-var hs-var">Top</span></a></span></span></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.UnBounded.html#GTop"><span class="hs-identifier hs-type">GTop</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-pragma hs-type">ValT</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-pragma hs-type">Top</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord1</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679327541"><span class="annot"><span class="annottext">liftCompare :: (a -&gt; b -&gt; Ordering) -&gt; Top a -&gt; Top b -&gt; Ordering
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftCompare</span></span></span><span> </span><span class="hs-identifier">_</span><span>   </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>       </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="hs-identifier">_</span><span>   </span><span class="hs-identifier">_</span><span>         </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="hs-identifier">_</span><span>   </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>       </span><span class="hs-identifier">_</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679327539"><span class="annot"><span class="annottext">cmp :: a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679327539"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span id="local-6989586621679327538"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327538"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span id="local-6989586621679327537"><span class="annot"><span class="annottext">y :: b
+</span><a href="#local-6989586621679327537"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327538"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679327539"><span class="hs-operator hs-var">`cmp`</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679327537"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679327536"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327522"><span id="local-6989586621679327524"><span id="local-6989586621679327526"><span id="local-6989586621679327528"><span id="local-6989586621679327530"><span id="local-6989586621679327532"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679327536"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327536"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679327520"><span class="annot"><span class="annottext">compare :: Top a -&gt; Top a -&gt; Ordering
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">compare</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Top a -&gt; Top a -&gt; Ordering
+forall (f :: * -&gt; *) a. (Ord1 f, Ord a) =&gt; f a -&gt; f a -&gt; Ordering
+</span><span class="hs-identifier hs-var">compare1</span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span id="local-6989586621679327517"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327512"><span id="local-6989586621679327515"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679327517"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327517"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679327510"><span class="annot"><span class="annottext">show :: Top a -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Top&quot;</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span id="local-6989586621679327508"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327508"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;ValT &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327508"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679327506"><span id="local-6989586621679327507"><span class="annot"><a href="Data.UnBounded.html#_ValT"><span class="hs-identifier hs-type">_ValT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327507"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327506"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327507"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327506"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-67"></span><span id="_ValT"><span class="annot"><span class="annottext">_ValT :: p a (f b) -&gt; p (Top a) (f (Top b))
+</span><a href="Data.UnBounded.html#_ValT"><span class="hs-identifier hs-var hs-var">_ValT</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; Top b)
+-&gt; (Top a -&gt; Either (Top b) a) -&gt; Prism (Top a) (Top b) a b
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><span class="hs-identifier hs-var">prism</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Top b
+forall a. a -&gt; Top a
+</span><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-var">ValT</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Top b -&gt; Either (Top b) a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">Top b
+forall a. Top a
+</span><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-var">Top</span></a></span><span> </span><span class="hs-special">;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span id="local-6989586621679327504"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327504"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either (Top b) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327504"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679327503"><span class="annot"><a href="Data.UnBounded.html#_Top"><span class="hs-identifier hs-type">_Top</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327503"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-70"></span><span id="_Top"><span class="annot"><span class="annottext">_Top :: p () (f ()) -&gt; p (Top a) (f (Top a))
+</span><a href="Data.UnBounded.html#_Top"><span class="hs-identifier hs-var hs-var">_Top</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(() -&gt; Top a) -&gt; (Top a -&gt; Maybe ()) -&gt; Prism (Top a) (Top a) () ()
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Top a -&gt; () -&gt; Top a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Top a
+forall a. Top a
+</span><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-var">Top</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Maybe ()
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe ()
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- | Iso between a 'Top a' and a 'Maybe a', interpreting a Top as a</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- Nothing and vice versa. Note that this reverses the ordering of</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- the elements.</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- &gt;&gt;&gt; ValT 5 ^. _TopMaybe</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- Just 5</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- &gt;&gt;&gt; Just 5 ^.re _TopMaybe</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- ValT 5</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; Top ^. _TopMaybe</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- &gt;&gt;&gt; Nothing ^.re _TopMaybe</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- Top</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679327499"><span class="annot"><a href="Data.UnBounded.html#_TopMaybe"><span class="hs-identifier hs-type">_TopMaybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Iso'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Top"><span class="hs-identifier hs-type">Top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327499"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679327499"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-85"></span><span id="_TopMaybe"><span class="annot"><span class="annottext">_TopMaybe :: p (Maybe a) (f (Maybe a)) -&gt; p (Top a) (f (Top a))
+</span><a href="Data.UnBounded.html#_TopMaybe"><span class="hs-identifier hs-var hs-var">_TopMaybe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Top a -&gt; Maybe a)
+-&gt; (Maybe a -&gt; Top a) -&gt; Iso (Top a) (Top a) (Maybe a) (Maybe a)
+forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
+</span><span class="hs-identifier hs-var">iso</span></span><span> </span><span class="annot"><span class="annottext">Top a -&gt; Maybe a
+forall a. Top a -&gt; Maybe a
+</span><a href="Data.UnBounded.html#topToMaybe"><span class="hs-identifier hs-var hs-var">topToMaybe</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Top a
+forall a. Maybe a -&gt; Top a
+</span><a href="Data.UnBounded.html#GTop"><span class="hs-identifier hs-var">GTop</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | `Bottom a` represents the type a, together with a 'Bottom' element,</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- i.e. an element that is smaller than any other element. We can think of</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- `Bottom a` being defined as:</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- &gt;&gt;&gt; data Bottom a = Bottom | ValB a</span><span>
+</span><span id="line-94"></span><span class="hs-keyword">newtype</span><span> </span><span id="Bottom"><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-var">Bottom</span></a></span></span><span> </span><span id="local-6989586621679327714"><span class="annot"><a href="#local-6989586621679327714"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GBottom"><span class="annot"><a href="Data.UnBounded.html#GBottom"><span class="hs-identifier hs-var">GBottom</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="bottomToMaybe"><span class="annot"><span class="annottext">Bottom a -&gt; Maybe a
+</span><a href="Data.UnBounded.html#bottomToMaybe"><span class="hs-identifier hs-var hs-var">bottomToMaybe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679327714"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-95"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327492"><span id="local-6989586621679327494"><span class="annot"><span class="annottext">Bottom a -&gt; Bottom a -&gt; Bool
+(Bottom a -&gt; Bottom a -&gt; Bool)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bool) -&gt; Eq (Bottom a)
+forall a. Eq a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Bottom a -&gt; Bottom a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+== :: Bottom a -&gt; Bottom a -&gt; Bool
+$c== :: forall a. Eq a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327477"><span id="local-6989586621679327479"><span id="local-6989586621679327481"><span id="local-6989586621679327483"><span id="local-6989586621679327485"><span id="local-6989586621679327487"><span id="local-6989586621679327489"><span class="annot"><span class="annottext">Eq (Bottom a)
+Eq (Bottom a) =&gt;
+(Bottom a -&gt; Bottom a -&gt; Ordering)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bool)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bool)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bool)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bool)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bottom a)
+-&gt; (Bottom a -&gt; Bottom a -&gt; Bottom a)
+-&gt; Ord (Bottom a)
+Bottom a -&gt; Bottom a -&gt; Bool
+Bottom a -&gt; Bottom a -&gt; Ordering
+Bottom a -&gt; Bottom a -&gt; Bottom a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Bottom a)
+forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Ordering
+forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bottom a
+min :: Bottom a -&gt; Bottom a -&gt; Bottom a
+$cmin :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bottom a
+max :: Bottom a -&gt; Bottom a -&gt; Bottom a
+$cmax :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bottom a
+&gt;= :: Bottom a -&gt; Bottom a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+&gt; :: Bottom a -&gt; Bottom a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+&lt;= :: Bottom a -&gt; Bottom a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+&lt; :: Bottom a -&gt; Bottom a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Bool
+compare :: Bottom a -&gt; Bottom a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; Bottom a -&gt; Bottom a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (Bottom a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327473"><span id="local-6989586621679327475"><span class="annot"><span class="annottext">a -&gt; Bottom b -&gt; Bottom a
+(a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+(forall a b. (a -&gt; b) -&gt; Bottom a -&gt; Bottom b)
+-&gt; (forall a b. a -&gt; Bottom b -&gt; Bottom a) -&gt; Functor Bottom
+forall a b. a -&gt; Bottom b -&gt; Bottom a
+forall a b. (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Bottom b -&gt; Bottom a
+$c&lt;$ :: forall a b. a -&gt; Bottom b -&gt; Bottom a
+fmap :: (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327439"><span id="local-6989586621679327441"><span id="local-6989586621679327443"><span id="local-6989586621679327445"><span id="local-6989586621679327447"><span id="local-6989586621679327449"><span id="local-6989586621679327451"><span id="local-6989586621679327453"><span id="local-6989586621679327455"><span id="local-6989586621679327457"><span id="local-6989586621679327459"><span id="local-6989586621679327461"><span id="local-6989586621679327463"><span id="local-6989586621679327465"><span id="local-6989586621679327467"><span id="local-6989586621679327469"><span id="local-6989586621679327471"><span class="annot"><span class="annottext">a -&gt; Bottom a -&gt; Bool
+Bottom m -&gt; m
+Bottom a -&gt; [a]
+Bottom a -&gt; Bool
+Bottom a -&gt; Int
+Bottom a -&gt; a
+Bottom a -&gt; a
+Bottom a -&gt; a
+Bottom a -&gt; a
+(a -&gt; m) -&gt; Bottom a -&gt; m
+(a -&gt; m) -&gt; Bottom a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+(a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+(a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+(a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+(forall m. Monoid m =&gt; Bottom m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bottom a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bottom a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a)
+-&gt; (forall a. Bottom a -&gt; [a])
+-&gt; (forall a. Bottom a -&gt; Bool)
+-&gt; (forall a. Bottom a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Bottom a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Bottom a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Bottom a -&gt; a)
+-&gt; (forall a. Num a =&gt; Bottom a -&gt; a)
+-&gt; (forall a. Num a =&gt; Bottom a -&gt; a)
+-&gt; Foldable Bottom
+forall a. Eq a =&gt; a -&gt; Bottom a -&gt; Bool
+forall a. Num a =&gt; Bottom a -&gt; a
+forall a. Ord a =&gt; Bottom a -&gt; a
+forall m. Monoid m =&gt; Bottom m -&gt; m
+forall a. Bottom a -&gt; Bool
+forall a. Bottom a -&gt; Int
+forall a. Bottom a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bottom a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Bottom a -&gt; a
+$cproduct :: forall a. Num a =&gt; Bottom a -&gt; a
+sum :: Bottom a -&gt; a
+$csum :: forall a. Num a =&gt; Bottom a -&gt; a
+minimum :: Bottom a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Bottom a -&gt; a
+maximum :: Bottom a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Bottom a -&gt; a
+elem :: a -&gt; Bottom a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Bottom a -&gt; Bool
+length :: Bottom a -&gt; Int
+$clength :: forall a. Bottom a -&gt; Int
+null :: Bottom a -&gt; Bool
+$cnull :: forall a. Bottom a -&gt; Bool
+toList :: Bottom a -&gt; [a]
+$ctoList :: forall a. Bottom a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Bottom a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Bottom a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Bottom a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bottom a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Bottom a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Bottom a -&gt; m
+fold :: Bottom m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Bottom m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">F.Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327429"><span id="local-6989586621679327431"><span id="local-6989586621679327433"><span id="local-6989586621679327435"><span class="annot"><span class="annottext">Functor Bottom
+Foldable Bottom
+(Functor Bottom, Foldable Bottom) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Bottom a -&gt; f (Bottom b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Bottom (f a) -&gt; f (Bottom a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Bottom a -&gt; m (Bottom b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Bottom (m a) -&gt; m (Bottom a))
+-&gt; Traversable Bottom
+(a -&gt; f b) -&gt; Bottom a -&gt; f (Bottom b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Bottom (m a) -&gt; m (Bottom a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Bottom (f a) -&gt; f (Bottom a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Bottom a -&gt; m (Bottom b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Bottom a -&gt; f (Bottom b)
+sequence :: Bottom (m a) -&gt; m (Bottom a)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Bottom (m a) -&gt; m (Bottom a)
+mapM :: (a -&gt; m b) -&gt; Bottom a -&gt; m (Bottom b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Bottom a -&gt; m (Bottom b)
+sequenceA :: Bottom (f a) -&gt; f (Bottom a)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Bottom (f a) -&gt; f (Bottom a)
+traverse :: (a -&gt; f b) -&gt; Bottom a -&gt; f (Bottom b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Bottom a -&gt; f (Bottom b)
+$cp2Traversable :: Foldable Bottom
+$cp1Traversable :: Functor Bottom
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">T.Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327418"><span id="local-6989586621679327420"><span id="local-6989586621679327422"><span id="local-6989586621679327424"><span id="local-6989586621679327426"><span class="annot"><span class="annottext">Functor Bottom
+a -&gt; Bottom a
+Functor Bottom =&gt;
+(forall a. a -&gt; Bottom a)
+-&gt; (forall a b. Bottom (a -&gt; b) -&gt; Bottom a -&gt; Bottom b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c) -&gt; Bottom a -&gt; Bottom b -&gt; Bottom c)
+-&gt; (forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b)
+-&gt; (forall a b. Bottom a -&gt; Bottom b -&gt; Bottom a)
+-&gt; Applicative Bottom
+Bottom a -&gt; Bottom b -&gt; Bottom b
+Bottom a -&gt; Bottom b -&gt; Bottom a
+Bottom (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+(a -&gt; b -&gt; c) -&gt; Bottom a -&gt; Bottom b -&gt; Bottom c
+forall a. a -&gt; Bottom a
+forall a b. Bottom a -&gt; Bottom b -&gt; Bottom a
+forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b
+forall a b. Bottom (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+forall a b c. (a -&gt; b -&gt; c) -&gt; Bottom a -&gt; Bottom b -&gt; Bottom c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+&lt;* :: Bottom a -&gt; Bottom b -&gt; Bottom a
+$c&lt;* :: forall a b. Bottom a -&gt; Bottom b -&gt; Bottom a
+*&gt; :: Bottom a -&gt; Bottom b -&gt; Bottom b
+$c*&gt; :: forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b
+liftA2 :: (a -&gt; b -&gt; c) -&gt; Bottom a -&gt; Bottom b -&gt; Bottom c
+$cliftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; Bottom a -&gt; Bottom b -&gt; Bottom c
+&lt;*&gt; :: Bottom (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+$c&lt;*&gt; :: forall a b. Bottom (a -&gt; b) -&gt; Bottom a -&gt; Bottom b
+pure :: a -&gt; Bottom a
+$cpure :: forall a. a -&gt; Bottom a
+$cp1Applicative :: Functor Bottom
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327411"><span id="local-6989586621679327413"><span id="local-6989586621679327415"><span class="annot"><span class="annottext">Applicative Bottom
+a -&gt; Bottom a
+Applicative Bottom =&gt;
+(forall a b. Bottom a -&gt; (a -&gt; Bottom b) -&gt; Bottom b)
+-&gt; (forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b)
+-&gt; (forall a. a -&gt; Bottom a)
+-&gt; Monad Bottom
+Bottom a -&gt; (a -&gt; Bottom b) -&gt; Bottom b
+Bottom a -&gt; Bottom b -&gt; Bottom b
+forall a. a -&gt; Bottom a
+forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b
+forall a b. Bottom a -&gt; (a -&gt; Bottom b) -&gt; Bottom b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+return :: a -&gt; Bottom a
+$creturn :: forall a. a -&gt; Bottom a
+&gt;&gt; :: Bottom a -&gt; Bottom b -&gt; Bottom b
+$c&gt;&gt; :: forall a b. Bottom a -&gt; Bottom b -&gt; Bottom b
+&gt;&gt;= :: Bottom a -&gt; (a -&gt; Bottom b) -&gt; Bottom b
+$c&gt;&gt;= :: forall a b. Bottom a -&gt; (a -&gt; Bottom b) -&gt; Bottom b
+$cp1Monad :: Applicative Bottom
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327409"><span class="annot"><span class="annottext">(a -&gt; b -&gt; Bool) -&gt; Bottom a -&gt; Bottom b -&gt; Bool
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; Bottom a -&gt; Bottom b -&gt; Bool)
+-&gt; Eq1 Bottom
+forall a b. (a -&gt; b -&gt; Bool) -&gt; Bottom a -&gt; Bottom b -&gt; Bool
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; f a -&gt; f b -&gt; Bool) -&gt; Eq1 f
+liftEq :: (a -&gt; b -&gt; Bool) -&gt; Bottom a -&gt; Bottom b -&gt; Bool
+$cliftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; Bottom a -&gt; Bottom b -&gt; Bool
+</span><a href="#local-6989586621679327409"><span class="hs-identifier hs-var hs-var hs-var hs-var">Eq1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679327406"><span class="annot"><span class="annottext">Eq1 Bottom
+Eq1 Bottom =&gt;
+(forall a b.
+ (a -&gt; b -&gt; Ordering) -&gt; Bottom a -&gt; Bottom b -&gt; Ordering)
+-&gt; Ord1 Bottom
+(a -&gt; b -&gt; Ordering) -&gt; Bottom a -&gt; Bottom b -&gt; Ordering
+forall a b.
+(a -&gt; b -&gt; Ordering) -&gt; Bottom a -&gt; Bottom b -&gt; Ordering
+forall (f :: * -&gt; *).
+Eq1 f =&gt;
+(forall a b. (a -&gt; b -&gt; Ordering) -&gt; f a -&gt; f b -&gt; Ordering)
+-&gt; Ord1 f
+liftCompare :: (a -&gt; b -&gt; Ordering) -&gt; Bottom a -&gt; Bottom b -&gt; Ordering
+$cliftCompare :: forall a b.
+(a -&gt; b -&gt; Ordering) -&gt; Bottom a -&gt; Bottom b -&gt; Ordering
+$cp1Ord1 :: Eq1 Bottom
+</span><a href="#local-6989586621679327406"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Ord1</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679327732"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327732"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bBottom"><span id="%24mBottom"><span id="Bottom"><span class="annot"><span class="annottext">$bBottom :: Bottom a
+$mBottom :: forall r a. Bottom a -&gt; (Void# -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.UnBounded.html#%24bBottom"><span class="hs-identifier hs-var hs-var hs-var">Bottom</span></a></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.UnBounded.html#GBottom"><span class="hs-identifier hs-type">GBottom</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span id="local-6989586621679327728"><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-identifier hs-type">ValB</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679327728"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327728"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-101"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bValB"><span id="%24mValB"><span id="ValB"><span class="annot"><span class="annottext">$bValB :: a -&gt; Bottom a
+$mValB :: forall r a. Bottom a -&gt; (a -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.UnBounded.html#%24bValB"><span class="hs-identifier hs-var hs-var hs-var">ValB</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679327401"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.UnBounded.html#GBottom"><span class="hs-identifier hs-type">GBottom</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679327401"><span class="annot"><a href="#local-6989586621679327401"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-pragma hs-type">Bottom</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-pragma hs-type">ValB</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679327400"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327395"><span id="local-6989586621679327398"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679327400"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327400"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679327394"><span class="annot"><span class="annottext">show :: Bottom a -&gt; String
+</span><a href="#local-6989586621679327394"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Bottom&quot;</span></span><span>
+</span><span id="line-107"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-identifier hs-type">ValB</span></a></span><span> </span><span id="local-6989586621679327393"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327393"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;ValB &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327393"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679327391"><span id="local-6989586621679327392"><span class="annot"><a href="Data.UnBounded.html#_ValB"><span class="hs-identifier hs-type">_ValB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327392"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327391"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327392"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327391"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-110"></span><span id="_ValB"><span class="annot"><span class="annottext">_ValB :: p a (f b) -&gt; p (Bottom a) (f (Bottom b))
+</span><a href="Data.UnBounded.html#_ValB"><span class="hs-identifier hs-var hs-var">_ValB</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; Bottom b)
+-&gt; (Bottom a -&gt; Either (Bottom b) a)
+-&gt; Prism (Bottom a) (Bottom b) a b
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><span class="hs-identifier hs-var">prism</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Bottom b
+forall a. a -&gt; Bottom a
+</span><a href="Data.UnBounded.html#ValB"><span class="hs-identifier hs-var">ValB</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bottom b -&gt; Either (Bottom b) a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">Bottom b
+forall a. Bottom a
+</span><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-var">Bottom</span></a></span><span> </span><span class="hs-special">;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-identifier hs-type">ValB</span></a></span><span> </span><span id="local-6989586621679327390"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327390"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either (Bottom b) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327390"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span id="local-6989586621679327389"><span class="annot"><a href="Data.UnBounded.html#_Bottom"><span class="hs-identifier hs-type">_Bottom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327389"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-113"></span><span id="_Bottom"><span class="annot"><span class="annottext">_Bottom :: p () (f ()) -&gt; p (Bottom a) (f (Bottom a))
+</span><a href="Data.UnBounded.html#_Bottom"><span class="hs-identifier hs-var hs-var">_Bottom</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(() -&gt; Bottom a)
+-&gt; (Bottom a -&gt; Maybe ()) -&gt; Prism (Bottom a) (Bottom a) () ()
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">prism'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bottom a -&gt; () -&gt; Bottom a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bottom a
+forall a. Bottom a
+</span><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-var">Bottom</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span> </span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Maybe ()
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">;</span><span> </span><span class="annot"><a href="Data.UnBounded.html#ValB"><span class="hs-identifier hs-type">ValB</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe ()
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- | Iso between a 'Bottom a' and a 'Maybe a', interpreting a Bottom as a</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- Nothing and vice versa.</span><span>
+</span><span id="line-117"></span><span class="hs-comment">--</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- &gt;&gt;&gt; ValB 5 ^. _BottomMaybe</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- Just 5</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- &gt;&gt;&gt; Just 5 ^.re _BottomMaybe</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- ValB 5</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- &gt;&gt;&gt; Bottom ^. _BottomMaybe</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- &gt;&gt;&gt; Nothing ^.re _BottomMaybe</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- Bottom</span><span>
+</span><span id="line-126"></span><span id="local-6989586621679327388"><span class="annot"><a href="Data.UnBounded.html#_BottomMaybe"><span class="hs-identifier hs-type">_BottomMaybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Iso'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Bottom"><span class="hs-identifier hs-type">Bottom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327388"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679327388"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-127"></span><span id="_BottomMaybe"><span class="annot"><span class="annottext">_BottomMaybe :: p (Maybe a) (f (Maybe a)) -&gt; p (Bottom a) (f (Bottom a))
+</span><a href="Data.UnBounded.html#_BottomMaybe"><span class="hs-identifier hs-var hs-var">_BottomMaybe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Bottom a -&gt; Maybe a)
+-&gt; (Maybe a -&gt; Bottom a)
+-&gt; Iso (Bottom a) (Bottom a) (Maybe a) (Maybe a)
+forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
+</span><span class="hs-identifier hs-var">iso</span></span><span> </span><span class="annot"><span class="annottext">Bottom a -&gt; Maybe a
+forall a. Bottom a -&gt; Maybe a
+</span><a href="Data.UnBounded.html#bottomToMaybe"><span class="hs-identifier hs-var hs-var">bottomToMaybe</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; Bottom a
+forall a. Maybe a -&gt; Bottom a
+</span><a href="Data.UnBounded.html#GBottom"><span class="hs-identifier hs-var">GBottom</span></a></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- | `UnBounded a` represents the type a, together with an element</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- `MaxInfinity` larger than any other element, and an element `MinInfinity`,</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- smaller than any other element.</span><span>
+</span><span id="line-134"></span><span class="hs-keyword">data</span><span> </span><span id="UnBounded"><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier hs-var">UnBounded</span></a></span></span><span> </span><span id="local-6989586621679327657"><span class="annot"><a href="#local-6989586621679327657"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MinInfinity"><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Val"><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unUnBounded"><span class="annot"><span class="annottext">UnBounded a -&gt; a
+</span><a href="Data.UnBounded.html#_unUnBounded"><span class="hs-identifier hs-var hs-var">_unUnBounded</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679327657"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MaxInfinity"><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span></span><span>
+</span><span id="line-135"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327380"><span id="local-6989586621679327382"><span class="annot"><span class="annottext">UnBounded a -&gt; UnBounded a -&gt; Bool
+(UnBounded a -&gt; UnBounded a -&gt; Bool)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; Bool) -&gt; Eq (UnBounded a)
+forall a. Eq a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+== :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c== :: forall a. Eq a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327365"><span id="local-6989586621679327367"><span id="local-6989586621679327369"><span id="local-6989586621679327371"><span id="local-6989586621679327373"><span id="local-6989586621679327375"><span id="local-6989586621679327377"><span class="annot"><span class="annottext">Eq (UnBounded a)
+Eq (UnBounded a) =&gt;
+(UnBounded a -&gt; UnBounded a -&gt; Ordering)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; Bool)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; Bool)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; Bool)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; Bool)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; UnBounded a)
+-&gt; (UnBounded a -&gt; UnBounded a -&gt; UnBounded a)
+-&gt; Ord (UnBounded a)
+UnBounded a -&gt; UnBounded a -&gt; Bool
+UnBounded a -&gt; UnBounded a -&gt; Ordering
+UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (UnBounded a)
+forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Ordering
+forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+min :: UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+$cmin :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+max :: UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+$cmax :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+&gt;= :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+&gt; :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+&lt;= :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+&lt; :: UnBounded a -&gt; UnBounded a -&gt; Bool
+$c&lt; :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Bool
+compare :: UnBounded a -&gt; UnBounded a -&gt; Ordering
+$ccompare :: forall a. Ord a =&gt; UnBounded a -&gt; UnBounded a -&gt; Ordering
+$cp1Ord :: forall a. Ord a =&gt; Eq (UnBounded a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327361"><span id="local-6989586621679327363"><span class="annot"><span class="annottext">a -&gt; UnBounded b -&gt; UnBounded a
+(a -&gt; b) -&gt; UnBounded a -&gt; UnBounded b
+(forall a b. (a -&gt; b) -&gt; UnBounded a -&gt; UnBounded b)
+-&gt; (forall a b. a -&gt; UnBounded b -&gt; UnBounded a)
+-&gt; Functor UnBounded
+forall a b. a -&gt; UnBounded b -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; UnBounded a -&gt; UnBounded b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; UnBounded b -&gt; UnBounded a
+$c&lt;$ :: forall a b. a -&gt; UnBounded b -&gt; UnBounded a
+fmap :: (a -&gt; b) -&gt; UnBounded a -&gt; UnBounded b
+$cfmap :: forall a b. (a -&gt; b) -&gt; UnBounded a -&gt; UnBounded b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327327"><span id="local-6989586621679327329"><span id="local-6989586621679327331"><span id="local-6989586621679327333"><span id="local-6989586621679327335"><span id="local-6989586621679327337"><span id="local-6989586621679327339"><span id="local-6989586621679327341"><span id="local-6989586621679327343"><span id="local-6989586621679327345"><span id="local-6989586621679327347"><span id="local-6989586621679327349"><span id="local-6989586621679327351"><span id="local-6989586621679327353"><span id="local-6989586621679327355"><span id="local-6989586621679327357"><span id="local-6989586621679327359"><span class="annot"><span class="annottext">UnBounded a -&gt; Bool
+(a -&gt; m) -&gt; UnBounded a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+(forall m. Monoid m =&gt; UnBounded m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; UnBounded a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; UnBounded a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a)
+-&gt; (forall a. UnBounded a -&gt; [a])
+-&gt; (forall a. UnBounded a -&gt; Bool)
+-&gt; (forall a. UnBounded a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; UnBounded a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; UnBounded a -&gt; a)
+-&gt; (forall a. Ord a =&gt; UnBounded a -&gt; a)
+-&gt; (forall a. Num a =&gt; UnBounded a -&gt; a)
+-&gt; (forall a. Num a =&gt; UnBounded a -&gt; a)
+-&gt; Foldable UnBounded
+forall a. Eq a =&gt; a -&gt; UnBounded a -&gt; Bool
+forall a. Num a =&gt; UnBounded a -&gt; a
+forall a. Ord a =&gt; UnBounded a -&gt; a
+forall m. Monoid m =&gt; UnBounded m -&gt; m
+forall a. UnBounded a -&gt; Bool
+forall a. UnBounded a -&gt; Int
+forall a. UnBounded a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; UnBounded a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: UnBounded a -&gt; a
+$cproduct :: forall a. Num a =&gt; UnBounded a -&gt; a
+sum :: UnBounded a -&gt; a
+$csum :: forall a. Num a =&gt; UnBounded a -&gt; a
+minimum :: UnBounded a -&gt; a
+$cminimum :: forall a. Ord a =&gt; UnBounded a -&gt; a
+maximum :: UnBounded a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; UnBounded a -&gt; a
+elem :: a -&gt; UnBounded a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; UnBounded a -&gt; Bool
+length :: UnBounded a -&gt; Int
+$clength :: forall a. UnBounded a -&gt; Int
+null :: UnBounded a -&gt; Bool
+$cnull :: forall a. UnBounded a -&gt; Bool
+toList :: UnBounded a -&gt; [a]
+$ctoList :: forall a. UnBounded a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; UnBounded a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; UnBounded a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; UnBounded a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; UnBounded a -&gt; m
+foldMap :: (a -&gt; m) -&gt; UnBounded a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; UnBounded a -&gt; m
+fold :: UnBounded m -&gt; m
+$cfold :: forall m. Monoid m =&gt; UnBounded m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">F.Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327317"><span id="local-6989586621679327319"><span id="local-6989586621679327321"><span id="local-6989586621679327323"><span class="annot"><span class="annottext">Functor UnBounded
+Foldable UnBounded
+(Functor UnBounded, Foldable UnBounded) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; UnBounded a -&gt; f (UnBounded b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    UnBounded (f a) -&gt; f (UnBounded a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; UnBounded a -&gt; m (UnBounded b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    UnBounded (m a) -&gt; m (UnBounded a))
+-&gt; Traversable UnBounded
+(a -&gt; f b) -&gt; UnBounded a -&gt; f (UnBounded b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+UnBounded (m a) -&gt; m (UnBounded a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+UnBounded (f a) -&gt; f (UnBounded a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; UnBounded a -&gt; m (UnBounded b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; UnBounded a -&gt; f (UnBounded b)
+sequence :: UnBounded (m a) -&gt; m (UnBounded a)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+UnBounded (m a) -&gt; m (UnBounded a)
+mapM :: (a -&gt; m b) -&gt; UnBounded a -&gt; m (UnBounded b)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; UnBounded a -&gt; m (UnBounded b)
+sequenceA :: UnBounded (f a) -&gt; f (UnBounded a)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+UnBounded (f a) -&gt; f (UnBounded a)
+traverse :: (a -&gt; f b) -&gt; UnBounded a -&gt; f (UnBounded b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; UnBounded a -&gt; f (UnBounded b)
+$cp2Traversable :: Foldable UnBounded
+$cp1Traversable :: Functor UnBounded
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">T.Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span id="local-6989586621679327316"><span id="unUnBounded"><span id="local-6989586621679327657"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">UnBounded</span></span></span></span><span>
+</span><span id="line-137"></span><span id="local-6989586621679327315"><span id="_MaxInfinity"><span id="_Val"><span id="_MinInfinity"><span id="local-6989586621679327657"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">UnBounded</span></span></span></span></span></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span id="local-6989586621679327314"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327309"><span id="local-6989586621679327312"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679327314"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327314"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-140"></span><span>  </span><span id="local-6989586621679327308"><span class="annot"><span class="annottext">show :: UnBounded a -&gt; String
+</span><a href="#local-6989586621679327308"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;MinInfinity&quot;</span></span><span>
+</span><span id="line-141"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327307"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327307"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;Val &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327307"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;MaxInfinity&quot;</span></span></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span id="local-6989586621679327306"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327303"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679327306"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327306"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-145"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span id="local-6989586621679327296"><span class="annot"><span class="annottext">+ :: UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">+</span></span></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-146"></span><span>  </span><span class="hs-identifier">_</span><span>           </span><span class="annot"><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327294"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327294"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="annot"><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327293"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679327293"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327294"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327293"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-identifier">_</span><span>           </span><span class="annot"><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-149"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span id="local-6989586621679327292"><span class="annot"><span class="annottext">* :: UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">*</span></span></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-identifier">_</span><span>           </span><span class="annot"><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327290"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327290"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="annot"><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327289"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679327289"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327290"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327289"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-identifier">_</span><span>           </span><span class="annot"><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-157"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>  </span><span id="local-6989586621679327288"><span class="annot"><span class="annottext">abs :: UnBounded a -&gt; UnBounded a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">abs</span></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-160"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327286"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327286"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327286"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-161"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>  </span><span id="local-6989586621679327285"><span class="annot"><span class="annottext">signum :: UnBounded a -&gt; UnBounded a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">signum</span></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-164"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327283"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327283"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327283"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-165"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span>  </span><span id="local-6989586621679327282"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; UnBounded a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; (Integer -&gt; a) -&gt; Integer -&gt; UnBounded a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; a
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span>  </span><span id="local-6989586621679327280"><span class="annot"><span class="annottext">negate :: UnBounded a -&gt; UnBounded a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327279"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327279"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327279"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span></span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span id="local-6989586621679327278"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327274"><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679327278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327278"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-174"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-type">MinInfinity</span></a></span><span> </span><span id="local-6989586621679327271"><span class="annot"><span class="annottext">/ :: UnBounded a -&gt; UnBounded a -&gt; UnBounded a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">/</span></span></span><span> </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-175"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327269"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327269"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="annot"><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327268"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679327268"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; a -&gt; UnBounded a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327269"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327268"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-176"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>     </span><span class="annot"><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-177"></span><span>  </span><span class="annot"><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-type">MaxInfinity</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnBounded a
+forall a. UnBounded a
+</span><a href="Data.UnBounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span>  </span><span id="local-6989586621679327267"><span class="annot"><span class="annottext">fromRational :: Rational -&gt; UnBounded a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromRational</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; UnBounded a
+forall a. a -&gt; UnBounded a
+</span><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; UnBounded a) -&gt; (Rational -&gt; a) -&gt; Rational -&gt; UnBounded a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; a
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- | Test if an Unbounded is actually bounded.</span><span>
+</span><span id="line-182"></span><span class="hs-comment">--</span><span>
+</span><span id="line-183"></span><span class="hs-comment">-- &gt;&gt;&gt; unBoundedToMaybe (Val 5)</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- Just 5</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- &gt;&gt;&gt; unBoundedToMaybe MinInfinity</span><span>
+</span><span id="line-186"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- &gt;&gt;&gt; unBoundedToMaybe MaxInfinity</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-189"></span><span id="local-6989586621679327266"><span class="annot"><a href="Data.UnBounded.html#unBoundedToMaybe"><span class="hs-identifier hs-type">unBoundedToMaybe</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.UnBounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327266"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679327266"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-190"></span><span id="unBoundedToMaybe"><span class="annot"><span class="annottext">unBoundedToMaybe :: UnBounded a -&gt; Maybe a
+</span><a href="Data.UnBounded.html#unBoundedToMaybe"><span class="hs-identifier hs-var hs-var">unBoundedToMaybe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.UnBounded.html#Val"><span class="hs-identifier hs-type">Val</span></a></span><span> </span><span id="local-6989586621679327265"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679327265"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679327265"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-191"></span><span class="annot"><a href="Data.UnBounded.html#unBoundedToMaybe"><span class="hs-identifier hs-var">unBoundedToMaybe</span></a></span><span> </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-192"></span></pre></body></html>

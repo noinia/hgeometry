@@ -1,0 +1,540 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.RedBlueSeparator.RIC</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Given a set of red points and a set of blue points in \(\mathbb{R}^2\) finds</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- a separating line in \(O(n)\) expected time, where \(n\) is the total number</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- of points.</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.RedBlueSeparator.RIC</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.LinearProgramming.LP2DRIC.html"><span class="hs-identifier">Algorithms.Geometry.LinearProgramming.LP2DRIC</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.LinearProgramming.Types.html"><span class="hs-identifier">Algorithms.Geometry.LinearProgramming.Types</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(&lt;|&gt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">below</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Random.Class</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.HalfSpace.html"><span class="hs-identifier">Data.Geometry.HalfSpace</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Foldable</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- -- | Given a set of red points and a set of blue points in \(\mathbb{R}^2\)</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- -- finds a separating line (if it exists). The result is strict in the</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- -- sense that there will not be any points on the line.</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- --</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- --</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- -- running time: \(O(n)\) expected time, where \(n\) is the total number</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- -- of points.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- strictSeparatingLine = undefined</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | Given a set of red points and a set of blue points in \(\mathbb{R}^2\)</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- finds a separating line (if it exists). The result is non-strict in the</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- sense that there may be points *on* the line.</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- running time: \(O(n)\) expected time, where \(n\) is the total number</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- of points.</span><span>
+</span><span id="line-49"></span><span id="local-6989586621679980152"><span id="local-6989586621679980153"><span id="local-6989586621679980154"><span id="local-6989586621679980155"><span id="local-6989586621679980156"><span id="local-6989586621679980157"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine"><span class="hs-identifier hs-type">separatingLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679980157"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980156"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980155"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980154"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980154"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980156"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980154"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980153"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980155"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980154"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980152"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980157"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980154"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span id="separatingLine"><span class="annot"><span class="annottext">separatingLine :: f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine"><span class="hs-identifier hs-var hs-var">separatingLine</span></a></span></span><span> </span><span id="local-6989586621679980150"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980150"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980149"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980149"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679980148"><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980148"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; m (Maybe (Line 2 r))
+forall (m :: * -&gt; *) (f :: * -&gt; *) (g :: * -&gt; *) r redData
+       blueData.
+(MonadRandom m, Foldable1 f, Foldable1 g, Fractional r, Ord r) =&gt;
+f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27"><span class="hs-identifier hs-var">separatingLine'</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980150"><span class="hs-identifier hs-var">reds</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980149"><span class="hs-identifier hs-var">blues</span></a></span><span>
+</span><span id="line-54"></span><span>                               </span><span id="local-6989586621679980146"><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980146"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+-&gt; f (Point 2 r :+ redData) -&gt; m (Maybe (Line 2 r))
+forall (m :: * -&gt; *) (f :: * -&gt; *) (g :: * -&gt; *) r redData
+       blueData.
+(MonadRandom m, Foldable1 f, Foldable1 g, Fractional r, Ord r) =&gt;
+f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27"><span class="hs-identifier hs-var">separatingLine'</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980149"><span class="hs-identifier hs-var">blues</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980150"><span class="hs-identifier hs-var">reds</span></a></span><span>
+</span><span id="line-55"></span><span>                               </span><span class="annot"><span class="annottext">Maybe (Line 2 r) -&gt; m (Maybe (Line 2 r))
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (Line 2 r) -&gt; m (Maybe (Line 2 r)))
+-&gt; Maybe (Line 2 r) -&gt; m (Maybe (Line 2 r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980148"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r) -&gt; Maybe (Line 2 r) -&gt; Maybe (Line 2 r)
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980146"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- | Given a set of red points and a set of blue points in \(\mathbb{R}^2\)</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- finds a separating line (if it exists) that has all red points *right* (or</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- on) the line, and all blue points left (or on) the line.</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- running time: \(O(n)\) expected time, where \(n\) is the total number</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- of points.</span><span>
+</span><span id="line-63"></span><span id="local-6989586621679980268"><span id="local-6989586621679980269"><span id="local-6989586621679980270"><span id="local-6989586621679980271"><span id="local-6989586621679980273"><span id="local-6989586621679980275"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27"><span class="hs-identifier hs-type">separatingLine'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679980275"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980273"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980271"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980270"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980270"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980273"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980270"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980269"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980271"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980270"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980268"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980275"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980270"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-67"></span><span id="separatingLine%27"><span class="annot"><span class="annottext">separatingLine' :: f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27"><span class="hs-identifier hs-var hs-var">separatingLine'</span></a></span></span><span> </span><span id="local-6989586621679980145"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980145"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980144"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980144"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; SP
+     (Maybe (Line 2 r)) (Point 2 r :+ redData, Point 2 r :+ blueData)
+forall (f :: * -&gt; *) (g :: * -&gt; *) r redData blueData.
+(Foldable1 f, Foldable1 g, Num r, Ord r) =&gt;
+f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; SP
+     (Maybe (Line 2 r)) (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#verticalSeparatingLine"><span class="hs-identifier hs-var">verticalSeparatingLine</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980145"><span class="hs-identifier hs-var">reds</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980144"><span class="hs-identifier hs-var">blues</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679980141"><span class="annot"><span class="annottext">r :: Point 2 r
+</span><a href="#local-6989586621679980141"><span class="hs-identifier hs-var">r</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679980139"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621679980139"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; Point 2 r
+-&gt; f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; m (Maybe (Line 2 r))
+forall (m :: * -&gt; *) (f :: * -&gt; *) (g :: * -&gt; *) r redData
+       blueData.
+(MonadRandom m, Foldable1 f, Foldable1 g, Fractional r, Ord r) =&gt;
+Point 2 r
+-&gt; Point 2 r
+-&gt; f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27%27"><span class="hs-identifier hs-var">separatingLine''</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980141"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980139"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980145"><span class="hs-identifier hs-var">reds</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980144"><span class="hs-identifier hs-var">blues</span></a></span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-comment">-- observe that if r and b were vertically above each other then we would</span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-comment">-- have found a separating line. So r and b are not vertically</span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-comment">-- aligned. Hence we satisfy the precondition.</span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span id="local-6989586621679980137"><span class="annot"><span class="annottext">ml :: Maybe (Line 2 r)
+</span><a href="#local-6989586621679980137"><span class="hs-identifier hs-var">ml</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">_</span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r) -&gt; m (Maybe (Line 2 r))
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980137"><span class="hs-identifier hs-var">ml</span></a></span><span>  </span><span class="hs-comment">-- already found a line</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- | given a red and blue point that are *NOT* vertically alligned, and all red</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- and all blue points, try to find a non-vertical separating line.</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- running time: \(O(n)\) expected time, where \(n\) is the total number</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- of points.</span><span>
+</span><span id="line-80"></span><span id="local-6989586621679980242"><span id="local-6989586621679980243"><span id="local-6989586621679980244"><span id="local-6989586621679980245"><span id="local-6989586621679980246"><span id="local-6989586621679980247"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27%27"><span class="hs-identifier hs-type">separatingLine''</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679980247"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980246"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980245"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ red point r</span><span>
+</span><span id="line-82"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ a blue point b</span><span>
+</span><span id="line-83"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980246"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980243"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980245"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980242"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980247"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980244"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-86"></span><span id="separatingLine%27%27"><span class="annot"><span class="annottext">separatingLine'' :: Point 2 r
+-&gt; Point 2 r
+-&gt; f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; m (Maybe (Line 2 r))
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#separatingLine%27%27"><span class="hs-identifier hs-var hs-var">separatingLine''</span></a></span></span><span> </span><span id="local-6989586621679980136"><span class="annot"><span class="annottext">r :: Point 2 r
+</span><a href="#local-6989586621679980136"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679980135"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621679980135"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679980134"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980134"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980133"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980133"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Line 2 r) -&gt; Maybe (Point 2 r) -&gt; Maybe (Line 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r
+forall r. Num r =&gt; Point 2 r -&gt; Line 2 r
+</span><a href="#local-6989586621679980132"><span class="hs-identifier hs-var">mkLine</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Point 2 r) -&gt; Maybe (Line 2 r))
+-&gt; m (Maybe (Point 2 r)) -&gt; m (Maybe (Line 2 r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
+forall (m :: * -&gt; *) r.
+(MonadRandom m, Ord r, Fractional r) =&gt;
+LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
+</span><a href="Algorithms.Geometry.LinearProgramming.LP2DRIC.html#solveBoundedLinearProgram"><span class="hs-identifier hs-var">solveBoundedLinearProgram</span></a></span><span> </span><span class="annot"><span class="annottext">LinearProgram 2 r
+</span><a href="#local-6989586621679980129"><span class="hs-identifier hs-var">lp</span></a></span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679980129"><span class="annot"><span class="annottext">lp :: LinearProgram 2 r
+</span><a href="#local-6989586621679980129"><span class="hs-identifier hs-var hs-var">lp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; [HalfSpace 2 r] -&gt; LinearProgram 2 r
+forall (d :: Nat) r.
+Vector d r -&gt; [HalfSpace d r] -&gt; LinearProgram d r
+</span><a href="Algorithms.Geometry.LinearProgramming.Types.html#LinearProgram"><span class="hs-identifier hs-var">LinearProgram</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679980127"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r
+forall r. Num r =&gt; Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980126"><span class="hs-identifier hs-var">mkRed</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980136"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r
+forall r. Num r =&gt; Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980125"><span class="hs-identifier hs-var">mkBlue</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980135"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[HalfSpace 2 r] -&gt; [HalfSpace 2 r] -&gt; [HalfSpace 2 r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[HalfSpace 2 r]
+</span><a href="#local-6989586621679980124"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679980127"><span class="annot"><span class="annottext">c :: Vector 2 r
+</span><a href="#local-6989586621679980127"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980136"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980135"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-91"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>  </span><span class="hs-comment">-- minimize a</span><span>
+</span><span id="line-92"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>    </span><span class="annot"><span class="hs-number">0</span></span><span>  </span><span class="hs-comment">-- maximize a</span><span>
+</span><span id="line-93"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Vector 2 r
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;separatingLine'': precondition failed. r and b vertically above each other&quot;</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679980132"><span class="annot"><span class="annottext">mkLine :: Point 2 r -&gt; Line 2 r
+</span><a href="#local-6989586621679980132"><span class="hs-identifier hs-var hs-var">mkLine</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679980117"><span class="annot"><span class="annottext">aa :: r
+</span><a href="#local-6989586621679980117"><span class="hs-identifier hs-var">aa</span></a></span></span><span> </span><span id="local-6989586621679980116"><span class="annot"><span class="annottext">bb :: r
+</span><a href="#local-6989586621679980116"><span class="hs-identifier hs-var">bb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#fromLinearFunction"><span class="hs-identifier hs-var">fromLinearFunction</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980117"><span class="hs-identifier hs-var">aa</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980116"><span class="hs-identifier hs-var">bb</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-comment">-- red points generate the constraint: ry &lt;= a*rx + b &lt;=&gt; b &gt;= (-rx)a + ry</span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679980126"><span class="annot"><span class="annottext">mkRed :: Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980126"><span class="hs-identifier hs-var hs-var">mkRed</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679980114"><span class="annot"><span class="annottext">rx :: r
+</span><a href="#local-6989586621679980114"><span class="hs-identifier hs-var">rx</span></a></span></span><span> </span><span id="local-6989586621679980113"><span class="annot"><span class="annottext">ry :: r
+</span><a href="#local-6989586621679980113"><span class="hs-identifier hs-var">ry</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfPlane r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#above"><span class="hs-identifier hs-var">above</span></a></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; HalfPlane r) -&gt; Line 2 r -&gt; HalfPlane r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#fromLinearFunction"><span class="hs-identifier hs-var">fromLinearFunction</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980114"><span class="hs-identifier hs-var">rx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980113"><span class="hs-identifier hs-var">ry</span></a></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-comment">-- blue points generate the constraint: by &gt;= a*bx + b &lt;=&gt; b &lt;= (-bx)a + by</span><span>
+</span><span id="line-100"></span><span>    </span><span id="local-6989586621679980125"><span class="annot"><span class="annottext">mkBlue :: Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980125"><span class="hs-identifier hs-var hs-var">mkBlue</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679980110"><span class="annot"><span class="annottext">bx :: r
+</span><a href="#local-6989586621679980110"><span class="hs-identifier hs-var">bx</span></a></span></span><span> </span><span id="local-6989586621679980109"><span class="annot"><span class="annottext">by :: r
+</span><a href="#local-6989586621679980109"><span class="hs-identifier hs-var">by</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfPlane r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#below"><span class="hs-identifier hs-var">below</span></a></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; HalfPlane r) -&gt; Line 2 r -&gt; HalfPlane r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#fromLinearFunction"><span class="hs-identifier hs-var">fromLinearFunction</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980110"><span class="hs-identifier hs-var">bx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980109"><span class="hs-identifier hs-var">by</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679980124"><span class="annot"><span class="annottext">hs :: [HalfSpace 2 r]
+</span><a href="#local-6989586621679980124"><span class="hs-identifier hs-var hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r
+forall r. Num r =&gt; Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980126"><span class="hs-identifier hs-var">mkRed</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980107"><span class="hs-identifier hs-var">rr</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679980107"><span class="annot"><span class="annottext">rr :: Point 2 r
+</span><a href="#local-6989586621679980107"><span class="hs-identifier hs-var">rr</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData) -&gt; [Point 2 r :+ redData]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980134"><span class="hs-identifier hs-var">reds</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[HalfSpace 2 r] -&gt; [HalfSpace 2 r] -&gt; [HalfSpace 2 r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r
+forall r. Num r =&gt; Point 2 r -&gt; HalfPlane r
+</span><a href="#local-6989586621679980125"><span class="hs-identifier hs-var">mkBlue</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679980105"><span class="hs-identifier hs-var">bb</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679980105"><span class="annot"><span class="annottext">bb :: Point 2 r
+</span><a href="#local-6989586621679980105"><span class="hs-identifier hs-var">bb</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData) -&gt; [Point 2 r :+ blueData]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980133"><span class="hs-identifier hs-var">blues</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- * Vertical Separators</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- | Computes a strict vertical separating line, if one exists</span><span>
+</span><span id="line-109"></span><span id="local-6989586621679980100"><span id="local-6989586621679980101"><span id="local-6989586621679980102"><span id="local-6989586621679980103"><span id="local-6989586621679980104"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#strictVerticalSeparatingLine"><span class="hs-identifier hs-type">strictVerticalSeparatingLine</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980104"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980103"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679980102"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980102"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>                                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980104"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980102"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980101"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>                                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980103"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980102"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980100"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>                                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980102"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-113"></span><span id="strictVerticalSeparatingLine"><span class="annot"><span class="annottext">strictVerticalSeparatingLine :: f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData) -&gt; Maybe (Line 2 r)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#strictVerticalSeparatingLine"><span class="hs-identifier hs-var hs-var">strictVerticalSeparatingLine</span></a></span></span><span> </span><span id="local-6989586621679980098"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980098"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980097"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980097"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679980096"><span class="annot"><span class="annottext">r :: Point 2 r :+ redData
+</span><a href="#local-6989586621679980096"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679980095"><span class="annot"><span class="annottext">b :: Point 2 r :+ blueData
+</span><a href="#local-6989586621679980095"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+forall (f :: * -&gt; *) (g :: * -&gt; *) r redData blueData.
+(Foldable1 f, Foldable1 g, Ord r) =&gt;
+f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#extremalPoints"><span class="hs-identifier hs-var">extremalPoints</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980098"><span class="hs-identifier hs-var">reds</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980097"><span class="hs-identifier hs-var">blues</span></a></span><span>
+</span><span id="line-114"></span><span>                                                 </span><span id="local-6989586621679980093"><span class="annot"><span class="annottext">rx :: r
+</span><a href="#local-6989586621679980093"><span class="hs-identifier hs-var hs-var">rx</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ redData
+</span><a href="#local-6989586621679980096"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ redData) -&gt; Getting r (Point 2 r :+ redData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ redData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span>
+</span><span id="line-115"></span><span>                                                 </span><span id="local-6989586621679980090"><span class="annot"><span class="annottext">bx :: r
+</span><a href="#local-6989586621679980090"><span class="hs-identifier hs-var hs-var">bx</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ blueData
+</span><a href="#local-6989586621679980095"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ blueData) -&gt; Getting r (Point 2 r :+ blueData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ blueData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span>
+</span><span id="line-116"></span><span>                                             </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980090"><span class="hs-identifier hs-var">bx</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980093"><span class="hs-identifier hs-var">rx</span></a></span><span>
+</span><span id="line-117"></span><span>                                               </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; Maybe (Line 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; Maybe (Line 2 r))
+-&gt; (r -&gt; Line 2 r) -&gt; r -&gt; Maybe (Line 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#verticalLine"><span class="hs-identifier hs-var">verticalLine</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Maybe (Line 2 r)) -&gt; r -&gt; Maybe (Line 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980093"><span class="hs-identifier hs-var">rx</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679980090"><span class="hs-identifier hs-var">bx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-118"></span><span>                                               </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- no vertical separator</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- | Test if there is a vertical separating line that has all red points to its</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- right (or on it) and all blue points to its left (or on it).  This function</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- also returns the two extremal points; in case a line is returned, the line</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- actually goes through the blue (second) point, if there is no line, this</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- pair provides evidence that there is no vertical separating line.</span><span>
+</span><span id="line-126"></span><span class="hs-comment">--</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- The line we return actually goes through one blue point.</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679980248"><span id="local-6989586621679980249"><span id="local-6989586621679980250"><span id="local-6989586621679980251"><span id="local-6989586621679980252"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#verticalSeparatingLine"><span class="hs-identifier hs-type">verticalSeparatingLine</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980252"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980251"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>                                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980252"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980249"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>                                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980251"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980248"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>                                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SP</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>                                        </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980249"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980250"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980248"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-133"></span><span id="verticalSeparatingLine"><span class="annot"><span class="annottext">verticalSeparatingLine :: f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; SP
+     (Maybe (Line 2 r)) (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#verticalSeparatingLine"><span class="hs-identifier hs-var hs-var">verticalSeparatingLine</span></a></span></span><span> </span><span id="local-6989586621679980085"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980085"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980084"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980084"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+-&gt; SP
+     (Maybe (Line 2 r)) (Point 2 r :+ redData, Point 2 r :+ blueData)
+forall a b. a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier hs-var">SP</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+</span><a href="#local-6989586621679980083"><span class="hs-identifier hs-var">ml</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980082"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679980082"><span class="annot"><span class="annottext">es :: (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980082"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679980081"><span class="annot"><span class="annottext">r :: Point 2 r :+ redData
+</span><a href="#local-6989586621679980081"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679980080"><span class="annot"><span class="annottext">b :: Point 2 r :+ blueData
+</span><a href="#local-6989586621679980080"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+forall (f :: * -&gt; *) (g :: * -&gt; *) r redData blueData.
+(Foldable1 f, Foldable1 g, Ord r) =&gt;
+f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#extremalPoints"><span class="hs-identifier hs-var">extremalPoints</span></a></span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980085"><span class="hs-identifier hs-var">reds</span></a></span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980084"><span class="hs-identifier hs-var">blues</span></a></span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679980083"><span class="annot"><span class="annottext">ml :: Maybe (Line 2 r)
+</span><a href="#local-6989586621679980083"><span class="hs-identifier hs-var hs-var">ml</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ blueData
+</span><a href="#local-6989586621679980080"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ blueData) -&gt; Getting r (Point 2 r :+ blueData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ blueData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ redData
+</span><a href="#local-6989586621679980081"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ redData) -&gt; Getting r (Point 2 r :+ redData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ redData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; Maybe (Line 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; Maybe (Line 2 r))
+-&gt; (r -&gt; Line 2 r) -&gt; r -&gt; Maybe (Line 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#verticalLine"><span class="hs-identifier hs-var">verticalLine</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Maybe (Line 2 r)) -&gt; r -&gt; Maybe (Line 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ blueData
+</span><a href="#local-6989586621679980080"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ blueData) -&gt; Getting r (Point 2 r :+ blueData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ blueData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>                                             </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Maybe (Line 2 r)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Get the the leftmost red point and the rightmost blue point.</span><span>
+</span><span id="line-140"></span><span id="local-6989586621679980188"><span id="local-6989586621679980189"><span id="local-6989586621679980190"><span id="local-6989586621679980191"><span id="local-6989586621679980192"><span class="annot"><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#extremalPoints"><span class="hs-identifier hs-type">extremalPoints</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980192"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679980191"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679980190"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980192"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980190"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980189"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679980191"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980190"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980188"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980190"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980189"><span class="hs-identifier hs-type">redData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679980190"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679980188"><span class="hs-identifier hs-type">blueData</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-144"></span><span id="extremalPoints"><span class="annot"><span class="annottext">extremalPoints :: f (Point 2 r :+ redData)
+-&gt; g (Point 2 r :+ blueData)
+-&gt; (Point 2 r :+ redData, Point 2 r :+ blueData)
+</span><a href="Algorithms.Geometry.RedBlueSeparator.RIC.html#extremalPoints"><span class="hs-identifier hs-var hs-var">extremalPoints</span></a></span></span><span> </span><span id="local-6989586621679980078"><span class="annot"><span class="annottext">reds :: f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980078"><span class="hs-identifier hs-var">reds</span></a></span></span><span> </span><span id="local-6989586621679980077"><span class="annot"><span class="annottext">blues :: g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980077"><span class="hs-identifier hs-var">blues</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ redData) -&gt; (Point 2 r :+ redData) -&gt; Ordering)
+-&gt; f (Point 2 r :+ redData) -&gt; Point 2 r :+ redData
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.minimumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ redData) -&gt; r)
+-&gt; (Point 2 r :+ redData) -&gt; (Point 2 r :+ redData) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ redData) -&gt; Getting r (Point 2 r :+ redData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ redData) -&gt; Const r (Point 2 r :+ redData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ redData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (Point 2 r :+ redData)
+</span><a href="#local-6989586621679980078"><span class="hs-identifier hs-var">reds</span></a></span><span>
+</span><span id="line-145"></span><span>                            </span><span class="hs-special">,</span><span class="annot"><span class="annottext">((Point 2 r :+ blueData) -&gt; (Point 2 r :+ blueData) -&gt; Ordering)
+-&gt; g (Point 2 r :+ blueData) -&gt; Point 2 r :+ blueData
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ blueData) -&gt; r)
+-&gt; (Point 2 r :+ blueData) -&gt; (Point 2 r :+ blueData) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ blueData) -&gt; Getting r (Point 2 r :+ blueData) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ blueData) -&gt; Const r (Point 2 r :+ blueData))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (Point 2 r :+ blueData) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">g (Point 2 r :+ blueData)
+</span><a href="#local-6989586621679980077"><span class="hs-identifier hs-var">blues</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-148"></span></pre></body></html>

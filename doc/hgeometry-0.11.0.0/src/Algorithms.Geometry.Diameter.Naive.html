@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.Diameter.Naive</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.html"><span class="hs-identifier">Data.Geometry</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">maximumBy</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span id="local-6989586621679979418"><span id="local-6989586621679979419"><span id="local-6989586621679979420"><span class="annot"><a href="Algorithms.Geometry.Diameter.Naive.html#diameter"><span class="hs-identifier hs-type">diameter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679979420"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679979420"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979419"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979419"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979420"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979418"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679979420"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-11"></span><span id="diameter"><span class="annot"><span class="annottext">diameter :: [Point d r :+ p] -&gt; r
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diameter"><span class="hs-identifier hs-var hs-var">diameter</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+-&gt; ((Point d r :+ p, Point d r :+ p) -&gt; r)
+-&gt; Maybe (Point d r :+ p, Point d r :+ p)
+-&gt; r
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679979415"><span class="annot"><span class="annottext">p :: Point d r :+ p
+</span><a href="#local-6989586621679979415"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679979414"><span class="annot"><span class="annottext">q :: Point d r :+ p
+</span><a href="#local-6989586621679979414"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; r
+forall r (d :: Nat).
+(Floating r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; r
+</span><a href="Data.Geometry.Point.Internal.html#euclideanDist"><span class="hs-identifier hs-var">euclideanDist</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979415"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point d r :+ p)
+-&gt; Getting (Point d r) (Point d r :+ p) (Point d r) -&gt; Point d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point d r) (Point d r :+ p) (Point d r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979414"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point d r :+ p)
+-&gt; Getting (Point d r) (Point d r :+ p) (Point d r) -&gt; Point d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point d r) (Point d r :+ p) (Point d r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Point d r :+ p, Point d r :+ p) -&gt; r)
+-&gt; ([Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p))
+-&gt; [Point d r :+ p]
+-&gt; r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+forall r (d :: Nat) p.
+(Ord r, Num r, Arity d) =&gt;
+[Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPair"><span class="hs-identifier hs-var">diametralPair</span></a></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- | Computes the Euclidean diametral pair by naively trying all pairs.</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- running time: \(O(n^2)\)</span><span>
+</span><span id="line-16"></span><span id="local-6989586621679979440"><span id="local-6989586621679979441"><span id="local-6989586621679979442"><span class="annot"><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPair"><span class="hs-identifier hs-type">diametralPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679979442"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679979442"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979441"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979441"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979442"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979440"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979441"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979442"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979440"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979441"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979442"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979440"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-18"></span><span id="diametralPair"><span class="annot"><span class="annottext">diametralPair :: [Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPair"><span class="hs-identifier hs-var hs-var">diametralPair</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point d r -&gt; Point d r -&gt; r)
+-&gt; [Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+forall r (d :: Nat) p.
+Ord r =&gt;
+(Point d r -&gt; Point d r -&gt; r)
+-&gt; [Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPairWith"><span class="hs-identifier hs-var">diametralPairWith</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; r
+</span><a href="Data.Geometry.Point.Internal.html#squaredEuclideanDist"><span class="hs-identifier hs-var">squaredEuclideanDist</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- | Given a distance function and a list of points pts, computes the diametral</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- pair by naively trying all pairs.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- running time: \(O(n^2)\)</span><span>
+</span><span id="line-24"></span><span id="local-6989586621679979434"><span id="local-6989586621679979435"><span id="local-6989586621679979436"><span class="annot"><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPairWith"><span class="hs-identifier hs-type">diametralPairWith</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-25"></span><span>                                     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979435"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979435"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979435"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979434"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-27"></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979435"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979434"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979435"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679979436"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679979434"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-28"></span><span id="diametralPairWith"><span class="annot"><span class="annottext">diametralPairWith :: (Point d r -&gt; Point d r -&gt; r)
+-&gt; [Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPairWith"><span class="hs-identifier hs-var hs-var">diametralPairWith</span></a></span></span><span> </span><span id="local-6989586621679979406"><span class="annot"><span class="annottext">f :: Point d r -&gt; Point d r -&gt; r
+</span><a href="#local-6989586621679979406"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679979405"><span class="annot"><span class="annottext">pts :: [Point d r :+ p]
+</span><a href="#local-6989586621679979405"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p)
+-&gt; Maybe (Point d r :+ p, Point d r :+ p)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((Point d r :+ p, Point d r :+ p)
+ -&gt; Maybe (Point d r :+ p, Point d r :+ p))
+-&gt; (Point d r :+ p, Point d r :+ p)
+-&gt; Maybe (Point d r :+ p, Point d r :+ p)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((Point d r :+ p, Point d r :+ p)
+ -&gt; (Point d r :+ p, Point d r :+ p) -&gt; Ordering)
+-&gt; [(Point d r :+ p, Point d r :+ p)]
+-&gt; (Point d r :+ p, Point d r :+ p)
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximumBy</span></span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p)
+-&gt; (Point d r :+ p, Point d r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679979404"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979403"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979402"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679979403"><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979403"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Point d r :+ p]
+</span><a href="#local-6989586621679979405"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679979402"><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979402"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Point d r :+ p]
+</span><a href="#local-6989586621679979405"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679979401"><span class="annot"><span class="annottext">f' :: (Point d r :+ p, Point d r :+ p) -&gt; r
+</span><a href="#local-6989586621679979401"><span class="hs-identifier hs-var hs-var">f'</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679979400"><span class="annot"><span class="annottext">p :: Point d r :+ p
+</span><a href="#local-6989586621679979400"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679979399"><span class="annot"><span class="annottext">q :: Point d r :+ p
+</span><a href="#local-6989586621679979399"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; r
+</span><a href="#local-6989586621679979406"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979400"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point d r :+ p)
+-&gt; Getting (Point d r) (Point d r :+ p) (Point d r) -&gt; Point d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point d r) (Point d r :+ p) (Point d r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679979399"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point d r :+ p)
+-&gt; Getting (Point d r) (Point d r :+ p) (Point d r) -&gt; Point d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point d r) (Point d r :+ p) (Point d r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679979398"><span class="annot"><span class="annottext">tp :: (Point d r :+ p, Point d r :+ p)
+</span><a href="#local-6989586621679979398"><span class="hs-identifier hs-var">tp</span></a></span></span><span> </span><span id="local-6989586621679979404"><span class="annot"><span class="annottext">cmp :: (Point d r :+ p, Point d r :+ p)
+-&gt; (Point d r :+ p, Point d r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679979404"><span class="hs-operator hs-var hs-var">`cmp`</span></a></span></span><span> </span><span id="local-6989586621679979397"><span class="annot"><span class="annottext">tq :: (Point d r :+ p, Point d r :+ p)
+</span><a href="#local-6989586621679979397"><span class="hs-identifier hs-var">tq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p) -&gt; r
+</span><a href="#local-6989586621679979401"><span class="hs-identifier hs-var">f'</span></a></span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p)
+</span><a href="#local-6989586621679979398"><span class="hs-identifier hs-var">tp</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p) -&gt; r
+</span><a href="#local-6989586621679979401"><span class="hs-identifier hs-var">f'</span></a></span><span> </span><span class="annot"><span class="annottext">(Point d r :+ p, Point d r :+ p)
+</span><a href="#local-6989586621679979397"><span class="hs-identifier hs-var">tq</span></a></span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPairWith"><span class="hs-identifier hs-var">diametralPairWith</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Point d r :+ p, Point d r :+ p)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-33"></span></pre></body></html>

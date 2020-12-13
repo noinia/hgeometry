@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.PlanarGraph</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Data type for representing connected planar graphs</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlanarGraph</span><span class="hs-special">(</span><span> </span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-12"></span><span>                         </span><span class="hs-comment">-- * The Planar Graph type</span><span>
+</span><span id="line-13"></span><span>                         </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier">PlanarGraph</span></a></span><span>
+</span><span id="line-14"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#embedding"><span class="hs-identifier">embedding</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#vertexData"><span class="hs-identifier">vertexData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#dartData"><span class="hs-identifier">dartData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#faceData"><span class="hs-identifier">faceData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#rawDartData"><span class="hs-identifier">rawDartData</span></a></span><span>
+</span><span id="line-15"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#edgeData"><span class="hs-identifier">edgeData</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#World"><span class="hs-identifier">World</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#DualOf"><span class="hs-identifier">DualOf</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Representing edges: Arcs and Darts</span></span><span>
+</span><span id="line-21"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Arc"><span class="hs-identifier">Arc</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Direction"><span class="hs-identifier">Direction</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#rev"><span class="hs-identifier">rev</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier">Dart</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#arc"><span class="hs-identifier">arc</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#direction"><span class="hs-identifier">direction</span></a></span><span>
+</span><span id="line-25"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#twin"><span class="hs-identifier">twin</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dart.html#isPositive"><span class="hs-identifier">isPositive</span></a></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Vertices</span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier">VertexId</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId%27"><span class="hs-identifier">VertexId'</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Building a planar graph</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#planarGraph"><span class="hs-identifier">planarGraph</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#planarGraph%27"><span class="hs-identifier">planarGraph'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.IO.html#fromAdjacencyLists"><span class="hs-identifier">fromAdjacencyLists</span></a></span><span>
+</span><span id="line-34"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#toAdjacencyLists"><span class="hs-identifier">toAdjacencyLists</span></a></span><span>
+</span><span id="line-35"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.IO.html#fromAdjRep"><span class="hs-identifier">fromAdjRep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.IO.html#toAdjRep"><span class="hs-identifier">toAdjRep</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>                       </span><span class="hs-comment">-- , buildFromJSON</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Quering a planar graph</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#numVertices"><span class="hs-identifier">numVertices</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#numDarts"><span class="hs-identifier">numDarts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#numEdges"><span class="hs-identifier">numEdges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#numFaces"><span class="hs-identifier">numFaces</span></a></span><span>
+</span><span id="line-42"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#darts%27"><span class="hs-identifier">darts'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#darts"><span class="hs-identifier">darts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#edges%27"><span class="hs-identifier">edges'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#edges"><span class="hs-identifier">edges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#vertices%27"><span class="hs-identifier">vertices'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#vertices"><span class="hs-identifier">vertices</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#faces%27"><span class="hs-identifier">faces'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#faces"><span class="hs-identifier">faces</span></a></span><span>
+</span><span id="line-43"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#traverseVertices"><span class="hs-identifier">traverseVertices</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#traverseDarts"><span class="hs-identifier">traverseDarts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#traverseFaces"><span class="hs-identifier">traverseFaces</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#tailOf"><span class="hs-identifier">tailOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#headOf"><span class="hs-identifier">headOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#endPoints"><span class="hs-identifier">endPoints</span></a></span><span>
+</span><span id="line-46"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#incidentEdges"><span class="hs-identifier">incidentEdges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#incomingEdges"><span class="hs-identifier">incomingEdges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#outgoingEdges"><span class="hs-identifier">outgoingEdges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#neighboursOf"><span class="hs-identifier">neighboursOf</span></a></span><span>
+</span><span id="line-47"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#nextIncidentEdge"><span class="hs-identifier">nextIncidentEdge</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#prevIncidentEdge"><span class="hs-identifier">prevIncidentEdge</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Associated Data</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#HasDataOf"><span class="hs-identifier">HasDataOf</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#endPointDataOf"><span class="hs-identifier">endPointDataOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#endPointData"><span class="hs-identifier">endPointData</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#dual"><span class="hs-identifier">dual</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>                       </span><span class="annot"><span class="hs-comment">-- * Faces</span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#FaceId"><span class="hs-identifier">FaceId</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#FaceId%27"><span class="hs-identifier">FaceId'</span></a></span><span>
+</span><span id="line-58"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#leftFace"><span class="hs-identifier">leftFace</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#rightFace"><span class="hs-identifier">rightFace</span></a></span><span>
+</span><span id="line-59"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#boundaryDart"><span class="hs-identifier">boundaryDart</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#boundary"><span class="hs-identifier">boundary</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#boundary%27"><span class="hs-identifier">boundary'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#boundaryVertices"><span class="hs-identifier">boundaryVertices</span></a></span><span>
+</span><span id="line-60"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#nextEdge"><span class="hs-identifier">nextEdge</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Dual.html#prevEdge"><span class="hs-identifier">prevEdge</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>                       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlanarGraph.Core.html"><span class="hs-identifier">Data.PlanarGraph.Core</span></a></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlanarGraph.Dart.html"><span class="hs-identifier">Data.PlanarGraph.Dart</span></a></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlanarGraph.Dual.html"><span class="hs-identifier">Data.PlanarGraph.Dual</span></a></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.PlanarGraph.IO.html"><span class="hs-identifier">Data.PlanarGraph.IO</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- let dart i s = Dart (Arc i) (read s)</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--     myGraph :: PlanarGraph () Primal () String ()</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--     myGraph = planarGraph [ [ (Dart aA Negative, &quot;a-&quot;)</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--                             , (Dart aC Positive, &quot;c+&quot;)</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--                             , (Dart aB Positive, &quot;b+&quot;)</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--                             , (Dart aA Positive, &quot;a+&quot;)</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--                             ]</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--                           , [ (Dart aE Negative, &quot;e-&quot;)</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--                             , (Dart aB Negative, &quot;b-&quot;)</span><span>
+</span><span id="line-83"></span><span class="hs-comment">--                             , (Dart aD Negative, &quot;d-&quot;)</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--                             , (Dart aG Positive, &quot;g+&quot;)</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--                             ]</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--                           , [ (Dart aE Positive, &quot;e+&quot;)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">--                             , (Dart aD Positive, &quot;d+&quot;)</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--                             , (Dart aC Negative, &quot;c-&quot;)</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--                             ]</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--                           , [ (Dart aG Negative, &quot;g-&quot;)</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--                             ]</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--                           ]</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-94"></span><span class="hs-comment">--</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- This represents the following graph. Note that the graph is undirected, the</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- arrows are just to indicate what the Positive direction of the darts is.</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- ![myGraph](docs/Data/PlanarGraph/testG.png)</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- Testing stuff</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- testPerm :: Permutation (Dart s)</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- testPerm = let (a:b:c:d:e:g:_) = take 6 [Arc 0..]</span><span>
+</span><span id="line-109"></span><span class="hs-comment">--            in toCycleRep 12 [ [ Dart a Negative</span><span>
+</span><span id="line-110"></span><span class="hs-comment">--                               , Dart c Positive</span><span>
+</span><span id="line-111"></span><span class="hs-comment">--                               , Dart b Positive</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--                               , Dart a Positive</span><span>
+</span><span id="line-113"></span><span class="hs-comment">--                               ]</span><span>
+</span><span id="line-114"></span><span class="hs-comment">--                             , [ Dart e Negative</span><span>
+</span><span id="line-115"></span><span class="hs-comment">--                               , Dart b Negative</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--                               , Dart d Negative</span><span>
+</span><span id="line-117"></span><span class="hs-comment">--                               , Dart g Positive</span><span>
+</span><span id="line-118"></span><span class="hs-comment">--                               ]</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--                             , [ Dart e Positive</span><span>
+</span><span id="line-120"></span><span class="hs-comment">--                               , Dart d Positive</span><span>
+</span><span id="line-121"></span><span class="hs-comment">--                               , Dart c Negative</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--                               ]</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--                             , [ Dart g Negative</span><span>
+</span><span id="line-124"></span><span class="hs-comment">--                               ]</span><span>
+</span><span id="line-125"></span><span class="hs-comment">--                             ]</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- data Test</span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- testG :: PlanarGraph Test Primal () String ()</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- testG = planarGraph [ [ (Dart aA Negative, &quot;a-&quot;)</span><span>
+</span><span id="line-131"></span><span class="hs-comment">--                       , (Dart aC Positive, &quot;c+&quot;)</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--                       , (Dart aB Positive, &quot;b+&quot;)</span><span>
+</span><span id="line-133"></span><span class="hs-comment">--                       , (Dart aA Positive, &quot;a+&quot;)</span><span>
+</span><span id="line-134"></span><span class="hs-comment">--                       ]</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--                     , [ (Dart aE Negative, &quot;e-&quot;)</span><span>
+</span><span id="line-136"></span><span class="hs-comment">--                       , (Dart aB Negative, &quot;b-&quot;)</span><span>
+</span><span id="line-137"></span><span class="hs-comment">--                       , (Dart aD Negative, &quot;d-&quot;)</span><span>
+</span><span id="line-138"></span><span class="hs-comment">--                       , (Dart aG Positive, &quot;g+&quot;)</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--                       ]</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--                     , [ (Dart aE Positive, &quot;e+&quot;)</span><span>
+</span><span id="line-141"></span><span class="hs-comment">--                       , (Dart aD Positive, &quot;d+&quot;)</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--                       , (Dart aC Negative, &quot;c-&quot;)</span><span>
+</span><span id="line-143"></span><span class="hs-comment">--                       ]</span><span>
+</span><span id="line-144"></span><span class="hs-comment">--                     , [ (Dart aG Negative, &quot;g-&quot;)</span><span>
+</span><span id="line-145"></span><span class="hs-comment">--                       ]</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--                     ]</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-148"></span><span class="hs-comment">--     (aA:aB:aC:aD:aE:aG:_) = take 6 [Arc 0..]</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-156"></span></pre></body></html>

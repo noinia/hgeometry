@@ -1,0 +1,586 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.Triangulate</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.MakeMonotone.html"><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.MakeMonotone</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">MM</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html"><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TM</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html"><span class="hs-identifier">Algorithms.Geometry.PolygonTriangulation.Types</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lefts</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Basic</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-20"></span><span id="local-6989586621679987850"><span id="local-6989586621679987851"><span id="local-6989586621679987852"><span id="local-6989586621679987853"><span id="local-6989586621679987854"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#triangulate"><span class="hs-identifier hs-type">triangulate</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987854"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987854"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679987853"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987852"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987851"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987850"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987854"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-22"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987852"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987850"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987854"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-23"></span><span id="triangulate"><span class="annot"><span class="annottext">triangulate :: proxy s
+-&gt; Polygon t p r
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#triangulate"><span class="hs-identifier hs-var hs-var">triangulate</span></a></span></span><span> </span><span id="local-6989586621679987848"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679987848"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679987847"><span class="annot"><span class="annottext">pg' :: Polygon t p r
+</span><a href="#local-6989586621679987847"><span class="hs-identifier hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+forall k (proxy :: k -&gt; *) r (s :: k) p.
+(Fractional r, Ord r) =&gt;
+proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-var">constructSubdivision</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679987848"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679987845"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987844"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987843"><span class="hs-identifier hs-var">diags</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987842"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679987842"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679987843"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987843"><span class="hs-identifier hs-var">diags</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+forall r (t :: PolygonType) p.
+(Ord r, Fractional r) =&gt;
+Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals%27"><span class="hs-identifier hs-var">computeDiagonals'</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987847"><span class="hs-identifier hs-var">pg'</span></a></span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987845"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679987845"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987844"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987844"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987842"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-32"></span><span id="local-6989586621679987835"><span id="local-6989586621679987836"><span id="local-6989586621679987837"><span id="local-6989586621679987838"><span id="local-6989586621679987839"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#triangulate%27"><span class="hs-identifier hs-type">triangulate'</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987839"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987839"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679987838"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987837"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987836"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987835"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987839"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-34"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987837"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987835"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987839"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-35"></span><span id="triangulate%27"><span class="annot"><span class="annottext">triangulate' :: proxy s
+-&gt; Polygon t p r
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#triangulate%27"><span class="hs-identifier hs-var hs-var">triangulate'</span></a></span></span><span> </span><span id="local-6989586621679987833"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679987833"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679987832"><span class="annot"><span class="annottext">pg' :: Polygon t p r
+</span><a href="#local-6989586621679987832"><span class="hs-identifier hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+forall k (proxy :: k -&gt; *) r (s :: k) p.
+(Fractional r, Ord r) =&gt;
+proxy s
+-&gt; LineSegment 2 p r
+-&gt; [LineSegment 2 p r]
+-&gt; [LineSegment 2 p r]
+-&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-var">constructGraph</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679987833"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679987830"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987829"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987828"><span class="hs-identifier hs-var">diags</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987827"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679987827"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679987828"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987828"><span class="hs-identifier hs-var">diags</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+forall r (t :: PolygonType) p.
+(Ord r, Fractional r) =&gt;
+Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals%27"><span class="hs-identifier hs-var">computeDiagonals'</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987832"><span class="hs-identifier hs-var">pg'</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679987830"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679987830"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679987829"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987829"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987827"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | Computes a set of diagaonals that together triangulate the input polygon</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- of \(n\) vertices.</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-45"></span><span id="local-6989586621679987824"><span id="local-6989586621679987825"><span id="local-6989586621679987826"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals"><span class="hs-identifier hs-type">computeDiagonals</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987826"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987826"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987825"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987824"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987826"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987824"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987826"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-46"></span><span id="computeDiagonals"><span class="annot"><span class="annottext">computeDiagonals :: Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals"><span class="hs-identifier hs-var hs-var">computeDiagonals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Polygon t p r, [LineSegment 2 p r]) -&gt; [LineSegment 2 p r]
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Polygon t p r, [LineSegment 2 p r]) -&gt; [LineSegment 2 p r])
+-&gt; (Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r]))
+-&gt; Polygon t p r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+forall r (t :: PolygonType) p.
+(Ord r, Fractional r) =&gt;
+Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals%27"><span class="hs-identifier hs-var">computeDiagonals'</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | Computes a set of diagaonals that together triangulate the input polygon</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- of \(n\) vertices. Returns a copy of the input polygon, whose boundaries are</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- oriented in counter clockwise order, as well.</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679987946"><span id="local-6989586621679987947"><span id="local-6989586621679987948"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals%27"><span class="hs-identifier hs-type">computeDiagonals'</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987948"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987948"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987947"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987948"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987947"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987948"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987948"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-55"></span><span id="computeDiagonals%27"><span class="annot"><span class="annottext">computeDiagonals' :: Polygon t p r -&gt; (Polygon t p r, [LineSegment 2 p r])
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Triangulate.html#computeDiagonals%27"><span class="hs-identifier hs-var hs-var">computeDiagonals'</span></a></span></span><span> </span><span id="local-6989586621679987821"><span class="annot"><span class="annottext">pg' :: Polygon t p r
+</span><a href="#local-6989586621679987821"><span class="hs-identifier hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">monotoneDiags</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679987818"><span class="hs-identifier hs-var">extraDiags</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679987820"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var hs-var">pg</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; Polygon t p r
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier hs-var">toCounterClockWiseOrder</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987821"><span class="hs-identifier hs-var">pg'</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679987816"><span class="annot"><span class="annottext">monotoneP :: PlanarSubdivision
+  (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+</span><a href="#local-6989586621679987816"><span class="hs-identifier hs-var hs-var">monotoneP</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Identity (Polygon t p r)
+-&gt; Polygon t p r
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+forall k r (proxy :: k -&gt; *) (s :: k) (t :: PolygonType) p.
+(Fractional r, Ord r) =&gt;
+proxy s
+-&gt; Polygon t p r
+-&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.MakeMonotone.html#makeMonotone"><span class="hs-identifier hs-var">MM.makeMonotone</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Polygon t p r -&gt; Identity (Polygon t p r)
+forall a. a -&gt; Identity a
+</span><span class="hs-identifier hs-var">Identity</span></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-comment">-- use some arbitrary proxy type</span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-comment">-- outerFaceId'  = outerFaceId monotoneP</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679987819"><span class="annot"><span class="annottext">monotoneDiags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var hs-var">monotoneDiags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; LineSegment 2 p r)
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+-&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Getting
+     (LineSegment 2 p r)
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+     (LineSegment 2 p r)
+-&gt; LineSegment 2 p r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; Const
+      (LineSegment 2 p r) (LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Const
+     (LineSegment 2 p r)
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span class="annot"><span class="annottext">(((LineSegment 2 p r :+ PolygonEdgeType)
+  -&gt; Const
+       (LineSegment 2 p r) (LineSegment 2 p r :+ PolygonEdgeType))
+ -&gt; (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; Const
+      (LineSegment 2 p r)
+      (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; ((LineSegment 2 p r
+     -&gt; Const (LineSegment 2 p r) (LineSegment 2 p r))
+    -&gt; (LineSegment 2 p r :+ PolygonEdgeType)
+    -&gt; Const
+         (LineSegment 2 p r) (LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; Getting
+     (LineSegment 2 p r)
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+     (LineSegment 2 p r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(LineSegment 2 p r
+ -&gt; Const (LineSegment 2 p r) (LineSegment 2 p r))
+-&gt; (LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Const (LineSegment 2 p r) (LineSegment 2 p r :+ PolygonEdgeType)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+ -&gt; [LineSegment 2 p r])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; Bool)
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679987810"><span class="annot"><span class="annottext">e' :: (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+</span><a href="#local-6989586621679987810"><span class="hs-identifier hs-var">e'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+</span><a href="#local-6989586621679987810"><span class="hs-identifier hs-var">e'</span></a></span><span class="annot"><span class="annottext">(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Getting
+     PolygonEdgeType
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+     PolygonEdgeType
+-&gt; PolygonEdgeType
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; Const PolygonEdgeType (LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Const
+     PolygonEdgeType
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span class="annot"><span class="annottext">(((LineSegment 2 p r :+ PolygonEdgeType)
+  -&gt; Const PolygonEdgeType (LineSegment 2 p r :+ PolygonEdgeType))
+ -&gt; (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; Const
+      PolygonEdgeType
+      (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; ((PolygonEdgeType -&gt; Const PolygonEdgeType PolygonEdgeType)
+    -&gt; (LineSegment 2 p r :+ PolygonEdgeType)
+    -&gt; Const PolygonEdgeType (LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; Getting
+     PolygonEdgeType
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+     PolygonEdgeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PolygonEdgeType -&gt; Const PolygonEdgeType PolygonEdgeType)
+-&gt; (LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; Const PolygonEdgeType (LineSegment 2 p r :+ PolygonEdgeType)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">PolygonEdgeType
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Diagonal"><span class="hs-identifier hs-var">Diagonal</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>                  </span><span class="annot"><span class="annottext">([(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+ -&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector
+   (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+ -&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; Vector
+         (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType))
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [(Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision
+  (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; Vector
+     (Dart (Polygon t p r), LineSegment 2 p r :+ PolygonEdgeType)
+forall k (s :: k) v e f r.
+PlanarSubdivision s v e f r
+-&gt; Vector (Dart s, LineSegment 2 v r :+ e)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#edgeSegments"><span class="hs-identifier hs-var">edgeSegments</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision
+   (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+ -&gt; [LineSegment 2 p r])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision
+  (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+</span><a href="#local-6989586621679987816"><span class="hs-identifier hs-var">monotoneP</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679987818"><span class="annot"><span class="annottext">extraDiags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679987818"><span class="hs-identifier hs-var hs-var">extraDiags</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Polygon 'Simple p r -&gt; [LineSegment 2 p r])
+-&gt; [Polygon 'Simple p r] -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Polygon 'Simple p r -&gt; [LineSegment 2 p r]
+forall r p.
+(Ord r, Num r) =&gt;
+MonotonePolygon p r -&gt; [LineSegment 2 p r]
+</span><a href="Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var">TM.computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">(Polygon 'Simple p r -&gt; [LineSegment 2 p r])
+-&gt; (Polygon 'Simple p r -&gt; Polygon 'Simple p r)
+-&gt; Polygon 'Simple p r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Polygon 'Simple p r -&gt; Polygon 'Simple p r
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder%27"><span class="hs-identifier hs-var">toCounterClockWiseOrder'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                  </span><span class="annot"><span class="annottext">([Polygon 'Simple p r] -&gt; [LineSegment 2 p r])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [Polygon 'Simple p r])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Either (Polygon 'Simple p r) (Polygon 'Multi p r)]
+-&gt; [Polygon 'Simple p r]
+forall a b. [Either a b] -&gt; [a]
+</span><span class="hs-identifier hs-var">lefts</span></span><span> </span><span class="annot"><span class="annottext">([Either (Polygon 'Simple p r) (Polygon 'Multi p r)]
+ -&gt; [Polygon 'Simple p r])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [Either (Polygon 'Simple p r) (Polygon 'Multi p r)])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [Polygon 'Simple p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((FaceId' (Polygon t p r),
+  Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+  :+ PolygonFaceData)
+ -&gt; Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+-&gt; [Either (Polygon 'Simple p r) (Polygon 'Multi p r)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(FaceId' (Polygon t p r),
+ Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+ :+ PolygonFaceData)
+-&gt; Getting
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+-&gt; Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+  :+ PolygonFaceData)
+ -&gt; Const
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+       :+ PolygonFaceData))
+-&gt; (FaceId' (Polygon t p r),
+    Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+    :+ PolygonFaceData)
+-&gt; Const
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span class="annot"><span class="annottext">(((Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+   :+ PolygonFaceData)
+  -&gt; Const
+       (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+       (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+        :+ PolygonFaceData))
+ -&gt; (FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)
+ -&gt; Const
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+      (FaceId' (Polygon t p r),
+       Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+       :+ PolygonFaceData))
+-&gt; ((Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     -&gt; Const
+          (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+          (Either (Polygon 'Simple p r) (Polygon 'Multi p r)))
+    -&gt; (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+        :+ PolygonFaceData)
+    -&gt; Const
+         (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+         (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+          :+ PolygonFaceData))
+-&gt; Getting
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+ -&gt; Const
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r)))
+-&gt; (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+    :+ PolygonFaceData)
+-&gt; Const
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r))
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>                  </span><span class="annot"><span class="annottext">([(FaceId' (Polygon t p r),
+   Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+   :+ PolygonFaceData)]
+ -&gt; [Either (Polygon 'Simple p r) (Polygon 'Multi p r)])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [(FaceId' (Polygon t p r),
+         Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+         :+ PolygonFaceData)])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [Either (Polygon 'Simple p r) (Polygon 'Multi p r)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((FaceId' (Polygon t p r),
+  Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+  :+ PolygonFaceData)
+ -&gt; Bool)
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679987802"><span class="annot"><span class="annottext">mp :: (FaceId' (Polygon t p r),
+ Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+ :+ PolygonFaceData)
+</span><a href="#local-6989586621679987802"><span class="hs-identifier hs-var">mp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(FaceId' (Polygon t p r),
+ Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+ :+ PolygonFaceData)
+</span><a href="#local-6989586621679987802"><span class="hs-identifier hs-var">mp</span></a></span><span class="annot"><span class="annottext">(FaceId' (Polygon t p r),
+ Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+ :+ PolygonFaceData)
+-&gt; Getting
+     PolygonFaceData
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+     PolygonFaceData
+-&gt; PolygonFaceData
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+  :+ PolygonFaceData)
+ -&gt; Const
+      PolygonFaceData
+      (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+       :+ PolygonFaceData))
+-&gt; (FaceId' (Polygon t p r),
+    Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+    :+ PolygonFaceData)
+-&gt; Const
+     PolygonFaceData
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">_2</span></span><span class="annot"><span class="annottext">(((Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+   :+ PolygonFaceData)
+  -&gt; Const
+       PolygonFaceData
+       (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+        :+ PolygonFaceData))
+ -&gt; (FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)
+ -&gt; Const
+      PolygonFaceData
+      (FaceId' (Polygon t p r),
+       Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+       :+ PolygonFaceData))
+-&gt; ((PolygonFaceData -&gt; Const PolygonFaceData PolygonFaceData)
+    -&gt; (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+        :+ PolygonFaceData)
+    -&gt; Const
+         PolygonFaceData
+         (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+          :+ PolygonFaceData))
+-&gt; Getting
+     PolygonFaceData
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+     PolygonFaceData
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(PolygonFaceData -&gt; Const PolygonFaceData PolygonFaceData)
+-&gt; (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+    :+ PolygonFaceData)
+-&gt; Const
+     PolygonFaceData
+     (Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span> </span><span class="annot"><span class="annottext">PolygonFaceData -&gt; PolygonFaceData -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">PolygonFaceData
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- triangulate only the insides</span><span>
+</span><span id="line-66"></span><span>                  </span><span class="hs-comment">-- . filter (\f -&gt; f^._1 /= outerFaceId')</span><span>
+</span><span id="line-67"></span><span>                  </span><span class="annot"><span class="annottext">([(FaceId' (Polygon t p r),
+   Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+   :+ PolygonFaceData)]
+ -&gt; [(FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; [(FaceId' (Polygon t p r),
+         Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+         :+ PolygonFaceData)])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector
+  (FaceId' (Polygon t p r),
+   Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+   :+ PolygonFaceData)
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector
+   (FaceId' (Polygon t p r),
+    Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+    :+ PolygonFaceData)
+ -&gt; [(FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)])
+-&gt; (PlanarSubdivision
+      (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+    -&gt; Vector
+         (FaceId' (Polygon t p r),
+          Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+          :+ PolygonFaceData))
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [(FaceId' (Polygon t p r),
+     Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+     :+ PolygonFaceData)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision
+  (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; Vector
+     (FaceId' (Polygon t p r),
+      Either (Polygon 'Simple p r) (Polygon 'Multi p r)
+      :+ PolygonFaceData)
+forall k (s :: k) v e f r.
+PlanarSubdivision s v e f r
+-&gt; Vector (FaceId' s, SomePolygon v r :+ f)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#rawFacePolygons"><span class="hs-identifier hs-var">rawFacePolygons</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanarSubdivision
+   (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+ -&gt; [LineSegment 2 p r])
+-&gt; PlanarSubdivision
+     (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+-&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision
+  (Polygon t p r) p PolygonEdgeType PolygonFaceData r
+</span><a href="#local-6989586621679987816"><span class="hs-identifier hs-var">monotoneP</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-comment">-- -- we alredy know we get the polgyons in *clockwise* order, so skip the</span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-comment">-- -- check if it is counter clockwise</span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-comment">-- toCounterClockWiseOrder'' = reverseOuterBoundary</span><span>
+</span><span id="line-72"></span></pre></body></html>

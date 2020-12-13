@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.PolyLineSimplification.DouglasPeucker</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">only</span></span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PolyLine.html"><span class="hs-identifier">Data.Geometry.PolyLine</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LSeq</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.LSeq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">LSeq</span></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><span class="hs-operator">(:|&gt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- | Line simplification with the well-known Douglas Peucker alogrithm. Given a distance</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- value eps adn a polyline pl, constructs a simplification of pl (i.e. with</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- vertices from pl) s.t. all other vertices are within dist eps to the</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- original polyline.</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Running time: O(n^2) worst case, O(n log n) expected.</span><span>
+</span><span id="line-22"></span><span id="local-6989586621679977950"><span id="local-6989586621679977952"><span id="local-6989586621679977953"><span class="annot"><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#douglasPeucker"><span class="hs-identifier hs-type">douglasPeucker</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679977953"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679977953"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977952"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679977953"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977952"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977950"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977953"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977952"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977950"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977953"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-24"></span><span id="douglasPeucker"><span class="annot"><span class="annottext">douglasPeucker :: r -&gt; PolyLine d p r -&gt; PolyLine d p r
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#douglasPeucker"><span class="hs-identifier hs-var hs-var">douglasPeucker</span></a></span></span><span> </span><span id="local-6989586621679977860"><span class="annot"><span class="annottext">eps :: r
+</span><a href="#local-6989586621679977860"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span id="local-6989586621679977859"><span class="annot"><span class="annottext">pl :: PolyLine d p r
+</span><a href="#local-6989586621679977859"><span class="hs-identifier hs-var">pl</span></a></span></span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679977858"><span class="hs-identifier hs-var">dst</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679977860"><span class="hs-identifier hs-var">eps</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679977860"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point d r :+ p] -&gt; PolyLine d p r
+forall (d :: Nat) r p. [Point d r :+ p] -&gt; PolyLine d p r
+</span><a href="Data.Geometry.PolyLine.html#fromPointsUnsafe"><span class="hs-identifier hs-var">fromPointsUnsafe</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679977854"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679977853"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- at least two points, so we are fine.</span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; PolyLine d p r -&gt; PolyLine d p r
+forall r (d :: Nat) p.
+(Ord r, Fractional r, Arity d) =&gt;
+r -&gt; PolyLine d p r -&gt; PolyLine d p r
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#douglasPeucker"><span class="hs-identifier hs-var">douglasPeucker</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679977860"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977852"><span class="hs-identifier hs-var">pref</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine d p r -&gt; PolyLine d p r -&gt; PolyLine d p r
+forall (d :: Nat) p r.
+PolyLine d p r -&gt; PolyLine d p r -&gt; PolyLine d p r
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#merge"><span class="hs-operator hs-var">`merge`</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; PolyLine d p r -&gt; PolyLine d p r
+forall r (d :: Nat) p.
+(Ord r, Fractional r, Arity d) =&gt;
+r -&gt; PolyLine d p r -&gt; PolyLine d p r
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#douglasPeucker"><span class="hs-identifier hs-var">douglasPeucker</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679977860"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977850"><span class="hs-identifier hs-var">subf</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>    </span><span id="local-6989586621679977849"><span class="annot"><span class="annottext">pts :: LSeq 2 (Point d r :+ p)
+</span><a href="#local-6989586621679977849"><span class="hs-identifier hs-var hs-var">pts</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977859"><span class="hs-identifier hs-var">pl</span></a></span><span class="annot"><span class="annottext">PolyLine d p r
+-&gt; Getting
+     (LSeq 2 (Point d r :+ p))
+     (PolyLine d p r)
+     (LSeq 2 (Point d r :+ p))
+-&gt; LSeq 2 (Point d r :+ p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (LSeq 2 (Point d r :+ p))
+  (PolyLine d p r)
+  (LSeq 2 (Point d r :+ p))
+forall (d :: Nat) p r (d2 :: Nat) p2 r2.
+Iso
+  (PolyLine d p r)
+  (PolyLine d2 p2 r2)
+  (LSeq 2 (Point d r :+ p))
+  (LSeq 2 (Point d2 r2 :+ p2))
+</span><a href="Data.Geometry.PolyLine.html#points"><span class="hs-identifier hs-var">points</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679977854"><span class="annot"><span class="annottext">a :: Point d r :+ p
+</span><a href="#local-6989586621679977854"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq (1 + 1) (Point d r :+ p) -&gt; Point d r :+ p
+forall (n :: Nat) a. LSeq (1 + n) a -&gt; a
+</span><span class="hs-identifier hs-var">LSeq.head</span></span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p)
+LSeq (1 + 1) (Point d r :+ p)
+</span><a href="#local-6989586621679977849"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679977853"><span class="annot"><span class="annottext">b :: Point d r :+ p
+</span><a href="#local-6989586621679977853"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq (1 + 1) (Point d r :+ p) -&gt; Point d r :+ p
+forall (n :: Nat) a. LSeq (1 + n) a -&gt; a
+</span><span class="hs-identifier hs-var">LSeq.last</span></span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p)
+LSeq (1 + 1) (Point d r :+ p)
+</span><a href="#local-6989586621679977849"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679977844"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679977844"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679977858"><span class="annot"><span class="annottext">dst :: r
+</span><a href="#local-6989586621679977858"><span class="hs-identifier hs-var">dst</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p) -&gt; LineSegment d p r -&gt; (Int, r)
+forall r (d :: Nat) (n :: Nat) p.
+(Ord r, Fractional r, Arity d) =&gt;
+LSeq n (Point d r :+ p) -&gt; LineSegment d p r -&gt; (Int, r)
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#maxDist"><span class="hs-identifier hs-var">maxDist</span></a></span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p)
+</span><a href="#local-6989586621679977849"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
+forall (d :: Nat) r p.
+(Point d r :+ p) -&gt; (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679977854"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r :+ p
+</span><a href="#local-6989586621679977853"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679977852"><span class="annot"><span class="annottext">pref :: PolyLine d p r
+</span><a href="#local-6989586621679977852"><span class="hs-identifier hs-var">pref</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679977850"><span class="annot"><span class="annottext">subf :: PolyLine d p r
+</span><a href="#local-6989586621679977850"><span class="hs-identifier hs-var">subf</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; PolyLine d p r -&gt; (PolyLine d p r, PolyLine d p r)
+forall (d :: Nat) p r.
+Int -&gt; PolyLine d p r -&gt; (PolyLine d p r, PolyLine d p r)
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#split"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679977844"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977859"><span class="hs-identifier hs-var">pl</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- * Internal functions</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | Concatenate the two polylines, dropping their shared vertex</span><span>
+</span><span id="line-39"></span><span id="local-6989586621679977947"><span id="local-6989586621679977948"><span id="local-6989586621679977949"><span class="annot"><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#merge"><span class="hs-identifier hs-type">merge</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977949"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977948"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977947"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977949"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977948"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977947"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977949"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977948"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977947"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-40"></span><span id="merge"><span class="annot"><span class="annottext">merge :: PolyLine d p r -&gt; PolyLine d p r -&gt; PolyLine d p r
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#merge"><span class="hs-identifier hs-var hs-var">merge</span></a></span></span><span> </span><span id="local-6989586621679977840"><span class="annot"><span class="annottext">pref :: PolyLine d p r
+</span><a href="#local-6989586621679977840"><span class="hs-identifier hs-var">pref</span></a></span></span><span> </span><span id="local-6989586621679977839"><span class="annot"><span class="annottext">sub :: PolyLine d p r
+</span><a href="#local-6989586621679977839"><span class="hs-identifier hs-var">sub</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r
+forall (d :: Nat) p r. LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r
+</span><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r)
+-&gt; LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LSeq 1 (Point d r :+ p)
+</span><a href="#local-6989586621679977837"><span class="hs-identifier hs-var">pref'</span></a></span><span> </span><span class="annot"><span class="annottext">LSeq 1 (Point d r :+ p)
+-&gt; LSeq 2 (Point d r :+ p) -&gt; LSeq 2 (Point d r :+ p)
+forall (n :: Nat) a (m :: Nat). LSeq n a -&gt; LSeq m a -&gt; LSeq m a
+</span><a href="#local-6989586621679977836"><span class="hs-operator hs-var">`append`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977839"><span class="hs-identifier hs-var">sub</span></a></span><span class="annot"><span class="annottext">PolyLine d p r
+-&gt; Getting
+     (LSeq 2 (Point d r :+ p))
+     (PolyLine d p r)
+     (LSeq 2 (Point d r :+ p))
+-&gt; LSeq 2 (Point d r :+ p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (LSeq 2 (Point d r :+ p))
+  (PolyLine d p r)
+  (LSeq 2 (Point d r :+ p))
+forall (d :: Nat) p r (d2 :: Nat) p2 r2.
+Iso
+  (PolyLine d p r)
+  (PolyLine d2 p2 r2)
+  (LSeq 2 (Point d r :+ p))
+  (LSeq 2 (Point d2 r2 :+ p2))
+</span><a href="Data.Geometry.PolyLine.html#points"><span class="hs-identifier hs-var">points</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679977837"><span class="annot"><span class="annottext">pref' :: LSeq 1 (Point d r :+ p)
+</span><a href="#local-6989586621679977837"><span class="hs-identifier hs-var">pref'</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|&gt;</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PolyLine d p r
+</span><a href="#local-6989586621679977840"><span class="hs-identifier hs-var">pref</span></a></span><span class="annot"><span class="annottext">PolyLine d p r
+-&gt; Getting
+     (LSeq 2 (Point d r :+ p))
+     (PolyLine d p r)
+     (LSeq 2 (Point d r :+ p))
+-&gt; LSeq 2 (Point d r :+ p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting
+  (LSeq 2 (Point d r :+ p))
+  (PolyLine d p r)
+  (LSeq 2 (Point d r :+ p))
+forall (d :: Nat) p r (d2 :: Nat) p2 r2.
+Iso
+  (PolyLine d p r)
+  (PolyLine d2 p2 r2)
+  (LSeq 2 (Point d r :+ p))
+  (LSeq 2 (Point d2 r2 :+ p2))
+</span><a href="Data.Geometry.PolyLine.html#points"><span class="hs-identifier hs-var">points</span></a></span><span>
+</span><span id="line-43"></span><span>    </span><span id="local-6989586621679977914"><span id="local-6989586621679977915"><span id="local-6989586621679977916"><span class="annot"><a href="#local-6989586621679977836"><span class="hs-identifier hs-type">append</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><a href="#local-6989586621679977916"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977915"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><a href="#local-6989586621679977914"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977915"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq.LSeq</span></span><span> </span><span class="annot"><a href="#local-6989586621679977914"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977915"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679977836"><span class="annot"><span class="annottext">append :: LSeq n a -&gt; LSeq m a -&gt; LSeq m a
+</span><a href="#local-6989586621679977836"><span class="hs-identifier hs-var hs-var">append</span></a></span></span><span> </span><span id="local-6989586621679977835"><span class="annot"><span class="annottext">a :: LSeq n a
+</span><a href="#local-6989586621679977835"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679977834"><span class="annot"><span class="annottext">b :: LSeq m a
+</span><a href="#local-6989586621679977834"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq (n + m) a -&gt; LSeq m a
+forall (m :: Nat) (n :: Nat) a. LSeq m a -&gt; LSeq n a
+</span><span class="hs-identifier hs-var">LSeq.promise</span></span><span> </span><span class="annot"><span class="annottext">(LSeq (n + m) a -&gt; LSeq m a) -&gt; LSeq (n + m) a -&gt; LSeq m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LSeq n a -&gt; LSeq m a -&gt; LSeq (n + m) a
+forall (n :: Nat) a (m :: Nat).
+LSeq n a -&gt; LSeq m a -&gt; LSeq (n + m) a
+</span><span class="hs-identifier hs-var">LSeq.append</span></span><span> </span><span class="annot"><span class="annottext">LSeq n a
+</span><a href="#local-6989586621679977835"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">LSeq m a
+</span><a href="#local-6989586621679977834"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-comment">-- our seq is actually even longer</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | Split the polyline at the given vertex. Both polylines contain this vertex</span><span>
+</span><span id="line-49"></span><span id="local-6989586621679977923"><span id="local-6989586621679977924"><span id="local-6989586621679977925"><span class="annot"><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#split"><span class="hs-identifier hs-type">split</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977925"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977924"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977923"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-50"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977925"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977924"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977923"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977925"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977924"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977923"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-51"></span><span id="split"><span class="annot"><span class="annottext">split :: Int -&gt; PolyLine d p r -&gt; (PolyLine d p r, PolyLine d p r)
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#split"><span class="hs-identifier hs-var hs-var">split</span></a></span></span><span> </span><span id="local-6989586621679977831"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679977831"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span id="local-6989586621679977830"><span class="annot"><span class="annottext">pts :: LSeq 2 (Point d r :+ p)
+</span><a href="#local-6989586621679977830"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LSeq 0 (Point d r :+ p) -&gt; PolyLine d p r)
+-&gt; (LSeq 0 (Point d r :+ p) -&gt; PolyLine d p r)
+-&gt; (LSeq 0 (Point d r :+ p), LSeq 0 (Point d r :+ p))
+-&gt; (PolyLine d p r, PolyLine d p r)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">LSeq 0 (Point d r :+ p) -&gt; PolyLine d p r
+forall (m :: Nat) (d :: Nat) r p.
+LSeq m (Point d r :+ p) -&gt; PolyLine d p r
+</span><a href="#local-6989586621679977828"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">LSeq 0 (Point d r :+ p) -&gt; PolyLine d p r
+forall (m :: Nat) (d :: Nat) r p.
+LSeq m (Point d r :+ p) -&gt; PolyLine d p r
+</span><a href="#local-6989586621679977828"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LSeq 0 (Point d r :+ p)
+</span><a href="#local-6989586621679977827"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">LSeq 0 (Point d r :+ p)
+</span><a href="#local-6989586621679977826"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679977828"><span class="annot"><span class="annottext">f :: LSeq m (Point d r :+ p) -&gt; PolyLine d p r
+</span><a href="#local-6989586621679977828"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r
+forall (d :: Nat) p r. LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r
+</span><a href="Data.Geometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(LSeq 2 (Point d r :+ p) -&gt; PolyLine d p r)
+-&gt; (LSeq m (Point d r :+ p) -&gt; LSeq 2 (Point d r :+ p))
+-&gt; LSeq m (Point d r :+ p)
+-&gt; PolyLine d p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">C 2 -&gt; LSeq m (Point d r :+ p) -&gt; LSeq 2 (Point d r :+ p)
+forall (n :: Nat) (proxy :: Nat -&gt; *) (m :: Nat) a.
+KnownNat n =&gt;
+proxy n -&gt; LSeq m a -&gt; LSeq n a
+</span><span class="hs-identifier hs-var">LSeq.forceLSeq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">C 2
+forall (n :: Nat). C n
+</span><a href="Data.Geometry.Vector.VectorFixed.html#C"><span class="hs-identifier hs-var">C</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFixed.html#C"><span class="hs-identifier hs-type">C</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679977827"><span class="annot"><span class="annottext">as :: LSeq 0 (Point d r :+ p)
+</span><a href="#local-6989586621679977827"><span class="hs-keyword hs-var hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; LSeq 2 (Point d r :+ p) -&gt; LSeq 0 (Point d r :+ p)
+forall (n :: Nat) a. Int -&gt; LSeq n a -&gt; LSeq 0 a
+</span><span class="hs-identifier hs-var">LSeq.take</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679977831"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p)
+</span><a href="#local-6989586621679977830"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679977826"><span class="annot"><span class="annottext">bs :: LSeq 0 (Point d r :+ p)
+</span><a href="#local-6989586621679977826"><span class="hs-identifier hs-var hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; LSeq 2 (Point d r :+ p) -&gt; LSeq 0 (Point d r :+ p)
+forall (n :: Nat) a. Int -&gt; LSeq n a -&gt; LSeq 0 a
+</span><span class="hs-identifier hs-var">LSeq.drop</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679977831"><span class="hs-identifier hs-var">i</span></a></span><span>     </span><span class="annot"><span class="annottext">LSeq 2 (Point d r :+ p)
+</span><a href="#local-6989586621679977830"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- | Given a sequence of points, find the index of the point that has the</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- Furthest distance to the LineSegment. The result is the index of the point</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- and this distance.</span><span>
+</span><span id="line-60"></span><span id="local-6989586621679977929"><span id="local-6989586621679977930"><span id="local-6989586621679977931"><span id="local-6989586621679977932"><span class="annot"><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#maxDist"><span class="hs-identifier hs-type">maxDist</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679977932"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679977932"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977931"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LSeq</span></span><span> </span><span class="annot"><a href="#local-6989586621679977930"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977931"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977932"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679977929"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977931"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977929"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679977932"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679977932"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-62"></span><span id="maxDist"><span class="annot"><span class="annottext">maxDist :: LSeq n (Point d r :+ p) -&gt; LineSegment d p r -&gt; (Int, r)
+</span><a href="Algorithms.Geometry.PolyLineSimplification.DouglasPeucker.html#maxDist"><span class="hs-identifier hs-var hs-var">maxDist</span></a></span></span><span> </span><span id="local-6989586621679977819"><span class="annot"><span class="annottext">pts :: LSeq n (Point d r :+ p)
+</span><a href="#local-6989586621679977819"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679977818"><span class="annot"><span class="annottext">s :: LineSegment d p r
+</span><a href="#local-6989586621679977818"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, r) -&gt; (Int, r) -&gt; Ordering) -&gt; LSeq n (Int, r) -&gt; (Int, r)
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, r) -&gt; r) -&gt; (Int, r) -&gt; (Int, r) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">(Int, r) -&gt; r
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(LSeq n (Int, r) -&gt; (Int, r))
+-&gt; (LSeq n (Point d r :+ p) -&gt; LSeq n (Int, r))
+-&gt; LSeq n (Point d r :+ p)
+-&gt; (Int, r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; (Point d r :+ p) -&gt; (Int, r))
+-&gt; LSeq n (Point d r :+ p) -&gt; LSeq n (Int, r)
+forall a b (n :: Nat). (Int -&gt; a -&gt; b) -&gt; LSeq n a -&gt; LSeq n b
+</span><span class="hs-identifier hs-var">LSeq.mapWithIndex</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679977815"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679977815"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679977814"><span class="annot"><span class="annottext">p :: Point d r
+</span><a href="#local-6989586621679977814"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-63"></span><span>                                                     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679977815"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point d r -&gt; LineSegment d p r -&gt; r
+forall (d :: Nat) r p.
+(Arity d, Fractional r, Ord r) =&gt;
+Point d r -&gt; LineSegment d p r -&gt; r
+</span><a href="Data.Geometry.LineSegment.html#sqDistanceToSeg"><span class="hs-identifier hs-var">sqDistanceToSeg</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679977814"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment d p r
+</span><a href="#local-6989586621679977818"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(LSeq n (Point d r :+ p) -&gt; (Int, r))
+-&gt; LSeq n (Point d r :+ p) -&gt; (Int, r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LSeq n (Point d r :+ p)
+</span><a href="#local-6989586621679977819"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-64"></span></pre></body></html>

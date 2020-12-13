@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Geometry.Polygon</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A Polygon data type and some basic functions to interact with them.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Polygon</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#PolygonType"><span class="hs-identifier">PolygonType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier">Polygon</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#_SimplePolygon"><span class="hs-identifier">_SimplePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#_MultiPolygon"><span class="hs-identifier">_MultiPolygon</span></a></span><span>
+</span><span id="line-14"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier">SimplePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#MultiPolygon"><span class="hs-identifier">MultiPolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SomePolygon"><span class="hs-identifier">SomePolygon</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#fromPoints"><span class="hs-identifier">fromPoints</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#polygonVertices"><span class="hs-identifier">polygonVertices</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier">listEdges</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier">outerBoundary</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#outerBoundaryEdges"><span class="hs-identifier">outerBoundaryEdges</span></a></span><span>
+</span><span id="line-21"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#outerVertex"><span class="hs-identifier">outerVertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#outerBoundaryEdge"><span class="hs-identifier">outerBoundaryEdge</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#polygonHoles"><span class="hs-identifier">polygonHoles</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#polygonHoles%27"><span class="hs-identifier">polygonHoles'</span></a></span><span>
+</span><span id="line-24"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#holeList"><span class="hs-identifier">holeList</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#inPolygon"><span class="hs-identifier">inPolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#insidePolygon"><span class="hs-identifier">insidePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#onBoundary"><span class="hs-identifier">onBoundary</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#area"><span class="hs-identifier">area</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#signedArea"><span class="hs-identifier">signedArea</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#centroid"><span class="hs-identifier">centroid</span></a></span><span>
+</span><span id="line-31"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#pickPoint"><span class="hs-identifier">pickPoint</span></a></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#isTriangle"><span class="hs-identifier">isTriangle</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier">isStarShaped</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#isCounterClockwise"><span class="hs-identifier">isCounterClockwise</span></a></span><span>
+</span><span id="line-36"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier">toCounterClockWiseOrder</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder%27"><span class="hs-identifier">toCounterClockWiseOrder'</span></a></span><span>
+</span><span id="line-37"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#toClockwiseOrder"><span class="hs-identifier">toClockwiseOrder</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#toClockwiseOrder%27"><span class="hs-identifier">toClockwiseOrder'</span></a></span><span>
+</span><span id="line-38"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#reverseOuterBoundary"><span class="hs-identifier">reverseOuterBoundary</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#findDiagonal"><span class="hs-identifier">findDiagonal</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#withIncidentEdges"><span class="hs-identifier">withIncidentEdges</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#numberVertices"><span class="hs-identifier">numberVertices</span></a></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#asSimplePolygon"><span class="hs-identifier">asSimplePolygon</span></a></span><span>
+</span><span id="line-45"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#extremesLinear"><span class="hs-identifier">extremesLinear</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier">cmpExtreme</span></a></span><span>
+</span><span id="line-46"></span><span>                            </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.LinearProgramming.LP2DRIC.html"><span class="hs-identifier">Algorithms.Geometry.LinearProgramming.LP2DRIC</span></a></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.LinearProgramming.Types.html"><span class="hs-identifier">Algorithms.Geometry.LinearProgramming.Types</span></a></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Simple</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Random.Class</span></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.HalfSpace.html"><span class="hs-identifier">Data.Geometry.HalfSpace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier">rightOf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html"><span class="hs-identifier">Data.Geometry.Polygon.Core</span></a></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html"><span class="hs-identifier">Data.Geometry.Polygon.Extremes</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- * Polygons</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | Test if a Simple polygon is star-shaped. Returns a point in the kernel</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- (i.e. from which the entire polygon is visible), if it exists.</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- \(O(n)\) expected time</span><span>
+</span><span id="line-69"></span><span id="local-6989586621679978478"><span id="local-6989586621679978479"><span id="local-6989586621679978480"><span class="annot"><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier hs-type">isStarShaped</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679978480"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679978479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679978479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679978478"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679978479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679978480"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679978479"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-71"></span><span id="isStarShaped"><span class="annot"><span class="annottext">isStarShaped :: SimplePolygon p r -&gt; m (Maybe (Point 2 r))
+</span><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier hs-var hs-var">isStarShaped</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; SimplePolygon p r
+forall r (t :: PolygonType) p.
+(Eq r, Fractional r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toClockwiseOrder"><span class="hs-identifier hs-var">toClockwiseOrder</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679978477"><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679978477"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
+forall (m :: * -&gt; *) r.
+(MonadRandom m, Ord r, Fractional r) =&gt;
+LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
+</span><a href="Algorithms.Geometry.LinearProgramming.LP2DRIC.html#solveBoundedLinearProgram"><span class="hs-identifier hs-var">solveBoundedLinearProgram</span></a></span><span> </span><span class="annot"><span class="annottext">(LinearProgram 2 r -&gt; m (Maybe (Point 2 r)))
+-&gt; LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; [HalfSpace 2 r] -&gt; LinearProgram 2 r
+forall (d :: Nat) r.
+Vector d r -&gt; [HalfSpace d r] -&gt; LinearProgram d r
+</span><a href="Algorithms.Geometry.LinearProgramming.Types.html#LinearProgram"><span class="hs-identifier hs-var">LinearProgram</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679978474"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CSeq (HalfSpace 2 r) -&gt; [HalfSpace 2 r]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">CSeq (HalfSpace 2 r)
+</span><a href="#local-6989586621679978472"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679978474"><span class="annot"><span class="annottext">c :: Vector 2 r
+</span><a href="#local-6989586621679978474"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679978477"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon p r
+-&gt; Getting (Vector 2 r) (SimplePolygon p r) (Vector 2 r)
+-&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Int -&gt; Lens' (SimplePolygon p r) (Point 2 r :+ p)
+forall (t :: PolygonType) p r.
+Int -&gt; Lens' (Polygon t p r) (Point 2 r :+ p)
+</span><a href="Data.Geometry.Polygon.Core.html#outerVertex"><span class="hs-identifier hs-var">outerVertex</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">(((Point 2 r :+ p) -&gt; Const (Vector 2 r) (Point 2 r :+ p))
+ -&gt; SimplePolygon p r -&gt; Const (Vector 2 r) (SimplePolygon p r))
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; (Point 2 r :+ p) -&gt; Const (Vector 2 r) (Point 2 r :+ p))
+-&gt; Getting (Vector 2 r) (SimplePolygon p r) (Vector 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Point 2 r :+ p) -&gt; Const (Vector 2 r) (Point 2 r :+ p)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+ -&gt; (Point 2 r :+ p) -&gt; Const (Vector 2 r) (Point 2 r :+ p))
+-&gt; ((Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+    -&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r))
+-&gt; (Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; (Point 2 r :+ p)
+-&gt; Const (Vector 2 r) (Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Const (Vector 2 r) (Vector 2 r))
+-&gt; Point 2 r -&gt; Const (Vector 2 r) (Point 2 r)
+forall (d :: Nat) r. Lens' (Point d r) (Vector d r)
+</span><a href="Data.Geometry.Point.Internal.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">-- the first vertex is the intersection point of the two supporting lines</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-comment">-- bounding it, so the first two edges bound the shape in this sirection</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679978472"><span class="annot"><span class="annottext">hs :: CSeq (HalfSpace 2 r)
+</span><a href="#local-6989586621679978472"><span class="hs-identifier hs-var hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; HalfSpace 2 r)
+-&gt; CSeq (LineSegment 2 p r) -&gt; CSeq (HalfSpace 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfSpace 2 r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier hs-var">rightOf</span></a></span><span> </span><span class="annot"><span class="annottext">(Line 2 r -&gt; HalfSpace 2 r)
+-&gt; (LineSegment 2 p r -&gt; Line 2 r)
+-&gt; LineSegment 2 p r
+-&gt; HalfSpace 2 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Line 2 r
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; Line (Dimension t) (NumType t)
+</span><a href="Data.Geometry.Line.Internal.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CSeq (LineSegment 2 p r) -&gt; CSeq (HalfSpace 2 r))
+-&gt; (SimplePolygon p r -&gt; CSeq (LineSegment 2 p r))
+-&gt; SimplePolygon p r
+-&gt; CSeq (HalfSpace 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; CSeq (LineSegment 2 p r)
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; CSeq (LineSegment 2 p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryEdges"><span class="hs-identifier hs-var">outerBoundaryEdges</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; CSeq (HalfSpace 2 r))
+-&gt; SimplePolygon p r -&gt; CSeq (HalfSpace 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679978477"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-78"></span></pre></body></html>
