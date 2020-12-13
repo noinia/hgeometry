@@ -1,9 +1,8 @@
 HGeometry
 =========
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/noinia/hgeometry/CI)
-[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg?color=success)](https://hackage.haskell.org/package/hgeometry)
-[![API docs coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fnoinia.github.io%2Fhgeometry%2Fhaddock_badge.json)](https://noinia.github.io/hgeometry/doc/)
+[![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
+[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg)](https://hackage.haskell.org/package/hgeometry)
 
 HGeometry is a library for computing with geometric objects in
 Haskell. It defines basic geometric types and primitives, and it
@@ -126,8 +125,8 @@ the vertices of the polygon to cary some extra information of type `p`
 
 ```haskell
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 ```
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.
