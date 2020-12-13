@@ -58,6 +58,7 @@ implements some more advanced geometric algorithms. In particuar, the
 following algorithms are currently available:
 
 * two \(O(n \log n)\) time algorithms for convex hull in
+  ![R^2](https://latex.codecogs.com/svg.latex?%5Cmathbb%7BR%7D%5E2)
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
 * an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
