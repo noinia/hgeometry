@@ -3,8 +3,6 @@ name: GitHub Page
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ] # only used for testing
 
 jobs:
   build:
@@ -49,10 +47,10 @@ jobs:
             \"message\": \"$COVERAGE%\", \
             \"color\": \"success\" \
           }" > haddock_badge.json
-        mkdir ../pages
-        cp -r `stack path --local-doc-root`/ ../pages/
-        cp haddock.txt ../pages
-        cp haddock_badge.json ../pages
+        mkdir --parents ../pages/docs/
+        cp -r `stack path --local-doc-root`/ ../pages/docs/
+        cp haddock.txt ../pages/docs/
+        cp haddock_badge.json ../pages/docs/
         cat haddock.txt
         cat haddock_badge.json
 
