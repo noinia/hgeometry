@@ -1,8 +1,9 @@
 HGeometry
 =========
 
-[![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
-[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg)](https://hackage.haskell.org/package/hgeometry)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/noinia/hgeometry/CI)
+[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg?color=success)](https://hackage.haskell.org/package/hgeometry)
+[![API docs coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fnoinia.github.io%2Fhgeometry%2Fhaddock_badge.json)](https://noinia.github.io/hgeometry/doc/)
 
 HGeometry is a library for computing with geometric objects in
 Haskell. It defines basic geometric types and primitives, and it
