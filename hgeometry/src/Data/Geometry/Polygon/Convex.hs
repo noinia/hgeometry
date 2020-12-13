@@ -248,7 +248,7 @@ lowerTangent       :: (Num r, Ord r)
                    -> LineSegment 2 p r
 lowerTangent lp rp = ClosedLineSegment l r
   where
-    mkH f = NonEmpty.fromList . F.toList . f . getVertices
+    mkH f = f . getVertices
     lh = mkH (CV.rightElements . rightMost) lp
     rh = mkH (CV.leftElements  . leftMost)  rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh

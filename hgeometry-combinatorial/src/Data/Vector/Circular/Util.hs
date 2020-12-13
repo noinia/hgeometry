@@ -53,7 +53,7 @@ rightElements :: CircularVector a -> NV.NonEmptyVector a
 rightElements = toNonEmptyVector
 
 leftElements :: CircularVector a -> NV.NonEmptyVector a
-leftElements v = NV.generate1 (length v) (\i -> CV.index v (length v-1-i))
+leftElements v = NV.generate1 (length v) (CV.index v . negate)
 
 findRotateTo   :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 findRotateTo p (CircularVector v _rot) = CircularVector v <$> NV.findIndex p v
