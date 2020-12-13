@@ -2,65 +2,42 @@
 module Data.Vector.Circular.Util where
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
-import           Control.DeepSeq
 import           Control.Lens
-import qualified Data.List.NonEmpty          as NonEmpty
 import           Data.Maybe
 import           Data.Semigroup.Foldable
 import qualified Data.Vector                 as V
 import           Data.Vector.Circular        as CV
 import qualified Data.Vector.NonEmpty        as NV
-import           GHC.Generics                (Generic)
 
--- type instance Index (CircularVector a) = Int
--- type instance IxValue (CircularVector a) = a
-
--- instance Ixed (CircularVector a) where
---   ix i f v = f (CV.index v i) <&> \a -> unsafeFromVector (toVector v V.// [(i,a)])
-
+-- FIXME: Upstream this to the non-empty vector library?
 instance Foldable1 NV.NonEmptyVector
 
+-- | Access the ith item in the CircularVector (w.r.t the rotation) as a lens
 item   :: Int -> Lens' (CircularVector a) a
 item i = lens (`CV.index` i) (\s x -> unsafeFromVector (toVector s V.// [(i,x)]))
 
--- FIXME: Will stream fusion make this efficient? Try expression this function
--- with Data.Vector.Fusion.Bundle.
--- zipWith :: (a -> b -> c) -> CircularVector a -> CircularVector b -> CircularVector c
--- zipWith f a b = unsafeFromVector $ V.zipWith f (toVector a) (toVector b)
-
--- zipWith3 :: (a -> b -> c -> d) -> CircularVector a -> CircularVector b -> CircularVector c
---   -> CircularVector d
--- zipWith3 f a b c = fromVector $ NV.zipWith3 f (toNonEmptyVector a) (toNonEmptyVector b) (toNonEmptyVector c)
-
--- reverseDirection :: CircularVector a -> CircularVector a
--- reverseDirection = unsafeFromVector . V.reverse . toVector
-
--- minIndexBy :: (a -> a -> Ordering) -> CircularVector a -> Int
--- minIndexBy fn (CircularVector v rot) = (NV.minIndexBy fn v - rot) `mod` NV.length v
-
--- toNonEmptyVector :: CircularVector a -> NV.NonEmptyVector a
--- toNonEmptyVector v = NV.generate1 (length v) (CV.index v)
-
--- rotateToMinimumBy :: (a -> a -> Ordering) -> CircularVector a -> CircularVector a
--- rotateToMinimumBy fn (CircularVector v _rot) =
---   CircularVector v (NV.minIndexBy fn v)
-
--- rotateToMaximumBy :: (a -> a -> Ordering) -> CircularVector a -> CircularVector a
--- rotateToMaximumBy fn (CircularVector v _rot) =
---   CircularVector v (NV.maxIndexBy fn v)
-
+-- | All elements, starting with the focus, going to the right
+--
+-- >>> rightElements $ unsafeFromList [3,4,5,1,2]
+-- [3,4,5,1,2]
 rightElements :: CircularVector a -> NV.NonEmptyVector a
 rightElements = toNonEmptyVector
 
+-- | All elements, starting with the focus, going to the left
+--
+-- >>> leftElements $ unsafeFromList [3,4,5,1,2]
+-- [3,2,1,5,4]
 leftElements :: CircularVector a -> NV.NonEmptyVector a
 leftElements v = NV.generate1 (length v) (CV.index v . negate)
 
+-- | Finds an element in the CircularVector
+--
+-- >>> findRotateTo (== 3) $ unsafeFromList [1..5]
+-- Just (CircularVector {vector = [1,2,3,4,5], rotation = 2})
+-- >>> findRotateTo (== 7) $ unsafeFromList [1..5]
+-- Nothing
 findRotateTo   :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 findRotateTo p (CircularVector v _rot) = CircularVector v <$> NV.findIndex p v
-
--- Delete once circular-vector has been fixed.
--- safeToNonEmpty :: CircularVector a -> NonEmpty.NonEmpty a
--- safeToNonEmpty = NV.toNonEmpty . toNonEmptyVector
 
 -- | Test if the circular list is a cyclic shift of the second
 -- list.
