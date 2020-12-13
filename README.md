@@ -58,7 +58,6 @@ implements some more advanced geometric algorithms. In particuar, the
 following algorithms are currently available:
 
 * two \(O(n \log n)\) time algorithms for convex hull in
-  ![R^2](https://latex.codecogs.com/png.latex?\bg_white&space;\fn_cm&space;\mathbb{R}^2)
   $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
 * an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
 * the well-known Douglas Peucker polyline line simplification algorithm,
@@ -127,8 +126,8 @@ the vertices of the polygon to cary some extra information of type `p`
 
 ```haskell
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 ```
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.
