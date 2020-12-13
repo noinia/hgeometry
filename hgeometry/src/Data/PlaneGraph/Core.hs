@@ -73,15 +73,13 @@ import           Data.Geometry.Properties
 import qualified Data.List.NonEmpty        as NonEmpty
 import qualified Data.Map                  as M
 import           Data.Ord                  (comparing)
-import           Data.PlanarGraph          (Arc (..), Dart (..), Direction (..),
-                                            FaceId (..), FaceId',
-                                            HasDataOf (..), PlanarGraph,
-                                            VertexId (..), VertexId',
-                                            World (..), dual, planarGraph, twin)
+import           Data.PlanarGraph          (Arc (..), Dart (..), Direction (..), FaceId (..),
+                                            FaceId', HasDataOf (..), PlanarGraph, VertexId (..),
+                                            VertexId', World (..), dual, planarGraph, twin)
 import qualified Data.PlanarGraph          as PG
 import           Data.Util
 import qualified Data.Vector               as V
-import qualified Data.Vector.Circular      as CV
+import           Data.Vector.Circular      (CircularVector)
 import           GHC.Generics              (Generic)
 
 --------------------------------------------------------------------------------
@@ -188,7 +186,7 @@ fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
 
 -- | Constructs a planar from the given vertices
 fromVertices      :: proxy s
-                  -> CV.CircularVector (Point 2 r :+ p)
+                  -> CircularVector (Point 2 r :+ p)
                   -> PlanarGraph s Primal (VertexData r p) () ()
 fromVertices _ vs = g&PG.vertexData .~ vData'
   where

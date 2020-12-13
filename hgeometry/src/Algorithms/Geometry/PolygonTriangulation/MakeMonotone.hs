@@ -31,7 +31,6 @@ import qualified Data.Set.Util                                              as S
 import           Data.Util
 import qualified Data.Vector                                                as V
 import qualified Data.Vector.Circular                                       as CV
-import qualified Data.Vector.Circular.Util                                  as CV
 import qualified Data.Vector.Mutable                                        as MV
 
 

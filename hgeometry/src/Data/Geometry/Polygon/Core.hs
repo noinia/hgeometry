@@ -46,12 +46,12 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
                                  ) where
 
 import           Control.DeepSeq
-import           Control.Lens hiding (Simple)
+import           Control.Lens                 hiding (Simple)
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line
@@ -59,20 +59,21 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Triangle (Triangle(..), inTriangle)
+import           Data.Geometry.Triangle       (Triangle (..), inTriangle)
 import           Data.Geometry.Vector
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Vector.Circular as CV
-import qualified Data.Vector.Circular.Util as CV
-import           Data.Maybe (mapMaybe, catMaybes)
-import           Data.Ord (comparing)
-import           Data.Semigroup (sconcat)
+import qualified Data.List                    as List
+import           Data.List.NonEmpty           (NonEmpty (..))
+import qualified Data.List.NonEmpty           as NonEmpty
+import           Data.Maybe                   (catMaybes, mapMaybe)
+import           Data.Ord                     (comparing)
+import           Data.Semigroup               (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence as Seq
+import qualified Data.Sequence                as Seq
 import           Data.Util
-import           Data.Vinyl.CoRec (asA)
+import           Data.Vector.Circular         (CircularVector)
+import qualified Data.Vector.Circular         as CV
+import qualified Data.Vector.Circular.Util    as CV
+import           Data.Vinyl.CoRec             (asA)
 
 -- import Data.RealNumber.Rational
 
@@ -97,15 +98,15 @@ data PolygonType = Simple | Multi
 
 
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: CV.CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: CV.CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 
 -- | Prism to 'test' if we are a simple polygon
-_SimplePolygon :: Prism' (Polygon Simple p r) (CV.CircularVector (Point 2 r :+ p))
+_SimplePolygon :: Prism' (Polygon Simple p r) (CircularVector (Point 2 r :+ p))
 _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 
 -- | Prism to 'test' if we are a Multi polygon
-_MultiPolygon :: Prism' (Polygon Multi p r) (CV.CircularVector (Point 2 r :+ p), [Polygon Simple p r])
+_MultiPolygon :: Prism' (Polygon Multi p r) (CircularVector (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
 instance Bifunctor (Polygon t) where
@@ -194,14 +195,14 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
-outerBoundary :: forall t p r. Lens' (Polygon t p r) (CV.CircularVector (Point 2 r :+ p))
+outerBoundary :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 outerBoundary = lens g s
   where
-    g                     :: Polygon t p r -> CV.CircularVector (Point 2 r :+ p)
+    g                     :: Polygon t p r -> CircularVector (Point 2 r :+ p)
     g (SimplePolygon vs)  = vs
     g (MultiPolygon vs _) = vs
 
-    s                           :: Polygon t p r -> CV.CircularVector (Point 2 r :+ p)
+    s                           :: Polygon t p r -> CircularVector (Point 2 r :+ p)
                                 -> Polygon t p r
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
@@ -257,7 +258,7 @@ fromPoints = SimplePolygon . CV.unsafeFromList
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --
 -- running time: \(O(n)\)
-outerBoundaryEdges :: Polygon t p r -> CV.CircularVector (LineSegment 2 p r)
+outerBoundaryEdges :: Polygon t p r -> CircularVector (LineSegment 2 p r)
 outerBoundaryEdges = toEdges . (^.outerBoundary)
 
 -- | Lists all edges. The edges on the outer boundary are given before the ones
@@ -298,7 +299,7 @@ withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
 -- FIXME: Test that \poly -> fromEdges (toEdges poly) == poly
 -- | Given the vertices of the polygon. Produce a list of edges. The edges are
 -- half-open.
-toEdges    :: CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (LineSegment 2 p r)
+toEdges    :: CircularVector (Point 2 r :+ p) -> CircularVector (LineSegment 2 p r)
 toEdges vs = CV.zipWith (\p q -> LineSegment (Closed p) (Open q)) vs (CV.rotateRight 1 vs)
 
 

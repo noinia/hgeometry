@@ -32,8 +32,7 @@ import           Data.Function                  (on)
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (SimplePolygon, fromPoints,
-                                                 outerBoundary)
+import           Data.Geometry.Polygon.Core     (SimplePolygon, fromPoints, outerBoundary)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -43,10 +42,10 @@ import qualified Data.List.NonEmpty             as NonEmpty
 import           Data.Maybe                     (fromJust)
 import           Data.Ord                       (comparing)
 import           Data.Semigroup.Foldable        (Foldable1 (..))
-import           Data.Sequence                  (ViewL (..), ViewR (..), viewl,
-                                                 viewr)
+import           Data.Sequence                  (ViewL (..), ViewR (..), viewl, viewr)
 import qualified Data.Sequence                  as S
 import           Data.Util
+import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
 
@@ -224,7 +223,7 @@ merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
     l' = takeAndRotate c a lp
 
 
-rotateTo'   :: Eq a => (a :+ b) -> CV.CircularVector (a :+ b) -> CV.CircularVector (a :+ b)
+rotateTo'   :: Eq a => (a :+ b) -> CircularVector (a :+ b) -> CircularVector (a :+ b)
 rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
 
 coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
@@ -248,9 +247,8 @@ lowerTangent       :: (Num r, Ord r)
                    -> LineSegment 2 p r
 lowerTangent lp rp = ClosedLineSegment l r
   where
-    mkH f = f . getVertices
-    lh = mkH (CV.rightElements . rightMost) lp
-    rh = mkH (CV.leftElements  . leftMost)  rp
+    lh = CV.rightElements . rightMost . getVertices $ lp
+    rh = CV.leftElements  . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Compute the lower tangent of the two convex chains lp and rp
@@ -295,9 +293,8 @@ upperTangent       :: (Num r, Ord r)
                    -> LineSegment 2 p r
 upperTangent lp rp = ClosedLineSegment l r
   where
-    mkH f = f . getVertices
-    lh = mkH (CV.leftElements  . rightMost) lp
-    rh = mkH (CV.rightElements . leftMost)  rp
+    lh = CV.leftElements  . rightMost . getVertices $ lp
+    rh = CV.rightElements . leftMost  . getVertices $ rp
     (Two (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
@@ -362,22 +359,23 @@ minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
 --------------------------------------------------------------------------------
 
 -- | Rotate to the rightmost point (rightmost and topmost in case of ties)
-rightMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
-rightMost xs = CV.rotateToMaximumBy (comparing (^.core)) xs
+rightMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
+rightMost = CV.rotateToMaximumBy (comparing (^.core))
 
 -- | Rotate to the leftmost point (and bottommost in case of ties)
-leftMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
-leftMost xs = CV.rotateToMinimumBy (comparing (^.core)) xs
+leftMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
+leftMost = CV.rotateToMinimumBy (comparing (^.core))
 
 -- | Rotate to the bottommost point (and leftmost in case of ties)
-bottomMost    :: Ord r => CV.CircularVector (Point 2 r :+ p) -> CV.CircularVector (Point 2 r :+ p)
-bottomMost xs = let f p = (p^.core.yCoord,p^.core.xCoord)
-                in CV.rotateToMinimumBy (comparing f) xs
+bottomMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
+bottomMost = CV.rotateToMinimumBy (comparing f)
+  where
+    f p = (p^.core.yCoord,p^.core.xCoord)
 
 
 
 -- | Helper to get the vertices of a convex polygon
-getVertices :: ConvexPolygon p r -> CV.CircularVector (Point 2 r :+ p)
+getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
 getVertices = view (simplePolygon.outerBoundary)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true
