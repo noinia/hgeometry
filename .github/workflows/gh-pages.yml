@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      STACK_YAML: stack-haddock.yaml
+
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-haskell@v1
@@ -33,12 +36,12 @@ jobs:
         cd hgeometry
         # Stack is required because cabal doesn't build docs for dependencies.
         # Without those, coverage will not reach 100%
-        stack build --haddock --only-dependencies --stack-yaml stack-haddock.yaml
+        stack build --haddock --only-dependencies
 
     - name: Haddock Badge
       run: |
         cd hgeometry
-        stack haddock --stack-yaml stack-haddock.yaml 2>&1 | grep ") in " | cut -c25- | sort -hr > haddock.txt
+        stack haddock 2>&1 | grep ") in " | cut -c25- | sort -hr > haddock.txt
         COVERAGE=$(awk '{good += $3; total += $5} END {printf "%.0f", good/total*100}' haddock.txt)
         echo "\
           { \"schemaVersion\": 1, \
@@ -46,12 +49,16 @@ jobs:
             \"message\": \"$COVERAGE%\", \
             \"color\": \"success\" \
           }" > haddock_badge.json
+        mkdir ../pages
+        cp -r `stack path --local-doc-root`/ ../pages/
+        cp haddock.txt ../pages
+        cp haddock_badge.json ../pages
         cat haddock.txt
         cat haddock_badge.json
 
-    # - name: Deploy 🚀
-    #   uses: JamesIves/github-pages-deploy-action@3.5.9
-    #   with:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     BRANCH: gh-pages # The branch the action should deploy to.
-    #     FOLDER: pages # The folder the action should deploy.
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.5.9
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: docs # The branch the action should deploy to.
+        FOLDER: pages # The folder the action should deploy.
