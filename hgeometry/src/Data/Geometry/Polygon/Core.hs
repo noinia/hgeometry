@@ -242,9 +242,9 @@ holeList (MultiPolygon _ hs) = hs
 -- they appear!
 polygonVertices                      :: Polygon t p r
                                      -> NonEmpty.NonEmpty (Point 2 r :+ p)
-polygonVertices (SimplePolygon vs)   = CV.safeToNonEmpty vs
+polygonVertices (SimplePolygon vs)   = toNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
-  sconcat $ CV.safeToNonEmpty vs NonEmpty.:| map polygonVertices hs
+  sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
 
 -- | Creates a simple polygon from the given list of vertices.
@@ -463,7 +463,7 @@ isTriangle = \case
     MultiPolygon vs [] -> go vs
     MultiPolygon _  _  -> False
   where
-    go vs = case CV.safeToNonEmpty vs of
+    go vs = case toNonEmpty vs of
               (_ :| [_,_]) -> True
               _            -> False
 
@@ -556,7 +556,7 @@ toCounterClockWiseOrder' p
       | otherwise                  = p
 
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
-reverseOuterBoundary p = p&outerBoundary %~ CV.reverseDirection
+reverseOuterBoundary p = p&outerBoundary %~ CV.reverse
 
 
 -- | Convert a Polygon to a simple polygon by forgetting about any holes.
