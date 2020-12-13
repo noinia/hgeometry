@@ -88,12 +88,12 @@ pred' :: CircularVector a -> CircularVector a
 pred' = CV.rotateLeft 1
 
 -- | Rotate to the rightmost point (rightmost and topmost in case of ties)
-rightMost    :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
-rightMost xs = CV.rotateToMaximumBy (comparing (^.core)) xs
+rightMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
+rightMost = CV.rotateToMaximumBy (comparing (^.core))
 
 -- | Rotate to the leftmost point (and bottommost in case of ties)
-leftMost    :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
-leftMost xs = CV.rotateToMinimumBy (comparing (^.core)) xs
+leftMost :: Ord r => CircularVector (Point 2 r :+ p) -> CircularVector (Point 2 r :+ p)
+leftMost = CV.rotateToMinimumBy (comparing (^.core))
 
 -- | Helper to get the vertices of a convex polygon
 getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
