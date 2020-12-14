@@ -40,6 +40,9 @@ import           Test.QuickCheck                   (Arbitrary (..), infiniteList
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import Control.Lens
+
 type instance Dimension (Vector d r) = d
 type instance NumType   (Vector d r) = r
 
@@ -151,18 +154,30 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 
 -- | Shorthand to access the first component
 --
--- >>> Point3 1 2 3 ^. xCoord
+-- >>> Vector3 1 2 3 ^. xComponent
 -- 1
--- >>> Point2 1 2 & xCoord .~ 10
--- Point2 [10,2]
+-- >>> Vector2 1 2 & xComponent .~ 10
+-- Vector2 [10,2]
 xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
 xComponent = element (C :: C 0)
 {-# INLINABLE xComponent #-}
 
+-- | Shorthand to access the second component
+--
+-- >>> Vector3 1 2 3 ^. yComponent
+-- 2
+-- >>> Vector2 1 2 & yComponent .~ 10
+-- Vector2 [1,10]
 yComponent :: (2 <= d, Arity d) => Lens' (Vector d r) r
 yComponent = element (C :: C 1)
 {-# INLINABLE yComponent #-}
 
+-- | Shorthand to access the third component
+--
+-- >>> Vector3 1 2 3 ^. zComponent
+-- 3
+-- >>> Vector3 1 2 3 & zComponent .~ 10
+-- Vector3 [1,2,10]
 zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
 zComponent = element (C :: C 2)
 {-# INLINABLE zComponent #-}
