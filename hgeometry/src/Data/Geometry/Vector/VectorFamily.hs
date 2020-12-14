@@ -127,22 +127,27 @@ deriving instance (NFData r, Arity d) => NFData (Vector d r)
 --------------------------------------------------------------------------------
 -- * Convenience "constructors"
 
+-- | Constant sized vector with d elements.
 pattern Vector   :: VectorFamilyF (Peano d) r -> Vector d r
 pattern Vector v = MKVector (VectorFamily v)
 {-# COMPLETE Vector #-}
 
+-- | Constant sized vector with 1 element.
 pattern Vector1   :: r -> Vector 1 r
 pattern Vector1 x = (Vector (Identity x))
 {-# COMPLETE Vector1 #-}
 
+-- | Constant sized vector with 2 elements.
 pattern Vector2     :: r -> r -> Vector 2 r
 pattern Vector2 x y = (Vector (L2.V2 x y))
 {-# COMPLETE Vector2 #-}
 
+-- | Constant sized vector with 3 elements.
 pattern Vector3        :: r -> r -> r -> Vector 3 r
 pattern Vector3 x y z  = (Vector (L3.V3 x y z))
 {-# COMPLETE Vector3 #-}
 
+-- | Constant sized vector with 4 elements.
 pattern Vector4         :: r -> r -> r -> r -> Vector 4 r
 pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
 {-# COMPLETE Vector4 #-}
