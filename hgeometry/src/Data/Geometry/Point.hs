@@ -34,11 +34,10 @@ module Data.Geometry.Point( Point(..)
 
                           , squaredEuclideanDist, euclideanDist
 
-
-                          , AsAPoint(..), coord, unsafeCoord, vector'
+                          , coord, unsafeCoord
                           ) where
 
 import Data.Geometry.Point.Class
-import Data.Geometry.Point.Internal hiding (coord, unsafeCoord)
+import Data.Geometry.Point.Internal
 import Data.Geometry.Point.Orientation.Degenerate
 import Data.Geometry.Point.Quadrants

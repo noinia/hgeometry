@@ -1,6 +1,12 @@
-module Algorithms.Geometry.LineSegmentIntersection where
+module Algorithms.Geometry.LineSegmentIntersection
+  ( hasInteriorIntersections
+  , hasSelfIntersections
+  , Intersections
+  , Compare
+  ) where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
+import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 
