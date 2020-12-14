@@ -42,6 +42,19 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+executable fromgeojson
+  main-is: FromGeoJSON.hs
+  hs-source-dirs: src
+  build-depends:  base,
+                  containers,
+                  lens,
+                  aeson,
+                  bytestring,
+                  hashable,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  geojson
+
 test-suite hspec
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
