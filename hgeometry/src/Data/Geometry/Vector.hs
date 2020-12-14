@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
@@ -23,20 +23,20 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , xComponent, yComponent, zComponent
                            ) where
 
-import           Control.Applicative (liftA2)
-import           Control.Lens (Lens')
+import           Control.Applicative               (liftA2)
+import           Control.Lens                      (Lens')
 import           Control.Monad.State
-import qualified Data.Foldable as F
+import qualified Data.Foldable                     as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Vector.VectorFixed (C(..))
-import qualified Data.Vector.Fixed as FV
+import           Data.Geometry.Vector.VectorFixed  (C (..))
+import qualified Data.Vector.Fixed                 as FV
 import           GHC.TypeLits
-import           Linear.Affine (Affine(..), qdA, distanceA)
-import           Linear.Metric (dot,norm,signorm,quadrance)
-import           Linear.Vector as LV hiding (E(..))
-import           System.Random (Random(..))
-import           Test.QuickCheck (Arbitrary(..),infiniteList)
+import           Linear.Affine                     (Affine (..), distanceA, qdA)
+import           Linear.Metric                     (dot, norm, quadrance, signorm)
+import           Linear.Vector                     as LV hiding (E (..))
+import           System.Random                     (Random (..))
+import           Test.QuickCheck                   (Arbitrary (..), infiniteList)
 
 --------------------------------------------------------------------------------
 
@@ -149,6 +149,12 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 --------------------------------------------------------------------------------
 -- * Helper functions specific to two and three dimensional vectors
 
+-- | Shorthand to access the first component
+--
+-- >>> Point3 1 2 3 ^. xCoord
+-- 1
+-- >>> Point2 1 2 & xCoord .~ 10
+-- Point2 [10,2]
 xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
 xComponent = element (C :: C 0)
 {-# INLINABLE xComponent #-}
