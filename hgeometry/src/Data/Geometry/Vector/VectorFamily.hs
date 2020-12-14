@@ -105,15 +105,17 @@ instance (Arity d, Show r) => Show (Vector d r) where
 
 instance (Read r, Arity d) => Read (Vector d r) where
   readPrec     = lift readVec
+    where
+      readVec :: (Arity d, Read r) => ReadP (Vector d r)
+      readVec = do let d = natVal (Proxy :: Proxy d)
+                   _  <- string $ "Vector" <> show d <> " "
+                   rs <- readPrec_to_P readPrec minPrec
+                   case vectorFromList rs of
+                    Just v -> pure v
+                    _      -> pfail
   readListPrec = readListPrecDefault
 
-readVec :: forall d r. (Arity d, Read r) => ReadP (Vector d r)
-readVec = do let d = natVal (Proxy :: Proxy d)
-             _  <- string $ "Vector" <> show d <> " "
-             rs <- readPrec_to_P readPrec minPrec
-             case vectorFromList rs of
-               Just v -> pure v
-               _      -> pfail
+
 
 deriving instance (FromJSON r, Arity d) => FromJSON (Vector d r)
 instance (ToJSON r, Arity d) => ToJSON (Vector d r) where
