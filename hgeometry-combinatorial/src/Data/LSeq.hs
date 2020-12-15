@@ -129,13 +129,20 @@ xs |> x = LSeq (toSeq xs S.|> x)
 infixr 5 <|
 infixl 5 |>
 
--- | /O(log(min(n1,n2)))/ Concatenate two sequences.
+-- | /O(log(min(n,m)))/ Concatenate two sequences.
 (><) :: LSeq n a -> LSeq m a -> LSeq (n + m) a
 xs >< ys = LSeq (toSeq xs <> toSeq ys)
 
 infix 5 ><
 
-
+-- | Prove a sequence has at least @n@ elements.
+--
+-- >>> eval (Proxy :: Proxy 3) (fromList [1,2,3])
+-- Just (LSeq (fromList [1,2,3]))
+-- >>> eval (Proxy :: Proxy 3) (fromList [1,2])
+-- Nothing
+-- >>> eval (Proxy :: Proxy 3) (fromList [1..10])
+-- Just (LSeq (fromList [1,2,3,4,5,6,7,8,9,10]))
 eval :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
 eval n (LSeq xs)
   | toInteger (S.length xs) >= natVal n = Just $ LSeq xs
