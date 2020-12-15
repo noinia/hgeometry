@@ -1,4 +1,12 @@
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Directions
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Directions( CardinalDirection(..)
                                , _North, _East, _South, _West
                                , oppositeDirection

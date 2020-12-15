@@ -1,5 +1,12 @@
 {-# Language ScopedTypeVariables #-}
 {-# Language TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Slab
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Slab where
 
 import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both, from)

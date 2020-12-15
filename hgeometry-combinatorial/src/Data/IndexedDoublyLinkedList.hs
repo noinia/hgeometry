@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.IndexedDoublyLinkedList
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.IndexedDoublyLinkedList( DLList(..)
                                    , Cell(..), emptyCell
                                    , DLListMonad, runDLListMonad

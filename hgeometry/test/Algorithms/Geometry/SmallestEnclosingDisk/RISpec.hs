@@ -3,7 +3,7 @@ module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
 
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
 import qualified Algorithms.Geometry.SmallestEnclosingBall.RIC as RIC
-import           Algorithms.Geometry.SmallestEnclosingBall.Types
+import           Algorithms.Geometry.SmallestEnclosingBall
 import           Control.Lens
 import           Control.Monad (when)
 import           Control.Monad.Random.Strict (evalRand)
@@ -70,4 +70,4 @@ readInput fp = fmap f <$> readSinglePageFile fp
         isInSolution s = s^.core.symbolName == "mark/cross(sx)"
 
         right = either (const Nothing) Just
-        solutionOf = right . fromList . map (^.core.symbolPoint) . filter isInSolution
+        solutionOf = right . twoOrThreeFromList . map (^.core.symbolPoint) . filter isInSolution

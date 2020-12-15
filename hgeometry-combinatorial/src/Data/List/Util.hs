@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.List.Util where
 
 import           Data.Bifunctor
@@ -33,21 +40,46 @@ leaveOutOne xs = second F.toList . fromJust . extractNext
 --------------------------------------------------------------------------------
 -- * Improved functions for minima and maxima
 
+-- | Safe variant of Prelude.minimum.
+--
+-- >>> minimum1 [] :: Maybe ()
+-- Nothing
+-- >>> minimum1 [1,2,3]
+-- Just 1
 minimum1 :: Ord a => [a] -> Maybe a
 minimum1 = minimum1By compare
 
+-- | Safe variant of Prelude.maximum.
+--
+-- >>> maximum [] :: Maybe ()
+-- Nothing
+-- >>> maximum1 [1,2,3]
+-- Just 3
 maximum1 :: Ord a => [a] -> Maybe a
 maximum1 = minimum1By (flip compare)
 
+-- | Total variant of Data.List.minimumBy.
+--
+-- >>> minimum1By (comparing abs) [] :: Maybe ()
+-- Nothing
+-- >>> minimum1By (comparing abs) [1,-2,3]
+-- Just 1
 minimum1By     :: (a -> a -> Ordering) -> [a] -> Maybe a
 minimum1By cmp = \case
   [] -> Nothing
   xs -> Just $ List.minimumBy cmp xs
 
+-- | Computes all minima by comparing some property.
+--
+-- >>> minimaOn (max 2) [1,2,3,4,5,-1]
+-- [-1,2,1]
 minimaOn   :: Ord b => (a -> b) -> [a] -> [a]
 minimaOn f = minimaBy (comparing f)
 
--- | computes all minima
+-- | Computes all minima.
+--
+-- >>> minimaBy (comparing abs) [1,2,3,2,1,-1]
+-- [-1,1,1]
 minimaBy     :: (a -> a -> Ordering) -> [a] -> [a]
 minimaBy cmp = \case
   []     -> []

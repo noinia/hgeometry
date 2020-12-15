@@ -27,11 +27,11 @@ instance F.Foldable TwoOrThree where
   foldMap f (Two   a b)   = f a <> f b
   foldMap f (Three a b c) = f a <> f b <> f c
 
-
-fromList         :: [a] -> Either String (TwoOrThree a)
-fromList [a,b]   = Right $ Two a b
-fromList [a,b,c] = Right $ Three a b c
-fromList _       = Left "Wrong number of elements"
+-- | Construct datatype from list with exactly two or three elements.
+twoOrThreeFromList         :: [a] -> Either String (TwoOrThree a)
+twoOrThreeFromList [a,b]   = Right $ Two a b
+twoOrThreeFromList [a,b,c] = Right $ Three a b c
+twoOrThreeFromList _       = Left "Wrong number of elements"
 
 
 
