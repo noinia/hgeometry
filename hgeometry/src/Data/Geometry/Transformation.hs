@@ -61,6 +61,10 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
+-- | Apply a transformation to a collection of objects.
+--
+-- >>> transformAllBy (uniformScaling 2) [Point1 1, Point1 2, Point1 3]
+-- [Point1 2.0,Point1 4.0,Point1 6.0]
 transformAllBy :: (Functor c, IsTransformable g)
                => Transformation (Dimension g) (NumType g) -> c g -> c g
 transformAllBy t = fmap (transformBy t)
