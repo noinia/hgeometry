@@ -10,13 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.SmallestEnclosingBall.Naive
-  ( -- * Types
-    DiskResult(..)
-  , TwoOrThree(..)
-  , enclosingDisk
-  , definingPoints
-    -- * Implementation
-  , smallestEnclosingDisk
+  ( smallestEnclosingDisk
   , enclosesAll
   ) where
 
