@@ -85,15 +85,31 @@ instance (Fractional r, Arity d, Arity (d + 1))
 --------------------------------------------------------------------------------
 -- * Common transformations
 
+-- | Create translation transformation from a vector.
+--
+-- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
+-- Point2 [3.0,5.0]
 translation   :: (Num r, Arity d, Arity (d + 1))
               => Vector d r -> Transformation d r
 translation v = Transformation . Matrix $ imap transRow (snoc v 1)
 
-
+-- | Create scaling transformation from a vector.
+--
+-- >>> transformBy (scaling $ Vector2 2 (-1)) $ Point2 2 3
+-- Point2 [4.0,-3.0]
 scaling   :: (Num r, Arity d, Arity (d + 1))
           => Vector d r -> Transformation d r
 scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 
+-- | Create scaling transformation from a scalar that is applied
+--   to all dimensions.
+--
+-- >>> transformBy (uniformScaling 5) $ Point2 2 3
+-- Point2 [10.0,15.0]
+-- >>> uniformScaling 5 == scaling (Vector2 5 5)
+-- True
+-- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
+-- True
 uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
 uniformScaling = scaling . pure
 
@@ -101,17 +117,29 @@ uniformScaling = scaling . pure
 --------------------------------------------------------------------------------
 -- * Functions that execute transformations
 
+-- | Translate a given point.
+--
+-- >>> translateBy (Vector2 1 2) $ Point2 2 3
+-- Point2 [3.0,5.0]
 translateBy :: ( IsTransformable g, Num (NumType g)
                , Arity (Dimension g), Arity (Dimension g + 1)
                ) => Vector (Dimension g) (NumType g) -> g -> g
 translateBy = transformBy . translation
 
+-- | Scale a given point.
+--
+-- >>> scaleBy (Vector2 2 (-1)) $ Point2 2 3
+-- Point2 [4.0,-3.0]
 scaleBy :: ( IsTransformable g, Num (NumType g)
            , Arity (Dimension g), Arity (Dimension g + 1)
            ) => Vector (Dimension g) (NumType g) -> g -> g
 scaleBy = transformBy . scaling
 
 
+-- | Scale a given point uniformly in all dimensions.
+--
+-- >>> scaleUniformlyBy 5 $ Point2 2 3
+-- Point2 [10.0,15.0]
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
                     , Arity (Dimension g), Arity (Dimension g + 1)
                     ) => NumType g -> g -> g
