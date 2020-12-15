@@ -8,6 +8,7 @@
 @package hgeometry-combinatorial
 @version 0.11.0.0
 
+
 module Algorithms.BinarySearch
 
 -- | Given a monotonic predicate p, a lower bound l, and an upper bound u,
@@ -66,6 +67,7 @@ binarySearchSeq :: (a -> Bool) -> Seq a -> Maybe Int
 --   running time: &lt;math&gt;, where &lt;math&gt; is the time to execute
 --   the predicate.
 binarySearchVec :: Vector v a => (a -> Bool) -> v a -> Maybe Int
+
 
 module Algorithms.DivideAndConquer
 
@@ -133,6 +135,7 @@ kmpMatch :: Eq a => Vector a -> Vector a -> Maybe Int
 --   running time: &lt;math&gt;.
 buildFailureFunction :: forall a. Eq a => Vector a -> Vector Int
 
+
 module Control.CanAquire
 
 -- | Run a computation on something that can aquire i's.
@@ -164,6 +167,7 @@ instance forall k s (a :: k). GHC.Show.Show (Control.CanAquire.I s a)
 instance forall k s (a :: k). Control.CanAquire.HasIndex (Control.CanAquire.I s a) GHC.Types.Int
 instance Data.Reflection.Reifies s (Data.Vector.Vector a) => Control.CanAquire.CanAquire (Control.CanAquire.I s a) a
 
+
 module Control.Monad.State.Persistent
 
 -- | A State monad that can store earlier versions of the state.
@@ -183,6 +187,7 @@ instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.State.Persistent.Pers
 instance GHC.Base.Monad m => GHC.Base.Applicative (Control.Monad.State.Persistent.PersistentStateT s m)
 instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.State.Persistent.PersistentStateT s m)
 instance GHC.Base.Monad m => Control.Monad.State.Class.MonadState s (Control.Monad.State.Persistent.PersistentStateT s m)
+
 
 module Data.CircularList.Util
 
@@ -227,6 +232,7 @@ splitIncr :: (a -> a -> Ordering) -> [a] -> ([a], [a])
 --   Running time: O(n), where n is the size of the smallest list
 isShiftOf :: Eq a => CList a -> CList a -> Bool
 
+
 module Data.CircularSeq
 
 -- | Nonempty circular sequence
@@ -234,13 +240,22 @@ data CSeq a
 
 -- | smart constructor that automatically balances the seq
 cseq :: Seq a -> a -> Seq a -> CSeq a
+
+-- | <i>O(1)</i> CSeq with exactly one element.
 singleton :: a -> CSeq a
 
 -- | builds a CSeq
 fromNonEmpty :: NonEmpty a -> CSeq a
+
+-- | <i>O(n)</i> Convert from a list to a CSeq.
+--   
+--   Warning: the onus is on the user to ensure that their list is not
+--   empty, otherwise all bets are off!
 fromList :: [a] -> CSeq a
 
--- | Gets the focus of the CSeq running time: O(1)
+-- | Gets the focus of the CSeq.
+--   
+--   running time: O(1)
 focus :: CSeq a -> a
 
 -- | Access the i^th item (w.r.t the focus) in the CSeq (indices modulo n).
@@ -367,7 +382,7 @@ leftElements :: CSeq a -> Seq a
 -- | Convert to a single Seq, starting with the focus.
 asSeq :: CSeq a -> Seq a
 
--- | Reversres the direction of the CSeq
+-- | Reverses the direction of the CSeq
 --   
 --   running time: &lt;math&gt;
 --   
@@ -399,6 +414,8 @@ allRotations :: CSeq a -> CSeq (CSeq a)
 --   Nothing
 --   </pre>
 findRotateTo :: (a -> Bool) -> CSeq a -> Maybe (CSeq a)
+
+-- | Rotate to a specific element in the CSeq.
 rotateTo :: Eq a => a -> CSeq a -> Maybe (CSeq a)
 
 -- | "Left zip": zip the two CLists, pairing up every element in the *left*
@@ -463,6 +480,7 @@ instance Data.Semigroup.Foldable.Class.Foldable1 Data.CircularSeq.CSeq
 instance Data.Foldable.Foldable Data.CircularSeq.CSeq
 instance GHC.Base.Functor Data.CircularSeq.CSeq
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.CircularSeq.CSeq a)
+
 
 module Data.DynamicOrd
 
@@ -596,28 +614,87 @@ module Data.LSeq
 
 -- | LSeq n a certifies that the sequence has *at least* n items
 data LSeq (n :: Nat) a
+
+-- | Convert to a sequence by dropping the type-level size.
 toSeq :: LSeq n a -> Seq a
+
+-- | <i>O(1)</i> The empty sequence.
 empty :: LSeq 0 a
 fromList :: Foldable f => f a -> LSeq 0 a
 fromNonEmpty :: NonEmpty a -> LSeq 1 a
 fromSeq :: Seq a -> LSeq 0 a
+
+-- | <i>O(1)</i> Add an element to the left end of a sequence. Mnemonic: a
+--   triangle with the single element at the pointy end.
 (<|) :: a -> LSeq n a -> LSeq (1 + n) a
 infixr 5 <|
+
+-- | <i>O(1)</i> Add an element to the right end of a sequence. Mnemonic: a
+--   triangle with the single element at the pointy end.
 (|>) :: LSeq n a -> a -> LSeq (1 + n) a
 infixl 5 |>
+
+-- | <i>O(log(min(n,m)))</i> Concatenate two sequences.
 (><) :: LSeq n a -> LSeq m a -> LSeq (n + m) a
 infix 5 ><
+
+-- | Prove a sequence has at least <tt>n</tt> elements.
+--   
+--   <pre>
+--   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1,2,3])
+--   Just (LSeq (fromList [1,2,3]))
+--   
+--   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1,2])
+--   Nothing
+--   
+--   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1..10])
+--   Just (LSeq (fromList [1,2,3,4,5,6,7,8,9,10]))
+--   </pre>
 eval :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
 
 -- | get the element with index i, counting from the left and starting at
 --   0. O(log(min(i,n-i)))
 index :: LSeq n a -> Int -> a
+
+-- | <i>O(log(min(i,n−i)))</i> Update the element at the specified
+--   position. If the position is out of range, the original sequence is
+--   returned. adjust can lead to poor performance and even memory leaks,
+--   because it does not force the new value before installing it in the
+--   sequence. adjust' should usually be preferred.
 adjust :: (a -> a) -> Int -> LSeq n a -> LSeq n a
+
+-- | <i>O(n)</i> The partition function takes a predicate p and a sequence
+--   xs and returns sequences of those elements which do and do not satisfy
+--   the predicate.
 partition :: (a -> Bool) -> LSeq n a -> (LSeq 0 a, LSeq 0 a)
+
+-- | A generalization of <a>fmap</a>, <a>mapWithIndex</a> takes a mapping
+--   function that also depends on the element's index, and applies it to
+--   every element in the sequence.
 mapWithIndex :: (Int -> a -> b) -> LSeq n a -> LSeq n b
+
+-- | &lt;math&gt;. The first <tt>i</tt> elements of a sequence. If
+--   <tt>i</tt> is negative, <tt><a>take</a> i s</tt> yields the empty
+--   sequence. If the sequence contains fewer than <tt>i</tt> elements, the
+--   whole sequence is returned.
 take :: Int -> LSeq n a -> LSeq 0 a
+
+-- | &lt;math&gt;. Elements of a sequence after the first <tt>i</tt>. If
+--   <tt>i</tt> is negative, <tt><a>drop</a> i s</tt> yields the whole
+--   sequence. If the sequence contains fewer than <tt>i</tt> elements, the
+--   empty sequence is returned.
 drop :: Int -> LSeq n a -> LSeq 0 a
+
+-- | &lt;math&gt;. <a>unstableSort</a> sorts the specified <tt>Seq</tt> by
+--   the natural ordering of its elements, but the sort is not stable. This
+--   algorithm is frequently faster and uses less memory than
+--   <tt>sort</tt>.
 unstableSort :: Ord a => LSeq n a -> LSeq n a
+
+-- | &lt;math&gt;. A generalization of <a>unstableSort</a>,
+--   <a>unstableSortBy</a> takes an arbitrary comparator and sorts the
+--   specified sequence. The sort is not stable. This algorithm is
+--   frequently faster and uses less memory than <tt>sortBy</tt>.
 unstableSortBy :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 
 -- | Gets the first element of the LSeq
@@ -710,6 +787,7 @@ instance Data.Aeson.Types.FromJSON.FromJSON a => Data.Aeson.Types.FromJSON.FromJ
 instance Control.Lens.At.Ixed (Data.LSeq.LSeq n a)
 instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Foldable.Class.Foldable1 (Data.LSeq.LSeq n)
 
+
 module Data.List.Alternating
 
 -- | A (non-empty) alternating list of a's and b's
@@ -770,6 +848,7 @@ instance Data.Bifunctor.Bifunctor Data.List.Alternating.Alternating
 instance Data.Bifoldable.Bifoldable Data.List.Alternating.Alternating
 instance Data.Bitraversable.Bitraversable Data.List.Alternating.Alternating
 
+
 module Data.List.Set
 
 -- | A Set of <tt>a</tt>s, implemented using a simple list. The only
@@ -804,7 +883,11 @@ intersection :: Eq a => Set a -> Set a -> Set a
 --   
 --   running time: &lt;math&gt;
 difference :: Eq a => Set a -> Set a -> Set a
+
+-- | O(n^2). Create a set from a finite list of elements.
 fromList :: Eq a => [a] -> Set a
+
+-- | O(n^2). Insert an element in a set.
 insertAll :: Eq a => [a] -> Set a -> Set a
 instance Data.Traversable.Traversable Data.List.Set.Set
 instance Data.Foldable.Foldable Data.List.Set.Set
@@ -814,6 +897,7 @@ instance GHC.Show.Show a => GHC.Show.Show (Data.List.Set.Set a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.List.Set.Set a)
 instance GHC.Classes.Eq a => GHC.Base.Semigroup (Data.List.Set.Set a)
 instance GHC.Classes.Eq a => GHC.Base.Monoid (Data.List.Set.Set a)
+
 
 module Data.List.Zipper
 
@@ -874,6 +958,7 @@ instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.List.Zipper.Zipper a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.List.Zipper.Zipper a)
 instance Data.Foldable.Foldable Data.List.Zipper.Zipper
 
+
 module Data.List.Util
 
 -- | Given an input list, computes all lists in which just one element is
@@ -894,12 +979,54 @@ module Data.List.Util
 --   [(1,[])]
 --   </pre>
 leaveOutOne :: [a] -> [(a, [a])]
+
+-- | Safe variant of Prelude.minimum.
+--   
+--   <pre>
+--   &gt;&gt;&gt; minimum1 [] :: Maybe ()
+--   Nothing
+--   
+--   &gt;&gt;&gt; minimum1 [1,2,3]
+--   Just 1
+--   </pre>
 minimum1 :: Ord a => [a] -> Maybe a
+
+-- | Safe variant of Prelude.maximum.
+--   
+--   <pre>
+--   &gt;&gt;&gt; maximum [] :: Maybe ()
+--   Nothing
+--   
+--   &gt;&gt;&gt; maximum1 [1,2,3]
+--   Just 3
+--   </pre>
 maximum1 :: Ord a => [a] -> Maybe a
+
+-- | Total variant of Data.List.minimumBy.
+--   
+--   <pre>
+--   &gt;&gt;&gt; minimum1By (comparing abs) [] :: Maybe ()
+--   Nothing
+--   
+--   &gt;&gt;&gt; minimum1By (comparing abs) [1,-2,3]
+--   Just 1
+--   </pre>
 minimum1By :: (a -> a -> Ordering) -> [a] -> Maybe a
+
+-- | Computes all minima by comparing some property.
+--   
+--   <pre>
+--   &gt;&gt;&gt; minimaOn (max 2) [1,2,3,4,5,-1]
+--   [-1,2,1]
+--   </pre>
 minimaOn :: Ord b => (a -> b) -> [a] -> [a]
 
--- | computes all minima
+-- | Computes all minima.
+--   
+--   <pre>
+--   &gt;&gt;&gt; minimaBy (comparing abs) [1,2,3,2,1,-1]
+--   [-1,1,1]
+--   </pre>
 minimaBy :: (a -> a -> Ordering) -> [a] -> [a]
 
 -- | extracts all minima from the list. The result consists of the list of
@@ -912,6 +1039,7 @@ minimaBy :: (a -> a -> Ordering) -> [a] -> [a]
 --   </pre>
 extractMinimaBy :: (a -> a -> Ordering) -> [a] -> [a] :+ [a]
 
+
 module Data.Measured.Class
 class Semigroup v => Measured v a | a -> v
 measure :: Measured v a => a -> v
@@ -920,7 +1048,9 @@ insertA :: CanInsert v a => a -> v -> v
 class Measured v a => CanDelete v a
 deleteA :: CanDelete v a => a -> v -> Maybe v
 
+
 module Data.Measured
+
 
 module Data.Measured.Size
 newtype Size
@@ -964,6 +1094,7 @@ instance GHC.Base.Monoid a => GHC.Base.Monoid (Data.Measured.Size.Sized a)
 instance Data.Measured.Class.Measured Data.Measured.Size.Size (Data.Measured.Size.Elem a)
 instance GHC.Base.Semigroup Data.Measured.Size.Size
 instance GHC.Base.Monoid Data.Measured.Size.Size
+
 
 module Data.OrdSeq
 data Key a
@@ -2149,6 +2280,7 @@ nextEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 --   running time: &lt;math&gt;.
 prevEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 
+
 module Algorithms.Graph.DFS
 
 -- | DFS on a planar graph.
@@ -2170,6 +2302,7 @@ adjacencyLists :: PlanarGraph s w v e f -> AdjacencyLists s w
 --   
 --   Running time: &lt;math&gt;
 dfs' :: forall s w. AdjacencyLists s w -> VertexId s w -> Tree (VertexId s w)
+
 
 module Algorithms.Graph.MST
 
@@ -2359,6 +2492,7 @@ instance GHC.Show.Show a => GHC.Show.Show (Data.Range.EndPoint a)
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Range.EndPoint a)
 instance Test.QuickCheck.Arbitrary.Arbitrary r => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.EndPoint r)
 
+
 module Data.RealNumber.Rational
 
 -- | Real Numbers represented using Rational numbers. The number type
@@ -2395,6 +2529,7 @@ instance GHC.TypeNats.KnownNat p => Data.Fixed.HasResolution (Data.RealNumber.Ra
 instance GHC.TypeNats.KnownNat p => GHC.Read.Read (Data.RealNumber.Rational.RealNumber p)
 instance GHC.TypeNats.KnownNat p => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Rational.RealNumber p)
 
+
 module Data.Sequence.Util
 
 -- | Partition the seq s given a monotone predicate p into (xs,ys) such
@@ -2408,6 +2543,7 @@ module Data.Sequence.Util
 --   running time: &lt;math&gt;, where &lt;math&gt; is the time to execute
 --   the predicate.
 splitMonotone :: (a -> Bool) -> Seq a -> (Seq a, Seq a)
+
 
 module Data.Set.Util
 
@@ -2693,6 +2829,7 @@ instance Data.Traversable.Traversable (Data.BinaryTree.BinLeafTree v)
 instance Data.Measured.Class.Measured v a => GHC.Base.Semigroup (Data.BinaryTree.BinLeafTree v a)
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbitrary v) => Test.QuickCheck.Arbitrary.Arbitrary (Data.BinaryTree.BinLeafTree v a)
 
+
 module Data.BinaryTree.Zipper
 data Ctx a
 Top :: Ctx a
@@ -2923,6 +3060,7 @@ instance Control.Lens.Tuple.Field1 (Data.Util.STR a b c) (Data.Util.STR d b c) a
 instance Control.Lens.Tuple.Field2 (Data.Util.STR a b c) (Data.Util.STR a d c) b d
 instance Control.Lens.Tuple.Field3 (Data.Util.STR a b c) (Data.Util.STR a b d) c d
 
+
 module Data.IndexedDoublyLinkedList.Bare
 
 -- | Doubly linked list implemented by a mutable vector. So actually this
@@ -3004,6 +3142,7 @@ instance GHC.Classes.Eq Data.IndexedDoublyLinkedList.Bare.Cell
 instance GHC.Show.Show Data.IndexedDoublyLinkedList.Bare.Cell
 instance Control.Monad.Primitive.PrimMonad (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
 instance Control.Monad.Reader.Class.MonadReader (Data.IndexedDoublyLinkedList.Bare.IDLList s) (Data.IndexedDoublyLinkedList.Bare.IDLListMonad s)
+
 
 module Data.IndexedDoublyLinkedList
 

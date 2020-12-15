@@ -1,33 +1,40 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Set.Util</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-2"></span><span>
-</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.DynamicOrd.html"><span class="hs-identifier">Data.DynamicOrd</span></a></span><span>
-</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
-</span><span id="line-5"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Set</span></span><span class="hs-special">)</span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set.Internal</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Internal</span></span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- import Data.Ord(comparing)</span><span>
-</span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- data S = S String deriving Show</span><span>
-</span><span id="line-12"></span><span class="hs-comment">-- cmpS :: S -&gt; S -&gt; Ordering</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- cmpS = comparing (\(S s) -&gt; length s)</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Set.Util</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Set.Util</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.DynamicOrd.html"><span class="hs-identifier">Data.DynamicOrd</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Set</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set.Internal</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Internal</span></span><span>
 </span><span id="line-14"></span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- $setup</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Ord(comparing)</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- &gt;&gt;&gt; data S = S String deriving Show</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- &gt;&gt;&gt; cmpS = comparing (\(S s) -&gt; length s)</span><span>
-</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- import Data.Ord(comparing)</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- data S = S String deriving Show</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- cmpS :: S -&gt; S -&gt; Ordering</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- cmpS = comparing (\(S s) -&gt; length s)</span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-comment">-- | Given a monotonic function f that maps a to b, split the sequence s</span><span>
-</span><span id="line-23"></span><span class="hs-comment">-- depending on the b values. I.e. the result (l,m,r) is such that</span><span>
-</span><span id="line-24"></span><span class="hs-comment">-- * all (&lt; x) . fmap f $ l</span><span>
-</span><span id="line-25"></span><span class="hs-comment">-- * all (== x) . fmap f $ m</span><span>
-</span><span id="line-26"></span><span class="hs-comment">-- * all (&gt; x) . fmap f $ r</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Ord(comparing)</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- &gt;&gt;&gt; data S = S String deriving Show</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- &gt;&gt;&gt; cmpS = comparing (\(S s) -&gt; length s)</span><span>
 </span><span id="line-27"></span><span class="hs-comment">--</span><span>
-</span><span id="line-28"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
-</span><span id="line-29"></span><span id="local-6989586621679325858"><span id="local-6989586621679325859"><span class="annot"><a href="Data.Set.Util.html#splitOn"><span class="hs-identifier hs-type">splitOn</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-30"></span><span id="splitOn"><span class="annot"><span class="annottext">splitOn :: (a -&gt; b) -&gt; b -&gt; Set a -&gt; (Set a, Set a, Set a)
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | Given a monotonic function f that maps a to b, split the sequence s</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- depending on the b values. I.e. the result (l,m,r) is such that</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- * all (&lt; x) . fmap f $ l</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- * all (== x) . fmap f $ m</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- * all (&gt; x) . fmap f $ r</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-36"></span><span id="local-6989586621679325858"><span id="local-6989586621679325859"><span class="annot"><a href="Data.Set.Util.html#splitOn"><span class="hs-identifier hs-type">splitOn</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325859"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325858"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-37"></span><span id="splitOn"><span class="annot"><span class="annottext">splitOn :: (a -&gt; b) -&gt; b -&gt; Set a -&gt; (Set a, Set a, Set a)
 </span><a href="Data.Set.Util.html#splitOn"><span class="hs-identifier hs-var hs-var">splitOn</span></a></span></span><span> </span><span id="local-6989586621679325856"><span class="annot"><span class="annottext">f :: a -&gt; b
 </span><a href="#local-6989586621679325856"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679325855"><span class="annot"><span class="annottext">x :: b
 </span><a href="#local-6989586621679325855"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679325854"><span class="annot"><span class="annottext">s :: Set a
@@ -42,7 +49,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
 </span><a href="#local-6989586621679325856"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325854"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-31"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679325848"><span class="annot"><span class="annottext">m :: Set a
+</span><span id="line-38"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679325848"><span class="annot"><span class="annottext">m :: Set a
 </span><a href="#local-6989586621679325848"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679325847"><span class="annot"><span class="annottext">r :: Set a
 </span><a href="#local-6989586621679325847"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; Set a -&gt; (Set a, Set a)
 forall a. (a -&gt; Bool) -&gt; Set a -&gt; (Set a, Set a)
@@ -53,7 +60,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
 </span><a href="#local-6989586621679325856"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325852"><span class="hs-identifier hs-var">s'</span></a></span><span>
-</span><span id="line-32"></span><span>                    </span><span id="local-6989586621679325850"><span class="annot"><span class="annottext">g :: Ordering -&gt; b -&gt; Bool
+</span><span id="line-39"></span><span>                    </span><span id="local-6989586621679325850"><span class="annot"><span class="annottext">g :: Ordering -&gt; b -&gt; Bool
 </span><a href="#local-6989586621679325850"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679325846"><span class="annot"><span class="annottext">c :: Ordering
 </span><a href="#local-6989586621679325846"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679325845"><span class="annot"><span class="annottext">y :: b
 </span><a href="#local-6989586621679325845"><span class="hs-identifier hs-var">y</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b
@@ -64,19 +71,19 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><a href="#local-6989586621679325846"><span class="hs-identifier hs-var">c</span></a></span><span>
-</span><span id="line-33"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Set a
+</span><span id="line-40"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325853"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325848"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325847"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>
-</span><span id="line-35"></span><span class="hs-comment">-- | Constructs a Set using the given Order.</span><span>
-</span><span id="line-36"></span><span class="hs-comment">--</span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- Note that this is dangerous as the resulting set may not abide the</span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- ordering expected of such sets.</span><span>
-</span><span id="line-39"></span><span class="hs-comment">--</span><span>
-</span><span id="line-40"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
-</span><span id="line-41"></span><span id="local-6989586621679325843"><span class="annot"><a href="Data.Set.Util.html#fromListBy"><span class="hs-identifier hs-type">fromListBy</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-42"></span><span id="fromListBy"><span class="annot"><span class="annottext">fromListBy :: (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; Set a
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | Constructs a Set using the given Order.</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- Note that this is dangerous as the resulting set may not abide the</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- ordering expected of such sets.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679325843"><span class="annot"><a href="Data.Set.Util.html#fromListBy"><span class="hs-identifier hs-type">fromListBy</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325843"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-49"></span><span id="fromListBy"><span class="annot"><span class="annottext">fromListBy :: (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; Set a
 </span><a href="Data.Set.Util.html#fromListBy"><span class="hs-identifier hs-var hs-var">fromListBy</span></a></span></span><span> </span><span id="local-6989586621679325841"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679325841"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679325840"><span class="annot"><span class="annottext">xs :: [a]
 </span><a href="#local-6989586621679325840"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering)
@@ -102,34 +109,34 @@ forall s a. a -&gt; O s a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679325840"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- | Given two sets l and r, such that all elements of l occur before</span><span>
-</span><span id="line-45"></span><span class="hs-comment">-- r, join the two sets into a combined set.</span><span>
-</span><span id="line-46"></span><span class="hs-comment">--</span><span>
-</span><span id="line-47"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
-</span><span id="line-48"></span><span id="local-6989586621679325835"><span class="annot"><a href="Data.Set.Util.html#join"><span class="hs-identifier hs-type">join</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-49"></span><span id="join"><span class="annot"><span class="annottext">join :: Set a -&gt; Set a -&gt; Set a
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Given two sets l and r, such that all elements of l occur before</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- r, join the two sets into a combined set.</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679325835"><span class="annot"><a href="Data.Set.Util.html#join"><span class="hs-identifier hs-type">join</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325835"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-56"></span><span id="join"><span class="annot"><span class="annottext">join :: Set a -&gt; Set a -&gt; Set a
 </span><a href="Data.Set.Util.html#join"><span class="hs-identifier hs-var hs-var">join</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Set a -&gt; Set a -&gt; Set a
 forall a. Set a -&gt; Set a -&gt; Set a
 </span><span class="hs-identifier hs-var">Internal.merge</span></span><span>
-</span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-comment">-- | Inserts an element into the set, assuming that the set is ordered</span><span>
-</span><span id="line-53"></span><span class="hs-comment">-- by the given order.</span><span>
-</span><span id="line-54"></span><span class="hs-comment">--</span><span>
-</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; insertBy cmpS (S &quot;ccc&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
-</span><span id="line-56"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;bb&quot;,S &quot;ccc&quot;,S &quot;dddd&quot;]</span><span>
-</span><span id="line-57"></span><span class="hs-comment">--</span><span>
-</span><span id="line-58"></span><span class="hs-comment">-- When trying to insert an element that equals an element already in</span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- the set (according to the given comparator), this function replaces</span><span>
-</span><span id="line-60"></span><span class="hs-comment">-- the old element by the new one:</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Inserts an element into the set, assuming that the set is ordered</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- by the given order.</span><span>
 </span><span id="line-61"></span><span class="hs-comment">--</span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- &gt;&gt;&gt; insertBy cmpS (S &quot;cc&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
-</span><span id="line-63"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;cc&quot;,S &quot;dddd&quot;]</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- &gt;&gt;&gt; insertBy cmpS (S &quot;ccc&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;bb&quot;,S &quot;ccc&quot;,S &quot;dddd&quot;]</span><span>
 </span><span id="line-64"></span><span class="hs-comment">--</span><span>
-</span><span id="line-65"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
-</span><span id="line-66"></span><span id="local-6989586621679325832"><span class="annot"><a href="Data.Set.Util.html#insertBy"><span class="hs-identifier hs-type">insertBy</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-67"></span><span id="insertBy"><span class="annot"><span class="annottext">insertBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; Set a -&gt; Set a
+</span><span id="line-65"></span><span class="hs-comment">-- When trying to insert an element that equals an element already in</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- the set (according to the given comparator), this function replaces</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- the old element by the new one:</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &gt;&gt;&gt; insertBy cmpS (S &quot;cc&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;cc&quot;,S &quot;dddd&quot;]</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-73"></span><span id="local-6989586621679325832"><span class="annot"><a href="Data.Set.Util.html#insertBy"><span class="hs-identifier hs-type">insertBy</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325832"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-74"></span><span id="insertBy"><span class="annot"><span class="annottext">insertBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; Set a -&gt; Set a
 </span><a href="Data.Set.Util.html#insertBy"><span class="hs-identifier hs-var hs-var">insertBy</span></a></span></span><span> </span><span id="local-6989586621679325830"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679325830"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679325829"><span class="annot"><span class="annottext">x :: a
 </span><a href="#local-6989586621679325829"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679325828"><span class="annot"><span class="annottext">s :: Set a
@@ -155,19 +162,19 @@ forall s a. a -&gt; O s a
 </span><a href="Data.DynamicOrd.html#O"><span class="hs-identifier hs-var">O</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679325829"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325828"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-comment">-- | Deletes an element from the set, assuming the set is ordered by</span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- the given ordering.</span><span>
-</span><span id="line-72"></span><span class="hs-comment">--</span><span>
-</span><span id="line-73"></span><span class="hs-comment">-- &gt;&gt;&gt; deleteAllBy cmpS (S &quot;bb&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
-</span><span id="line-74"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;dddd&quot;]</span><span>
-</span><span id="line-75"></span><span class="hs-comment">-- &gt;&gt;&gt; deleteAllBy cmpS (S &quot;bb&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;cc&quot;, S &quot;dd&quot;, S &quot;ee&quot;, S &quot;ff&quot;, S &quot;dddd&quot;]</span><span>
-</span><span id="line-76"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;dddd&quot;]</span><span>
-</span><span id="line-77"></span><span class="hs-comment">--</span><span>
-</span><span id="line-78"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
-</span><span id="line-79"></span><span id="local-6989586621679325825"><span class="annot"><a href="Data.Set.Util.html#deleteAllBy"><span class="hs-identifier hs-type">deleteAllBy</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-80"></span><span id="deleteAllBy"><span class="annot"><span class="annottext">deleteAllBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; Set a -&gt; Set a
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | Deletes an element from the set, assuming the set is ordered by</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- the given ordering.</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; deleteAllBy cmpS (S &quot;bb&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;dddd&quot;]</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;dddd&quot;]</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- &gt;&gt;&gt; deleteAllBy cmpS (S &quot;bb&quot;) $ fromListBy cmpS [S &quot;a&quot; , S &quot;bb&quot; , S &quot;cc&quot;, S &quot;dd&quot;, S &quot;ee&quot;, S &quot;ff&quot;, S &quot;dddd&quot;]</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- fromList [S &quot;a&quot;,S &quot;dddd&quot;]</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- running time: \(O(\log n)\)</span><span>
+</span><span id="line-86"></span><span id="local-6989586621679325825"><span class="annot"><a href="Data.Set.Util.html#deleteAllBy"><span class="hs-identifier hs-type">deleteAllBy</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Set</span></span><span> </span><span class="annot"><a href="#local-6989586621679325825"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-87"></span><span id="deleteAllBy"><span class="annot"><span class="annottext">deleteAllBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; Set a -&gt; Set a
 </span><a href="Data.Set.Util.html#deleteAllBy"><span class="hs-identifier hs-var hs-var">deleteAllBy</span></a></span></span><span> </span><span id="local-6989586621679325823"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679325823"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679325822"><span class="annot"><span class="annottext">x :: a
 </span><a href="#local-6989586621679325822"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679325821"><span class="annot"><span class="annottext">s :: Set a
@@ -193,4 +200,4 @@ forall s a. a -&gt; O s a
 </span><a href="Data.DynamicOrd.html#O"><span class="hs-identifier hs-var">O</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679325822"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Set a
 </span><a href="#local-6989586621679325821"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-81"></span></pre></body></html>
+</span><span id="line-88"></span></pre></body></html>

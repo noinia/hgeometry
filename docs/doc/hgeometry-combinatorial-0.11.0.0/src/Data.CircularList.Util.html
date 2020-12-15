@@ -1,47 +1,54 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.CircularList.Util</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-2"></span><span>
-</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
-</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Tuple</span></span><span>
-</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.CircularList</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- $setup</span><span>
-</span><span id="line-12"></span><span class="hs-comment">-- &gt;&gt;&gt; let ordList = C.fromList [5,6,10,20,30,1,2,3]</span><span>
-</span><span id="line-13"></span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.CircularList.Util</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.CircularList.Util</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Tuple</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.CircularList</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
 </span><span id="line-14"></span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- | Given a circular list, whose elements are in increasing order, insert the</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- new element into the Circular list in its sorted order.</span><span>
-</span><span id="line-18"></span><span class="hs-comment">--</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 C.empty</span><span>
-</span><span id="line-20"></span><span class="hs-comment">-- fromList [1]</span><span>
-</span><span id="line-21"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 $ C.fromList [2]</span><span>
-</span><span id="line-22"></span><span class="hs-comment">-- fromList [2,1]</span><span>
-</span><span id="line-23"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 2 $ C.fromList [1,3]</span><span>
-</span><span id="line-24"></span><span class="hs-comment">-- fromList [1,2,3]</span><span>
-</span><span id="line-25"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 31 ordList</span><span>
-</span><span id="line-26"></span><span class="hs-comment">-- fromList [5,6,10,20,30,31,1,2,3]</span><span>
-</span><span id="line-27"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 ordList</span><span>
-</span><span id="line-28"></span><span class="hs-comment">-- fromList [5,6,10,20,30,1,1,2,3]</span><span>
-</span><span id="line-29"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 4 ordList</span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- fromList [5,6,10,20,30,1,2,3,4]</span><span>
-</span><span id="line-31"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 11 ordList</span><span>
-</span><span id="line-32"></span><span class="hs-comment">-- fromList [5,6,10,11,20,30,1,2,3]</span><span>
-</span><span id="line-33"></span><span id="local-6989586621679317094"><span class="annot"><a href="Data.CircularList.Util.html#insertOrd"><span class="hs-identifier hs-type">insertOrd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-34"></span><span id="insertOrd"><span class="annot"><span class="annottext">insertOrd :: a -&gt; CList a -&gt; CList a
+</span><span id="line-16"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- &gt;&gt;&gt; let ordList = C.fromList [5,6,10,20,30,1,2,3]</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- | Given a circular list, whose elements are in increasing order, insert the</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- new element into the Circular list in its sorted order.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 C.empty</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- fromList [1]</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 $ C.fromList [2]</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- fromList [2,1]</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 2 $ C.fromList [1,3]</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- fromList [1,2,3]</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 31 ordList</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- fromList [5,6,10,20,30,31,1,2,3]</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 1 ordList</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- fromList [5,6,10,20,30,1,1,2,3]</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 4 ordList</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- fromList [5,6,10,20,30,1,2,3,4]</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- &gt;&gt;&gt; insertOrd 11 ordList</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- fromList [5,6,10,11,20,30,1,2,3]</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679317094"><span class="annot"><a href="Data.CircularList.Util.html#insertOrd"><span class="hs-identifier hs-type">insertOrd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317094"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-41"></span><span id="insertOrd"><span class="annot"><span class="annottext">insertOrd :: a -&gt; CList a -&gt; CList a
 </span><a href="Data.CircularList.Util.html#insertOrd"><span class="hs-identifier hs-var hs-var">insertOrd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; a -&gt; CList a -&gt; CList a
 forall a. (a -&gt; a -&gt; Ordering) -&gt; a -&gt; CList a -&gt; CList a
 </span><a href="Data.CircularList.Util.html#insertOrdBy"><span class="hs-identifier hs-var">insertOrdBy</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- | Insert an element into an increasingly ordered circular list, with</span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- specified compare operator.</span><span>
-</span><span id="line-38"></span><span id="local-6989586621679317141"><span class="annot"><a href="Data.CircularList.Util.html#insertOrdBy"><span class="hs-identifier hs-type">insertOrdBy</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-39"></span><span id="insertOrdBy"><span class="annot"><span class="annottext">insertOrdBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; CList a -&gt; CList a
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- | Insert an element into an increasingly ordered circular list, with</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- specified compare operator.</span><span>
+</span><span id="line-45"></span><span id="local-6989586621679317141"><span class="annot"><a href="Data.CircularList.Util.html#insertOrdBy"><span class="hs-identifier hs-type">insertOrdBy</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317141"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-46"></span><span id="insertOrdBy"><span class="annot"><span class="annottext">insertOrdBy :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; CList a -&gt; CList a
 </span><a href="Data.CircularList.Util.html#insertOrdBy"><span class="hs-identifier hs-var hs-var">insertOrdBy</span></a></span></span><span> </span><span id="local-6989586621679317090"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679317090"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679317089"><span class="annot"><span class="annottext">x :: a
 </span><a href="#local-6989586621679317089"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; CList a
@@ -57,11 +64,11 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CList a -&gt; [a]
 forall a. CList a -&gt; [a]
 </span><span class="hs-identifier hs-var">C.rightElements</span></span><span>
-</span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span class="hs-comment">-- | List version of insertOrdBy; i.e. the list contains the elements in</span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- cirulcar order. Again produces a list that has the items in circular order.</span><span>
-</span><span id="line-43"></span><span id="local-6989586621679317134"><span class="annot"><a href="Data.CircularList.Util.html#insertOrdBy%27"><span class="hs-identifier hs-type">insertOrdBy'</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
-</span><span id="line-44"></span><span id="insertOrdBy%27"><span class="annot"><span class="annottext">insertOrdBy' :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | List version of insertOrdBy; i.e. the list contains the elements in</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- cirulcar order. Again produces a list that has the items in circular order.</span><span>
+</span><span id="line-50"></span><span id="local-6989586621679317134"><span class="annot"><a href="Data.CircularList.Util.html#insertOrdBy%27"><span class="hs-identifier hs-type">insertOrdBy'</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317134"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-51"></span><span id="insertOrdBy%27"><span class="annot"><span class="annottext">insertOrdBy' :: (a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
 </span><a href="Data.CircularList.Util.html#insertOrdBy%27"><span class="hs-identifier hs-var hs-var">insertOrdBy'</span></a></span></span><span> </span><span id="local-6989586621679317084"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679317084"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679317083"><span class="annot"><span class="annottext">x :: a
 </span><a href="#local-6989586621679317083"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679317082"><span class="annot"><span class="annottext">xs :: [a]
@@ -72,13 +79,13 @@ forall a. CList a -&gt; [a]
 forall a. [a] -&gt; a
 </span><span class="hs-identifier hs-var">head</span></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317081"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-45"></span><span>    </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span>  </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
+</span><span id="line-52"></span><span>    </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span>  </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
 forall a. (a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">L.insertBy</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679317084"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679317083"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317078"><span class="hs-identifier hs-var">pref</span></a></span><span>
-</span><span id="line-46"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679317077"><span class="annot"><span class="annottext">z :: a
+</span><span id="line-53"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679317077"><span class="annot"><span class="annottext">z :: a
 </span><a href="#local-6989586621679317077"><span class="hs-identifier hs-var">z</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679317076"><span class="annot"><span class="annottext">zs :: [a]
 </span><a href="#local-6989586621679317076"><span class="hs-identifier hs-var">zs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679317077"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
@@ -92,12 +99,12 @@ forall a. (a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317078"><span class="hs-identifier hs-var">pref</span></a></span><span>
-</span><span id="line-47"></span><span>    </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><span id="line-54"></span><span>    </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679317083"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317082"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-comment">-- == x : rest ++ pref</span><span>
-</span><span id="line-48"></span><span>    </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><span id="line-55"></span><span>    </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317081"><span class="hs-identifier hs-var">rest</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
@@ -106,24 +113,24 @@ forall a. (a -&gt; a -&gt; Ordering) -&gt; a -&gt; [a] -&gt; [a]
 </span><a href="#local-6989586621679317084"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679317083"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317078"><span class="hs-identifier hs-var">pref</span></a></span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-50"></span><span>    </span><span class="hs-comment">-- split the list at its maximum.</span><span>
-</span><span id="line-51"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679317078"><span class="annot"><span class="annottext">pref :: [a]
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-comment">-- split the list at its maximum.</span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679317078"><span class="annot"><span class="annottext">pref :: [a]
 </span><a href="#local-6989586621679317078"><span class="hs-identifier hs-var">pref</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679317081"><span class="annot"><span class="annottext">rest :: [a]
 </span><a href="#local-6989586621679317081"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; ([a], [a])
 forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; ([a], [a])
 </span><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-var">splitIncr</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679317084"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317082"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span class="hs-comment">-- given a list of elements that is supposedly a a cyclic-shift of a list of</span><span>
-</span><span id="line-54"></span><span class="hs-comment">-- increasing items, find the splitting point. I.e. returns a pair of lists</span><span>
-</span><span id="line-55"></span><span class="hs-comment">-- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted</span><span>
-</span><span id="line-56"></span><span class="hs-comment">-- order.</span><span>
-</span><span id="line-57"></span><span id="local-6989586621679317128"><span class="annot"><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-type">splitIncr</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span></span><span>
-</span><span id="line-58"></span><span id="splitIncr"><span class="annot"><span class="annottext">splitIncr :: (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; ([a], [a])
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- given a list of elements that is supposedly a a cyclic-shift of a list of</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- increasing items, find the splitting point. I.e. returns a pair of lists</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- order.</span><span>
+</span><span id="line-64"></span><span id="local-6989586621679317128"><span class="annot"><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-type">splitIncr</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679317128"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span></span><span>
+</span><span id="line-65"></span><span id="splitIncr"><span class="annot"><span class="annottext">splitIncr :: (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; ([a], [a])
 </span><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-var hs-var">splitIncr</span></a></span></span><span> </span><span class="hs-identifier">_</span><span>   </span><span class="hs-special">[</span><span class="hs-special">]</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span class="annot"><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-var">splitIncr</span></a></span><span> </span><span id="local-6989586621679317074"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
+</span><span id="line-66"></span><span class="annot"><a href="Data.CircularList.Util.html#splitIncr"><span class="hs-identifier hs-var">splitIncr</span></a></span><span> </span><span id="local-6989586621679317074"><span class="annot"><span class="annottext">cmp :: a -&gt; a -&gt; Ordering
 </span><a href="#local-6989586621679317074"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679317073"><span class="annot"><span class="annottext">xs :: [a]
 </span><a href="#local-6989586621679317073"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679317072"><span class="annot"><span class="annottext">x :: a
 </span><a href="#local-6989586621679317072"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([a], [a]) -&gt; ([a], [a])
@@ -145,7 +152,7 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(a, a) -&gt; a
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span>
-</span><span id="line-60"></span><span>                      </span><span class="annot"><span class="annottext">(([(a, a)], [(a, a)]) -&gt; ([a], [a]))
+</span><span id="line-67"></span><span>                      </span><span class="annot"><span class="annottext">(([(a, a)], [(a, a)]) -&gt; ([a], [a]))
 -&gt; ([(a, a)] -&gt; ([(a, a)], [(a, a)])) -&gt; [(a, a)] -&gt; ([a], [a])
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((a, a) -&gt; Bool) -&gt; [(a, a)] -&gt; ([(a, a)], [(a, a)])
@@ -168,11 +175,11 @@ forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317073"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
 </span><a href="#local-6989586621679317073"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-61"></span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- | Test if the circular list is a cyclic shift of the second list.</span><span>
-</span><span id="line-63"></span><span class="hs-comment">-- Running time: O(n), where n is the size of the smallest list</span><span>
-</span><span id="line-64"></span><span id="local-6989586621679317066"><span class="annot"><a href="Data.CircularList.Util.html#isShiftOf"><span class="hs-identifier hs-type">isShiftOf</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
-</span><span id="line-65"></span><span id="local-6989586621679317064"><span class="annot"><span class="annottext">xs :: CList a
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Test if the circular list is a cyclic shift of the second list.</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- Running time: O(n), where n is the size of the smallest list</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679317066"><span class="annot"><a href="Data.CircularList.Util.html#isShiftOf"><span class="hs-identifier hs-type">isShiftOf</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="#local-6989586621679317066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-72"></span><span id="local-6989586621679317064"><span class="annot"><span class="annottext">xs :: CList a
 </span><a href="#local-6989586621679317064"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="isShiftOf"><span class="annot"><span class="annottext">isShiftOf :: CList a -&gt; CList a -&gt; Bool
 </span><a href="Data.CircularList.Util.html#isShiftOf"><span class="hs-operator hs-var hs-var">`isShiftOf`</span></a></span></span><span> </span><span id="local-6989586621679317063"><span class="annot"><span class="annottext">ys :: CList a
 </span><a href="#local-6989586621679317063"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679317062"><span class="annot"><span class="annottext">rest :: CList a -&gt; [a]
@@ -183,7 +190,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CList a -&gt; [a]
 forall a. CList a -&gt; [a]
 </span><span class="hs-identifier hs-var">C.leftElements</span></span><span>
-</span><span id="line-66"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (CList a -&gt; Bool) -&gt; Maybe (CList a) -&gt; Bool
+</span><span id="line-73"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (CList a -&gt; Bool) -&gt; Maybe (CList a) -&gt; Bool
 forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
 </span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679317058"><span class="annot"><span class="annottext">xs' :: CList a
@@ -198,7 +205,7 @@ forall a. CList a -&gt; [a]
 </span><a href="#local-6989586621679317063"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (CList a) -&gt; Bool) -&gt; Maybe (CList a) -&gt; Bool
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-67"></span><span>                         </span><span class="annot"><span class="annottext">CList a -&gt; Maybe a
+</span><span id="line-74"></span><span>                         </span><span class="annot"><span class="annottext">CList a -&gt; Maybe a
 forall a. CList a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">C.focus</span></span><span> </span><span class="annot"><span class="annottext">CList a
 </span><a href="#local-6989586621679317063"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; (a -&gt; Maybe (CList a)) -&gt; Maybe (CList a)
@@ -210,4 +217,4 @@ forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 forall a. Eq a =&gt; a -&gt; CList a -&gt; Maybe (CList a)
 </span><span class="hs-identifier hs-var">C.rotateTo</span></span><span> </span><span class="annot"><span class="annottext">CList a
 </span><a href="#local-6989586621679317064"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-68"></span></pre></body></html>
+</span><span id="line-75"></span></pre></body></html>
