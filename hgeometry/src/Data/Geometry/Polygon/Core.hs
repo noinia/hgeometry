@@ -98,10 +98,12 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
       [simpleTriangle]
 :} -}
 
--- | We distinguish between simple polygons (without holes) and Polygons with holes.
+-- | We distinguish between simple polygons (without holes) and polygons with holes.
 data PolygonType = Simple | Multi
 
-
+-- | Polygons are sequences of points and may or may not contain holes.
+--   Degenerate polygons (polygons with self-intersections or fewer than 3 points)
+--   are possible and it is the responsibility of the user to avoid creating them.
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
@@ -134,8 +136,10 @@ bitraverseVertices     :: (Applicative f, Traversable t) => (p -> f q) -> (r -> 
                   -> t (Point 2 r :+ p) -> f (t (Point 2 s :+ q))
 bitraverseVertices f g = traverse (bitraverse (traverse g) f)
 
+-- | Polygon without holes.
 type SimplePolygon = Polygon Simple
 
+-- | Polygon with zero or more holes.
 type MultiPolygon  = Polygon Multi
 
 -- | Either a simple or multipolygon
@@ -239,6 +243,8 @@ polygonHoles' = \f -> \case
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
 outerVertex i = outerBoundary.C.item i
 
+-- | Get the n^th edge along the outer boundary of the polygon. The edge is half open.
+--
 -- running time: \(O(\log i)\)
 outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
 outerBoundaryEdge i p = let u = p^.outerVertex i
@@ -570,6 +576,10 @@ toCounterClockWiseOrder' p
       | not $ isCounterClockwise p = reverseOuterBoundary p
       | otherwise                  = p
 
+-- | Reorient the outer boundary from clockwise order to counter-clockwise order or
+--   from counter-clockwise order to clockwise order. Leaves
+--   any holes as they are.
+--
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
 reverseOuterBoundary p = p&outerBoundary %~ C.reverseDirection
 
