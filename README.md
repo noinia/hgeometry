@@ -62,18 +62,18 @@ following algorithms are currently available:
 * an *O(n)* expected time algorithm for smallest enclosing disk in ℝ²,
 * the well-known Douglas Peucker polyline line simplification algorithm,
 * an *O(n log n)* time algorithm for computing the Delaunay triangulation
-(using divide and conquer).
+(using divide and conquer),
 * an *O(n log n)* time algorithm for computing the Euclidean Minimum Spanning
-Tree (EMST), based on computing the Delaunay Triangulation.
+Tree (EMST), based on computing the Delaunay Triangulation,
 * an *O(log² n)* time algorithm to find extremal points and tangents on/to a
-  convex polygon.
-* An optimal *O(n+m)* time algorithm to compute the Minkowski sum of two convex
-polygons.
-* An *O(1/εᵈn log n)* time algorithm for constructing a Well-Separated pair
-  decomposition.
-* The classic (optimal) *O(n log n)* time divide and conquer algorithm to
-  compute the closest pair among a set of *n* points in ℝ².
-* An *O(nm)* time algorithm to compute the discrete Fréchet
+  convex polygon,
+* an optimal *O(n+m)* time algorithm to compute the Minkowski sum of two convex
+polygons,
+* an *O(1/εᵈn log n)* time algorithm for constructing a Well-Separated pair
+  decomposition,
+* the classic (optimal) *O(n log n)* time divide and conquer algorithm to
+  compute the closest pair among a set of *n* points in ℝ²,
+* an *O(nm)* time algorithm to compute the discrete Fréchet
   distance of two sequences of points (curves) of length *n* and
   *m*, respectively.
 
