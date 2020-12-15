@@ -61,7 +61,7 @@ following algorithms are currently available:
   ℝ²: the typical Graham scan, and a divide and conquer algorithm,
 * an *O(n)* expected time algorithm for smallest enclosing disk in ℝ²,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an *(O(n log n)* time algorithm for computing the Delaunay triangulation
+* an *O(n log n)* time algorithm for computing the Delaunay triangulation
 (using divide and conquer).
 * an *O(n log n)* time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation.
