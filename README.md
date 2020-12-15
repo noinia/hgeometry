@@ -57,25 +57,25 @@ line segments, testing if a point lies in a polygon etc, HGeometry
 implements some more advanced geometric algorithms. In particuar, the
 following algorithms are currently available:
 
-* two \(O(n \log n)\) time algorithms for convex hull in
-  $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
-* an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
+* two *O(n log n)* time algorithms for convex hull in
+  ℝ²: the typical Graham scan, and a divide and conquer algorithm,
+* an *O(n)* expected time algorithm for smallest enclosing disk in ℝ²,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an \(O(n \log n)\) time algorithm for computing the Delaunay triangulation
+* an *(O(n log n)* time algorithm for computing the Delaunay triangulation
 (using divide and conquer).
-* an \(O(n \log n)\) time algorithm for computing the Euclidean Minimum Spanning
+* an *O(n log n)* time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation.
-* an \(O(\log^2 n)\) time algorithm to find extremal points and tangents on/to a
+* an *O(log² n)* time algorithm to find extremal points and tangents on/to a
   convex polygon.
-* An optimal \(O(n+m)\) time algorithm to compute the Minkowski sum of two convex
+* An optimal *O(n+m)* time algorithm to compute the Minkowski sum of two convex
 polygons.
-* An \(O(1/\varepsilon^dn\log n)\) time algorithm for constructing a Well-Separated pair
+* An *O(1/εᵈn log n)* time algorithm for constructing a Well-Separated pair
   decomposition.
-* The classic (optimal) \(O(n\log n)\) time divide and conquer algorithm to
-  compute the closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
-* An \(O(nm)\) time algorithm to compute the discrete Fr\'echet
-  distance of two sequences of points (curves) of length \(n\) and
-  \(m\), respectively.
+* The classic (optimal) *O(n log n)* time divide and conquer algorithm to
+  compute the closest pair among a set of *n* points in ℝ².
+* An *O(nm)* time algorithm to compute the discrete Fréchet
+  distance of two sequences of points (curves) of length *n* and
+  *m*, respectively.
 
 Available Geometric Data Structures
 -----------------------------------
