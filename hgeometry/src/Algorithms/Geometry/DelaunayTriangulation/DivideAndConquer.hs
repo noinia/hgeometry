@@ -46,8 +46,6 @@ import qualified Data.Vector as V
 --
 -- Rotating Right <-> rotate clockwise
 
--- FIXME: rename 'delaunayTriangulation' to 'triangulate'?
-
 -- | Computes the delaunay triangulation of a set of points.
 --
 -- Running time: \(O(n \log n)\)

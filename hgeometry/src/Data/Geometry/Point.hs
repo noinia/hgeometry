@@ -38,6 +38,6 @@ module Data.Geometry.Point( Point(..)
                           ) where
 
 import Data.Geometry.Point.Class
-import Data.Geometry.Point.Internal
+import Data.Geometry.Point.Internal hiding (coord, unsafeCoord)
 import Data.Geometry.Point.Orientation.Degenerate
 import Data.Geometry.Point.Quadrants

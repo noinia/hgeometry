@@ -11,7 +11,6 @@ import           GHC.TypeNats
 -- $setup
 -- >>> import Data.Geometry.Point.Internal (pattern Point2, pattern Point3, origin)
 
-{-
 class ToAPoint point d r where
   toPoint   :: Prism' (point d r) (Point d r)
 
@@ -52,10 +51,7 @@ instance ToAPoint Point d r where
 
 instance AsAPoint Point where
   asAPoint = id
--}
 
-
--- FIXME: move xCoord, yCoord and zCoord to Data.Geometry.Point.Internal
 
 -- | Shorthand to access the first coordinate C 1
 --
@@ -63,8 +59,8 @@ instance AsAPoint Point where
 -- 1
 -- >>> Point2 1 2 & xCoord .~ 10
 -- Point2 [10,2]
-xCoord :: (1 <= d, Arity d) => Lens' (Point d r) r
-xCoord = Internal.coord (C :: C 1)
+xCoord :: (1 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+xCoord = coord (C :: C 1)
 {-# INLINABLE xCoord #-}
 
 -- | Shorthand to access the second coordinate C 2
@@ -73,8 +69,8 @@ xCoord = Internal.coord (C :: C 1)
 -- 2
 -- >>> Point3 1 2 3 & yCoord %~ (+1)
 -- Point3 [1,3,3]
-yCoord :: (2 <= d, Arity d) => Lens' (Point d r) r
-yCoord = Internal.coord (C :: C 2)
+yCoord :: (2 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+yCoord = coord (C :: C 2)
 {-# INLINABLE yCoord #-}
 
 -- | Shorthand to access the third coordinate C 3
@@ -83,6 +79,6 @@ yCoord = Internal.coord (C :: C 2)
 -- 3
 -- >>> Point3 1 2 3 & zCoord %~ (+1)
 -- Point3 [1,2,4]
-zCoord :: (3 <= d, Arity d) => Lens' (Point d r) r
-zCoord = Internal.coord (C :: C 3)
+zCoord :: (3 <= d, Arity d, AsAPoint point) => Lens' (point d r) r
+zCoord = coord (C :: C 3)
 {-# INLINABLE zCoord #-}
