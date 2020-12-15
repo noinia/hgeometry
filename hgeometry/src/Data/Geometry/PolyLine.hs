@@ -1,6 +1,13 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE UndecidableInstances  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PolyLine
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.PolyLine where
 
 import           Control.Lens

@@ -1,5 +1,12 @@
 {-# LANGUAGE Unsafe #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Transformation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Transformation where
 
 import           Control.Lens (iso,set,Iso,imap)

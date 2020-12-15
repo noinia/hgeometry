@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Interval
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Interval(
                              -- * 1 dimensional Intervals
                                Interval
@@ -20,18 +27,18 @@ module Data.Geometry.Interval(
                              ) where
 
 import           Control.DeepSeq
-import           Control.Lens (lens, (^.),(%~),(&), Lens')
+import           Control.Lens             (Lens', lens, (%~), (&), (^.))
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable            as F
 import           Data.Geometry.Properties
 import           Data.Range
-import           Data.Semigroup(Arg(..))
-import qualified Data.Traversable as T
+import           Data.Semigroup           (Arg (..))
+import qualified Data.Traversable         as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           GHC.Generics (Generic)
+import           GHC.Generics             (Generic)
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
@@ -45,7 +52,7 @@ newtype Interval a r = GInterval { toRange :: Range (r :+ a) }
                      deriving (Eq,Generic,Arbitrary)
 
 _Range :: Lens' (Interval a r) (Range (r :+ a))
-_Range = lens toRange (const GInterval)
+_Range = lens toRange (const fromRange)
 {-# INLINE _Range #-}
 
 -- | Constrct an interval from a Range

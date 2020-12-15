@@ -79,6 +79,7 @@ import           Data.Vinyl.CoRec (asA)
 
 {- $setup
 >>> import Data.RealNumber.Rational
+>>> import Data.Foldable
 >>> :{
 -- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () (RealNumber 10)
@@ -88,6 +89,13 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
                                                         , Point2 5 15
                                                         , Point2 1 11
                                                         ]
+    simpleTriangle :: SimplePolygon () (RealNumber 10)
+    simpleTriangle = SimplePolygon . C.fromList . map ext $
+      [ Point2 0 0, Point2 2 0, Point2 1 1]
+    multiPoly :: MultiPolygon () (RealNumber 10)
+    multiPoly = MultiPolygon
+      (C.fromList . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
+      [simpleTriangle]
 :} -}
 
 -- | We distinguish between simple polygons (without holes) and Polygons with holes.
@@ -192,6 +200,10 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
+-- | Lens access to the outer boundary of a polygon.
+--
+-- >>> toList (simpleTriangle ^. outerBoundary)
+-- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (C.CSeq (Point 2 r :+ p))
 outerBoundary = lens g s
   where
@@ -204,6 +216,10 @@ outerBoundary = lens g s
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
 
+-- | Lens access for polygon holes.
+--
+-- >>> multiPoly ^. polygonHoles
+-- [SimplePolygon (CSeq [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()])]
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 polygonHoles = lens g s
   where

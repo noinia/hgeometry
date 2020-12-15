@@ -1,5 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.BezierSpline
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.BezierSpline(
     BezierSpline (BezierSpline)
   , controlPoints

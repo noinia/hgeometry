@@ -10,7 +10,13 @@
 --
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.SmallestEnclosingBall.RIC(
-    smallestEnclosingDisk'
+    -- * Types
+    DiskResult(..)
+  , TwoOrThree(..)
+  , enclosingDisk
+  , definingPoints
+    -- * Implementation
+  , smallestEnclosingDisk'
   , smallestEnclosingDisk
   , smallestEnclosingDiskWithPoint
   , smallestEnclosingDiskWithPoints

@@ -1,4 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
   (
     -- * Divide & Conqueror Delaunay Triangulation

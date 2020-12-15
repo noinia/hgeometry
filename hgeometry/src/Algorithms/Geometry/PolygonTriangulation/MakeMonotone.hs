@@ -1,5 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.PolygonTriangulation.MakeMonotone
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , computeDiagonals
 
