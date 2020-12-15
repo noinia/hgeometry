@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.DivideAndConquer( divideAndConquer
                                   , divideAndConquer1
                                   , divideAndConquer1With

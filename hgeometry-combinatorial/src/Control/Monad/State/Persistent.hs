@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Control.Monad.State.Persistent
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Control.Monad.State.Persistent( PersistentStateT
                                      , PersistentState
                                      , store

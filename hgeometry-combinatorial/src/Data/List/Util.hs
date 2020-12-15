@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.List.Util where
 
 import           Data.Bifunctor
