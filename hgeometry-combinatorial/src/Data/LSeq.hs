@@ -79,6 +79,7 @@ newtype LSeq (n :: Nat) a = LSeq (S.Seq a)
                           deriving (Show,Read,Eq,Ord,Foldable,Functor,Traversable
                                    ,Generic,NFData)
 
+-- | Convert to a sequence by dropping the type-level size.
 toSeq          :: LSeq n a -> S.Seq a
 toSeq (LSeq s) = s
 
@@ -111,19 +112,24 @@ instance (1 <= n) => Foldable1 (LSeq n)
 --   traverse1 f s = case traverse1 f $ viewl s of
 --                     x :< s' -> x <| s'
 
-
+-- | /O(1)/ The empty sequence.
 empty :: LSeq 0 a
 empty = LSeq S.empty
 
+-- | /O(1)/ Add an element to the left end of a sequence.
+--   Mnemonic: a triangle with the single element at the pointy end.
 (<|) :: a -> LSeq n a -> LSeq (1 + n) a
 x <| xs = LSeq (x S.<| toSeq xs)
 
+-- | /O(1)/ Add an element to the right end of a sequence.
+--   Mnemonic: a triangle with the single element at the pointy end.
 (|>)    :: LSeq n a -> a -> LSeq (1 + n) a
 xs |> x = LSeq (toSeq xs S.|> x)
 
 infixr 5 <|
 infixl 5 |>
 
+-- | /O(log(min(n1,n2)))/ Concatenate two sequences.
 (><) :: LSeq n a -> LSeq m a -> LSeq (n + m) a
 xs >< ys = LSeq (toSeq xs <> toSeq ys)
 
@@ -172,26 +178,48 @@ sa `append` sb = LSeq $ toSeq sa <> toSeq sb
 index     :: LSeq n a -> Int -> a
 index s i = s^?!ix i
 
+-- | /O(log(min(i,n−i)))/ Update the element at the specified position. If the
+--   position is out of range, the original sequence is returned. adjust can lead
+--   to poor performance and even memory leaks, because it does not force the new
+--   value before installing it in the sequence. adjust' should usually be preferred.
 adjust       :: (a -> a) -> Int -> LSeq n a -> LSeq n a
 adjust f i s = s&ix i %~ f
 
-
+-- | /O(n)/ The partition function takes a predicate p and a sequence xs and
+--   returns sequences of those elements which do and do not satisfy the predicate.
 partition   :: (a -> Bool) -> LSeq n a -> (LSeq 0 a, LSeq 0 a)
 partition p = bimap LSeq LSeq . S.partition p . toSeq
 
+-- | A generalization of 'fmap', 'mapWithIndex' takes a mapping
+-- function that also depends on the element's index, and applies it to every
+-- element in the sequence.
 mapWithIndex   :: (Int -> a -> b) -> LSeq n a -> LSeq n b
 mapWithIndex f = wrapUnsafe (S.mapWithIndex f)
 
+-- | \( O(\log(\min(i,n-i))) \). The first @i@ elements of a sequence.
+-- If @i@ is negative, @'take' i s@ yields the empty sequence.
+-- If the sequence contains fewer than @i@ elements, the whole sequence
+-- is returned.
 take   :: Int -> LSeq n a -> LSeq 0 a
 take i = wrapUnsafe (S.take i)
 
+-- | \( O(\log(\min(i,n-i))) \). Elements of a sequence after the first @i@.
+-- If @i@ is negative, @'drop' i s@ yields the whole sequence.
+-- If the sequence contains fewer than @i@ elements, the empty sequence
+-- is returned.
 drop   :: Int -> LSeq n a -> LSeq 0 a
 drop i = wrapUnsafe (S.drop i)
 
-
+-- | \( O(n \log n) \).  A generalization of 'unstableSort', 'unstableSortBy'
+-- takes an arbitrary comparator and sorts the specified sequence.
+-- The sort is not stable.  This algorithm is frequently faster and
+-- uses less memory than 'sortBy'.
 unstableSortBy   :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 unstableSortBy f = wrapUnsafe (S.unstableSortBy f)
 
+-- | \( O(n \log n) \).  'unstableSort' sorts the specified 'Seq' by
+-- the natural ordering of its elements, but the sort is not stable.
+-- This algorithm is frequently faster and uses less memory than 'sort'.
 unstableSort :: Ord a => LSeq n a -> LSeq n a
 unstableSort = wrapUnsafe S.unstableSort
 
