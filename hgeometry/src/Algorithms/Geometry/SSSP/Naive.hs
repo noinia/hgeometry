@@ -19,24 +19,18 @@ import qualified Data.Vector.Unboxed                         as VU
 -- | O(n^3 log n) Single-Source Shortest Path.
 sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
 sssp p = runST $ do
+    -- Create an n*n matrix containing paths and distances between vertices.
     graph <- mkGraph n infinity (visibleEdges p)
+    -- Use FloydWarshall O(n^3) to complete the matrix.
     floydWarshall n graph
+    -- Create a tree describing the shortest path from any node to the 0th node.
     g <- VU.unsafeFreeze graph
     pure $ VU.generate n $ \i ->
       let (_dist, next) = g VU.! (mkIndex n (i, 0))
       in next
-
   where
     infinity = read "Infinity" :: Double
     n = F.length (p ^. outerBoundary)
-
-{-
-floydWarshall :: (Unbox a, Num a, Bounded a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
-mkIndex :: Num a => a -> (a, a) -> a
-mkGraph :: (Unbox a, Num a, Bounded a) => Int -> [(Int,Int,a)] -> ST s (MVector s (a, Int))
-interiorIntersections :: (Ord r, Fractional r)
-                       => [LineSegment 2 p r] -> Intersections p r
--}
 
 -- O(n^3 log n)
 visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Double)]
