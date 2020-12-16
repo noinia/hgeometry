@@ -1,4 +1,11 @@
 {-# LANGUAGE ParallelListComp #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SSSP.Naive
+-- Copyright   :  (C) David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SSSP.Naive
   ( sssp
   ) where
