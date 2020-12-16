@@ -1,0 +1,55 @@
+{-# LANGUAGE ParallelListComp #-}
+module Algorithms.Geometry.SSSP.Naive
+  ( sssp
+  ) where
+
+import           Algorithms.FloydWarshall                    (floydWarshall, mkGraph, mkIndex)
+import           Algorithms.Geometry.LineSegmentIntersection (hasInteriorIntersections)
+import           Algorithms.Geometry.SSSP                    (SSSP)
+import           Control.Lens                                ((^.))
+import           Control.Monad.ST                            (runST)
+import qualified Data.Foldable                               as F
+import           Data.Geometry.LineSegment                   (EndPoint (Closed, Open), pattern LineSegment,
+                                                              sqSegmentLength)
+import           Data.Geometry.Polygon                       (SimplePolygon, listEdges,
+                                                              outerBoundary)
+import           Data.List                                   (tails)
+import qualified Data.Vector.Unboxed                         as VU
+
+-- | O(n^3 log n) Single-Source Shortest Path.
+sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
+sssp p = runST $ do
+    graph <- mkGraph n infinity (visibleEdges p)
+    floydWarshall n graph
+    g <- VU.unsafeFreeze graph
+    pure $ VU.generate n $ \i ->
+      let (_dist, next) = g VU.! (mkIndex n (i, 0))
+      in next
+
+  where
+    infinity = read "Infinity" :: Double
+    n = F.length (p ^. outerBoundary)
+
+{-
+floydWarshall :: (Unbox a, Num a, Bounded a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
+mkIndex :: Num a => a -> (a, a) -> a
+mkGraph :: (Unbox a, Num a, Bounded a) => Int -> [(Int,Int,a)] -> ST s (MVector s (a, Int))
+interiorIntersections :: (Ord r, Fractional r)
+                       => [LineSegment 2 p r] -> Intersections p r
+-}
+
+-- O(n^3 log n)
+visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Double)]
+visibleEdges p = concat
+  [
+    [ (i, j, sqrt (realToFrac (sqSegmentLength line)))
+    | (j, endPt) <- rest
+    , let line = LineSegment (Closed pt) (Open endPt)
+    , not (hasInteriorIntersections (line : edges))
+    ]
+  | (i, pt) <- pts
+  | rest <- Prelude.drop 1 $ tails pts
+  ]
+  where
+    pts = Prelude.zip [0..] (F.toList (p ^. outerBoundary))
+    edges = listEdges p

@@ -25,6 +25,7 @@ module Data.Geometry.LineSegment( LineSegment
                                 , onSegment
                                 , orderedEndPoints
                                 , segmentLength
+                                , sqSegmentLength
                                 , sqDistanceToSeg, sqDistanceToSegArg
                                 , flipSegment
 
@@ -259,6 +260,8 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
 
+sqSegmentLength                     :: (Arity d, Num r) => LineSegment d p r -> r
+sqSegmentLength ~(LineSegment' p q) = qdA (p^.core) (q^.core)
 
 -- | Squared distance from the point to the Segment s. The same remark as for
 -- the 'sqDistanceToSegArg' applies here.
