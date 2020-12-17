@@ -118,7 +118,7 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle 2 () r)
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath (Triangle p q r) = polygonToPath . fromPoints . map (&extra .~ ()) $ [p,q,r]
+    triToPath (Triangle p q r) = polygonToPath . unsafeFromPoints . map (&extra .~ ()) $ [p,q,r]
     path2tri p = case p^..pathSegments.traverse._PolygonPath of
                     []   -> Nothing
                     [pg] -> case polygonVertices pg of

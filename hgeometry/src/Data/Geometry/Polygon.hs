@@ -12,8 +12,11 @@ module Data.Geometry.Polygon( PolygonType(..)
                             , Polygon(..)
                             , _SimplePolygon, _MultiPolygon
                             , SimplePolygon, MultiPolygon, SomePolygon
+                            , pattern SimplePolygonP
+                            , pattern MultiPolygonP
 
                             , fromPoints
+                            , unsafeFromPoints
 
                             , polygonVertices, listEdges
 

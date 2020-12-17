@@ -216,7 +216,7 @@ ipePolygon (first (const ()) -> pg) = case pg of
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle p r) Path r
-ipeRectangle r = ipePolygon $ fromPoints [tl,tr,br,bl]
+ipeRectangle r = ipePolygon $ unsafeFromPoints [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
 

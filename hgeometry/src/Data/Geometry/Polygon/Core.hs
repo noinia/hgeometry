@@ -9,14 +9,14 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Core( PolygonType(..)
-                                 , Winding(..)
                                  , Polygon(..)
                                  , _SimplePolygon, _MultiPolygon
                                  , SimplePolygon, MultiPolygon, SomePolygon
-
+                                 , pattern SimplePolygonP
+                                 , pattern MultiPolygonP
 
                                  , fromPoints
-                                 , winding
+                                 , unsafeFromPoints
 
                                  , polygonVertices, listEdges
 
@@ -48,13 +48,13 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
                                  ) where
 
 import           Control.DeepSeq
-import           Control.Lens hiding (Simple)
+import           Control.Lens                 hiding (Simple)
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
-import qualified Data.CircularSeq as C
+import qualified Data.CircularSeq             as C
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line
@@ -62,18 +62,18 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Triangle (Triangle(..), inTriangle)
+import           Data.Geometry.Triangle       (Triangle (..), inTriangle)
 import           Data.Geometry.Vector
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe, catMaybes)
-import           Data.Ord (comparing)
-import           Data.Semigroup (sconcat)
+import qualified Data.List                    as List
+import           Data.List.NonEmpty           (NonEmpty (..))
+import qualified Data.List.NonEmpty           as NonEmpty
+import           Data.Maybe                   (catMaybes, mapMaybe)
+import           Data.Ord                     (comparing)
+import           Data.Semigroup               (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence as Seq
+import qualified Data.Sequence                as Seq
 import           Data.Util
-import           Data.Vinyl.CoRec (asA)
+import           Data.Vinyl.CoRec             (asA)
 
 -- import Data.RealNumber.Rational
 
@@ -109,6 +109,22 @@ data PolygonType = Simple | Multi
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+
+pattern SimplePolygonP :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
+pattern SimplePolygonP lst <- (viewSimple -> lst)
+  where
+    SimplePolygonP lst = fromPoints lst
+
+pattern MultiPolygonP :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon p r
+pattern MultiPolygonP boundary hs <- (viewMulti -> (boundary, hs))
+  where
+    MultiPolygonP (SimplePolygon boundary) hs = MultiPolygon boundary hs
+
+viewSimple :: SimplePolygon p r -> [Point 2 r :+ p]
+viewSimple (SimplePolygon s) = F.toList s
+
+viewMulti :: MultiPolygon p r -> (SimplePolygon p r, [SimplePolygon p r])
+viewMulti (MultiPolygon boundary hs) = (SimplePolygon boundary, hs)
 
 -- | Prism to 'test' if we are a simple polygon
 _SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
@@ -272,9 +288,14 @@ polygonVertices (MultiPolygon vs hs) =
 -- | Creates a simple polygon from the given list of vertices.
 --
 -- pre: the input list constains no repeated vertices.
-fromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
-fromPoints = SimplePolygon . C.fromList
+fromPoints :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
+fromPoints = {- toCounterClockWiseOrder . -} SimplePolygon . C.fromList
 
+-- | Creates a simple polygon from the given list of vertices.
+--
+-- pre: the input list constains no repeated vertices.
+unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
+unsafeFromPoints = SimplePolygon . C.fromList
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --
@@ -537,14 +558,6 @@ safeMaximumOn f = \case
   [] -> Nothing
   xs -> Just $ List.maximumBy (comparing f) xs
 
-
-winding :: (Eq r, Num r) => Polygon t p r -> Winding
-winding p =
-    if a == abs a
-      then CounterClockwise
-      else Clockwise
-  where
-    a = signedArea2X (asSimplePolygon p)
 
 -- | Test if the outer boundary of the polygon is in clockwise or counter
 -- clockwise order.

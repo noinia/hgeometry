@@ -683,7 +683,7 @@ rawFaceBoundary      :: FaceId' s -> PlaneGraph s v e f r
                     -> SimplePolygon v r :+ f
 rawFaceBoundary i ps = pg :+ (ps^.dataOf i)
   where
-    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
+    pg = unsafeFromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
        . boundaryVertices i $ ps
 
 -- | Alias for rawFace Boundary

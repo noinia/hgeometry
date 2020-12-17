@@ -641,7 +641,7 @@ boundary' d ps = let (_,d',g) = asLocalD d ps
 --
 -- \(O(k)\), where \(k\) is the complexity of the outer boundary of the face
 rawFaceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = fromPoints pts :+ (ps^.dataOf i)
+rawFaceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
   where
     d   = V.head $ outerBoundaryDarts i ps
     pts = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
