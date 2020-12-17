@@ -116,6 +116,9 @@ _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 _MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
+instance Functor (Polygon t p) where
+  fmap = bimap id
+
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
 

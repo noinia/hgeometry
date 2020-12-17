@@ -2,17 +2,55 @@
 module Data.Geometry.PolygonSpec where
 
 import           Control.Applicative
-import           Control.Lens
+import           Control.Lens              ((^.), (^..))
+import qualified Data.ByteString           as BS
 import qualified Data.CircularSeq          as C
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
+import           Data.Geometry.Polygon     (fromPoints)
 import           Data.Proxy
+import           Data.Serialize
 import           Data.Traversable          (traverse)
+import           Paths_hgeometry_test
+import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
+
+{-# NOINLINE allSimplePolygons #-}
+allSimplePolygons :: [SimplePolygon () Double]
+allSimplePolygons = unsafePerformIO $ do
+  path <- getDataFileName "data/polygons.simple"
+  inp <- BS.readFile path
+  case decode inp of
+    Left msg -> error msg
+    Right points -> pure $
+      [ fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      | lst <- points
+      ]
+
+{-# NOINLINE allMultiPolygons #-}
+allMultiPolygons :: [MultiPolygon () Double]
+allMultiPolygons = unsafePerformIO $ do
+  path <- getDataFileName "data/polygons.multi"
+  inp <- BS.readFile path
+  case decode inp of
+    Left msg -> error msg
+    Right points -> pure $
+      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- outer ])
+          (map toSimple holes)
+      | (outer:holes) <- points
+      ]
+  where
+    toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+
+instance Fractional a => Arbitrary (SimplePolygon () a) where
+  arbitrary = fmap realToFrac <$> elements allSimplePolygons
+
+instance Fractional a => Arbitrary (MultiPolygon () a) where
+  arbitrary = fmap realToFrac <$> elements allMultiPolygons
 
 spec :: Spec
 spec = do
