@@ -29,14 +29,17 @@ main = do
     ("geojson":files) -> do
       polygons <- forM files $ \file -> do
         inp <- BS.readFile file
-        putStrLn $ file ++ ": " ++ show (hash inp)
+        -- putStrLn $ file ++ ": " ++ show (hash inp)
         let mbGeo = eitherDecodeStrict' inp
         case mbGeo :: Either String (GeoFeatureCollection Value) of
           Left err  -> error $ "Invalid GeoJSON: " ++ file ++ "\n" ++ err
           Right geo -> pure $ map fromGeoPolygon $ getPolygons geo
       let (simple, multi) = partitionEithers $ nub $ concat polygons
       -- forM_ multi print
-      print (F.length simple, F.length multi)
+      print (sum $ map (F.length . view outerBoundary) simple)
+      -- print (F.length simple, F.length multi)
+      -- writeFile "out.simple" (show simple)
+      -- writeFile "out.multi" (show multi)
       return ()
     _ -> printUsage
 
