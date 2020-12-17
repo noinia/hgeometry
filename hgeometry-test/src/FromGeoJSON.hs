@@ -77,7 +77,8 @@ fromGeoPolygon p =
       Right $ H.MultiPolygon pts xs
   where
     fromRing :: LinearRing GeoPositionWithoutCRS -> SimplePolygon () Double
-    fromRing = fromPoints . map (ext . fromPointXY . retrieveXY) . fromLinearRing
+    fromRing = toCounterClockWiseOrder .
+      fromPoints . map (ext . fromPointXY . retrieveXY) . nub . fromLinearRing
 
     fromPointXY :: PointXY -> Point 2 Double
     fromPointXY (PointXY x y) = realToFrac <$> Point2 x y

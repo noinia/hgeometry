@@ -1,23 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.Geometry.PolygonSpec where
 
+import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Applicative
-import           Control.Lens              ((^.), (^..))
-import qualified Data.ByteString           as BS
-import qualified Data.CircularSeq          as C
+import           Control.Lens                                ((^.), (^..))
+import           Control.Monad
+import qualified Data.ByteString                             as BS
+import qualified Data.CircularSeq                            as C
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon     (fromPoints)
+import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Proxy
 import           Data.Serialize
-import           Data.Traversable          (traverse)
+import           Data.Traversable                            (traverse)
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.QuickCheck.Instances ()
+import           Test.QuickCheck.Instances                   ()
 
 {-# NOINLINE allSimplePolygons #-}
 allSimplePolygons :: [SimplePolygon () Double]
@@ -63,6 +65,10 @@ spec = do
     property $ \(seq :: C.CSeq (Point 2 Rational :+ ())) ->
       let p = MultiPolygon seq [SimplePolygon seq] in
       read (show p) == p
+  it "valid polygons" $ do
+    forM_ allSimplePolygons $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
 
 
 testCases    :: FilePath -> Spec
