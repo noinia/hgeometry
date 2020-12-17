@@ -1,3 +1,4 @@
+-- | Tree-related utilities.
 module Data.Tree.Util where
 
 import           Data.Bifoldable

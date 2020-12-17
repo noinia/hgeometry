@@ -1,4 +1,11 @@
 {-# Language FunctionalDependencies #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Measured.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Measured.Class where
 
 class Semigroup v => Measured v a | a -> v where

@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.IntervalTree
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.IntervalTree( NodeData(..)
                                  , splitPoint, intervalsLeft, intervalsRight
                                  , IntervalTree(..), unIntervalTree

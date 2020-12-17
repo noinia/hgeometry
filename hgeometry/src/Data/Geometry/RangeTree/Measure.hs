@@ -1,4 +1,11 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.RangeTree.Measure
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.RangeTree.Measure where
 
 import Data.Measured.Class

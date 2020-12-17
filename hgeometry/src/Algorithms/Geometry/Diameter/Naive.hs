@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.Diameter.Naive
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.Diameter.Naive where
 
 import Control.Lens
@@ -7,6 +14,9 @@ import Data.List(maximumBy)
 
 --------------------------------------------------------------------------------
 
+-- | Computes the Euclidean diameter by naively trying all pairs.
+--
+-- running time: \(O(n^2)\)
 diameter :: (Ord r, Floating r, Arity d) => [Point d r :+ p] -> r
 diameter = maybe 0 (\(p,q) -> euclideanDist (p^.core) (q^.core)) . diametralPair
 

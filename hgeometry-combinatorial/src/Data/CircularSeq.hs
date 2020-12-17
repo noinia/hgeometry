@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.CircularSeq
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.CircularSeq( CSeq
                        , cseq
                        , singleton
@@ -93,10 +100,12 @@ instance Functor CSeq where
 instance Arbitrary a => Arbitrary (CSeq a) where
   arbitrary = CSeq <$> arbitrary <*> arbitrary <*> arbitrary
 
+-- | /O(1)/ CSeq with exactly one element.
 singleton   :: a -> CSeq a
 singleton x = CSeq S.empty x S.empty
 
--- | Gets the focus of the CSeq
+-- | Gets the focus of the CSeq.
+--
 -- running time: O(1)
 focus              :: CSeq a -> a
 focus (CSeq _ x _) = x
@@ -230,6 +239,10 @@ fromNonEmpty                    :: NonEmpty.NonEmpty a -> CSeq a
 fromNonEmpty (x NonEmpty.:| xs) = withFocus x $ S.fromList xs
 
 {- HLINT ignore fromList -}
+-- | /O(n)/ Convert from a list to a CSeq.
+--
+-- Warning: the onus is on the user to ensure that their list
+-- is not empty, otherwise all bets are off!
 fromList        :: [a] -> CSeq a
 fromList (x:xs) = withFocus x $ S.fromList xs
 fromList []     = error "fromList: Empty list"
@@ -273,7 +286,7 @@ rotateNL i s = let (x :< xs) = S.viewl $ rightElements s
                     S.EmptyR -> let (y :< r') = S.viewl r in cseq l' y r'
 
 
--- | Reversres the direction of the CSeq
+-- | Reverses the direction of the CSeq
 --
 -- running time: \(O(n)\)
 --
@@ -292,7 +305,7 @@ reverseDirection (CSeq l x r) = CSeq (S.reverse r) x (S.reverse l)
 findRotateTo   :: (a -> Bool) -> CSeq a -> Maybe (CSeq a)
 findRotateTo p = L.find (p . focus) . allRotations'
 
-
+-- | Rotate to a specific element in the CSeq.
 rotateTo   :: Eq a => a -> CSeq a -> Maybe (CSeq a)
 rotateTo x = findRotateTo (== x)
 

@@ -34,8 +34,7 @@ module Data.Geometry.Point( Point(..)
 
                           , squaredEuclideanDist, euclideanDist
 
-
-                          , AsAPoint(..), coord, unsafeCoord, vector'
+                          , coord, unsafeCoord
                           ) where
 
 import Data.Geometry.Point.Class
