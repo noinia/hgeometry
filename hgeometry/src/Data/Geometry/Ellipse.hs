@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ellipse
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Ellipse(
     Ellipse(Ellipse)
   , affineTransformation

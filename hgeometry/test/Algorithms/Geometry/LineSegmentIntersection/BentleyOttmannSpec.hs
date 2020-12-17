@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
 
-import           Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
+import           Algorithms.Geometry.LineSegmentIntersection
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
-import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Interval

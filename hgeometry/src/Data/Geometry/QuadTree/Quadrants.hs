@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.QuadTree.Quadrants
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.QuadTree.Quadrants( pattern Quadrants
                                        , Quadrants
                                        , module Data.Geometry.Box.Corners

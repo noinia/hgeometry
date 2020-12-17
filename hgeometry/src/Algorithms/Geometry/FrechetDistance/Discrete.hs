@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.FrechetDistance.Discrete
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.FrechetDistance.Discrete( discreteFrechetDistance
                                                    , discreteFrechetDistanceWith
                                                    ) where

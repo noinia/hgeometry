@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.GrahamScan
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 , upperHull, upperHull'
                                                 , lowerHull, lowerHull'

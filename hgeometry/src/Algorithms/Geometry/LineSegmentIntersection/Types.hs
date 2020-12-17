@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.LineSegmentIntersection.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.Types where
 
 import           Control.DeepSeq
