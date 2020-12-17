@@ -51,7 +51,7 @@ minimum1 = minimum1By compare
 
 -- | Safe variant of Prelude.maximum.
 --
--- >>> maximum [] :: Maybe ()
+-- >>> maximum1 [] :: Maybe ()
 -- Nothing
 -- >>> maximum1 [1,2,3]
 -- Just 3
@@ -60,7 +60,7 @@ maximum1 = minimum1By (flip compare)
 
 -- | Total variant of Data.List.minimumBy.
 --
--- >>> minimum1By (comparing abs) [] :: Maybe ()
+-- >>> minimum1By (comparing abs) [] :: Maybe Int
 -- Nothing
 -- >>> minimum1By (comparing abs) [1,-2,3]
 -- Just 1
