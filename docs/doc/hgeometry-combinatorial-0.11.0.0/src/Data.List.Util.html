@@ -81,7 +81,7 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-comment">-- | Safe variant of Prelude.maximum.</span><span>
 </span><span id="line-53"></span><span class="hs-comment">--</span><span>
-</span><span id="line-54"></span><span class="hs-comment">-- &gt;&gt;&gt; maximum [] :: Maybe ()</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- &gt;&gt;&gt; maximum1 [] :: Maybe ()</span><span>
 </span><span id="line-55"></span><span class="hs-comment">-- Nothing</span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; maximum1 [1,2,3]</span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- Just 3</span><span>
@@ -97,7 +97,7 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="hs-comment">-- | Total variant of Data.List.minimumBy.</span><span>
 </span><span id="line-62"></span><span class="hs-comment">--</span><span>
-</span><span id="line-63"></span><span class="hs-comment">-- &gt;&gt;&gt; minimum1By (comparing abs) [] :: Maybe ()</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- &gt;&gt;&gt; minimum1By (comparing abs) [] :: Maybe Int</span><span>
 </span><span id="line-64"></span><span class="hs-comment">-- Nothing</span><span>
 </span><span id="line-65"></span><span class="hs-comment">-- &gt;&gt;&gt; minimum1By (comparing abs) [1,-2,3]</span><span>
 </span><span id="line-66"></span><span class="hs-comment">-- Just 1</span><span>

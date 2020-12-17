@@ -994,7 +994,7 @@ minimum1 :: Ord a => [a] -> Maybe a
 -- | Safe variant of Prelude.maximum.
 --   
 --   <pre>
---   &gt;&gt;&gt; maximum [] :: Maybe ()
+--   &gt;&gt;&gt; maximum1 [] :: Maybe ()
 --   Nothing
 --   
 --   &gt;&gt;&gt; maximum1 [1,2,3]
@@ -1005,7 +1005,7 @@ maximum1 :: Ord a => [a] -> Maybe a
 -- | Total variant of Data.List.minimumBy.
 --   
 --   <pre>
---   &gt;&gt;&gt; minimum1By (comparing abs) [] :: Maybe ()
+--   &gt;&gt;&gt; minimum1By (comparing abs) [] :: Maybe Int
 --   Nothing
 --   
 --   &gt;&gt;&gt; minimum1By (comparing abs) [1,-2,3]
