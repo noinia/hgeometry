@@ -6,10 +6,8 @@ import qualified Data.Foldable as F
 import qualified Data.Geometry.BezierMaarten as Maarten
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Point
-import           Data.Geometry.Vector
 import           Data.Range
 import           Data.RealNumber.Rational
-import           GHC.TypeNats
 import           Test.Hspec
 import           Test.QuickCheck
 --------------------------------------------------------------------------------

@@ -1,18 +1,18 @@
 module Algorithms.Geometry.SoS.OrientationSpec where
 
-import           Algorithms.Geometry.SoS
-import           Control.Lens
-import           Control.Monad (forM_)
-import           Data.Ext
-import           Data.Geometry.Point
--- import           Data.Geometry.Point.Orientation.Degenerate (CCW(..))
-import           Data.Geometry.Vector
-import qualified Data.List as List
-import           Data.Proxy
-import           Data.Util
-import           GHC.TypeNats
+-- import           Algorithms.Geometry.SoS
+-- import           Control.Lens
+-- import           Control.Monad (forM_)
+-- import           Data.Ext
+-- import           Data.Geometry.Point
+-- -- import           Data.Geometry.Point.Orientation.Degenerate (CCW(..))
+-- import           Data.Geometry.Vector
+-- import qualified Data.List as List
+-- import           Data.Proxy
+-- import           Data.Util
+-- import           GHC.TypeNats
 import           Test.Hspec
-import           Test.QuickCheck
+-- import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 

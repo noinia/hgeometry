@@ -1,8 +1,7 @@
-module Main where
+module Main (main) where
 
 import qualified Spec
 import           System.Directory
-import           Test.Hspec.Formatters
 import           Test.Hspec.Runner
 
 main :: IO ()

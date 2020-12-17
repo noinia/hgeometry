@@ -1,25 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Data.Geometry.Polygon.Convex.ConvexSpec where
+module Data.Geometry.Polygon.Convex.ConvexSpec (spec) where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull, lowerHull)
-import           Control.Applicative
+import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
 import           Control.Arrow ((&&&))
 import           Control.Lens
-import qualified Data.CircularSeq as C
 import           Data.Ext
 import qualified Data.Foldable as F
-import           Data.Function (on)
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon (extremesLinear, cmpExtreme, fromPoints)
 import           Data.Geometry.Polygon.Convex
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
-import           Data.Ord (comparing)
 import           Data.RealNumber.Rational
-import           Data.Traversable (traverse)
-import           Data.Util
 import           Test.Hspec
 import           Test.QuickCheck (Arbitrary(..), property, suchThat)
 import           Test.QuickCheck.Instances ()
@@ -51,7 +42,7 @@ toSingleSpec poly u = it msg $
     F.all allEq (unzip [extremes u poly, extremesLinear u (poly^.simplePolygon)])
     `shouldBe` True
   where
-    allEq (p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
+    allEq ~(p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
     msg = "Extremes test with direction " ++ show u
 
 -- | generates 360 vectors "equally" spaced/angled

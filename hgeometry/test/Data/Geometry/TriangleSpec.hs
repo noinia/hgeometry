@@ -1,18 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.TriangleSpec where
+module Data.Geometry.TriangleSpec (spec) where
 
-import Data.Traversable(traverse)
 import Data.Ext
 import Control.Lens
-import Control.Applicative
 import Data.Geometry
 import Data.Geometry.Triangle
 import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Data.Proxy
 import Test.Hspec
-import Data.Ratio
-import Data.Vinyl.CoRec
 
 spec :: Spec
 spec = do testCases "test/Data/Geometry/pointInTriangle.ipe"

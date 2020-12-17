@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.PolygonSpec where
+module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Applicative
 import           Control.Lens                                ((^.), (^..))
 import           Control.Monad
 import qualified Data.ByteString                             as BS
@@ -14,7 +13,6 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Proxy
 import           Data.Serialize
-import           Data.Traversable                            (traverse)
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
@@ -24,26 +22,24 @@ import           Test.QuickCheck.Instances                   ()
 {-# NOINLINE allSimplePolygons #-}
 allSimplePolygons :: [SimplePolygon () Double]
 allSimplePolygons = unsafePerformIO $ do
-  path <- getDataFileName "data/polygons.simple"
-  inp <- BS.readFile path
+  inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
   case decode inp of
     Left msg -> error msg
-    Right points -> pure $
+    Right pts -> pure $
       [ fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
-      | lst <- points
+      | lst <- pts
       ]
 
 {-# NOINLINE allMultiPolygons #-}
 allMultiPolygons :: [MultiPolygon () Double]
 allMultiPolygons = unsafePerformIO $ do
-  path <- getDataFileName "data/polygons.multi"
-  inp <- BS.readFile path
+  inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
   case decode inp of
     Left msg -> error msg
-    Right points -> pure $
-      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- outer ])
+    Right pts -> pure $
+      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- boundary ])
           (map toSimple holes)
-      | (outer:holes) <- points
+      | (boundary:holes) <- pts
       ]
   where
     toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
@@ -58,12 +54,12 @@ spec :: Spec
 spec = do
   testCases "test/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
-    property $ \(seq :: C.CSeq (Point 2 Rational :+ ())) ->
-      let p = SimplePolygon seq in
+    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = SimplePolygon pts in
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
-    property $ \(seq :: C.CSeq (Point 2 Rational :+ ())) ->
-      let p = MultiPolygon seq [SimplePolygon seq] in
+    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = MultiPolygon pts [SimplePolygon pts] in
       read (show p) == p
   it "valid polygons" $ do
     forM_ allSimplePolygons $ \poly -> do

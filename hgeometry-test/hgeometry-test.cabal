@@ -66,9 +66,12 @@ test-suite hspec
   main-is:              Main.hs
 
 
-  ghc-options:   -fno-warn-unticked-promoted-constructors
+  ghc-options:   -Wall
+                 -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures
                  -fno-warn-missing-signatures
+                 -fno-warn-type-defaults
+                 -fno-warn-orphans
 
   build-tool-depends: hspec-discover:hspec-discover
 
@@ -106,6 +109,7 @@ test-suite hspec
                  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
                  Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
+                 Algorithms.Geometry.PolygonTriangulation.TriangulateSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
