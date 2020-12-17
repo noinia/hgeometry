@@ -30,7 +30,7 @@ import           Data.PlaneGraph                                (FaceId (..), Pl
                                                                  VertexId (..), VertexId', dual,
                                                                  graph)
 import qualified Data.PlaneGraph                                as PlaneGraph
-import           Data.Tree
+import           Data.Tree                                      (Tree (Node))
 import qualified Data.Vector                                    as V
 import           Data.Vector.Unboxed                            (Vector)
 import qualified Data.Vector.Unboxed                            as VU
@@ -47,8 +47,9 @@ sssp :: (Ord r, Fractional r)
 sssp trig p =
     ssspFinger p d
   where
+    FaceId outer = PlaneGraph.outerFaceId trig
     dualGraph = trig^.graph.dual
-    dualTree' = dfs' (V.map (filter (/= VertexId 0)) $ adjacencyLists dualGraph) (VertexId 1)
+    dualTree' = dfs' (V.map (filter (/= outer)) $ adjacencyLists dualGraph) (VertexId 1)
     dualVS = fmap (\v -> PlaneGraph.boundaryVertices (FaceId v) trig) dualTree'
     trigTree = toTrigTree trig dualVS
     d = mkDual trigTree
@@ -200,12 +201,14 @@ data DualTree
 
 
 
-toTrigTree :: PlaneGraph s Int PolygonEdgeType PolygonFaceData r -> Tree (V.Vector (VertexId' s)) -> Tree (Int,Int,Int)
-toTrigTree trig = fmap toTrig
+toTrigTree :: PlaneGraph s Int PolygonEdgeType PolygonFaceData r
+           -> Tree (V.Vector (VertexId' s))
+           -> Tree (Int,Int,Int)
+toTrigTree trig = fmap toTrig . fmap (fmap toDat)
   where
-    toTrig v = case V.toList $ V.map toDat v of
+    toTrig v = case V.toList v of
       [a,b,c] -> (a,b,c)
-      _       -> undefined
+      _       -> error "Algorithms.Geometry.SSSP: Invalid triangulation."
     toDat v =
       case trig ^. PlaneGraph.vertexDataOf v of
         PlaneGraph.VertexData _loc dat -> dat
