@@ -48,19 +48,19 @@ data TestCase r = TestCase { _triangle   :: Triangle 2 () r
                   deriving (Show)
 
 
-toSingleSpec poly r q = it msg $ (q `inTriangle` poly) `shouldBe` r
-  where
-    msg = "Point in triangle test with " ++ show q
+toSingleSpec poly r q = (q `inTriangle` poly) `shouldBe` r
+  -- where
+  --   msg = "Point in triangle test with " ++ show q
 
 
 toSpec                          ::  (Show r, Ord r, Fractional r)
                                 =>  TestCase r -> Spec
 toSpec (TestCase poly is bs os) = do
-                                    describe "inside tests" $
+                                    it "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
-                                    describe "on boundary tests" $
+                                    it "on boundary tests" $
                                       mapM_ (toSingleSpec poly OnBoundary) bs
-                                    describe "outside tests" $
+                                    it "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
 

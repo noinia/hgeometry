@@ -90,9 +90,9 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
   it "same dart data" $
     (g^.PG.rawDartData) `shouldBe` ((^.dataVal) <$> ps^.rawDartData)
   -- it "same dart endpoints" $ do
-  describe "same darts" $ do
+  specify "same darts" $ do
     forM_ (darts' ps) $ \d ->
-      it ("sameDarts: " ++ (show d)) $ endPoints d ps `shouldBe` PG.endPoints d g
+      endPoints d ps `shouldBe` PG.endPoints d g
   -- sameDarts g ps
   it "same edges" $
     (V.fromList . L.sortOn fst . toList $ PG.edgeSegments g) `shouldBe` edgeSegments ps

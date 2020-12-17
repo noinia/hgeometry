@@ -36,14 +36,13 @@ data TestCase r = TestCase { _polygon    :: ConvexPolygon () r
                   deriving (Show)
 
 toSingleSpec        :: (Num r, Ord r, Show r)
-                    => ConvexPolygon q r -> Vector 2 r -> SpecWith ()
-toSingleSpec poly u = it msg $
+                    => ConvexPolygon q r -> Vector 2 r -> Expectation
+toSingleSpec poly u =
   -- test that the reported extremes are equally far in direction u
     F.all allEq (unzip [extremes u poly, extremesLinear u (poly^.simplePolygon)])
     `shouldBe` True
   where
     allEq ~(p:ps) = all (\q -> cmpExtreme u p q == EQ) ps
-    msg = "Extremes test with direction " ++ show u
 
 -- | generates 360 vectors "equally" spaced/angled
 directions :: Num r => [Vector 2 r]
@@ -54,7 +53,7 @@ directions = map (fmap toRat . uncurry Vector2 . (cos &&& sin) . toRad) ([0..359
 
 toSpec                 :: (Num r, Ord r, Show r) => TestCase r -> SpecWith ()
 toSpec (TestCase poly) = do
-                           describe "Extreme points; binsearch same as linear" $
+                           it "Extreme points; binsearch same as linear" $
                              mapM_ (toSingleSpec poly) directions
 
 

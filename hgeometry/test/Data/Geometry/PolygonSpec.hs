@@ -88,17 +88,17 @@ data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                   deriving (Show)
 
 
-toSingleSpec poly r q = it msg $ (q `inPolygon` poly) `shouldBe` r
-  where
-    msg = "Point in polygon test with " ++ show q
+toSingleSpec poly r q = (q `inPolygon` poly) `shouldBe` r
+  -- where
+  --   msg = "Point in polygon test with " ++ show q
 
 
 toSpec (TestCase poly is bs os) = do
-                                    describe "inside tests" $
+                                    specify "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
-                                    describe "on boundary tests" $
+                                    specify "on boundary tests" $
                                       mapM_ (toSingleSpec poly OnBoundary) bs
-                                    describe "outside tests" $
+                                    specify "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
 readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
