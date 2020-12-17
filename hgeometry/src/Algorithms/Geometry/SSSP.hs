@@ -14,15 +14,11 @@ module Algorithms.Geometry.SSSP
 import           Algorithms.Geometry.PolygonTriangulation.Types (PolygonEdgeType)
 import           Algorithms.Graph.DFS                           (adjacencyLists, dfs')
 import           Control.Lens                                   ((^.))
-import qualified Data.CircularSeq                               as C
-import           Data.Coerce                                    (coerce)
-import           Data.Ext                                       (core)
+import           Data.Ext                                       (type (:+) (..))
 import qualified Data.FingerTree                                as F
 import           Data.Geometry.PlanarSubdivision                (PolygonFaceData (..))
 import           Data.Geometry.Point                            (Point, ccw, pattern CCW,
                                                                  pattern CW)
-import           Data.Geometry.Polygon                          (Polygon, SimplePolygon,
-                                                                 outerBoundary)
 import           Data.List                                      (sortOn, (\\))
 import           Data.Maybe                                     (fromMaybe)
 import           Data.PlanarGraph                               ()
@@ -42,10 +38,9 @@ type SSSP = Vector Int
 -- | O(n) Single-Source shortest path.
 sssp :: (Ord r, Fractional r)
   => PlaneGraph s Int PolygonEdgeType PolygonFaceData r
-  -> SimplePolygon p r
   -> SSSP
-sssp trig p =
-    ssspFinger p d
+sssp trig =
+    ssspFinger d
   where
     FaceId outer = PlaneGraph.outerFaceId trig
     dualGraph = trig^.graph.dual
@@ -67,29 +62,32 @@ sssp trig p =
 
 
 
-data MinMax = MinMax Index Index | MinMaxEmpty deriving (Show)
-instance Semigroup MinMax where
+data MinMax r = MinMax (Index r) (Index r) | MinMaxEmpty deriving (Show)
+instance Semigroup (MinMax r) where
   MinMaxEmpty <> b = b
   a <> MinMaxEmpty = a
   MinMax a _b <> MinMax _c d
     = MinMax a d
-instance Monoid MinMax where
+instance Monoid (MinMax r) where
   mempty = MinMaxEmpty
 
-newtype Index = Index Int deriving (Show)
+newtype Index r = Index (Point 2 r :+ Int) deriving (Show)
 
-type Chain = F.FingerTree MinMax Index
-data Funnel = Funnel
-  { funnelLeft  :: Chain
-  , funnelCusp  :: Index
-  , funnelRight :: Chain
+instance Eq (Index r) where
+  Index (_ :+ a) == Index (_ :+ b) = a == b
+
+type Chain r = F.FingerTree (MinMax r) (Index r)
+data Funnel r = Funnel
+  { funnelLeft  :: Chain r
+  , funnelCusp  :: Index r
+  , funnelRight :: Chain r
   }
 
-instance F.Measured MinMax Index where
+instance F.Measured (MinMax r) (Index r) where
   measure i = MinMax i i
 
-splitFunnel :: (Fractional r, Ord r) => SimplePolygon p r -> Index -> Funnel -> (Index, Funnel, Funnel)
-splitFunnel p x Funnel{..}
+splitFunnel :: (Fractional r, Ord r) => Index r -> Funnel r -> (Index r, Funnel r, Funnel r)
+splitFunnel x Funnel{..}
     | isOnLeftChain =
       case doSearch isRightTurn funnelLeft of
         (lower, t, upper) ->
@@ -112,7 +110,7 @@ splitFunnel p x Funnel{..}
     isOnRightChain = fromMaybe False $
       isRightTurnOrLinear cuspElt <$> rightElt <*> pure targetElt
     doSearch fn chain =
-      case F.search (searchChain fn) (chain::Chain) of
+      case F.search (searchChain fn) chain of
         F.Position lower t upper -> (lower, t, upper)
         F.OnLeft                 -> error "cannot happen"
         F.OnRight                -> error "cannot happen"
@@ -120,19 +118,19 @@ splitFunnel p x Funnel{..}
     searchChain _ MinMaxEmpty _             = False
     searchChain _ _ MinMaxEmpty             = True
     searchChain check (MinMax _ l) (MinMax r _) =
-      check (ringAccess p l) (ringAccess p r) targetElt
-    cuspElt   = ringAccess p funnelCusp
-    targetElt = ringAccess p x
-    leftElt   = ringAccess p <$> chainLeft funnelLeft
-    rightElt  = ringAccess p <$> chainLeft funnelRight
+      check (ringAccess l) (ringAccess r) targetElt
+    cuspElt   = ringAccess funnelCusp
+    targetElt = ringAccess x
+    leftElt   = ringAccess <$> chainLeft funnelLeft
+    rightElt  = ringAccess <$> chainLeft funnelRight
     chainLeft chain =
       case F.viewl chain of
         F.EmptyL   -> Nothing
         elt F.:< _ -> Just elt
 
 -- O(n)
-ssspFinger :: (Fractional r, Ord r) => SimplePolygon p r -> Dual -> SSSP
-ssspFinger p d = toSSSP $
+ssspFinger :: (Fractional r, Ord r) => Dual r -> SSSP
+ssspFinger d = toSSSP $
     case d of
       Dual (a,b,c) ab bc ca ->
         (a, a) :
@@ -142,9 +140,10 @@ ssspFinger p d = toSSSP $
         worker (Funnel (F.singleton c) a (F.singleton b)) bc ++
         loopRight a b ab
   where
-    toSSSP :: [(Index,Index)] -> SSSP
-    toSSSP =
-      VU.fromList . map snd . sortOn fst . (coerce :: [(Index,Index)] -> [(Int,Int)])
+    toSSSP :: [(Index r,Index r)] -> SSSP
+    toSSSP lst =
+      VU.fromList . map snd . sortOn fst $
+      [ (a,b) | (Index (_ :+ a), Index (_ :+ b)) <- lst ]
     loopLeft a outer l =
       case l of
         EmptyDual -> []
@@ -161,7 +160,7 @@ ssspFinger p d = toSSSP $
           loopRight a x r'
     worker _ EmptyDual = []
     worker f (NodeDual x l r) =
-      case splitFunnel p x f of
+      case splitFunnel x f of
         (v, fL, fR) ->
           (x, v) :
           worker fL l ++
@@ -173,17 +172,17 @@ ssspFinger p d = toSSSP $
 
 
 
-data Dual = Dual (Index, Index, Index) -- (a,b,c)
-                  DualTree -- borders ab
-                  DualTree -- borders bc
-                  DualTree -- borders ca
+data Dual r = Dual (Index r, Index r, Index r) -- (a,b,c)
+                   (DualTree r) -- borders ab
+                   (DualTree r) -- borders bc
+                   (DualTree r) -- borders ca
   deriving (Show)
 
-data DualTree
+data DualTree r
   = EmptyDual
-  | NodeDual Index -- axb triangle, a and b are from parent.
-      DualTree -- borders xb
-      DualTree -- borders ax
+  | NodeDual (Index r) -- axb triangle, a and b are from parent.
+      (DualTree r) -- borders xb
+      (DualTree r) -- borders ax
   deriving (Show)
 
 -- poly :: SimplePolygon Int Rational
@@ -203,30 +202,28 @@ data DualTree
 
 toTrigTree :: PlaneGraph s Int PolygonEdgeType PolygonFaceData r
            -> Tree (V.Vector (VertexId' s))
-           -> Tree (Int,Int,Int)
+           -> Tree (Index r,Index r,Index r)
 toTrigTree trig = fmap toTrig . fmap (fmap toDat)
   where
     toTrig v = case V.toList v of
       [a,b,c] -> (a,b,c)
       _       -> error "Algorithms.Geometry.SSSP: Invalid triangulation."
-    toDat v =
-      case trig ^. PlaneGraph.vertexDataOf v of
-        PlaneGraph.VertexData _loc dat -> dat
+    toDat v = Index $ PlaneGraph.vtxDataToExt (trig ^. PlaneGraph.vertexDataOf v)
 
 -- pp :: Show a => Tree a -> IO ()
 -- pp = putStrLn . drawTree . fmap show
 
-mkDual :: Tree (Int,Int,Int) -> Dual
+mkDual :: Tree (Index r,Index r,Index r) -> Dual r
 mkDual (Node (a,b,c) forest) =
-    Dual (Index a,Index b,Index c)
+    Dual (a, b, c)
       (dualTree a b forest)
       (dualTree b c forest)
       (dualTree c a forest)
 
-dualTree :: Int -> Int -> [Tree (Int,Int,Int)] -> DualTree
+dualTree :: Index r -> Index r -> [Tree (Index r,Index r,Index r)] -> DualTree r
 dualTree p1 p2 (Node (a,b,c) sub:xs) =
   case [a,b,c] \\ [p1,p2] of
-    [x] -> NodeDual (Index x) (dualTree p1 x sub) (dualTree p2 x sub)
+    [x] -> NodeDual x (dualTree p1 x sub) (dualTree p2 x sub)
     _   -> dualTree p1 p2 xs
 dualTree _p1 _p2 [] = EmptyDual
 
@@ -237,9 +234,8 @@ dualTree _p1 _p2 [] = EmptyDual
 --------------------------------------------------------------------------------
 -- Helpers
 
-ringAccess :: Polygon t p r -> Index -> Point 2 r
-ringAccess p (Index idx) =
-  (C.index (p ^. outerBoundary) idx) ^. core
+ringAccess :: Index r -> Point 2 r
+ringAccess (Index (pt :+ _idx)) = pt
 
 isRightTurnOrLinear :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
 isRightTurnOrLinear p1 p2 p3 = not $ isLeftTurn p1 p2 p3
