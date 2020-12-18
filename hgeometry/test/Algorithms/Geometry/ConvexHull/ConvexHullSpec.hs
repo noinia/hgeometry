@@ -120,4 +120,4 @@ testPoints2 = fmap ext $ NonEmpty.fromList
   ]
 
 
-fromPointsUnsafe = ConvexPolygon . fromPoints . map ext
+fromPointsUnsafe = ConvexPolygon . unsafeFromPoints . map ext

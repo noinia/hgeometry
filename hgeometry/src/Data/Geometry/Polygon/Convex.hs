@@ -34,7 +34,7 @@ import           Data.Function (on)
 import           Data.Geometry.Box (IsBoxable(..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core (fromPoints, SimplePolygon, outerBoundary)
+import           Data.Geometry.Polygon.Core (unsafeFromPoints, SimplePolygon, outerBoundary)
 import           Data.Geometry.Polygon.Extremes(cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -209,7 +209,7 @@ rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 merge       :: (Num r, Ord r) => ConvexPolygon p r  -> ConvexPolygon p r
             -> (ConvexPolygon p r, LineSegment 2 p r, LineSegment 2 p r)
-merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
+merge lp rp = (ConvexPolygon . unsafeFromPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
@@ -335,7 +335,7 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 -- running time: \(O(n+m)\).
 minkowskiSum     :: (Ord r, Num r)
                  => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
-minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
+minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
   where
     f p' = let xs@(S.viewl -> (v :< _)) = C.asSeq . bottomMost . getVertices $ p'
            in F.toList $ xs |> v

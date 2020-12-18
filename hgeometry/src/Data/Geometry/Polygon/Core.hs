@@ -301,14 +301,13 @@ polygonVertices (SimplePolygon vs)   = toNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
   sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
 
-
--- | Creates a simple polygon from the given list of vertices.
+-- | /O(n)/. Creates a simple polygon from the given list of vertices.
 --
 -- pre: the input list constains no repeated vertices.
 fromPoints :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
-fromPoints = {- toCounterClockWiseOrder . -} SimplePolygon . C.fromList
+fromPoints = toCounterClockWiseOrder . SimplePolygon . C.fromList
 
--- | Creates a simple polygon from the given list of vertices.
+-- | /O(1)/. Creates a simple polygon from the given list of vertices.
 --
 -- pre: the input list constains no repeated vertices.
 unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
