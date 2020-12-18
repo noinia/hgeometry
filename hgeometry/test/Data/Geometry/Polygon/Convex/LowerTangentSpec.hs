@@ -1,30 +1,17 @@
-module Data.Geometry.Polygon.Convex.LowerTangentSpec where
+module Data.Geometry.Polygon.Convex.LowerTangentSpec (spec) where
 
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan (lowerHull, upperHull)
-import           Control.Applicative
-import           Control.Arrow ((&&&))
+import           Algorithms.Geometry.ConvexHull.GrahamScan (lowerHull)
 import           Control.Lens
-import qualified Data.CircularSeq as C
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry hiding (vector)
-import           Data.Geometry.Polygon (extremesLinear, fromPoints, outerBoundary)
+import qualified Data.Foldable                             as F
+import           Data.Geometry                             hiding (vector)
+import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
-import qualified Data.Geometry.Polygon.Convex.LowerTangent as LowerT
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
-import           Data.Ord (comparing)
-import           Data.Ratio
-import           Data.Traversable (traverse)
-import           Data.Util
+import           Data.List.NonEmpty                        (NonEmpty (..))
 import           Test.Hspec
-import           Test.QuickCheck (Arbitrary(..), property, suchThat, (==>), listOf)
-import           Test.QuickCheck.Instances ()
-
-import Debug.Trace
+import           Test.QuickCheck                           (Arbitrary (..), listOf, suchThat)
+import           Test.QuickCheck.Instances                 ()
 
 spec :: Spec
 spec = pure ()

@@ -4,28 +4,19 @@ module Data.Geometry.PlanarSubdivisionSpec where
 
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as MM
 import qualified Algorithms.Geometry.PolygonTriangulation.Triangulate as TR
-import qualified Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone as TM
 import           Control.Lens hiding (holesOf)
-import           Data.Bifunctor (second)
-import           Data.Either (lefts)
 import           Data.Ext
 import           Data.Foldable (toList, forM_)
-import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.Point
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.Geometry.PlanarSubdivision as PS
-import           Data.Geometry.PlanarSubdivision.Draw
 import           Data.Geometry.Polygon
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
-import           Data.PlanarGraph (FaceId(..),VertexId(..))
 import qualified Data.PlaneGraph as PG
-import           Data.PlaneGraph.Draw
-import           Data.Range
-import           Data.Ratio
 import qualified Data.Vector as V
 import           Test.Hspec
 
@@ -99,9 +90,9 @@ sameAsConnectedPG g ps = describe "connected planarsubdiv, same as PlaneGraph" $
   it "same dart data" $
     (g^.PG.rawDartData) `shouldBe` ((^.dataVal) <$> ps^.rawDartData)
   -- it "same dart endpoints" $ do
-  describe "same darts" $ do
+  specify "same darts" $ do
     forM_ (darts' ps) $ \d ->
-      it ("sameDarts: " ++ (show d)) $ endPoints d ps `shouldBe` PG.endPoints d g
+      endPoints d ps `shouldBe` PG.endPoints d g
   -- sameDarts g ps
   it "same edges" $
     (V.fromList . L.sortOn fst . toList $ PG.edgeSegments g) `shouldBe` edgeSegments ps

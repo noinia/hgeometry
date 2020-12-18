@@ -1,9 +1,8 @@
-module Data.Geometry.RangeTreeSpec where
+module Data.Geometry.RangeTreeSpec (spec) where
 
 import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.Ext
-import           Data.Geometry.Point
 import           Data.Geometry.PrioritySearchTreeSpec (Unique(..))
 import           Data.Geometry.RangeTree.Generic
 import           Data.List.NonEmpty (NonEmpty(..))
