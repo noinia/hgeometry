@@ -79,11 +79,11 @@ fromGeoPolygon p =
   case map fromRing $ F.toList (p^.unGeoPolygon) of
     []  -> error "Invalid polygon"
     [x] -> Left x
-    (SimplePolygon pts:xs) ->
-      Right $ H.MultiPolygon pts xs
+    (x:xs) ->
+      Right $ H.MultiPolygon x xs
   where
     fromRing :: LinearRing GeoPositionWithoutCRS -> SimplePolygon () Double
-    fromRing = toCounterClockWiseOrder .
+    fromRing =
       fromPoints . map (ext . fromPointXY . retrieveXY) . nub . fromLinearRing
 
     fromPointXY :: PointXY -> Point 2 Double
