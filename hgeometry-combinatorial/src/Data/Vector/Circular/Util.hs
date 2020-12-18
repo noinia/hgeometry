@@ -8,6 +8,7 @@ import           Data.Semigroup.Foldable
 import qualified Data.Vector                 as V
 import           Data.Vector.Circular        as CV
 import qualified Data.Vector.NonEmpty        as NV
+import           Test.QuickCheck             (Arbitrary (..), NonEmptyList (..))
 
 -- FIXME: Upstream this to the non-empty vector library?
 instance Foldable1 NV.NonEmptyVector
@@ -49,3 +50,6 @@ xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
                         once        = leftElements
                         check as bs = isJust $ once as `isSubStringOf` twice bs
                     in length xs == length ys && check xs ys
+
+instance Arbitrary a => Arbitrary (CircularVector a) where
+  arbitrary = unsafeFromList <$> (getNonEmpty <$> arbitrary)

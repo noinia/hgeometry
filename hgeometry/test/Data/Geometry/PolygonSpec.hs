@@ -5,7 +5,6 @@ import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                ((^.), (^..))
 import           Control.Monad
 import qualified Data.ByteString                             as BS
-import qualified Data.CircularSeq                            as C
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Boundary
@@ -13,6 +12,7 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Proxy
 import           Data.Serialize
+import qualified Data.Vector.Circular                        as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
@@ -40,7 +40,7 @@ allMultiPolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- boundary ])
+      [ MultiPolygon (CV.unsafeFromList [ ext (Point2 x y) | (x,y) <- boundary ])
           (map toSimple holes)
       | (boundary:holes) <- pts
       ]
@@ -60,11 +60,11 @@ spec :: Spec
 spec = do
   testCases "test/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
-    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+    property $ \(pts :: CV.CircularVector (Point 2 Rational :+ ())) ->
       let p = SimplePolygon pts in
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
-    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+    property $ \(pts :: CV.CircularVector (Point 2 Rational :+ ())) ->
       let p = MultiPolygon pts [SimplePolygon pts] in
       read (show p) == p
   it "valid polygons (Simple/Double)" $ do

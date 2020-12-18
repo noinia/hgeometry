@@ -7,7 +7,6 @@ import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
 import qualified Data.Vector.Circular.Util as CV
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Function (on)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -106,10 +105,3 @@ a `isRightOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CW
 isLeftOf            :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool
 a `isLeftOf` (b,c) = ccw (b^.core) (c^.core) (a^.core) == CCW
-
-rotateTo'   :: Eq a => (a :+ b) -> CircularVector (a :+ b) -> CircularVector (a :+ b)
-rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
-
-
-coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
-coreEq = (==) `on` (^.core)
