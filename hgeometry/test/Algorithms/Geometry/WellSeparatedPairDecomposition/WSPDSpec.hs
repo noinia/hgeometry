@@ -1,19 +1,14 @@
-module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec where
+module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec (spec) where
 
-import           Algorithms.Geometry.Diameter.Naive
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
-import           Control.Lens
+import           Control.Lens                                             ((%~), (&))
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.LSeq as LSeq
-import qualified Data.Set as Set
-import qualified Data.Vector as V
+import qualified Data.LSeq                                                as LSeq
+import qualified Data.List.NonEmpty                                       as NonEmpty
+import qualified Data.Vector                                              as V
 import           Test.Hspec
-import           Test.Util
-import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
@@ -64,30 +59,26 @@ ptSeq = LSeq.fromNonEmpty . NonEmpty.fromList . map (&extra %~ ext)
 
 -- coversAll
 
-points1 :: NonEmpty.NonEmpty (Point 2 Double :+ ())
-points1 = ext <$> NonEmpty.fromList [Point2 0 0, Point2 1 1, Point2 2 100, Point2 3 101]
+-- points1 :: NonEmpty.NonEmpty (Point 2 Double :+ ())
+-- points1 = ext <$> NonEmpty.fromList [Point2 0 0, Point2 1 1, Point2 2 100, Point2 3 101]
 
 
--- | Computes all pairs of points that are uncovered by the WSPD with separation s
-uncovered         :: (Floating r, Ord r, Arity d, Arity (d+1), Ord p)
-                  => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
-uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
-  where
-    allPairs = Set.fromList [ (p,q) | p <- pts, q <- pts, p < q ]
-    covered  = Set.unions [ mkSet as bs | (as,bs) <- wellSeparatedPairs s t]
+-- -- | Computes all pairs of points that are uncovered by the WSPD with separation s
+-- uncovered         :: (Floating r, Ord r, Arity d, Arity (d+1), Ord p)
+--                   => [Point d r :+ p] -> r -> SplitTree d p r a -> [(Point d r :+ p, Point d r :+ p)]
+-- uncovered pts s t = Set.toList $ allPairs `Set.difference` covered
+--   where
+--     allPairs = Set.fromList [ (p,q) | p <- pts, q <- pts, p < q ]
+--     covered  = Set.unions [ mkSet as bs | (as,bs) <- wellSeparatedPairs s t]
 
-    mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList bs]
+--     mkSet as bs = Set.fromList [ (min a b,max a b) | a <- F.toList as, b <- F.toList bs]
 
--- | Naively check if a WSP pair is actually well separated with respect to
--- separation s. i.e. computes the maximum diameter of as and bs, and then
--- tests by brute force if all pairs (a,b) from different sets are at distance
--- at least s times the maximum diameter.
-isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
-isWellSeparated s (as,bs) =
-    and [ euclideanDist (a^.core) (b^.core) >= s*r | a <- F.toList as, b <- F.toList bs ]
-  where
-    r = (/2) . maximum . map (diameter . F.toList) $ [as,bs]
-
-
-
-allCoveredTest = describe
+-- -- | Naively check if a WSP pair is actually well separated with respect to
+-- -- separation s. i.e. computes the maximum diameter of as and bs, and then
+-- -- tests by brute force if all pairs (a,b) from different sets are at distance
+-- -- at least s times the maximum diameter.
+-- isWellSeparated           :: (Floating r, Ord r, Arity d) => r -> WSP d p r a -> Bool
+-- isWellSeparated s (as,bs) =
+--     and [ euclideanDist (a^.core) (b^.core) >= s*r | a <- F.toList as, b <- F.toList bs ]
+--   where
+--     r = (/2) . maximum . map (diameter . F.toList) $ [as,bs]

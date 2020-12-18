@@ -1,18 +1,88 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Data.Geometry.PolygonSpec where
+module Data.Geometry.PolygonSpec (spec) where
 
-import Data.Traversable(traverse)
-import Data.Ext
-import Control.Lens
-import Control.Applicative
-import Data.Geometry
-import Data.Geometry.Boundary
-import Data.Geometry.Ipe
-import Data.Proxy
-import Test.Hspec
+import           Algorithms.Geometry.LineSegmentIntersection
+import           Control.Lens                                ((^.), (^..))
+import           Control.Monad
+import qualified Data.ByteString                             as BS
+import qualified Data.CircularSeq                            as C
+import           Data.Ext
+import           Data.Geometry
+import           Data.Geometry.Boundary
+import           Data.Geometry.Ipe
+import           Data.Geometry.Polygon                       (fromPoints)
+import           Data.Proxy
+import           Data.Serialize
+import           Paths_hgeometry_test
+import           System.IO.Unsafe
+import           Test.Hspec
+import           Test.QuickCheck
+import           Test.QuickCheck.Instances                   ()
+
+{-# NOINLINE allSimplePolygons #-}
+allSimplePolygons :: [SimplePolygon () Double]
+allSimplePolygons = unsafePerformIO $ do
+  inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
+  case decode inp of
+    Left msg -> error msg
+    Right pts -> pure $
+      [ fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      | lst <- pts
+      ]
+
+allSimplePolygons' :: [SimplePolygon () Rational]
+allSimplePolygons' = map (realToFrac <$>) allSimplePolygons
+
+{-# NOINLINE allMultiPolygons #-}
+allMultiPolygons :: [MultiPolygon () Double]
+allMultiPolygons = unsafePerformIO $ do
+  inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
+  case decode inp of
+    Left msg -> error msg
+    Right pts -> pure $
+      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- boundary ])
+          (map toSimple holes)
+      | (boundary:holes) <- pts
+      ]
+  where
+    toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+
+allMultiPolygons' :: [MultiPolygon () Rational]
+allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
+
+instance Fractional a => Arbitrary (SimplePolygon () a) where
+  arbitrary = fmap realToFrac <$> elements allSimplePolygons
+
+instance Fractional a => Arbitrary (MultiPolygon () a) where
+  arbitrary = fmap realToFrac <$> elements allMultiPolygons
 
 spec :: Spec
-spec = testCases "test/Data/Geometry/pointInPolygon.ipe"
+spec = do
+  testCases "test/Data/Geometry/pointInPolygon.ipe"
+  it "read . show = id (SimplePolygon)" $ do
+    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = SimplePolygon pts in
+      read (show p) == p
+  it "read . show = id (MultiPolygon)" $ do
+    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+      let p = MultiPolygon pts [SimplePolygon pts] in
+      read (show p) == p
+  it "valid polygons (Simple/Double)" $ do
+    forM_ allSimplePolygons $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Simple/Rational)" $ do
+    forM_ allSimplePolygons' $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Multi/Double)" $ do
+    forM_ allMultiPolygons $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Multi/Rational)" $ do
+    forM_ allMultiPolygons' $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
 
 
 testCases    :: FilePath -> Spec
@@ -36,17 +106,17 @@ data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                   deriving (Show)
 
 
-toSingleSpec poly r q = it msg $ (q `inPolygon` poly) `shouldBe` r
-  where
-    msg = "Point in polygon test with " ++ show q
+toSingleSpec poly r q = (q `inPolygon` poly) `shouldBe` r
+  -- where
+  --   msg = "Point in polygon test with " ++ show q
 
 
 toSpec (TestCase poly is bs os) = do
-                                    describe "inside tests" $
+                                    specify "inside tests" $
                                       mapM_ (toSingleSpec poly Inside) is
-                                    describe "on boundary tests" $
+                                    specify "on boundary tests" $
                                       mapM_ (toSingleSpec poly OnBoundary) bs
-                                    describe "outside tests" $
+                                    specify "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
 readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])

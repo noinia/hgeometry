@@ -116,6 +116,9 @@ _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 _MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
+instance Functor (Polygon t p) where
+  fmap = bimap id
+
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
 
@@ -155,6 +158,20 @@ type instance NumType   (Polygon t p r) = r
 instance (Show p, Show r) => Show (Polygon t p r) where
   show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"
   show (MultiPolygon vs hs) = "MultiPolygon (" <> show vs <> ") (" <> show hs <> ")"
+
+instance (Read p, Read r) => Read (SimplePolygon p r) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (SimplePolygon vs, t)
+      | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
+    where app_prec = 10
+
+instance (Read p, Read r) => Read (MultiPolygon p r) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (MultiPolygon vs hs, t')
+      | ("MultiPolygon", s) <- lex r
+      , (vs, t) <- reads s
+      , (hs, t') <- reads t ]
+    where app_prec = 10
 
 -- instance (Read p, Read r) => Show (Polygon t p r) where
 --   show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"

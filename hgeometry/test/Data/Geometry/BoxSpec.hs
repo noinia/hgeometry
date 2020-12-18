@@ -2,9 +2,7 @@ module Data.Geometry.BoxSpec where
 
 import Data.Geometry
 import Data.Geometry.Box
-import Data.Geometry.Properties
 import Test.Hspec
-
 
 spec :: Spec
 spec = do
