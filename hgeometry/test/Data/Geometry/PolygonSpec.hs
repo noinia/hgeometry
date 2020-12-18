@@ -40,8 +40,7 @@ allMultiPolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ MultiPolygon (C.fromList [ ext (Point2 x y) | (x,y) <- boundary ])
-          (map toSimple holes)
+      [ MultiPolygon (toSimple boundary) (map toSimple holes)
       | (boundary:holes) <- pts
       ]
   where
@@ -65,7 +64,8 @@ spec = do
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
     property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
-      let p = MultiPolygon pts [SimplePolygon pts] in
+      let simple = SimplePolygon pts
+          p = MultiPolygon simple [simple] in
       read (show p) == p
   it "valid polygons (Simple/Double)" $ do
     forM_ allSimplePolygons $ \poly -> do

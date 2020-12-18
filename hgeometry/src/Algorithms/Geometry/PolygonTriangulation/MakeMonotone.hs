@@ -58,7 +58,7 @@ classifyVertices                     :: (Num r, Ord r)
 classifyVertices p@(SimplePolygon _) = classifyVertices' p
 classifyVertices (MultiPolygon vs h) = MultiPolygon vs' h'
   where
-    (SimplePolygon vs') = classifyVertices' $ SimplePolygon vs
+    vs' = classifyVertices' vs
     h' = map (first (&extra %~ onHole) . classifyVertices') h
 
     -- the roles on hole vertices are slightly different

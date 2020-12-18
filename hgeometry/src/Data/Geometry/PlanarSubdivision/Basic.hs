@@ -655,9 +655,9 @@ rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
                     -> SomePolygon v r :+ f
 rawFacePolygon i ps = case F.toList $ holesOf i ps of
                         [] -> Left  res                               :+ x
-                        hs -> Right (MultiPolygon vs $ map toHole hs) :+ x
+                        hs -> Right (MultiPolygon res $ map toHole hs) :+ x
   where
-    res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
+    res :+ x = rawFaceBoundary i ps
     toHole d = rawFaceBoundary (leftFace d ps) ps ^. core
 
 -- | Lists all *internal* faces of the planar subdivision.

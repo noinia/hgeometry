@@ -164,14 +164,14 @@ _asSomePolygon = prism' embed pathToPolygon
 polygonToPath                      :: Polygon t () r -> Path r
 polygonToPath pg@(SimplePolygon _) = Path . fromSingleton . PolygonPath $ pg
 polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
-                                   $ (SimplePolygon vs) :| hs
+                                   $ vs :| hs
 
 
 pathToPolygon   :: Path r -> Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
 pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
-                    []                   -> Nothing
-                    [pg]                 -> Just . Left  $ pg
-                    SimplePolygon vs: hs -> Just . Right $ MultiPolygon vs hs
+                    []    -> Nothing
+                    [pg]  -> Just . Left  $ pg
+                    vs:hs -> Just . Right $ MultiPolygon vs hs
 
 
 

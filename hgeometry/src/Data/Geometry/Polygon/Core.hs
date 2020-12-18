@@ -107,8 +107,8 @@ data PolygonType = Simple | Multi
 --   Degenerate polygons (polygons with self-intersections or fewer than 3 points)
 --   are possible and it is the responsibility of the user to avoid creating them.
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: C.CSeq (Point 2 r :+ p)                  -> SimplePolygon p r
+  MultiPolygon  :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon  p r
 
 pattern SimplePolygonP :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
 pattern SimplePolygonP lst <- (viewSimple -> lst)
@@ -118,20 +118,20 @@ pattern SimplePolygonP lst <- (viewSimple -> lst)
 pattern MultiPolygonP :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon p r
 pattern MultiPolygonP boundary hs <- (viewMulti -> (boundary, hs))
   where
-    MultiPolygonP (SimplePolygon boundary) hs = MultiPolygon boundary hs
+    MultiPolygonP boundary hs = MultiPolygon boundary hs
 
 viewSimple :: SimplePolygon p r -> [Point 2 r :+ p]
 viewSimple (SimplePolygon s) = F.toList s
 
 viewMulti :: MultiPolygon p r -> (SimplePolygon p r, [SimplePolygon p r])
-viewMulti (MultiPolygon boundary hs) = (SimplePolygon boundary, hs)
+viewMulti (MultiPolygon boundary hs) = (boundary, hs)
 
 -- | Prism to 'test' if we are a simple polygon
 _SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
 _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 
 -- | Prism to 'test' if we are a Multi polygon
-_MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
+_MultiPolygon :: Prism' (Polygon Multi p r) (Polygon Simple p r, [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
 instance Functor (Polygon t p) where
@@ -146,7 +146,7 @@ instance Bifoldable (Polygon t) where
 instance Bitraversable (Polygon t) where
   bitraverse f g p = case p of
     SimplePolygon vs   -> SimplePolygon <$> bitraverseVertices f g vs
-    MultiPolygon vs hs -> MultiPolygon  <$> bitraverseVertices f g vs
+    MultiPolygon vs hs -> MultiPolygon  <$> bitraverse f g vs
                                         <*> traverse (bitraverse f g) hs
 
 instance (NFData p, NFData r) => NFData (Polygon t p r) where
@@ -203,7 +203,7 @@ instance (Eq p, Eq r) => Eq (Polygon t p r) where
 
 instance PointFunctor (Polygon t p) where
   pmap f (SimplePolygon vs)   = SimplePolygon (fmap (first f) vs)
-  pmap f (MultiPolygon vs hs) = MultiPolygon  (fmap (first f) vs) (map (pmap f) hs)
+  pmap f (MultiPolygon vs hs) = MultiPolygon  (pmap f vs) (map (pmap f) hs)
 
 instance Fractional r => IsTransformable (Polygon t p r) where
   transformBy = transformPointFunctor
@@ -248,12 +248,12 @@ outerBoundary = lens g s
   where
     g                     :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
     g (SimplePolygon vs)  = vs
-    g (MultiPolygon vs _) = vs
+    g (MultiPolygon (SimplePolygon vs) _) = vs
 
     s                           :: Polygon t p r -> C.CSeq (Point 2 r :+ p)
                                 -> Polygon t p r
     s (SimplePolygon _)      vs = SimplePolygon vs
-    s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
+    s (MultiPolygon  _   hs) vs = MultiPolygon (SimplePolygon vs) hs
 
 -- | Lens access for polygon holes.
 --
@@ -299,7 +299,7 @@ polygonVertices                      :: Polygon t p r
                                      -> NonEmpty.NonEmpty (Point 2 r :+ p)
 polygonVertices (SimplePolygon vs)   = toNonEmpty vs
 polygonVertices (MultiPolygon vs hs) =
-  sconcat $ toNonEmpty vs NonEmpty.:| map polygonVertices hs
+  sconcat $ toNonEmpty (polygonVertices vs) NonEmpty.:| map polygonVertices hs
 
 -- | /O(n)/. Creates a simple polygon from the given list of vertices.
 --
@@ -346,7 +346,7 @@ withIncidentEdges (SimplePolygon vs) =
     f p c n = c&extra .~ Two (ClosedLineSegment p c) (ClosedLineSegment c n)
 withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
   where
-    (SimplePolygon vs') = withIncidentEdges $ SimplePolygon vs
+    vs' = withIncidentEdges vs
     hs' = map withIncidentEdges hs
 
 -- -- | Gets the i^th edge on the outer boundary of the polygon, that is the edge
@@ -478,7 +478,7 @@ q `insidePolygon` pg = q `inPolygon` pg == Inside
 -- | Compute the area of a polygon
 area                        :: Fractional r => Polygon t p r -> r
 area poly@(SimplePolygon _) = abs $ signedArea poly
-area (MultiPolygon vs hs)   = area (SimplePolygon vs) - sum [area h | h <- hs]
+area (MultiPolygon vs hs)   = area vs - sum [area h | h <- hs]
 
 
 -- | Compute the signed area of a simple polygon. The the vertices are in
@@ -525,7 +525,7 @@ pickPoint pg | isTriangle pg = centroid . SimplePolygon $ pg^.outerBoundary
 isTriangle :: Polygon p t r -> Bool
 isTriangle = \case
     SimplePolygon vs   -> go vs
-    MultiPolygon vs [] -> go vs
+    MultiPolygon vs [] -> isTriangle vs
     MultiPolygon _  _  -> False
   where
     go vs = case toNonEmpty vs of
@@ -627,10 +627,10 @@ reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
 reverseOuterBoundary p = p&outerBoundary %~ C.reverseDirection
 
 
--- | Convert a Polygon to a simple polygon by forgetting about any holes.
-asSimplePolygon                        :: Polygon t p r -> SimplePolygon p r
-asSimplePolygon poly@(SimplePolygon _) = poly
-asSimplePolygon (MultiPolygon vs _)    = SimplePolygon vs
+-- | /O(1)/. Convert a Polygon to a simple polygon by forgetting about any holes.
+asSimplePolygon                      :: Polygon t p r -> SimplePolygon p r
+asSimplePolygon poly@SimplePolygon{} = poly
+asSimplePolygon (MultiPolygon vs _)  = vs
 
 
 -- | assigns unique integer numbers to all vertices. Numbers start from 0, and

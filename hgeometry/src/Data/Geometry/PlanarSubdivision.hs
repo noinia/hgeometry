@@ -83,7 +83,7 @@ fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
   where
     wp = Proxy :: Proxy (Wrap s)
 
-    outerPG = fromSimplePolygon p (SimplePolygon vs) iD oD
+    outerPG = fromSimplePolygon p vs iD oD
     i = V.last $ faces' outerPG
 
 
