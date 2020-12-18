@@ -14,21 +14,23 @@ import Test.Hspec
 spec :: Spec
 spec = do testCases "test/Data/Geometry/pointInPolygon.ipe"
           testCases "../hgeometry-examples/data/world.ipe"
-          toSpec testPoly
-          toSpec testPoly2
+          it "Pick point in polygon test"  $
+            toSpec testPoly
+          it "Pick point in polygon test"  $
+            toSpec testPoly2
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
-    Right tcs -> mapM_ toSpec tcs
+    Right tcs -> it "Pick point in polygon test"  $
+      mapM_ toSpec tcs
 
 data TestCase r = TestCase { _polygon    :: SimplePolygon () r }
                   deriving (Show)
 
-toSpec                  :: TestCase Rational -> Spec
-toSpec (TestCase  poly) = it "Pick point in polygon test"  $
-                            (pickPoint poly `inPolygon` poly) `shouldBe` Inside
+toSpec                  :: TestCase Rational -> Expectation
+toSpec (TestCase  poly) = (pickPoint poly `inPolygon` poly) `shouldBe` Inside
 
 readInputFromFile    :: FilePath -> IO (Either ConversionError [TestCase Rational])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp

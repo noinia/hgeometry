@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.LowerEnvelope.LowerEnvSpec where
+module Algorithms.Geometry.LowerEnvelope.LowerEnvSpec (spec) where
 
 import qualified Algorithms.Geometry.LowerEnvelope.DualCH as DualCH
 import           Control.Lens
@@ -8,15 +8,11 @@ import           Data.Eq.Approximate
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import           Data.Geometry.Line
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
-import           Data.Ratio
-import           Data.Semigroup
-import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 import           Test.Hspec
 import           Test.Util
