@@ -6,16 +6,12 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module Data.Geometry.Interval(
-                             -- * 1 dimensional Intervals
-                               Interval
+                               -- * 1 dimensional Intervals
+                               Interval (Interval, OpenInterval,ClosedInterval)
                              , fromRange, toRange
                              , _Range
 
-                             , pattern OpenInterval
-                             , pattern ClosedInterval
-                             , pattern Interval
-
-                             -- * querying the start and end of intervals
+                               -- * querying the start and end of intervals
                              , HasStart(..), HasEnd(..)
                              -- * Working with intervals
                              , inInterval

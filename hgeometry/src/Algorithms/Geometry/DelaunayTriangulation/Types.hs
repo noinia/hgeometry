@@ -10,7 +10,20 @@
 -- Defines some geometric types used in the delaunay triangulation
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.DelaunayTriangulation.Types where
+module Algorithms.Geometry.DelaunayTriangulation.Types
+  ( VertexID
+  , Vertex
+  , Adj
+  , Triangulation(..)
+  , vertexIds
+  , positions
+  , neighbours
+  , Mapping
+  , triangulationEdges
+  , tEdges
+  , toPlanarSubdivision
+  , toPlaneGraph
+  ) where
 
 import           Control.Lens
 import qualified Data.CircularList as C

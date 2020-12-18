@@ -8,6 +8,7 @@ import           Data.Maybe
 -- | The sign of an expression
 data Sign = Negative | Positive deriving (Show,Eq,Ord,Enum,Bounded)
 
+-- | Flip Positive <=> Negative.
 flipSign :: Sign -> Sign
 flipSign = \case
   Negative -> Positive

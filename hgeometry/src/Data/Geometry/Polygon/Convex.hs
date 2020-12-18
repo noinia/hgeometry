@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon.Convex
@@ -56,7 +55,11 @@ import           Data.Util
 -- | Data Type representing a convex polygon
 newtype ConvexPolygon p r = ConvexPolygon {_simplePolygon :: SimplePolygon p r }
                           deriving (Show,Eq,NFData)
-makeLenses ''ConvexPolygon
+
+-- | ConvexPolygons are isomorphic to SimplePolygons with the added constraint that they have no
+--   reflex vertices.
+simplePolygon :: Iso (ConvexPolygon p1 r1) (ConvexPolygon p2 r2) (SimplePolygon p1 r1) (SimplePolygon p2 r2)
+simplePolygon = iso _simplePolygon ConvexPolygon
 
 instance PointFunctor (ConvexPolygon p) where
   pmap f (ConvexPolygon p) = ConvexPolygon $ pmap f p
@@ -167,7 +170,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
                      CW       -> GT -- q is right of the line from o to p
 
 
---  | Given a convex polygon poly, and a point outside the polygon, find the
+-- | Given a convex polygon poly, and a point outside the polygon, find the
 --  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
@@ -175,7 +178,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
---  | Given a convex polygon poly, and a point outside the polygon, find the
+-- | Given a convex polygon poly, and a point outside the polygon, find the
 --  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
