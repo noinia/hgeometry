@@ -84,18 +84,18 @@ import           Data.Vinyl.CoRec             (asA)
 >>> :{
 -- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () (RealNumber 10)
-    simplePoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
+    simplePoly = SimplePolygonP . map ext $ [ Point2 0 0
                                                         , Point2 10 0
                                                         , Point2 10 10
                                                         , Point2 5 15
                                                         , Point2 1 11
                                                         ]
     simpleTriangle :: SimplePolygon () (RealNumber 10)
-    simpleTriangle = SimplePolygon . C.fromList . map ext $
+    simpleTriangle = SimplePolygonP . map ext $
       [ Point2 0 0, Point2 2 0, Point2 1 1]
     multiPoly :: MultiPolygon () (RealNumber 10)
     multiPoly = MultiPolygon
-      (C.fromList . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
+      (SimplePolygonP . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
       [simpleTriangle]
 :} -}
 
