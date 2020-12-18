@@ -10,14 +10,11 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point( Point(..)
+module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
                           , origin, vector
                           , pointFromList
                           , projectPoint
 
-                          , pattern Point1
-                          , pattern Point2
-                          , pattern Point3
                           , xCoord, yCoord, zCoord
 
                           , PointFunctor(..)

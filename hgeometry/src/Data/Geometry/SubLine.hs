@@ -35,9 +35,11 @@ data SubLine d p s r = SubLine { _line     :: Line d r
                                , _subRange :: Interval p s
                                }
 
+-- | Line part of SubLine.
 line :: Lens (SubLine d1 p s r1) (SubLine d2 p s r2) (Line d1 r1) (Line d2 r2)
 line = lens _line (\sub l -> SubLine l (_subRange sub))
 
+-- | Interval part of SubLine.
 subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
 subRange = lens _subRange (\sub r -> SubLine (_line sub) r)
 

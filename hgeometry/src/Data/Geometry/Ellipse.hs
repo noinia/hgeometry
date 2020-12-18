@@ -25,7 +25,7 @@ import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | A typre representing planar ellipses
+-- | A type representing planar ellipses
 newtype Ellipse r = Ellipse { _affineTransformation :: Transformation 2 r }
                    deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''Ellipse
