@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
@@ -42,7 +41,10 @@ import           GHC.TypeLits
 
 -- | A Poly line in R^d has at least 2 vertices
 newtype PolyLine d p r = PolyLine { _points :: LSeq 2 (Point d r :+ p) } deriving (Generic)
-makeLenses ''PolyLine
+
+-- | PolyLines are isomorphic to a sequence of points with at least 2 members.
+points :: Iso (PolyLine d1 p1 r1) (PolyLine d2 p2 r2) (LSeq 2 (Point d1 r1 :+ p1)) (LSeq 2 (Point d2 r2 :+ p2))
+points = iso (\(PolyLine s) -> s) PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq      (PolyLine d p r)

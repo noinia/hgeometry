@@ -80,6 +80,7 @@ import           Data.Vinyl.CoRec (asA)
 {- $setup
 >>> import Data.RealNumber.Rational
 >>> import Data.Foldable
+>>> import Control.Lens.Extras
 >>> :{
 -- import qualified Data.CircularSeq as C
 let simplePoly :: SimplePolygon () (RealNumber 10)
@@ -108,11 +109,16 @@ data Polygon (t :: PolygonType) p r where
   SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 
--- | Prism to 'test' if we are a simple polygon
+-- | Prism to 'test' if we are a simple polygon.
+--
+-- >>> is _SimplePolygon simplePoly
+-- True
 _SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
 _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 
--- | Prism to 'test' if we are a Multi polygon
+-- | Prism to 'test' if we are a multi polygon.
+-- >>> is _MultiPolygon multiPoly
+-- True
 _MultiPolygon :: Prism' (Polygon Multi p r) (C.CSeq (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
 
@@ -251,6 +257,7 @@ polygonHoles = lens g s
     s (MultiPolygon vs _) = MultiPolygon vs
 
 {- HLINT ignore polygonHoles' -}
+-- | /O(1)/. Traversal lens for polygon holes. Does nothing for simple polygons.
 polygonHoles' :: Traversal' (Polygon t p r) [Polygon Simple p r]
 polygonHoles' = \f -> \case
   p@SimplePolygon{}  -> pure p

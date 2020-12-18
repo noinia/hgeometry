@@ -104,7 +104,7 @@ evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
 
     blend p q = p .+^ t *^ (q .-. p)
 
-
+-- | Tangent to the bezier spline at the starting point.
 tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r
 tangent b = b^?!controlPoints.ix 1  .-. b^?!controlPoints.ix 0
 
