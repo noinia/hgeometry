@@ -2,23 +2,24 @@
 {-# LANGUAGE GADTs     #-}
 module Main where
 
+import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens
 import           Control.Monad
-import           Data.Aeson (Value, eitherDecodeStrict')
-import qualified Data.ByteString       as BS
+import           Data.Aeson                                  (Value, eitherDecodeStrict')
+import qualified Data.ByteString                             as BS
 import           Data.Either
 import           Data.Ext
 import           Data.Foldable
-import           Data.Foldable         as F
+import           Data.Foldable                               as F
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon as H
-import           Data.Geospatial       as Geo
+import           Data.Geometry.Polygon                       as H
+import           Data.Geospatial                             as Geo
 import           Data.Hashable
 import           Data.LinearRing
 import           Data.List
-import           Data.Sequence         as Seq
+import           Data.Sequence                               as Seq
 import           Data.Serialize
-import qualified Data.Set              as Set
+import qualified Data.Set                                    as Set
 import           System.Environment
 import           System.Exit
 import           System.IO
@@ -35,7 +36,9 @@ main = do
         case mbGeo :: Either String (GeoFeatureCollection Value) of
           Left err  -> error $ "Invalid GeoJSON: " ++ file ++ "\n" ++ err
           Right geo -> pure $ map fromGeoPolygon $ getPolygons geo
-      let (simple, multi) = partitionEithers $ nub $ concat polygons
+      let (simple', multi') = partitionEithers $ nub $ concat polygons
+          simple = Prelude.filter isValidPolygon simple'
+          multi = Prelude.filter isValidPolygon multi'
       -- forM_ multi print
       print (sum $ map (F.length . view outerBoundary) simple)
       print (F.length simple, F.length multi)
@@ -43,6 +46,9 @@ main = do
       BS.writeFile "polygons.multi" (encode $ map flattenMultiPolygon multi)
       return ()
     _ -> printUsage
+
+isValidPolygon :: Polygon t p Double -> Bool
+isValidPolygon = not . hasSelfIntersections . fmap (realToFrac :: Double -> Rational)
 
 flattenPolygon :: SimplePolygon p r -> [(r,r)]
 flattenPolygon = map (unpack . view core) . F.toList . view outerBoundary

@@ -15,7 +15,6 @@ import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances                   ()
 
-
 spec :: Spec
 spec = do
   it "sum (map area (triangulate polygon)) == area polygon" $ do

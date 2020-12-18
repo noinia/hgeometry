@@ -61,8 +61,12 @@ spec = do
     property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
       let p = MultiPolygon pts [SimplePolygon pts] in
       read (show p) == p
-  it "valid polygons" $ do
+  it "valid polygons (Double)" $ do
     forM_ allSimplePolygons $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Rational)" $ do
+    forM_ (map (fmap realToFrac) allSimplePolygons) $ \(poly :: SimplePolygon () Rational) -> do
       hasSelfIntersections poly `shouldBe` False
       isCounterClockwise poly `shouldBe` True
 
