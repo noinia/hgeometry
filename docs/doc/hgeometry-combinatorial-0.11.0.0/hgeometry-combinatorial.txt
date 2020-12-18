@@ -172,16 +172,22 @@ module Control.Monad.State.Persistent
 
 -- | A State monad that can store earlier versions of the state.
 data PersistentStateT s m a
+
+-- | A State monad that can store earlier versions of the state.
 type PersistentState s = PersistentStateT s Identity
 
 -- | Create a snapshot of the current state and add it to the list of
 --   states that we store.
 store :: Monad m => PersistentStateT s m ()
 
--- | run a persistentStateT, returns a triplet with the value, the last
+-- | Run a persistentStateT, returns a triplet with the value, the last
 --   state and a list of all states (including the last one) in
 --   chronological order
 runPersistentStateT :: Functor m => PersistentStateT s m a -> s -> m (a, s, [s])
+
+-- | Run a persistentStateT, returns a triplet with the value, the last
+--   state and a list of all states (including the last one) in
+--   chronological order
 runPersistentState :: PersistentState s a -> s -> (a, s, [s])
 instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.State.Persistent.PersistentStateT s m)
 instance GHC.Base.Monad m => GHC.Base.Applicative (Control.Monad.State.Persistent.PersistentStateT s m)
@@ -226,6 +232,11 @@ insertOrdBy :: (a -> a -> Ordering) -> a -> CList a -> CList a
 --   cirulcar order. Again produces a list that has the items in circular
 --   order.
 insertOrdBy' :: (a -> a -> Ordering) -> a -> [a] -> [a]
+
+-- | Given a list of elements that is supposedly a a cyclic-shift of a list
+--   of increasing items, find the splitting point. I.e. returns a pair of
+--   lists (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in
+--   sorted order.
 splitIncr :: (a -> a -> Ordering) -> [a] -> ([a], [a])
 
 -- | Test if the circular list is a cyclic shift of the second list.
@@ -616,30 +627,54 @@ module Data.LSeq
 -- | LSeq n a certifies that the sequence has *at least* n items
 data LSeq (n :: Nat) a
 
--- | Convert to a sequence by dropping the type-level size.
+-- | The empty sequence.
+pattern EmptyL :: LSeq n a
+
+-- | A bidirectional pattern synonym viewing the front of a non-empty
+--   sequence.
+pattern (:<|) :: a -> LSeq n a -> LSeq (1 + n) a
+
+-- | A unidirectional pattern synonym viewing the front of a non-empty
+--   sequence.
+pattern (:<<) :: a -> LSeq 0 a -> LSeq n a
+
+-- | A bidirectional pattern synonym viewing the rear of a non-empty
+--   sequence.
+pattern (:|>) :: forall n a. LSeq n a -> a -> LSeq (1 + n) a
+infixr 5 :<|
+infixr 5 :<<
+infixl 5 :|>
+
+-- | &lt;math&gt; Convert to a sequence by dropping the type-level size.
 toSeq :: LSeq n a -> Seq a
 
--- | <i>O(1)</i> The empty sequence.
+-- | &lt;math&gt; The empty sequence.
 empty :: LSeq 0 a
+
+-- | &lt;math&gt;. Create an l-sequence from a finite list of elements.
 fromList :: Foldable f => f a -> LSeq 0 a
+
+-- | &lt;math&gt;. Create an l-sequence from a non-empty list.
 fromNonEmpty :: NonEmpty a -> LSeq 1 a
+
+-- | &lt;math&gt;. Create an l-sequence from a sequence of elements.
 fromSeq :: Seq a -> LSeq 0 a
 
--- | <i>O(1)</i> Add an element to the left end of a sequence. Mnemonic: a
+-- | &lt;math&gt; Add an element to the left end of a sequence. Mnemonic: a
 --   triangle with the single element at the pointy end.
 (<|) :: a -> LSeq n a -> LSeq (1 + n) a
 infixr 5 <|
 
--- | <i>O(1)</i> Add an element to the right end of a sequence. Mnemonic: a
---   triangle with the single element at the pointy end.
+-- | &lt;math&gt; Add an element to the right end of a sequence. Mnemonic:
+--   a triangle with the single element at the pointy end.
 (|>) :: LSeq n a -> a -> LSeq (1 + n) a
 infixl 5 |>
 
--- | <i>O(log(min(n,m)))</i> Concatenate two sequences.
+-- | &lt;math&gt; Concatenate two sequences.
 (><) :: LSeq n a -> LSeq m a -> LSeq (n + m) a
 infix 5 ><
 
--- | Prove a sequence has at least <tt>n</tt> elements.
+-- | &lt;math&gt; Prove a sequence has at least <tt>n</tt> elements.
 --   
 --   <pre>
 --   &gt;&gt;&gt; eval (Proxy :: Proxy 3) (fromList [1,2,3])
@@ -728,21 +763,22 @@ init :: LSeq (1 + n) a -> LSeq n a
 
 -- | appends two sequences.
 append :: LSeq n a -> LSeq m a -> LSeq (n + m) a
+
+-- | View of the left end of a sequence.
 data ViewL n a
 [:<] :: a -> LSeq n a -> ViewL (1 + n) a
 infixr 5 :<
+
+-- | ( O(1) ). Analyse the left end of a sequence.
 viewl :: LSeq (1 + n) a -> ViewL (1 + n) a
-pattern (:<|) :: a -> LSeq n a -> LSeq (1 + n) a
-infixr 5 :<|
-pattern (:<<) :: a -> LSeq 0 a -> LSeq n a
-infixr 5 :<<
-pattern EmptyL :: LSeq n a
+
+-- | View of the right end of a sequence.
 data ViewR n a
 [:>] :: LSeq n a -> a -> ViewR (1 + n) a
 infixl 5 :>
+
+-- | &lt;math&gt;. Analyse the right end of a sequence.
 viewr :: LSeq (1 + n) a -> ViewR (1 + n) a
-pattern (:|>) :: forall n a. LSeq n a -> a -> LSeq (1 + n) a
-infixl 5 :|>
 
 -- | Zips two equal length LSeqs
 zipWith :: (a -> b -> c) -> LSeq n a -> LSeq n b -> LSeq n c
@@ -2336,8 +2372,26 @@ module Data.Range
 data EndPoint a
 Open :: !a -> EndPoint a
 Closed :: !a -> EndPoint a
+
+-- | True iff EndPoint is open.
 isOpen :: EndPoint a -> Bool
+
+-- | True iff EndPoint is closed.
 isClosed :: EndPoint a -> Bool
+
+-- | Access lens for EndPoint value regardless of whether it is open or
+--   closed.
+--   
+--   <pre>
+--   &gt;&gt;&gt; Open 5 ^. unEndPoint
+--   5
+--   
+--   &gt;&gt;&gt; Closed 10 ^. unEndPoint
+--   10
+--   
+--   &gt;&gt;&gt; Open 4 &amp; unEndPoint .~ 0
+--   Open 0
+--   </pre>
 unEndPoint :: Lens (EndPoint a) (EndPoint b) a b
 
 -- | Data type for representing ranges.
@@ -2345,6 +2399,11 @@ data Range a
 Range :: !EndPoint a -> !EndPoint a -> Range a
 [_lower] :: Range a -> !EndPoint a
 [_upper] :: Range a -> !EndPoint a
+pattern OpenRange :: a -> a -> Range a
+pattern ClosedRange :: a -> a -> Range a
+
+-- | A range from l to u, ignoring/forgetting the type of the endpoints
+pattern Range' :: a -> a -> Range a
 
 -- | Helper function to show a range in mathematical notation.
 --   
@@ -2361,11 +2420,6 @@ Range :: !EndPoint a -> !EndPoint a -> Range a
 prettyShow :: Show a => Range a -> String
 lower :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
 upper :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
-pattern OpenRange :: a -> a -> Range a
-pattern ClosedRange :: a -> a -> Range a
-
--- | A range from l to u, ignoring/forgetting the type of the endpoints
-pattern Range' :: a -> a -> Range a
 
 -- | Test if a value lies in a range.
 --   
