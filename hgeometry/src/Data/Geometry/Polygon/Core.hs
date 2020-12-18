@@ -81,6 +81,7 @@ import           Data.Vinyl.CoRec             (asA)
 
 {- $setup
 >>> import Data.RealNumber.Rational
+>>> import Data.Foldable
 >>> :{
 -- import qualified Data.Vector.Circular as CV
 let simplePoly :: SimplePolygon () (RealNumber 10)
@@ -91,12 +92,21 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
       , Point2 5 15
       , Point2 1 11
       ]
+    simpleTriangle :: SimplePolygon () (RealNumber 10)
+    simpleTriangle = SimplePolygon . C.fromList . map ext $
+      [ Point2 0 0, Point2 2 0, Point2 1 1]
+    multiPoly :: MultiPolygon () (RealNumber 10)
+    multiPoly = MultiPolygon
+      (C.fromList . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
+      [simpleTriangle]
 :} -}
 
--- | We distinguish between simple polygons (without holes) and Polygons with holes.
+-- | We distinguish between simple polygons (without holes) and polygons with holes.
 data PolygonType = Simple | Multi
 
-
+-- | Polygons are sequences of points and may or may not contain holes.
+--   Degenerate polygons (polygons with self-intersections or fewer than 3 points)
+--   are possible and it is the responsibility of the user to avoid creating them.
 data Polygon (t :: PolygonType) p r where
   SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
   MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
@@ -108,6 +118,9 @@ _SimplePolygon = prism' SimplePolygon (\(SimplePolygon vs) -> Just vs)
 -- | Prism to 'test' if we are a Multi polygon
 _MultiPolygon :: Prism' (Polygon Multi p r) (CircularVector (Point 2 r :+ p), [Polygon Simple p r])
 _MultiPolygon = prism' (uncurry MultiPolygon) (\(MultiPolygon vs hs) -> Just (vs,hs))
+
+instance Functor (Polygon t p) where
+  fmap = bimap id
 
 instance Bifunctor (Polygon t) where
   bimap = bimapDefault
@@ -129,8 +142,10 @@ bitraverseVertices     :: (Applicative f, Traversable t) => (p -> f q) -> (r -> 
                   -> t (Point 2 r :+ p) -> f (t (Point 2 s :+ q))
 bitraverseVertices f g = traverse (bitraverse (traverse g) f)
 
+-- | Polygon without holes.
 type SimplePolygon = Polygon Simple
 
+-- | Polygon with zero or more holes.
 type MultiPolygon  = Polygon Multi
 
 -- | Either a simple or multipolygon
@@ -146,6 +161,20 @@ type instance NumType   (Polygon t p r) = r
 instance (Show p, Show r) => Show (Polygon t p r) where
   show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"
   show (MultiPolygon vs hs) = "MultiPolygon (" <> show vs <> ") (" <> show hs <> ")"
+
+instance (Read p, Read r) => Read (SimplePolygon p r) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (SimplePolygon vs, t)
+      | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
+    where app_prec = 10
+
+instance (Read p, Read r) => Read (MultiPolygon p r) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (MultiPolygon vs hs, t')
+      | ("MultiPolygon", s) <- lex r
+      , (vs, t) <- reads s
+      , (hs, t') <- reads t ]
+    where app_prec = 10
 
 -- instance (Read p, Read r) => Show (Polygon t p r) where
 --   show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"
@@ -195,6 +224,10 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
+-- | Lens access to the outer boundary of a polygon.
+--
+-- >>> toList (simpleTriangle ^. outerBoundary)
+-- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 outerBoundary = lens g s
   where
@@ -207,6 +240,10 @@ outerBoundary = lens g s
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon vs hs
 
+-- | Lens access for polygon holes.
+--
+-- >>> multiPoly ^. polygonHoles
+-- [SimplePolygon (CSeq [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()])]
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 polygonHoles = lens g s
   where
@@ -226,6 +263,8 @@ polygonHoles' = \f -> \case
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
 outerVertex i = outerBoundary . CV.item i
 
+-- | Get the n^th edge along the outer boundary of the polygon. The edge is half open.
+--
 -- running time: \(O(\log i)\)
 outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
 outerBoundaryEdge i p = let u = p^.outerVertex i
@@ -556,6 +595,10 @@ toCounterClockWiseOrder' p
       | not $ isCounterClockwise p = reverseOuterBoundary p
       | otherwise                  = p
 
+-- | Reorient the outer boundary from clockwise order to counter-clockwise order or
+--   from counter-clockwise order to clockwise order. Leaves
+--   any holes as they are.
+--
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
 reverseOuterBoundary p = p&outerBoundary %~ CV.reverse
 

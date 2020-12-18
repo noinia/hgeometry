@@ -11,19 +11,12 @@ import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
-import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.Map as Map
-import           Data.Proxy
-import qualified Data.Set as Set
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck(property)
 import           Test.QuickCheck.Instances ()
--- import           Test.Util
-
-import           Debug.Trace
 
 spec :: Spec
 spec = do
@@ -100,7 +93,7 @@ myPoints = NonEmpty.fromList . map ext $
            ]
 
 
-mPoint2 [x,y] = Point2 x y
+mPoint2 ~[x,y] = Point2 x y
 
 testPoints = fmap ext $ NonEmpty.fromList
   [ mPoint2 [0, 10]

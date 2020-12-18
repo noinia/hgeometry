@@ -122,7 +122,7 @@ origin = Point $ pure 0
 -- Vector3 [1,2,3]
 -- >>> origin & vector .~ Vector3 1 2 3
 -- Point3 [1,2,3]
-vector :: Lens' (Point d r) (Vector d r)
+vector :: Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
 vector = lens toVec (const Point)
 {-# INLINABLE vector #-}
 

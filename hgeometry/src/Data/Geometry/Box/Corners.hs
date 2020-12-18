@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Box.Corners
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
                                 , corners, cornersInDirection
                                 ) where

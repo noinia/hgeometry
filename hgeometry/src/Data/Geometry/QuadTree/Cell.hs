@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.QuadTree.Cell
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.QuadTree.Cell where
 
 import Control.Lens (makeLenses, (^.),(&),(%~),ix, to)

@@ -1,6 +1,13 @@
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.HyperPlane
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.HyperPlane where
 
 import Control.DeepSeq

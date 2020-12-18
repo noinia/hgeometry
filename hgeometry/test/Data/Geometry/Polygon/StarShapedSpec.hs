@@ -20,19 +20,20 @@ testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile fp) >>= \case
     Left e    -> it "reading star-shaped file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
-    Right tcs -> mapM_ toSpec tcs
+    Right tcs -> specify "isStarShaped test" $
+      mapM_ toSpec tcs
 
 data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                            , _isStar     :: Bool
                            }
                   deriving (Show)
 
-toSpec                   :: TestCase Rational -> Spec
-toSpec (TestCase poly b) = it "isStarShaped test" $ do
-                             -- correct result
-                             isJust mq `shouldBe` b
-                             -- it "returned point in polygon" $
-                             (maybe True (`intersects` poly) mq) `shouldBe` True
+toSpec                   :: TestCase Rational -> Expectation
+toSpec (TestCase poly b) = do
+    -- correct result
+    isJust mq `shouldBe` b
+    -- it "returned point in polygon" $
+    (maybe True (`intersects` poly) mq) `shouldBe` True
   where
     mq = flip evalRand (mkStdGen 15)
            (isStarShaped poly)

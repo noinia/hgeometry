@@ -9,9 +9,10 @@
 -- points in \(\mathbb{R}^2\)
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SmallestEnclosingBall.Naive( smallestEnclosingDisk
-                                                      , enclosesAll
-                                                      ) where
+module Algorithms.Geometry.SmallestEnclosingBall.Naive
+  ( smallestEnclosingDisk
+  , enclosesAll
+  ) where
 
 -- just for the types
 import Control.Lens

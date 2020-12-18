@@ -1,8 +1,9 @@
 HGeometry
 =========
 
-[![Build Status](https://travis-ci.org/noinia/hgeometry.svg?branch=master)](https://travis-ci.org/noinia/hgeometry)
-[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg)](https://hackage.haskell.org/package/hgeometry)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/noinia/hgeometry/CI)
+[![Hackage](https://img.shields.io/hackage/v/hgeometry.svg?color=success)](https://hackage.haskell.org/package/hgeometry)
+[![API docs coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fnoinia.github.io%2Fhgeometry%2Fhaddock_badge.json)](https://noinia.github.io/hgeometry/doc/)
 
 HGeometry is a library for computing with geometric objects in
 Haskell. It defines basic geometric types and primitives, and it
@@ -56,25 +57,25 @@ line segments, testing if a point lies in a polygon etc, HGeometry
 implements some more advanced geometric algorithms. In particuar, the
 following algorithms are currently available:
 
-* two \(O(n \log n)\) time algorithms for convex hull in
-  $\mathbb{R}^2$: the typical Graham scan, and a divide and conquer algorithm,
-* an \(O(n)\) expected time algorithm for smallest enclosing disk in $\mathbb{R}^$2,
+* two *O(n log n)* time algorithms for convex hull in
+  ℝ²: the typical Graham scan, and a divide and conquer algorithm,
+* an *O(n)* expected time algorithm for smallest enclosing disk in ℝ²,
 * the well-known Douglas Peucker polyline line simplification algorithm,
-* an \(O(n \log n)\) time algorithm for computing the Delaunay triangulation
-(using divide and conquer).
-* an \(O(n \log n)\) time algorithm for computing the Euclidean Minimum Spanning
-Tree (EMST), based on computing the Delaunay Triangulation.
-* an \(O(\log^2 n)\) time algorithm to find extremal points and tangents on/to a
-  convex polygon.
-* An optimal \(O(n+m)\) time algorithm to compute the Minkowski sum of two convex
-polygons.
-* An \(O(1/\varepsilon^dn\log n)\) time algorithm for constructing a Well-Separated pair
-  decomposition.
-* The classic (optimal) \(O(n\log n)\) time divide and conquer algorithm to
-  compute the closest pair among a set of \(n\) points in \(\mathbb{R}^2\).
-* An \(O(nm)\) time algorithm to compute the discrete Fr\'echet
-  distance of two sequences of points (curves) of length \(n\) and
-  \(m\), respectively.
+* an *O(n log n)* time algorithm for computing the Delaunay triangulation
+(using divide and conquer),
+* an *O(n log n)* time algorithm for computing the Euclidean Minimum Spanning
+Tree (EMST), based on computing the Delaunay Triangulation,
+* an *O(log² n)* time algorithm to find extremal points and tangents on/to a
+  convex polygon,
+* an optimal *O(n+m)* time algorithm to compute the Minkowski sum of two convex
+polygons,
+* an *O(1/εᵈn log n)* time algorithm for constructing a Well-Separated pair
+  decomposition,
+* the classic (optimal) *O(n log n)* time divide and conquer algorithm to
+  compute the closest pair among a set of *n* points in ℝ²,
+* an *O(nm)* time algorithm to compute the discrete Fréchet
+  distance of two sequences of points (curves) of length *n* and
+  *m*, respectively.
 
 Available Geometric Data Structures
 -----------------------------------
@@ -125,8 +126,8 @@ the vertices of the polygon to cary some extra information of type `p`
 
 ```haskell
 data Polygon (t :: PolygonType) p r where
-  SimplePolygon :: C.CSeq (Point 2 r :+ p)                         -> Polygon Simple p r
-  MultiPolygon  :: C.CSeq (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
+  SimplePolygon :: CircularVector (Point 2 r :+ p)                         -> Polygon Simple p r
+  MultiPolygon  :: CircularVector (Point 2 r :+ p) -> [Polygon Simple p r] -> Polygon Multi  p r
 ```
 In all places this extra data is accessable by the (:+) type in Data.Ext, which
 is essentially just a pair.
