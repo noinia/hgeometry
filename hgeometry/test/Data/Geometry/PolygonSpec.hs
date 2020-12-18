@@ -30,6 +30,9 @@ allSimplePolygons = unsafePerformIO $ do
       | lst <- pts
       ]
 
+allSimplePolygons' :: [SimplePolygon () Rational]
+allSimplePolygons' = map (realToFrac <$>) allSimplePolygons
+
 {-# NOINLINE allMultiPolygons #-}
 allMultiPolygons :: [MultiPolygon () Double]
 allMultiPolygons = unsafePerformIO $ do
@@ -43,6 +46,9 @@ allMultiPolygons = unsafePerformIO $ do
       ]
   where
     toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+
+allMultiPolygons' :: [MultiPolygon () Rational]
+allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Fractional a => Arbitrary (SimplePolygon () a) where
   arbitrary = fmap realToFrac <$> elements allSimplePolygons
@@ -61,12 +67,20 @@ spec = do
     property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
       let p = MultiPolygon pts [SimplePolygon pts] in
       read (show p) == p
-  it "valid polygons (Double)" $ do
+  it "valid polygons (Simple/Double)" $ do
     forM_ allSimplePolygons $ \poly -> do
       hasSelfIntersections poly `shouldBe` False
       isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Rational)" $ do
-    forM_ (map (fmap realToFrac) allSimplePolygons) $ \(poly :: SimplePolygon () Rational) -> do
+  it "valid polygons (Simple/Rational)" $ do
+    forM_ allSimplePolygons' $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Multi/Double)" $ do
+    forM_ allMultiPolygons $ \poly -> do
+      hasSelfIntersections poly `shouldBe` False
+      isCounterClockwise poly `shouldBe` True
+  it "valid polygons (Multi/Rational)" $ do
+    forM_ allMultiPolygons' $ \poly -> do
       hasSelfIntersections poly `shouldBe` False
       isCounterClockwise poly `shouldBe` True
 
