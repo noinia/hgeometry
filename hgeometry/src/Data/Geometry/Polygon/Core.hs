@@ -13,7 +13,6 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
                                  , _SimplePolygon, _MultiPolygon
                                  , SimplePolygon, MultiPolygon, SomePolygon
                                  , pattern SimplePolygonP
-                                 , pattern MultiPolygonP
 
                                  , fromPoints
                                  , unsafeFromPoints
@@ -115,16 +114,8 @@ pattern SimplePolygonP lst <- (viewSimple -> lst)
   where
     SimplePolygonP lst = fromPoints lst
 
-pattern MultiPolygonP :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon p r
-pattern MultiPolygonP boundary hs <- (viewMulti -> (boundary, hs))
-  where
-    MultiPolygonP boundary hs = MultiPolygon boundary hs
-
 viewSimple :: SimplePolygon p r -> [Point 2 r :+ p]
 viewSimple (SimplePolygon s) = F.toList s
-
-viewMulti :: MultiPolygon p r -> (SimplePolygon p r, [SimplePolygon p r])
-viewMulti (MultiPolygon boundary hs) = (boundary, hs)
 
 -- | Prism to 'test' if we are a simple polygon
 _SimplePolygon :: Prism' (Polygon Simple p r) (C.CSeq (Point 2 r :+ p))
