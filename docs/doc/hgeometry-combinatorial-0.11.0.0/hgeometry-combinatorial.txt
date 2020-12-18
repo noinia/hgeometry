@@ -475,6 +475,7 @@ instance GHC.Generics.Generic (Data.CircularSeq.CSeq a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.CircularSeq.CSeq a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.CircularSeq.CSeq a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.CircularSeq.CSeq a)
+instance GHC.Read.Read a => GHC.Read.Read (Data.CircularSeq.CSeq a)
 instance Data.Traversable.Traversable Data.CircularSeq.CSeq
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.CircularSeq.CSeq
 instance Data.Foldable.Foldable Data.CircularSeq.CSeq
@@ -1206,8 +1207,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHgV a_aHzM. Lens (Permutation a_aHgV) (Permutation a_aHzM) (Vector (Orbit a_aHgV)) (Vector (Orbit a_aHzM))
-indexes :: forall a_aHgV. Lens' (Permutation a_aHgV) (Vector (Int, Int))
+orbits :: forall a_aHj8 a_aHBZ. Lens (Permutation a_aHj8) (Permutation a_aHBZ) (Vector (Orbit a_aHj8)) (Vector (Orbit a_aHBZ))
+indexes :: forall a_aHj8. Lens' (Permutation a_aHj8) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1319,8 +1320,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKxv. Lens' (Dart s_aKxv) Direction
-arc :: forall s_aKxv s_aKXW. Lens (Dart s_aKxv) (Dart s_aKXW) (Arc s_aKxv) (Arc s_aKXW)
+direction :: forall s_aKzI. Lens' (Dart s_aKzI) Direction
+arc :: forall s_aKzI s_aL06. Lens (Dart s_aKzI) (Dart s_aL06) (Arc s_aKzI) (Arc s_aL06)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -1929,8 +1930,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKxv s_aKXW. Lens (Dart s_aKxv) (Dart s_aKXW) (Arc s_aKxv) (Arc s_aKXW)
-direction :: forall s_aKxv. Lens' (Dart s_aKxv) Direction
+arc :: forall s_aKzI s_aL06. Lens (Dart s_aKzI) (Dart s_aL06) (Arc s_aKzI) (Arc s_aL06)
+direction :: forall s_aKzI. Lens' (Dart s_aKzI) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2358,8 +2359,8 @@ Range :: !EndPoint a -> !EndPoint a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aQSZ. Lens' (Range a_aQSZ) (EndPoint a_aQSZ)
-upper :: forall a_aQSZ. Lens' (Range a_aQSZ) (EndPoint a_aQSZ)
+lower :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
+upper :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
 pattern OpenRange :: a -> a -> Range a
 pattern ClosedRange :: a -> a -> Range a
 
@@ -2958,10 +2959,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZfC a_a10T0. Traversal (UnBounded a_aZfC) (UnBounded a_a10T0) a_aZfC a_a10T0
-_MinInfinity :: forall a_aZfC. Prism' (UnBounded a_aZfC) ()
-_Val :: forall a_aZfC a_a10VT. Prism (UnBounded a_a10VT) (UnBounded a_aZfC) a_a10VT a_aZfC
-_MaxInfinity :: forall a_aZfC. Prism' (UnBounded a_aZfC) ()
+unUnBounded :: forall a_aZhM a_a10Va. Traversal (UnBounded a_aZhM) (UnBounded a_a10Va) a_aZhM a_a10Va
+_MinInfinity :: forall a_aZhM. Prism' (UnBounded a_aZhM) ()
+_Val :: forall a_aZhM a_a10Y3. Prism (UnBounded a_a10Y3) (UnBounded a_aZhM) a_a10Y3 a_aZhM
+_MaxInfinity :: forall a_aZhM. Prism' (UnBounded a_aZhM) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   

@@ -30,11 +30,11 @@
 </span><span id="line-30"></span><span class="hs-comment">--</span><span>
 </span><span id="line-31"></span><span class="hs-comment">-- pre: the input is a *SET*, i.e. contains no duplicate points. (If the</span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- input does contain duplicate points, the implementation throws them away)</span><span>
-</span><span id="line-33"></span><span id="local-6989586621679987824"><span id="local-6989586621679987825"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#delaunayTriangulation"><span class="hs-identifier hs-type">delaunayTriangulation</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987825"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679987825"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679987824"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Triangulation"><span class="hs-identifier hs-type">Triangulation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987824"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987825"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679990573"><span id="local-6989586621679990574"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#delaunayTriangulation"><span class="hs-identifier hs-type">delaunayTriangulation</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679990574"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679990574"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679990574"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679990573"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Triangulation"><span class="hs-identifier hs-type">Triangulation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990573"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990574"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
 </span><span id="line-35"></span><span id="delaunayTriangulation"><span class="annot"><span class="annottext">delaunayTriangulation :: NonEmpty (Point 2 r :+ p) -&gt; Triangulation p r
-</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#delaunayTriangulation"><span class="hs-identifier hs-var hs-var">delaunayTriangulation</span></a></span></span><span> </span><span id="local-6989586621679987822"><span class="annot"><span class="annottext">pts :: NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621679987822"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r) VertexID
+</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#delaunayTriangulation"><span class="hs-identifier hs-var hs-var">delaunayTriangulation</span></a></span></span><span> </span><span id="local-6989586621679990571"><span class="annot"><span class="annottext">pts :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679990571"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r) VertexID
 -&gt; Vector (Point 2 r :+ p)
 -&gt; Vector (CList VertexID)
 -&gt; Triangulation p r
@@ -44,12 +44,12 @@ Map (Point 2 r) VertexID
 -&gt; Vector (CList VertexID)
 -&gt; Triangulation p r
 </span><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Triangulation"><span class="hs-identifier hs-var">Triangulation</span></a></span><span> </span><span class="annot"><span class="annottext">Map (Point 2 r) VertexID
-</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">ptIds</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (CList VertexID)
-</span><a href="#local-6989586621679987818"><span class="hs-identifier hs-var">adjV</span></a></span><span>
+</span><a href="#local-6989586621679990569"><span class="hs-identifier hs-var">ptIds</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (CList VertexID)
+</span><a href="#local-6989586621679990567"><span class="hs-identifier hs-var">adjV</span></a></span><span>
 </span><span id="line-36"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-37"></span><span>    </span><span id="local-6989586621679987819"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var hs-var">ptsV</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; Vector (Point 2 r :+ p)
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679990568"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var hs-var">ptsV</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; Vector (Point 2 r :+ p)
 forall a. [a] -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.fromList</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; Vector (Point 2 r :+ p))
 -&gt; (NonEmpty (Point 2 r :+ p) -&gt; [Point 2 r :+ p])
@@ -84,9 +84,9 @@ Lens (core :+ extra) (core' :+ extra) core core'
 -&gt; NonEmpty (Point 2 r :+ p) -&gt; Vector (Point 2 r :+ p)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621679987822"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-38"></span><span>    </span><span id="local-6989586621679987820"><span class="annot"><span class="annottext">ptIds :: Map (Point 2 r) VertexID
-</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var hs-var">ptIds</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Point 2 r, VertexID)] -&gt; Map (Point 2 r) VertexID
+</span><a href="#local-6989586621679990571"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-38"></span><span>    </span><span id="local-6989586621679990569"><span class="annot"><span class="annottext">ptIds :: Map (Point 2 r) VertexID
+</span><a href="#local-6989586621679990569"><span class="hs-identifier hs-var hs-var">ptIds</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Point 2 r, VertexID)] -&gt; Map (Point 2 r) VertexID
 forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
 </span><span class="hs-identifier hs-var">M.fromList</span></span><span> </span><span class="annot"><span class="annottext">([(Point 2 r, VertexID)] -&gt; Map (Point 2 r) VertexID)
 -&gt; [(Point 2 r, VertexID)] -&gt; Map (Point 2 r) VertexID
@@ -112,15 +112,15 @@ forall a. Vector a -&gt; [a]
 -&gt; Vector (Point 2 r :+ p) -&gt; [Point 2 r]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
-</span><span id="line-39"></span><span>    </span><span id="local-6989586621679987818"><span class="annot"><span class="annottext">adjV :: Vector (CList VertexID)
-</span><a href="#local-6989586621679987818"><span class="hs-identifier hs-var hs-var">adjV</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mapping p r -&gt; [(VertexID, VertexID)] -&gt; Vector (CList VertexID)
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
+</span><span id="line-39"></span><span>    </span><span id="local-6989586621679990567"><span class="annot"><span class="annottext">adjV :: Vector (CList VertexID)
+</span><a href="#local-6989586621679990567"><span class="hs-identifier hs-var hs-var">adjV</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mapping p r -&gt; [(VertexID, VertexID)] -&gt; Vector (CList VertexID)
 forall r p.
 (Num r, Ord r) =&gt;
 Mapping p r -&gt; [(VertexID, VertexID)] -&gt; Vector (CList VertexID)
 </span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#toAdjLists"><span class="hs-identifier hs-var">toAdjLists</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r) VertexID
-</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">ptIds</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(VertexID, VertexID)] -&gt; Vector (CList VertexID))
+</span><a href="#local-6989586621679990569"><span class="hs-identifier hs-var">ptIds</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(VertexID, VertexID)] -&gt; Vector (CList VertexID))
 -&gt; ([(VertexID, VertexID, VertexID)] -&gt; [(VertexID, VertexID)])
 -&gt; [(VertexID, VertexID, VertexID)]
 -&gt; Vector (CList VertexID)
@@ -130,54 +130,54 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; [(VertexID, VertexID, VertexID)] -&gt; Vector (CList VertexID)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(VertexID, VertexID, VertexID)]
-</span><a href="#local-6989586621679987807"><span class="hs-identifier hs-var">fs</span></a></span><span>
-</span><span id="line-40"></span><span>    </span><span id="local-6989586621679987806"><span class="annot"><span class="annottext">n :: VertexID
-</span><a href="#local-6989586621679987806"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID
+</span><a href="#local-6989586621679990556"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679990555"><span class="annot"><span class="annottext">n :: VertexID
+</span><a href="#local-6989586621679990555"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID
 forall a. Vector a -&gt; VertexID
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; VertexID
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; VertexID
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
 </span><span id="line-41"></span><span>
 </span><span id="line-42"></span><span>    </span><span class="hs-comment">-- construct the list of faces/triangles in the delaunay triangulation</span><span>
-</span><span id="line-43"></span><span>    </span><span id="local-6989586621679987807"><span class="annot"><span class="annottext">fs :: [(VertexID, VertexID, VertexID)]
-</span><a href="#local-6989586621679987807"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987804"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987803"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987802"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679987804"><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987804"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987806"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679987803"><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987803"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987804"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987806"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679987802"><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987802"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987803"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987806"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mapping p r -&gt; VertexID -&gt; VertexID -&gt; VertexID -&gt; Bool
+</span><span id="line-43"></span><span>    </span><span id="local-6989586621679990556"><span class="annot"><span class="annottext">fs :: [(VertexID, VertexID, VertexID)]
+</span><a href="#local-6989586621679990556"><span class="hs-identifier hs-var hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990553"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990552"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990551"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679990553"><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990553"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990555"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679990552"><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990552"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990553"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990555"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679990551"><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990551"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990552"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990555"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mapping p r -&gt; VertexID -&gt; VertexID -&gt; VertexID -&gt; Bool
 forall r p.
 (Fractional r, Ord r) =&gt;
 Mapping p r -&gt; VertexID -&gt; VertexID -&gt; VertexID -&gt; Bool
 </span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#isDelaunay"><span class="hs-identifier hs-var">isDelaunay</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map (Point 2 r) VertexID
-</span><a href="#local-6989586621679987820"><span class="hs-identifier hs-var">ptIds</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987819"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987804"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987803"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987802"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><a href="#local-6989586621679990569"><span class="hs-identifier hs-var">ptIds</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990568"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990553"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990552"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990551"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-45"></span><span>         </span><span class="hs-special">]</span><span>
 </span><span id="line-46"></span><span>
 </span><span id="line-47"></span><span class="hs-comment">-- | Given a list of edges, as vertexId pairs, construct a vector with the</span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- adjacency lists, each in CW sorted order.</span><span>
-</span><span id="line-49"></span><span id="local-6989586621679987903"><span id="local-6989586621679987904"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#toAdjLists"><span class="hs-identifier hs-type">toAdjLists</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679987904"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987904"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987903"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987904"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span id="local-6989586621679990652"><span id="local-6989586621679990653"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#toAdjLists"><span class="hs-identifier hs-type">toAdjLists</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679990653"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679990653"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990652"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990653"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-50"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-51"></span><span id="toAdjLists"><span class="annot"><span class="annottext">toAdjLists :: Mapping p r -&gt; [(VertexID, VertexID)] -&gt; Vector (CList VertexID)
-</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#toAdjLists"><span class="hs-identifier hs-var hs-var">toAdjLists</span></a></span></span><span> </span><span id="local-6989586621679987800"><span class="annot"><span class="annottext">m :: Mapping p r
-</span><a href="#local-6989586621679987800"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679987799"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987799"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679987798"><span class="annot"><span class="annottext">es :: [(VertexID, VertexID)]
-</span><a href="#local-6989586621679987798"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(VertexID -&gt; [VertexID] -&gt; CList VertexID)
+</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#toAdjLists"><span class="hs-identifier hs-var hs-var">toAdjLists</span></a></span></span><span> </span><span id="local-6989586621679990549"><span class="annot"><span class="annottext">m :: Mapping p r
+</span><a href="#local-6989586621679990549"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679990548"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990548"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679990547"><span class="annot"><span class="annottext">es :: [(VertexID, VertexID)]
+</span><a href="#local-6989586621679990547"><span class="hs-identifier hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(VertexID -&gt; [VertexID] -&gt; CList VertexID)
 -&gt; Vector [VertexID] -&gt; Vector (CList VertexID)
 forall a b. (VertexID -&gt; a -&gt; b) -&gt; Vector a -&gt; Vector b
 </span><span class="hs-identifier hs-var">V.imap</span></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; [VertexID] -&gt; CList VertexID
-</span><a href="#local-6989586621679987796"><span class="hs-identifier hs-var">toCList</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector [VertexID] -&gt; Vector (CList VertexID))
+</span><a href="#local-6989586621679990545"><span class="hs-identifier hs-var">toCList</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector [VertexID] -&gt; Vector (CList VertexID))
 -&gt; Vector [VertexID] -&gt; Vector (CList VertexID)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s [VertexID])) -&gt; Vector [VertexID]
@@ -186,8 +186,8 @@ forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
 -&gt; (forall s. ST s (MVector s [VertexID])) -&gt; Vector [VertexID]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621679987794"><span class="annot"><span class="annottext">MVector s [VertexID]
-</span><a href="#local-6989586621679987794"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679990543"><span class="annot"><span class="annottext">MVector s [VertexID]
+</span><a href="#local-6989586621679990543"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">VertexID
 -&gt; [VertexID] -&gt; ST s (MVector (PrimState (ST s)) [VertexID])
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
@@ -195,85 +195,85 @@ VertexID -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">MV.replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID
 forall a. Vector a -&gt; VertexID
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987799"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679990548"><span class="hs-identifier hs-var">ptsV</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">[(VertexID, VertexID)]
 -&gt; ((VertexID, VertexID) -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[(VertexID, VertexID)]
-</span><a href="#local-6989586621679987798"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">(((VertexID, VertexID) -&gt; ST s ()) -&gt; ST s ())
+</span><a href="#local-6989586621679990547"><span class="hs-identifier hs-var">es</span></a></span><span> </span><span class="annot"><span class="annottext">(((VertexID, VertexID) -&gt; ST s ()) -&gt; ST s ())
 -&gt; ((VertexID, VertexID) -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679987792"><span class="annot"><span class="annottext">i :: VertexID
-</span><a href="#local-6989586621679987792"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679987791"><span class="annot"><span class="annottext">j :: VertexID
-</span><a href="#local-6989586621679987791"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679990541"><span class="annot"><span class="annottext">i :: VertexID
+</span><a href="#local-6989586621679990541"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679990540"><span class="annot"><span class="annottext">j :: VertexID
+</span><a href="#local-6989586621679990540"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-54"></span><span>      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) [VertexID]
 -&gt; VertexID -&gt; VertexID -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) [a] -&gt; VertexID -&gt; a -&gt; m ()
-</span><a href="#local-6989586621679987790"><span class="hs-identifier hs-var">addAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexID]
+</span><a href="#local-6989586621679990539"><span class="hs-identifier hs-var">addAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexID]
 MVector (PrimState (ST s)) [VertexID]
-</span><a href="#local-6989586621679987794"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987792"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987791"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><a href="#local-6989586621679990543"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990541"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990540"><span class="hs-identifier hs-var">j</span></a></span><span>
 </span><span id="line-55"></span><span>      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) [VertexID]
 -&gt; VertexID -&gt; VertexID -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) [a] -&gt; VertexID -&gt; a -&gt; m ()
-</span><a href="#local-6989586621679987790"><span class="hs-identifier hs-var">addAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexID]
+</span><a href="#local-6989586621679990539"><span class="hs-identifier hs-var">addAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexID]
 MVector (PrimState (ST s)) [VertexID]
-</span><a href="#local-6989586621679987794"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987791"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987792"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621679990543"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990540"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990541"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-56"></span><span>    </span><span class="annot"><span class="annottext">MVector s [VertexID] -&gt; ST s (MVector s [VertexID])
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexID]
-</span><a href="#local-6989586621679987794"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679990543"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679987789"><span class="annot"><span class="annottext">updateAt :: MVector (PrimState m) a -&gt; VertexID -&gt; (a -&gt; a) -&gt; m ()
-</span><a href="#local-6989586621679987789"><span class="hs-identifier hs-var hs-var">updateAt</span></a></span></span><span> </span><span id="local-6989586621679987788"><span class="annot"><span class="annottext">v :: MVector (PrimState m) a
-</span><a href="#local-6989586621679987788"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679987787"><span class="annot"><span class="annottext">i :: VertexID
-</span><a href="#local-6989586621679987787"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679987786"><span class="annot"><span class="annottext">f :: a -&gt; a
-</span><a href="#local-6989586621679987786"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; VertexID -&gt; m a
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679990538"><span class="annot"><span class="annottext">updateAt :: MVector (PrimState m) a -&gt; VertexID -&gt; (a -&gt; a) -&gt; m ()
+</span><a href="#local-6989586621679990538"><span class="hs-identifier hs-var hs-var">updateAt</span></a></span></span><span> </span><span id="local-6989586621679990537"><span class="annot"><span class="annottext">v :: MVector (PrimState m) a
+</span><a href="#local-6989586621679990537"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679990536"><span class="annot"><span class="annottext">i :: VertexID
+</span><a href="#local-6989586621679990536"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679990535"><span class="annot"><span class="annottext">f :: a -&gt; a
+</span><a href="#local-6989586621679990535"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; VertexID -&gt; m a
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; VertexID -&gt; m a
 </span><span class="hs-identifier hs-var">MV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a
-</span><a href="#local-6989586621679987788"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987787"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">m a -&gt; (a -&gt; m ()) -&gt; m ()
+</span><a href="#local-6989586621679990537"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990536"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">m a -&gt; (a -&gt; m ()) -&gt; m ()
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
-</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679987784"><span class="annot"><span class="annottext">x :: a
-</span><a href="#local-6989586621679987784"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; VertexID -&gt; a -&gt; m ()
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679990533"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679990533"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a -&gt; VertexID -&gt; a -&gt; m ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; VertexID -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) a
-</span><a href="#local-6989586621679987788"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987787"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679987786"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679987784"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679987790"><span class="annot"><span class="annottext">addAt :: MVector (PrimState m) [a] -&gt; VertexID -&gt; a -&gt; m ()
-</span><a href="#local-6989586621679987790"><span class="hs-identifier hs-var hs-var">addAt</span></a></span></span><span>    </span><span id="local-6989586621679987782"><span class="annot"><span class="annottext">v :: MVector (PrimState m) [a]
-</span><a href="#local-6989586621679987782"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679987781"><span class="annot"><span class="annottext">i :: VertexID
-</span><a href="#local-6989586621679987781"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679987780"><span class="annot"><span class="annottext">j :: a
-</span><a href="#local-6989586621679987780"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) [a] -&gt; VertexID -&gt; ([a] -&gt; [a]) -&gt; m ()
+</span><a href="#local-6989586621679990537"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990536"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679990535"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679990533"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679990539"><span class="annot"><span class="annottext">addAt :: MVector (PrimState m) [a] -&gt; VertexID -&gt; a -&gt; m ()
+</span><a href="#local-6989586621679990539"><span class="hs-identifier hs-var hs-var">addAt</span></a></span></span><span>    </span><span id="local-6989586621679990531"><span class="annot"><span class="annottext">v :: MVector (PrimState m) [a]
+</span><a href="#local-6989586621679990531"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679990530"><span class="annot"><span class="annottext">i :: VertexID
+</span><a href="#local-6989586621679990530"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679990529"><span class="annot"><span class="annottext">j :: a
+</span><a href="#local-6989586621679990529"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) [a] -&gt; VertexID -&gt; ([a] -&gt; [a]) -&gt; m ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; VertexID -&gt; (a -&gt; a) -&gt; m ()
-</span><a href="#local-6989586621679987789"><span class="hs-identifier hs-var">updateAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) [a]
-</span><a href="#local-6989586621679987782"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987781"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679987780"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679990538"><span class="hs-identifier hs-var">updateAt</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) [a]
+</span><a href="#local-6989586621679990531"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990530"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679990529"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span>    </span><span class="hs-comment">-- convert to a CList, sorted in CCW order around point u</span><span>
-</span><span id="line-62"></span><span>    </span><span id="local-6989586621679987796"><span class="annot"><span class="annottext">toCList :: VertexID -&gt; [VertexID] -&gt; CList VertexID
-</span><a href="#local-6989586621679987796"><span class="hs-identifier hs-var hs-var">toCList</span></a></span></span><span> </span><span id="local-6989586621679987779"><span class="annot"><span class="annottext">u :: VertexID
-</span><a href="#local-6989586621679987779"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VertexID] -&gt; CList VertexID
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679990545"><span class="annot"><span class="annottext">toCList :: VertexID -&gt; [VertexID] -&gt; CList VertexID
+</span><a href="#local-6989586621679990545"><span class="hs-identifier hs-var hs-var">toCList</span></a></span></span><span> </span><span id="local-6989586621679990528"><span class="annot"><span class="annottext">u :: VertexID
+</span><a href="#local-6989586621679990528"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VertexID] -&gt; CList VertexID
 forall a. [a] -&gt; CList a
 </span><span class="hs-identifier hs-var">C.fromList</span></span><span> </span><span class="annot"><span class="annottext">([VertexID] -&gt; CList VertexID)
 -&gt; ([VertexID] -&gt; [VertexID]) -&gt; [VertexID] -&gt; CList VertexID
@@ -283,19 +283,19 @@ forall r p.
 (Num r, Ord r) =&gt;
 Mapping p r -&gt; VertexID -&gt; [VertexID] -&gt; [VertexID]
 </span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#sortAround%27"><span class="hs-identifier hs-var">sortAround'</span></a></span><span> </span><span class="annot"><span class="annottext">Mapping p r
-</span><a href="#local-6989586621679987800"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987779"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621679990549"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990528"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span class="hs-comment">-- | Given a particular point u and a list of points vs, sort the points vs in</span><span>
 </span><span id="line-65"></span><span class="hs-comment">-- CW order around u.</span><span>
 </span><span id="line-66"></span><span class="hs-comment">-- running time: O(m log m), where m=|vs| is the number of vertices to sort.</span><span>
-</span><span id="line-67"></span><span id="local-6989586621679987865"><span id="local-6989586621679987866"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#sortAround%27"><span class="hs-identifier hs-type">sortAround'</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679987866"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987866"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-68"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987865"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987866"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679990614"><span id="local-6989586621679990615"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#sortAround%27"><span class="hs-identifier hs-type">sortAround'</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679990615"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679990615"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990614"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990615"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">]</span></span></span><span>
 </span><span id="line-69"></span><span id="sortAround%27"><span class="annot"><span class="annottext">sortAround' :: Mapping p r -&gt; VertexID -&gt; [VertexID] -&gt; [VertexID]
-</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#sortAround%27"><span class="hs-identifier hs-var hs-var">sortAround'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679987776"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987776"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679987775"><span class="annot"><span class="annottext">u :: VertexID
-</span><a href="#local-6989586621679987775"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679987774"><span class="annot"><span class="annottext">vs :: [VertexID]
-</span><a href="#local-6989586621679987774"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VertexID] -&gt; [VertexID]
+</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#sortAround%27"><span class="hs-identifier hs-var hs-var">sortAround'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679990525"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990525"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679990524"><span class="annot"><span class="annottext">u :: VertexID
+</span><a href="#local-6989586621679990524"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679990523"><span class="annot"><span class="annottext">vs :: [VertexID]
+</span><a href="#local-6989586621679990523"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VertexID] -&gt; [VertexID]
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">([VertexID] -&gt; [VertexID])
 -&gt; ([Point 2 r :+ VertexID] -&gt; [VertexID])
@@ -320,21 +320,21 @@ forall r q p.
 (Ord r, Num r) =&gt;
 (Point 2 r :+ q) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
 </span><a href="Data.Geometry.Point.Orientation.Degenerate.html#sortAround"><span class="hs-identifier hs-var">sortAround</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r :+ VertexID
-</span><a href="#local-6989586621679987770"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987775"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(VertexID -&gt; Point 2 r :+ VertexID)
+</span><a href="#local-6989586621679990519"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990524"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(VertexID -&gt; Point 2 r :+ VertexID)
 -&gt; [VertexID] -&gt; [Point 2 r :+ VertexID]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r :+ VertexID
-</span><a href="#local-6989586621679987770"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[VertexID]
-</span><a href="#local-6989586621679987774"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679990519"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[VertexID]
+</span><a href="#local-6989586621679990523"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-70"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-71"></span><span>    </span><span id="local-6989586621679987770"><span class="annot"><span class="annottext">f :: VertexID -&gt; Point 2 r :+ VertexID
-</span><a href="#local-6989586621679987770"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679987769"><span class="annot"><span class="annottext">v :: VertexID
-</span><a href="#local-6989586621679987769"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987776"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID -&gt; Point 2 r :+ p
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679990519"><span class="annot"><span class="annottext">f :: VertexID -&gt; Point 2 r :+ VertexID
+</span><a href="#local-6989586621679990519"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679990518"><span class="annot"><span class="annottext">v :: VertexID
+</span><a href="#local-6989586621679990518"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990525"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID -&gt; Point 2 r :+ p
 forall a. Vector a -&gt; VertexID -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987769"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+</span><a href="#local-6989586621679990518"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
 -&gt; ((Point 2 r :+ p) -&gt; Point 2 r :+ VertexID)
 -&gt; Point 2 r :+ VertexID
 forall a b. a -&gt; (a -&gt; b) -&gt; b
@@ -347,7 +347,7 @@ Lens (core :+ extra) (core :+ extra') extra extra'
 -&gt; VertexID -&gt; (Point 2 r :+ p) -&gt; Point 2 r :+ VertexID
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987769"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679990518"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-72"></span><span>
 </span><span id="line-73"></span><span class="hs-comment">-- | Given a list of faces, construct a list of edges</span><span>
 </span><span id="line-74"></span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#extractEdges"><span class="hs-identifier hs-type">extractEdges</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
@@ -380,45 +380,45 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((VertexID, VertexID, VertexID) -&gt; [(VertexID, VertexID)])
 -&gt; [(VertexID, VertexID, VertexID)] -&gt; [(VertexID, VertexID)]
 forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
-</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679987761"><span class="annot"><span class="annottext">p :: VertexID
-</span><a href="#local-6989586621679987761"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679987760"><span class="annot"><span class="annottext">q :: VertexID
-</span><a href="#local-6989586621679987760"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679987759"><span class="annot"><span class="annottext">r :: VertexID
-</span><a href="#local-6989586621679987759"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987761"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987760"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987760"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987759"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987761"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987759"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679990510"><span class="annot"><span class="annottext">p :: VertexID
+</span><a href="#local-6989586621679990510"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679990509"><span class="annot"><span class="annottext">q :: VertexID
+</span><a href="#local-6989586621679990509"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679990508"><span class="annot"><span class="annottext">r :: VertexID
+</span><a href="#local-6989586621679990508"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990510"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990509"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990509"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990508"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990510"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990508"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-77"></span><span>               </span><span class="hs-comment">-- we encounter every edge twice. To get rid of the duplicates</span><span>
 </span><span id="line-78"></span><span>               </span><span class="hs-comment">-- we sort, group, and take the head of the lists</span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span>
 </span><span id="line-81"></span><span class="hs-comment">-- | Test if the given three points form a triangle in the delaunay triangulation.</span><span>
 </span><span id="line-82"></span><span class="hs-comment">-- running time: O(n)</span><span>
-</span><span id="line-83"></span><span id="local-6989586621679987899"><span id="local-6989586621679987900"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#isDelaunay"><span class="hs-identifier hs-type">isDelaunay</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679987900"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679987900"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987899"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679987900"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-83"></span><span id="local-6989586621679990648"><span id="local-6989586621679990649"><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#isDelaunay"><span class="hs-identifier hs-type">isDelaunay</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679990649"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679990649"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#Mapping"><span class="hs-identifier hs-type">Mapping</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990648"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679990649"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.DelaunayTriangulation.Types.html#VertexID"><span class="hs-identifier hs-type">VertexID</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
 </span><span id="line-85"></span><span id="isDelaunay"><span class="annot"><span class="annottext">isDelaunay :: Mapping p r -&gt; VertexID -&gt; VertexID -&gt; VertexID -&gt; Bool
-</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#isDelaunay"><span class="hs-identifier hs-var hs-var">isDelaunay</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679987758"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987758"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679987757"><span class="annot"><span class="annottext">p :: VertexID
-</span><a href="#local-6989586621679987757"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679987756"><span class="annot"><span class="annottext">q :: VertexID
-</span><a href="#local-6989586621679987756"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679987755"><span class="annot"><span class="annottext">r :: VertexID
-</span><a href="#local-6989586621679987755"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Maybe (Disk () r)
+</span><a href="Algorithms.Geometry.DelaunayTriangulation.Naive.html#isDelaunay"><span class="hs-identifier hs-var hs-var">isDelaunay</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="hs-special">,</span><span id="local-6989586621679990507"><span class="annot"><span class="annottext">ptsV :: Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990507"><span class="hs-identifier hs-var">ptsV</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679990506"><span class="annot"><span class="annottext">p :: VertexID
+</span><a href="#local-6989586621679990506"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679990505"><span class="annot"><span class="annottext">q :: VertexID
+</span><a href="#local-6989586621679990505"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679990504"><span class="annot"><span class="annottext">r :: VertexID
+</span><a href="#local-6989586621679990504"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Maybe (Disk () r)
 forall r.
 (Eq r, Fractional r) =&gt;
 Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Maybe (Disk () r)
 </span><a href="Data.Geometry.Ball.html#disk"><span class="hs-identifier hs-var">disk</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
-</span><a href="#local-6989586621679987754"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987757"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
-</span><a href="#local-6989586621679987754"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987756"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
-</span><a href="#local-6989586621679987754"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987755"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679990503"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990506"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
+</span><a href="#local-6989586621679990503"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990505"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
+</span><a href="#local-6989586621679990503"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990504"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-86"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-comment">-- if the points are colinear, we interpret this as: all</span><span>
 </span><span id="line-87"></span><span>                     </span><span class="hs-comment">-- pts in the plane are in the circle.</span><span>
-</span><span id="line-88"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679987753"><span class="annot"><span class="annottext">d :: Disk () r
-</span><a href="#local-6989586621679987753"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span id="line-88"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679990502"><span class="annot"><span class="annottext">d :: Disk () r
+</span><a href="#local-6989586621679990502"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; Bool -&gt; Bool
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Bool) -&gt; [Point 2 r] -&gt; Bool
@@ -428,36 +428,36 @@ forall (d :: Nat) r p.
 (Arity d, Ord r, Num r) =&gt;
 Point d r -&gt; Ball d p r -&gt; Bool
 </span><a href="Data.Geometry.Ball.html#insideBall"><span class="hs-operator hs-var">`insideBall`</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
-</span><a href="#local-6989586621679987753"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679990502"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">VertexID -&gt; Point 2 r
-</span><a href="#local-6989586621679987754"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987750"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679987750"><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987750"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID
+</span><a href="#local-6989586621679990503"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990499"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679990499"><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990499"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID
 forall a. Vector a -&gt; VertexID
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987758"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; VertexID
+</span><a href="#local-6989586621679990507"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; VertexID
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987750"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
+</span><a href="#local-6989586621679990499"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987757"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987750"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
+</span><a href="#local-6989586621679990506"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990499"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987756"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987750"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
+</span><a href="#local-6989586621679990505"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">VertexID
+</span><a href="#local-6989586621679990499"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">VertexID -&gt; VertexID -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987755"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679990504"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-90"></span><span>   </span><span class="hs-keyword">where</span><span>
-</span><span id="line-91"></span><span>     </span><span id="local-6989586621679987754"><span class="annot"><span class="annottext">pt :: VertexID -&gt; Point 2 r
-</span><a href="#local-6989586621679987754"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span id="local-6989586621679987748"><span class="annot"><span class="annottext">i :: VertexID
-</span><a href="#local-6989586621679987748"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
-</span><a href="#local-6989586621679987758"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID -&gt; Point 2 r :+ p
+</span><span id="line-91"></span><span>     </span><span id="local-6989586621679990503"><span class="annot"><span class="annottext">pt :: VertexID -&gt; Point 2 r
+</span><a href="#local-6989586621679990503"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span id="local-6989586621679990497"><span class="annot"><span class="annottext">i :: VertexID
+</span><a href="#local-6989586621679990497"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p)
+</span><a href="#local-6989586621679990507"><span class="hs-identifier hs-var">ptsV</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; VertexID -&gt; Point 2 r :+ p
 forall a. Vector a -&gt; VertexID -&gt; a
 </span><span class="hs-operator hs-var">V.!</span></span><span> </span><span class="annot"><span class="annottext">VertexID
-</span><a href="#local-6989586621679987748"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+</span><a href="#local-6989586621679990497"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
 -&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
