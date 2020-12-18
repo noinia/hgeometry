@@ -93,11 +93,11 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
       , Point2 1 11
       ]
     simpleTriangle :: SimplePolygon () (RealNumber 10)
-    simpleTriangle = SimplePolygon . C.fromList . map ext $
+    simpleTriangle = SimplePolygon . CV.unsafeFromList . map ext $
       [ Point2 0 0, Point2 2 0, Point2 1 1]
     multiPoly :: MultiPolygon () (RealNumber 10)
     multiPoly = MultiPolygon
-      (C.fromList . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
+      (CV.unsafeFromList . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
       [simpleTriangle]
 :} -}
 
@@ -243,7 +243,7 @@ outerBoundary = lens g s
 -- | Lens access for polygon holes.
 --
 -- >>> multiPoly ^. polygonHoles
--- [SimplePolygon (CSeq [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()])]
+-- [SimplePolygon (CircularVector {vector = [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()], rotation = 0})]
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 polygonHoles = lens g s
   where
