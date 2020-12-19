@@ -32,7 +32,7 @@ import           Data.Geometry
 import           Data.Geometry.PlanarSubdivision
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map as M
-import qualified Data.Map.Strict as SM
+-- import qualified Data.Map.Strict as SM
 import qualified Data.PlaneGraph  as PG
 import qualified Data.PlanarGraph as PPG
 import qualified Data.Vector as V
@@ -71,8 +71,8 @@ type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
 
 
 
-showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
-showDT = mapM_ print . triangulationEdges
+-- showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
+-- showDT = mapM_ print . triangulationEdges
 
 {- HLINT ignore triangulationEdges -}
 triangulationEdges   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
@@ -86,9 +86,9 @@ tEdges = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
 
 --------------------------------------------------------------------------------
 
-data ST a b c = ST { fst' :: !a, snd' :: !b , trd' :: !c}
+-- data ST a b c = ST { fst' :: !a, snd' :: !b , trd' :: !c}
 
-type ArcID = Int
+-- type ArcID = Int
 
 -- | ST' is a strict triple (m,a,x) containing:
 --
@@ -96,7 +96,7 @@ type ArcID = Int
 --            u < v, to arcId's.
 -- - a: the next available unused arcID
 -- - x: the data value we are interested in computing
-type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
+-- type ST' a = ST (SM.Map (VertexID,VertexID) ArcID) ArcID a
 
 
 -- | convert the triangulation into a planarsubdivision
