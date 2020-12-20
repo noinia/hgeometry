@@ -114,7 +114,7 @@ connectHolesLinear' vec border (hole:holes) =
     connectHolesLinear' vec newBorder holes
   where
     newBorder = SimplePolygon (C.fromList (openBorder ++ F.toList hole ++ [focus hole]))
-    line = undefined
+    line = Line (focus hole ^. core) vec
     (_pt, openBorder) =
       F.minimumBy (cmpExtreme vec `on` fst)
       [ (pt, outer)
