@@ -281,7 +281,7 @@ numDarts = V.length . _rawDartData
 numEdges :: PlanarSubdivision s v e f r  -> Int
 numEdges = (`div` 2) . V.length . _rawDartData
 
--- | Get the number of faces
+-- | \( O(1) \). Get the number of faces
 --
 -- >>> numFaces myGraph
 -- 4
@@ -328,11 +328,12 @@ edges' = V.filter isPositive . darts'
 edges    :: PlanarSubdivision s v e f r  -> V.Vector (Dart s, e)
 edges ps = (\e -> (e,ps^.dataOf e)) <$> edges' ps
 
-
+-- | \( O(n) \). Vector of all primal faces.
 faces'    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s)
 faces' ps = let n = numFaces ps
             in V.fromList $ map (FaceId . VertexId) [0..n-1]
 
+-- | \( O(n) \). Vector of all primal faces with associated data.
 faces    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s, FaceData (Dart s) f)
 faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
