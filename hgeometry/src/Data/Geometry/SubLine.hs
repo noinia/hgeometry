@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -41,7 +40,7 @@ line = lens _line (\sub l -> SubLine l (_subRange sub))
 
 -- | Interval part of SubLine.
 subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
-subRange = lens _subRange (\sub r -> SubLine (_line sub) r)
+subRange = lens _subRange (SubLine . _line)
 
 type instance Dimension (SubLine d p s r) = d
 
