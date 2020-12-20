@@ -1,5 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+  (
+    -- * Divide & Conqueror Delaunay Triangulation
+    delaunayTriangulation
+  ) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types
@@ -41,7 +52,6 @@ import qualified Data.Vector as V
 -- successor (i.e. its predecessor) on the convex hull
 --
 -- Rotating Right <-> rotate clockwise
-
 
 -- | Computes the delaunay triangulation of a set of points.
 --
@@ -284,6 +294,7 @@ pred' = CL.rotR
 succ' :: CL.CList a -> CL.CList a
 succ' = CL.rotL
 
+-- | Return the focus of the CList, throwing an exception if the list is empty.
 focus' :: CL.CList a -> a
 focus' = fromJust . CL.focus
 
@@ -296,4 +307,4 @@ withID     :: c :+ e -> e' -> c :+ (e :+ e')
 withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
-lookup'' k = fromJust . IM.lookup k
+lookup'' k m = m IM.! k

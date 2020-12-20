@@ -26,12 +26,15 @@ import qualified Data.List as L
 -- the option of allowing Colinearities.
 newtype CCW = CCWWrap Ordering deriving Eq
 
+-- | CounterClockwise orientation. Also called a left-turn.
 pattern CCW      :: CCW
 pattern CCW      = CCWWrap GT
 
+-- | Clockwise orientation. Also called a right-turn.
 pattern CW       :: CCW
 pattern CW       = CCWWrap LT
 
+-- | CoLinear orientation. Also called a straight line.
 pattern CoLinear :: CCW
 pattern CoLinear = CCWWrap EQ
 {-# COMPLETE CCW, CW, CoLinear #-}

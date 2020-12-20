@@ -29,8 +29,8 @@ evaluate :: (Arity d, Ord r, Num r, Show r) => Bezier d r -> r -> Point d r
 evaluate b t | t < 0 || t > 1                = error $ "Evaluation parameter " ++ show t ++ " out of bounds."
              | length (controlPoints b) == 0 = error "Bezier curve of degree -1?"
              | length (controlPoints b) == 1 = head $ controlPoints b
-             | otherwise = flip evaluate t $ Bezier $ zipWith (blend t) (init $ controlPoints b) (tail $ controlPoints b)
-  where blend t p q = p .+^ t *^ (q .-. p)
+             | otherwise = flip evaluate t $ Bezier $ zipWith blend (init $ controlPoints b) (tail $ controlPoints b)
+  where blend p q = p .+^ t *^ (q .-. p)
 
 tangent :: (Arity d, Num r) => Bezier d r -> Vector d r
 tangent b | length (controlPoints b) == 0 = error "Bezier curve of degree -1?"
@@ -50,10 +50,10 @@ split t b | t < 0 || t > 1                = error "Split parameter out of bounds
                         in (Bezier $ take (n + 1) ps, Bezier $ drop n ps)
 
 collect :: (Arity d, Ord r, Num r) => r -> [Point d r] -> [Point d r]
-collect t []  = []
-collect t [p] = [p]
-collect t ps  = [head ps] ++ collect t (zipWith (blend t) (init ps) (tail ps)) ++ [last ps]
-  where blend t p q = p .+^ t *^ (q .-. p)
+collect _ []  = []
+collect _ [p] = [p]
+collect t ps  = [head ps] ++ collect t (zipWith blend (init ps) (tail ps)) ++ [last ps]
+  where blend p q = p .+^ t *^ (q .-. p)
 
 {-
 

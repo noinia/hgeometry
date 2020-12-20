@@ -1,4 +1,26 @@
-module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
+  ( MonotonePolygon
+  , triangulate
+  , triangulate'
+  , computeDiagonals
+  -- , LR(..)
+  -- , P
+  -- , Stack
+  -- , chainOf
+  -- , toVtx
+  -- , seg
+  -- , process
+  -- , isInside
+  -- , mergeBy
+  -- , splitPolygon
+  ) where
 
 import           Control.Lens
 import qualified Data.CircularSeq as C
@@ -16,7 +38,8 @@ import           Data.Geometry.PlanarSubdivision.Basic(PolygonFaceData, PlanarSu
 
 --------------------------------------------------------------------------------
 
---
+-- | Y-monotone polygon. All straight horizontal lines intersects the polygon
+--   no more than twice.
 type MonotonePolygon p r = SimplePolygon p r
 
 data LR = L | R deriving (Show,Eq)
@@ -154,15 +177,15 @@ splitPolygon pg = bimap (f L) (f R . reverse)
 
 
 
-testPoly5 :: SimplePolygon () Rational
-testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext [ Point2 176 736
-                                                           , Point2 240 688
-                                                           , Point2 240 608
-                                                           , Point2 128 576
-                                                           , Point2 64 640
-                                                           , Point2 80 720
-                                                           , Point2 128 752
-                                                           ]
+-- testPoly5 :: SimplePolygon () Rational
+-- testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext [ Point2 176 736
+--                                                            , Point2 240 688
+--                                                            , Point2 240 608
+--                                                            , Point2 128 576
+--                                                            , Point2 64 640
+--                                                            , Point2 80 720
+--                                                            , Point2 128 752
+--                                                            ]
 
 
 -- testPoly5 :: SimplePolygon () Rational

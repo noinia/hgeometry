@@ -1,16 +1,16 @@
 module Algorithms.Geometry.SoSSpec where
 
 import           Algorithms.Geometry.SoS.Symbolic
-import           Control.Lens
-import           Control.Monad (forM_)
+-- import           Control.Lens
+-- import           Control.Monad (forM_)
 import           Data.Foldable
-import           Data.Geometry.Vector
-import qualified Data.List as List
-import           Data.Proxy
-import           Data.RealNumber.Rational
-import           Data.Util
-import           Data.Word
-import           GHC.TypeNats
+-- import           Data.Geometry.Vector
+-- import qualified Data.List as List
+-- import           Data.Proxy
+-- import           Data.RealNumber.Rational
+-- import           Data.Util
+-- import           Data.Word
+-- import           GHC.TypeNats
 import           Test.Hspec
 import           Test.QuickCheck
 --------------------------------------------------------------------------------
