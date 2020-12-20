@@ -551,10 +551,20 @@ data core :+ extra
 (:+) :: core -> extra -> (:+) core extra
 infixr 1 :+
 infixr 1 :+
+
+-- | Access the core of an extended value.
 _core :: (core :+ extra) -> core
+
+-- | Access the extra part of an extended value.
 _extra :: (core :+ extra) -> extra
+
+-- | Lens access to the core of an extended value.
 core :: Lens (core :+ extra) (core' :+ extra) core core'
+
+-- | Lens access to the extra part of an extended value.
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
+
+-- | Tag a value with the unit type.
 ext :: a -> a :+ ()
 instance (Control.DeepSeq.NFData core, Control.DeepSeq.NFData extra) => Control.DeepSeq.NFData (core Data.Ext.:+ extra)
 instance GHC.Generics.Generic (core Data.Ext.:+ extra)
@@ -1078,10 +1088,16 @@ extractMinimaBy :: (a -> a -> Ordering) -> [a] -> [a] :+ [a]
 
 
 module Data.Measured.Class
+
+-- | Things that can be measured.
 class Semigroup v => Measured v a | a -> v
 measure :: Measured v a => a -> v
+
+-- | Things that can be inserted.
 class Measured v a => CanInsert v a
 insertA :: CanInsert v a => a -> v -> v
+
+-- | Things that can be deleted.
 class Measured v a => CanDelete v a
 deleteA :: CanDelete v a => a -> v -> Maybe v
 
@@ -1090,6 +1106,8 @@ module Data.Measured
 
 
 module Data.Measured.Size
+
+-- | Measured size. Always non-negative.
 newtype Size
 Size :: Word -> Size
 
@@ -1134,17 +1152,11 @@ instance GHC.Base.Monoid Data.Measured.Size.Size
 
 
 module Data.OrdSeq
-data Key a
-NoKey :: Key a
-Key :: !a -> Key a
-[getKey] :: Key a -> !a
-liftCmp :: (a -> a -> Ordering) -> Key a -> Key a -> Ordering
-newtype Elem a
-Elem :: a -> Elem a
-[getElem] :: Elem a -> a
-newtype OrdSeq a
-OrdSeq :: FingerTree (Key a) (Elem a) -> OrdSeq a
-[_asFingerTree] :: OrdSeq a -> FingerTree (Key a) (Elem a)
+
+-- | Sequence of ordered elements.
+data OrdSeq a
+
+-- | Signature for functions that give the ordering of two values.
 type Compare a = a -> a -> Ordering
 
 -- | Insert into a monotone OrdSeq.
@@ -1158,25 +1170,26 @@ insertBy :: Compare a -> a -> OrdSeq a -> OrdSeq a
 --   
 --   &lt;math&gt;
 insert :: Ord a => a -> OrdSeq a -> OrdSeq a
-deleteAllBy :: Compare a -> a -> OrdSeq a -> OrdSeq a
 
 -- | &lt;math&gt;
 splitBy :: Compare a -> a -> OrdSeq a -> (OrdSeq a, OrdSeq a, OrdSeq a)
 
 -- | Given a monotonic function f that maps a to b, split the sequence s
---   depending on the b values. I.e. the result (l,m,r) is such that * all
---   (&lt; x) . fmap f $ l * all (== x) . fmap f $ m * all (&gt; x) . fmap
---   f $ r
+--   depending on the b values. I.e. the result (l,m,r) is such that
+--   
+--   <ul>
+--   <li><pre>all (&lt; x) . fmap f $ l</pre></li>
+--   <li><pre>all (== x) . fmap f $ m</pre></li>
+--   <li><pre>all (&gt; x) . fmap f $ r</pre></li>
+--   </ul>
 --   
 --   <pre>
---   &gt;&gt;&gt; splitOn id 3 $ fromAscList' [1..5]
---   (OrdSeq {_asFingerTree = fromList [Elem 1,Elem 2]},OrdSeq {_asFingerTree = fromList [Elem 3]},OrdSeq {_asFingerTree = fromList [Elem 4,Elem 5]})
+--   &gt;&gt;&gt; splitOn id 3 $ fromAscList [1..5]
+--   (fromAscList [1,2],fromAscList [3],fromAscList [4,5])
 --   
---   &gt;&gt;&gt; splitOn fst 2 $ fromAscList' [(0,"-"),(1,"A"),(2,"B"),(2,"C"),(3,"D"),(4,"E")]
---   (OrdSeq {_asFingerTree = fromList [Elem (0,"-"),Elem (1,"A")]},OrdSeq {_asFingerTree = fromList [Elem (2,"B"),Elem (2,"C")]},OrdSeq {_asFingerTree = fromList [Elem (3,"D"),Elem (4,"E")]})
+--   &gt;&gt;&gt; splitOn fst 2 $ fromAscList [(0,"-"),(1,"A"),(2,"B"),(2,"C"),(3,"D"),(4,"E")]
+--   (fromAscList [(0,"-"),(1,"A")],fromAscList [(2,"B"),(2,"C")],fromAscList [(3,"D"),(4,"E")])
 --   </pre>
---   
---   &lt;math&gt;
 splitOn :: Ord b => (a -> b) -> b -> OrdSeq a -> (OrdSeq a, OrdSeq a, OrdSeq a)
 
 -- | Given a monotonic predicate p, splits the sequence s into two
@@ -1184,7 +1197,14 @@ splitOn :: Ord b => (a -> b) -> b -> OrdSeq a -> (OrdSeq a, OrdSeq a, OrdSeq a)
 --   
 --   &lt;math&gt;
 splitMonotonic :: (a -> Bool) -> OrdSeq a -> (OrdSeq a, OrdSeq a)
+
+-- | Deletes all elements from the OrdDeq
+--   
+--   &lt;math&gt;
 deleteAll :: Ord a => a -> OrdSeq a -> OrdSeq a
+
+-- | &lt;math&gt;. Delete all elements that compare as equal to <tt>x</tt>.
+deleteAllBy :: Compare a -> a -> OrdSeq a -> OrdSeq a
 
 -- | inserts all eleements in order &lt;math&gt;
 fromListBy :: Compare a -> [a] -> OrdSeq a
@@ -1193,10 +1213,13 @@ fromListBy :: Compare a -> [a] -> OrdSeq a
 fromListByOrd :: Ord a => [a] -> OrdSeq a
 
 -- | O(n)
-fromAscList' :: [a] -> OrdSeq a
+fromAscList :: [a] -> OrdSeq a
 
 -- | &lt;math&gt;
 lookupBy :: Compare a -> a -> OrdSeq a -> Maybe a
+
+-- | &lt;math&gt;. Queries for the existance of any elements that compare
+--   as equal to <tt>x</tt>.
 memberBy :: Compare a -> a -> OrdSeq a -> Bool
 
 -- | Fmap, assumes the order does not change O(n)
@@ -1204,13 +1227,22 @@ mapMonotonic :: (a -> b) -> OrdSeq a -> OrdSeq b
 
 -- | Gets the first element from the sequence &lt;math&gt;
 viewl :: OrdSeq a -> ViewL OrdSeq a
+
+-- | Gets the last element from the sequence &lt;math&gt;
 viewr :: OrdSeq a -> ViewR OrdSeq a
+
+-- | &lt;math&gt;
 minView :: OrdSeq a -> Maybe (a, OrdSeq a)
+
+-- | &lt;math&gt;
 lookupMin :: OrdSeq a -> Maybe a
+
+-- | &lt;math&gt;
 maxView :: OrdSeq a -> Maybe (a, OrdSeq a)
+
+-- | &lt;math&gt;
 lookupMax :: OrdSeq a -> Maybe a
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.OrdSeq a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.OrdSeq a)
 instance GHC.Base.Functor Data.OrdSeq.Elem
 instance Data.Foldable.Foldable Data.OrdSeq.Elem
 instance Data.Traversable.Traversable Data.OrdSeq.Elem
@@ -1219,6 +1251,7 @@ instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Elem a)
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.OrdSeq.Key a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.OrdSeq.Key a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.Key a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.OrdSeq.OrdSeq a)
 instance GHC.Base.Semigroup (Data.OrdSeq.OrdSeq a)
 instance GHC.Base.Monoid (Data.OrdSeq.OrdSeq a)
 instance Data.Foldable.Foldable Data.OrdSeq.OrdSeq
@@ -1243,8 +1276,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHj8 a_aHBZ. Lens (Permutation a_aHj8) (Permutation a_aHBZ) (Vector (Orbit a_aHj8)) (Vector (Orbit a_aHBZ))
-indexes :: forall a_aHj8. Lens' (Permutation a_aHj8) (Vector (Int, Int))
+orbits :: forall a_aHir a_aHBi. Lens (Permutation a_aHir) (Permutation a_aHBi) (Vector (Orbit a_aHir)) (Vector (Orbit a_aHBi))
+indexes :: forall a_aHir. Lens' (Permutation a_aHir) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1356,8 +1389,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKzI. Lens' (Dart s_aKzI) Direction
-arc :: forall s_aKzI s_aL06. Lens (Dart s_aKzI) (Dart s_aL06) (Arc s_aKzI) (Arc s_aL06)
+direction :: forall s_aKz1. Lens' (Dart s_aKz1) Direction
+arc :: forall s_aKz1 s_aKZp. Lens (Dart s_aKz1) (Dart s_aKZp) (Arc s_aKz1) (Arc s_aKZp)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -1966,8 +1999,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKzI s_aL06. Lens (Dart s_aKzI) (Dart s_aL06) (Arc s_aKzI) (Arc s_aL06)
-direction :: forall s_aKzI. Lens' (Dart s_aKzI) Direction
+arc :: forall s_aKz1 s_aKZp. Lens (Dart s_aKz1) (Dart s_aKZp) (Arc s_aKz1) (Arc s_aKZp)
+direction :: forall s_aKz1. Lens' (Dart s_aKz1) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2418,8 +2451,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
-upper :: forall a_aQV9. Lens' (Range a_aQV9) (EndPoint a_aQV9)
+lower :: forall a_aQUs. Lens' (Range a_aQUs) (EndPoint a_aQUs)
+upper :: forall a_aQUs. Lens' (Range a_aQUs) (EndPoint a_aQUs)
 
 -- | Test if a value lies in a range.
 --   
@@ -3013,10 +3046,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZhM a_a10Va. Traversal (UnBounded a_aZhM) (UnBounded a_a10Va) a_aZhM a_a10Va
-_MinInfinity :: forall a_aZhM. Prism' (UnBounded a_aZhM) ()
-_Val :: forall a_aZhM a_a10Y3. Prism (UnBounded a_a10Y3) (UnBounded a_aZhM) a_a10Y3 a_aZhM
-_MaxInfinity :: forall a_aZhM. Prism' (UnBounded a_aZhM) ()
+unUnBounded :: forall a_aZh5 a_a10Ut. Traversal (UnBounded a_aZh5) (UnBounded a_a10Ut) a_aZh5 a_a10Ut
+_MinInfinity :: forall a_aZh5. Prism' (UnBounded a_aZh5) ()
+_Val :: forall a_aZh5 a_a10Xm. Prism (UnBounded a_a10Xm) (UnBounded a_aZh5) a_a10Xm a_aZh5
+_MaxInfinity :: forall a_aZh5. Prism' (UnBounded a_aZh5) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
