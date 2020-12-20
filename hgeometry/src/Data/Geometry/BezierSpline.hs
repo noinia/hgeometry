@@ -1,5 +1,4 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.BezierSpline
@@ -41,7 +40,11 @@ import qualified Test.QuickCheck as QC
 
 -- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
 newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq (1+n) (Point d r) }
-makeLenses ''BezierSpline
+-- makeLenses ''BezierSpline
+
+-- | Bezier control points. With n degrees, there are n+1 control points.
+controlPoints :: Iso (BezierSpline n1 d1 r1) (BezierSpline n2 d2 r2) (LSeq (1+n1) (Point d1 r1)) (LSeq (1+n2) (Point d2 r2))
+controlPoints = iso _controlPoints BezierSpline
 
 -- | Quadratic Bezier Spline
 pattern Bezier2      :: Point d r -> Point d r -> Point d r -> BezierSpline 2 d r

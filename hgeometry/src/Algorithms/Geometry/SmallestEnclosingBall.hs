@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.SmallestEnclosingBall
