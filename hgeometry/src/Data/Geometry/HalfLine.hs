@@ -26,8 +26,6 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Traversable             as T
 import           Data.UnBounded
-import           Data.Vinyl
-import           Data.Vinyl.CoRec
 import           GHC.Generics                 (Generic)
 import           GHC.TypeLits
 
