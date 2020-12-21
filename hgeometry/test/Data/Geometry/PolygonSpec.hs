@@ -84,6 +84,14 @@ spec = do
     forM_ allMultiPolygons' $ \poly -> do
       hasSelfIntersections poly `shouldBe` False
       isCounterClockwise poly `shouldBe` True
+  
+  it "has no self-intersections after connectHoles" $
+    property $ \(poly :: MultiPolygon () Rational) ->
+      not (hasSelfIntersections (connectHoles poly))
+
+  it "has the same area after connectHoles" $
+    property $ \(poly :: MultiPolygon () Rational) ->
+      area poly === area (connectHoles poly)
 
 
 testCases    :: FilePath -> Spec
