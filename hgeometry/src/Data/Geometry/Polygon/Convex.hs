@@ -31,8 +31,9 @@ import           Data.Function                  (on)
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core (unsafeFromPoints, SimplePolygon, outerBoundary)
-import           Data.Geometry.Polygon.Extremes(cmpExtreme)
+import           Data.Geometry.Polygon.Core     (SimplePolygon, outerBoundaryVector,
+                                                 unsafeFromPoints)
+import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
@@ -379,7 +380,7 @@ bottomMost = CV.rotateToMinimumBy (comparing f)
 
 -- | Helper to get the vertices of a convex polygon
 getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
-getVertices = view (simplePolygon.outerBoundary)
+getVertices = view (simplePolygon.outerBoundaryVector)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true
 -- rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a

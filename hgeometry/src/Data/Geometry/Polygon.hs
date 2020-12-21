@@ -19,7 +19,8 @@ module Data.Geometry.Polygon( PolygonType(..)
 
                             , polygonVertices, listEdges
 
-                            , outerBoundary, outerBoundaryEdges
+                            , outerBoundary, outerBoundaryVector
+                            , outerBoundaryEdges
                             , outerVertex, outerBoundaryEdge
 
                             , polygonHoles, polygonHoles'

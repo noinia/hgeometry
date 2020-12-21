@@ -34,6 +34,6 @@ cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
 -- running time: \(O(n)\)
 extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
                    -> (Point 2 r :+ p, Point 2 r :+ p)
-extremesLinear u p = let vs = p^.outerBoundary
+extremesLinear u p = let vs = p^.outerBoundaryVector
                          f  = cmpExtreme u
                      in (F.minimumBy f vs, F.maximumBy f vs)

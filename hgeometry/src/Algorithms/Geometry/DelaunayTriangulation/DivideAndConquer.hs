@@ -110,7 +110,7 @@ firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
 fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
                                          . F.toList . CV.rightElements
-                                         $ p^.simplePolygon.outerBoundary
+                                         $ p^.simplePolygon.outerBoundaryVector
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
                         in IM.fromList es

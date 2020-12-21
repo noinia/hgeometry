@@ -18,7 +18,8 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
 
                                  , polygonVertices, listEdges
 
-                                 , outerBoundary, outerBoundaryEdges
+                                 , outerBoundary, outerBoundaryVector
+                                 , outerBoundaryEdges
                                  , outerVertex, outerBoundaryEdge
 
                                  , polygonHoles, polygonHoles'
@@ -46,7 +47,8 @@ module Data.Geometry.Polygon.Core( PolygonType(..)
                                  ) where
 
 import           Control.DeepSeq
-import           Control.Lens                 hiding (Simple)
+import           Control.Lens                 (Lens', Prism', Traversal', lens, prism', toListOf,
+                                               (%~), (&), (.~), (^.))
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -206,7 +208,7 @@ instance Fractional r => IsTransformable (Polygon t p r) where
   transformBy = transformPointFunctor
 
 instance IsBoxable (Polygon t p r) where
-  boundingBox = boundingBoxList' . toListOf (outerBoundary.traverse.core)
+  boundingBox = boundingBoxList' . toListOf (outerBoundaryVector.traverse.core)
 
 type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
   '[Seq.Seq (Either (Point 2 r) (LineSegment 2 () r))]
@@ -238,19 +240,35 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- | Lens access to the outer boundary of a polygon.
 --
--- >>> toList (simpleTriangle ^. outerBoundary)
+-- >>> toList (simpleTriangle ^. outerBoundaryVector)
 -- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
-outerBoundary :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
-outerBoundary = lens g s
+outerBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
+outerBoundaryVector = lens g s
   where
     g                     :: Polygon t p r -> CircularVector (Point 2 r :+ p)
-    g (SimplePolygon vs)  = vs
+    g (SimplePolygon vs)                  = vs
     g (MultiPolygon (SimplePolygon vs) _) = vs
 
     s                           :: Polygon t p r -> CircularVector (Point 2 r :+ p)
                                 -> Polygon t p r
     s (SimplePolygon _)      vs = SimplePolygon vs
     s (MultiPolygon  _   hs) vs = MultiPolygon (SimplePolygon vs) hs
+
+-- | Lens access to the outer boundary of a polygon.
+--
+-- >>> toList (simpleTriangle ^. outerBoundaryVector)
+-- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
+outerBoundary :: forall t p r. Lens' (Polygon t p r) (SimplePolygon p r)
+outerBoundary = lens g s
+  where
+    g                     :: Polygon t p r -> SimplePolygon p r
+    g poly@SimplePolygon{}    = poly
+    g (MultiPolygon simple _) = simple
+
+    s                           :: Polygon t p r -> SimplePolygon p r
+                                -> Polygon t p r
+    s SimplePolygon{} simple     = simple
+    s (MultiPolygon _ hs) simple = MultiPolygon simple hs
 
 -- | Lens access for polygon holes.
 --
@@ -274,7 +292,7 @@ polygonHoles' = \f -> \case
 
 -- | Access the i^th vertex on the outer boundary
 outerVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
-outerVertex i = outerBoundary . CV.item i
+outerVertex i = outerBoundaryVector . CV.item i
 
 -- | Get the n^th edge along the outer boundary of the polygon. The edge is half open.
 --
@@ -315,7 +333,7 @@ unsafeFromPoints = SimplePolygon . CV.unsafeFromList
 --
 -- running time: \(O(n)\)
 outerBoundaryEdges :: Polygon t p r -> CircularVector (LineSegment 2 p r)
-outerBoundaryEdges = toEdges . (^.outerBoundary)
+outerBoundaryEdges = toEdges . (^.outerBoundaryVector)
 
 -- | Lists all edges. The edges on the outer boundary are given before the ones
 -- on the holes. However, no other guarantees are given on the order.
@@ -380,7 +398,7 @@ toEdges vs = CV.zipWith (\p q -> LineSegment (Closed p) (Open q)) vs (CV.rotateR
 onBoundary        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
 q `onBoundary` pg = any (q `onSegment`) es
   where
-    out = SimplePolygon $ pg^.outerBoundary
+    out = pg^.outerBoundary
     es = concatMap (F.toList . outerBoundaryEdges) $ out : holeList pg
 
 -- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.
@@ -512,7 +530,7 @@ centroid poly = Point $ sum' xs ^/ (6 * signedArea poly)
 --
 -- running time: \(O(n)\)
 pickPoint    :: (Ord r, Fractional r) => Polygon p t r -> Point 2 r
-pickPoint pg | isTriangle pg = centroid . SimplePolygon $ pg^.outerBoundary
+pickPoint pg | isTriangle pg = centroid $ pg^.outerBoundary
              | otherwise     = let LineSegment' (p :+ _) (q :+ _) = findDiagonal pg
                                in p .+^ (0.5 *^ (q .-. p))
 
@@ -538,7 +556,7 @@ findDiagonal    :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
 findDiagonal pg = List.head . catMaybes . F.toList $ diags
      -- note that a diagonal is guaranteed to exist, so the usage of head is safe.
   where
-    vs      = pg^.outerBoundary
+    vs      = pg^.outerBoundaryVector
     diags   = CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
     f u v w = case ccw (u^.core) (v^.core) (w^.core) of
                 CCW      -> Just $ findDiag u v w
@@ -621,7 +639,7 @@ toCounterClockWiseOrder' p
 --   any holes as they are.
 --
 reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
-reverseOuterBoundary p = p&outerBoundary %~ CV.reverse
+reverseOuterBoundary p = p&outerBoundaryVector %~ CV.reverse
 
 
 -- | /O(1)/. Convert a Polygon to a simple polygon by forgetting about any holes.
