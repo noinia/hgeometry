@@ -8,47 +8,58 @@
 -- A Polygon data type and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Core( PolygonType(..)
-                                 , Polygon(.., SimplePolygonP)
-                                 , _SimplePolygon, _MultiPolygon
-                                 , SimplePolygon, MultiPolygon, SomePolygon
+module Data.Geometry.Polygon.Core
+  ( PolygonType(..)
+  , Polygon(.., SimplePolygonP)
+  , _SimplePolygon, _MultiPolygon
+  , SimplePolygon, MultiPolygon, SomePolygon
 
-                                 , fromPoints
-                                 , unsafeFromPoints
+    -- * Construction
+  , fromPoints
+  , unsafeFromPoints
+  , unsafeFromCircularVector
+  , toVector
 
-                                 , polygonVertices, listEdges
+  , polygonVertices, listEdges
 
-                                 , outerBoundary, outerBoundaryVector
-                                 , outerBoundaryEdges
-                                 , outerVertex, outerBoundaryEdge
+  , outerBoundary, outerBoundaryVector
+  , outerBoundaryEdges
+  , outerVertex, outerBoundaryEdge
 
-                                 , polygonHoles, polygonHoles'
-                                 , holeList
+  , polygonHoles, polygonHoles'
+  , holeList
 
-                                 , inPolygon, insidePolygon, onBoundary
+  , inPolygon, insidePolygon, onBoundary
 
-                                 , area, signedArea
+  , area, signedArea
 
-                                 , centroid
-                                 , pickPoint
+  , centroid
+  , pickPoint
 
-                                 , isTriangle
+  , isTriangle
 
-                                 , isCounterClockwise
-                                 , toCounterClockWiseOrder, toCounterClockWiseOrder'
-                                 , toClockwiseOrder, toClockwiseOrder'
-                                 , reverseOuterBoundary
+  , isCounterClockwise
+  , toCounterClockWiseOrder, toCounterClockWiseOrder'
+  , toClockwiseOrder, toClockwiseOrder'
+  , reverseOuterBoundary
 
-                                 , findDiagonal
+  , findDiagonal
 
-                                 , withIncidentEdges, numberVertices
+  , withIncidentEdges, numberVertices
 
-                                 , asSimplePolygon
-                                 ) where
+    -- * Specialized folds
+  , Data.Geometry.Polygon.Core.maximum
+  , Data.Geometry.Polygon.Core.minimum
+  , maximumBy
+  , minimumBy
+  , findRotateTo
+  , rotateLeft
+  , rotateRight
+  ) where
 
 import           Control.DeepSeq
-import           Control.Lens                 (Lens', Prism', Traversal', lens, prism', toListOf,
-                                               (%~), (&), (.~), (^.))
+import           Control.Lens                 (Lens', Prism', Traversal', lens, over, prism',
+                                               toListOf, view, (%~), (&), (.~), (^.))
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -62,7 +73,8 @@ import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Triangle       (Triangle (..), inTriangle)
-import           Data.Geometry.Vector
+import           Data.Geometry.Vector         (Additive (zero, (^+^)), Affine ((.+^), (.-.)), (*^),
+                                               (^*), (^/))
 import qualified Data.List                    as List
 import           Data.List.NonEmpty           (NonEmpty (..))
 import qualified Data.List.NonEmpty           as NonEmpty
@@ -72,6 +84,7 @@ import           Data.Semigroup               (sconcat)
 import           Data.Semigroup.Foldable
 import qualified Data.Sequence                as Seq
 import           Data.Util
+import           Data.Vector                  (Vector)
 import           Data.Vector.Circular         (CircularVector)
 import qualified Data.Vector.Circular         as CV
 import qualified Data.Vector.Circular.Util    as CV
@@ -96,7 +109,7 @@ let simplePoly :: SimplePolygon () (RealNumber 10)
       , Point2 1 11
       ]
     simpleTriangle :: SimplePolygon () (RealNumber 10)
-    simpleTriangle = SimplePolygon . CV.unsafeFromList . map ext $
+    simpleTriangle = SimplePolygonP  . map ext $
       [ Point2 0 0, Point2 2 0, Point2 1 1]
     multiPoly :: MultiPolygon () (RealNumber 10)
     multiPoly = MultiPolygon
@@ -329,6 +342,22 @@ fromPoints = toCounterClockWiseOrder . SimplePolygon . CV.unsafeFromList
 unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 unsafeFromPoints = SimplePolygon . CV.unsafeFromList
 
+-- | /O(1)/. Creates a simple polygon from the given list of vertices.
+--
+-- pre: the input list constains no repeated vertices.
+unsafeFromCircularVector :: CircularVector (Point 2 r :+ p) -> SimplePolygon p r
+unsafeFromCircularVector = SimplePolygon
+
+-- -- | Polygon points, from left to right.
+-- toList :: Polygon t p r -> [Point 2 r :+ p]
+-- toList (SimplePolygon c)   = F.toList c
+-- toList (MultiPolygon s hs) = toList s ++ concatMap toList hs
+
+-- | Polygon points, from left to right.
+toVector :: Polygon t p r -> Vector (Point 2 r :+ p)
+toVector (SimplePolygon c)   = CV.toVector c
+toVector (MultiPolygon s hs) = foldr (<>) (toVector s) (map toVector hs)
+
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --
 -- running time: \(O(n)\)
@@ -357,7 +386,7 @@ listEdges pg = let f = F.toList . outerBoundaryEdges
 withIncidentEdges                    :: Polygon t p r
                                      -> Polygon t (Two (LineSegment 2 p r)) r
 withIncidentEdges (SimplePolygon vs) =
-      SimplePolygon $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
+      unsafeFromCircularVector $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
     f p c n = c&extra .~ Two (ClosedLineSegment p c) (ClosedLineSegment c n)
 withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
@@ -596,7 +625,7 @@ safeMaximumOn f = \case
 -- running time: \(O(n)\)
 --
 isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
-isCounterClockwise = (\x -> x == abs x) . signedArea2X . asSimplePolygon
+isCounterClockwise = (\x -> x == abs x) . signedArea2X . view outerBoundary
 
 
 -- | Make sure that every edge has the polygon's interior on its
@@ -642,12 +671,6 @@ reverseOuterBoundary   :: Polygon t p r -> Polygon t p r
 reverseOuterBoundary p = p&outerBoundaryVector %~ CV.reverse
 
 
--- | /O(1)/. Convert a Polygon to a simple polygon by forgetting about any holes.
-asSimplePolygon                      :: Polygon t p r -> SimplePolygon p r
-asSimplePolygon poly@SimplePolygon{} = poly
-asSimplePolygon (MultiPolygon vs _)  = vs
-
-
 -- | assigns unique integer numbers to all vertices. Numbers start from 0, and
 -- are increasing along the outer boundary. The vertices of holes
 -- will be numbered last, in the same order.
@@ -657,3 +680,44 @@ asSimplePolygon (MultiPolygon vs _)  = vs
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
+
+
+
+--------------------------------------------------------------------------------
+-- Specialized folds
+
+-- | /O(n)/ Yield the maximum point of the polygon.
+maximum :: Ord r => SimplePolygon p r -> Point 2 r :+ p
+maximum = F.maximumBy (comparing _core) . view outerBoundaryVector
+
+-- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
+maximumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> SimplePolygon p r -> Point 2 r :+ p
+maximumBy fn = F.maximumBy fn . view outerBoundaryVector
+
+-- | /O(n)/ Yield the maximum point of the polygon.
+minimum :: Ord r => SimplePolygon p r -> Point 2 r :+ p
+minimum = F.minimumBy (comparing _core) . view outerBoundaryVector
+
+-- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
+minimumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> SimplePolygon p r -> Point 2 r :+ p
+minimumBy fn = F.minimumBy fn . view outerBoundaryVector
+
+-- | Rotate to the first point that matches the given condition.
+--
+-- >>> toVector <$> findRotateTo (== (Point2 1 0 :+ ())) (unsafeFromPoints [Point2 0 0 :+ (), Point2 1 0 :+ (), Point2 1 1 :+ ()])
+-- Just [Point2 [1,0] :+ (),Point2 [1,1] :+ (),Point2 [0,0] :+ ()]
+-- >>> findRotateTo (== (Point2 7 0 :+ ())) $ unsafeFromPoints [Point2 0 0 :+ (), Point2 1 0 :+ (), Point2 1 1 :+ ()]
+-- Nothing
+findRotateTo :: (Point 2 r :+ p -> Bool) -> SimplePolygon p r -> Maybe (SimplePolygon p r)
+findRotateTo fn = fmap SimplePolygon . CV.findRotateTo fn . view outerBoundaryVector
+
+--------------------------------------------------------------------------------
+-- Rotation
+
+-- | /O(1)/ Rotate the polygon to the left by n number of points.
+rotateLeft :: Int -> SimplePolygon p r -> SimplePolygon p r
+rotateLeft n = over outerBoundaryVector (CV.rotateLeft n)
+
+-- | /O(1)/ Rotate the polygon to the right by n number of points.
+rotateRight :: Int -> SimplePolygon p r -> SimplePolygon p r
+rotateRight n = over outerBoundaryVector (CV.rotateRight n)

@@ -8,45 +8,45 @@
 -- A Polygon data type and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon( PolygonType(..)
-                            , Polygon(..)
-                            , _SimplePolygon, _MultiPolygon
-                            , SimplePolygon, MultiPolygon, SomePolygon
-                            , pattern SimplePolygonP
+module Data.Geometry.Polygon
+  ( PolygonType(..)
+  , Polygon(..)
+  , _SimplePolygon, _MultiPolygon
+  , SimplePolygon, MultiPolygon, SomePolygon
 
-                            , fromPoints
-                            , unsafeFromPoints
+  , fromPoints
+  , unsafeFromPoints
+  , toVector
 
-                            , polygonVertices, listEdges
+  , polygonVertices, listEdges
 
-                            , outerBoundary, outerBoundaryVector
-                            , outerBoundaryEdges
-                            , outerVertex, outerBoundaryEdge
+  , outerBoundary, outerBoundaryVector
+  , outerBoundaryEdges
+  , outerVertex, outerBoundaryEdge
 
-                            , polygonHoles, polygonHoles'
-                            , holeList
+  , polygonHoles, polygonHoles'
+  , holeList
 
-                            , inPolygon, insidePolygon, onBoundary
+  , inPolygon, insidePolygon, onBoundary
 
-                            , area, signedArea
+  , area, signedArea
 
-                            , centroid
-                            , pickPoint
+  , centroid
+  , pickPoint
 
-                            , isTriangle, isStarShaped
+  , isTriangle, isStarShaped
 
-                            , isCounterClockwise
-                            , toCounterClockWiseOrder, toCounterClockWiseOrder'
-                            , toClockwiseOrder, toClockwiseOrder'
-                            , reverseOuterBoundary
+  , isCounterClockwise
+  , toCounterClockWiseOrder, toCounterClockWiseOrder'
+  , toClockwiseOrder, toClockwiseOrder'
+  , reverseOuterBoundary
 
-                            , findDiagonal
+  , findDiagonal
 
-                            , withIncidentEdges, numberVertices
+  , withIncidentEdges, numberVertices
 
-                            , asSimplePolygon
-                            , extremesLinear, cmpExtreme
-                            ) where
+  , extremesLinear, cmpExtreme
+  ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC
 import           Algorithms.Geometry.LinearProgramming.Types
