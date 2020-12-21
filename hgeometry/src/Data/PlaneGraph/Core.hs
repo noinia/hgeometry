@@ -1,6 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell     #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.PlaneGraph.Core
@@ -58,33 +58,29 @@ module Data.PlaneGraph.Core( -- $setup
                            ) where
 
 
-import           Control.Lens hiding (holes, holesOf, (.=))
+import           Control.Lens              hiding (holes, holesOf, (.=))
 import           Data.Aeson
-import qualified Data.CircularSeq as C
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
+import qualified Data.Foldable             as F
+import           Data.Function             (on)
 import           Data.Geometry.Box
 import           Data.Geometry.Interval
-import           Data.Geometry.Line (cmpSlope, supportingLine)
+import           Data.Geometry.Line        (cmpSlope, supportingLine)
 import           Data.Geometry.LineSegment hiding (endPoints)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Properties
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Ord (comparing)
-import qualified Data.PlanarGraph as PG
-import           Data.PlanarGraph( PlanarGraph, planarGraph, dual
-                                 , Dart(..), VertexId(..), FaceId(..), Arc(..)
-                                 , Direction(..), twin
-                                 , World(..)
-                                 , FaceId', VertexId'
-                                 , HasDataOf(..)
-                                 )
+import qualified Data.List.NonEmpty        as NonEmpty
+import qualified Data.Map                  as M
+import           Data.Ord                  (comparing)
+import           Data.PlanarGraph          (Arc (..), Dart (..), Direction (..), FaceId (..),
+                                            FaceId', HasDataOf (..), PlanarGraph, VertexId (..),
+                                            VertexId', World (..), dual, planarGraph, twin)
+import qualified Data.PlanarGraph          as PG
 import           Data.Util
-import qualified Data.Vector as V
-import           GHC.Generics (Generic)
+import qualified Data.Vector               as V
+import           Data.Vector.Circular      (CircularVector)
+import           GHC.Generics              (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -190,7 +186,7 @@ fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
 
 -- | Constructs a planar from the given vertices
 fromVertices      :: proxy s
-                  -> C.CSeq (Point 2 r :+ p)
+                  -> CircularVector (Point 2 r :+ p)
                   -> PlanarGraph s Primal (VertexData r p) () ()
 fromVertices _ vs = g&PG.vertexData .~ vData'
   where

@@ -22,19 +22,19 @@ module Algorithms.Geometry.PolygonTriangulation.TriangulateMonotone
   -- , splitPolygon
   ) where
 
+import           Algorithms.Geometry.PolygonTriangulation.Types
 import           Control.Lens
-import qualified Data.CircularSeq as C
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                                  as F
 import           Data.Geometry.LineSegment
+import           Data.Geometry.PlanarSubdivision.Basic          (PlanarSubdivision, PolygonFaceData)
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.List as L
-import           Data.Ord (comparing, Down(..))
+import qualified Data.List                                      as L
+import           Data.Ord                                       (Down (..), comparing)
+import           Data.PlaneGraph                                (PlaneGraph)
 import           Data.Util
-import           Algorithms.Geometry.PolygonTriangulation.Types
-import           Data.PlaneGraph (PlaneGraph)
-import           Data.Geometry.PlanarSubdivision.Basic(PolygonFaceData, PlanarSubdivision)
+import qualified Data.Vector.Circular.Util                      as CV
 
 --------------------------------------------------------------------------------
 
@@ -150,11 +150,11 @@ splitPolygon    :: Ord r => MonotonePolygon p r
                 -> ([Point 2 r :+ (LR :+ p)], [Point 2 r :+ (LR :+ p)])
 splitPolygon pg = bimap (f L) (f R . reverse)
                 . L.break (\v -> v^.core == vMinY)
-                . F.toList . C.rightElements $ vs'
+                . F.toList . CV.rightElements $ vs'
   where
     f x = map (&extra %~ (x :+))
     -- rotates the list to the vtx with max ycoord
-    Just vs' = C.findRotateTo (\v -> v^.core == vMaxY)
+    Just vs' = CV.findRotateTo (\v -> v^.core == vMaxY)
              $ pg^.outerBoundary
     vMaxY = getY F.maximumBy
     vMinY = getY F.minimumBy
