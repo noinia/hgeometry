@@ -73,8 +73,8 @@ spec = do
 newtype PG = PG (ConvexPolygon () Rational) deriving (Show)
 
 instance Eq PG where
-  (PG a) == (PG b) = let as = a^.simplePolygon.outerBoundary
-                         bs = b^.simplePolygon.outerBoundary
+  (PG a) == (PG b) = let as = a^.simplePolygon.outerBoundaryVector
+                         bs = b^.simplePolygon.outerBoundaryVector
                      in isShiftOf as bs
 
 myPoints :: NonEmpty.NonEmpty (Point 2 Rational :+ ())

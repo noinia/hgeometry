@@ -105,7 +105,7 @@ _asRectangle = prism' rectToPath pathToRect
     pathToRect p = p^?_asSimplePolygon >>= asRect
 
     asRect    :: SimplePolygon () r -> Maybe (Rectangle () r)
-    asRect pg = case pg^..outerBoundary.traverse of
+    asRect pg = case pg^..outerBoundaryVector.traverse of
         [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (boundingBoxList' [a,c])
         [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (boundingBoxList' [a,c])
         _                                                    -> Nothing

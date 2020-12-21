@@ -32,7 +32,7 @@ instance Arbitrary Hulls where
                  rh <- right (xMax lh)
                  pure $ Hulls lh rh
     where
-      xMax = maximum . fmap (^.core.xCoord) . (^.simplePolygon.outerBoundary)
+      xMax = maximum . fmap (^.core.xCoord) . (^.simplePolygon.outerBoundaryVector)
       lowerHull' = ConvexPolygon . fromPoints . reverse . F.toList . lowerHull
       left = do p    <- arbitrary
                 q    <- suchThat arbitrary (\a -> a^.core.xCoord > p^.core.xCoord)
