@@ -9,7 +9,7 @@
 -- Description :  Wrapper around Data.Sequence with type level length annotation.
 --
 --------------------------------------------------------------------------------
-module Data.LSeq( LSeq
+module Data.LSeq( LSeq( EmptyL, (:<|), (:<<), (:|>) )
                 , toSeq
                 , empty
                 , fromList
@@ -32,14 +32,9 @@ module Data.LSeq( LSeq
 
                 , ViewL(..)
                 , viewl
-                , pattern (:<|)
-
-                , pattern (:<<)
-                , pattern EmptyL
 
                 , ViewR(..)
                 , viewr
-                , pattern (:|>)
 
                 , zipWith
 
@@ -79,7 +74,7 @@ newtype LSeq (n :: Nat) a = LSeq (S.Seq a)
                           deriving (Show,Read,Eq,Ord,Foldable,Functor,Traversable
                                    ,Generic,NFData)
 
--- | Convert to a sequence by dropping the type-level size.
+-- | \( O(1) \) Convert to a sequence by dropping the type-level size.
 toSeq          :: LSeq n a -> S.Seq a
 toSeq (LSeq s) = s
 
@@ -112,16 +107,16 @@ instance (1 <= n) => Foldable1 (LSeq n)
 --   traverse1 f s = case traverse1 f $ viewl s of
 --                     x :< s' -> x <| s'
 
--- | /O(1)/ The empty sequence.
+-- | \( O(1) \) The empty sequence.
 empty :: LSeq 0 a
 empty = LSeq S.empty
 
--- | /O(1)/ Add an element to the left end of a sequence.
+-- | \( O(1) \) Add an element to the left end of a sequence.
 --   Mnemonic: a triangle with the single element at the pointy end.
 (<|) :: a -> LSeq n a -> LSeq (1 + n) a
 x <| xs = LSeq (x S.<| toSeq xs)
 
--- | /O(1)/ Add an element to the right end of a sequence.
+-- | \( O(1) \) Add an element to the right end of a sequence.
 --   Mnemonic: a triangle with the single element at the pointy end.
 (|>)    :: LSeq n a -> a -> LSeq (1 + n) a
 xs |> x = LSeq (toSeq xs S.|> x)
@@ -129,13 +124,13 @@ xs |> x = LSeq (toSeq xs S.|> x)
 infixr 5 <|
 infixl 5 |>
 
--- | /O(log(min(n,m)))/ Concatenate two sequences.
+-- | \( O(log(min(n,m))) \) Concatenate two sequences.
 (><) :: LSeq n a -> LSeq m a -> LSeq (n + m) a
 xs >< ys = LSeq (toSeq xs <> toSeq ys)
 
 infix 5 ><
 
--- | Prove a sequence has at least @n@ elements.
+-- | \( O(1) \) Prove a sequence has at least @n@ elements.
 --
 -- >>> eval (Proxy :: Proxy 3) (fromList [1,2,3])
 -- Just (LSeq (fromList [1,2,3]))
@@ -236,18 +231,22 @@ wrapUnsafe f = LSeq . f . toSeq
 
 --------------------------------------------------------------------------------
 
+-- | \( O(n) \). Create an l-sequence from a sequence of elements.
 fromSeq :: S.Seq a -> LSeq 0 a
 fromSeq = LSeq
 
+-- | \( O(n) \). Create an l-sequence from a finite list of elements.
 fromList :: Foldable f => f a -> LSeq 0 a
 fromList = LSeq . S.fromList . F.toList
 
+-- | \( O(n) \). Create an l-sequence from a non-empty list.
 fromNonEmpty :: NonEmpty.NonEmpty a -> LSeq 1 a
 fromNonEmpty = LSeq . S.fromList . F.toList
 
 
 --------------------------------------------------------------------------------
 
+-- | View of the left end of a sequence.
 data ViewL n a where
   (:<) :: a -> LSeq n a -> ViewL (1 + n) a
 
@@ -277,7 +276,7 @@ instance Eq a => Eq (ViewL n a) where
 instance Ord a => Ord (ViewL n a) where
   s `compare` s' = F.toList s `compare` F.toList s'
 
-
+-- | \( O(1) )\. Analyse the left end of a sequence.
 viewl :: LSeq (1 + n) a -> ViewL (1 + n) a
 viewl xs = let ~(x S.:< ys) = S.viewl $ toSeq xs in x :< LSeq ys
 
@@ -286,6 +285,8 @@ viewl' xs = let ~(x S.:< ys) = S.viewl $ toSeq xs in (x,LSeq ys)
 
 infixr 5 :<|
 
+-- | A bidirectional pattern synonym viewing the front of a non-empty
+-- sequence.
 pattern (:<|)    :: a -> LSeq n a -> LSeq (1 + n) a
 pattern x :<| xs <- (viewl' -> (x,xs)) -- we need the coerce unfortunately
   where
@@ -296,9 +297,12 @@ pattern x :<| xs <- (viewl' -> (x,xs)) -- we need the coerce unfortunately
 
 infixr 5 :<<
 
+-- | A unidirectional pattern synonym viewing the front of a non-empty
+-- sequence.
 pattern (:<<)    :: a -> LSeq 0 a -> LSeq n a
 pattern x :<< xs <- (viewLSeq -> Just (x,xs))
 
+-- | The empty sequence.
 pattern EmptyL   :: LSeq n a
 pattern EmptyL   <- (viewLSeq -> Nothing)
 
@@ -310,6 +314,7 @@ viewLSeq (LSeq s) = case S.viewl s of
 
 --------------------------------------------------------------------------------
 
+-- | View of the right end of a sequence.
 data ViewR n a where
   (:>) :: LSeq n a -> a -> ViewR (1 + n) a
 
@@ -330,6 +335,7 @@ instance Eq a => Eq (ViewR n a) where
 instance Ord a => Ord (ViewR n a) where
   s `compare` s' = F.toList s `compare` F.toList s'
 
+-- | \( O(1) \). Analyse the right end of a sequence.
 viewr    :: LSeq (1 + n) a -> ViewR (1 + n) a
 viewr xs = let ~(ys S.:> x) = S.viewr $ toSeq xs in LSeq ys :> x
 
@@ -338,6 +344,8 @@ viewr' xs = let ~(ys S.:> x) = S.viewr $ toSeq xs in (LSeq ys, x)
 
 infixl 5 :|>
 
+-- | A bidirectional pattern synonym viewing the rear of a non-empty
+-- sequence.
 pattern (:|>)    :: forall n a. LSeq n a -> a -> LSeq (1 + n) a
 pattern xs :|> x <- (viewr' -> (xs,x))
   where

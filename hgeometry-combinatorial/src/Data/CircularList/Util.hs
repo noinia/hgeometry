@@ -57,7 +57,7 @@ insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     -- split the list at its maximum.
     (pref,rest) = splitIncr cmp xs
 
--- given a list of elements that is supposedly a a cyclic-shift of a list of
+-- | Given a list of elements that is supposedly a a cyclic-shift of a list of
 -- increasing items, find the splitting point. I.e. returns a pair of lists
 -- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted
 -- order.

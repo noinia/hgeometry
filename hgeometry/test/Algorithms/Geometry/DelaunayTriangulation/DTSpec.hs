@@ -19,7 +19,7 @@ import           Test.Util
 
 dtEdges :: (Fractional r, Ord r)
         => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
-dtEdges = tEdges . DC.delaunayTriangulation
+dtEdges = edgesAsVertices . DC.delaunayTriangulation
 
 take'   :: Int -> NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
 take' i = NonEmpty.fromList . NonEmpty.take i

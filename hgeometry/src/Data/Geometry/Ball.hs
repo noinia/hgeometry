@@ -75,6 +75,7 @@ unitBall = Ball (ext origin) 1
 
 -- * Querying if a point lies in a ball
 
+-- | Query location of a point relative to a d-dimensional ball.
 inBall                 :: (Arity d, Ord r, Num r)
                        => Point d r -> Ball d p r -> PointLocationResult
 p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of

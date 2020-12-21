@@ -13,6 +13,7 @@ import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
+-- | Measured size. Always non-negative.
 newtype Size = Size Word deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord,Generic,NFData)
 
 instance Semigroup Size where

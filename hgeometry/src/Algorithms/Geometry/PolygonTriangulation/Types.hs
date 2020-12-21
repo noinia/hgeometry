@@ -22,6 +22,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
+-- | After triangulation, edges are either from the original polygon or a new diagonal.
 data PolygonEdgeType = Original | Diagonal
                      deriving (Show,Read,Eq)
 
