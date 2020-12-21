@@ -61,6 +61,17 @@ import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
 -- * A d-dimensional Point
 
 -- | A d-dimensional point.
+--
+-- There are convenience pattern synonyms for 1, 2 and 3 dimensional points.
+--
+-- >>> let f (Point1 x) = x in f (Point1 1)
+-- 1
+-- >>> let f (Point2 x y) = x in f (Point2 1 2)
+-- 1
+-- >>> let f (Point3 x y z) = z in f (Point3 1 2 3)
+-- 3
+-- >>> let f (Point3 x y z) = z in f (Point $ Vector3 1 2 3)
+-- 3
 newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
 
 instance (Show r, Arity d) => Show (Point d r) where
@@ -176,44 +187,18 @@ projectPoint = Point . prefix . toVec
 --------------------------------------------------------------------------------
 -- * Convenience functions to construct 1, 2 and 3 dimensional points
 
--- | We provide pattern synonyms for 1, 2 and 3 dimensional points. i.e.
--- we can write:
---
---
--- >>> :{
---   let
---     f            :: Num r => Point 1 r -> r
---     f (Point1 x) = x + 1
---   in f (Point1 1)
--- :}
--- 2
+-- | A bidirectional pattern synonym for 1 dimensional points.
 pattern Point1   :: r -> Point 1 r
 pattern Point1 x = Point (Vector1 x)
 {-# COMPLETE Point1 #-}
 
 
--- | Pattern synonym for 2 dimensional points
---
--- >>> :{
---   let
---     f              :: Point 2 r -> r
---     f (Point2 x y) = x
---   in f (Point2 1 2)
--- :}
--- 1
+-- | A bidirectional pattern synonym for 2 dimensional points.
 pattern Point2       :: r -> r -> Point 2 r
 pattern Point2 x y = Point (Vector2 x y)
 {-# COMPLETE Point2 #-}
 
--- | Similarly, we can write:
---
--- >>> :{
---   let
---     g                :: Point 3 r -> r
---     g (Point3 x y z) = z
---   in g myPoint
--- :}
--- 3
+-- | A bidirectional pattern synonym for 3 dimensional points.
 pattern Point3       :: r -> r -> r -> Point 3 r
 pattern Point3 x y z = (Point (Vector3 x y z))
 {-# COMPLETE Point3 #-}

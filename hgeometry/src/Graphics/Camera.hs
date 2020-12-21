@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Graphics.Camera
@@ -32,7 +31,7 @@ import Data.Geometry.Vector
 -- | A basic camera data type. The fields stored are:
 --
 -- * the camera position,
--- * the raw camera normal, i.e. a unit vecotr into the center of the screen,
+-- * the raw camera normal, i.e. a unit vector into the center of the screen,
 -- * the raw view up vector indicating which side points "upwards" in the scene,
 -- * the viewplane depth (i.e. the distance from the camera position to the plane on which we project),
 -- * the near distance (everything closer than this is clipped),
@@ -53,7 +52,37 @@ data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
 ----------------------------------------
 -- * Field Accessor Lenses
 
-makeLenses ''Camera
+-- Lemmih: Writing out the lenses by hand so they can be documented.
+-- makeLenses ''Camera
+
+-- | Camera position.
+cameraPosition :: Lens' (Camera r) (Point 3 r)
+cameraPosition = lens _cameraPosition (\cam p -> cam{_cameraPosition=p})
+
+-- | Raw camera normal, i.e. a unit vector into the center of the screen.
+rawCameraNormal :: Lens' (Camera r) (Vector 3 r)
+rawCameraNormal = lens _rawCameraNormal (\cam r -> cam{_rawCameraNormal=r})
+
+-- | Raw view up vector indicating which side points "upwards" in the scene.
+rawViewUp :: Lens' (Camera r) (Vector 3 r)
+rawViewUp = lens _rawViewUp (\cam r -> cam{_rawViewUp=r})
+
+-- | Viewplane depth (i.e. the distance from the camera position to the plane on which we project).
+viewPlaneDepth :: Lens' (Camera r) r
+viewPlaneDepth = lens _viewPlaneDepth (\cam v -> cam{_viewPlaneDepth=v})
+
+-- | Near distance (everything closer than this is clipped).
+nearDist :: Lens' (Camera r) r
+nearDist = lens _nearDist (\cam n -> cam{_nearDist=n})
+
+-- | Far distance (everything further away than this is clipped).
+farDist :: Lens' (Camera r) r
+farDist = lens _farDist (\cam f -> cam{_farDist=f})
+
+-- | Screen dimensions.
+screenDimensions :: Lens' (Camera r) (Vector 2 r)
+screenDimensions = lens _screenDimensions (\cam d -> cam{_screenDimensions=d})
+
 
 --------------------------------------------------------------------------------
 -- * Accessor Lenses

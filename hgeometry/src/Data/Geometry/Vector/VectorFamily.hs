@@ -56,8 +56,9 @@ type instance V.Dim   (Vector d)   = Fam.FromPeano (Peano d)
 type instance Index   (Vector d r) = Int
 type instance IxValue (Vector d r) = r
 
-unV :: Lens (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
-unV = lens _unV (const MKVector)
+-- | Vectors are isomorphic to a definition determined by 'VectorFamily'.
+unV :: Iso (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
+unV = iso _unV MKVector
 {-# INLINE unV #-}
 
 -- type Arity d = (ImplicitArity (Peano d), KnownNat d)

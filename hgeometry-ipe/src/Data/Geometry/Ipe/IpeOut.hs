@@ -23,7 +23,6 @@ import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
 import           Data.Geometry.Ellipse(Ellipse, circleToEllipse)
-import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
