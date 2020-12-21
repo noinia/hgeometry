@@ -55,6 +55,7 @@ modules :: [String]
 modules =
   [ "Data.Range"
   , "Data.CircularList.Util"
+  , "Data.Vector.Circular.Util"
   , "Data.Permutation"
   , "Data.CircularSeq"
   , "Data.LSeq"
