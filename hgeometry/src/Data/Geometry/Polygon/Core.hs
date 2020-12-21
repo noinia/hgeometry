@@ -9,10 +9,9 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Core( PolygonType(..)
-                                 , Polygon(..)
+                                 , Polygon(.., SimplePolygonP)
                                  , _SimplePolygon, _MultiPolygon
                                  , SimplePolygon, MultiPolygon, SomePolygon
-                                 , pattern SimplePolygonP
 
                                  , fromPoints
                                  , unsafeFromPoints
