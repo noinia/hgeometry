@@ -40,7 +40,7 @@ main = do
           simple = Prelude.filter isValidPolygon simple'
           multi = Prelude.filter isValidPolygon multi'
       -- forM_ multi print
-      print (sum $ map (F.length . view outerBoundary) simple)
+      print (sum $ map (F.length . view outerBoundaryVector) simple)
       print (F.length simple, F.length multi)
       BS.writeFile "polygons.simple" (encode $ map flattenPolygon simple)
       BS.writeFile "polygons.multi" (encode $ map flattenMultiPolygon multi)
@@ -51,13 +51,13 @@ isValidPolygon :: Polygon t p Double -> Bool
 isValidPolygon = not . hasSelfIntersections . fmap (realToFrac :: Double -> Rational)
 
 flattenPolygon :: SimplePolygon p r -> [(r,r)]
-flattenPolygon = map (unpack . view core) . F.toList . view outerBoundary
+flattenPolygon = map (unpack . view core) . F.toList . view outerBoundaryVector
   where
     unpack (Point2 a b) = (a,b)
 
 flattenMultiPolygon :: MultiPolygon p r -> [[(r,r)]]
 flattenMultiPolygon p =
-  flattenPolygon (asSimplePolygon p) : map flattenPolygon (p ^. polygonHoles)
+  flattenPolygon (p^.outerBoundary) : map flattenPolygon (p ^. polygonHoles)
 
 printUsage :: IO ()
 printUsage = do
