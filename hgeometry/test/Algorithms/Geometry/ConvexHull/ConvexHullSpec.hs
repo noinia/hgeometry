@@ -6,7 +6,7 @@ import qualified Algorithms.Geometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified Algorithms.Geometry.ConvexHull.OldDivideAndConquer as OldDivAndConquer
 import qualified Algorithms.Geometry.ConvexHull.QuickHull as QuickHull
 import           Control.Lens
-import           Data.CircularSeq (isShiftOf)
+import           Data.Vector.Circular.Util (isShiftOf)
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon

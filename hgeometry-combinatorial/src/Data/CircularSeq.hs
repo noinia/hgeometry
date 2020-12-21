@@ -150,7 +150,7 @@ adjust f i' s@(CSeq l x r) = let i  = i' `mod` length s
                                      else CSeq (S.adjust f (i - rn - 1) l) x r
 
 
--- | Access te ith item in the CSeq (w.r.t the focus) as a lens
+-- | Access the ith item in the CSeq (w.r.t the focus) as a lens
 item   :: Int -> Lens' (CSeq a) a
 item i = lens (`index` i) (\s x -> adjust (const x) i s)
 

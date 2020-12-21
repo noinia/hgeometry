@@ -5,7 +5,6 @@ import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                ((^.), (^..))
 import           Control.Monad
 import qualified Data.ByteString                             as BS
-import qualified Data.CircularSeq                            as C
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Boundary
@@ -13,6 +12,8 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Proxy
 import           Data.Serialize
+import           Data.Vector.Circular                        (CircularVector)
+import qualified Data.Vector.Circular                        as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
@@ -59,11 +60,11 @@ spec :: Spec
 spec = do
   testCases "test/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
-    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+    property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
       let p = SimplePolygon pts in
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
-    property $ \(pts :: C.CSeq (Point 2 Rational :+ ())) ->
+    property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
       let simple = SimplePolygon pts
           p = MultiPolygon simple [simple] in
       read (show p) == p
