@@ -5,14 +5,11 @@ module Data.Geometry.Polygon.Convex.LowerTangent( lowerTangent
 import           Control.Lens hiding ((:<), (:>))
 import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
-import qualified Data.Vector.Circular.Util as CV
 import           Data.Ext
-import           Data.Function (on)
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon (outerBoundary)
 import           Data.Geometry.Polygon.Convex(ConvexPolygon(..), simplePolygon)
-import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 
 
