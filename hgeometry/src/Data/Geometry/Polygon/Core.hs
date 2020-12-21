@@ -114,12 +114,9 @@ data Polygon (t :: PolygonType) p r where
   MultiPolygon  :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon  p r
 
 pattern SimplePolygonP :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
-pattern SimplePolygonP lst <- (viewSimple -> lst)
+pattern SimplePolygonP lst <- (SimplePolygon (F.toList -> lst))
   where
     SimplePolygonP lst = fromPoints lst
-
-viewSimple :: SimplePolygon p r -> [Point 2 r :+ p]
-viewSimple (SimplePolygon s) = F.toList s
 
 -- | Prism to 'test' if we are a simple polygon
 --
