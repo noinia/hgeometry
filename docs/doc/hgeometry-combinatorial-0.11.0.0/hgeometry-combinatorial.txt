@@ -307,7 +307,7 @@ index :: CSeq a -> Int -> a
 --   </pre>
 adjust :: (a -> a) -> Int -> CSeq a -> CSeq a
 
--- | Access te ith item in the CSeq (w.r.t the focus) as a lens
+-- | Access the ith item in the CSeq (w.r.t the focus) as a lens
 item :: Int -> Lens' (CSeq a) a
 
 -- | rotates the focus to the left
@@ -1276,8 +1276,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHir a_aHBi. Lens (Permutation a_aHir) (Permutation a_aHBi) (Vector (Orbit a_aHir)) (Vector (Orbit a_aHBi))
-indexes :: forall a_aHir. Lens' (Permutation a_aHir) (Vector (Int, Int))
+orbits :: forall a_aHnL a_aHGC. Lens (Permutation a_aHnL) (Permutation a_aHGC) (Vector (Orbit a_aHnL)) (Vector (Orbit a_aHGC))
+indexes :: forall a_aHnL. Lens' (Permutation a_aHnL) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1389,8 +1389,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKz1. Lens' (Dart s_aKz1) Direction
-arc :: forall s_aKz1 s_aKZp. Lens (Dart s_aKz1) (Dart s_aKZp) (Arc s_aKz1) (Arc s_aKZp)
+direction :: forall s_aKEl. Lens' (Dart s_aKEl) Direction
+arc :: forall s_aKEl s_aL4J. Lens (Dart s_aKEl) (Dart s_aL4J) (Arc s_aKEl) (Arc s_aL4J)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -1999,8 +1999,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKz1 s_aKZp. Lens (Dart s_aKz1) (Dart s_aKZp) (Arc s_aKz1) (Arc s_aKZp)
-direction :: forall s_aKz1. Lens' (Dart s_aKz1) Direction
+arc :: forall s_aKEl s_aL4J. Lens (Dart s_aKEl) (Dart s_aL4J) (Arc s_aKEl) (Arc s_aL4J)
+direction :: forall s_aKEl. Lens' (Dart s_aKEl) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2451,8 +2451,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aQUs. Lens' (Range a_aQUs) (EndPoint a_aQUs)
-upper :: forall a_aQUs. Lens' (Range a_aQUs) (EndPoint a_aQUs)
+lower :: forall a_aQZM. Lens' (Range a_aQZM) (EndPoint a_aQZM)
+upper :: forall a_aQZM. Lens' (Range a_aQZM) (EndPoint a_aQZM)
 
 -- | Test if a value lies in a range.
 --   
@@ -3046,10 +3046,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZh5 a_a10Ut. Traversal (UnBounded a_aZh5) (UnBounded a_a10Ut) a_aZh5 a_a10Ut
-_MinInfinity :: forall a_aZh5. Prism' (UnBounded a_aZh5) ()
-_Val :: forall a_aZh5 a_a10Xm. Prism (UnBounded a_a10Xm) (UnBounded a_aZh5) a_a10Xm a_aZh5
-_MaxInfinity :: forall a_aZh5. Prism' (UnBounded a_aZh5) ()
+unUnBounded :: forall a_aZmp a_a10ZN. Traversal (UnBounded a_aZmp) (UnBounded a_a10ZN) a_aZmp a_a10ZN
+_MinInfinity :: forall a_aZmp. Prism' (UnBounded a_aZmp) ()
+_Val :: forall a_aZmp a_a112G. Prism (UnBounded a_a112G) (UnBounded a_aZmp) a_a112G a_aZmp
+_MaxInfinity :: forall a_aZmp. Prism' (UnBounded a_aZmp) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
@@ -3322,6 +3322,47 @@ instance GHC.Show.Show Data.IndexedDoublyLinkedList.Cell
 instance Control.Monad.Primitive.PrimMonad (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance Control.Monad.Reader.Class.MonadReader (Data.IndexedDoublyLinkedList.DLList s b) (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance GHC.Base.Functor (Data.IndexedDoublyLinkedList.DLList s)
+
+module Data.Vector.Circular.Util
+
+-- | Access the ith item in the CircularVector (w.r.t the rotation) as a
+--   lens
+item :: Int -> Lens' (CircularVector a) a
+
+-- | All elements, starting with the focus, going to the right
+--   
+--   <pre>
+--   &gt;&gt;&gt; rightElements $ unsafeFromList [3,4,5,1,2]
+--   [3,4,5,1,2]
+--   </pre>
+rightElements :: CircularVector a -> NonEmptyVector a
+
+-- | All elements, starting with the focus, going to the left
+--   
+--   <pre>
+--   &gt;&gt;&gt; leftElements $ unsafeFromList [3,4,5,1,2]
+--   [3,2,1,5,4]
+--   </pre>
+leftElements :: CircularVector a -> NonEmptyVector a
+
+-- | Finds an element in the CircularVector
+--   
+--   <pre>
+--   &gt;&gt;&gt; findRotateTo (== 3) $ unsafeFromList [1..5]
+--   Just (CircularVector {vector = [1,2,3,4,5], rotation = 2})
+--   
+--   &gt;&gt;&gt; findRotateTo (== 7) $ unsafeFromList [1..5]
+--   Nothing
+--   </pre>
+findRotateTo :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
+
+-- | Test if the circular list is a cyclic shift of the second list.
+--   
+--   Running time: &lt;math&gt;, where &lt;math&gt; and &lt;math&gt; are
+--   the sizes of the lists.
+isShiftOf :: Eq a => CircularVector a -> CircularVector a -> Bool
+instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
+instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
 
 
 module Data.Yaml.Util

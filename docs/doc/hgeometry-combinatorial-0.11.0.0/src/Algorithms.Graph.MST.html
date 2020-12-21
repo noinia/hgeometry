@@ -31,14 +31,14 @@
 </span><span id="line-31"></span><span class="hs-comment">-- The algorithm used is Kruskal's.</span><span>
 </span><span id="line-32"></span><span class="hs-comment">--</span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
-</span><span id="line-34"></span><span id="local-6989586621679324901"><span id="local-6989586621679324902"><span id="local-6989586621679324903"><span id="local-6989586621679324904"><span id="local-6989586621679324905"><span class="annot"><a href="Algorithms.Graph.MST.html#mst"><span class="hs-identifier hs-type">mst</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679324905"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324904"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324903"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324902"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324905"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324901"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324904"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324903"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-34"></span><span id="local-6989586621679326373"><span id="local-6989586621679326374"><span id="local-6989586621679326375"><span id="local-6989586621679326376"><span id="local-6989586621679326377"><span class="annot"><a href="Algorithms.Graph.MST.html#mst"><span class="hs-identifier hs-type">mst</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679326377"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326376"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326375"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326374"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326377"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326373"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326376"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326375"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
 </span><span id="line-35"></span><span id="mst"><span class="annot"><span class="annottext">mst :: PlanarGraph s w v e f -&gt; Tree (VertexId s w)
-</span><a href="Algorithms.Graph.MST.html#mst"><span class="hs-identifier hs-var hs-var">mst</span></a></span></span><span> </span><span id="local-6989586621679324900"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
-</span><a href="#local-6989586621679324900"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; [Dart s] -&gt; Tree (VertexId s w)
+</span><a href="Algorithms.Graph.MST.html#mst"><span class="hs-identifier hs-var hs-var">mst</span></a></span></span><span> </span><span id="local-6989586621679326372"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
+</span><a href="#local-6989586621679326372"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; [Dart s] -&gt; Tree (VertexId s w)
 forall k (s :: k) (w :: World) v e f.
 PlanarGraph s w v e f -&gt; [Dart s] -&gt; Tree (VertexId s w)
 </span><a href="Algorithms.Graph.MST.html#makeTree"><span class="hs-identifier hs-var">makeTree</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324900"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">([Dart s] -&gt; Tree (VertexId s w))
+</span><a href="#local-6989586621679326372"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">([Dart s] -&gt; Tree (VertexId s w))
 -&gt; [Dart s] -&gt; Tree (VertexId s w)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; [Dart s]
@@ -46,51 +46,51 @@ forall k e (s :: k) (w :: World) v f.
 Ord e =&gt;
 PlanarGraph s w v e f -&gt; [Dart s]
 </span><a href="Algorithms.Graph.MST.html#mstEdges"><span class="hs-identifier hs-var">mstEdges</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324900"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679326372"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-36"></span><span>  </span><span class="hs-comment">-- TODO: Add edges/darts to the output somehow.</span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span class="hs-comment">-- | Computes the set of edges in the Minimum spanning tree</span><span>
 </span><span id="line-39"></span><span class="hs-comment">--</span><span>
 </span><span id="line-40"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
-</span><span id="line-41"></span><span id="local-6989586621679325037"><span id="local-6989586621679325038"><span id="local-6989586621679325039"><span id="local-6989586621679325040"><span id="local-6989586621679325041"><span class="annot"><a href="Algorithms.Graph.MST.html#mstEdges"><span class="hs-identifier hs-type">mstEdges</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679325041"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325040"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325039"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325038"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325041"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325037"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325040"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span></span></span></span></span></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679326509"><span id="local-6989586621679326510"><span id="local-6989586621679326511"><span id="local-6989586621679326512"><span id="local-6989586621679326513"><span class="annot"><a href="Algorithms.Graph.MST.html#mstEdges"><span class="hs-identifier hs-type">mstEdges</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679326513"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326512"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326511"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326510"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326513"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326509"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326512"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span></span></span></span></span></span><span>
 </span><span id="line-42"></span><span id="mstEdges"><span class="annot"><span class="annottext">mstEdges :: PlanarGraph s w v e f -&gt; [Dart s]
-</span><a href="Algorithms.Graph.MST.html#mstEdges"><span class="hs-identifier hs-var hs-var">mstEdges</span></a></span></span><span> </span><span id="local-6989586621679324899"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
-</span><a href="#local-6989586621679324899"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s [Dart s]) -&gt; [Dart s]
+</span><a href="Algorithms.Graph.MST.html#mstEdges"><span class="hs-identifier hs-var hs-var">mstEdges</span></a></span></span><span> </span><span id="local-6989586621679326371"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
+</span><a href="#local-6989586621679326371"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s [Dart s]) -&gt; [Dart s]
 forall a. (forall s. ST s a) -&gt; a
 </span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s [Dart s]) -&gt; [Dart s])
 -&gt; (forall s. ST s [Dart s]) -&gt; [Dart s]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-43"></span><span>          </span><span id="local-6989586621679324898"><span class="annot"><span class="annottext">UF s (VertexId s w)
-</span><a href="#local-6989586621679324898"><span class="hs-identifier hs-var">uf</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (UF s (VertexId s w))
+</span><span id="line-43"></span><span>          </span><span id="local-6989586621679326370"><span class="annot"><span class="annottext">UF s (VertexId s w)
+</span><a href="#local-6989586621679326370"><span class="hs-identifier hs-var">uf</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (UF s (VertexId s w))
 forall k s (a :: k). Int -&gt; ST s (UF s a)
 </span><a href="Algorithms.Graph.MST.html#new"><span class="hs-identifier hs-var">new</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; Int
 forall k (s :: k) (w :: World) v e f. PlanarGraph s w v e f -&gt; Int
 </span><a href="Data.PlanarGraph.Core.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324899"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679326371"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-44"></span><span>          </span><span class="annot"><span class="annottext">(Dart s -&gt; ST s Bool) -&gt; [Dart s] -&gt; ST s [Dart s]
 forall (m :: * -&gt; *) a.
 Applicative m =&gt;
 (a -&gt; m Bool) -&gt; [a] -&gt; m [a]
-</span><span class="hs-identifier hs-var">filterM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679324895"><span class="annot"><span class="annottext">e :: Dart s
-</span><a href="#local-6989586621679324895"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UF s (VertexId s w) -&gt; VertexId s w -&gt; VertexId s w -&gt; ST s Bool
+</span><span class="hs-identifier hs-var">filterM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679326367"><span class="annot"><span class="annottext">e :: Dart s
+</span><a href="#local-6989586621679326367"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UF s (VertexId s w) -&gt; VertexId s w -&gt; VertexId s w -&gt; ST s Bool
 forall a s. (Enum a, Eq a) =&gt; UF s a -&gt; a -&gt; a -&gt; ST s Bool
 </span><a href="Algorithms.Graph.MST.html#union"><span class="hs-identifier hs-var">union</span></a></span><span> </span><span class="annot"><span class="annottext">UF s (VertexId s w)
-</span><a href="#local-6989586621679324898"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
+</span><a href="#local-6989586621679326370"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 forall k (s :: k) (w :: World) v e f.
 Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 </span><a href="Data.PlanarGraph.Core.html#headOf"><span class="hs-identifier hs-var">headOf</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679324895"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324899"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
+</span><a href="#local-6989586621679326367"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
+</span><a href="#local-6989586621679326371"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 forall k (s :: k) (w :: World) v e f.
 Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 </span><a href="Data.PlanarGraph.Core.html#tailOf"><span class="hs-identifier hs-var">tailOf</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679324895"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324899"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Dart s]
-</span><a href="#local-6989586621679324891"><span class="hs-identifier hs-var">edges''</span></a></span><span>
+</span><a href="#local-6989586621679326367"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
+</span><a href="#local-6989586621679326371"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Dart s]
+</span><a href="#local-6989586621679326363"><span class="hs-identifier hs-var">edges''</span></a></span><span>
 </span><span id="line-45"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-46"></span><span>    </span><span id="local-6989586621679324891"><span class="annot"><span class="annottext">edges'' :: [Dart s]
-</span><a href="#local-6989586621679324891"><span class="hs-identifier hs-var hs-var">edges''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Dart s, e) -&gt; Dart s) -&gt; [(Dart s, e)] -&gt; [Dart s]
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679326363"><span class="annot"><span class="annottext">edges'' :: [Dart s]
+</span><a href="#local-6989586621679326363"><span class="hs-identifier hs-var hs-var">edges''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Dart s, e) -&gt; Dart s) -&gt; [(Dart s, e)] -&gt; [Dart s]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(Dart s, e) -&gt; Dart s
 forall a b. (a, b) -&gt; a
@@ -116,39 +116,39 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall k (s :: k) (w :: World) v e f.
 PlanarGraph s w v e f -&gt; Vector (Dart s, e)
 </span><a href="Data.PlanarGraph.Core.html#edges"><span class="hs-identifier hs-var">edges</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324899"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679326371"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- | Given an underlying planar graph, and a set of edges that form a tree,</span><span>
 </span><span id="line-50"></span><span class="hs-comment">-- create the actual tree.</span><span>
 </span><span id="line-51"></span><span class="hs-comment">--</span><span>
 </span><span id="line-52"></span><span class="hs-comment">-- pre: the planar graph has at least one vertex.</span><span>
-</span><span id="line-53"></span><span class="annot"><a href="Algorithms.Graph.MST.html#makeTree"><span class="hs-identifier hs-type">makeTree</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679325050"><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679325049"><span class="annot"><a href="#local-6989586621679325049"><span class="hs-identifier hs-type">w</span></a></span></span><span> </span><span id="local-6989586621679325048"><span class="annot"><a href="#local-6989586621679325048"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679325047"><span class="annot"><a href="#local-6989586621679325047"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679325046"><span class="annot"><a href="#local-6989586621679325046"><span class="hs-identifier hs-type">f</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-54"></span><span>              </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325049"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325048"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325047"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325046"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325049"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Algorithms.Graph.MST.html#makeTree"><span class="hs-identifier hs-type">makeTree</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679326522"><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679326521"><span class="annot"><a href="#local-6989586621679326521"><span class="hs-identifier hs-type">w</span></a></span></span><span> </span><span id="local-6989586621679326520"><span class="annot"><a href="#local-6989586621679326520"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679326519"><span class="annot"><a href="#local-6989586621679326519"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679326518"><span class="annot"><a href="#local-6989586621679326518"><span class="hs-identifier hs-type">f</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-54"></span><span>              </span><span class="annot"><a href="Data.PlanarGraph.Core.html#PlanarGraph"><span class="hs-identifier hs-type">PlanarGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326521"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326520"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326519"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326518"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326521"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span id="makeTree"><span class="annot"><span class="annottext">makeTree :: PlanarGraph s w v e f -&gt; [Dart s] -&gt; Tree (VertexId s w)
-</span><a href="Algorithms.Graph.MST.html#makeTree"><span class="hs-identifier hs-var hs-var">makeTree</span></a></span></span><span> </span><span id="local-6989586621679324886"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
-</span><a href="#local-6989586621679324886"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(AdjacencyLists s w -&gt; VertexId s w -&gt; Tree (VertexId s w))
+</span><a href="Algorithms.Graph.MST.html#makeTree"><span class="hs-identifier hs-var hs-var">makeTree</span></a></span></span><span> </span><span id="local-6989586621679326358"><span class="annot"><span class="annottext">g :: PlanarGraph s w v e f
+</span><a href="#local-6989586621679326358"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(AdjacencyLists s w -&gt; VertexId s w -&gt; Tree (VertexId s w))
 -&gt; VertexId s w -&gt; AdjacencyLists s w -&gt; Tree (VertexId s w)
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">AdjacencyLists s w -&gt; VertexId s w -&gt; Tree (VertexId s w)
 forall k (s :: k) (w :: World).
 AdjacencyLists s w -&gt; VertexId s w -&gt; Tree (VertexId s w)
 </span><a href="Algorithms.Graph.DFS.html#dfs%27"><span class="hs-identifier hs-var">dfs'</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
-</span><a href="#local-6989586621679324884"><span class="hs-identifier hs-var">start</span></a></span><span> </span><span class="annot"><span class="annottext">(AdjacencyLists s w -&gt; Tree (VertexId s w))
+</span><a href="#local-6989586621679326356"><span class="hs-identifier hs-var">start</span></a></span><span> </span><span class="annot"><span class="annottext">(AdjacencyLists s w -&gt; Tree (VertexId s w))
 -&gt; ([Dart s] -&gt; AdjacencyLists s w)
 -&gt; [Dart s]
 -&gt; Tree (VertexId s w)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Dart s] -&gt; AdjacencyLists s w
-</span><a href="#local-6989586621679324883"><span class="hs-identifier hs-var">mkAdjacencyLists</span></a></span><span>
+</span><a href="#local-6989586621679326355"><span class="hs-identifier hs-var">mkAdjacencyLists</span></a></span><span>
 </span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621679324882"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679324882"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; Int
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679326354"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679326354"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f -&gt; Int
 forall k (s :: k) (w :: World) v e f. PlanarGraph s w v e f -&gt; Int
 </span><a href="Data.PlanarGraph.Core.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324886"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679324884"><span class="annot"><span class="annottext">start :: VertexId s w
-</span><a href="#local-6989586621679324884"><span class="hs-identifier hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (VertexId s w) -&gt; VertexId s w
+</span><a href="#local-6989586621679326358"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679326356"><span class="annot"><span class="annottext">start :: VertexId s w
+</span><a href="#local-6989586621679326356"><span class="hs-identifier hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (VertexId s w) -&gt; VertexId s w
 forall a. Vector a -&gt; a
 </span><span class="hs-identifier hs-var">V.head</span></span><span> </span><span class="annot"><span class="annottext">(Vector (VertexId s w) -&gt; VertexId s w)
 -&gt; Vector (VertexId s w) -&gt; VertexId s w
@@ -157,21 +157,21 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall k (s :: k) (w :: World) v e f.
 PlanarGraph s w v e f -&gt; Vector (VertexId s w)
 </span><a href="Data.PlanarGraph.Core.html#vertices%27"><span class="hs-identifier hs-var">vertices'</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324886"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679326358"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span>    </span><span id="local-6989586621679324944"><span id="local-6989586621679324945"><span class="annot"><a href="#local-6989586621679324879"><span class="hs-identifier hs-type">append</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679324945"><span class="hs-identifier hs-type">s'</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679324944"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325049"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679324944"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679324945"><span class="hs-identifier hs-type">s'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-61"></span><span>    </span><span id="local-6989586621679324879"><span class="annot"><span class="annottext">append :: MVector s' [a] -&gt; VertexId s w -&gt; a -&gt; ST s' ()
-</span><a href="#local-6989586621679324879"><span class="hs-identifier hs-var hs-var">append</span></a></span></span><span> </span><span id="local-6989586621679324878"><span class="annot"><span class="annottext">v :: MVector s' [a]
-</span><a href="#local-6989586621679324878"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span id="local-6989586621679324876"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679324876"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679324875"><span class="annot"><span class="annottext">x :: a
-</span><a href="#local-6989586621679324875"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s')) [a] -&gt; Int -&gt; ST s' [a]
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621679326416"><span id="local-6989586621679326417"><span class="annot"><a href="#local-6989586621679326351"><span class="hs-identifier hs-type">append</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679326417"><span class="hs-identifier hs-type">s'</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679326416"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326521"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679326416"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679326417"><span class="hs-identifier hs-type">s'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679326351"><span class="annot"><span class="annottext">append :: MVector s' [a] -&gt; VertexId s w -&gt; a -&gt; ST s' ()
+</span><a href="#local-6989586621679326351"><span class="hs-identifier hs-var hs-var">append</span></a></span></span><span> </span><span id="local-6989586621679326350"><span class="annot"><span class="annottext">v :: MVector s' [a]
+</span><a href="#local-6989586621679326350"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Core.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span> </span><span id="local-6989586621679326348"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679326348"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679326347"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326347"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s')) [a] -&gt; Int -&gt; ST s' [a]
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m a
 </span><span class="hs-identifier hs-var">MV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector s' [a]
 MVector (PrimState (ST s')) [a]
-</span><a href="#local-6989586621679324878"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324876"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">ST s' [a] -&gt; ([a] -&gt; ST s' ()) -&gt; ST s' ()
+</span><a href="#local-6989586621679326350"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326348"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">ST s' [a] -&gt; ([a] -&gt; ST s' ()) -&gt; ST s' ()
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s')) [a] -&gt; Int -&gt; [a] -&gt; ST s' ()
 forall (m :: * -&gt; *) a.
@@ -179,100 +179,100 @@ PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s' [a]
 MVector (PrimState (ST s')) [a]
-</span><a href="#local-6989586621679324878"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324876"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; ST s' ()) -&gt; ([a] -&gt; [a]) -&gt; [a] -&gt; ST s' ()
+</span><a href="#local-6989586621679326350"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326348"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; ST s' ()) -&gt; ([a] -&gt; [a]) -&gt; [a] -&gt; ST s' ()
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324875"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679326347"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span>
 </span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span>    </span><span class="annot"><a href="#local-6989586621679324883"><span class="hs-identifier hs-type">mkAdjacencyLists</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.DFS.html#AdjacencyLists"><span class="hs-identifier hs-type">AdjacencyLists</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325050"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325049"><span class="hs-identifier hs-type">w</span></a></span><span>
-</span><span id="line-64"></span><span>    </span><span id="local-6989586621679324883"><span class="annot"><span class="annottext">mkAdjacencyLists :: [Dart s] -&gt; AdjacencyLists s w
-</span><a href="#local-6989586621679324883"><span class="hs-identifier hs-var hs-var">mkAdjacencyLists</span></a></span></span><span> </span><span id="local-6989586621679324872"><span class="annot"><span class="annottext">edges'' :: [Dart s]
-</span><a href="#local-6989586621679324872"><span class="hs-identifier hs-var">edges''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s [VertexId s w])) -&gt; AdjacencyLists s w
+</span><span id="line-63"></span><span>    </span><span class="annot"><a href="#local-6989586621679326355"><span class="hs-identifier hs-type">mkAdjacencyLists</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.PlanarGraph.Dart.html#Dart"><span class="hs-identifier hs-type">Dart</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.DFS.html#AdjacencyLists"><span class="hs-identifier hs-type">AdjacencyLists</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326522"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326521"><span class="hs-identifier hs-type">w</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679326355"><span class="annot"><span class="annottext">mkAdjacencyLists :: [Dart s] -&gt; AdjacencyLists s w
+</span><a href="#local-6989586621679326355"><span class="hs-identifier hs-var hs-var">mkAdjacencyLists</span></a></span></span><span> </span><span id="local-6989586621679326344"><span class="annot"><span class="annottext">edges'' :: [Dart s]
+</span><a href="#local-6989586621679326344"><span class="hs-identifier hs-var">edges''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s [VertexId s w])) -&gt; AdjacencyLists s w
 forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.create</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s [VertexId s w])) -&gt; AdjacencyLists s w)
 -&gt; (forall s. ST s (MVector s [VertexId s w]))
 -&gt; AdjacencyLists s w
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-65"></span><span>                                 </span><span id="local-6989586621679324870"><span class="annot"><span class="annottext">MVector s [VertexId s w]
-</span><a href="#local-6989586621679324870"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-65"></span><span>                                 </span><span id="local-6989586621679326342"><span class="annot"><span class="annottext">MVector s [VertexId s w]
+</span><a href="#local-6989586621679326342"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; [VertexId s w]
 -&gt; ST s (MVector (PrimState (ST s)) [VertexId s w])
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 Int -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">MV.replicate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324882"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679326354"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-66"></span><span>                                 </span><span class="annot"><span class="annottext">[Dart s] -&gt; (Dart s -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[Dart s]
-</span><a href="#local-6989586621679324872"><span class="hs-identifier hs-var">edges''</span></a></span><span> </span><span class="annot"><span class="annottext">((Dart s -&gt; ST s ()) -&gt; ST s ()) -&gt; (Dart s -&gt; ST s ()) -&gt; ST s ()
+</span><a href="#local-6989586621679326344"><span class="hs-identifier hs-var">edges''</span></a></span><span> </span><span class="annot"><span class="annottext">((Dart s -&gt; ST s ()) -&gt; ST s ()) -&gt; (Dart s -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679324868"><span class="annot"><span class="annottext">e :: Dart s
-</span><a href="#local-6989586621679324868"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-67"></span><span>                                   </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679324867"><span class="annot"><span class="annottext">u :: VertexId s w
-</span><a href="#local-6989586621679324867"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679326340"><span class="annot"><span class="annottext">e :: Dart s
+</span><a href="#local-6989586621679326340"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-67"></span><span>                                   </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679326339"><span class="annot"><span class="annottext">u :: VertexId s w
+</span><a href="#local-6989586621679326339"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 forall k (s :: k) (w :: World) v e f.
 Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 </span><a href="Data.PlanarGraph.Core.html#headOf"><span class="hs-identifier hs-var">headOf</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679324868"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324886"><span class="hs-identifier hs-var">g</span></a></span><span>
-</span><span id="line-68"></span><span>                                       </span><span id="local-6989586621679324866"><span class="annot"><span class="annottext">v :: VertexId s w
-</span><a href="#local-6989586621679324866"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
+</span><a href="#local-6989586621679326340"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
+</span><a href="#local-6989586621679326358"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-68"></span><span>                                       </span><span id="local-6989586621679326338"><span class="annot"><span class="annottext">v :: VertexId s w
+</span><a href="#local-6989586621679326338"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 forall k (s :: k) (w :: World) v e f.
 Dart s -&gt; PlanarGraph s w v e f -&gt; VertexId s w
 </span><a href="Data.PlanarGraph.Core.html#tailOf"><span class="hs-identifier hs-var">tailOf</span></a></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679324868"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
-</span><a href="#local-6989586621679324886"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679326340"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarGraph s w v e f
+</span><a href="#local-6989586621679326358"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-69"></span><span>                                   </span><span class="annot"><span class="annottext">MVector s [VertexId s w] -&gt; VertexId s w -&gt; VertexId s w -&gt; ST s ()
 forall s' a. MVector s' [a] -&gt; VertexId s w -&gt; a -&gt; ST s' ()
-</span><a href="#local-6989586621679324879"><span class="hs-identifier hs-var">append</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexId s w]
-</span><a href="#local-6989586621679324870"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
-</span><a href="#local-6989586621679324867"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
-</span><a href="#local-6989586621679324866"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679326351"><span class="hs-identifier hs-var">append</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexId s w]
+</span><a href="#local-6989586621679326342"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
+</span><a href="#local-6989586621679326339"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
+</span><a href="#local-6989586621679326338"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-70"></span><span>                                   </span><span class="annot"><span class="annottext">MVector s [VertexId s w] -&gt; VertexId s w -&gt; VertexId s w -&gt; ST s ()
 forall s' a. MVector s' [a] -&gt; VertexId s w -&gt; a -&gt; ST s' ()
-</span><a href="#local-6989586621679324879"><span class="hs-identifier hs-var">append</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexId s w]
-</span><a href="#local-6989586621679324870"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
-</span><a href="#local-6989586621679324866"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
-</span><a href="#local-6989586621679324867"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621679326351"><span class="hs-identifier hs-var">append</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexId s w]
+</span><a href="#local-6989586621679326342"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
+</span><a href="#local-6989586621679326338"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId s w
+</span><a href="#local-6989586621679326339"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-71"></span><span>                                 </span><span class="annot"><span class="annottext">MVector s [VertexId s w] -&gt; ST s (MVector s [VertexId s w])
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s [VertexId s w]
-</span><a href="#local-6989586621679324870"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><a href="#local-6989586621679326342"><span class="hs-identifier hs-var">vs</span></a></span><span>
 </span><span id="line-72"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-73"></span><span>
 </span><span id="line-74"></span><span class="hs-comment">-- | Union find DS</span><span>
-</span><span id="line-75"></span><span class="hs-keyword">newtype</span><span> </span><span id="UF"><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-var">UF</span></a></span></span><span> </span><span id="local-6989586621679324927"><span class="annot"><a href="#local-6989586621679324927"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679324926"><span class="annot"><a href="#local-6989586621679324926"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UF"><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-var">UF</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unUF"><span class="annot"><span class="annottext">UF s a -&gt; MVector s (Int, Int)
-</span><a href="Algorithms.Graph.MST.html#_unUF"><span class="hs-identifier hs-var hs-var">_unUF</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UMV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679324927"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-75"></span><span class="hs-keyword">newtype</span><span> </span><span id="UF"><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-var">UF</span></a></span></span><span> </span><span id="local-6989586621679326399"><span class="annot"><a href="#local-6989586621679326399"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679326398"><span class="annot"><a href="#local-6989586621679326398"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UF"><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-var">UF</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unUF"><span class="annot"><span class="annottext">UF s a -&gt; MVector s (Int, Int)
+</span><a href="Algorithms.Graph.MST.html#_unUF"><span class="hs-identifier hs-var hs-var">_unUF</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UMV.MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679326399"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span id="local-6989586621679325023"><span id="local-6989586621679325024"><span class="annot"><a href="Algorithms.Graph.MST.html#new"><span class="hs-identifier hs-type">new</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679325024"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325024"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325023"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679326495"><span id="local-6989586621679326496"><span class="annot"><a href="Algorithms.Graph.MST.html#new"><span class="hs-identifier hs-type">new</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679326496"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326496"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326495"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-78"></span><span id="new"><span class="annot"><span class="annottext">new :: Int -&gt; ST s (UF s a)
-</span><a href="Algorithms.Graph.MST.html#new"><span class="hs-identifier hs-var hs-var">new</span></a></span></span><span> </span><span id="local-6989586621679324863"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679324863"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-79"></span><span>          </span><span id="local-6989586621679324862"><span class="annot"><span class="annottext">MVector s (Int, Int)
-</span><a href="#local-6989586621679324862"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) (Int, Int))
+</span><a href="Algorithms.Graph.MST.html#new"><span class="hs-identifier hs-var hs-var">new</span></a></span></span><span> </span><span id="local-6989586621679326335"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679326335"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-79"></span><span>          </span><span id="local-6989586621679326334"><span class="annot"><span class="annottext">MVector s (Int, Int)
+</span><a href="#local-6989586621679326334"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) (Int, Int))
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 Int -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">UMV.new</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324863"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621679326335"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-80"></span><span>          </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324863"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679326335"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s ()) -&gt; ST s ()) -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679324860"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679324860"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679326332"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679326332"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-81"></span><span>            </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -280,9 +280,9 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324862"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324860"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324860"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679326334"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326332"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326332"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
 </span><span id="line-82"></span><span>          </span><span class="annot"><span class="annottext">UF s a -&gt; ST s (UF s a)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(UF s a -&gt; ST s (UF s a)) -&gt; UF s a -&gt; ST s (UF s a)
@@ -290,57 +290,57 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int) -&gt; UF s a
 forall k s (a :: k). MVector s (Int, Int) -&gt; UF s a
 </span><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-var">UF</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
-</span><a href="#local-6989586621679324862"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679326334"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="hs-comment">-- | Union the components containing x and y. Returns weather or not the two</span><span>
 </span><span id="line-85"></span><span class="hs-comment">-- components were already in the same component or not.</span><span>
-</span><span id="line-86"></span><span id="local-6989586621679325013"><span id="local-6989586621679325014"><span class="annot"><a href="Algorithms.Graph.MST.html#union"><span class="hs-identifier hs-type">union</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679325014"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679325014"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325013"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679325014"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325014"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679325014"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679325013"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-86"></span><span id="local-6989586621679326485"><span id="local-6989586621679326486"><span class="annot"><a href="Algorithms.Graph.MST.html#union"><span class="hs-identifier hs-type">union</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679326486"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679326486"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326485"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326486"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679326486"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679326486"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679326485"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
 </span><span id="line-87"></span><span id="union"><span class="annot"><span class="annottext">union :: UF s a -&gt; a -&gt; a -&gt; ST s Bool
-</span><a href="Algorithms.Graph.MST.html#union"><span class="hs-identifier hs-var hs-var">union</span></a></span></span><span> </span><span id="local-6989586621679324858"><span class="annot"><span class="annottext">uf :: UF s a
-</span><a href="#local-6989586621679324858"><span class="hs-identifier hs-var">uf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span id="local-6989586621679324857"><span class="annot"><span class="annottext">v :: MVector s (Int, Int)
-</span><a href="#local-6989586621679324857"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679324856"><span class="annot"><span class="annottext">x :: a
-</span><a href="#local-6989586621679324856"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679324855"><span class="annot"><span class="annottext">y :: a
-</span><a href="#local-6989586621679324855"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-88"></span><span>                        </span><span class="hs-special">(</span><span id="local-6989586621679324854"><span class="annot"><span class="annottext">rx :: a
-</span><a href="#local-6989586621679324854"><span class="hs-identifier hs-var">rx</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679324853"><span class="annot"><span class="annottext">rrx :: Int
-</span><a href="#local-6989586621679324853"><span class="hs-identifier hs-var">rrx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
+</span><a href="Algorithms.Graph.MST.html#union"><span class="hs-identifier hs-var hs-var">union</span></a></span></span><span> </span><span id="local-6989586621679326330"><span class="annot"><span class="annottext">uf :: UF s a
+</span><a href="#local-6989586621679326330"><span class="hs-identifier hs-var">uf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span id="local-6989586621679326329"><span class="annot"><span class="annottext">v :: MVector s (Int, Int)
+</span><a href="#local-6989586621679326329"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679326328"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326328"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679326327"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679326327"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>                        </span><span class="hs-special">(</span><span id="local-6989586621679326326"><span class="annot"><span class="annottext">rx :: a
+</span><a href="#local-6989586621679326326"><span class="hs-identifier hs-var">rx</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679326325"><span class="annot"><span class="annottext">rrx :: Int
+</span><a href="#local-6989586621679326325"><span class="hs-identifier hs-var">rrx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
 forall a s. (Enum a, Eq a) =&gt; UF s a -&gt; a -&gt; ST s (a, Int)
 </span><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-var">find'</span></a></span><span> </span><span class="annot"><span class="annottext">UF s a
-</span><a href="#local-6989586621679324858"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324856"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-89"></span><span>                        </span><span class="hs-special">(</span><span id="local-6989586621679324851"><span class="annot"><span class="annottext">ry :: a
-</span><a href="#local-6989586621679324851"><span class="hs-identifier hs-var">ry</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679324850"><span class="annot"><span class="annottext">rry :: Int
-</span><a href="#local-6989586621679324850"><span class="hs-identifier hs-var">rry</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
+</span><a href="#local-6989586621679326330"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326328"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-89"></span><span>                        </span><span class="hs-special">(</span><span id="local-6989586621679326323"><span class="annot"><span class="annottext">ry :: a
+</span><a href="#local-6989586621679326323"><span class="hs-identifier hs-var">ry</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679326322"><span class="annot"><span class="annottext">rry :: Int
+</span><a href="#local-6989586621679326322"><span class="hs-identifier hs-var">rry</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
 forall a s. (Enum a, Eq a) =&gt; UF s a -&gt; a -&gt; ST s (a, Int)
 </span><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-var">find'</span></a></span><span> </span><span class="annot"><span class="annottext">UF s a
-</span><a href="#local-6989586621679324858"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324855"><span class="hs-identifier hs-var">y</span></a></span><span>
-</span><span id="line-90"></span><span>                        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679324849"><span class="annot"><span class="annottext">b :: Bool
-</span><a href="#local-6989586621679324849"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324854"><span class="hs-identifier hs-var">rx</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679326330"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326327"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-90"></span><span>                        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679326321"><span class="annot"><span class="annottext">b :: Bool
+</span><a href="#local-6989586621679326321"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679326326"><span class="hs-identifier hs-var">rx</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324851"><span class="hs-identifier hs-var">ry</span></a></span><span>
-</span><span id="line-91"></span><span>                            </span><span id="local-6989586621679324847"><span class="annot"><span class="annottext">rx' :: Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var hs-var">rx'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679326323"><span class="hs-identifier hs-var">ry</span></a></span><span>
+</span><span id="line-91"></span><span>                            </span><span id="local-6989586621679326319"><span class="annot"><span class="annottext">rx' :: Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var hs-var">rx'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324854"><span class="hs-identifier hs-var">rx</span></a></span><span>
-</span><span id="line-92"></span><span>                            </span><span id="local-6989586621679324845"><span class="annot"><span class="annottext">ry' :: Int
-</span><a href="#local-6989586621679324845"><span class="hs-identifier hs-var hs-var">ry'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679326326"><span class="hs-identifier hs-var">rx</span></a></span><span>
+</span><span id="line-92"></span><span>                            </span><span id="local-6989586621679326317"><span class="annot"><span class="annottext">ry' :: Int
+</span><a href="#local-6989586621679326317"><span class="hs-identifier hs-var hs-var">ry'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324851"><span class="hs-identifier hs-var">ry</span></a></span><span>
+</span><a href="#local-6989586621679326323"><span class="hs-identifier hs-var">ry</span></a></span><span>
 </span><span id="line-93"></span><span>                        </span><span class="annot"><span class="annottext">Bool -&gt; ST s () -&gt; ST s ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679324849"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
+</span><a href="#local-6989586621679326321"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324853"><span class="hs-identifier hs-var">rrx</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Ordering
+</span><a href="#local-6989586621679326325"><span class="hs-identifier hs-var">rrx</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324850"><span class="hs-identifier hs-var">rry</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679326322"><span class="hs-identifier hs-var">rry</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-94"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -348,10 +348,10 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324857"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var">rx'</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324845"><span class="hs-identifier hs-var">ry'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324853"><span class="hs-identifier hs-var">rrx</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679326329"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var">rx'</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326317"><span class="hs-identifier hs-var">ry'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326325"><span class="hs-identifier hs-var">rrx</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-95"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -359,10 +359,10 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324857"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324845"><span class="hs-identifier hs-var">ry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324850"><span class="hs-identifier hs-var">rry</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679326329"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326317"><span class="hs-identifier hs-var">ry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326322"><span class="hs-identifier hs-var">rry</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-96"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -370,10 +370,10 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324857"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324845"><span class="hs-identifier hs-var">ry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324850"><span class="hs-identifier hs-var">rry</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679326329"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326317"><span class="hs-identifier hs-var">ry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326322"><span class="hs-identifier hs-var">rry</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-97"></span><span>                                     </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -381,16 +381,16 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324857"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var">rx'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324847"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324853"><span class="hs-identifier hs-var">rrx</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679326329"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var">rx'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326319"><span class="hs-identifier hs-var">rx'</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326325"><span class="hs-identifier hs-var">rrx</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-98"></span><span>                        </span><span class="annot"><span class="annottext">Bool -&gt; ST s Bool
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679324849"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679326321"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-99"></span><span>
 </span><span id="line-100"></span><span>
 </span><span id="line-101"></span><span class="hs-comment">-- | Get the representative of the component containing x</span><span>
@@ -398,46 +398,46 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span id="line-103"></span><span class="hs-comment">-- find uf = fmap fst . find' uf</span><span>
 </span><span id="line-104"></span><span>
 </span><span id="line-105"></span><span class="hs-comment">-- | get the representative (and its rank) of the component containing x</span><span>
-</span><span id="line-106"></span><span id="local-6989586621679324922"><span id="local-6989586621679324923"><span class="annot"><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-type">find'</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679324923"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679324923"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324922"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679324923"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679324923"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679324922"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679324923"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-106"></span><span id="local-6989586621679326394"><span id="local-6989586621679326395"><span class="annot"><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-type">find'</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679326395"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679326395"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326394"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679326395"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679326395"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679326394"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679326395"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-107"></span><span id="find%27"><span class="annot"><span class="annottext">find' :: UF s a -&gt; a -&gt; ST s (a, Int)
-</span><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-var hs-var">find'</span></a></span></span><span> </span><span id="local-6989586621679324842"><span class="annot"><span class="annottext">uf :: UF s a
-</span><a href="#local-6989586621679324842"><span class="hs-identifier hs-var">uf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span id="local-6989586621679324841"><span class="annot"><span class="annottext">v :: MVector s (Int, Int)
-</span><a href="#local-6989586621679324841"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679324840"><span class="annot"><span class="annottext">x :: a
-</span><a href="#local-6989586621679324840"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-108"></span><span>                      </span><span class="hs-special">(</span><span id="local-6989586621679324839"><span class="annot"><span class="annottext">p :: Int
-</span><a href="#local-6989586621679324839"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679324838"><span class="annot"><span class="annottext">r :: Int
-</span><a href="#local-6989586621679324838"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int) -&gt; Int -&gt; ST s (Int, Int)
+</span><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-var hs-var">find'</span></a></span></span><span> </span><span id="local-6989586621679326314"><span class="annot"><span class="annottext">uf :: UF s a
+</span><a href="#local-6989586621679326314"><span class="hs-identifier hs-var">uf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Graph.MST.html#UF"><span class="hs-identifier hs-type">UF</span></a></span><span> </span><span id="local-6989586621679326313"><span class="annot"><span class="annottext">v :: MVector s (Int, Int)
+</span><a href="#local-6989586621679326313"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679326312"><span class="annot"><span class="annottext">x :: a
+</span><a href="#local-6989586621679326312"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-108"></span><span>                      </span><span class="hs-special">(</span><span id="local-6989586621679326311"><span class="annot"><span class="annottext">p :: Int
+</span><a href="#local-6989586621679326311"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679326310"><span class="annot"><span class="annottext">r :: Int
+</span><a href="#local-6989586621679326310"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int) -&gt; Int -&gt; ST s (Int, Int)
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m a
 </span><span class="hs-identifier hs-var">UMV.read</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324841"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679326313"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324840"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- get my parent</span><span>
+</span><a href="#local-6989586621679326312"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- get my parent</span><span>
 </span><span id="line-109"></span><span>                      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int -&gt; a
 forall a. Enum a =&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">toEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324839"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679326311"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324840"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><a href="#local-6989586621679326312"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">then</span><span>
 </span><span id="line-110"></span><span>                        </span><span class="annot"><span class="annottext">(a, Int) -&gt; ST s (a, Int)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324840"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324838"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- I am a root</span><span>
+</span><a href="#local-6989586621679326312"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326310"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- I am a root</span><span>
 </span><span id="line-111"></span><span>                      </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-112"></span><span>                        </span><span id="local-6989586621679324835"><span class="annot"><span class="annottext">rt :: (a, Int)
-</span><a href="#local-6989586621679324835"><span class="hs-identifier hs-var">rt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679324834"><span class="annot"><span class="annottext">j :: a
-</span><a href="#local-6989586621679324834"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
+</span><span id="line-112"></span><span>                        </span><span id="local-6989586621679326307"><span class="annot"><span class="annottext">rt :: (a, Int)
+</span><a href="#local-6989586621679326307"><span class="hs-identifier hs-var">rt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679326306"><span class="annot"><span class="annottext">j :: a
+</span><a href="#local-6989586621679326306"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UF s a -&gt; a -&gt; ST s (a, Int)
 forall a s. (Enum a, Eq a) =&gt; UF s a -&gt; a -&gt; ST s (a, Int)
 </span><a href="Algorithms.Graph.MST.html#find%27"><span class="hs-identifier hs-var">find'</span></a></span><span> </span><span class="annot"><span class="annottext">UF s a
-</span><a href="#local-6989586621679324842"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a
+</span><a href="#local-6989586621679326314"><span class="hs-identifier hs-var">uf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a
 forall a. Enum a =&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">toEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324839"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- get the root of my parent</span><span>
+</span><a href="#local-6989586621679326311"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- get the root of my parent</span><span>
 </span><span id="line-113"></span><span>                        </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Int, Int)
 -&gt; Int -&gt; (Int, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -445,18 +445,18 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">UMV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679324841"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679326313"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324840"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679326312"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679324834"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679324838"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-comment">-- path compression</span><span>
+</span><a href="#local-6989586621679326306"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679326310"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-comment">-- path compression</span><span>
 </span><span id="line-114"></span><span>                        </span><span class="annot"><span class="annottext">(a, Int) -&gt; ST s (a, Int)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(a, Int)
-</span><a href="#local-6989586621679324835"><span class="hs-identifier hs-var">rt</span></a></span><span>
+</span><a href="#local-6989586621679326307"><span class="hs-identifier hs-var">rt</span></a></span><span>
 </span><span id="line-115"></span><span>
 </span><span id="line-116"></span><span>
 </span><span id="line-117"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>

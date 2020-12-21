@@ -22,11 +22,11 @@
 </span><span id="line-22"></span><span class="hs-comment">-- | Fisher&#8211;Yates shuffle, which shuffles a list/foldable uniformly at random.</span><span>
 </span><span id="line-23"></span><span class="hs-comment">--</span><span>
 </span><span id="line-24"></span><span class="hs-comment">-- running time: \(O(n)\).</span><span>
-</span><span id="line-25"></span><span id="local-6989586621679329532"><span id="local-6989586621679329533"><span id="local-6989586621679329534"><span class="annot"><a href="System.Random.Shuffle.html#shuffle"><span class="hs-identifier hs-type">shuffle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679329534"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679329533"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679329534"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329532"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679329533"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679329532"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679331124"><span id="local-6989586621679331125"><span id="local-6989586621679331126"><span class="annot"><a href="System.Random.Shuffle.html#shuffle"><span class="hs-identifier hs-type">shuffle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679331126"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679331125"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331126"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331124"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331125"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679331124"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-26"></span><span id="shuffle"><span class="annot"><span class="annottext">shuffle :: f a -&gt; m (Vector a)
 </span><a href="System.Random.Shuffle.html#shuffle"><span class="hs-identifier hs-var hs-var">shuffle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; m (Vector a)
 forall (f :: * -&gt; *) a. MonadRandom f =&gt; Vector a -&gt; f (Vector a)
-</span><a href="#local-6989586621679329531"><span class="hs-identifier hs-var">withLength</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m (Vector a))
+</span><a href="#local-6989586621679331123"><span class="hs-identifier hs-var">withLength</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; m (Vector a))
 -&gt; (f a -&gt; Vector a) -&gt; f a -&gt; m (Vector a)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Vector a
@@ -37,80 +37,80 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span>
 </span><span id="line-27"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-28"></span><span>    </span><span id="local-6989586621679329531"><span class="annot"><span class="annottext">withLength :: Vector a -&gt; f (Vector a)
-</span><a href="#local-6989586621679329531"><span class="hs-identifier hs-var hs-var">withLength</span></a></span></span><span> </span><span id="local-6989586621679329527"><span class="annot"><span class="annottext">v :: Vector a
-</span><a href="#local-6989586621679329527"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679329526"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679329526"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Int
+</span><span id="line-28"></span><span>    </span><span id="local-6989586621679331123"><span class="annot"><span class="annottext">withLength :: Vector a -&gt; f (Vector a)
+</span><a href="#local-6989586621679331123"><span class="hs-identifier hs-var hs-var">withLength</span></a></span></span><span> </span><span id="local-6989586621679331119"><span class="annot"><span class="annottext">v :: Vector a
+</span><a href="#local-6989586621679331119"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679331118"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679331118"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Int
 forall a. Vector a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679329527"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">([SP Int Int] -&gt; Vector a -&gt; Vector a)
+</span><a href="#local-6989586621679331119"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">([SP Int Int] -&gt; Vector a -&gt; Vector a)
 -&gt; Vector a -&gt; [SP Int Int] -&gt; Vector a
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">[SP Int Int] -&gt; Vector a -&gt; Vector a
 forall (t :: * -&gt; *) a.
 Foldable t =&gt;
 t (SP Int Int) -&gt; Vector a -&gt; Vector a
-</span><a href="#local-6989586621679329523"><span class="hs-identifier hs-var">withRands</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
-</span><a href="#local-6989586621679329527"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">([SP Int Int] -&gt; Vector a) -&gt; f [SP Int Int] -&gt; f (Vector a)
+</span><a href="#local-6989586621679331115"><span class="hs-identifier hs-var">withRands</span></a></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679331119"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">([SP Int Int] -&gt; Vector a) -&gt; f [SP Int Int] -&gt; f (Vector a)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; f [SP Int Int]
 forall (m :: * -&gt; *). MonadRandom m =&gt; Int -&gt; m [SP Int Int]
 </span><a href="System.Random.Shuffle.html#rands"><span class="hs-identifier hs-var">rands</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329526"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679331118"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>    </span><span id="local-6989586621679329523"><span class="annot"><span class="annottext">withRands :: t (SP Int Int) -&gt; Vector a -&gt; Vector a
-</span><a href="#local-6989586621679329523"><span class="hs-identifier hs-var hs-var">withRands</span></a></span></span><span> </span><span id="local-6989586621679329520"><span class="annot"><span class="annottext">rs :: t (SP Int Int)
-</span><a href="#local-6989586621679329520"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. MVector s a -&gt; ST s ()) -&gt; Vector a -&gt; Vector a
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679331115"><span class="annot"><span class="annottext">withRands :: t (SP Int Int) -&gt; Vector a -&gt; Vector a
+</span><a href="#local-6989586621679331115"><span class="hs-identifier hs-var hs-var">withRands</span></a></span></span><span> </span><span id="local-6989586621679331112"><span class="annot"><span class="annottext">rs :: t (SP Int Int)
+</span><a href="#local-6989586621679331112"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. MVector s a -&gt; ST s ()) -&gt; Vector a -&gt; Vector a
 forall a.
 (forall s. MVector s a -&gt; ST s ()) -&gt; Vector a -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.modify</span></span><span> </span><span class="annot"><span class="annottext">((forall s. MVector s a -&gt; ST s ()) -&gt; Vector a -&gt; Vector a)
 -&gt; (forall s. MVector s a -&gt; ST s ()) -&gt; Vector a -&gt; Vector a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679329518"><span class="annot"><span class="annottext">v :: MVector s a
-</span><a href="#local-6989586621679329518"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679331110"><span class="annot"><span class="annottext">v :: MVector s a
+</span><a href="#local-6989586621679331110"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-30"></span><span>                     </span><span class="annot"><span class="annottext">t (SP Int Int) -&gt; (SP Int Int -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">t (SP Int Int)
-</span><a href="#local-6989586621679329520"><span class="hs-identifier hs-var">rs</span></a></span><span> </span><span class="annot"><span class="annottext">((SP Int Int -&gt; ST s ()) -&gt; ST s ())
+</span><a href="#local-6989586621679331112"><span class="hs-identifier hs-var">rs</span></a></span><span> </span><span class="annot"><span class="annottext">((SP Int Int -&gt; ST s ()) -&gt; ST s ())
 -&gt; (SP Int Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679329515"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679329515"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679329514"><span class="annot"><span class="annottext">j :: Int
-</span><a href="#local-6989586621679329514"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) a -&gt; Int -&gt; Int -&gt; ST s ()
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679331107"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679331107"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679331106"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679331106"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) a -&gt; Int -&gt; Int -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; Int -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.swap</span></span><span> </span><span class="annot"><span class="annottext">MVector s a
 MVector (PrimState (ST s)) a
-</span><a href="#local-6989586621679329518"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329515"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329514"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><a href="#local-6989586621679331110"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679331107"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679331106"><span class="hs-identifier hs-var">j</span></a></span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- | Generate a list of indices in decreasing order, coupled with a random</span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- value in the range [0,i].</span><span>
-</span><span id="line-35"></span><span id="local-6989586621679329563"><span class="annot"><a href="System.Random.Shuffle.html#rands"><span class="hs-identifier hs-type">rands</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679329563"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679329563"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-35"></span><span id="local-6989586621679331155"><span class="annot"><a href="System.Random.Shuffle.html#rands"><span class="hs-identifier hs-type">rands</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679331155"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331155"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span></span><span>
 </span><span id="line-36"></span><span id="rands"><span class="annot"><span class="annottext">rands :: Int -&gt; m [SP Int Int]
-</span><a href="System.Random.Shuffle.html#rands"><span class="hs-identifier hs-var hs-var">rands</span></a></span></span><span> </span><span id="local-6989586621679329512"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679329512"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m (SP Int Int)) -&gt; [Int] -&gt; m [SP Int Int]
+</span><a href="System.Random.Shuffle.html#rands"><span class="hs-identifier hs-var hs-var">rands</span></a></span></span><span> </span><span id="local-6989586621679331104"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679331104"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m (SP Int Int)) -&gt; [Int] -&gt; m [SP Int Int]
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Traversable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m (t b)
-</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679329510"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679329510"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; SP Int Int
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679331102"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679331102"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; SP Int Int
 forall a b. a -&gt; b -&gt; SP a b
 </span><a href="Data.Util.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329510"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; SP Int Int) -&gt; m Int -&gt; m (SP Int Int)
+</span><a href="#local-6989586621679331102"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; SP Int Int) -&gt; m Int -&gt; m (SP Int Int)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; m Int
 forall (m :: * -&gt; *) a. (MonadRandom m, Random a) =&gt; (a, a) -&gt; m a
 </span><span class="hs-identifier hs-var">getRandomR</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329510"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329512"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679329512"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679331102"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679331104"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679331104"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-glyph">..</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-37"></span></pre></body></html>
