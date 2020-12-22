@@ -11,7 +11,6 @@ import Data.Geometry
 import Data.Geometry.Ipe
 import Data.Geometry.Ipe.Color(named)
 import Data.Geometry.HalfSpace
-import Data.Geometry.Properties
 import Data.List.NonEmpty(NonEmpty)
 import Data.Ratio
 import Test.Hspec

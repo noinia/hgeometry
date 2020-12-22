@@ -2,7 +2,6 @@ module Data.Geometry.HalfSpaceSpec where
 
 import Data.Geometry
 import Data.Geometry.HalfSpace
-import Data.Geometry.Line
 import Data.Ratio
 import Test.Hspec
 

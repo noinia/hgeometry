@@ -1,6 +1,13 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveAnyClass #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.HalfLine
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.HalfLine where
 
 

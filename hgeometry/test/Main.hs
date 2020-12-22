@@ -1,9 +1,9 @@
-module Main where
+module Main (main) where
 
 import qualified Spec
 import           System.Directory
-import           Test.Hspec.Formatters
 import           Test.Hspec.Runner
+-- import           Test.Hspec
 
 main :: IO ()
 main = do setCurrentDirectory "../hgeometry"

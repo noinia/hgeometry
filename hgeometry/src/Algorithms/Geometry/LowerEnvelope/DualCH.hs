@@ -1,4 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.LowerEnvelope.DualCH
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.LowerEnvelope.DualCH where
 
 import Data.Maybe(fromJust)

@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Algorithms.Geometry.SmallestEnclosingDisk.RISpec where
+module Algorithms.Geometry.SmallestEnclosingDisk.RISpec (spec) where
 
 import qualified Algorithms.Geometry.SmallestEnclosingBall.Naive as Naive
 import qualified Algorithms.Geometry.SmallestEnclosingBall.RIC as RIC
-import           Algorithms.Geometry.SmallestEnclosingBall.Types
+import           Algorithms.Geometry.SmallestEnclosingBall
 import           Control.Lens
 import           Control.Monad (when)
 import           Control.Monad.Random.Strict (evalRand)
@@ -12,7 +12,6 @@ import           Data.Geometry
 import           Data.Geometry.Ball (fromDiameter, disk, Disk)
 import           Data.Geometry.Ipe
 import           Data.Maybe
-import           Data.Proxy
 import           System.Random (mkStdGen)
 import           Test.Hspec
 import           Test.Util
@@ -70,4 +69,4 @@ readInput fp = fmap f <$> readSinglePageFile fp
         isInSolution s = s^.core.symbolName == "mark/cross(sx)"
 
         right = either (const Nothing) Just
-        solutionOf = right . fromList . map (^.core.symbolPoint) . filter isInSolution
+        solutionOf = right . twoOrThreeFromList . map (^.core.symbolPoint) . filter isInSolution

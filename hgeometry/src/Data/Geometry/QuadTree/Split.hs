@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.QuadTree.Split
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.QuadTree.Split where
 
 import Control.Lens (makePrisms,(^.))

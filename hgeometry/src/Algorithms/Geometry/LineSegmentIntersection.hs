@@ -1,6 +1,19 @@
-module Algorithms.Geometry.LineSegmentIntersection where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.LineSegmentIntersection
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Algorithms.Geometry.LineSegmentIntersection
+  ( hasInteriorIntersections
+  , hasSelfIntersections
+  , Intersections
+  , Compare
+  ) where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
+import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 

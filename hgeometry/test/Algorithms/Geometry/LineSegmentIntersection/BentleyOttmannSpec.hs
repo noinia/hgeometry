@@ -1,28 +1,17 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec where
+module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec (spec) where
 
-import           Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
+import           Algorithms.Geometry.LineSegmentIntersection
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as Sweep
 import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
-import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens
 import           Data.Ext
-import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Proxy
-import           Data.Semigroup
-import qualified Data.Set as Set
 import           Test.Hspec
-import           Test.QuickCheck
-import           Test.Util
-
-import           Debug.Trace
 
 spec :: Spec
 spec = do

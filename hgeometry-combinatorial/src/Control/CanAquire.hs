@@ -1,4 +1,11 @@
 {-# LANGUAGE FunctionalDependencies #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Control.CanAquire
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Control.CanAquire(
       runAcquire
     , CanAquire(..)

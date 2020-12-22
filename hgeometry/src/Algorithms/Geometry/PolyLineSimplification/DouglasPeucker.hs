@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker where
 
 import           Control.Lens hiding (only)

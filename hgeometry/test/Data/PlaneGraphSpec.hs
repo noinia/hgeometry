@@ -1,21 +1,14 @@
 {-# LANGUAGE PartialTypeSignatures #-}
-module Data.PlaneGraphSpec where
-
+module Data.PlaneGraphSpec (spec) where
 
 import           Control.Lens
-import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.PlaneGraph
-import           Data.PlaneGraph.IO(makeCCW)
-import           Data.PlaneGraph.AdjRep
-import           Data.Proxy
-import           Data.Util
 import qualified Data.Vector as V
-import           Data.Yaml (prettyPrintParseException)
 import           Data.Yaml.Util
 import           Test.Hspec
 
@@ -81,46 +74,47 @@ testSegs2 = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
 
 --------------------------------------------------------------------------------
 
-triangle :: Gr (Vtx Int String Int) (Face String)
-triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
-                                , (1,"0->1")
-                                ] 0
-           , Vtx 1 (Point2 2 2) [ (0,"1->0")
-                                , (2,"1->2")
-                                ] 1
-           , Vtx 2 (Point2 2 0) [ (0,"2->0")
-                                , (1,"2->1")
-                                ] 2
-           ]
-           [ Face (2,1) "OuterFace"
-           , Face (0,1) "A"
-           ]
+-- triangle :: Gr (Vtx Int String Int) (Face String)
+-- triangle = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+--                                 , (1,"0->1")
+--                                 ] 0
+--            , Vtx 1 (Point2 2 2) [ (0,"1->0")
+--                                 , (2,"1->2")
+--                                 ] 1
+--            , Vtx 2 (Point2 2 0) [ (0,"2->0")
+--                                 , (1,"2->1")
+--                                 ] 2
+--            ]
+--            [ Face (2,1) "OuterFace"
+--            , Face (0,1) "A"
+--            ]
 
-smallG = fromAdjRep (Proxy :: Proxy ()) small
+-- smallG = fromAdjRep (Proxy :: Proxy ()) small
 
-small :: Gr (Vtx Int String Int) (Face String)
-small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
-                                , (1,"0->1")
-                                , (3,"0->3")
-                                ] 0
-           , Vtx 1 (Point2 2 2) [ (0,"1->0")
-                                , (2,"1->2")
-                                , (3,"1->3")
-                                ] 1
-           , Vtx 2 (Point2 2 0) [ (0,"2->0")
-                                , (1,"2->1")
-                                ] 2
-           , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
-                                   , (1,"3->1")
-                                   ] 3
-           ]
-           [ Face (2,1) "OuterFace"
-           , Face (0,1) "A"
-           , Face (1,0) "B"
-           ]
+-- small :: Gr (Vtx Int String Int) (Face String)
+-- small = Gr [ Vtx 0 (Point2 0 0) [ (2,"0->2")
+--                                 , (1,"0->1")
+--                                 , (3,"0->3")
+--                                 ] 0
+--            , Vtx 1 (Point2 2 2) [ (0,"1->0")
+--                                 , (2,"1->2")
+--                                 , (3,"1->3")
+--                                 ] 1
+--            , Vtx 2 (Point2 2 0) [ (0,"2->0")
+--                                 , (1,"2->1")
+--                                 ] 2
+--            , Vtx 3 (Point2 (-1) 4) [ (0,"3->0")
+--                                    , (1,"3->1")
+--                                    ] 3
+--            ]
+--            [ Face (2,1) "OuterFace"
+--            , Face (0,1) "A"
+--            , Face (1,0) "B"
+--            ]
 
-
+{-
 data Test
+
 myGraphG = fromAdjRep (Proxy :: Proxy Test) myGraph
 
 myGraph :: Gr (Vtx () () Int) (Face String)
@@ -191,6 +185,7 @@ myGraph' = Gr [ Vtx 0 (Point2 0 0) [ (1,())
              , Face (8,5) "E"
              , Face (9,6) "F"
              ]
+-}
 
 data InOrOut = In | Out deriving (Show,Eq)
 
