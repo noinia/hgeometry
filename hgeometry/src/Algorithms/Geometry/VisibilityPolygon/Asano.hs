@@ -10,10 +10,17 @@ import           Data.Geometry.Polygon
 import           Data.Intersection
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe (mapMaybe, isJust)
 import           Data.Ord (comparing)
 import qualified Data.Set as Set
 import qualified Data.Set.Util as Set
 import           Data.Vinyl.CoRec
+
+
+import           Debug.Trace
+import           Data.RealNumber.Rational
+
+type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
@@ -22,11 +29,16 @@ type StarShapedPolygon p r = SimplePolygon p r
 
 data EventKind = Insert | Delete deriving (Show,Eq,Ord)
 
+-- | An event corresponds to some orientation at which the set of segments
+-- intersected by the ray changes (this orientation is defined by a point)
 data Event p e r = Event { _eventVtx :: Point 2 r :+ p
                          , _toInsert :: [LineSegment 2 p r :+ e]
                          , _toDelete :: [LineSegment 2 p r :+ e]
                          } deriving Show
 
+-- | The status structure maintains the subset of segments currently
+-- intersected by the ray that starts in the query point q, in order
+-- of increasing distance along the ray.
 type Status p e r = Set.Set (LineSegment 2 p r :+ e)
 
 
@@ -37,21 +49,32 @@ type Definer p e r = Either p (Point 2 r :+ p,LineSegment 2 p r :+ e)
 
 --------------------------------------------------------------------------------
 
+visibilityPolygon   :: forall p t r. (Ord r, Fractional r, Show r, Show p)
+                    => Point 2 r
+                    -> Polygon t p r
+                    -> StarShapedPolygon (Definer p () r) r
+visibilityPolygon q = visibilityPolygon' q . map (ext . asClosed) . listEdges
+  where
+    asClosed (LineSegment' u v) = ClosedLineSegment u v
+
+
 -- | pre: - all line segments are considered closed.
 --        - no singleton linesegments exactly pointing away from q.
-visibilityPolygon'        :: forall p r e. (Ord r, Fractional r)
+--
+--
+visibilityPolygon'        :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
                           => Point 2 r
                           -> [LineSegment 2 p r :+ e]
                           -> StarShapedPolygon (Definer p e r) r
 visibilityPolygon' q segs = fromPoints . snd
                           $ List.foldl' (handleEvent q) (statusStruct,[]) events
   where
-    statusStruct = fromListByDistTo q segs
+    statusStruct = traceShowId $ fromListByDistTo q segs
 
     events    :: [Event p e r]
     events    = map (mkEvent q)
               . groupBy'    (ccwCmpAround (ext q))
-              . List.sortBy (ccwCmpAround (ext q))
+              . List.sortBy (ccwCmpAround (ext q) <> cmpByDistanceTo (ext q))
               $ endPoints'
 
     endPoints' = concatMap (\s@(LineSegment' u v :+ _) -> [ u&extra %~ (,v,s)
@@ -59,23 +82,43 @@ visibilityPolygon' q segs = fromPoints . snd
                                                           ]
                            ) segs
 
-
-mkEvent               :: (Ord r, Num r)
+-- | Computes the right events happening at this slope
+mkEvent               :: (Ord r, Fractional r)
                       => Point 2 r
                       -> NonEmpty (Point 2 r :+ (p, Point 2 r :+ p, LineSegment 2 p r :+ e))
                       -> Event p e r
-mkEvent q ps@(p :| _) = Event (p&extra %~ \(e,_,_) -> e) (f <$> ins) (f <$>  dels)
+mkEvent q ps@(p :| _) = Event (p&extra %~ \(e,_,_) -> e) (ins <> extraIns) (dels <> extraDels)
   where
-    (ins,_colinears,dels) = partition3 (\(u :+ (_,v,_)) -> ccwCmpAround (ext q) (ext u) v) ps
-    f (_ :+ (_,_,s)) = s
+    -- figure out which segments start at u or end at u; segments
+    -- for which u appears "before" the other endpoint v sould
+    -- typically be inserted, whereas segments where u appears after v
+    -- should typically be deleted.
+    (ins',_colinears,dels') = partition3 (\(u :+ (_,v,_)) -> ccwCmpAround (ext q) (ext u) v) ps
+
+    -- if a segment s=uv would intersect the initial, rightward ray, it is currently classified
+    -- as "insert at u", since u would appear before v in the ordering. However, as s
+    -- is already in the initial status structure, we should categorize s as a deletion instead.
+    (extraDels,ins) = handleInitial ins'
+    (extraIns,dels) = handleInitial dels'
+
+    handleInitial = List.partition (isJust . initialIntersection q)
+                  . map (\(_ :+ (_,_,s)) -> s)
+
+    -- FIXME: maybe we shoulnd't just return the first p in ps, but
+    -- all of them.  if we want to do that we should make sure the
+    -- points are orderd by increasing distance from p when sorting the points
+    --
+
+    -- FIXME: if q is a vertex in ps our partitioning stuff probably goes wrong
 
 
 -- | Handles an event, computes the new status structure and output polygon.
-handleEvent                                     :: (Ord r, Fractional r)
+handleEvent                                     :: (Ord r, Fractional r, Show r, Show p, Show e)
                                                 => Point 2 r
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
                                                 -> Event p e r
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
+handleEvent q (ss,out) e | traceShow ("handle", e, ss, out) False = undefined
 handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
   where
     ss' = flip (foldr (insertAt q p)) is
@@ -107,7 +150,7 @@ handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
 --      from q through p (in a point), in that order.
 --
 -- running time: \(O(\log n)\)
-firstHitAt     :: forall p r e. (Ord r, Fractional r)
+firstHitAt     :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
                => Point 2 r -> Point 2 r
                -> Status p e r
                -> Maybe (Point 2 r :+ LineSegment 2 p r :+ e)
@@ -125,7 +168,7 @@ firstHitAt q p = computeIntersectionPoint <=< Set.lookupMin
 --      - the status structure is non-empty
 --
 -- running time: \(O(\log n)\)
-firstHitAt'        :: forall p r e. (Ord r, Fractional r)
+firstHitAt'        :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
                   => Point 2 r -> Point 2 r
                   -> Status p e r
                   -> Point 2 r :+ LineSegment 2 p r :+ e
@@ -147,7 +190,10 @@ firstHitAt' q p s = case firstHitAt q p s of
 insertAt     :: (Ord r, Fractional r)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
-insertAt q p = Set.insertBy (compareByDistanceToAt q p)
+insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndPoint)
+  -- if two segments have the same distance, they must share and endpoint
+  -- so we use the CCW ordering around this common endpoint to determine
+  -- the order.
 
 -- | Delete a segment from the status structure, depending on the
 -- (distance from q to to the) intersection point with the ray from q
@@ -160,21 +206,37 @@ insertAt q p = Set.insertBy (compareByDistanceToAt q p)
 deleteAt     :: (Ord r, Fractional r)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
-deleteAt p q = Set.deleteAllBy (compareByDistanceToAt q p)
+deleteAt p q = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint)
+  -- if two segments have the same distance, we use the ccw order around their common
+  -- (end) point.
+
+-- FIXME: If there are somehow segmetns that would continue at p as
+-- well, they are also deleted.
+
 
 -- | Given a point q compute the subset of segments intersecting the
 -- horizontal rightward ray starting in q, and order them by
 -- increasing dsitance.
 fromListByDistTo   :: forall r p e. (Ord r, Fractional r)
                    => Point 2 r -> [LineSegment 2 p r :+ e] -> Status p e r
-fromListByDistTo q = foldr (Set.insertBy cmp) Set.empty
-  where
-    cmp        = comparing f
-    f (s :+ _) = case asA @(Point 2 r) $ s `intersect` (horizontalLine $ q^.yCoord) of
-                   Nothing -> Nothing
-                   Just p  -> let d = p^.xCoord - q^.xCoord
-                              in if d < 0 then Nothing else Just d
-      -- TODO: use the faster test intersecting things with a horizontalLine
+fromListByDistTo q = Set.mapMonotonic (^.extra)
+                   . foldr (Set.insertBy $ comparing (^.core)) Set.empty
+                   . mapMaybe (initialIntersection q)
+
+-- | Given q and a segment s, computes if the segment intersects the initial, rightward
+-- ray starting in q, and if so returns the (squared) distance from q to that point
+-- together with the segment
+initialIntersection     :: forall r p e. (Ord r, Fractional r)
+                        => Point 2 r -> LineSegment 2 p r :+ e
+                        -> Maybe (r :+ (LineSegment 2 p r :+ e))
+initialIntersection q s =
+  case asA @(Point 2 r) $ (s^.core) `intersect` horizontalLine (q^.yCoord) of
+    Nothing -> Nothing
+    Just p  -> let d = p^.xCoord - q^.xCoord
+               in if d < 0 then Nothing else Just (d :+ s)
+-- TODO: use the faster test intersecting things with a horizontalLine
+
+
 
 --------------------------------------------------------------------------------
 -- * Comparators for the rotating ray
@@ -192,6 +254,29 @@ compareByDistanceToAt q p = comparing f
     f (s :+ _) = fmap (squaredEuclideanDist q)
                . asA @(Point 2 r)
                $ supportingLine s `intersect` lineThrough p q
+
+-- | Given two segments that share an endpoint, order them by their
+-- order around this common endpoint. I.e. if uv and uw share endpoint
+-- u we uv is considered smaller iff v is smaller than w in the
+-- counterclockwise order around u (treating horizontal rightward as
+-- zero).
+compareAroundEndPoint                     :: forall p r e. (Ord r, Fractional r)
+                                          => LineSegment 2 p r :+ e
+                                          -> LineSegment 2 p r :+ e
+                                          -> Ordering
+compareAroundEndPoint (sa :+ _) (sb :+ _) =
+    ccwCmpAround (ext p) (otherEndPoint' sa) (otherEndPoint' sb)
+  where
+    Just p = asA @(Point 2 r) $ supportingLine sa `intersect` supportingLine sb
+    otherEndPoint' s = case otherEndPoint p s of
+                         Just v  -> v
+                         Nothing -> error "compareAroundEndPoint: not an endpoint?"
+
+-- | Get the other endpoint of the segment
+otherEndPoint     :: Eq r => Point 2 r -> LineSegment 2 p r -> Maybe (Point 2 r :+ p)
+otherEndPoint p (LineSegment' a b) | p == a^.core = Just b
+                                   | p == b^.core = Just a
+                                   | otherwise    = Nothing
 
 --------------------------------------------------------------------------------
 -- * Generic Helper functions
@@ -226,3 +311,31 @@ groupBy' cmp = go
       []       -> []
       (x:xs)   -> let (pref,rest) = List.span (\y -> x `cmp` y == EQ) xs
                   in (x :| pref) : go rest
+
+
+--------------------------------------------------------------------------------
+
+test :: StarShapedPolygon (Definer Int () R) R
+test = visibilityPolygon origin testPg
+
+testPg :: SimplePolygon Int R
+testPg = fromPoints $ zipWith (:+) [ Point2 3    1
+                                   , Point2 3    2
+                                   , Point2 4    2
+                                   , Point2 2    4
+                                   , Point2 (-1) 4
+                                   , Point2 1    2
+                                   , Point2 (-3) (-1)
+                                   , Point2 4    (-1)
+                                   ] [1..]
+
+testPg2 :: SimplePolygon Int R
+testPg2 = fromPoints $ zipWith (:+) [ Point2 3    1
+                                    , Point2 3    2
+                                    , Point2 4    2
+                                    , Point2 2    4
+                                    , Point2 (-1) 4
+                                    , Point2 1    2.1
+                                    , Point2 (-3) (-1)
+                                    , Point2 4    (-1)
+                                    ] [1..]
