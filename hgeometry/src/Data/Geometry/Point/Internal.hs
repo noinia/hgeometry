@@ -32,20 +32,22 @@ import           Control.DeepSeq
 import           Control.Lens
 import           Data.Aeson
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                   as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as Vec
+import qualified Data.Geometry.Vector            as Vec
 import           Data.Hashable
-import           Data.Ord (comparing)
+import           Data.List                       (intersperse)
+import           Data.Ord                        (comparing)
 import           Data.Proxy
-import           GHC.Generics (Generic)
+import           GHC.Generics                    (Generic)
 import           GHC.TypeLits
-import           System.Random (Random(..))
-import           Test.QuickCheck (Arbitrary)
-import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
+import           System.Random                   (Random (..))
+import           Test.QuickCheck                 (Arbitrary)
+import           Text.ParserCombinators.ReadP    (ReadP, pfail, string)
 import           Text.ParserCombinators.ReadPrec (lift)
-import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
+import           Text.Read                       (Read (..), minPrec, readListPrecDefault,
+                                                  readPrec_to_P)
 
 
 --------------------------------------------------------------------------------
@@ -75,9 +77,14 @@ import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
 newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
 
 instance (Show r, Arity d) => Show (Point d r) where
-  show (Point v) = mconcat [ "Point", show $ F.length v , " "
-                           , show $ F.toList v
-                           ]
+  showsPrec d (Point v) = showParen (d > app_prec) $
+    showString "Point" . shows (F.length v) . showChar ' ' .
+    if F.length v > 3
+      then shows (F.toList v)
+      else unwordsS (map (showsPrec app_prec) (F.toList v))
+    where
+      app_prec = 10
+      unwordsS = foldr (.) id . intersperse (showChar ' ')
 instance (Read r, Arity d) => Read (Point d r) where
   readPrec     = lift readPt
   readListPrec = readListPrecDefault

@@ -166,12 +166,12 @@ type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
 
 instance (Show p, Show r) => Show (Polygon t p r) where
-  show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"
+  show (SimplePolygon vs)   = "SimplePolygon " <> show (F.toList vs)
   show (MultiPolygon vs hs) = "MultiPolygon (" <> show vs <> ") (" <> show hs <> ")"
 
 instance (Read p, Read r) => Read (SimplePolygon p r) where
   readsPrec d = readParen (d > app_prec) $ \r ->
-      [ (SimplePolygon vs, t)
+      [ (fromPoints vs, t)
       | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
     where app_prec = 10
 
