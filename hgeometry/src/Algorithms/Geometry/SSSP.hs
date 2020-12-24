@@ -8,32 +8,36 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.SSSP
   ( SSSP
+  , triangulate
   , sssp
   ) where
 
-import           Algorithms.Geometry.PolygonTriangulation.Types (PolygonEdgeType)
-import           Algorithms.Graph.DFS                           (adjacencyLists, dfs')
-import           Control.Lens                                   ((^.))
-import           Data.Ext                                       (extra, type (:+) (..))
-import qualified Data.FingerTree                                as F
-import           Data.Geometry.PlanarSubdivision                (PolygonFaceData (..))
-import           Data.Geometry.Point                            (Point, ccw, pattern CCW,
-                                                                 pattern CW)
-import           Data.List                                      (sortOn, (\\))
-import           Data.Maybe                                     (fromMaybe)
-import           Data.PlanarGraph                               ()
-import           Data.PlaneGraph                                (FaceId (..), PlaneGraph,
-                                                                 VertexData (..), VertexId', dual,
-                                                                 graph, incidentEdges, leftFace,
-                                                                 vertices)
-import qualified Data.PlaneGraph                                as PlaneGraph
-import           Data.Tree                                      (Tree (Node))
-import qualified Data.Vector                                    as V
-import qualified Data.Vector.Circular                           as CV
-import qualified Data.Vector.Circular.Util                      as CV
-import           Data.Vector.Unboxed                            (Vector)
-import qualified Data.Vector.Unboxed                            as VU
-
+import           Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate')
+import           Algorithms.Geometry.PolygonTriangulation.Types       (PolygonEdgeType)
+import           Algorithms.Graph.DFS                                 (adjacencyLists, dfs')
+import           Control.Lens                                         ((^.))
+import           Data.Bitraversable
+import           Data.Ext                                             (extra, type (:+) (..))
+import qualified Data.FingerTree                                      as F
+import           Data.Geometry.PlanarSubdivision                      (PolygonFaceData (..))
+import           Data.Geometry.Point                                  (Point, ccw, pattern CCW,
+                                                                       pattern CW)
+import           Data.Geometry.Polygon
+import           Data.List                                            (sortOn, (\\))
+import           Data.Maybe                                           (fromMaybe)
+import           Data.PlanarGraph                                     ()
+import           Data.PlaneGraph                                      (FaceId (..), PlaneGraph,
+                                                                       VertexData (..), VertexId',
+                                                                       dual, graph, incidentEdges,
+                                                                       leftFace, vertices)
+import qualified Data.PlaneGraph                                      as PlaneGraph
+import           Data.Proxy
+import           Data.Tree                                            (Tree (Node))
+import qualified Data.Vector                                          as V
+import qualified Data.Vector.Circular                                 as CV
+import qualified Data.Vector.Circular.Util                            as CV
+import           Data.Vector.Unboxed                                  (Vector)
+import qualified Data.Vector.Unboxed                                  as VU
 -- import           Algorithms.Geometry.PolygonTriangulation.Triangulate
 -- import           Data.Bitraversable
 -- import           Data.Ext
@@ -96,6 +100,12 @@ import qualified Data.Vector.Unboxed                            as VU
 --   in sssp graph
 
 type SSSP = Vector Int
+
+
+triangulate :: (Ord r, Fractional r) => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
+triangulate p =
+  let poly' = snd $ bimapAccumL (\a _ -> (a+1,a)) (,) 0 p
+  in triangulate' Proxy poly'
 
 -- | O(n) Single-Source shortest path.
 sssp :: (Ord r, Fractional r)

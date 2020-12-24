@@ -45,9 +45,7 @@ spec :: Spec
 spec = do
   specify "Fast.sssp == Naive.sssp" $
     property $ \(poly :: SimplePolygon () Rational) ->
-      let poly' = snd $ bimapAccumL (\a p -> (a+1,a)) (,) 0 $ poly
-          graph = triangulate' Proxy poly'
-      in sssp graph === Naive.sssp poly
+      sssp (triangulate poly) === Naive.sssp poly
 
 -- fastSSSP p =
 --   let poly' = snd $ bimapAccumL (\a p -> (a+1,a)) (,) 0 p
