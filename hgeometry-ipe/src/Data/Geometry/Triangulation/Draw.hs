@@ -10,5 +10,5 @@ import           Data.Geometry.Ipe
 drawTriangulation :: IpeOut (Triangulation p r) Group r
 drawTriangulation tr =
   ipeGroup [ iO $ ipeLineSegment e
-           | e <- map (uncurry ClosedLineSegment) . triangulationEdges $ tr
+           | e <- map (uncurry ClosedLineSegment) . edgesAsPoints $ tr
            ]

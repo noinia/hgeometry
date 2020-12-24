@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Box.Sides
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Box.Sides( Sides(Sides), north, east, south, west
                               , topSide, bottomSide, leftSide, rightSide
                               , sides, sides'

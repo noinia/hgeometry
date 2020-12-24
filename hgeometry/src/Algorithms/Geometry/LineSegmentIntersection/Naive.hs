@@ -1,5 +1,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.LineSegmentIntersection.Naive where
+-- | Line segment intersections in \(O(n^2)\) by checking
+--   all pairs.
+module Algorithms.Geometry.LineSegmentIntersection.Naive
+  ( intersections
+  ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens

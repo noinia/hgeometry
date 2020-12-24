@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Control.Monad.State.Persistent
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Control.Monad.State.Persistent( PersistentStateT
                                      , PersistentState
                                      , store
@@ -32,7 +39,7 @@ instance Monad m => MonadState s (PersistentStateT s m) where
               put (s' :| os)
               return x
 
--- | run a persistentStateT, returns a triplet with the value, the last state
+-- | Run a persistentStateT, returns a triplet with the value, the last state
 -- and a list of all states (including the last one) in chronological order
 runPersistentStateT :: Functor m => PersistentStateT s m a -> s -> m (a,s,[s])
 runPersistentStateT (PersistentStateT act) initS = f <$> runStateT act (initS :| [])
@@ -42,7 +49,10 @@ runPersistentStateT (PersistentStateT act) initS = f <$> runStateT act (initS :|
 
 --------------------------------------------------------------------------------
 
+-- | A State monad that can store earlier versions of the state.
 type PersistentState s = PersistentStateT s Identity
 
+-- | Run a persistentStateT, returns a triplet with the value, the last state
+-- and a list of all states (including the last one) in chronological order
 runPersistentState     :: PersistentState s a -> s -> (a,s,[s])
 runPersistentState act = runIdentity . runPersistentStateT act

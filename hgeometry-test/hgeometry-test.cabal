@@ -32,6 +32,8 @@ data-files:          ../hgeometry/test/Algorithms/Geometry/LineSegmentIntersecti
                      ../hgeometry/test/Data/PlaneGraph/myPlaneGraph.yaml
                      ../hgeometry/test/Data/PlaneGraph/small.yaml
                      ../hgeometry/test/Data/PlaneGraph/testsegs.png
+                     data/polygons.simple
+                     data/polygons.multi
 
                      -- in the future (cabal >=2.4) we can use
                      -- examples/**/*.in
@@ -42,6 +44,21 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+executable fromgeojson
+  main-is: FromGeoJSON.hs
+  hs-source-dirs: src
+  default-language:     Haskell2010
+  build-depends:  base,
+                  containers,
+                  lens,
+                  aeson,
+                  bytestring,
+                  hashable,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  geojson,
+                  cereal
+
 test-suite hspec
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
@@ -49,9 +66,12 @@ test-suite hspec
   main-is:              Main.hs
 
 
-  ghc-options:   -fno-warn-unticked-promoted-constructors
+  ghc-options:   -Wall -threaded
+                 -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures
                  -fno-warn-missing-signatures
+                 -fno-warn-type-defaults
+                 -fno-warn-orphans
 
   build-tool-depends: hspec-discover:hspec-discover
 
@@ -81,6 +101,7 @@ test-suite hspec
 
                  Algorithms.Geometry.SoSSpec
                  -- Algorithms.Geometry.SoS.SortSpec
+                 Algorithms.Geometry.SoS.OrientationSpec
 
                  Algorithms.Geometry.SmallestEnclosingDisk.RISpec
                  Algorithms.Geometry.DelaunayTriangulation.DTSpec
@@ -88,6 +109,7 @@ test-suite hspec
                  Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannSpec
                  Algorithms.Geometry.PolygonTriangulation.MakeMonotoneSpec
                  Algorithms.Geometry.PolygonTriangulation.TriangulateMonotoneSpec
+                 Algorithms.Geometry.PolygonTriangulation.TriangulateSpec
                  Algorithms.Geometry.LowerEnvelope.LowerEnvSpec
                  Algorithms.Geometry.ConvexHull.ConvexHullSpec
                  -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemovalSpec
@@ -104,6 +126,7 @@ test-suite hspec
 
                  Test.Util
                  Spec
+                 Paths_hgeometry_test
 
                  Data.Geometry.Point.CmpAround
                  Data.Geometry.Polygon.Convex.LowerTangent
@@ -120,6 +143,7 @@ test-suite hspec
                       , hgeometry-ipe
                       , lens
                       , data-clist
+                      , vector-circular      >= 0.1.1
                       , linear
                       , bytestring
                       , vinyl
@@ -132,6 +156,7 @@ test-suite hspec
                       , directory
                       , yaml
                       , MonadRandom
+                      , cereal
 
   default-extensions: TypeFamilies
                     , GADTs

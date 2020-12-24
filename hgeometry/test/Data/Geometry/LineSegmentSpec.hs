@@ -3,7 +3,6 @@ module Data.Geometry.LineSegmentSpec where
 
 import Data.Ext
 import Data.Geometry
-import Data.Vinyl.CoRec
 import Test.Hspec
 
 spec :: Spec

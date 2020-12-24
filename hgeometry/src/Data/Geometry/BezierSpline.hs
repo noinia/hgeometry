@@ -1,5 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.BezierSpline
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.BezierSpline(
     BezierSpline (BezierSpline)
   , controlPoints
@@ -34,7 +40,11 @@ import qualified Test.QuickCheck as QC
 
 -- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
 newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq (1+n) (Point d r) }
-makeLenses ''BezierSpline
+-- makeLenses ''BezierSpline
+
+-- | Bezier control points. With n degrees, there are n+1 control points.
+controlPoints :: Iso (BezierSpline n1 d1 r1) (BezierSpline n2 d2 r2) (LSeq (1+n1) (Point d1 r1)) (LSeq (1+n2) (Point d2 r2))
+controlPoints = iso _controlPoints BezierSpline
 
 -- | Quadratic Bezier Spline
 pattern Bezier2      :: Point d r -> Point d r -> Point d r -> BezierSpline 2 d r
@@ -97,7 +107,7 @@ evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
 
     blend p q = p .+^ t *^ (q .-. p)
 
-
+-- | Tangent to the bezier spline at the starting point.
 tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r
 tangent b = b^?!controlPoints.ix 1  .-. b^?!controlPoints.ix 0
 
