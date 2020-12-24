@@ -1,13 +1,26 @@
-
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.VisibilityPolygon.Lee
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- \(O(n\log n)\) time algorithm to compute the visibility polygon of
+-- a point inside a polygon (possibly containing holes) with \(n\)
+-- vertices, or among a set of \(n\) disjoint segments. The alogirhtm
+-- used is the the rotational sweepline algorithm by Lee, described
+-- in:
+--
 -- D. T. Lee. Proximity and reachability in the plane. Report R-831, Dept. Elect.
 -- Engrg., Univ. Illinois, Urbana, IL, 1978.
-
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.VisibilityPolygon.Lee where
 
 import           Control.Lens
 import           Control.Monad ((<=<))
 import           Data.Bifunctor (second)
-import qualified Data.CircularSeq as CSeq
+import qualified Data.Vector.Circular as CVec
 import           Data.Ext
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -97,7 +110,7 @@ visibilityPolygon' q segs = fromPoints . reverse . snd
 
 
 -- | Gets the combinatorial representation of the visibility polygon
-toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CSeq.CSeq (Either p (p,e))
+toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CVec.CircularVector (Either p (p,e))
 toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundary
   where
     f = bimap (^.extra) (^.extra)

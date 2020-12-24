@@ -5,7 +5,7 @@ module Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec where
 import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
 import           Algorithms.Geometry.VisibilityPolygon.Lee (toCombinatorial)
 import           Control.Lens
-import qualified Data.CircularSeq as CSeq
+import qualified Data.Vector.Circular as CVec
 import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
@@ -27,6 +27,8 @@ import           Test.Util
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
+type P = Int
+type E = (P,P)
 
 spec :: Spec
 spec = do
@@ -35,7 +37,8 @@ spec = do
       toCombinatorial (RotationalSweep.visibilityPolygon origin testPg) `shouldBe` testPgAnswer
 
 
-testPgAnswer = CSeq.fromList [Left 1,Left 2,Right (2,(3,4)),Left 4,Right (4,(6,7)),Left 7,Left 8]
+testPgAnswer :: CVec.CircularVector (Either P (P,E))
+testPgAnswer = CVec.unsafeFromList [Left 1,Left 2,Right (2,(3,4)),Left 4,Right (4,(6,7)),Left 7,Left 8]
 
 testPg :: SimplePolygon Int R
 testPg = fromPoints [ Point2 3    1     :+ 1
