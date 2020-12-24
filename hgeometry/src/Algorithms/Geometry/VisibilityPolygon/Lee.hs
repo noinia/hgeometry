@@ -6,6 +6,8 @@ module Algorithms.Geometry.VisibilityPolygon.Lee where
 
 import           Control.Lens
 import           Control.Monad ((<=<))
+import           Data.Bifunctor (second)
+import qualified Data.CircularSeq as CSeq
 import           Data.Ext
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -19,7 +21,6 @@ import           Data.Ord (comparing)
 import qualified Data.Set as Set
 import qualified Data.Set.Util as Set
 import           Data.Vinyl.CoRec
-
 
 -- import           Debug.Trace
 import           Data.RealNumber.Rational
@@ -50,7 +51,6 @@ type Status p e r = Set.Set (LineSegment 2 p r :+ e)
 -- or defined by some vertex and an edge
 type Definer p e r = Either p (Point 2 r :+ p,LineSegment 2 p r :+ e)
 
-
 --------------------------------------------------------------------------------
 
 -- | Computes the visibility polygon of a point q in a polygon with
@@ -60,10 +60,10 @@ type Definer p e r = Either p (Point 2 r :+ p,LineSegment 2 p r :+ e)
 visibilityPolygon   :: forall p t r. (Ord r, Fractional r, Show r, Show p)
                     => Point 2 r
                     -> Polygon t p r
-                    -> StarShapedPolygon (Definer p () r) r
-visibilityPolygon q = visibilityPolygon' q . map (ext . asClosed) . listEdges
+                    -> StarShapedPolygon (Definer p (p,p) r) r
+visibilityPolygon q = visibilityPolygon' q . map asClosed . listEdges
   where
-    asClosed (LineSegment' u v) = ClosedLineSegment u v
+    asClosed (LineSegment' u v) = ClosedLineSegment u v :+ (u^.extra,v^.extra)
 
 -- | computes the visibility polygon of a set of \(n\) disjoint
 -- segments. The input segments are allowed to share endpoints, but no
@@ -94,6 +94,16 @@ visibilityPolygon' q segs = fromPoints . reverse . snd
                                                           , v&extra %~ (,u,s)
                                                           ]
                            ) segs
+
+
+-- | Gets the combinatorial representation of the visibility polygon
+toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CSeq.CSeq (Either p (p,e))
+toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundary
+  where
+    f = bimap (^.extra) (^.extra)
+
+
+----------------------------------------
 
 -- | Computes the right events happening at this slope
 mkEvent               :: (Ord r, Fractional r)
@@ -329,7 +339,7 @@ groupBy' cmp = go
 
 --------------------------------------------------------------------------------
 
-test :: StarShapedPolygon (Definer Int () R) R
+test :: StarShapedPolygon (Definer Int (Int,Int) R) R
 test = visibilityPolygon origin testPg
 
 testPg :: SimplePolygon Int R
