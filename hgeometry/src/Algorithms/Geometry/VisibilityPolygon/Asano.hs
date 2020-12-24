@@ -17,7 +17,7 @@ import qualified Data.Set.Util as Set
 import           Data.Vinyl.CoRec
 
 
-import           Debug.Trace
+-- import           Debug.Trace
 import           Data.RealNumber.Rational
 
 type R = RealNumber 5
@@ -49,6 +49,10 @@ type Definer p e r = Either p (Point 2 r :+ p,LineSegment 2 p r :+ e)
 
 --------------------------------------------------------------------------------
 
+-- | Computes the visibility polygon of a point q in a polygon with
+-- \(n\) vertices.
+--
+-- running time: \(O(n\log n)\)
 visibilityPolygon   :: forall p t r. (Ord r, Fractional r, Show r, Show p)
                     => Point 2 r
                     -> Polygon t p r
@@ -57,19 +61,24 @@ visibilityPolygon q = visibilityPolygon' q . map (ext . asClosed) . listEdges
   where
     asClosed (LineSegment' u v) = ClosedLineSegment u v
 
-
--- | pre: - all line segments are considered closed.
---        - no singleton linesegments exactly pointing away from q.
+-- | computes the visibility polygon of a set of \(n\) disjoint
+-- segments. The input segments are allowed to share endpoints, but no
+-- intersections or no endpoints in the interior of other segments.
 --
+-- pre : - all line segments are considered closed.
+--       - no singleton linesegments exactly pointing away from q.
+--       - for every orientattion the visibility is blocked somewhere, i.e.
+--            no rays starting in the query point q that are disjoint from all segments.
 --
+-- running time: \(O(n\log n)\)
 visibilityPolygon'        :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
                           => Point 2 r
                           -> [LineSegment 2 p r :+ e]
                           -> StarShapedPolygon (Definer p e r) r
-visibilityPolygon' q segs = fromPoints . snd
+visibilityPolygon' q segs = fromPoints . reverse . snd
                           $ List.foldl' (handleEvent q) (statusStruct,[]) events
   where
-    statusStruct = traceShowId $ fromListByDistTo q segs
+    statusStruct = fromListByDistTo q segs
 
     events    :: [Event p e r]
     events    = map (mkEvent q)
@@ -118,7 +127,7 @@ handleEvent                                     :: (Ord r, Fractional r, Show r,
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
                                                 -> Event p e r
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
-handleEvent q (ss,out) e | traceShow ("handle", e, ss, out) False = undefined
+-- handleEvent q (ss,out) e | traceShow ("handle", e, ss, out) False = undefined
 handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
   where
     ss' = flip (foldr (insertAt q p)) is
@@ -129,8 +138,8 @@ handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
                  (b :+ sb) = firstHitAt' q p ss'
                  ae        = valOf a sa
              in case (a /= b, a == p) of
-                  (True, _)     -> [ a :+ Left  ae -- a must be a vertex!
-                                   , b :+ Right (a :+ ae,sb)
+                  (True, _)     -> [ b :+ Right (a :+ ae,sb)
+                                   , a :+ Left  ae -- a must be a vertex!
                                    ] -- new window of the output polygon discovered
                   (False,True)  -> [ p :+ Left z]
                     -- sweeping over a regular vertex of the visibility polygon
@@ -187,7 +196,7 @@ firstHitAt' q p s = case firstHitAt q p s of
 --      from q through p, in that order.
 --
 -- \(O(\log n)\)
-insertAt     :: (Ord r, Fractional r)
+insertAt     :: (Ord r, Fractional r, Show r, Show p)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
 insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndPoint)
@@ -203,7 +212,7 @@ insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndP
 --      from q through p, in that order.
 --
 -- \(O(\log n)\)
-deleteAt     :: (Ord r, Fractional r)
+deleteAt     :: (Ord r, Fractional r, Show r, Show p)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
 deleteAt p q = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint)
@@ -260,23 +269,24 @@ compareByDistanceToAt q p = comparing f
 -- u we uv is considered smaller iff v is smaller than w in the
 -- counterclockwise order around u (treating horizontal rightward as
 -- zero).
-compareAroundEndPoint                     :: forall p r e. (Ord r, Fractional r)
-                                          => LineSegment 2 p r :+ e
-                                          -> LineSegment 2 p r :+ e
-                                          -> Ordering
-compareAroundEndPoint (sa :+ _) (sb :+ _) =
-    ccwCmpAround (ext p) (otherEndPoint' sa) (otherEndPoint' sb)
-  where
-    Just p = asA @(Point 2 r) $ supportingLine sa `intersect` supportingLine sb
-    otherEndPoint' s = case otherEndPoint p s of
-                         Just v  -> v
-                         Nothing -> error "compareAroundEndPoint: not an endpoint?"
+compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
+                       => LineSegment 2 p r :+ e
+                       -> LineSegment 2 p r :+ e
+                       -> Ordering
+compareAroundEndPoint (LineSegment' p q :+ _)
+                      (LineSegment' s t :+ _)
+    | p^.core == s^.core = ccwCmpAround p q t
+    | p^.core == t^.core = ccwCmpAround p q s
+    | q^.core == s^.core = ccwCmpAround q p t
+    | q^.core == t^.core = ccwCmpAround q p s
+    | otherwise          = error "compareAroundEndPoint: precondition failed!"
 
--- | Get the other endpoint of the segment
-otherEndPoint     :: Eq r => Point 2 r -> LineSegment 2 p r -> Maybe (Point 2 r :+ p)
-otherEndPoint p (LineSegment' a b) | p == a^.core = Just b
-                                   | p == b^.core = Just a
-                                   | otherwise    = Nothing
+
+-- -- | Get the other endpoint of the segment
+-- otherEndPoint     :: Eq r => Point 2 r -> LineSegment 2 p r -> Maybe (Point 2 r :+ p)
+-- otherEndPoint p (LineSegment' a b) | p == a^.core = Just b
+--                                    | p == b^.core = Just a
+--                                    | otherwise    = Nothing
 
 --------------------------------------------------------------------------------
 -- * Generic Helper functions
@@ -339,3 +349,15 @@ testPg2 = fromPoints $ zipWith (:+) [ Point2 3    1
                                     , Point2 (-3) (-1)
                                     , Point2 4    (-1)
                                     ] [1..]
+
+
+
+-- SimplePolygon (CSeq
+
+-- [Point2 [4,-1] :+ Left 8
+-- ,Point2 [-3,-1] :+ Left 7
+-- ,Point2 [2,4] :+ Left 4
+-- ,Point2 [1,2] :+ Right (Point2 [2,4] :+ 4,LineSegment (Closed (Point2 [1,2] :+ 6)) (Closed (Point2 [-3,-1] :+ 7)) :+ ())
+-- ,Point2 [3,2] :+ Left 2
+-- ,Point2 [3.6,2.4] :+ Right (Point2 [3,2] :+ 2,LineSegment (Closed (Point2 [4,2] :+ 3)) (Closed (Point2 [2,4] :+ 4)) :+ ())
+-- ,Point2 [3,1] :+ Left 1])
