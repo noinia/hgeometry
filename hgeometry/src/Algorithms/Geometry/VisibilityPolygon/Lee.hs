@@ -1,4 +1,8 @@
-module Algorithms.Geometry.VisibilityPolygon.Asano where
+
+-- D. T. Lee. Proximity and reachability in the plane. Report R-831, Dept. Elect.
+-- Engrg., Univ. Illinois, Urbana, IL, 1978.
+
+module Algorithms.Geometry.VisibilityPolygon.Lee where
 
 import           Control.Lens
 import           Control.Monad ((<=<))
