@@ -1,31 +1,12 @@
 module Algorithms.Geometry.SSSPSpec (spec) where
 
-import           Algorithms.Geometry.LineSegmentIntersection
-import           Algorithms.Geometry.PolygonTriangulation.Triangulate
-import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
 import           Algorithms.Geometry.SSSP
-import qualified Algorithms.Geometry.SSSP.Naive                       as Naive
-import           Control.Lens                                         ((^.), (^..))
-import           Control.Monad
-import           Data.Bifoldable
-import           Data.Bitraversable
-import qualified Data.ByteString                                      as BS
-import           Data.Ext
+import qualified Algorithms.Geometry.SSSP.Naive as Naive
 import           Data.Geometry
-import           Data.Geometry.Boundary
-import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon                                (fromPoints)
-import           Data.Geometry.PolygonSpec                            ()
-import           Data.Proxy
-import           Data.Ratio
-import           Data.Serialize
-import           Data.Vector.Circular                                 (CircularVector)
-import qualified Data.Vector.Circular                                 as CV
-import           Paths_hgeometry_test
-import           System.IO.Unsafe
+import           Data.Geometry.PolygonSpec      ()
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.QuickCheck.Instances                            ()
+import           Test.QuickCheck.Instances      ()
 
 -- p1 :: SimplePolygon () Rational
 -- p1 = fromPoints $ map ext [Point2 0 0, Point2 1 0, Point2 1 1, Point2 0 1]
@@ -46,8 +27,3 @@ spec = do
   specify "Fast.sssp == Naive.sssp" $
     property $ \(poly :: SimplePolygon () Rational) ->
       sssp (triangulate poly) === Naive.sssp poly
-
--- fastSSSP p =
---   let poly' = snd $ bimapAccumL (\a p -> (a+1,a)) (,) 0 p
---       graph = triangulate' Proxy poly'
---   in sssp graph
