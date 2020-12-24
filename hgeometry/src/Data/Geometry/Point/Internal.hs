@@ -29,11 +29,12 @@ module Data.Geometry.Point.Internal
   ) where
 
 import           Control.DeepSeq
-import           Control.Monad
 import           Control.Lens
+import           Control.Monad
 import           Data.Aeson
 import           Data.Ext
 import qualified Data.Foldable                   as F
+import           Data.Functor.Classes
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
 import qualified Data.Geometry.Vector            as Vec
@@ -44,11 +45,8 @@ import           Data.Proxy
 import           GHC.Generics                    (Generic)
 import           GHC.TypeLits
 import           System.Random                   (Random (..))
-import           Test.QuickCheck                 (Arbitrary)
-import           Text.ParserCombinators.ReadP    (ReadP, pfail, string)
-import           Text.ParserCombinators.ReadPrec (lift)
-import           Text.Read                       (Read (..), minPrec, readListPrecDefault,
-                                                  readPrec_to_P)
+import           Test.QuickCheck                 (Arbitrary, Arbitrary1)
+import           Text.Read                       (Read (..), readListPrecDefault)
 
 
 --------------------------------------------------------------------------------
@@ -78,35 +76,50 @@ import           Text.Read                       (Read (..), minPrec, readListPr
 newtype Point d r = Point { toVec :: Vector d r } deriving (Generic)
 
 instance (Show r, Arity d) => Show (Point d r) where
-  showsPrec d (Point v) = showParen (d > app_prec) $
-    showString "Point" . shows (F.length v) . showChar ' ' .
-    if F.length v > 3
-      then shows (F.toList v)
-      else unwordsS (map (showsPrec app_prec) (F.toList v))
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance (Arity d) => Show1 (Point d) where
+  liftShowsPrec sp _ d (Point v) = showParen (d > 10) $
+      showString constr . showChar ' ' .
+      unwordsS (map (sp 11) (F.toList v))
     where
-      app_prec = 10
+      constr = "Point" <> show (fromIntegral (natVal @d Proxy))
       unwordsS = foldr (.) id . intersperse (showChar ' ')
+
 instance (Read r, Arity d) => Read (Point d r) where
-  readPrec     = lift readPt
+  readPrec     = liftReadPrec readPrec readListPrec
   readListPrec = readListPrecDefault
 
-readPt :: forall d r. (Arity d, Read r) => ReadP (Point d r)
-readPt = do let d = natVal (Proxy :: Proxy d)
-            _  <- string $ "Point" <> show d
-            rs <- if d > 3
-              then readPrec_to_P readPrec minPrec
-              else replicateM (fromIntegral d) (readPrec_to_P readPrec minPrec)
-            case pointFromList rs of
-              Just p -> pure p
-              _      -> pfail
+instance (Arity d) => Read1 (Point d) where
+  liftReadPrec rp _rl = readData $
+      readUnaryWith (replicateM d rp) constr $ \rs ->
+        case pointFromList rs of
+          Just p -> p
+          _      -> error "internal error in Data.Geometry.Point read instance."
+    where
+      d = fromIntegral (natVal (Proxy :: Proxy d))
+      constr = "Point" <> show d
+  liftReadListPrec = liftReadListPrecDefault
+
+-- readPt :: forall d r. (Arity d, Read r) => ReadP (Point d r)
+-- readPt = do let d = natVal (Proxy :: Proxy d)
+--             _  <- string $ "Point" <> show d
+--             rs <- if d > 3
+--               then readPrec_to_P readPrec minPrec
+--               else replicateM (fromIntegral d) (readPrec_to_P readPrec minPrec)
+--             case pointFromList rs of
+--               Just p -> pure p
+--               _      -> pfail
 
 deriving instance (Eq r, Arity d)        => Eq (Point d r)
+deriving instance Arity d                => Eq1 (Point d)
 deriving instance (Ord r, Arity d)       => Ord (Point d r)
 deriving instance Arity d                => Functor (Point d)
 deriving instance Arity d                => Foldable (Point d)
 deriving instance Arity d                => Traversable (Point d)
 deriving instance (Arity d, NFData r)    => NFData (Point d r)
 deriving instance (Arity d, Arbitrary r) => Arbitrary (Point d r)
+deriving instance Arity d                => Arbitrary1 (Point d)
 deriving instance (Arity d, Hashable r)  => Hashable (Point d r)
 deriving instance (Arity d, Random r)    => Random (Point d r)
 
