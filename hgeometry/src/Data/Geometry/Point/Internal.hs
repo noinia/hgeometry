@@ -29,6 +29,7 @@ module Data.Geometry.Point.Internal
   ) where
 
 import           Control.DeepSeq
+import           Control.Monad
 import           Control.Lens
 import           Data.Aeson
 import           Data.Ext
@@ -91,8 +92,10 @@ instance (Read r, Arity d) => Read (Point d r) where
 
 readPt :: forall d r. (Arity d, Read r) => ReadP (Point d r)
 readPt = do let d = natVal (Proxy :: Proxy d)
-            _  <- string $ "Point" <> show d <> " "
-            rs <- readPrec_to_P readPrec minPrec
+            _  <- string $ "Point" <> show d
+            rs <- if d > 3
+              then readPrec_to_P readPrec minPrec
+              else replicateM (fromIntegral d) (readPrec_to_P readPrec minPrec)
             case pointFromList rs of
               Just p -> pure p
               _      -> pfail
