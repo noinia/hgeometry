@@ -301,13 +301,13 @@ flipSegment s = let p = s^.start
 -- | Linearly interpolate the two endpoints with a value in the range [0,1]
 --
 -- >>> interpolate 0.5 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [5.0,5.0]
+-- Point2 5.0 5.0
 -- >>> interpolate 0.1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [1.0,1.0]
+-- Point2 1.0 1.0
 -- >>> interpolate 0 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [0.0,0.0]
+-- Point2 0.0 0.0
 -- >>> interpolate 1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [10.0,10.0]
+-- Point2 10.0 10.0
 interpolate                      :: (Fractional r, Arity d) => r -> LineSegment d p r -> Point d r
 interpolate t (LineSegment' p q) = Point $ (asV p ^* (1-t)) ^+^ (asV q ^* t)
   where

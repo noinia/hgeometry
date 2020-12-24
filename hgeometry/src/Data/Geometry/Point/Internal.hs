@@ -142,7 +142,7 @@ origin = Point $ pure 0
 -- >>> (Point3 1 2 3) ^. vector
 -- Vector3 [1,2,3]
 -- >>> origin & vector .~ Vector3 1 2 3
--- Point3 [1,2,3]
+-- Point3 1 2 3
 vector :: Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
 vector = lens toVec (const Point)
 {-# INLINABLE vector #-}
@@ -163,9 +163,9 @@ unsafeCoord i = vector . singular (ix (i-1))
 -- >>> Point3 1 2 3 ^. coord (C :: C 2)
 -- 2
 -- >>> Point3 1 2 3 & coord (C :: C 1) .~ 10
--- Point3 [10,2,3]
+-- Point3 10 2 3
 -- >>> Point3 1 2 3 & coord (C :: C 3) %~ (+1)
--- Point3 [1,2,4]
+-- Point3 1 2 4
 coord   :: forall proxy i d r. (1 <= i, i <= d, Arity d, KnownNat i)
         => proxy i -> Lens' (Point d r) r
 coord _ = unsafeCoord $ fromIntegral (natVal $ C @i)
@@ -181,7 +181,7 @@ coord _ = unsafeCoord $ fromIntegral (natVal $ C @i)
 -- list has to match the dimension exactly.
 --
 -- >>> pointFromList [1,2,3] :: Maybe (Point 3 Int)
--- Just Point3 [1,2,3]
+-- Just (Point3 1 2 3)
 -- >>> pointFromList [1] :: Maybe (Point 3 Int)
 -- Nothing
 -- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
