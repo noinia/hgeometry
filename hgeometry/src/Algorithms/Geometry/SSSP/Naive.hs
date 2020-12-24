@@ -12,26 +12,29 @@ module Algorithms.Geometry.SSSP.Naive
   ) where
 
 import           Algorithms.FloydWarshall  (floydWarshall, mkGraph, mkIndex)
-import           Algorithms.Geometry.SSSP  (SSSP)
-import           Control.Lens              ((^.))
+import           Control.Lens
 import           Control.Monad.ST          (runST)
-import           Data.Ext                  (core)
+import           Data.Ext                  (_core, core)
 import qualified Data.Foldable             as F
 import           Data.Geometry.Interval    (EndPoint (Closed, Open), end, start)
 import           Data.Geometry.LineSegment (LineSegment (..), sqSegmentLength)
+import           Data.Geometry.Point
 import           Data.Geometry.Polygon     (SimplePolygon, listEdges, outerBoundary)
 import           Data.Intersection         (IsIntersectableWith (intersect),
                                             NoIntersection (NoIntersection))
-import           Data.List                 (tails)
 import           Data.Vector               (Vector)
 import qualified Data.Vector               as V
+import qualified Data.Vector.Circular      as CV
 import qualified Data.Vector.Unboxed       as VU
 import           Data.Vinyl                (Rec (RNil, (:&)))
 import           Data.Vinyl.CoRec          (Handler (H), match)
+import           Linear.Affine             ((.-.))
+
+type SSSP = VU.Vector Int
 
 -- | O(n^3) Single-Source Shortest Path.
 sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
-sssp = V.head . sssp'
+sssp p = V.head . sssp' $ p
 
 -- | O(n^3) Single-Source Shortest Path from all vertices.
 sssp' :: (Real r, Fractional r) => SimplePolygon p r -> Vector SSSP
@@ -55,15 +58,25 @@ visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Doubl
 visibleEdges p = concat
   [
     [ (i, j, sqrt (realToFrac (sqSegmentLength line)))
-    | (j, endPt) <- rest
+    | j <- [i+2 .. n-1]
+    , let endPt = CV.index vs j
     , let line = LineSegment (Closed pt) (Open endPt)
+      -- Check if the line goes through the inside of the polygon.
+    , ccwCmpAroundWith ((_core prev) .-. (_core pt)) pt endPt next == GT
+      -- Check if there are any intersections not the line end points.
     , not (interiorIntersection line edges)
     ]
-  | (i, pt) <- pts
-  | rest <- Prelude.drop 1 $ tails pts
+  | i <- [0 .. n-1]
+  , let pt = CV.index vs i
+        prev = CV.index vs (i-1)
+        next = CV.index vs (i+1)
+  ] ++
+  [ (i,(i+1)`mod`n,sqrt (realToFrac (sqSegmentLength edge)))
+  | (i, edge) <- zip [0..] edges
   ]
   where
-    pts = Prelude.zip [0..] (F.toList (p ^. outerBoundary))
+    vs = p^.outerBoundary
+    n = F.length vs
     edges = listEdges p
 
 interiorIntersection :: (Ord r, Fractional r) => LineSegment 2 p r -> [LineSegment 2 p r] -> Bool
@@ -72,6 +85,6 @@ interiorIntersection l (x:xs) =
   match (l `intersect` x) (
        H (\NoIntersection -> False)
     :& H (\pt -> pt /= l^.start.core && pt /= l^.end.core)
-    :& H (\_line -> True)
+    :& H (\line -> sqSegmentLength line /= 0)
     :& RNil)
   || interiorIntersection l xs

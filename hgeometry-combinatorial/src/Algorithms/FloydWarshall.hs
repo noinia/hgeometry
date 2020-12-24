@@ -17,13 +17,12 @@ module Algorithms.FloydWarshall
   ) where
 
 import           Control.Monad               (forM_, when)
-import           Control.Monad.ST            (ST, runST)
-import           Data.Vector.Unboxed         (Vector, freeze)
+import           Control.Monad.ST            (ST)
 import           Data.Vector.Unboxed.Mutable as V (MVector, length, replicate, unsafeRead,
                                                    unsafeWrite, Unbox)
 
 -- | O(n^3)
-floydWarshall :: (Unbox a, Num a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
+floydWarshall :: (Unbox a, Fractional a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
 floydWarshall n graph = do
     let nSq = V.length graph
     when (n*n /= nSq) $ error "Bad bounds"
@@ -34,11 +33,12 @@ floydWarshall n graph = do
           (distIK, pathIK) <- access (i,k)
           (distKJ, _) <- access (k,j)
           let indirectDist = distIK + distKJ
-          when (distIJ > indirectDist && distIJ > distIK && distIJ > distKJ) $
+          when (distIJ > indirectDist+indirectDist*eps && distIJ > distIK && distIJ > distKJ) $
             put (i,j) (indirectDist, pathIK)
   where
     access idx = V.unsafeRead graph (mkIndex n idx)
     put idx e = V.unsafeWrite graph (mkIndex n idx) e
+    eps = 1e-10 -- When two paths are nearly the same length, pick the one with the fewest segments.
 
 mkIndex :: Num a => a -> (a, a) -> a
 mkIndex n (i,j) = i*n+j
@@ -52,13 +52,3 @@ mkGraph n maxValue edges = do
     unsafeWrite graph (mkIndex n (i,j)) (cost, j)
     unsafeWrite graph (mkIndex n (j,i)) (cost, i)
   return graph
-
--- test :: (UArray (Int, Int) Word, UArray (Int, Int) Int)
-test :: Vector (Word, Int)
-test = runST $ do
-  let n = Prelude.length vertices
-      vertices = [0,1,2]
-      edges = [ (0,1,1), (1,2,1) ]
-  graph <- mkGraph n maxBound edges
-  floydWarshall n graph
-  freeze graph
