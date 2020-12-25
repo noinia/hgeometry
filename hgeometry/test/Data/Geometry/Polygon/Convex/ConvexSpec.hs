@@ -9,11 +9,13 @@ import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
+import           Data.Geometry.PolygonSpec ()
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
 import           Test.Hspec
-import           Test.QuickCheck (Arbitrary(..), property, suchThat)
+import           Test.QuickCheck (Arbitrary(..), property, suchThat, (===), (==>))
 import           Test.QuickCheck.Instances ()
+import qualified Data.Vector.Circular as CV
 
 --------------------------------------------------------------------------------
 
@@ -21,7 +23,14 @@ type R = RealNumber 10
 
 
 spec :: Spec
-spec = testCases "test/Data/Geometry/Polygon/Convex/convexTests.ipe"
+spec = do
+  testCases "test/Data/Geometry/Polygon/Convex/convexTests.ipe"
+  specify "extremes convex == extremesLinear convex" $
+    property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
+      quadrance u > 0 ==>
+      let hull = over simplePolygon toCounterClockWiseOrder $
+            convexHull (CV.toNonEmpty (p^.outerBoundary))
+      in extremes u hull === extremesLinear u (hull^.simplePolygon)
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile fp) >>= \case

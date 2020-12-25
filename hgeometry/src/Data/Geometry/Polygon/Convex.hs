@@ -144,7 +144,7 @@ findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
       | otherwise          = binSearch ac c cb
 
     -- | Given the vertices [a..] c [..b] find the exteral vtx
-    binSearch ac@(viewl -> a:<r) c cb = case (isUpwards a r, isUpwards c cb, a >=. c) of
+    binSearch ac@(viewl -> a:<r) c cb = case (isUpwards a (r |> c), isUpwards c cb, a >=. c) of
         (True,False,_)      -> findMax (ac |> c)
         (True,True,True)    -> findMax (ac |> c)
         (True,True,False)   -> findMax (c <| cb)
