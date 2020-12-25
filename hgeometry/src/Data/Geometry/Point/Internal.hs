@@ -143,7 +143,7 @@ instance (ToJSON r, Arity d) => ToJSON (Point d r) where
 -- | Point representing the origin in d dimensions
 --
 -- >>> origin :: Point 4 Int
--- Point4 [0,0,0,0]
+-- Point4 0 0 0 0
 origin :: (Arity d, Num r) => Point d r
 origin = Point $ pure 0
 
