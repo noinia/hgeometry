@@ -2,7 +2,6 @@ module BAPC2012.Gunslinger where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens
-import qualified Data.CircularSeq as C
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
@@ -11,7 +10,7 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
+import qualified Data.Vector.Circular.Util as C
 import           Linear.Affine (distanceA)
 
 {-
