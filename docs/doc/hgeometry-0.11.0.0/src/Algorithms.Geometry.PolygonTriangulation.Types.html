@@ -24,7 +24,7 @@
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-comment">-- | After triangulation, edges are either from the original polygon or a new diagonal.</span><span>
 </span><span id="line-26"></span><span class="hs-keyword">data</span><span> </span><span id="PolygonEdgeType"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-var">PolygonEdgeType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Original"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Original"><span class="hs-identifier hs-var">Original</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Diagonal"><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Diagonal"><span class="hs-identifier hs-var">Diagonal</span></a></span></span><span>
-</span><span id="line-27"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679948077"><span id="local-6989586621679948079"><span id="local-6989586621679948081"><span class="annot"><span class="annottext">Int -&gt; PolygonEdgeType -&gt; ShowS
+</span><span id="line-27"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679955813"><span id="local-6989586621679955815"><span id="local-6989586621679955817"><span class="annot"><span class="annottext">Int -&gt; PolygonEdgeType -&gt; ShowS
 [PolygonEdgeType] -&gt; ShowS
 PolygonEdgeType -&gt; String
 (Int -&gt; PolygonEdgeType -&gt; ShowS)
@@ -39,7 +39,7 @@ show :: PolygonEdgeType -&gt; String
 $cshow :: PolygonEdgeType -&gt; String
 showsPrec :: Int -&gt; PolygonEdgeType -&gt; ShowS
 $cshowsPrec :: Int -&gt; PolygonEdgeType -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679948068"><span id="local-6989586621679948070"><span id="local-6989586621679948072"><span id="local-6989586621679948074"><span class="annot"><span class="annottext">ReadPrec [PolygonEdgeType]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679955804"><span id="local-6989586621679955806"><span id="local-6989586621679955808"><span id="local-6989586621679955810"><span class="annot"><span class="annottext">ReadPrec [PolygonEdgeType]
 ReadPrec PolygonEdgeType
 Int -&gt; ReadS PolygonEdgeType
 ReadS [PolygonEdgeType]
@@ -59,7 +59,7 @@ readList :: ReadS [PolygonEdgeType]
 $creadList :: ReadS [PolygonEdgeType]
 readsPrec :: Int -&gt; ReadS PolygonEdgeType
 $creadsPrec :: Int -&gt; ReadS PolygonEdgeType
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679948063"><span id="local-6989586621679948065"><span class="annot"><span class="annottext">PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679955799"><span id="local-6989586621679955801"><span class="annot"><span class="annottext">PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool
 (PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool)
 -&gt; (PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool)
 -&gt; Eq PolygonEdgeType
@@ -75,25 +75,25 @@ $c== :: PolygonEdgeType -&gt; PolygonEdgeType -&gt; Bool
 </span><span id="line-31"></span><span class="hs-comment">--</span><span>
 </span><span id="line-32"></span><span class="hs-comment">--</span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
-</span><span id="line-34"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-type">constructSubdivision</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679948060"><span class="annot"><a href="#local-6989586621679948060"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679948059"><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679948058"><span class="annot"><a href="#local-6989586621679948058"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679948057"><span class="annot"><a href="#local-6989586621679948057"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679948060"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948058"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-36"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948057"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ A counter-clockwise</span><span>
+</span><span id="line-34"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-type">constructSubdivision</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679955796"><span class="annot"><a href="#local-6989586621679955796"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679955795"><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679955794"><span class="annot"><a href="#local-6989586621679955794"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679955793"><span class="annot"><a href="#local-6989586621679955793"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679955796"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955794"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-36"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955793"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ A counter-clockwise</span><span>
 </span><span id="line-37"></span><span>                                                         </span><span class="hs-comment">-- edge along the outer</span><span>
 </span><span id="line-38"></span><span>                                                         </span><span class="hs-comment">-- boundary</span><span>
-</span><span id="line-39"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948057"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ remaining original edges</span><span>
-</span><span id="line-40"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948057"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ diagonals</span><span>
-</span><span id="line-41"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948058"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-42"></span><span>                                            </span><span class="annot"><a href="#local-6989586621679948057"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948059"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-39"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955793"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ remaining original edges</span><span>
+</span><span id="line-40"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955793"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ diagonals</span><span>
+</span><span id="line-41"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955794"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-42"></span><span>                                            </span><span class="annot"><a href="#local-6989586621679955793"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955795"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-43"></span><span id="constructSubdivision"><span class="annot"><span class="annottext">constructSubdivision :: proxy s
 -&gt; LineSegment 2 p r
 -&gt; [LineSegment 2 p r]
 -&gt; [LineSegment 2 p r]
 -&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
-</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-var hs-var">constructSubdivision</span></a></span></span><span> </span><span id="local-6989586621679948056"><span class="annot"><span class="annottext">px :: proxy s
-</span><a href="#local-6989586621679948056"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679948055"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
-</span><a href="#local-6989586621679948055"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679948054"><span class="annot"><span class="annottext">origs :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679948054"><span class="hs-identifier hs-var">origs</span></a></span></span><span> </span><span id="local-6989586621679948053"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679948053"><span class="hs-identifier hs-var">diags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlaneGraph s p PolygonEdgeType PolygonFaceData r
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructSubdivision"><span class="hs-identifier hs-var hs-var">constructSubdivision</span></a></span></span><span> </span><span id="local-6989586621679955792"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679955792"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679955791"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679955791"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679955790"><span class="annot"><span class="annottext">origs :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679955790"><span class="hs-identifier hs-var">origs</span></a></span></span><span> </span><span id="local-6989586621679955789"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679955789"><span class="hs-identifier hs-var">diags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlaneGraph s p PolygonEdgeType PolygonFaceData r
 -&gt; PlanarSubdivision s p PolygonEdgeType PolygonFaceData r
 forall k (s :: k) v e f r.
 (Ord r, Fractional r) =&gt;
@@ -116,10 +116,10 @@ proxy s
 -&gt; [LineSegment 2 p r]
 -&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
 </span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-var">constructGraph</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
-</span><a href="#local-6989586621679948056"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679948055"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679948054"><span class="hs-identifier hs-var">origs</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679948053"><span class="hs-identifier hs-var">diags</span></a></span><span>
+</span><a href="#local-6989586621679955792"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679955791"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679955790"><span class="hs-identifier hs-var">origs</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679955789"><span class="hs-identifier hs-var">diags</span></a></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="hs-comment">-- constructSubdivision px e origs diags =</span><span>
 </span><span id="line-46"></span><span class="hs-comment">--     subdiv &amp; rawVertexData.traverse.dataVal  %~ NonEmpty.head</span><span>
@@ -159,27 +159,27 @@ proxy s
 </span><span id="line-80"></span><span class="hs-comment">--</span><span>
 </span><span id="line-81"></span><span class="hs-comment">--</span><span>
 </span><span id="line-82"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
-</span><span id="line-83"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-type">constructGraph</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679948212"><span class="annot"><a href="#local-6989586621679948212"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679948213"><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679948211"><span class="annot"><a href="#local-6989586621679948211"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679948210"><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679948212"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948211"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-85"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ A counter-clockwise</span><span>
+</span><span id="line-83"></span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-type">constructGraph</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679955948"><span class="annot"><a href="#local-6989586621679955948"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679955949"><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679955947"><span class="annot"><a href="#local-6989586621679955947"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679955946"><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>                                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679955948"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955947"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-85"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- ^ A counter-clockwise</span><span>
 </span><span id="line-86"></span><span>                                                         </span><span class="hs-comment">-- edge along the outer</span><span>
 </span><span id="line-87"></span><span>                                                         </span><span class="hs-comment">-- boundary</span><span>
-</span><span id="line-88"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ remaining original edges</span><span>
-</span><span id="line-89"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ diagonals</span><span>
-</span><span id="line-90"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PG.PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948211"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-91"></span><span>                                            </span><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-88"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ remaining original edges</span><span>
+</span><span id="line-89"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ diagonals</span><span>
+</span><span id="line-90"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PG.PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955947"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-91"></span><span>                                            </span><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-92"></span><span id="constructGraph"><span class="annot"><span class="annottext">constructGraph :: proxy s
 -&gt; LineSegment 2 p r
 -&gt; [LineSegment 2 p r]
 -&gt; [LineSegment 2 p r]
 -&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r
-</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-var hs-var">constructGraph</span></a></span></span><span> </span><span id="local-6989586621679948050"><span class="annot"><span class="annottext">px :: proxy s
-</span><a href="#local-6989586621679948050"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679948049"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
-</span><a href="#local-6989586621679948049"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679948048"><span class="annot"><span class="annottext">origs :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679948048"><span class="hs-identifier hs-var">origs</span></a></span></span><span> </span><span id="local-6989586621679948047"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679948047"><span class="hs-identifier hs-var">diags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#constructGraph"><span class="hs-identifier hs-var hs-var">constructGraph</span></a></span></span><span> </span><span id="local-6989586621679955786"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679955786"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679955785"><span class="annot"><span class="annottext">e :: LineSegment 2 p r
+</span><a href="#local-6989586621679955785"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679955784"><span class="annot"><span class="annottext">origs :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679955784"><span class="hs-identifier hs-var">origs</span></a></span></span><span> </span><span id="local-6989586621679955783"><span class="annot"><span class="annottext">diags :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679955783"><span class="hs-identifier hs-var">diags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-93"></span><span>    </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var">subdiv</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var">subdiv</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
 -&gt; (PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
     -&gt; PlaneGraph s p (Bool, PolygonEdgeType) () r)
 -&gt; PlaneGraph s p (Bool, PolygonEdgeType) () r
@@ -241,7 +241,7 @@ Lens
 -&gt; PlaneGraph s p (Bool, PolygonEdgeType) PolygonFaceData r
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
 </span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Vector PolygonFaceData
-</span><a href="#local-6989586621679948037"><span class="hs-identifier hs-var">faceData'</span></a></span><span>
+</span><a href="#local-6989586621679955773"><span class="hs-identifier hs-var">faceData'</span></a></span><span>
 </span><span id="line-95"></span><span>           </span><span class="annot"><span class="annottext">PlaneGraph s p (Bool, PolygonEdgeType) PolygonFaceData r
 -&gt; (PlaneGraph s p (Bool, PolygonEdgeType) PolygonFaceData r
     -&gt; PlaneGraph s p PolygonEdgeType PolygonFaceData r)
@@ -285,9 +285,9 @@ forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span>
 </span><span id="line-96"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-97"></span><span>    </span><span class="annot"><a href="#local-6989586621679948046"><span class="hs-identifier hs-type">subdiv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PG.PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679948211"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679948210"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679948213"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-98"></span><span>    </span><span id="local-6989586621679948046"><span class="annot"><span class="annottext">subdiv :: PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var hs-var">subdiv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><span id="line-97"></span><span>    </span><span class="annot"><a href="#local-6989586621679955782"><span class="hs-identifier hs-type">subdiv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlaneGraph.Core.html#PlaneGraph"><span class="hs-identifier hs-type">PG.PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955947"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679955946"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">,</span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679955949"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679955782"><span class="annot"><span class="annottext">subdiv :: PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var hs-var">subdiv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
 forall k (f :: * -&gt; *) r (proxy :: k -&gt; *) (s :: k) p e.
@@ -295,26 +295,26 @@ forall k (f :: * -&gt; *) r (proxy :: k -&gt; *) (s :: k) p e.
 proxy s
 -&gt; f (LineSegment 2 p r :+ e) -&gt; PlaneGraph s (NonEmpty p) e () r
 </span><a href="Data.PlaneGraph.Core.html#fromConnectedSegments"><span class="hs-identifier hs-var">PG.fromConnectedSegments</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
-</span><a href="#local-6989586621679948050"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
+</span><a href="#local-6989586621679955786"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
  -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r)
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r :+ (Bool, PolygonEdgeType)
-</span><a href="#local-6989586621679948034"><span class="hs-identifier hs-var">e'</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r :+ (Bool, PolygonEdgeType))
+</span><a href="#local-6989586621679955770"><span class="hs-identifier hs-var">e'</span></a></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r :+ (Bool, PolygonEdgeType))
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
-</span><a href="#local-6989586621679948033"><span class="hs-identifier hs-var">origs'</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
+</span><a href="#local-6989586621679955769"><span class="hs-identifier hs-var">origs'</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
-</span><a href="#local-6989586621679948032"><span class="hs-identifier hs-var">diags'</span></a></span><span>
+</span><a href="#local-6989586621679955768"><span class="hs-identifier hs-var">diags'</span></a></span><span>
 </span><span id="line-99"></span><span>
-</span><span id="line-100"></span><span>    </span><span id="local-6989586621679948032"><span class="annot"><span class="annottext">diags' :: [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
-</span><a href="#local-6989586621679948032"><span class="hs-identifier hs-var hs-var">diags'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><span id="line-100"></span><span>    </span><span id="local-6989586621679955768"><span class="annot"><span class="annottext">diags' :: [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
+</span><a href="#local-6989586621679955768"><span class="hs-identifier hs-var hs-var">diags'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; (Bool, PolygonEdgeType)
 -&gt; LineSegment 2 p r :+ (Bool, PolygonEdgeType)
 forall core extra. core -&gt; extra -&gt; core :+ extra
@@ -325,9 +325,9 @@ forall core extra. core -&gt; extra -&gt; core :+ extra
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679948047"><span class="hs-identifier hs-var">diags</span></a></span><span>
-</span><span id="line-101"></span><span>    </span><span id="local-6989586621679948033"><span class="annot"><span class="annottext">origs' :: [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
-</span><a href="#local-6989586621679948033"><span class="hs-identifier hs-var hs-var">origs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679955783"><span class="hs-identifier hs-var">diags</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679955769"><span class="annot"><span class="annottext">origs' :: [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
+</span><a href="#local-6989586621679955769"><span class="hs-identifier hs-var hs-var">origs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; (Bool, PolygonEdgeType)
 -&gt; LineSegment 2 p r :+ (Bool, PolygonEdgeType)
 forall core extra. core -&gt; extra -&gt; core :+ extra
@@ -338,10 +338,10 @@ forall core extra. core -&gt; extra -&gt; core :+ extra
 -&gt; [LineSegment 2 p r :+ (Bool, PolygonEdgeType)]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679948048"><span class="hs-identifier hs-var">origs</span></a></span><span>
-</span><span id="line-102"></span><span>    </span><span id="local-6989586621679948034"><span class="annot"><span class="annottext">e' :: LineSegment 2 p r :+ (Bool, PolygonEdgeType)
-</span><a href="#local-6989586621679948034"><span class="hs-identifier hs-var hs-var">e'</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679948049"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679955784"><span class="hs-identifier hs-var">origs</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679955770"><span class="annot"><span class="annottext">e' :: LineSegment 2 p r :+ (Bool, PolygonEdgeType)
+</span><a href="#local-6989586621679955770"><span class="hs-identifier hs-var hs-var">e'</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679955785"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; (Bool, PolygonEdgeType)
 -&gt; LineSegment 2 p r :+ (Bool, PolygonEdgeType)
 forall core extra. core -&gt; extra -&gt; core :+ extra
@@ -350,11 +350,11 @@ forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Original"><span class="hs-identifier hs-var">Original</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>
 </span><span id="line-104"></span><span>    </span><span class="hs-comment">-- the darts incident to internal faces</span><span>
-</span><span id="line-105"></span><span>    </span><span id="local-6989586621679948029"><span class="annot"><span class="annottext">queryDarts :: [Dart s]
-</span><a href="#local-6989586621679948029"><span class="hs-identifier hs-var hs-var">queryDarts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; [Dart s]) -&gt; [Dart s] -&gt; [Dart s]
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679955765"><span class="annot"><span class="annottext">queryDarts :: [Dart s]
+</span><a href="#local-6989586621679955765"><span class="hs-identifier hs-var hs-var">queryDarts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; [Dart s]) -&gt; [Dart s] -&gt; [Dart s]
 forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
 </span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; [Dart s]
-</span><a href="#local-6989586621679948027"><span class="hs-identifier hs-var">shouldQuery</span></a></span><span> </span><span class="annot"><span class="annottext">([Dart s] -&gt; [Dart s])
+</span><a href="#local-6989586621679955763"><span class="hs-identifier hs-var">shouldQuery</span></a></span><span> </span><span class="annot"><span class="annottext">([Dart s] -&gt; [Dart s])
 -&gt; (PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
     -&gt; [Dart s])
 -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
@@ -377,11 +377,11 @@ forall k (s :: k) v e f r. PlaneGraph s v e f r -&gt; Vector (Dart s)
 -&gt; [Dart s]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var">subdiv</span></a></span><span>
-</span><span id="line-106"></span><span>    </span><span id="local-6989586621679948027"><span class="annot"><span class="annottext">shouldQuery :: Dart s -&gt; [Dart s]
-</span><a href="#local-6989586621679948027"><span class="hs-identifier hs-var hs-var">shouldQuery</span></a></span></span><span> </span><span id="local-6989586621679948024"><span class="annot"><span class="annottext">d :: Dart s
-</span><a href="#local-6989586621679948024"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var">subdiv</span></a></span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var">subdiv</span></a></span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679955763"><span class="annot"><span class="annottext">shouldQuery :: Dart s -&gt; [Dart s]
+</span><a href="#local-6989586621679955763"><span class="hs-identifier hs-var hs-var">shouldQuery</span></a></span></span><span> </span><span id="local-6989586621679955760"><span class="annot"><span class="annottext">d :: Dart s
+</span><a href="#local-6989586621679955760"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var">subdiv</span></a></span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
 -&gt; Getting
      (Bool, PolygonEdgeType)
      (PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r)
@@ -395,19 +395,19 @@ forall s a. s -&gt; Getting a s a -&gt; a
         (PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r) (Dart s))
 forall g i. HasDataOf g i =&gt; i -&gt; Lens' g (DataOf g i)
 </span><span class="hs-identifier hs-var">dataOf</span></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679948024"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679955760"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-107"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Original"><span class="hs-identifier hs-type">Original</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679948024"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679955760"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-108"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.PolygonTriangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679948024"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; Dart s
+</span><a href="#local-6989586621679955760"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Dart s -&gt; Dart s
 forall k (s :: k). Dart s -&gt; Dart s
 </span><span class="hs-identifier hs-var">twin</span></span><span> </span><span class="annot"><span class="annottext">Dart s
-</span><a href="#local-6989586621679948024"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679955760"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-109"></span><span>                      </span><span class="hs-identifier">_</span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-110"></span><span>
 </span><span id="line-111"></span><span>    </span><span class="hs-comment">-- the interior faces</span><span>
-</span><span id="line-112"></span><span>    </span><span id="local-6989586621679948020"><span class="annot"><span class="annottext">intFaces :: [FaceId' s]
-</span><a href="#local-6989586621679948020"><span class="hs-identifier hs-var hs-var">intFaces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679955756"><span class="annot"><span class="annottext">intFaces :: [FaceId' s]
+</span><a href="#local-6989586621679955756"><span class="hs-identifier hs-var hs-var">intFaces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Dart s
  -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
  -&gt; FaceId' s)
 -&gt; PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
@@ -420,14 +420,14 @@ forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 forall k (s :: k) v e f r.
 Dart s -&gt; PlaneGraph s v e f r -&gt; FaceId' s
 </span><a href="Data.PlaneGraph.Core.html#leftFace"><span class="hs-identifier hs-var">PG.leftFace</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var">subdiv</span></a></span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; FaceId' s) -&gt; [Dart s] -&gt; [FaceId' s]
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var">subdiv</span></a></span><span> </span><span class="annot"><span class="annottext">(Dart s -&gt; FaceId' s) -&gt; [Dart s] -&gt; [FaceId' s]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Dart s]
-</span><a href="#local-6989586621679948029"><span class="hs-identifier hs-var">queryDarts</span></a></span><span>
+</span><a href="#local-6989586621679955765"><span class="hs-identifier hs-var">queryDarts</span></a></span><span>
 </span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span>    </span><span class="annot"><a href="#local-6989586621679948037"><span class="hs-identifier hs-type">faceData'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
-</span><span id="line-115"></span><span>    </span><span id="local-6989586621679948037"><span class="annot"><span class="annottext">faceData' :: Vector PolygonFaceData
-</span><a href="#local-6989586621679948037"><span class="hs-identifier hs-var hs-var">faceData'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s PolygonFaceData))
+</span><span id="line-114"></span><span>    </span><span class="annot"><a href="#local-6989586621679955773"><span class="hs-identifier hs-type">faceData'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679955773"><span class="annot"><span class="annottext">faceData' :: Vector PolygonFaceData
+</span><a href="#local-6989586621679955773"><span class="hs-identifier hs-var hs-var">faceData'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s PolygonFaceData))
 -&gt; Vector PolygonFaceData
 forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.create</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s PolygonFaceData))
@@ -436,8 +436,8 @@ forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
 -&gt; Vector PolygonFaceData
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-116"></span><span>                  </span><span id="local-6989586621679948016"><span class="annot"><span class="annottext">MVector s PolygonFaceData
-</span><a href="#local-6989586621679948016"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-116"></span><span>                  </span><span id="local-6989586621679955752"><span class="annot"><span class="annottext">MVector s PolygonFaceData
+</span><a href="#local-6989586621679955752"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; PolygonFaceData
 -&gt; ST s (MVector (PrimState (ST s)) PolygonFaceData)
 forall (m :: * -&gt; *) a.
@@ -446,18 +446,18 @@ Int -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">MV.replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r -&gt; Int
 forall k (s :: k) v e f r. PlaneGraph s v e f r -&gt; Int
 </span><a href="Data.PlaneGraph.Core.html#numFaces"><span class="hs-identifier hs-var">PG.numFaces</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph s (NonEmpty p) (Bool, PolygonEdgeType) () r
-</span><a href="#local-6989586621679948046"><span class="hs-identifier hs-var">subdiv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PolygonFaceData
+</span><a href="#local-6989586621679955782"><span class="hs-identifier hs-var">subdiv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PolygonFaceData
 </span><a href="Data.Geometry.PlanarSubdivision.Basic.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
 </span><span id="line-117"></span><span>                  </span><span class="annot"><span class="annottext">[FaceId' s] -&gt; (FaceId' s -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[FaceId' s]
-</span><a href="#local-6989586621679948020"><span class="hs-identifier hs-var">intFaces</span></a></span><span> </span><span class="annot"><span class="annottext">((FaceId' s -&gt; ST s ()) -&gt; ST s ())
+</span><a href="#local-6989586621679955756"><span class="hs-identifier hs-var">intFaces</span></a></span><span> </span><span class="annot"><span class="annottext">((FaceId' s -&gt; ST s ()) -&gt; ST s ())
 -&gt; (FaceId' s -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PG.FaceId</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PG.VertexId</span></span><span> </span><span id="local-6989586621679948010"><span class="annot"><span class="annottext">f :: Int
-</span><a href="#local-6989586621679948010"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PG.FaceId</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PG.VertexId</span></span><span> </span><span id="local-6989586621679955746"><span class="annot"><span class="annottext">f :: Int
+</span><a href="#local-6989586621679955746"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-118"></span><span>                    </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) PolygonFaceData
 -&gt; Int -&gt; PolygonFaceData -&gt; ST s ()
 forall (m :: * -&gt; *) a.
@@ -465,13 +465,13 @@ PrimMonad m =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">MV.write</span></span><span> </span><span class="annot"><span class="annottext">MVector s PolygonFaceData
 MVector (PrimState (ST s)) PolygonFaceData
-</span><a href="#local-6989586621679948016"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679948010"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">PolygonFaceData
+</span><a href="#local-6989586621679955752"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679955746"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">PolygonFaceData
 </span><a href="Data.Geometry.PlanarSubdivision.Basic.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span>
 </span><span id="line-119"></span><span>                  </span><span class="annot"><span class="annottext">MVector s PolygonFaceData -&gt; ST s (MVector s PolygonFaceData)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s PolygonFaceData
-</span><a href="#local-6989586621679948016"><span class="hs-identifier hs-var">v'</span></a></span><span>
+</span><a href="#local-6989586621679955752"><span class="hs-identifier hs-var">v'</span></a></span><span>
 </span><span id="line-120"></span><span>
 </span><span id="line-121"></span><span class="hs-comment">-- -constructSubdivision px e origs diags =</span><span>
 </span><span id="line-122"></span><span class="hs-comment">-- -    subdiv &amp; planeGraph.PG.vertexData.traverse        %~ NonEmpty.head</span><span>

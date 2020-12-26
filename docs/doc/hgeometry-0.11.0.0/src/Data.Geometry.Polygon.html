@@ -66,15 +66,15 @@
 </span><span id="line-66"></span><span class="hs-comment">--</span><span>
 </span><span id="line-67"></span><span class="hs-comment">--</span><span>
 </span><span id="line-68"></span><span class="hs-comment">-- \(O(n)\) expected time</span><span>
-</span><span id="line-69"></span><span id="local-6989586621679939841"><span id="local-6989586621679939842"><span id="local-6989586621679939843"><span class="annot"><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier hs-type">isStarShaped</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679939843"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679939842"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679939842"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-70"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679939841"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679939842"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679939843"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679939842"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679947374"><span id="local-6989586621679947375"><span id="local-6989586621679947376"><span class="annot"><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier hs-type">isStarShaped</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679947376"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679947375"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679947375"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947374"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947375"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679947376"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679947375"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-71"></span><span id="isStarShaped"><span class="annot"><span class="annottext">isStarShaped :: SimplePolygon p r -&gt; m (Maybe (Point 2 r))
 </span><a href="Data.Geometry.Polygon.html#isStarShaped"><span class="hs-identifier hs-var hs-var">isStarShaped</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; SimplePolygon p r
 forall r (t :: PolygonType) p.
 (Eq r, Fractional r) =&gt;
 Polygon t p r -&gt; Polygon t p r
-</span><a href="Data.Geometry.Polygon.Core.html#toClockwiseOrder"><span class="hs-identifier hs-var">toClockwiseOrder</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679939840"><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679939840"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Data.Geometry.Polygon.Core.html#toClockwiseOrder"><span class="hs-identifier hs-var">toClockwiseOrder</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679947373"><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679947373"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">LinearProgram 2 r -&gt; m (Maybe (Point 2 r))
 forall (m :: * -&gt; *) r.
 (MonadRandom m, Ord r, Fractional r) =&gt;
@@ -86,14 +86,14 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall (d :: Nat) r.
 Vector d r -&gt; [HalfSpace d r] -&gt; LinearProgram d r
 </span><a href="Algorithms.Geometry.LinearProgramming.Types.html#LinearProgram"><span class="hs-identifier hs-var">LinearProgram</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679939837"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CircularVector (HalfSpace 2 r) -&gt; [HalfSpace 2 r]
+</span><a href="#local-6989586621679947370"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CircularVector (HalfSpace 2 r) -&gt; [HalfSpace 2 r]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (HalfSpace 2 r)
-</span><a href="#local-6989586621679939835"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679947368"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>    </span><span id="local-6989586621679939837"><span class="annot"><span class="annottext">c :: Vector 2 r
-</span><a href="#local-6989586621679939837"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679939840"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679947370"><span class="annot"><span class="annottext">c :: Vector 2 r
+</span><a href="#local-6989586621679947370"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679947373"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon p r
 -&gt; Getting (Vector 2 r) (SimplePolygon p r) (Vector 2 r)
 -&gt; Vector 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
@@ -125,8 +125,8 @@ Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
 </span><a href="Data.Geometry.Point.Internal.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
 </span><span id="line-75"></span><span>    </span><span class="hs-comment">-- the first vertex is the intersection point of the two supporting lines</span><span>
 </span><span id="line-76"></span><span>    </span><span class="hs-comment">-- bounding it, so the first two edges bound the shape in this sirection</span><span>
-</span><span id="line-77"></span><span>    </span><span id="local-6989586621679939835"><span class="annot"><span class="annottext">hs :: CircularVector (HalfSpace 2 r)
-</span><a href="#local-6989586621679939835"><span class="hs-identifier hs-var hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; HalfSpace 2 r)
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679947368"><span class="annot"><span class="annottext">hs :: CircularVector (HalfSpace 2 r)
+</span><a href="#local-6989586621679947368"><span class="hs-identifier hs-var hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; HalfSpace 2 r)
 -&gt; CircularVector (LineSegment 2 p r)
 -&gt; CircularVector (HalfSpace 2 r)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -154,5 +154,5 @@ Polygon t p r -&gt; CircularVector (LineSegment 2 p r)
 -&gt; SimplePolygon p r -&gt; CircularVector (HalfSpace 2 r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679939840"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><a href="#local-6989586621679947373"><span class="hs-identifier hs-var">pg</span></a></span><span>
 </span><span id="line-78"></span></pre></body></html>

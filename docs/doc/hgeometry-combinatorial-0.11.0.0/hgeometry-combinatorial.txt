@@ -111,6 +111,18 @@ mergeSortedBy :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a -> NonEmpty a
 mergeSortedListsBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
 
 
+-- | Implementation of Floyd-Warshall shortest path algorithm.
+--   
+--   See Wikipedia article for details:
+--   <a>https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm</a>
+module Algorithms.FloydWarshall
+mkIndex :: Num a => a -> (a, a) -> a
+mkGraph :: (Unbox a, Num a) => Int -> a -> [(Int, Int, a)] -> ST s (MVector s (a, Int))
+
+-- | O(n^3)
+floydWarshall :: (Unbox a, Fractional a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
+
+
 -- | Implementation of Knuth-Morris-Pratt String-searching algorithm. The
 --   exposition is based on that of Goodrich and Tamassia in "Data
 --   Structures and Algorithms in Java 2nd Edition".
@@ -1276,8 +1288,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHnL a_aHGC. Lens (Permutation a_aHnL) (Permutation a_aHGC) (Vector (Orbit a_aHnL)) (Vector (Orbit a_aHGC))
-indexes :: forall a_aHnL. Lens' (Permutation a_aHnL) (Vector (Int, Int))
+orbits :: forall a_aHvB a_aHOq. Lens (Permutation a_aHvB) (Permutation a_aHOq) (Vector (Orbit a_aHvB)) (Vector (Orbit a_aHOq))
+indexes :: forall a_aHvB. Lens' (Permutation a_aHvB) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1389,8 +1401,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKEl. Lens' (Dart s_aKEl) Direction
-arc :: forall s_aKEl s_aL4J. Lens (Dart s_aKEl) (Dart s_aL4J) (Arc s_aKEl) (Arc s_aL4J)
+direction :: forall s_aKM7. Lens' (Dart s_aKM7) Direction
+arc :: forall s_aKM7 s_aLcv. Lens (Dart s_aKM7) (Dart s_aLcv) (Arc s_aKM7) (Arc s_aLcv)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -1999,8 +2011,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKEl s_aL4J. Lens (Dart s_aKEl) (Dart s_aL4J) (Arc s_aKEl) (Arc s_aL4J)
-direction :: forall s_aKEl. Lens' (Dart s_aKEl) Direction
+arc :: forall s_aKM7 s_aLcv. Lens (Dart s_aKM7) (Dart s_aLcv) (Arc s_aKM7) (Arc s_aLcv)
+direction :: forall s_aKM7. Lens' (Dart s_aKM7) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2451,8 +2463,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aQZM. Lens' (Range a_aQZM) (EndPoint a_aQZM)
-upper :: forall a_aQZM. Lens' (Range a_aQZM) (EndPoint a_aQZM)
+lower :: forall a_aR7r. Lens' (Range a_aR7r) (EndPoint a_aR7r)
+upper :: forall a_aR7r. Lens' (Range a_aR7r) (EndPoint a_aR7r)
 
 -- | Test if a value lies in a range.
 --   
@@ -3046,10 +3058,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZmp a_a10ZN. Traversal (UnBounded a_aZmp) (UnBounded a_a10ZN) a_aZmp a_a10ZN
-_MinInfinity :: forall a_aZmp. Prism' (UnBounded a_aZmp) ()
-_Val :: forall a_aZmp a_a112G. Prism (UnBounded a_a112G) (UnBounded a_aZmp) a_a112G a_aZmp
-_MaxInfinity :: forall a_aZmp. Prism' (UnBounded a_aZmp) ()
+unUnBounded :: forall a_aZu3 a_a117r. Traversal (UnBounded a_aZu3) (UnBounded a_a117r) a_aZu3 a_a117r
+_MinInfinity :: forall a_aZu3. Prism' (UnBounded a_aZu3) ()
+_Val :: forall a_aZu3 a_a11ak. Prism (UnBounded a_a11ak) (UnBounded a_aZu3) a_a11ak a_aZu3
+_MaxInfinity :: forall a_aZu3. Prism' (UnBounded a_aZu3) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
@@ -3361,6 +3373,7 @@ findRotateTo :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 --   Running time: &lt;math&gt;, where &lt;math&gt; and &lt;math&gt; are
 --   the sizes of the lists.
 isShiftOf :: Eq a => CircularVector a -> CircularVector a -> Bool
+map :: (a -> b) -> CircularVector a -> CircularVector b
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
 

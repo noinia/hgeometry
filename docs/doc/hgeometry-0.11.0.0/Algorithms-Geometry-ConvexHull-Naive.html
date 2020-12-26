@@ -9,7 +9,7 @@
 </code></strong>Nothing
 <code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>let t = (Triangle (ext origin) (ext $ Point3 1 0 0) (ext $ Point3 0 1 0))
 </code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>isValidTriangle t [ext $ Point3 5 5 (-10)]
-</code></strong>Just (Point3 [5,5,-10] :+ ())
+</code></strong>Just (Point3 5 5 (-10) :+ ())
 </pre></div></div><div class="top"><p class="src"><a id="v:upperHalfSpaceOf" class="def">upperHalfSpaceOf</a> :: (<a href="../base-4.13.0.0/Data-Ord.html#t:Ord" title="Data.Ord">Ord</a> r, <a href="../base-4.13.0.0/Prelude.html#t:Num" title="Prelude">Num</a> r) =&gt; <a href="Data-Geometry-Triangle.html#t:Triangle" title="Data.Geometry.Triangle">Triangle</a> 3 p r -&gt; <a href="Data-Geometry-HalfSpace.html#t:HalfSpace" title="Data.Geometry.HalfSpace">HalfSpace</a> 3 r <a href="src/Algorithms.Geometry.ConvexHull.Naive.html#upperHalfSpaceOf" class="link">Source</a> <a href="#v:upperHalfSpaceOf" class="selflink">#</a></p><div class="doc"><p>Computes the halfspace above the triangle.</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>upperHalfSpaceOf (Triangle (ext $ origin) (ext $ Point3 10 0 0) (ext $ Point3 0 10 0))
-</code></strong>HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 [0,0,0], _normalVec = Vector3 [0,0,100]}}
+</code></strong>HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 [0,0,100]}}
 </pre></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.23.0</p></div></body></html>
