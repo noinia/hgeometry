@@ -72,3 +72,6 @@ binarySearch cmpFn cv = worker (-n) n
         LT -> worker (middle+1) sMax
         -- The wanted element is to the left.
         GT -> worker sMin middle
+
+map :: (a -> b) -> CircularVector a -> CircularVector b
+map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot

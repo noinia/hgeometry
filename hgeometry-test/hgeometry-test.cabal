@@ -65,8 +65,8 @@ test-suite hspec
   hs-source-dirs:       ../hgeometry/test
   main-is:              Main.hs
 
-
-  ghc-options:   -Wall -threaded
+  -- -threaded -with-rtsopts=-N
+  ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures
                  -fno-warn-missing-signatures
@@ -119,6 +119,8 @@ test-suite hspec
                  Algorithms.Geometry.RedBlueSeparator.RICSpec
 
                  Algorithms.Geometry.FrechetDistance.DiscreteSpec
+
+                 Algorithms.Geometry.SSSPSpec
 
 
 

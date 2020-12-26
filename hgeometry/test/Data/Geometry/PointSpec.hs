@@ -1,13 +1,15 @@
-module Data.Geometry.PointSpec where
+module Data.Geometry.PointSpec (spec) where
 
-import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Point.CmpAround
-import Data.Geometry.Vector
-import Test.QuickCheck
-import Test.QuickCheck.Instances()
-import Test.Hspec
-import qualified Data.CircularList as C
+import qualified Data.CircularList             as C
+import           Data.Ext
+import           Data.Geometry.Point
+import           Data.Geometry.Point.CmpAround
+import           Data.Geometry.Vector
+import           Data.Proxy
+import           Test.Hspec
+import           Test.QuickCheck
+import           Test.QuickCheck.Instances     ()
+import           Test.Util
 
 --------------------------------------------------------------------------------
 
@@ -109,3 +111,12 @@ spec = do
                               , Point2 6    (-4)
                               , Point2 26   (-2)
                               ])
+
+  specify "Read/Show properties for Point1" $
+    property $ qcReadShow1 @(Point 1) Proxy
+  specify "Read/Show properties for Point2" $
+    property $ qcReadShow1 @(Point 2) Proxy
+  specify "Read/Show properties for Point3" $
+    property $ qcReadShow1 @(Point 3) Proxy
+  specify "Read/Show properties for Point4" $
+    property $ qcReadShow1 @(Point 4) Proxy

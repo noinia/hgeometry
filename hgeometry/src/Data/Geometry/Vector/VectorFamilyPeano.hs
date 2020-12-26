@@ -17,6 +17,7 @@ import           Data.Aeson (FromJSON(..),ToJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
 import           Data.Proxy
+import           Data.Functor.Classes
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Cont (PeanoNum(..), Fun(..))
 import           GHC.TypeLits
@@ -98,6 +99,15 @@ instance (Eq r, ImplicitArity d) => Eq (VectorFamily d r) where
         (SS (SS (SS (SS SZ))))     -> u == v
         (SS (SS (SS (SS (SS _))))) -> u == v
   {-# INLINE (==) #-}
+
+instance (ImplicitArity d) => Eq1 (VectorFamily d) where
+  liftEq eq (VectorFamily u) (VectorFamily v) = case (implicitPeano :: SingPeano d) of
+        SZ                         -> liftEq eq u v
+        (SS SZ)                    -> liftEq eq u v
+        (SS (SS SZ))               -> liftEq eq u v
+        (SS (SS (SS SZ)))          -> liftEq eq u v
+        (SS (SS (SS (SS SZ))))     -> liftEq eq u v
+        (SS (SS (SS (SS (SS _))))) -> liftEq eq u v
 
 instance (Ord r, ImplicitArity d) => Ord (VectorFamily d r) where
   (VectorFamily u) `compare` (VectorFamily v) = case (implicitPeano :: SingPeano d) of

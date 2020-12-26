@@ -1,22 +1,74 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE ScopedTypeVariables       #-}
+{-# LANGUAGE TypeApplications          #-}
 module Test.Util where
 
 import           Control.Exception.Base (bracket)
-import           Control.Monad (when)
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as LB
+import           Control.Monad          (when)
+import qualified Data.ByteString        as B
+import qualified Data.ByteString.Lazy   as LB
 import           Data.Ext
-import           Data.Function (on)
+import           Data.Function          (on)
+import           Data.Functor.Classes
 import           Data.Geometry.Ipe
-import qualified Data.List as List
+import qualified Data.List              as List
 import           Data.Proxy
-import qualified Data.Set as Set
-import           Data.Singletons (Apply)
+import qualified Data.Set               as Set
+import           Data.Singletons        (Apply)
 import           Data.Vinyl
-import           System.Directory (removeFile, getTemporaryDirectory)
-import           System.FilePath (takeExtension)
-import           System.IO (hClose,openTempFile, Handle)
+import           System.Directory       (getTemporaryDirectory, removeFile)
+import           System.FilePath        (takeExtension)
+import           System.IO              (Handle, hClose, openTempFile)
 import           Test.Hspec
 import           Test.QuickCheck
+
+--------------------------------------------------------------------------------
+
+qcReadShow1 :: forall s. (Arbitrary1 s, Read1 s, Eq1 s, Show1 s) => Proxy s -> Property
+qcReadShow1 Proxy =
+    runner @Double           (\v -> read1 (show1 v) ==== v) .&&.
+    runner @Rational         (\v -> read1 (show1 v) ==== v) .&&.
+    runner @(Double, Double) (\v -> read1 (show1 v) ==== v) .&&.
+    runner @(Maybe Int)      (\v -> read1 (show1 v) ==== v) .&&.
+    runner @Int              (\v ->
+      case readf1 (showf1 (Just v)) of
+        Nothing -> counterexample "nested Read/Show failure" False
+        Just v' -> v ==== v')
+  where
+    runner :: (Show a, Arbitrary a) => (s a -> Property) -> Property
+    runner = forAll1 @s
+
+forAll1 :: (Show1 s, Show a, Arbitrary1 s, Arbitrary a) => (s a -> Property) -> Property
+forAll1 = forAllShow arbitrary1 show1
+
+show1 :: (Show1 s, Show a) => s a -> String
+show1 x = liftShowsPrec showsPrec showList 0 x ""
+
+showf1 :: (Show1 f, Show1 s, Show a) => f (s a) -> String
+showf1 x = liftShowsPrec (liftShowsPrec showsPrec showList) (liftShowList showsPrec showList) 0 x ""
+
+read1 :: (Read1 s, Read a) => String -> s a
+read1 inp =
+  case liftReadsPrec readsPrec readList 0 inp of
+    [(val,_rest)] -> val
+    []            -> error "no parse"
+    _             -> error "ambiguous parse"
+
+readf1 :: (Read1 f, Read1 s, Read a) => String -> f (s a)
+readf1 inp =
+  case liftReadsPrec (liftReadsPrec readsPrec readList) (liftReadList readsPrec readList) 0 inp of
+    [(val,_rest)] -> val
+    []            -> error "no parse"
+    _             -> error "ambiguous parse"
+
+infix 4 ====
+(====) :: (Eq1 s, Show1 s, Eq a, Show a) => s a -> s a -> Property
+x ==== y =
+  counterexample (show1 x ++ interpret res ++ show1 y) res
+  where
+    res = x `eq1` y
+    interpret True  = " == "
+    interpret False = " /= "
 
 --------------------------------------------------------------------------------
 
