@@ -67,10 +67,10 @@ instance Arbitrary (MultiPolygon () Rational) where
 simplifyP :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 simplifyP p
       -- Scale up polygon such that each coordinate is a whole number.
-    | lcmP /= 1 = [SimplePolygon $ CV.map (over core (multP lcmP)) vs]
+    | lcmP /= 1 = [unsafeFromCircularVector $ CV.map (over core (multP lcmP)) vs]
       -- Scale down polygon maintaining each coordinate as a whole number
-    | gcdP /= 1 = [SimplePolygon $ CV.map (over core (divP gcdP)) vs]
-    -- | otherwise = [SimplePolygon $ CV.map (over core div2) vs]
+    | gcdP /= 1 = [unsafeFromCircularVector $ CV.map (over core (divP gcdP)) vs]
+    -- otherwise = [SimplePolygon $ CV.map (over core div2) vs]
     | otherwise = []
   where
     vs = p ^. outerBoundaryVector
@@ -95,7 +95,7 @@ gcdPoint p = realToFrac t
     t = foldl1 gcd lst
 
 cutEarAt :: SimplePolygon () Rational -> Int -> SimplePolygon () Rational
-cutEarAt p n = SimplePolygon $ CV.unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
+cutEarAt p n = unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
   where
     vs = p^.outerBoundaryVector
 
@@ -122,11 +122,11 @@ spec = do
   testCases "test/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
     property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let p = SimplePolygon pts in
+      let p = unsafeFromCircularVector pts in
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
     property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let simple = SimplePolygon pts
+      let simple = unsafeFromCircularVector pts
           p = MultiPolygon simple [simple] in
       read (show p) == p
   it "valid polygons (Simple/Double)" $ do

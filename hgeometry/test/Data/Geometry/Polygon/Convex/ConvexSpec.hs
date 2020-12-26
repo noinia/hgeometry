@@ -91,7 +91,7 @@ minkowskiTest p q = it "minkowskisum" $
 
 naiveMinkowski     :: (Fractional r, Ord r)
                    => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p, q) r
-naiveMinkowski p q = over (simplePolygon.outerBoundaryVector) bottomMost
+naiveMinkowski p q = over (simplePolygon.unsafeOuterBoundaryVector) bottomMost
                    . toCCW . convexHull . NonEmpty.fromList
                    $ [ v .+. w | v <- p^..simplePolygon.outerBoundaryVector.traverse
                                , w <- q^..simplePolygon.outerBoundaryVector.traverse

@@ -178,8 +178,9 @@ fromSimplePolygon                            :: proxy s
                                              -> f -- ^ data inside
                                              -> f -- ^ data outside the polygon
                                              -> PlaneGraph s p () f r
-fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
+fromSimplePolygon p poly iD oD = PlaneGraph g'
   where
+    vs     = poly ^. outerBoundaryVector
     g      = fromVertices p vs
     fData' = V.fromList [iD, oD]
     g'     = g & PG.faceData .~ fData'

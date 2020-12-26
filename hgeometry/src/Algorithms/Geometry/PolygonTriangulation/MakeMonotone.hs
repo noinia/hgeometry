@@ -55,7 +55,7 @@ data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
 classifyVertices                     :: (Num r, Ord r)
                                      => Polygon t p r
                                      -> Polygon t (p :+ VertexType) r
-classifyVertices p@(SimplePolygon _) = classifyVertices' p
+classifyVertices p@SimplePolygon{}   = classifyVertices' p
 classifyVertices (MultiPolygon vs h) = MultiPolygon vs' h'
   where
     vs' = classifyVertices' vs
@@ -76,9 +76,10 @@ classifyVertices (MultiPolygon vs h) = MultiPolygon vs' h'
 classifyVertices'                    :: (Num r, Ord r)
                                      => SimplePolygon p r
                                      -> SimplePolygon (p :+ VertexType) r
-classifyVertices' (SimplePolygon vs) =
-    SimplePolygon $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
+classifyVertices' poly =
+    unsafeFromCircularVector $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
+    vs = poly ^. outerBoundaryVector
     -- is the angle larger than > 180 degrees
     largeInteriorAngle p c n = case ccw (p^.core) (c^.core) (n^.core) of
            CCW -> False

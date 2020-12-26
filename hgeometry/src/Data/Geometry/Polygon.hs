@@ -16,11 +16,14 @@ module Data.Geometry.Polygon
 
   , fromPoints
   , unsafeFromPoints
+  , unsafeFromCircularVector
+  , unsafeFromVector
   , toVector
 
   , polygonVertices, listEdges
 
   , outerBoundary, outerBoundaryVector
+  , unsafeOuterBoundaryVector
   , outerBoundaryEdges
   , outerVertex, outerBoundaryEdge
 

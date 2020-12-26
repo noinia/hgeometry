@@ -209,8 +209,8 @@ pathSegment = PolyLineSegment . fromLineSegment . first (const ())
 -- | Draw a polygon
 ipePolygon                          :: IpeOut (Polygon t p r) Path r
 ipePolygon (first (const ()) -> pg) = case pg of
-               (SimplePolygon _)  -> pg^.re _asSimplePolygon :+ mempty
-               (MultiPolygon _ _) -> pg^.re _asMultiPolygon  :+ mempty
+               SimplePolygon{} -> pg^.re _asSimplePolygon :+ mempty
+               MultiPolygon{}  -> pg^.re _asMultiPolygon  :+ mempty
 
 
 -- | Draw a Rectangle

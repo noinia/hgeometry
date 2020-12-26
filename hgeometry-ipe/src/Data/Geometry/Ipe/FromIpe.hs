@@ -162,7 +162,7 @@ _asSomePolygon = prism' embed pathToPolygon
 
 
 polygonToPath                      :: Polygon t () r -> Path r
-polygonToPath pg@(SimplePolygon _) = Path . fromSingleton . PolygonPath $ pg
+polygonToPath pg@SimplePolygon{}   = Path . fromSingleton . PolygonPath $ pg
 polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
                                    $ vs :| hs
 
