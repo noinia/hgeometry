@@ -2,18 +2,23 @@
 module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Lens                                ((^.), (^..))
+import           Control.Lens                                ((^.), (^..), over)
 import           Control.Monad
 import qualified Data.ByteString                             as BS
 import           Data.Ext
+import qualified Data.Foldable                               as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
+import           Data.Geometry.Triangle
 import           Data.Proxy
+import           Data.Ratio
 import           Data.Serialize
+import qualified Data.Vector                                 as V
 import           Data.Vector.Circular                        (CircularVector)
 import qualified Data.Vector.Circular                        as CV
+import qualified Data.Vector.Circular.Util                   as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
@@ -51,11 +56,67 @@ allMultiPolygons = unsafePerformIO $ do
 allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
-instance Fractional a => Arbitrary (SimplePolygon () a) where
+instance Arbitrary (SimplePolygon () Rational) where
   arbitrary = fmap realToFrac <$> elements allSimplePolygons
+  shrink p
+    | isTriangle p = simplifyP p
+    | otherwise = cutEars p ++ simplifyP p
 
-instance Fractional a => Arbitrary (MultiPolygon () a) where
+instance Arbitrary (MultiPolygon () Rational) where
   arbitrary = fmap realToFrac <$> elements allMultiPolygons
+
+simplifyP :: SimplePolygon () Rational -> [SimplePolygon () Rational]
+simplifyP p
+      -- Scale up polygon such that each coordinate is a whole number.
+    | lcmP /= 1 = [SimplePolygon $ CV.map (over core (multP lcmP)) vs]
+      -- Scale down polygon maintaining each coordinate as a whole number
+    | gcdP /= 1 = [SimplePolygon $ CV.map (over core (divP gcdP)) vs]
+    -- | otherwise = [SimplePolygon $ CV.map (over core div2) vs]
+    | otherwise = []
+  where
+    vs = p ^. outerBoundary
+    lcmP = lcmPoint p
+    gcdP = gcdPoint p
+    multP v (Point2 c d) = Point2 (c*v) (d*v)
+    divP v (Point2 c d) = Point2 (c/v) (d/v)
+    _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
+
+lcmPoint :: SimplePolygon () Rational -> Rational
+lcmPoint p = realToFrac t
+  where
+    vs = F.toList (p^.outerBoundary)
+    lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
+    t = foldl1 lcm lst
+
+gcdPoint :: SimplePolygon () Rational -> Rational
+gcdPoint p = realToFrac t
+  where
+    vs = F.toList (p^.outerBoundary)
+    lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
+    t = foldl1 gcd lst
+
+cutEarAt :: SimplePolygon () Rational -> Int -> SimplePolygon () Rational
+cutEarAt p n = SimplePolygon $ CV.unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
+  where
+    vs = p^.outerBoundary
+
+cutEars :: SimplePolygon () Rational -> [SimplePolygon () Rational]
+cutEars p | isTriangle p = []
+cutEars p = map (cutEarAt p) ears
+  where
+    ears =
+      [ n
+      | n <- [0 .. F.length vs-1]
+      , let prev = CV.index vs (n-1)
+            cur  = CV.index vs n
+            next = CV.index vs (n+1)
+            triangle = Triangle prev cur next
+      , ccw' prev cur next == CCW -- left turn.
+      , CV.all (\pt -> pt `elem` [prev,cur,next] || not (onTriangle (_core pt) triangle)) vs
+      ]
+    vs = p^.outerBoundary
+
+
 
 spec :: Spec
 spec = do
