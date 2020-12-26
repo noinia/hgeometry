@@ -10,6 +10,7 @@ import           Data.Vector.Circular        as CV
 import qualified Data.Vector.NonEmpty        as NV
 import           Test.QuickCheck             (Arbitrary (..), NonEmptyList (..))
 
+
 -- FIXME: Upstream this to the non-empty vector library?
 instance Foldable1 NV.NonEmptyVector
 

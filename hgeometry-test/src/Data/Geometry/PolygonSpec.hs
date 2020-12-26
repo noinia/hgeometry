@@ -2,7 +2,7 @@
 module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Lens                                ((^.), (^..), over)
+import           Control.Lens                                (over, view, (^.), (^..))
 import           Control.Monad
 import qualified Data.ByteString                             as BS
 import           Data.Ext
@@ -12,6 +12,8 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Geometry.Triangle
+import           Data.Ord
+import           Data.Coerce
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Serialize
@@ -71,12 +73,20 @@ simplifyP p
     | lcmP /= 1 = [SimplePolygon $ CV.map (over core (multP lcmP)) vs]
       -- Scale down polygon maintaining each coordinate as a whole number
     | gcdP /= 1 = [SimplePolygon $ CV.map (over core (divP gcdP)) vs]
-    -- | otherwise = [SimplePolygon $ CV.map (over core div2) vs]
-    | otherwise = []
+    | minX /= 0 || minY /= 0
+      = [SimplePolygon $ CV.map (over core align) vs]
+    | otherwise =
+      let p' = SimplePolygon $ CV.map (over core _div2) vs
+      in [ p' | not (hasSelfIntersections p') ]
+    -- otherwise = []
   where
+    minX = F.minimumBy (comparing (view (core.xCoord))) vs ^. core.xCoord
+    minY = F.minimumBy (comparing (view (core.yCoord))) vs ^. core.yCoord
     vs = p ^. outerBoundary
     lcmP = lcmPoint p
     gcdP = gcdPoint p
+    align :: Point 2 Rational -> Point 2 Rational
+    align v = coerce (v .-. Point2 minX minY)
     multP v (Point2 c d) = Point2 (c*v) (d*v)
     divP v (Point2 c d) = Point2 (c/v) (d/v)
     _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
