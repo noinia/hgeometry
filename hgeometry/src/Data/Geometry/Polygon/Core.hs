@@ -48,8 +48,8 @@ module Data.Geometry.Polygon.Core
   , withIncidentEdges, numberVertices
 
     -- * Specialized folds
-  , Data.Geometry.Polygon.Core.maximum
-  , Data.Geometry.Polygon.Core.minimum
+  -- , Data.Geometry.Polygon.Core.maximum
+  -- , Data.Geometry.Polygon.Core.minimum
   , maximumBy
   , minimumBy
   , findRotateTo
@@ -683,13 +683,15 @@ numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
 --------------------------------------------------------------------------------
 -- Specialized folds
 
+-- maximum and minimum probably aren't useful. Disabled for now. Lemmih, 2020-12-26.
+
 -- | /O(n)/ Yield the maximum point of the polygon. Points are compared first by x-coordinate
 --   and then by y-coordinate. The maximum point will therefore be the right-most point in
 --   the polygon (and top-most if multiple points share the largest x-coordinate).
 --
 --   Hole vertices are ignored since they cannot be the maximum.
-maximum :: Ord r => Polygon t p r -> Point 2 r :+ p
-maximum = F.maximumBy (comparing _core) . view outerBoundaryVector
+_maximum :: Ord r => Polygon t p r -> Point 2 r :+ p
+_maximum = F.maximumBy (comparing _core) . view outerBoundaryVector
 
 -- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
 maximumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
@@ -701,8 +703,8 @@ maximumBy fn (MultiPolygon b hs) = F.maximumBy fn $ map (maximumBy fn) (b:hs)
 --   the polygon (and bottom-most if multiple points share the smallest x-coordinate).
 --
 --   Hole vertices are ignored since they cannot be the minimum.
-minimum :: Ord r => Polygon t p r -> Point 2 r :+ p
-minimum = F.minimumBy (comparing _core) . view outerBoundaryVector
+_minimum :: Ord r => Polygon t p r -> Point 2 r :+ p
+_minimum = F.minimumBy (comparing _core) . view outerBoundaryVector
 
 -- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
 minimumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
