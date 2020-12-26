@@ -12,7 +12,6 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Geometry.Triangle
-import           Data.Maybe
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Serialize
@@ -80,7 +79,7 @@ simplifyP p
     gcdP = gcdPoint p
     multP v (Point2 c d) = Point2 (c*v) (d*v)
     divP v (Point2 c d) = Point2 (c/v) (d/v)
-    div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
+    _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
 
 lcmPoint :: SimplePolygon () Rational -> Rational
 lcmPoint p = realToFrac t
