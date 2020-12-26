@@ -35,7 +35,7 @@ import qualified Data.Set as Set
 import qualified Data.Set.Util as Set
 import           Data.Vinyl.CoRec
 
--- import           Debug.Trace
+import           Debug.Trace
 import           Data.RealNumber.Rational
 
 type R = RealNumber 5
@@ -210,7 +210,7 @@ firstHitAt'        :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e
                   -> Point 2 r :+ LineSegment 2 p r :+ e
 firstHitAt' q p s = case firstHitAt q p s of
                       Just x  -> x
-                      Nothing -> error "firstHitAt: precondition failed!"
+                      Nothing -> error $ "firstHitAt: precondition failed!" <> show (p,q,s)
 
 --------------------------------------------------------------------------------
 -- * Status Structure Operations
@@ -239,10 +239,10 @@ insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndP
 --      from q through p, in that order.
 --
 -- \(O(\log n)\)
-deleteAt     :: (Ord r, Fractional r, Show r, Show p)
+deleteAt     :: (Ord r, Fractional r, Show r, Show p, Show e)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
-deleteAt p q = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint)
+deleteAt q p = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint)
   -- if two segments have the same distance, we use the ccw order around their common
   -- (end) point.
 
@@ -388,3 +388,9 @@ testPg2 = fromPoints $ zipWith (:+) [ Point2 3    1
 -- ,Point2 [3,2] :+ Left 2
 -- ,Point2 [3.6,2.4] :+ Right (Point2 [3,2] :+ 2,LineSegment (Closed (Point2 [4,2] :+ 3)) (Closed (Point2 [2,4] :+ 4)) :+ ())
 -- ,Point2 [3,1] :+ Left 1])
+
+testz :: SimplePolygon () R
+testz = fromPoints $ read "[Point2 [144,640] :+ (),Point2 [64,640] :+ (),Point2 [128,592] :+ (),Point2 [224,656] :+ (),Point2 [256,592] :+ (),Point2 [320,656] :+ (),Point2 [272,752] :+ (),Point2 [208,688] :+ (),Point2 [176,768] :+ (),Point2 [112,688] :+ ()]"
+
+queryP :: Point 2 R
+queryP = Point2 136 616
