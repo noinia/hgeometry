@@ -15,31 +15,31 @@
 module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
-import           Control.Lens hiding (element)
+import           Control.Lens                           hiding (element)
 import           Data.Aeson
 -- import           Data.Aeson (ToJSON(..),FromJSON(..))
-import qualified Data.Foldable as F
-import qualified Data.List as L
-import           Data.Geometry.Vector.VectorFixed (C(..))
+import qualified Data.Foldable                          as F
+import           Data.Functor.Classes
+import           Data.Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
+                                                         VectorFamilyF)
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
-import           Data.Geometry.Vector.VectorFamilyPeano ( VectorFamily(..)
-                                                        , VectorFamilyF
-                                                        , ImplicitArity
-                                                        )
-import qualified Data.Vector.Fixed as V
-import           Data.Vector.Fixed.Cont (Peano)
-import           GHC.TypeLits
-import           Linear.Affine (Affine(..))
-import           Linear.Metric
-import qualified Linear.V2 as L2
-import qualified Linear.V3 as L3
-import qualified Linear.V4 as L4
-import           Linear.Vector
-import           Text.ParserCombinators.ReadP (ReadP, string,pfail)
-import           Text.ParserCombinators.ReadPrec (lift)
-import           Text.Read (Read(..),readListPrecDefault, readPrec_to_P,minPrec)
-import           Data.Proxy
+import           Data.Geometry.Vector.VectorFixed       (C (..))
 import           Data.Hashable
+import qualified Data.List                              as L
+import           Data.Proxy
+import qualified Data.Vector.Fixed                      as V
+import           Data.Vector.Fixed.Cont                 (Peano)
+import           GHC.TypeLits
+import           Linear.Affine                          (Affine (..))
+import           Linear.Metric
+import qualified Linear.V2                              as L2
+import qualified Linear.V3                              as L3
+import qualified Linear.V4                              as L4
+import           Linear.Vector
+import           Text.ParserCombinators.ReadP           (ReadP, pfail, string)
+import           Text.ParserCombinators.ReadPrec        (lift)
+import           Text.Read                              (Read (..), minPrec, readListPrecDefault,
+                                                         readPrec_to_P)
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -67,6 +67,7 @@ instance (ImplicitArity (Peano d), KnownNat d) => Arity d
 
 
 deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
+deriving instance Arity d          => Eq1 (Vector d)
 deriving instance (Ord r, Arity d) => Ord (Vector d r)
 
 deriving instance Arity d => Functor     (Vector d)

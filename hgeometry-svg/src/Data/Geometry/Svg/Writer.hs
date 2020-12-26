@@ -29,7 +29,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon
 import           Data.Geometry.Svg.MathCoordinateSystem
-import           Data.Geometry.Transformation (Matrix)
+import           Data.Geometry.Matrix (Matrix)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
 import           Data.Monoid (mconcat)

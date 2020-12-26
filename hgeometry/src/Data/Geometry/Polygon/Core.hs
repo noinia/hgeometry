@@ -186,12 +186,12 @@ type instance Dimension (Polygon t p r) = 2
 type instance NumType   (Polygon t p r) = r
 
 instance (Show p, Show r) => Show (Polygon t p r) where
-  show (SimplePolygon vs)   = "SimplePolygon (" <> show vs <> ")"
+  show (SimplePolygon vs)   = "SimplePolygon " <> show (F.toList vs)
   show (MultiPolygon vs hs) = "MultiPolygon (" <> show vs <> ") (" <> show hs <> ")"
 
 instance (Read p, Read r) => Read (SimplePolygon p r) where
   readsPrec d = readParen (d > app_prec) $ \r ->
-      [ (SimplePolygon vs, t)
+      [ (unsafeFromPoints vs, t)
       | ("SimplePolygon", s) <- lex r, (vs, t) <- reads s ]
     where app_prec = 10
 
@@ -251,10 +251,10 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
--- | Lens access to the outer boundary of a polygon.
+-- | Lens access to the outer boundary vector of a polygon.
 --
 -- >>> toList (simpleTriangle ^. outerBoundaryVector)
--- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
+-- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
 outerBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 outerBoundaryVector = lens g s
   where
@@ -268,9 +268,6 @@ outerBoundaryVector = lens g s
     s (MultiPolygon  _   hs) vs = MultiPolygon (SimplePolygon vs) hs
 
 -- | Lens access to the outer boundary of a polygon.
---
--- >>> toList (simpleTriangle ^. outerBoundaryVector)
--- [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()]
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (SimplePolygon p r)
 outerBoundary = lens g s
   where
@@ -286,7 +283,7 @@ outerBoundary = lens g s
 -- | Lens access for polygon holes.
 --
 -- >>> multiPoly ^. polygonHoles
--- [SimplePolygon (CircularVector {vector = [Point2 [0,0] :+ (),Point2 [2,0] :+ (),Point2 [1,1] :+ ()], rotation = 0})]
+-- [SimplePolygon [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]]
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 polygonHoles = lens g s
   where
@@ -378,11 +375,11 @@ listEdges pg = let f = F.toList . outerBoundaryEdges
 --
 --
 -- >>> mapM_ print . polygonVertices $ withIncidentEdges simplePoly
--- Point2 [0,0] :+ V2 LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ())) LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ()))
--- Point2 [10,0] :+ V2 LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ())) LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ()))
--- Point2 [10,10] :+ V2 LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ())) LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ()))
--- Point2 [5,15] :+ V2 LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ())) LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ()))
--- Point2 [1,11] :+ V2 LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ())) LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ()))
+-- Point2 0 0 :+ V2 LineSegment (Closed (Point2 1 11 :+ ())) (Closed (Point2 0 0 :+ ())) LineSegment (Closed (Point2 0 0 :+ ())) (Closed (Point2 10 0 :+ ()))
+-- Point2 10 0 :+ V2 LineSegment (Closed (Point2 0 0 :+ ())) (Closed (Point2 10 0 :+ ())) LineSegment (Closed (Point2 10 0 :+ ())) (Closed (Point2 10 10 :+ ()))
+-- Point2 10 10 :+ V2 LineSegment (Closed (Point2 10 0 :+ ())) (Closed (Point2 10 10 :+ ())) LineSegment (Closed (Point2 10 10 :+ ())) (Closed (Point2 5 15 :+ ()))
+-- Point2 5 15 :+ V2 LineSegment (Closed (Point2 10 10 :+ ())) (Closed (Point2 5 15 :+ ())) LineSegment (Closed (Point2 5 15 :+ ())) (Closed (Point2 1 11 :+ ()))
+-- Point2 1 11 :+ V2 LineSegment (Closed (Point2 5 15 :+ ())) (Closed (Point2 1 11 :+ ())) LineSegment (Closed (Point2 1 11 :+ ())) (Closed (Point2 0 0 :+ ()))
 withIncidentEdges                    :: Polygon t p r
                                      -> Polygon t (Two (LineSegment 2 p r)) r
 withIncidentEdges (SimplePolygon vs) =
@@ -676,7 +673,7 @@ reverseOuterBoundary p = p&outerBoundaryVector %~ CV.reverse
 -- will be numbered last, in the same order.
 --
 -- >>> numberVertices simplePoly
--- SimplePolygon (CircularVector {vector = [Point2 [0,0] :+ SP 0 (),Point2 [10,0] :+ SP 1 (),Point2 [10,10] :+ SP 2 (),Point2 [5,15] :+ SP 3 (),Point2 [1,11] :+ SP 4 ()], rotation = 0})
+-- SimplePolygon [Point2 0 0 :+ SP 0 (),Point2 10 0 :+ SP 1 (),Point2 10 10 :+ SP 2 (),Point2 5 15 :+ SP 3 (),Point2 1 11 :+ SP 4 ()]
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
@@ -715,7 +712,7 @@ minimumBy fn (MultiPolygon b hs) = F.minimumBy fn $ map (minimumBy fn) (b:hs)
 -- | Rotate to the first point that matches the given condition.
 --
 -- >>> toVector <$> findRotateTo (== (Point2 1 0 :+ ())) (unsafeFromPoints [Point2 0 0 :+ (), Point2 1 0 :+ (), Point2 1 1 :+ ()])
--- Just [Point2 [1,0] :+ (),Point2 [1,1] :+ (),Point2 [0,0] :+ ()]
+-- Just [Point2 1 0 :+ (),Point2 1 1 :+ (),Point2 0 0 :+ ()]
 -- >>> findRotateTo (== (Point2 7 0 :+ ())) $ unsafeFromPoints [Point2 0 0 :+ (), Point2 1 0 :+ (), Point2 1 1 :+ ()]
 -- Nothing
 findRotateTo :: (Point 2 r :+ p -> Bool) -> SimplePolygon p r -> Maybe (SimplePolygon p r)
