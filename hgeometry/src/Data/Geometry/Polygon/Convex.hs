@@ -121,7 +121,23 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 --
 -- running time: \(O(\log^2 n)\)
 maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u = findMaxWith (cmpExtreme u)
+maxInDirection u = findMaxWithV (cmpExtreme u)
+
+-- O(log n)
+findMaxWithV :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
+             -> ConvexPolygon p r -> Point 2 r :+ p
+findMaxWithV cmp p = CV.index v (CV.binarySearch fn v)
+  where
+    v = p ^. simplePolygon.outerBoundary
+    a `lt` b = a `cmp` b == LT
+    fn idx
+      | cur `lt` left  = GT -- `idx` is greater than it should be. Go left.
+      | cur `lt` right = LT -- `idx` is less than it should be. Go right.
+      | otherwise      = EQ -- cur is greater or equal to points on either side.
+      where
+        cur = CV.index v idx
+        left = CV.index v (idx-1)
+        right = CV.index v (idx+1)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
