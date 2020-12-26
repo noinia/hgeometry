@@ -2,7 +2,7 @@
 module Demo.MinDisk where
 
 import           Algorithms.Geometry.SmallestEnclosingBall.RIC
-import           Algorithms.Geometry.SmallestEnclosingBall.Types
+import           Algorithms.Geometry.SmallestEnclosingBall
 import           Control.Lens
 import           Control.Monad.Random.Strict
 import           Data.Data

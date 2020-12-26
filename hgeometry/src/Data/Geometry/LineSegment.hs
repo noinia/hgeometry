@@ -45,8 +45,8 @@ import           Data.Ord (comparing)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
-import           Test.QuickCheck(Arbitrary(..))
-
+import           Test.QuickCheck (Arbitrary(..))
+import           Text.Read
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
 
@@ -139,7 +139,39 @@ instance (Num r, Arity d) => HasSupportingLine (LineSegment d p r) where
 
 
 instance (Show r, Show p, Arity d) => Show (LineSegment d p r) where
-  show ~(LineSegment p q) = concat ["LineSegment (", show p, ") (", show q, ")"]
+  showsPrec d (LineSegment p' q') = case (p',q') of
+      (Closed p, Closed q) -> f "ClosedLineSegment" p q
+      (Open p, Open q)     -> f "OpenLineSegment"   p q
+      (p,q)                -> f "LineSegment"       p q
+    where
+      app_prec = 10
+      f        :: (Show a, Show b) => String -> a -> b -> String -> String
+      f cn p q = showParen (d > app_prec) $
+                     showString cn . showString " "
+                   . showsPrec (app_prec+1) p
+                   . showString " "
+                   . showsPrec (app_prec+1) q
+
+instance (Read r, Read p, Arity d) => Read (LineSegment d p r) where
+  readPrec = parens $ (prec app_prec $ do
+                                  Ident "ClosedLineSegment" <- lexP
+                                  p <- step readPrec
+                                  q <- step readPrec
+                                  return (ClosedLineSegment p q))
+                       +++
+                       (prec app_prec $ do
+                                  Ident "OpenLineSegment" <- lexP
+                                  p <- step readPrec
+                                  q <- step readPrec
+                                  return (OpenLineSegment p q))
+                       +++
+                       (prec app_prec $ do
+                                  Ident "LineSegment" <- lexP
+                                  p <- step readPrec
+                                  q <- step readPrec
+                                  return (LineSegment p q))
+    where app_prec = 10
+
 
 deriving instance (Eq r, Eq p, Arity d)     => Eq (LineSegment d p r)
 -- deriving instance (Ord r, Ord p, Arity d)   => Ord (LineSegment d p r)
