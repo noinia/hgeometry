@@ -10,14 +10,15 @@ import Data.Geometry.Ipe.Color (named)
 import Data.Maybe
 import System.Random (mkStdGen)
 import Test.Hspec
+import           Paths_hgeometry_test
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = do testCases "test/Data/Geometry/Polygon/star_shaped.ipe"
+spec = do testCases "src/Data/Geometry/Polygon/star_shaped.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading star-shaped file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> specify "isStarShaped test" $

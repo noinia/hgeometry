@@ -9,9 +9,10 @@ import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Data.Proxy
 import Test.Hspec
+import           Paths_hgeometry_test
 
 spec :: Spec
-spec = do testCases "test/Data/Geometry/pointInTriangle.ipe"
+spec = do testCases "src/Data/Geometry/pointInTriangle.ipe"
           describe "intersection tests" $ do
             it "intersecting Line 2 with Triangle 2 " $ do
               let t :: Triangle 2 () Rational
@@ -28,7 +29,7 @@ spec = do testCases "test/Data/Geometry/pointInTriangle.ipe"
 
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in triangle file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

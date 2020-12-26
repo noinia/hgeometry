@@ -8,11 +8,12 @@ import Data.Geometry.Polygon
 import Data.Geometry.Boundary
 import Data.Geometry.Ipe
 import Test.Hspec
+import           Paths_hgeometry_test
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = do testCases "test/Data/Geometry/pointInPolygon.ipe"
+spec = do testCases "src/Data/Geometry/pointInPolygon.ipe"
           testCases "../hgeometry-examples/data/world.ipe"
           it "Pick point in polygon test"  $
             toSpec testPoly
@@ -20,7 +21,7 @@ spec = do testCases "test/Data/Geometry/pointInPolygon.ipe"
             toSpec testPoly2
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> it "Pick point in polygon test"  $
