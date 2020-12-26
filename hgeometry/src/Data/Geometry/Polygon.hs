@@ -9,16 +9,20 @@
 --
 --------------------------------------------------------------------------------
 module Data.Geometry.Polygon
-  ( PolygonType(..)
+  ( -- * Types
+    PolygonType(..)
   , Polygon(..)
   , _SimplePolygon, _MultiPolygon
   , SimplePolygon, MultiPolygon, SomePolygon
 
+    -- * Conversion
   , fromPoints
   , unsafeFromPoints
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
+
+    -- * Accessors
 
   , polygonVertices, listEdges
 
@@ -30,12 +34,14 @@ module Data.Geometry.Polygon
   , polygonHoles, polygonHoles'
   , holeList
 
-  , inPolygon, insidePolygon, onBoundary
+    -- * Properties
 
   , area, signedArea
-
   , centroid
-  , pickPoint
+
+    -- * Queries
+  , inPolygon, insidePolygon, onBoundary
+
 
   , isTriangle, isStarShaped
 
@@ -44,6 +50,8 @@ module Data.Geometry.Polygon
   , toClockwiseOrder, toClockwiseOrder'
   , reverseOuterBoundary
 
+   -- * Misc
+  , pickPoint
   , findDiagonal
 
   , withIncidentEdges, numberVertices
