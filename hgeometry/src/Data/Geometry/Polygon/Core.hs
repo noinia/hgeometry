@@ -322,11 +322,11 @@ listEdges pg = let f = F.toList . outerBoundaryEdges
 --
 --
 -- >>> mapM_ print . polygonVertices $ withIncidentEdges simplePoly
--- Point2 [0,0] :+ V2 LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ())) LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ()))
--- Point2 [10,0] :+ V2 LineSegment (Closed (Point2 [0,0] :+ ())) (Closed (Point2 [10,0] :+ ())) LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ()))
--- Point2 [10,10] :+ V2 LineSegment (Closed (Point2 [10,0] :+ ())) (Closed (Point2 [10,10] :+ ())) LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ()))
--- Point2 [5,15] :+ V2 LineSegment (Closed (Point2 [10,10] :+ ())) (Closed (Point2 [5,15] :+ ())) LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ()))
--- Point2 [1,11] :+ V2 LineSegment (Closed (Point2 [5,15] :+ ())) (Closed (Point2 [1,11] :+ ())) LineSegment (Closed (Point2 [1,11] :+ ())) (Closed (Point2 [0,0] :+ ()))
+-- Point2 [0,0] :+ V2 (ClosedLineSegment (Point2 [1,11] :+ ()) (Point2 [0,0] :+ ())) (ClosedLineSegment (Point2 [0,0] :+ ()) (Point2 [10,0] :+ ()))
+-- Point2 [10,0] :+ V2 (ClosedLineSegment (Point2 [0,0] :+ ()) (Point2 [10,0] :+ ())) (ClosedLineSegment (Point2 [10,0] :+ ()) (Point2 [10,10] :+ ()))
+-- Point2 [10,10] :+ V2 (ClosedLineSegment (Point2 [10,0] :+ ()) (Point2 [10,10] :+ ())) (ClosedLineSegment (Point2 [10,10] :+ ()) (Point2 [5,15] :+ ()))
+-- Point2 [5,15] :+ V2 (ClosedLineSegment (Point2 [10,10] :+ ()) (Point2 [5,15] :+ ())) (ClosedLineSegment (Point2 [5,15] :+ ()) (Point2 [1,11] :+ ()))
+-- Point2 [1,11] :+ V2 (ClosedLineSegment (Point2 [5,15] :+ ()) (Point2 [1,11] :+ ())) (ClosedLineSegment (Point2 [1,11] :+ ()) (Point2 [0,0] :+ ()))
 withIncidentEdges                    :: Polygon t p r
                                      -> Polygon t (Two (LineSegment 2 p r)) r
 withIncidentEdges (SimplePolygon vs) =

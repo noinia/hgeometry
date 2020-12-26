@@ -78,7 +78,7 @@ transformAllBy t = fmap (transformBy t)
 --   points. Polygons, triangles, line segments, etc, are all PointFunctors.
 --
 -- >>> transformPointFunctor (uniformScaling 2) $ OpenLineSegment (Point1 1 :+ ()) (Point1 2 :+ ())
--- LineSegment (Open (Point1 [2.0] :+ ())) (Open (Point1 [4.0] :+ ()))
+-- OpenLineSegment (Point1 [2.0] :+ ()) (Point1 [4.0] :+ ())
 transformPointFunctor   :: ( PointFunctor g, Fractional r, d ~ Dimension (g r)
                            , Arity d, Arity (d + 1)
                            ) => Transformation d r -> g r -> g r
