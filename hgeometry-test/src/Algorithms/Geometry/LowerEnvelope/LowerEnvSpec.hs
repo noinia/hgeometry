@@ -14,16 +14,17 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
 import           Data.Proxy
 import           GHC.TypeLits
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util
 
 -- import Algorithms.Geometry.LowerEnvelope.Types
 
 spec :: Spec
-spec = testCases "test/Algorithms/Geometry/LowerEnvelope/manual.ipe"
+spec = testCases "src/Algorithms/Geometry/LowerEnvelope/manual.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading Smallest enclosing disk file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

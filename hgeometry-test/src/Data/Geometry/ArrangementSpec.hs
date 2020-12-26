@@ -8,15 +8,16 @@ import           Data.Geometry
 import           Data.Geometry.Arrangement
 import           Data.Geometry.Arrangement.Draw
 import           Data.Geometry.Ipe
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util(runOnFile)
 
 spec :: Spec
-spec = testCases "test/Data/Geometry/arrangement.ipe"
+spec = testCases "src/Data/Geometry/arrangement.ipe"
 
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading arrangement file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

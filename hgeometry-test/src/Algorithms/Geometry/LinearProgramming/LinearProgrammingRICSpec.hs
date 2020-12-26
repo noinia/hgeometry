@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-module Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec where
+module Algorithms.Geometry.LinearProgramming.LinearProgrammingRICSpec (spec) where
 
 import Algorithms.Geometry.LinearProgramming.LP2DRIC
 import Algorithms.Geometry.LinearProgramming.Types
@@ -14,6 +14,7 @@ import Data.Geometry.HalfSpace
 import Data.List.NonEmpty(NonEmpty)
 import Data.Ratio
 import Test.Hspec
+import           Paths_hgeometry_test
 -- import Util
 
 --------------------------------------------------------------------------------
@@ -48,14 +49,14 @@ spec = describe "2D LP Tests" $ do
          --   \(lp :: LinearProgram 2 Rational) ->
          --   inAllHalfpaces (solveBoundedLinearProgram' lp) lp
 
-         testCases "test/Algorithms/Geometry/LinearProgramming/manual.ipe"
+         testCases "src/Algorithms/Geometry/LinearProgramming/manual.ipe"
 
 
 --------------------------------------------------------------------------------
 
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading 2D Linear Programming file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

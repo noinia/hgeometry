@@ -12,16 +12,17 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           System.Random (mkStdGen)
+import           Paths_hgeometry_test
 import           Test.Hspec
 -- import           Test.Util
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = testCases "test/Algorithms/Geometry/RedBlueSeparator/manual.ipe"
+spec = testCases "src/Algorithms/Geometry/RedBlueSeparator/manual.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading RedBlue Separator file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

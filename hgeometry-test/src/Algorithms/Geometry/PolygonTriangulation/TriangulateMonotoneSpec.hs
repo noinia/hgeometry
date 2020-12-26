@@ -7,16 +7,17 @@ import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Maybe
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util
 
 
 spec :: Spec
-spec = do testCases "test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe"
-          testCases "test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe"
+spec = do testCases "src/Algorithms/Geometry/PolygonTriangulation/monotone.ipe"
+          testCases "src/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading TriangulateMonotone file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

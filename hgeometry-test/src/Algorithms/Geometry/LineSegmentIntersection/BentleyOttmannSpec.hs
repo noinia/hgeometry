@@ -11,6 +11,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Polygon
 import qualified Data.Map as Map
 import           Data.Proxy
+import           Paths_hgeometry_test
 import           Test.Hspec
 
 spec :: Spec
@@ -22,13 +23,13 @@ spec = do
   describe "Self Intersecting Polygon Tests" $ do
     siTestCases (testPath <> "selfIntersections.ipe")
 
-testPath = "test/Algorithms/Geometry/LineSegmentIntersection/"
+testPath = "src/Algorithms/Geometry/LineSegmentIntersection/"
 
 ipeSpec :: Spec
 ipeSpec = testCases (testPath <> "manual.ipe")
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading LineSegment Intersection file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs
@@ -71,7 +72,7 @@ data SelfIntersectionTestCase r = SITestCase { _siPolygon :: SimplePolygon () r
 
 
 siTestCases    :: FilePath -> Spec
-siTestCases fp = (runIO $ readSiInput fp) >>= \case
+siTestCases fp = (runIO $ readSiInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading SelfIntersection file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ siToSpec tcs
