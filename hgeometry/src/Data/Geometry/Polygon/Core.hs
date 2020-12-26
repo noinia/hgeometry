@@ -686,21 +686,31 @@ numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
 --------------------------------------------------------------------------------
 -- Specialized folds
 
--- | /O(n)/ Yield the maximum point of the polygon.
-maximum :: Ord r => SimplePolygon p r -> Point 2 r :+ p
+-- | /O(n)/ Yield the maximum point of the polygon. Points are compared first by x-coordinate
+--   and then by y-coordinate. The maximum point will therefore be the right-most point in
+--   the polygon (and top-most if multiple points share the largest x-coordinate).
+--
+--   Hole vertices are ignored since they cannot be the maximum.
+maximum :: Ord r => Polygon t p r -> Point 2 r :+ p
 maximum = F.maximumBy (comparing _core) . view outerBoundaryVector
 
 -- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
-maximumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> SimplePolygon p r -> Point 2 r :+ p
-maximumBy fn = F.maximumBy fn . view outerBoundaryVector
+maximumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
+maximumBy fn (SimplePolygon vs) = F.maximumBy fn vs
+maximumBy fn (MultiPolygon b hs) = F.maximumBy fn $ map (maximumBy fn) (b:hs)
 
--- | /O(n)/ Yield the maximum point of the polygon.
-minimum :: Ord r => SimplePolygon p r -> Point 2 r :+ p
+-- | /O(n)/ Yield the maximum point of the polygon. Points are compared first by x-coordinate
+--   and then by y-coordinate. The minimum point will therefore be the left-most point in
+--   the polygon (and bottom-most if multiple points share the smallest x-coordinate).
+--
+--   Hole vertices are ignored since they cannot be the minimum.
+minimum :: Ord r => Polygon t p r -> Point 2 r :+ p
 minimum = F.minimumBy (comparing _core) . view outerBoundaryVector
 
 -- | /O(n)/ Yield the maximum point of a polygon according to the given comparison function.
-minimumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> SimplePolygon p r -> Point 2 r :+ p
-minimumBy fn = F.minimumBy fn . view outerBoundaryVector
+minimumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
+minimumBy fn (SimplePolygon vs) = F.minimumBy fn vs
+minimumBy fn (MultiPolygon b hs) = F.minimumBy fn $ map (minimumBy fn) (b:hs)
 
 -- | Rotate to the first point that matches the given condition.
 --
