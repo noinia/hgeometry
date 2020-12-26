@@ -1,18 +1,19 @@
-module Algorithms.Geometry.DelaunayTriangulation.DTSpec where
+module Algorithms.Geometry.DelaunayTriangulation.DTSpec (spec) where
 
 import qualified Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer as DC
-import qualified Algorithms.Geometry.DelaunayTriangulation.Naive as Naive
+import qualified Algorithms.Geometry.DelaunayTriangulation.Naive            as Naive
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
-import qualified Data.CircularList.Util as CU
+import qualified Data.CircularList.Util                                     as CU
 import           Data.Ext
 import           Data.Geometry
 import           Data.Geometry.Ipe
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Maybe (mapMaybe, fromJust)
+import qualified Data.List.NonEmpty                                         as NonEmpty
+import qualified Data.Map                                                   as M
+import           Data.Maybe                                                 (fromJust, mapMaybe)
 import           Data.RealNumber.Rational
-import qualified Data.Vector as V
+import qualified Data.Vector                                                as V
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util
 
@@ -38,10 +39,10 @@ spec = do
     ipeSpec
 
 ipeSpec :: Spec
-ipeSpec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
+ipeSpec = testCases "src/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading Delaunay Triangulation disk file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

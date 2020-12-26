@@ -6,5 +6,4 @@ import           Test.Hspec.Runner
 -- import           Test.Hspec
 
 main :: IO ()
-main = do setCurrentDirectory "../hgeometry"
-          hspecWith defaultConfig Spec.spec
+main = hspecWith defaultConfig Spec.spec

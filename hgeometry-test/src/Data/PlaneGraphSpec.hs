@@ -20,13 +20,13 @@ spec = describe "PlaneGraph tests" $ do
            draw test `shouldBe` mempty
            draw test2 `shouldBe` mempty
          it "encode yaml test" $ do
-           b <- B.readFile "test/Data/PlaneGraph/myPlaneGraph.yaml"
+           b <- B.readFile "src/Data/PlaneGraph/myPlaneGraph.yaml"
            encodeYaml myGraph `shouldBe` b
          it "from simple polygon; inside and outside correct" $
            outerFaceId simplePgGraph `shouldBe` (FaceId (VertexId 1))
          -- it "decode yaml test" $ do
          --   (first prettyPrintParseException
-         --     <$> decodeYamlFile "test/Data/myPlaneGraph.yaml")
+         --     <$> decodeYamlFile "src/Data/myPlaneGraph.yaml")
          --   `shouldReturn`
          --   (Right myGraph)
         -- the result is the same up to renumbering it seems. That is fine.
@@ -49,7 +49,7 @@ test2 = fromConnectedSegments (Identity Test1) testSegs2
 
 -- |
 --
--- ![myGraph](test/Data/PlaneGraph/testsegs.png)
+-- ![myGraph](src/Data/PlaneGraph/testsegs.png)
 testSegs :: [LineSegment 2 () Integer :+ ()]
 testSegs = map (\(p,q) -> ClosedLineSegment (ext p) (ext q) :+ ())
                    [ (origin, Point2 10 10)

@@ -48,10 +48,10 @@ spec = do
     it "quickheck Dart: fromEnum (toEnum i) = i" $
       property $ \(NonNegative i) -> fromEnum ((toEnum i) :: Dart TestG) `shouldBe` i
     it "encode yaml test" $ do
-      b <- B.readFile "test/Data/PlanarGraph/myGraph.yaml"
+      b <- B.readFile "src/Data/PlanarGraph/myGraph.yaml"
       encodeYaml (fromAdjacencyLists testEdges) `shouldBe` b
     it "decode yaml test" $ do
-      (first prettyPrintParseException <$> decodeYamlFile "test/Data/PlanarGraph/myGraph.yaml")
+      (first prettyPrintParseException <$> decodeYamlFile "src/Data/PlanarGraph/myGraph.yaml")
       `shouldReturn`
       (Right $ fromAdjacencyLists testEdges)
 
