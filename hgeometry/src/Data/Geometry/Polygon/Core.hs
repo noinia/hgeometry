@@ -270,7 +270,7 @@ unsafeOuterBoundaryVector = lens g s
     g                     :: Polygon t p r -> CircularVector (Point 2 r :+ p)
     g (SimplePolygon (Vertices vs))                  = vs
     g (MultiPolygon (SimplePolygon (Vertices vs)) _) = vs
-    
+
     s                           :: Polygon t p r -> CircularVector (Point 2 r :+ p)
                                 -> Polygon t p r
     s SimplePolygon{}     vs = SimplePolygon (Vertices vs)
