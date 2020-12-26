@@ -15,23 +15,23 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-data-files:          ../hgeometry/test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
-                     ../hgeometry/test/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
-                     ../hgeometry/test/Algorithms/Geometry/LowerEnvelope/manual.ipe
-                     ../hgeometry/test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
-                     ../hgeometry/test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
-                     ../hgeometry/test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
-                     ../hgeometry/test/Algorithms/Geometry/LinearProgramming/manual.ipe
-                     ../hgeometry/test/Algorithms/Geometry/RedBlueSeparator/manual.ipe
-                     ../hgeometry/test/Data/Geometry/pointInPolygon.ipe
-                     ../hgeometry/test/Data/Geometry/pointInTriangle.ipe
-                     ../hgeometry/test/Data/Geometry/Polygon/star_shaped.ipe
-                     ../hgeometry/test/Data/Geometry/Polygon/Convex/convexTests.ipe
-                     ../hgeometry/test/Data/Geometry/arrangement.ipe
-                     ../hgeometry/test/Data/Geometry/arrangement.ipe.out.ipe
-                     ../hgeometry/test/Data/PlaneGraph/myPlaneGraph.yaml
-                     ../hgeometry/test/Data/PlaneGraph/small.yaml
-                     ../hgeometry/test/Data/PlaneGraph/testsegs.png
+data-files:          src/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
+                     src/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
+                     src/Algorithms/Geometry/LowerEnvelope/manual.ipe
+                     src/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
+                     src/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
+                     src/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
+                     src/Algorithms/Geometry/LinearProgramming/manual.ipe
+                     src/Algorithms/Geometry/RedBlueSeparator/manual.ipe
+                     src/Data/Geometry/pointInPolygon.ipe
+                     src/Data/Geometry/pointInTriangle.ipe
+                     src/Data/Geometry/Polygon/star_shaped.ipe
+                     src/Data/Geometry/Polygon/Convex/convexTests.ipe
+                     src/Data/Geometry/arrangement.ipe
+                     src/Data/Geometry/arrangement.ipe.out.ipe
+                     src/Data/PlaneGraph/myPlaneGraph.yaml
+                     src/Data/PlaneGraph/small.yaml
+                     src/Data/PlaneGraph/testsegs.png
                      data/polygons.simple
                      data/polygons.multi
 
@@ -62,11 +62,11 @@ executable fromgeojson
 test-suite hspec
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
-  hs-source-dirs:       ../hgeometry/test
+  hs-source-dirs:       src
   main-is:              Main.hs
 
-
-  ghc-options:   -Wall -threaded
+  -- -threaded -with-rtsopts=-N
+  ghc-options:   -Wall
                  -fno-warn-unticked-promoted-constructors
                  -fno-warn-partial-type-signatures
                  -fno-warn-missing-signatures
@@ -121,6 +121,9 @@ test-suite hspec
                  Algorithms.Geometry.FrechetDistance.DiscreteSpec
 
                  Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec
+                 Algorithms.Geometry.SSSPSpec
+
+
 
                  Graphics.CameraSpec
 

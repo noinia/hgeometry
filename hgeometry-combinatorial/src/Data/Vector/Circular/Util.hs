@@ -53,3 +53,6 @@ xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
 
 instance Arbitrary a => Arbitrary (CircularVector a) where
   arbitrary = unsafeFromList <$> (getNonEmpty <$> arbitrary)
+
+map :: (a -> b) -> CircularVector a -> CircularVector b
+map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot

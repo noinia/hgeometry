@@ -268,10 +268,10 @@ vertices' = PG.vertices' . _graph
 -- | Enumerate all vertices, together with their vertex data
 --
 -- >>> mapM_ print $ vertices smallG
--- (VertexId 0,VertexData {_location = Point2 [0,0], _vData = 0})
--- (VertexId 1,VertexData {_location = Point2 [2,2], _vData = 1})
--- (VertexId 2,VertexData {_location = Point2 [2,0], _vData = 2})
--- (VertexId 3,VertexData {_location = Point2 [-1,4], _vData = 3})
+-- (VertexId 0,VertexData {_location = Point2 0 0, _vData = 0})
+-- (VertexId 1,VertexData {_location = Point2 2 2, _vData = 1})
+-- (VertexId 2,VertexData {_location = Point2 2 0, _vData = 2})
+-- (VertexId 3,VertexData {_location = Point2 (-1) 4, _vData = 3})
 vertices   :: PlaneGraph s v e f r  -> V.Vector (VertexId' s, VertexData r v)
 vertices = PG.vertices . _graph
 
@@ -646,11 +646,11 @@ outerFaceDart ps = d
 -- | Reports all edges as line segments
 --
 -- >>> mapM_ print $ edgeSegments smallG
--- (Dart (Arc 0) +1,ClosedLineSegment (Point2 [0,0] :+ 0) (Point2 [2,0] :+ 2) :+ "0->2")
--- (Dart (Arc 1) +1,ClosedLineSegment (Point2 [0,0] :+ 0) (Point2 [2,2] :+ 1) :+ "0->1")
--- (Dart (Arc 2) +1,ClosedLineSegment (Point2 [0,0] :+ 0) (Point2 [-1,4] :+ 3) :+ "0->3")
--- (Dart (Arc 4) +1,ClosedLineSegment (Point2 [2,2] :+ 1) (Point2 [2,0] :+ 2) :+ "1->2")
--- (Dart (Arc 3) +1,ClosedLineSegment (Point2 [2,2] :+ 1) (Point2 [-1,4] :+ 3) :+ "1->3")
+-- (Dart (Arc 0) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 2 0 :+ 2) :+ "0->2")
+-- (Dart (Arc 1) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 2 2 :+ 1) :+ "0->1")
+-- (Dart (Arc 2) +1,ClosedLineSegment (Point2 0 0 :+ 0) (Point2 (-1) 4 :+ 3) :+ "0->3")
+-- (Dart (Arc 4) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 2 0 :+ 2) :+ "1->2")
+-- (Dart (Arc 3) +1,ClosedLineSegment (Point2 2 2 :+ 1) (Point2 (-1) 4 :+ 3) :+ "1->3")
 edgeSegments    :: PlaneGraph s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
 edgeSegments ps = fmap withSegment . edges $ ps
   where

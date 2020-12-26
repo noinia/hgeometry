@@ -22,6 +22,7 @@ module Data.Geometry.LineSegment
   , onSegment
   , orderedEndPoints
   , segmentLength
+  , sqSegmentLength
   , sqDistanceToSeg, sqDistanceToSegArg
   , flipSegment
 
@@ -285,6 +286,8 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
 
+sqSegmentLength                     :: (Arity d, Num r) => LineSegment d p r -> r
+sqSegmentLength ~(LineSegment' p q) = qdA (p^.core) (q^.core)
 
 -- | Squared distance from the point to the Segment s. The same remark as for
 -- the 'sqDistanceToSegArg' applies here.
@@ -330,13 +333,13 @@ flipSegment s = let p = s^.start
 -- | Linearly interpolate the two endpoints with a value in the range [0,1]
 --
 -- >>> interpolate 0.5 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [5.0,5.0]
+-- Point2 5.0 5.0
 -- >>> interpolate 0.1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [1.0,1.0]
+-- Point2 1.0 1.0
 -- >>> interpolate 0 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [0.0,0.0]
+-- Point2 0.0 0.0
 -- >>> interpolate 1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [10.0,10.0]
+-- Point2 10.0 10.0
 interpolate                      :: (Fractional r, Arity d) => r -> LineSegment d p r -> Point d r
 interpolate t (LineSegment' p q) = Point $ (asV p ^* (1-t)) ^+^ (asV q ^* t)
   where
