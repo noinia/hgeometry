@@ -126,9 +126,8 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 -- O(log n)
 findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWith cmp p = CV.index v (worker 0 n)
+findMaxWith cmp p = CV.index v (worker 0 (F.length v))
   where
-    n = F.length v
     v = p ^. simplePolygon.outerBoundary
     a `icmp` b = CV.index v a `cmp` CV.index v b
     worker a b
