@@ -73,7 +73,7 @@ simplifyP p
     -- | otherwise = [SimplePolygon $ CV.map (over core div2) vs]
     | otherwise = []
   where
-    vs = p ^. outerBoundary
+    vs = p ^. outerBoundaryVector
     lcmP = lcmPoint p
     gcdP = gcdPoint p
     multP v (Point2 c d) = Point2 (c*v) (d*v)
@@ -83,21 +83,21 @@ simplifyP p
 lcmPoint :: SimplePolygon () Rational -> Rational
 lcmPoint p = realToFrac t
   where
-    vs = F.toList (p^.outerBoundary)
+    vs = F.toList (p^.outerBoundaryVector)
     lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
     t = foldl1 lcm lst
 
 gcdPoint :: SimplePolygon () Rational -> Rational
 gcdPoint p = realToFrac t
   where
-    vs = F.toList (p^.outerBoundary)
+    vs = F.toList (p^.outerBoundaryVector)
     lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
     t = foldl1 gcd lst
 
 cutEarAt :: SimplePolygon () Rational -> Int -> SimplePolygon () Rational
 cutEarAt p n = SimplePolygon $ CV.unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
   where
-    vs = p^.outerBoundary
+    vs = p^.outerBoundaryVector
 
 cutEars :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 cutEars p | isTriangle p = []
@@ -113,7 +113,7 @@ cutEars p = map (cutEarAt p) ears
       , ccw' prev cur next == CCW -- left turn.
       , CV.all (\pt -> pt `elem` [prev,cur,next] || not (onTriangle (_core pt) triangle)) vs
       ]
-    vs = p^.outerBoundary
+    vs = p^.outerBoundaryVector
 
 
 
