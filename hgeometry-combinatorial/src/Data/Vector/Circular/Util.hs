@@ -3,7 +3,6 @@ module Data.Vector.Circular.Util where
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.Lens
-import           Data.Foldable as F
 import           Data.Maybe
 import           Data.Semigroup.Foldable
 import qualified Data.Vector                 as V
@@ -11,7 +10,6 @@ import           Data.Vector.Circular        as CV
 import qualified Data.Vector.NonEmpty        as NV
 import           Test.QuickCheck             (Arbitrary (..), NonEmptyList (..))
 
-import Debug.Trace
 
 -- FIXME: Upstream this to the non-empty vector library?
 instance Foldable1 NV.NonEmptyVector
