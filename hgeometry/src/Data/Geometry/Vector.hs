@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
@@ -23,28 +23,35 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , xComponent, yComponent, zComponent
                            ) where
 
-import           Control.Applicative (liftA2)
-import           Control.Lens (Lens')
+import           Control.Applicative               (liftA2)
+import           Control.Lens                      (Lens')
 import           Control.Monad.State
-import qualified Data.Foldable as F
+import qualified Data.Foldable                     as F
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector.VectorFamily
-import           Data.Geometry.Vector.VectorFixed (C(..))
-import qualified Data.Vector.Fixed as FV
+import           Data.Geometry.Vector.VectorFixed  (C (..))
+import qualified Data.Vector.Fixed                 as FV
 import           GHC.TypeLits
-import           Linear.Affine (Affine(..), qdA, distanceA)
-import           Linear.Metric (dot,norm,signorm,quadrance)
-import           Linear.Vector as LV hiding (E(..))
-import           System.Random (Random(..))
-import           Test.QuickCheck (Arbitrary(..),infiniteList)
+import           Linear.Affine                     (Affine (..), distanceA, qdA)
+import           Linear.Metric                     (dot, norm, quadrance, signorm)
+import           Linear.Vector                     as LV hiding (E (..))
+import           System.Random                     (Random (..))
+import           Test.QuickCheck                   (Arbitrary (..), Arbitrary1 (..), infiniteList,
+                                                    infiniteListOf)
 
 --------------------------------------------------------------------------------
+
+-- $setup
+-- >>> import Control.Lens
 
 type instance Dimension (Vector d r) = d
 type instance NumType   (Vector d r) = r
 
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
+
+instance (Arity d) => Arbitrary1 (Vector d) where
+  liftArbitrary gen = vectorFromListUnsafe <$> infiniteListOf gen
 
 instance (Random r, Arity d) => Random (Vector d r) where
   randomR (lows,highs) g0 = flip runState g0 $
@@ -149,14 +156,32 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 --------------------------------------------------------------------------------
 -- * Helper functions specific to two and three dimensional vectors
 
+-- | Shorthand to access the first component
+--
+-- >>> Vector3 1 2 3 ^. xComponent
+-- 1
+-- >>> Vector2 1 2 & xComponent .~ 10
+-- Vector2 [10,2]
 xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
 xComponent = element (C :: C 0)
 {-# INLINABLE xComponent #-}
 
+-- | Shorthand to access the second component
+--
+-- >>> Vector3 1 2 3 ^. yComponent
+-- 2
+-- >>> Vector2 1 2 & yComponent .~ 10
+-- Vector2 [1,10]
 yComponent :: (2 <= d, Arity d) => Lens' (Vector d r) r
 yComponent = element (C :: C 1)
 {-# INLINABLE yComponent #-}
 
+-- | Shorthand to access the third component
+--
+-- >>> Vector3 1 2 3 ^. zComponent
+-- 3
+-- >>> Vector3 1 2 3 & zComponent .~ 10
+-- Vector3 [1,2,10]
 zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
 zComponent = element (C :: C 2)
 {-# INLINABLE zComponent #-}

@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -27,8 +26,6 @@ import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           Test.QuickCheck(Arbitrary(..))
 
-import           Data.Ratio
-
 --------------------------------------------------------------------------------
 
 -- | Part of a line. The interval is ranged based on the vector of the
@@ -36,7 +33,14 @@ import           Data.Ratio
 data SubLine d p s r = SubLine { _line     :: Line d r
                                , _subRange :: Interval p s
                                }
-makeLenses ''SubLine
+
+-- | Line part of SubLine.
+line :: Lens (SubLine d1 p s r1) (SubLine d2 p s r2) (Line d1 r1) (Line d2 r2)
+line = lens _line (\sub l -> SubLine l (_subRange sub))
+
+-- | Interval part of SubLine.
+subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
+subRange = lens _subRange (SubLine . _line)
 
 type instance Dimension (SubLine d p s r) = d
 
@@ -169,6 +173,7 @@ getEndPointsUnBounded sl = second (fmap f) $ sl^.subRange
   where
     f = flip pointAt (sl^.line)
 
+-- | Create a SubLine that covers the original line from -infinity to +infinity.
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r) r
 fromLine l = SubLine l (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
 
@@ -186,6 +191,6 @@ fromLine l = SubLine l (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
 -- testzz = let f  = bimap (fmap Val) (const ())
 --          in
 
-testz :: SubLine 2 () Rational Rational
-testz = SubLine (Line (Point2 0 0) (Vector2 10 0))
-                (Interval (Closed (0 % 1 :+ ())) (Closed (1 % 1 :+ ())))
+-- testz :: SubLine 2 () Rational Rational
+-- testz = SubLine (Line (Point2 0 0) (Vector2 10 0))
+--                 (Interval (Closed (0 % 1 :+ ())) (Closed (1 % 1 :+ ())))

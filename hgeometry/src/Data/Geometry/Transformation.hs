@@ -1,5 +1,12 @@
 {-# LANGUAGE Unsafe #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Transformation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Transformation where
 
 import           Control.Lens (iso,set,Iso,imap)
@@ -12,6 +19,10 @@ import qualified Data.Geometry.Vector as V
 import           Data.Proxy
 import           GHC.TypeLits
 
+{- $setup
+>>> import Data.Geometry.LineSegment
+>>> import Data.Ext
+-}
 
 --------------------------------------------------------------------------------
 -- * Transformations
@@ -19,6 +30,7 @@ import           GHC.TypeLits
 -- | A type representing a Transformation for d dimensional objects
 newtype Transformation d r = Transformation { _transformationMatrix :: Matrix (d + 1) (d + 1) r }
 
+-- | Transformations and Matrices are isomorphic.
 transformationMatrix :: Iso (Transformation d r)       (Transformation d       s)
                             (Matrix (d + 1) (d + 1) r) (Matrix (d + 1) (d + 1) s)
 transformationMatrix = iso _transformationMatrix Transformation
@@ -54,11 +66,19 @@ inverseOf = Transformation . inverse' . _transformationMatrix
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
 
+-- | Apply a transformation to a collection of objects.
+--
+-- >>> transformAllBy (uniformScaling 2) [Point1 1, Point1 2, Point1 3]
+-- [Point1 2.0,Point1 4.0,Point1 6.0]
 transformAllBy :: (Functor c, IsTransformable g)
                => Transformation (Dimension g) (NumType g) -> c g -> c g
 transformAllBy t = fmap (transformBy t)
 
-
+-- | Apply transformation to a PointFunctor, ie something that contains
+--   points. Polygons, triangles, line segments, etc, are all PointFunctors.
+--
+-- >>> transformPointFunctor (uniformScaling 2) $ OpenLineSegment (Point1 1 :+ ()) (Point1 2 :+ ())
+-- LineSegment (Open (Point1 2.0 :+ ())) (Open (Point1 4.0 :+ ()))
 transformPointFunctor   :: ( PointFunctor g, Fractional r, d ~ Dimension (g r)
                            , Arity d, Arity (d + 1)
                            ) => Transformation d r -> g r -> g r
@@ -78,15 +98,31 @@ instance (Fractional r, Arity d, Arity (d + 1))
 --------------------------------------------------------------------------------
 -- * Common transformations
 
+-- | Create translation transformation from a vector.
+--
+-- >>> transformBy (translation $ Vector2 1 2) $ Point2 2 3
+-- Point2 3.0 5.0
 translation   :: (Num r, Arity d, Arity (d + 1))
               => Vector d r -> Transformation d r
 translation v = Transformation . Matrix $ imap transRow (snoc v 1)
 
-
+-- | Create scaling transformation from a vector.
+--
+-- >>> transformBy (scaling $ Vector2 2 (-1)) $ Point2 2 3
+-- Point2 4.0 (-3.0)
 scaling   :: (Num r, Arity d, Arity (d + 1))
           => Vector d r -> Transformation d r
 scaling v = Transformation . Matrix $ imap mkRow (snoc v 1)
 
+-- | Create scaling transformation from a scalar that is applied
+--   to all dimensions.
+--
+-- >>> transformBy (uniformScaling 5) $ Point2 2 3
+-- Point2 10.0 15.0
+-- >>> uniformScaling 5 == scaling (Vector2 5 5)
+-- True
+-- >>> uniformScaling 5 == scaling (Vector3 5 5 5)
+-- True
 uniformScaling :: (Num r, Arity d, Arity (d + 1)) => r -> Transformation d r
 uniformScaling = scaling . pure
 
@@ -94,17 +130,29 @@ uniformScaling = scaling . pure
 --------------------------------------------------------------------------------
 -- * Functions that execute transformations
 
+-- | Translate a given point.
+--
+-- >>> translateBy (Vector2 1 2) $ Point2 2 3
+-- Point2 3.0 5.0
 translateBy :: ( IsTransformable g, Num (NumType g)
                , Arity (Dimension g), Arity (Dimension g + 1)
                ) => Vector (Dimension g) (NumType g) -> g -> g
 translateBy = transformBy . translation
 
+-- | Scale a given point.
+--
+-- >>> scaleBy (Vector2 2 (-1)) $ Point2 2 3
+-- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
            , Arity (Dimension g), Arity (Dimension g + 1)
            ) => Vector (Dimension g) (NumType g) -> g -> g
 scaleBy = transformBy . scaling
 
 
+-- | Scale a given point uniformly in all dimensions.
+--
+-- >>> scaleUniformlyBy 5 $ Point2 2 3
+-- Point2 10.0 15.0
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
                     , Arity (Dimension g), Arity (Dimension g + 1)
                     ) => NumType g -> g -> g

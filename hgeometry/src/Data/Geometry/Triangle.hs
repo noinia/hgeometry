@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- | Triangles in \(d\)-dimensional space.
 module Data.Geometry.Triangle where
 
 import           Control.DeepSeq
@@ -29,7 +30,7 @@ import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
 
--- | Triangles in \(d\)-dimensional space.
+-- | A triangle in \(d\)-dimensional space.
 data Triangle d p r = Triangle !(Point d r :+ p)
                                !(Point d r :+ p)
                                !(Point d r :+ p)
@@ -61,6 +62,7 @@ instance Field3 (Triangle d p r) (Triangle d p r) (Point d r :+ p) (Point d r :+
 type instance NumType   (Triangle d p r) = r
 type instance Dimension (Triangle d p r) = d
 
+-- | A \(d\)-dimensional triangle is isomorphic to a triple of \(d\)-dimensional points.
 _TriangleThreePoints :: Iso' (Triangle d p r) (Three (Point d r :+ p))
 _TriangleThreePoints = iso (\(Triangle p q r) -> Three p q r) (\(Three p q r) -> Triangle p q r)
 
@@ -76,7 +78,7 @@ pattern Triangle' p q r <- Triangle (p :+ ()) (q :+ ()) (r :+ ())
   where
     Triangle' p q r = Triangle (ext p) (ext q) (ext r)
 
-
+-- | Get the three line-segments that make up the sides of a triangle.
 sideSegments                  :: Triangle d p r -> [LineSegment d p r]
 sideSegments (Triangle p q r) =
   [ClosedLineSegment p q, ClosedLineSegment q r, ClosedLineSegment r p]
@@ -100,7 +102,7 @@ doubleArea (Triangle a b c) = abs $ ax*by - ax*cy
 isDegenerateTriangle :: (Num r, Eq r) => Triangle 2 p r -> Bool
 isDegenerateTriangle = (== 0) . doubleArea
 
--- | get the inscribed disk. Returns Nothing if the triangle is degenerate,
+-- | Get the inscribed disk. Returns Nothing if the triangle is degenerate,
 -- i.e. if the points are colinear.
 inscribedDisk                  :: (Eq r, Fractional r)
                                => Triangle 2 p r -> Maybe (Disk () r)

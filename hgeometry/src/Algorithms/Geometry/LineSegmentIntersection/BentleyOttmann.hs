@@ -10,7 +10,13 @@
 -- and Ottmann.
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
+module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+  ( intersections
+  , interiorIntersections
+    -- FIXME: Move ordAt and xCoordAt to Data.Geometry.LineSegment?
+  , ordAt
+  , xCoordAt
+  ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)

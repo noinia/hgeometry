@@ -1,3 +1,11 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SoS.Symbolic
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SoS.Symbolic(
     EpsFold
   , eps, mkEpsFold

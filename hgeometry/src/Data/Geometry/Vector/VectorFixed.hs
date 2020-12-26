@@ -1,5 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Vector.VectorFixed
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Vector.VectorFixed where
 
 import           Control.DeepSeq
@@ -9,6 +16,7 @@ import qualified Data.Foldable as F
 import           Data.Proxy
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed (Arity)
+import           Data.Functor.Classes
 import           Data.Vector.Fixed.Boxed
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
@@ -64,6 +72,11 @@ instance (Show r, Arity d) => Show (Vector d r) where
                             ]
 
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
+
+-- FIXME: Upstream Eq1 instance to 'fixed-vector' package.
+instance Arity d => Eq1 (Vector d) where
+  liftEq eq (Vector lhs) (Vector rhs) = V.and $ V.zipWith eq lhs rhs
+
 deriving instance (Ord r, Arity d)  => Ord (Vector d r)
 -- deriving instance Arity d  => Functor (Vector d)
 

@@ -10,26 +10,24 @@
 -- Line segment data type and some basic functions on line segments
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.LineSegment( LineSegment
-                                , pattern LineSegment
-                                , pattern LineSegment'
-                                , pattern ClosedLineSegment
-                                , pattern OpenLineSegment
-                                , endPoints
+module Data.Geometry.LineSegment
+  ( LineSegment(LineSegment, LineSegment', ClosedLineSegment, OpenLineSegment)
+  , endPoints
 
-                                , _SubLine
-                                , module Data.Geometry.Interval
+  , _SubLine
+  , module Data.Geometry.Interval
 
 
-                                , toLineSegment
-                                , onSegment
-                                , orderedEndPoints
-                                , segmentLength
-                                , sqDistanceToSeg, sqDistanceToSegArg
-                                , flipSegment
+  , toLineSegment
+  , onSegment
+  , orderedEndPoints
+  , segmentLength
+  , sqSegmentLength
+  , sqDistanceToSeg, sqDistanceToSegArg
+  , flipSegment
 
-                                , interpolate
-                                ) where
+  , interpolate
+  ) where
 
 import           Control.Arrow ((&&&))
 import           Control.DeepSeq
@@ -64,9 +62,6 @@ newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
 makeLenses ''LineSegment
 
 
--- | Pattern that essentially models the line segment as a:
---
--- >>> data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p)) (EndPoint (Point d r :+ p))
 pattern LineSegment           :: EndPoint (Point d r :+ p)
                               -> EndPoint (Point d r :+ p)
                               -> LineSegment d p r
@@ -259,6 +254,8 @@ orderedEndPoints s = if pc <= qc then (p, q) else (q,p)
 segmentLength                     :: (Arity d, Floating r) => LineSegment d p r -> r
 segmentLength ~(LineSegment' p q) = distanceA (p^.core) (q^.core)
 
+sqSegmentLength                     :: (Arity d, Num r) => LineSegment d p r -> r
+sqSegmentLength ~(LineSegment' p q) = qdA (p^.core) (q^.core)
 
 -- | Squared distance from the point to the Segment s. The same remark as for
 -- the 'sqDistanceToSegArg' applies here.
@@ -304,13 +301,13 @@ flipSegment s = let p = s^.start
 -- | Linearly interpolate the two endpoints with a value in the range [0,1]
 --
 -- >>> interpolate 0.5 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [5.0,5.0]
+-- Point2 5.0 5.0
 -- >>> interpolate 0.1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [1.0,1.0]
+-- Point2 1.0 1.0
 -- >>> interpolate 0 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [0.0,0.0]
+-- Point2 0.0 0.0
 -- >>> interpolate 1 $ ClosedLineSegment (ext $ origin) (ext $ Point2 10.0 10.0)
--- Point2 [10.0,10.0]
+-- Point2 10.0 10.0
 interpolate                      :: (Fractional r, Arity d) => r -> LineSegment d p r -> Point d r
 interpolate t (LineSegment' p q) = Point $ (asV p ^* (1-t)) ^+^ (asV q ^* t)
   where

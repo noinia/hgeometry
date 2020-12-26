@@ -14,10 +14,9 @@
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
-                 , Range(..)
+                 , Range(.., OpenRange, ClosedRange, Range')
                  , prettyShow
                  , lower, upper
-                 , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper, midPoint, clampTo
                  , isValid, covers
 
@@ -56,6 +55,14 @@ _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
 _unEndPoint (Closed a) = a
 
+-- | Access lens for EndPoint value regardless of whether it is open or closed.
+--
+-- >>> Open 5 ^. unEndPoint
+-- 5
+-- >>> Closed 10 ^. unEndPoint
+-- 10
+-- >>> Open 4 & unEndPoint .~ 0
+-- Open 0
 unEndPoint :: Lens (EndPoint a) (EndPoint b) a b
 unEndPoint = lens _unEndPoint f
   where
@@ -63,10 +70,12 @@ unEndPoint = lens _unEndPoint f
     f (Closed _) a = Closed a
 {-# INLINE unEndPoint #-}
 
+-- | True iff EndPoint is open.
 isOpen          :: EndPoint a -> Bool
-isOpen (Open _) = True
-isOpen _        = False
+isOpen Open{} = True
+isOpen _      = False
 
+-- | True iff EndPoint is closed.
 isClosed :: EndPoint a -> Bool
 isClosed = not . isOpen
 

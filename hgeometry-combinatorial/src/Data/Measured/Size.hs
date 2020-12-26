@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Measured.Size
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Measured.Size where
 
 import Control.DeepSeq
@@ -6,6 +13,7 @@ import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
+-- | Measured size. Always non-negative.
 newtype Size = Size Word deriving (Show,Read,Eq,Num,Integral,Enum,Real,Ord,Generic,NFData)
 
 instance Semigroup Size where
