@@ -130,7 +130,7 @@ cutEars p = map (cutEarAt p) ears
 
 spec :: Spec
 spec = do
-  testCases "test/Data/Geometry/pointInPolygon.ipe"
+  testCases "src/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
     property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
       let p = SimplePolygon pts in
@@ -158,7 +158,7 @@ spec = do
 
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

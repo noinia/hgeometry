@@ -13,15 +13,16 @@ import           Data.Geometry.Ball (fromDiameter, disk, Disk)
 import           Data.Geometry.Ipe
 import           Data.Maybe
 import           System.Random (mkStdGen)
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.Util
 
 
 spec :: Spec
-spec = testCases "test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
+spec = testCases "src/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe"
 
 testCases    :: FilePath -> Spec
-testCases fp = (runIO $ readInput fp) >>= \case
+testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading Smallest enclosing disk file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs

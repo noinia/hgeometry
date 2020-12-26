@@ -12,6 +12,7 @@ import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.PolygonSpec ()
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
+import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.QuickCheck (Arbitrary(..), property, suchThat, (===), (==>))
 import           Test.QuickCheck.Instances ()
@@ -24,7 +25,7 @@ type R = RealNumber 10
 
 spec :: Spec
 spec = do
-  testCases "test/Data/Geometry/Polygon/Convex/convexTests.ipe"
+  testCases "src/Data/Geometry/Polygon/Convex/convexTests.ipe"
   specify "extremes convex == extremesLinear convex" $
     property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
       quadrance u > 0 ==>
@@ -33,7 +34,7 @@ spec = do
       in extremes u hull === extremesLinear u (hull^.simplePolygon)
 
 testCases    :: FilePath -> Spec
-testCases fp = runIO (readInputFromFile fp) >>= \case
+testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading ConvexTests file" $
                    expectationFailure . unwords $
                      [ "Failed to read ipe file", show fp, ":", show e]

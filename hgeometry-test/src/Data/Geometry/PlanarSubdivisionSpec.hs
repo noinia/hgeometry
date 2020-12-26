@@ -232,13 +232,13 @@ noEmptyFacesSpec = describe "fromConnectedSegments, correct handling of high deg
       draw' testSegs2 `shouldBe` mempty
     it "ps3" $
       draw' testSegs3 `shouldBe` mempty
-    -- segs4 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments_simple2.ipe"
+    -- segs4 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.ipe"
     -- it "connected_simple2.ipe" $
     --   draw' segs4 `shouldBe` mempty
-    -- segs2 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments_simple.ipe"
+    -- segs2 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments_simple.ipe"
     -- it "connected_simple.ipe" $
     --   draw' segs2 `shouldBe` mempty
-    -- segs3 <- runIO $ readFromIpeFile "test/Data/Geometry/connectedsegments.ipe"
+    -- segs3 <- runIO $ readFromIpeFile "src/Data/Geometry/connectedsegments.ipe"
     -- it "connectedsegments.ipe" $
     --   draw' segs3 `shouldBe` mempty
   where
@@ -251,7 +251,7 @@ readFromIpeFile fp = do Right page <- readSinglePageFile fp
 
 data Test1 = Test1
 
-testX = do segs <- readFromIpeFile "test/Data/Geometry/connectedsegments_simple2.ipe"
+testX = do segs <- readFromIpeFile "src/Data/Geometry/connectedsegments_simple2.ipe"
            let ps = fromConnectedSegments (Identity Test1) segs
            print $ draw ps
 
