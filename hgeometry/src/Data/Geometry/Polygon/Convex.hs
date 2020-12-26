@@ -41,8 +41,6 @@ import qualified Data.List.NonEmpty             as NonEmpty
 import           Data.Maybe                     (fromJust)
 import           Data.Ord                       (comparing)
 import           Data.Semigroup.Foldable        (Foldable1 (..))
-import           Data.Sequence                  (ViewL (..), ViewR (..), viewl, viewr)
-import qualified Data.Sequence                  as S
 import           Data.Util
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
@@ -119,25 +117,37 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 --
 -- pre: The input polygon is strictly convex.
 --
--- running time: \(O(\log^2 n)\)
+-- running time: \(O(\log n)\)
 maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
-maxInDirection u = findMaxWithV (cmpExtreme u)
+maxInDirection u = findMaxWith (cmpExtreme u)
 
+-- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
+--        Use unsafe indexing.
 -- O(log n)
-findMaxWithV :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
+findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
-findMaxWithV cmp p = CV.index v (CV.binarySearch fn v)
+findMaxWith cmp p = CV.index v (worker 0 n)
   where
+    n = F.length v
     v = p ^. simplePolygon.outerBoundary
-    a `lt` b = a `cmp` b == LT
-    fn idx
-      | cur `lt` left  = GT -- `idx` is greater than it should be. Go left.
-      | cur `lt` right = LT -- `idx` is less than it should be. Go right.
-      | otherwise      = EQ -- cur is greater or equal to points on either side.
+    a `icmp` b = CV.index v a `cmp` CV.index v b
+    worker a b
+      | localMaximum c = c
+      | a+1==b         = b
+      | otherwise      =
+        case  (isUpwards a, isUpwards c, c `icmp` a /= LT) of
+          (True, False, _)      -> worker a c -- A is up, C is down, pick [a,c]
+          (True, True, True)    -> worker c b -- A is up, C is up, C is GTE A, pick [c,b]
+          (True, True, False)   -> worker a c -- A is up, C is LT A, pick [a,c]
+          (False, True, _)      -> worker c b -- A is down, C is up, pick [c,b]
+          (False, False, False) -> worker c b -- A is down, C is down, C is LT A, pick [c,b]
+          (False, _, True)      -> worker a c -- A is down, C is GTE A, pick [a,c]
       where
-        cur = CV.index v idx
-        left = CV.index v (idx-1)
-        right = CV.index v (idx+1)
+        c = (a+b) `div` 2
+        localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
+    isUpwards idx = idx `icmp` (idx+1) /= GT
+
+{- Convex binary search using sequences in O(log^2 n)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
@@ -177,7 +187,7 @@ findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
     -- the Edge from a to b is upwards w.r.t b if a is not larger than b
     isUpwards a (viewl -> b :< _) = (a `cmp` b) /= GT
     isUpwards _ _                 = error "isUpwards: no edge endpoint"
-
+-}
 
 tangentCmp       :: (Num r, Ord r)
                  => Point 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering

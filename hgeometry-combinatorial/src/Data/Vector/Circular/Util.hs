@@ -57,21 +57,5 @@ xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
 instance Arbitrary a => Arbitrary (CircularVector a) where
   arbitrary = unsafeFromList <$> (getNonEmpty <$> arbitrary)
 
-binarySearch :: (Int -> Ordering) -> CircularVector a -> Int
-binarySearch cmpFn cv = worker (-n) n
-  where
-    n = F.length cv
-    worker sMin sMax
-      | sMin == sMax = sMin
-      | sMin > sMax = error (show (sMin, sMax))
-      | otherwise =
-      let middle = sMin + (sMax-sMin) `div` 2 in
-      case cmpFn middle of
-        EQ -> middle
-        -- The wanted element is to the right.
-        LT -> worker (middle+1) sMax
-        -- The wanted element is to the left.
-        GT -> worker sMin middle
-
 map :: (a -> b) -> CircularVector a -> CircularVector b
 map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot
