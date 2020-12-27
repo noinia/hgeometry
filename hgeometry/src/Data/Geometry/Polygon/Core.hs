@@ -22,6 +22,7 @@ module Data.Geometry.Polygon.Core
   , unsafeFromVector
   , toVector
 
+  , size
   , polygonVertices, listEdges
 
   , outerBoundary, outerBoundaryVector
@@ -340,6 +341,11 @@ holeList                     :: Polygon t p r -> [Polygon Simple p r]
 holeList SimplePolygon{}     = []
 holeList (MultiPolygon _ hs) = hs
 
+
+-- | Vertex count.
+size :: Polygon t p r -> Int
+size (SimplePolygon (Vertices cv)) = F.length cv
+size (MultiPolygon b hs) = sum (map size (b:hs))
 
 -- | The vertices in the polygon. No guarantees are given on the order in which
 -- they appear!

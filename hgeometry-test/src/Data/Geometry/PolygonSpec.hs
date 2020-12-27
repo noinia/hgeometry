@@ -34,7 +34,7 @@ allSimplePolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
@@ -52,7 +52,7 @@ allMultiPolygons = unsafePerformIO $ do
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
 
 allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons

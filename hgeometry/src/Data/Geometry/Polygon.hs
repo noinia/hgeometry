@@ -24,6 +24,7 @@ module Data.Geometry.Polygon
 
     -- * Accessors
 
+  , size
   , polygonVertices, listEdges
 
   , outerBoundary, outerBoundaryVector

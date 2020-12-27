@@ -83,7 +83,7 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, ConvexPolygon $ fromPoints [withID p i])
+                     in (IM.singleton i CL.empty, ConvexPolygon $ unsafeFromPoints [withID p i])
   | size' pts <= 3 = let pts'  = NonEmpty.fromList
                                . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                . F.toList $ pts
