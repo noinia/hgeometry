@@ -76,7 +76,8 @@ import           Data.Bitraversable
 import           Data.Ext
 import qualified Data.Foldable                                              as F
 import           Data.Geometry.Boundary
-import           Data.Geometry.Box
+import           Data.Geometry.Box                                          (IsBoxable (..),
+                                                                             boundingBoxList')
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
@@ -262,7 +263,7 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
 
 -- * Functions on Polygons
 
--- | Lens access to the outer boundary vector of a polygon.
+-- | Getter access to the outer boundary vector of a polygon.
 --
 -- >>> toList (simpleTriangle ^. outerBoundaryVector)
 -- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
@@ -273,6 +274,13 @@ outerBoundaryVector = to g
     g (SimplePolygon (Vertices vs))                  = vs
     g (MultiPolygon (SimplePolygon (Vertices vs)) _) = vs
 
+-- | Lens access to the outer boundary vector of a polygon.
+--
+-- >>> toList (simpleTriangle ^. unsafeOuterBoundaryVector)
+-- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
+--
+-- >>> simpleTriangle & unsafeOuterBoundaryVector .~ CV.singleton (Point2 0 0 :+ ())
+-- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
 unsafeOuterBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 unsafeOuterBoundaryVector = lens g s
   where
@@ -345,7 +353,7 @@ holeList (MultiPolygon _ hs) = hs
 -- | Vertex count.
 size :: Polygon t p r -> Int
 size (SimplePolygon (Vertices cv)) = F.length cv
-size (MultiPolygon b hs) = sum (map size (b:hs))
+size (MultiPolygon b hs)           = sum (map size (b:hs))
 
 -- | The vertices in the polygon. No guarantees are given on the order in which
 -- they appear!
@@ -399,9 +407,15 @@ instance (Num a, Ord a) => Ord (PlainRatio a) where
 -- | /O(n log n)/. Creates a simple polygon from the given list of vertices.
 --
 -- The following conditions must be true and are checked:
+--
 --  * The polygon has at least three vertices.
 --  * Polygon edges may not intersect.
 --  * Vertices may not be repeated.
+--
+-- Note: Using 'Double' or 'Float' for coordinates may trigger the
+--       self-intersection check if edges are very close together.
+--       If this happens, you may want to use `unsafeFromPoints` or
+--       switch to `Rational`.
 fromPoints :: forall p r. (Ord r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
 fromPoints lst@(_:_:_:_) =
   let p = toCounterClockWiseOrder . unsafeFromCircularVector . CV.unsafeFromList $ lst
@@ -413,7 +427,7 @@ fromPoints lst@(_:_:_:_) =
       else p
 fromPoints _ = error "Data.Geometry.Polygon.fromPoints: Polygons must have at least three points."
 
--- | /O(1)/. Creates a simple polygon from the given list of vertices.
+-- | /O(n)/. Creates a simple polygon from the given list of vertices.
 --
 -- pre: the input list constains no repeated vertices.
 unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
