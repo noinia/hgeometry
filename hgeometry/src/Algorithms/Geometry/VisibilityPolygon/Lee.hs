@@ -74,9 +74,13 @@ visibilityPolygon   :: forall p t r. (Ord r, Fractional r, Show r, Show p)
                     => Point 2 r
                     -> Polygon t p r
                     -> StarShapedPolygon (Definer p (p,p) r) r
-visibilityPolygon q = visibilityPolygon' q . map asClosed . listEdges
+visibilityPolygon q = visibilityPolygon' q . closedEdges
+
+closedEdges :: Polygon t p r -> [LineSegment 2 p r :+ (p,p)]
+closedEdges = map asClosed . listEdges
   where
     asClosed (LineSegment' u v) = ClosedLineSegment u v :+ (u^.extra,v^.extra)
+
 
 -- | computes the visibility polygon of a set of \(n\) disjoint
 -- segments. The input segments are allowed to share endpoints, but no
@@ -95,18 +99,30 @@ visibilityPolygon'        :: forall p r e. (Ord r, Fractional r, Show r, Show p,
 visibilityPolygon' q segs = fromPoints . reverse . snd
                           $ List.foldl' (handleEvent q) (statusStruct,[]) events
   where
-    statusStruct = fromListByDistTo q segs
+    statusStruct = let res = fromListByDistTo q segs in traceShow ("initial SS", res) res
+    events       = computeEvents q segs
 
-    events    :: [Event p e r]
-    events    = map (mkEvent q)
-              . groupBy'    (ccwCmpAround (ext q))
-              . List.sortBy (ccwCmpAround (ext q) <> cmpByDistanceTo (ext q))
-              $ endPoints'
-
+-- | Computes the events in the sweep
+computeEvents        :: (Ord r, Fractional r, Show r, Show p, Show e)
+                     => Point 2 r
+                     -> [LineSegment 2 p r :+ e]
+                     -> [Event p e r]
+computeEvents q segs = addLastEvent
+                     . map (mkEvent q)
+                     . groupBy'    (ccwCmpAround (ext q))
+                     . List.sortBy (ccwCmpAround (ext q) <> cmpByDistanceTo (ext q))
+                     $ endPoints'
+  where
     endPoints' = concatMap (\s@(LineSegment' u v :+ _) -> [ u&extra %~ (,v,s)
                                                           , v&extra %~ (,u,s)
                                                           ]
                            ) segs
+
+    -- add a copy of the first event in case the first event lies *on* the initial horizontal ray
+    addLastEvent es = case es of
+                        []                                              -> []
+                        (e:_) | (_eventVtx e)^.core.yCoord == q^.yCoord -> es <> [e]
+                              | otherwise                               -> es
 
 
 -- | Gets the combinatorial representation of the visibility polygon
@@ -118,33 +134,47 @@ toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundary
 
 ----------------------------------------
 
+data EventType a = Insertion a  | Deletion a deriving (Show,Eq,Ord)
+
+-- | Test if we should insert or delete a segment
+determineEventType                  :: (Ord r, Fractional r, Show r, Show p, Show e)
+                                    => Point 2 r
+                                    -> (Point 2 r :+ (p, Point 2 r :+ p, LineSegment 2 p r :+ e))
+                                    -> Maybe (EventType (LineSegment 2 p r :+ e))
+determineEventType q (u :+ (_,v,s)) =
+    case (ccwCmpAround (ext q) (ext u) v, isJust $ initialIntersection q s) of
+      (EQ, _)     -> Nothing -- colinear, so do nothing
+      (LT, False) -> Just $ Insertion s -- normal mode && u before v => insertion at u
+      (GT, False) -> Just $ Deletion s  -- normal mode && u after v  => deletion  at u
+      (LT, True)  -> if v^.core.yCoord > q^.yCoord then Just $ Insertion s
+                                                   else Just $ Deletion s
+                     -- u appears before v, and we intersect the initial ray,
+                     -- that must either mean that:
+                     --  * u lies *on* the ray, v lies strictly above the ray
+                     --          => insertion at u
+                     --  * u lies above (or on) the ray, v lies strictly below the ray
+                     --          => deletion at u
+
+      (GT, True)  -> if u^.yCoord > q^.yCoord then Just $ Deletion s
+                                              else Just $ Insertion s
+
+
 -- | Computes the right events happening at this slope
-mkEvent               :: (Ord r, Fractional r)
+mkEvent               :: (Ord r, Fractional r, Show r, Show p, Show e)
                       => Point 2 r
                       -> NonEmpty (Point 2 r :+ (p, Point 2 r :+ p, LineSegment 2 p r :+ e))
                       -> Event p e r
-mkEvent q ps@(p :| _) = Event (p&extra %~ \(e,_,_) -> e) (ins <> extraIns) (dels <> extraDels)
+mkEvent q ps@(p :| _) = Event (p&extra %~ \(e,_,_) -> e) ins dels
   where
-    -- figure out which segments start at u or end at u; segments
-    -- for which u appears "before" the other endpoint v sould
-    -- typically be inserted, whereas segments where u appears after v
-    -- should typically be deleted.
-    (ins',_colinears,dels') = partition3 (\(u :+ (_,v,_)) -> ccwCmpAround (ext q) (ext u) v) ps
-
-    -- if a segment s=uv would intersect the initial, rightward ray, it is currently classified
-    -- as "insert at u", since u would appear before v in the ordering. However, as s
-    -- is already in the initial status structure, we should categorize s as a deletion instead.
-    (extraDels,ins) = handleInitial ins'
-    (extraIns,dels) = handleInitial dels'
-
-    handleInitial = List.partition (isJust . initialIntersection q)
-                  . map (\(_ :+ (_,_,s)) -> s)
-
+    (ins,dels) = foldr (\p' acc@(ins',dels') -> case determineEventType q p' of
+                                                  Nothing            -> acc
+                                                  Just (Insertion s) -> (s:ins',dels')
+                                                  Just (Deletion  s) -> (ins',s:dels')
+                       ) ([],[]) ps
     -- FIXME: maybe we shoulnd't just return the first p in ps, but
     -- all of them.  if we want to do that we should make sure the
     -- points are orderd by increasing distance from p when sorting the points
     --
-
     -- FIXME: if q is a vertex in ps our partitioning stuff probably goes wrong
 
 
@@ -154,7 +184,7 @@ handleEvent                                     :: (Ord r, Fractional r, Show r,
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
                                                 -> Event p e r
                                                 -> (Status p e r, [Point 2 r :+ Definer p e r])
--- handleEvent q (ss,out) e | traceShow ("handle", e, ss, out) False = undefined
+handleEvent q (ss,out) e | traceShow ("handle", e, ss, out) False = undefined
 handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
   where
     ss' = flip (foldr (insertAt q p)) is
@@ -261,18 +291,16 @@ fromListByDistTo q = Set.mapMonotonic (^.extra)
 
 -- | Given q and a segment s, computes if the segment intersects the initial, rightward
 -- ray starting in q, and if so returns the (squared) distance from q to that point
--- together with the segment
+-- together with the segment.
 initialIntersection     :: forall r p e. (Ord r, Fractional r)
                         => Point 2 r -> LineSegment 2 p r :+ e
                         -> Maybe (r :+ (LineSegment 2 p r :+ e))
 initialIntersection q s =
-  case asA @(Point 2 r) $ (s^.core) `intersect` horizontalLine (q^.yCoord) of
-    Nothing -> Nothing
-    Just p  -> let d = p^.xCoord - q^.xCoord
-               in if d < 0 then Nothing else Just (d :+ s)
--- TODO: use the faster test intersecting things with a horizontalLine
-
-
+    case asA @(Point 2 r) $ (s^.core) `intersect` horizontalLine (q^.yCoord) of
+      Nothing -> Nothing
+      Just p  -> let d = p^.xCoord - q^.xCoord
+                 in if d < 0
+                    then Nothing else Just (d :+ s)
 
 --------------------------------------------------------------------------------
 -- * Comparators for the rotating ray
@@ -300,13 +328,14 @@ compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
                        => LineSegment 2 p r :+ e
                        -> LineSegment 2 p r :+ e
                        -> Ordering
-compareAroundEndPoint (LineSegment' p q :+ _)
-                      (LineSegment' s t :+ _)
+compareAroundEndPoint (sa@(LineSegment' p q) :+ _)
+                      (sb@(LineSegment' s t) :+ _)
+    -- | traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
     | p^.core == s^.core = ccwCmpAround p q t
     | p^.core == t^.core = ccwCmpAround p q s
     | q^.core == s^.core = ccwCmpAround q p t
     | q^.core == t^.core = ccwCmpAround q p s
-    | otherwise          = error "compareAroundEndPoint: precondition failed!"
+    | otherwise          = error $ "compareAroundEndPoint: precondition failed!" <> show (sa,sb)
 
 
 -- -- | Get the other endpoint of the segment
@@ -394,3 +423,9 @@ testz = fromPoints $ read "[Point2 [144,640] :+ (),Point2 [64,640] :+ (),Point2 
 
 queryP :: Point 2 R
 queryP = Point2 136 616
+
+query2 :: Point 2 R
+query2 = Point2 252 704
+
+spike :: SimplePolygon () R
+spike = read "SimplePolygon [Point2 160 656 :+ (),Point2 288 640 :+ (),Point2 320 704 :+ (),Point2 368 640 :+ (),Point2 368 736 :+ (),Point2 288 752 :+ (),Point2 256 704 :+ (),Point2 224 768 :+ ()]"
