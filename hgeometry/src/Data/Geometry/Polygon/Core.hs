@@ -61,14 +61,19 @@ module Data.Geometry.Polygon.Core
   , rotateRight
   ) where
 
+import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
 import           Control.DeepSeq
-import           Control.Lens                 (Getter, Lens', Prism', Traversal', lens, over,
-                                               prism', to, toListOf, view, (%~), (&), (.~), (^.))
+import           Control.Exception
+import           Control.Lens                                               (Getter, Lens', Prism',
+                                                                             Traversal', lens, over,
+                                                                             prism', to, toListOf,
+                                                                             view, (%~), (&), (.~),
+                                                                             (^.))
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable                as F
+import qualified Data.Foldable                                              as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Line
@@ -76,22 +81,25 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
-import           Data.Geometry.Triangle       (Triangle (..), inTriangle)
-import           Data.Geometry.Vector         (Additive (zero, (^+^)), Affine ((.+^), (.-.)), (*^),
-                                               (^*), (^/))
-import qualified Data.List                    as List
-import qualified Data.List.NonEmpty           as NonEmpty
-import           Data.Maybe                   (catMaybes, mapMaybe)
-import           Data.Ord                     (comparing)
-import           Data.Semigroup               (sconcat)
+import           Data.Geometry.Triangle                                     (Triangle (..),
+                                                                             inTriangle)
+import           Data.Geometry.Vector                                       (Additive (zero, (^+^)),
+                                                                             Affine ((.+^), (.-.)),
+                                                                             (*^), (^*), (^/))
+import qualified Data.List                                                  as List
+import qualified Data.List.NonEmpty                                         as NonEmpty
+import           Data.Maybe                                                 (catMaybes, mapMaybe)
+import           Data.Ord                                                   (comparing)
+import           Data.Ratio
+import           Data.Semigroup                                             (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence                as Seq
+import qualified Data.Sequence                                              as Seq
 import           Data.Util
-import           Data.Vector                  (Vector)
-import           Data.Vector.Circular         (CircularVector)
-import qualified Data.Vector.Circular         as CV
-import qualified Data.Vector.Circular.Util    as CV
-import           Data.Vinyl.CoRec             (asA)
+import           Data.Vector                                                (Vector)
+import           Data.Vector.Circular                                       (CircularVector)
+import qualified Data.Vector.Circular                                       as CV
+import qualified Data.Vector.Circular.Util                                  as CV
+import           Data.Vinyl.CoRec                                           (asA)
 
 -- import Data.RealNumber.Rational
 
@@ -341,11 +349,63 @@ polygonVertices p@SimplePolygon{}    = toNonEmpty $ p^.outerBoundaryVector
 polygonVertices (MultiPolygon vs hs) =
   sconcat $ toNonEmpty (polygonVertices vs) NonEmpty.:| map polygonVertices hs
 
--- | /O(n)/. Creates a simple polygon from the given list of vertices.
+
+
+
+-- Non-reducing ratio.
 --
--- pre: the input list constains no repeated vertices.
-fromPoints :: (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
-fromPoints = toCounterClockWiseOrder . unsafeFromCircularVector . CV.unsafeFromList
+-- We can take any instance of Num and turn it into a Fractional by wrapping it in
+-- PlainRatio. Thus we can query for edge intersections without imposing a Fractional
+-- constraint on our point-type.
+-- Why not use Data.Ratio, you ask? Well, Data.Ratio imposes a Integral constraint in
+-- order to reduce the fraction as much as possible. We don't care about reducing the
+-- fraction, we just want a boolean answer to whether some lines intersect or not.
+data PlainRatio a = Over a a deriving (Show)
+
+instance Num a => Num (PlainRatio a) where
+  (x `Over` y) + (x' `Over` y') = (x*y' + x'*y) `Over` (y*y')
+  (x `Over` y) - (x' `Over` y') = (x*y' - x'*y) `Over` (y*y')
+  (x `Over` y) * (x' `Over` y') = (x*x') `Over` (y*y')
+  negate (x `Over` y)           = negate x `Over` y
+  abs (x `Over` y)              = abs x `Over` y
+  signum (x `Over` _)           = signum x `Over` 1
+  fromInteger x                 = fromInteger x `Over` 1
+
+instance (Num a, Ord a) => Fractional (PlainRatio a) where
+  (x `Over` y) / (x' `Over` y')
+    | x' < 0    = negate (x*y') `Over` negate (y*x')
+    | otherwise = (x*y') `Over` (y*x')
+  recip (0 `Over` _) = throw RatioZeroDenominator
+  recip (x `Over` y)
+    | x < 0          = negate y `Over` negate x
+    | otherwise      = y `Over` x
+  fromRational r = fromInteger (numerator r) `Over` fromInteger (denominator r)
+
+instance (Num a, Eq a) => Eq (PlainRatio a) where
+  (x `Over` y) == (x' `Over` y') = x*y' == x'*y
+
+instance (Num a, Ord a) => Ord (PlainRatio a) where
+  (x `Over` y) `compare` (x' `Over` y') =
+    compare (x*y') (x'*y)
+
+
+
+-- | /O(n log n)/. Creates a simple polygon from the given list of vertices.
+--
+-- The following conditions must be true and are checked:
+--  * The polygon has at least three vertices.
+--  * Polygon edges may not intersect.
+--  * Vertices may not be repeated.
+fromPoints :: forall p r. (Ord r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
+fromPoints lst@(_:_:_:_) =
+  let p = toCounterClockWiseOrder . unsafeFromCircularVector . CV.unsafeFromList $ lst
+      plainEdges :: [LineSegment 2 p (PlainRatio r)]
+      plainEdges = map (fmap (\v -> Over v 1)) (listEdges p)
+      hasInteriorIntersections = not . null . BO.interiorIntersections
+  in if hasInteriorIntersections plainEdges
+      then error "Data.Geometry.Polygon.fromPoints: Found self-intersections or repeated vertices."
+      else p
+fromPoints _ = error "Data.Geometry.Polygon.fromPoints: Polygons must have at least three points."
 
 -- | /O(1)/. Creates a simple polygon from the given list of vertices.
 --
