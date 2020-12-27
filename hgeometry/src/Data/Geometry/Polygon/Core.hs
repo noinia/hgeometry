@@ -274,13 +274,13 @@ outerBoundaryVector = to g
     g (SimplePolygon (Vertices vs))                  = vs
     g (MultiPolygon (SimplePolygon (Vertices vs)) _) = vs
 
--- | Lens access to the outer boundary vector of a polygon.
+-- | Unsafe lens access to the outer boundary vector of a polygon.
 --
 -- >>> toList (simpleTriangle ^. unsafeOuterBoundaryVector)
 -- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
 --
 -- >>> simpleTriangle & unsafeOuterBoundaryVector .~ CV.singleton (Point2 0 0 :+ ())
--- [Point2 0 0 :+ (),Point2 2 0 :+ (),Point2 1 1 :+ ()]
+-- SimplePolygon [Point2 0 0 :+ ()]
 unsafeOuterBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 unsafeOuterBoundaryVector = lens g s
   where
@@ -327,17 +327,25 @@ polygonHoles' = \f -> \case
   p@SimplePolygon{}  -> pure p
   MultiPolygon vs hs -> MultiPolygon vs <$> f hs
 
--- | Access the i^th vertex on the outer boundary
+-- | /O(1)/ Access the i^th vertex on the outer boundary
+--
+-- >>> simplePoly ^. outerVertex 0
+-- Point2 0 0 :+ ()
 outerVertex   :: Int -> Getter (Polygon t p r) (Point 2 r :+ p)
 outerVertex i = outerBoundaryVector . CV.item i
 
--- | Access the i^th vertex on the outer boundary
+-- | /O(1)/ and /O(n)/. Access the i^th vertex on the outer boundary
+--
+-- >>> simplePoly ^. unsafeOuterVertex 0
+-- Point2 0 0 :+ ()
+-- >>> simplePoly & unsafeOuterVertex 0 .~ (Point2 10 10 :+ ())
+-- SimplePolygon [Point2 10 10 :+ (),Point2 10 0 :+ (),Point2 10 10 :+ (),Point2 5 15 :+ (),Point2 1 11 :+ ()]
 unsafeOuterVertex   :: Int -> Lens' (Polygon t p r) (Point 2 r :+ p)
 unsafeOuterVertex i = unsafeOuterBoundaryVector . CV.item i
 
 -- | Get the n^th edge along the outer boundary of the polygon. The edge is half open.
 --
--- running time: \(O(\log i)\)
+-- running time: \(O(1)\)
 outerBoundaryEdge     :: Int -> Polygon t p r -> LineSegment 2 p r
 outerBoundaryEdge i p = let u = p^.outerVertex i
                             v = p^.outerVertex (i+1)
