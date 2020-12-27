@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Geometry.LineSegmentSpec where
 
+import Control.Lens
 import Data.Ext
 import Data.Geometry.Line
 import Data.Geometry.LineSegment
@@ -9,7 +10,6 @@ import Data.Geometry.Point
 import Data.Geometry.Vector
 import Data.Intersection
 import Data.RealNumber.Rational
-import Data.Vinyl.CoRec
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
@@ -44,10 +44,15 @@ spec =
       (Point3 1 1 1 `intersects'` seg) `shouldBe` True
       (Point3 1 2 1 `intersects'` seg) `shouldBe` False
 
-    it "onSegment2 same result as generic onSegment (quickheck)" $
+    it "onSegment2 same result as generic onSegment (quickheck; (mostly) false points)" $
       property $ \(q :: Point 2 R) (seg :: LineSegment 2 () R) ->
         q `onSegment` seg == q `onSegment2` seg
-      -- FIXME: we should probably generate specific points on the segment instead.
+        -- note: most of the points above will likely not lie on the segment
+    it "onSegment2 same result as generic onSegment (quickheck ; true points)" $
+      property $ \(lambda :: R) (seg :: LineSegment 2 () R) ->
+        let v = (seg^.end.core) .-. (seg^.start.core)
+            q = (seg^.start.core) .+^ (lambda *^ v)
+        in q `onSegment` seg == q `onSegment2` seg
 
     it "intersecting line segment and line" $ do
       let s = ClosedLineSegment (ext origin) (ext $ Point2 10 (0 :: R))

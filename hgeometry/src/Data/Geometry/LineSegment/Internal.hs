@@ -221,16 +221,19 @@ type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
 -- As a user, you should typically just use 'intersects' instead.
 onSegment :: (Ord r, Fractional r, Arity d) => Point d r -> LineSegment d p r -> Bool
 p `onSegment` (LineSegment up vp) =
-      maybe False inRange' (scalarMultiple (p .-. u) (v .-. u))
+      maybe False inRange' (scalarMultiple (p .-. u) (v .-. u)) && whenDegenerate
     where
       u = up^.unEndPoint.core
       v = vp^.unEndPoint.core
 
-      atMostUpperBound  = if isClosed vp then (<= 1)  else (< 1)
-      atLeastLowerBound = if isClosed up then (<= lb) else (< lb)
-      lb = if u == v then 1 else 0
+      atMostUpperBound  = if isClosed vp then (<= 1) else (< 1)
+      atLeastLowerBound = if isClosed up then (0 <=) else (0 <)
+      whenDegenerate = (u == v) `implies` (p == u && isClosed up && isClosed vp)
+
+      a `implies` b = not a || b
 
       inRange' x = atLeastLowerBound x && atMostUpperBound x
+
 
 instance (Ord r, Fractional r, Arity d) => Point d r `IsIntersectableWith` LineSegment d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
@@ -284,13 +287,18 @@ onSegment2                          :: (Ord r, Num r)
 p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEndPoint) of
     CoLinear -> let su = p `onSide` lu
                     sv = p `onSide` lv
-                in su /= sv && if su == OnLine then isClosed u else False
-                            && if sv == OnLine then isClosed v else False
+                in su /= sv || isDegen
+                && ((su == OnLine) `implies` isClosed u)
+                && ((sv == OnLine) `implies` isClosed v)
     _        -> False
   where
+    isDegen = u^.unEndPoint.core == v^.unEndPoint.core
+
     (Line _ w) = perpendicularTo $ supportingLine s
     lu = Line (u^.unEndPoint.core) w
     lv = Line (v^.unEndPoint.core) w
+
+    a `implies` b = not a || b
 
 
 -- | The left and right end point (or left below right if they have equal x-coords)
