@@ -155,11 +155,11 @@ splitPolygon pg = bimap (f L) (f R . reverse)
     f x = map (&extra %~ (x :+))
     -- rotates the list to the vtx with max ycoord
     Just vs' = CV.findRotateTo (\v -> v^.core == vMaxY)
-             $ pg^.outerBoundary
+             $ pg^.outerBoundaryVector
     vMaxY = getY F.maximumBy
     vMinY = getY F.minimumBy
     swap' (Point2 x y) = Point2 y x
-    getY ff = let p = ff (comparing (^.core.to swap')) $ pg^.outerBoundary
+    getY ff = let p = ff (comparing (^.core.to swap')) $ pg^.outerBoundaryVector
               in p^.core
 
 

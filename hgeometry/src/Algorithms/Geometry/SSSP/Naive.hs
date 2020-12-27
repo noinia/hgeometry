@@ -19,7 +19,7 @@ import qualified Data.Foldable             as F
 import           Data.Geometry.Interval    (EndPoint (Closed, Open), end, start)
 import           Data.Geometry.LineSegment (LineSegment (..), sqSegmentLength)
 import           Data.Geometry.Point       (ccwCmpAroundWith)
-import           Data.Geometry.Polygon     (SimplePolygon, listEdges, outerBoundary)
+import           Data.Geometry.Polygon     (SimplePolygon, listEdges, outerBoundaryVector)
 import           Data.Intersection         (IsIntersectableWith (intersect),
                                             NoIntersection (NoIntersection))
 import           Data.Vector               (Vector)
@@ -51,7 +51,7 @@ sssp' p = runST $ do
         in next
   where
     infinity = read "Infinity" :: Double
-    n = F.length (p ^. outerBoundary)
+    n = F.length (p ^. outerBoundaryVector)
 
 -- O(n^3)
 visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Double)]
@@ -75,7 +75,7 @@ visibleEdges p = concat
   | (i, edge) <- zip [0..] edges
   ]
   where
-    vs = p^.outerBoundary
+    vs = p^.outerBoundaryVector
     n = F.length vs
     edges = listEdges p
 

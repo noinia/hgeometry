@@ -192,7 +192,7 @@ data InOrOut = In | Out deriving (Show,Eq)
 simplePgGraph :: Num r => PlaneGraph Test1 () () InOrOut r
 simplePgGraph = fromSimplePolygon (Identity Test1) pg In Out
   where
-    pg = fromPoints . map ext $ [ Point2 144 160
+    pg = unsafeFromPoints . map ext $ [ Point2 144 160
                                 , Point2 64 96
                                 , Point2 128 32
                                 , Point2 208 96

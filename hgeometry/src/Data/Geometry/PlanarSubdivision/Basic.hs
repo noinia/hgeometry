@@ -642,7 +642,7 @@ boundary' d ps = let (_,d',g) = asLocalD d ps
 --
 -- \(O(k)\), where \(k\) is the complexity of the outer boundary of the face
 rawFaceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = fromPoints pts :+ (ps^.dataOf i)
+rawFaceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
   where
     d   = V.head $ outerBoundaryDarts i ps
     pts = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
@@ -656,9 +656,9 @@ rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
                     -> SomePolygon v r :+ f
 rawFacePolygon i ps = case F.toList $ holesOf i ps of
                         [] -> Left  res                               :+ x
-                        hs -> Right (MultiPolygon vs $ map toHole hs) :+ x
+                        hs -> Right (MultiPolygon res $ map toHole hs) :+ x
   where
-    res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
+    res :+ x = rawFaceBoundary i ps
     toHole d = rawFaceBoundary (leftFace d ps) ps ^. core
 
 -- | Lists all *internal* faces of the planar subdivision.

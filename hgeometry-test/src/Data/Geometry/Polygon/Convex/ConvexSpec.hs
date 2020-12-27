@@ -30,7 +30,7 @@ spec = do
     property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
       quadrance u > 0 ==>
       let hull = over simplePolygon toCounterClockWiseOrder $
-            convexHull (CV.toNonEmpty (p^.outerBoundary))
+            convexHull (CV.toNonEmpty (p^.outerBoundaryVector))
       in extremes u hull === extremesLinear u (hull^.simplePolygon)
 
 testCases    :: FilePath -> Spec
@@ -101,10 +101,10 @@ minkowskiTest p q = it "minkowskisum" $
 
 naiveMinkowski     :: (Fractional r, Ord r)
                    => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p, q) r
-naiveMinkowski p q = over (simplePolygon.outerBoundary) bottomMost
+naiveMinkowski p q = over (simplePolygon.unsafeOuterBoundaryVector) bottomMost
                    . toCCW . convexHull . NonEmpty.fromList
-                   $ [ v .+. w | v <- p^..simplePolygon.outerBoundary.traverse
-                               , w <- q^..simplePolygon.outerBoundary.traverse
+                   $ [ v .+. w | v <- p^..simplePolygon.outerBoundaryVector.traverse
+                               , w <- q^..simplePolygon.outerBoundaryVector.traverse
                      ]
   where
     (v :+ ve) .+. (w :+ we) = v .+^ (toVec w) :+ (ve,we)
@@ -123,4 +123,4 @@ newtype CP r = CP (ConvexPolygon () r) deriving (Eq,Show)
 
 instance (Arbitrary r, Fractional r, Ord r) => Arbitrary (CP r) where
   arbitrary =  CP . toCCW <$> suchThat (convexHull <$> arbitrary)
-                              (\p -> p^.simplePolygon.outerBoundary.to length > 2)
+                              (\p -> p^.simplePolygon.outerBoundaryVector.to length > 2)

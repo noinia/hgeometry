@@ -27,7 +27,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 convexHull :: (Ord r, Num r)
            => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
 convexHull = unMerge
-           . divideAndConquer1 (Merge . ConvexPolygon . fromPoints . (:[]))
+           . divideAndConquer1 (Merge . ConvexPolygon . unsafeFromPoints . (:[]))
            . NonEmpty.sortBy (compare `on` (^.core))
 
 newtype Merge r p = Merge { unMerge :: ConvexPolygon p r }
