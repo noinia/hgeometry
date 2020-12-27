@@ -19,7 +19,7 @@ module Data.Geometry.LineSegment.Internal
 
 
   , toLineSegment
-  , onSegment
+  , onSegment, onSegment2
   , orderedEndPoints
   , segmentLength
   , sqSegmentLength
@@ -266,22 +266,19 @@ instance (Ord r, Fractional r) =>
 
 -- | Test if a point lies on a line segment.
 --
--- >>> (Point2 1 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> (Point2 1 0) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
--- >>> (Point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> (Point2 1 1) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (Point2 5 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> (Point2 5 0) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (Point2 (-1) 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> (Point2 (-1) 0) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- False
--- >>> (Point2 1 1) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ()))
+-- >>> (Point2 1 1) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 3 3 :+ ()))
 -- True
---
--- Note that the segments are assumed to be closed. So the end points lie on the segment.
---
--- >>> (Point2 2 0) `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> (Point2 2 0) `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
--- >>> origin `onSegment` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
+-- >>> origin `onSegment2` (ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ()))
 -- True
 onSegment2                          :: (Ord r, Num r)
                                     => Point 2 r -> LineSegment 2 p r -> Bool
@@ -295,12 +292,6 @@ p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEnd
     (Line _ w) = perpendicularTo $ supportingLine s
     lu = Line (u^.unEndPoint.core) w
     lv = Line (v^.unEndPoint.core) w
-
-
-
-
-
-
 
 
 -- | The left and right end point (or left below right if they have equal x-coords)

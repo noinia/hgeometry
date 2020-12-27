@@ -19,12 +19,14 @@ module Algorithms.Geometry.VisibilityPolygon.Lee where
 
 import           Control.Lens
 import           Control.Monad ((<=<))
-import           Data.Bifunctor (second)
+import           Data.Bifunctor (first, second)
 import qualified Data.Vector.Circular as CVec
 import           Data.Ext
 import           Data.Geometry.Line
+import           Data.Geometry.HalfLine
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
+import           Data.Geometry.Vector
 import           Data.Geometry.Polygon
 import           Data.Intersection
 import qualified Data.List as List
@@ -99,16 +101,23 @@ visibilityPolygon'        :: forall p r e. (Ord r, Fractional r, Show r, Show p,
 visibilityPolygon' q segs = fromPoints . reverse . snd
                           $ List.foldl' (handleEvent q) (statusStruct,[]) events
   where
-    statusStruct = let res = fromListByDistTo q segs in traceShow ("initial SS", res) res
+    statusStruct = let res = fromListByDistTo q s segs in traceShow ("initial SS", res) res
     events       = computeEvents q segs
+    s            = startingDirection events
+
+startingDirection    :: Fractional r => [Event p e r] -> Point 2 r
+startingDirection es = mid (List.head vs) (List.last vs)
+  where
+    vs = map (view core . _eventVtx) es
+    mid p q = p .+^ (q .-. p ^/ 2)
+
 
 -- | Computes the events in the sweep
 computeEvents        :: (Ord r, Fractional r, Show r, Show p, Show e)
                      => Point 2 r
                      -> [LineSegment 2 p r :+ e]
                      -> [Event p e r]
-computeEvents q segs = addLastEvent
-                     . map (mkEvent q)
+computeEvents q segs = map (mkEvent q)
                      . groupBy'    (ccwCmpAround (ext q))
                      . List.sortBy (ccwCmpAround (ext q) <> cmpByDistanceTo (ext q))
                      $ endPoints'
@@ -118,11 +127,11 @@ computeEvents q segs = addLastEvent
                                                           ]
                            ) segs
 
-    -- add a copy of the first event in case the first event lies *on* the initial horizontal ray
-    addLastEvent es = case es of
-                        []                                              -> []
-                        (e:_) | (_eventVtx e)^.core.yCoord == q^.yCoord -> es <> [e]
-                              | otherwise                               -> es
+    -- -- add a copy of the first event in case the first event lies *on* the initial horizontal ray
+    -- addLastEvent es = case es of
+    --                     []                                              -> []
+    --                     (e:_) | (_eventVtx e)^.core.yCoord == q^.yCoord -> es <> [e]
+    --                           | otherwise                               -> es
 
 
 -- | Gets the combinatorial representation of the visibility polygon
@@ -142,7 +151,7 @@ determineEventType                  :: (Ord r, Fractional r, Show r, Show p, Sho
                                     -> (Point 2 r :+ (p, Point 2 r :+ p, LineSegment 2 p r :+ e))
                                     -> Maybe (EventType (LineSegment 2 p r :+ e))
 determineEventType q (u :+ (_,v,s)) =
-    case (ccwCmpAround (ext q) (ext u) v, isJust $ initialIntersection q s) of
+    case (ccwCmpAround (ext q) (ext u) v, isJust $ initialIntersection q (q .+^ Vector2 1 0) s) of
       (EQ, _)     -> Nothing -- colinear, so do nothing
       (LT, False) -> Just $ Insertion s -- normal mode && u before v => insertion at u
       (GT, False) -> Just $ Deletion s  -- normal mode && u after v  => deletion  at u
@@ -283,24 +292,24 @@ deleteAt q p = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoi
 -- | Given a point q compute the subset of segments intersecting the
 -- horizontal rightward ray starting in q, and order them by
 -- increasing dsitance.
-fromListByDistTo   :: forall r p e. (Ord r, Fractional r)
-                   => Point 2 r -> [LineSegment 2 p r :+ e] -> Status p e r
-fromListByDistTo q = Set.mapMonotonic (^.extra)
-                   . foldr (Set.insertBy $ comparing (^.core)) Set.empty
-                   . mapMaybe (initialIntersection q)
+fromListByDistTo     :: forall r p e. (Ord r, Fractional r)
+                     => Point 2 r -> Point 2 r -> [LineSegment 2 p r :+ e] -> Status p e r
+fromListByDistTo q p = Set.mapMonotonic (^.extra)
+                     . foldr (Set.insertBy $ comparing (^.core)) Set.empty
+                     . mapMaybe (initialIntersection q p)
 
 -- | Given q and a segment s, computes if the segment intersects the initial, rightward
 -- ray starting in q, and if so returns the (squared) distance from q to that point
 -- together with the segment.
-initialIntersection     :: forall r p e. (Ord r, Fractional r)
-                        => Point 2 r -> LineSegment 2 p r :+ e
-                        -> Maybe (r :+ (LineSegment 2 p r :+ e))
-initialIntersection q s =
-    case asA @(Point 2 r) $ (s^.core) `intersect` horizontalLine (q^.yCoord) of
+initialIntersection       :: forall r p e. (Ord r, Fractional r)
+                          => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
+                          -> Maybe (r :+ (LineSegment 2 p r :+ e))
+initialIntersection q p s =
+    case asA @(Point 2 r) $ seg `intersect` HalfLine q (p .-. q) of
       Nothing -> Nothing
-      Just p  -> let d = p^.xCoord - q^.xCoord
-                 in if d < 0
-                    then Nothing else Just (d :+ s)
+      Just z  -> Just $ squaredEuclideanDist q z :+ s
+  where
+    seg = first (const ()) $ s^.core
 
 --------------------------------------------------------------------------------
 -- * Comparators for the rotating ray

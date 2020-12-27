@@ -136,30 +136,31 @@ test-suite hspec
 
                  Algorithms.Geometry.ConvexHull.OldDivideAndConquer
 
-  build-depends:        base
-                      , hspec                >= 2.1
+  build-depends:        MonadRandom
                       , QuickCheck           >= 2.5
-                      , quickcheck-instances    >= 0.3
                       , approximate-equality >= 1.1.0.2
-                      , hgeometry                >= 0.9.0.0
+                      , base
+                      , bytestring
+                      , cereal
+                      , containers
+                      , data-clist
+                      , directory
+                      , filepath
+                      , hgeometry                >= 0.11.0.0
                       , hgeometry-combinatorial
                       , hgeometry-ipe
+                      , hspec                >= 2.1
                       , lens
-                      , data-clist
-                      , vector-circular      >= 0.1.1
                       , linear
-                      , bytestring
-                      , vinyl
-                      , semigroups
-                      , vector
-                      , containers
+                      , quickcheck-instances    >= 0.3
                       , random
+                      , semigroups
                       , singletons
-                      , filepath
-                      , directory
+                      , singletons
+                      , vector
+                      , vector-circular      >= 0.1.1
+                      , vinyl
                       , yaml
-                      , MonadRandom
-                      , cereal
 
   default-extensions: TypeFamilies
                     , GADTs

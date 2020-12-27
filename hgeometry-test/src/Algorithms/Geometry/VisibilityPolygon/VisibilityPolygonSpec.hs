@@ -30,11 +30,20 @@ type R = RealNumber 5
 type P = Int
 type E = (P,P)
 
+
+
+
 spec :: Spec
 spec = do
-  describe "Testing Visibility Polygon" $ do
-    it "small testPg" $
-      toCombinatorial (RotationalSweep.visibilityPolygon origin testPg) `shouldBe` testPgAnswer
+    describe "Testing Visibility Polygon" $ do
+      it "small testPg" $
+        sweep origin testPg `shouldBe` testPgAnswer
+      it "spike easy" $
+        sweep (Point2 356 704) spike `shouldBe` spikeEasy
+      it "spike" $
+        sweep querySpike spike `shouldBe` spikeAnswer
+  where
+    sweep q pg = toCombinatorial $ RotationalSweep.visibilityPolygon q pg
 
 
 testPgAnswer :: CVec.CircularVector (Either P (P,E))
@@ -50,6 +59,22 @@ testPg = fromPoints [ Point2 3    1     :+ 1
                     , Point2 (-3) (-1)  :+ 7
                     , Point2 4    (-1)  :+ 8
                     ]
+
+
+
+querySpike :: Point 2 R
+querySpike = Point2 252 704
+
+spike :: SimplePolygon Int R
+spike = read "SimplePolygon [Point2 160 656 :+ 1,Point2 288 640 :+ 2,Point2 320 704 :+ 3,Point2 368 640 :+ 4,Point2 368 736 :+ 5,Point2 288 752 :+ 6,Point2 256 704 :+ 7,Point2 224 768 :+ 8]"
+
+spikeEasy = CVec.unsafeFromList [Left 5,Left 6,Left 7,Right (7,(3,4)),Left 4]
+
+spikeAnswer = CVec.unsafeFromList [Left 7,Left 8,Left 1,Left 2,Left 3]
+
+
+
+
 
 
 

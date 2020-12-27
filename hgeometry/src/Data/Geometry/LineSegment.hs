@@ -17,15 +17,16 @@ module Data.Geometry.LineSegment
   , _SubLine
   , module Data.Geometry.Interval
 
-
   , toLineSegment
   , orderedEndPoints
   , segmentLength
   , sqSegmentLength
   , sqDistanceToSeg, sqDistanceToSegArg
   , flipSegment
+  , onSegment2
 
   , interpolate
   ) where
 
+import Data.Geometry.Interval hiding (width, midPoint)
 import Data.Geometry.LineSegment.Internal
