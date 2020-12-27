@@ -17,7 +17,7 @@ module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , quadrance, qdA, distanceA
                            , dot, norm, signorm
                            , isScalarMultipleOf
-                           , scalarMultiple
+                           , scalarMultiple, sameDirection
                            -- reexports
                            , FV.replicate
                            , xComponent, yComponent, zComponent
@@ -152,6 +152,17 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 {-# SPECIALIZE
     scalarMultiple' :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Maybe r #-}
 
+
+-- | Given two colinar vectors, u and v, test if they point in the same direction, i.e.
+-- iff scalarMultiple' u v == Just lambda, with lambda > 0
+--
+-- pre: u and v are colinear, u and v are non-zero
+sameDirection     :: (Eq r, Num r, Arity d) => Vector d r -> Vector d r -> Bool
+sameDirection u v = and $ FV.zipWith (\ux vx -> signum ux == signum vx) u v
+
+-- sameDirectionProp      :: (Eq r, Fractional r, Arity d)
+--                        => Vector d r -> Vector d r -> Bool
+-- sameDirectionProp u v = sameDirection u v == maybe False ((/= (-1)) . signum) (scalarMultiple' u v)
 
 --------------------------------------------------------------------------------
 -- * Helper functions specific to two and three dimensional vectors
