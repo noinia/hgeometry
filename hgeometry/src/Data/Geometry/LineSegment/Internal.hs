@@ -217,7 +217,8 @@ type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
                                                               ]
 
 -- | Test if a point lies on a line segment.
--- use 'intersects' instead.
+--
+-- As a user, you should typically just use 'intersects' instead.
 onSegment :: (Ord r, Fractional r, Arity d) => Point d r -> LineSegment d p r -> Bool
 p `onSegment` (LineSegment up vp) =
       maybe False inRange' (scalarMultiple (p .-. u) (v .-. u))
@@ -236,8 +237,6 @@ instance (Ord r, Fractional r, Arity d) => Point d r `IsIntersectableWith` LineS
   intersects = onSegment
   p `intersect` seg | p `intersects` seg = coRec p
                     | otherwise          = coRec NoIntersection
-
-
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` LineSegment 2 p r where
