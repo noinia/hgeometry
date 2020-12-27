@@ -25,6 +25,7 @@ module Data.Geometry.Point.Internal
   , PointFunctor(..)
 
   , cmpByDistanceTo
+  , cmpByDistanceTo'
   , squaredEuclideanDist, euclideanDist
   ) where
 
@@ -115,6 +116,7 @@ deriving instance (Eq r, Arity d)        => Eq (Point d r)
 deriving instance Arity d                => Eq1 (Point d)
 deriving instance (Ord r, Arity d)       => Ord (Point d r)
 deriving instance Arity d                => Functor (Point d)
+deriving instance Arity d                => Applicative (Point d)
 deriving instance Arity d                => Foldable (Point d)
 deriving instance Arity d                => Traversable (Point d)
 deriving instance (Arity d, NFData r)    => NFData (Point d r)
@@ -126,6 +128,14 @@ deriving instance (Arity d, Random r)    => Random (Point d r)
 
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
+
+instance Arity d => Additive (Point d) where
+  zero = origin
+  p ^+^ q = Point $ toVec p ^+^ toVec q
+  p ^-^ q = Point $ toVec p ^-^ toVec q
+  lerp i a b = Point $ lerp i (toVec a) (toVec b)
+  liftU2 app a b = Point $ liftU2 app (toVec a) (toVec b)
+  liftI2 app a b = Point $ liftI2 app (toVec a) (toVec b)
 
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
@@ -245,9 +255,13 @@ instance PointFunctor (Point d) where
 
 -- | Compare by distance to the first argument
 cmpByDistanceTo              :: (Ord r, Num r, Arity d)
-                             => Point d r :+ c -> Point d r :+ p -> Point d r :+ q -> Ordering
-cmpByDistanceTo (c :+ _) p q = comparing (squaredEuclideanDist c) (p^.core) (q^.core)
+                             => Point d r -> Point d r -> Point d r -> Ordering
+cmpByDistanceTo c p q = comparing (squaredEuclideanDist c) p q
 
+-- | Compare by distance to the first argument
+cmpByDistanceTo'  :: (Ord r, Num r, Arity d)
+                  => Point d r :+ c -> Point d r :+ p -> Point d r :+ q -> Ordering
+cmpByDistanceTo' c p q = cmpByDistanceTo (c^.core) (p^.core) (q^.core)
 
 
 
