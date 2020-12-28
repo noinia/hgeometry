@@ -39,8 +39,10 @@ HGeometry is split into a few smaller packages. In particular:
   (i.e. combinatorial) data types, data structures, and algorithms.
 - hgeometry-ipe : defines functions for working with [ipe](http://ipe.otfried.org) files.
 - hgeometry-svg : defines functions for working with svg files.
-- hgeometry-interactive : defines functions for building an
+- hgeometry-web : defines functions for building an
   interactive viewer using [miso](https://haskell-miso.org).
+- hgeometry-interactive : defines functions for building an
+  interactive viewer using [reflex-sdl2](https://hackage.haskell.org/package/reflex-sdl2).
 - hgeometry : defines the actual geometric data types, data
   structures, and algorithms.
 
@@ -102,8 +104,8 @@ that Floating-point arithmetic and Geometric algorithms don't go well together;
 i.e. because of floating point errors one may get completely wrong
 results. Hence, I *strongly* advise against using `Double` or `Float` for these
 types. In several algorithms it is sufficient if the type `r` is
-`Fractional`. Hence, you can use an exact number type such as `Rational`.
-
+`Fractional`. Hence, you can use an exact number type such as
+`Data.RealNumber.Rational` or `Data.Ratio.Rational`.
 
 Working with additional data
 ----------------------------
