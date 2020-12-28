@@ -385,7 +385,7 @@ requireThree label _ = error $
 -- | /O(n)/. Creates a polygon from the given list of vertices.
 --
 -- The points are placed in CCW order if they are not already. Overlapping
--- and repeated vertices are allowed.
+-- edges and repeated vertices are allowed.
 --
 fromPoints :: forall p r. (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
 fromPoints = fromCircularVector . CV.unsafeFromList . requireThree "fromPoints"
@@ -393,7 +393,7 @@ fromPoints = fromCircularVector . CV.unsafeFromList . requireThree "fromPoints"
 -- | /O(n)/. Creates a polygon from the given vector of vertices.
 --
 -- The points are placed in CCW order if they are not already. Overlapping
--- and repeated vertices are allowed.
+-- edges and repeated vertices are allowed.
 --
 fromCircularVector :: forall p r. (Eq r, Num r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 fromCircularVector = toCounterClockWiseOrder . unsafeFromCircularVector
@@ -401,7 +401,7 @@ fromCircularVector = toCounterClockWiseOrder . unsafeFromCircularVector
 -- | /O(n log n)/. Creates a simple polygon from the given list of vertices.
 --
 -- The points are placed in CCW order if they are not already. Overlapping
--- and repeated vertices are /not/ allowed and will trigger an exception.
+-- edges and repeated vertices are /not/ allowed and will trigger an exception.
 --
 simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> SimplePolygon p r
 simpleFromPoints =
@@ -410,7 +410,7 @@ simpleFromPoints =
 -- | /O(n log n)/. Creates a simple polygon from the given vector of vertices.
 --
 -- The points are placed in CCW order if they are not already. Overlapping
--- and repeated vertices are /not/ allowed and will trigger an exception.
+-- edges and repeated vertices are /not/ allowed and will trigger an exception.
 --
 simpleFromCircularVector :: forall p r. (Ord r, Fractional r)
   => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
