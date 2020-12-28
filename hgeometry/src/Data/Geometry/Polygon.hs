@@ -17,10 +17,16 @@ module Data.Geometry.Polygon
 
     -- * Conversion
   , fromPoints
+  , fromCircularVector
+
+  , simpleFromPoints
+  , simpleFromCircularVector
+
   , unsafeFromPoints
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
+  , toList
 
     -- * Accessors
 
