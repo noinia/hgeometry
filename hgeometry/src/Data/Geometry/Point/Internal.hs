@@ -129,14 +129,6 @@ deriving instance (Arity d, Random r)    => Random (Point d r)
 type instance NumType (Point d r) = r
 type instance Dimension (Point d r) = d
 
-instance Arity d => Additive (Point d) where
-  zero = origin
-  p ^+^ q = Point $ toVec p ^+^ toVec q
-  p ^-^ q = Point $ toVec p ^-^ toVec q
-  lerp i a b = Point $ lerp i (toVec a) (toVec b)
-  liftU2 app a b = Point $ liftU2 app (toVec a) (toVec b)
-  liftI2 app a b = Point $ liftI2 app (toVec a) (toVec b)
-
 instance Arity d =>  Affine (Point d) where
   type Diff (Point d) = Vector d
 

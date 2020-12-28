@@ -27,6 +27,7 @@ module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
 import           Data.Function                  (on)
@@ -370,10 +371,10 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
   where
     f p' = let (v:xs) = F.toList . bottomMost . getVertices $ p'
            in v:xs++[v]
-    (v :+ ve) .+. (w :+ we) = v ^+^ w :+ (ve,we)
+    (v :+ ve) .+. (w :+ we) = v .+^ toVec w :+ (ve,we)
 
     cmpAngle v v' w w' =
-      ccwCmpAround origin (v' ^-^ v) (w' ^-^ w)
+      ccwCmpAround origin (Point $ v' .-. v) (Point $ w' .-. w)
 
     merge' [_]       [_]       = []
     merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
@@ -441,10 +442,10 @@ getVertices = view (simplePolygon.outerBoundaryVector)
 
 -- This is true for all convex polygons:
 --   1. the sum of all edge vectors is (0,0). This is even true for all polygons.
---   2. edges are sorted by angle.
+--   2. edges are sorted by angle. Ie. all vertices are convex, not reflex.
 --
--- So, if we can generate a set of edges that sum to zero then we can sort them
--- and the result will be a convex polygon.
+-- So, if we can generate a set of vectors that sum to zero then we can sort them
+-- and place them end-to-end and the result will be a convex polygon.
 --
 -- So, we need to generate N points that sum to 0. This can be done by generating
 -- two sets of N points that sum to M, and the subtracting them from each other.
@@ -458,14 +459,17 @@ getVertices = view (simplePolygon.outerBoundaryVector)
 --   0            M
 --   |  *      *  |
 -- Then we look at the distance between 0 and point1, point1 and point2, and point2 to M:
---   0             M
+--   0            M
 --   |--*------*--|
---    2     6     2
+--    2     6    2
 -- 2+6+2 = 10 = M
 --
--- Doing this again might yield [5,2,3]. Shuffle the numbers and subtract them:
---   [2,2,6] - [5,3,2] = [2-5, 2-3, 6-2] = [-3, -1, 4]
--- And the sum of [-3, -1, 4] = 0.
+-- Doing this again might yield [5,2,3]. Subtract them:
+--     [2,   6,   2  ]
+--   - [5,   2,   3  ]
+--   = [2-5, 6-2, 2-3]
+--   = [-3,  4,   -1 ]
+-- And the sum of [-3, 4, -1] = -3+4-1 = 0.
 
 -- O(n log n)
 randomBetween :: RandomGen g => Int -> Int -> Rand g (VU.Vector Int)
@@ -484,9 +488,9 @@ randomBetween n vMax = worker (n-1) IS.empty
 randomBetweenZero :: RandomGen g => Int -> Int -> Rand g (VU.Vector Int)
 randomBetweenZero n vMax = VU.zipWith (-) <$> randomBetween n vMax <*> randomBetween n vMax
 
-randomEdges :: RandomGen g => Int -> Int -> Rand g [Point 2 Int]
+randomEdges :: RandomGen g => Int -> Int -> Rand g [Vector 2 Int]
 randomEdges n vMax = do
-  zipWith Point2
+  zipWith Vector2
     <$> fmap VU.toList (randomBetweenZero n vMax)
     <*> fmap VU.toList (randomBetweenZero n vMax)
 
@@ -496,9 +500,9 @@ randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon () Rational)
 randomConvex n _vMax | n < 3 =
   error "Data.Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
 randomConvex n vMax = do
-  edges <- sortAround origin <$> randomEdges n vMax
-  let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanr1 (^+^) edges
+  ~(v:vs) <- coerce . sortAround origin . coerce <$> randomEdges n vMax
+  let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
       pRational = unsafeFromPoints $ map ext vertices
-      c = centroid pRational
-      pFinal = pRational & unsafeOuterBoundaryVector %~ CV.map (over core (^-^ c))
+      Point c = centroid pRational
+      pFinal = pRational & unsafeOuterBoundaryVector %~ CV.map (over core (.-^ c))
   pure $ ConvexPolygon pFinal
