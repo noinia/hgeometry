@@ -9,20 +9,23 @@
 -- Convex Polygons
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
-                                   , merge
-                                   , lowerTangent, lowerTangent'
-                                   , upperTangent, upperTangent'
+module Data.Geometry.Polygon.Convex
+  ( ConvexPolygon(..), simplePolygon
+  , convexPolygon
+  , isConvex, verifyConvex
+  , merge
+  , lowerTangent, lowerTangent'
+  , upperTangent, upperTangent'
 
-                                   , extremes
-                                   , maxInDirection
+  , extremes
+  , maxInDirection
 
-                                   , leftTangent, rightTangent
+  , leftTangent, rightTangent
 
-                                   , minkowskiSum
-                                   , bottomMost
-                                   , randomConvex
-                                   ) where
+  , minkowskiSum
+  , bottomMost
+  , randomConvex
+  ) where
 
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
@@ -34,8 +37,9 @@ import           Data.Function                  (on)
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (SimplePolygon, centroid, outerBoundaryVector,
-                                                 unsafeFromPoints, unsafeOuterBoundaryVector)
+import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
+                                                 outerBoundaryVector, unsafeFromPoints,
+                                                 unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -80,13 +84,22 @@ instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
 
--- convexPolygon   :: SimplePolygon p r -> Maybe (ConvexPolygon p r)
--- convexPolygon p = if isConvex p then Just p else Nothing
+convexPolygon :: (Ord r, Num r) => Polygon t p r -> Maybe (ConvexPolygon p r)
+convexPolygon p@SimplePolygon{} =
+  let convex = ConvexPolygon p in
+  if verifyConvex convex then Just convex else Nothing
+convexPolygon (MultiPolygon b []) = convexPolygon b
+convexPolygon _ = Nothing
 
--- isConvex   :: SimplePolygon p r -> Bool
--- isConvex p = let ch = convexHull $ p^.vertices
---              in p^.vertices.size == ch^.simplePolygon.vertices.size
+isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
+isConvex = verifyConvex . ConvexPolygon
 
+verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
+verifyConvex (ConvexPolygon s) =
+    CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
+  where
+    f a b c = ccw' a b c == CCW
+    vs = s ^. outerBoundaryVector
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
