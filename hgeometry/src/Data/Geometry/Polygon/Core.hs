@@ -369,7 +369,7 @@ toEdges vs = CV.zipWith (\p q -> LineSegment (Closed p) (Open q)) vs (CV.rotateR
 --
 -- TODO: testcases multipolygon
 onBoundary        :: (Num r, Ord r) => Point 2 r -> Polygon t p r -> Bool
-q `onBoundary` pg = any (q `onSegment2`) es
+q `onBoundary` pg = any (q `intersects`) es
   where
     out = SimplePolygon $ pg^.outerBoundary
     es = concatMap (F.toList . outerBoundaryEdges) $ out : holeList pg

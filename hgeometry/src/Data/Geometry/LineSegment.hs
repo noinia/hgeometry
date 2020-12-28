@@ -23,7 +23,6 @@ module Data.Geometry.LineSegment
   , sqSegmentLength
   , sqDistanceToSeg, sqDistanceToSegArg
   , flipSegment
-  , onSegment2
 
   , interpolate
   ) where

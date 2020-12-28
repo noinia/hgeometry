@@ -193,7 +193,7 @@ extractContains p ss = (before, F.toList $ mid1 <> mid2, after)
   where
     (before, mid1, after') = SS.splitOn (xCoordAt $ p^.yCoord) (p^.xCoord) ss
     -- Make sure to also select the horizontal segments containing p
-    (mid2, after) = SS.splitMonotonic (\s -> not $ p `onSegment2` s) after'
+    (mid2, after) = SS.splitMonotonic (not . intersects p) after'
 
 -- | Given a point and the linesegements that contain it. Create a piece of
 -- status structure for it.
