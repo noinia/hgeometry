@@ -136,7 +136,7 @@ computeEvents q segs = map (mkEvent q)
 
 -- | Gets the combinatorial representation of the visibility polygon
 toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CVec.CircularVector (Either p (p,e))
-toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundary
+toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundaryVector
   where
     f = bimap (^.extra) (^.extra)
 
