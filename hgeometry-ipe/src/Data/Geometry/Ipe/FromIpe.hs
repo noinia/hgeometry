@@ -105,7 +105,7 @@ _asRectangle = prism' rectToPath pathToRect
     pathToRect p = p^?_asSimplePolygon >>= asRect
 
     asRect    :: SimplePolygon () r -> Maybe (Rectangle () r)
-    asRect pg = case pg^..outerBoundary.traverse of
+    asRect pg = case pg^..outerBoundaryVector.traverse of
         [a,b,c,d] | isH a b && isV b c && isH c d && isV d a -> Just (boundingBoxList' [a,c])
         [a,b,c,d] | isV a b && isH b c && isV c d && isH d a -> Just (boundingBoxList' [a,c])
         _                                                    -> Nothing
@@ -118,7 +118,7 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle 2 () r)
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath (Triangle p q r) = polygonToPath . fromPoints . map (&extra .~ ()) $ [p,q,r]
+    triToPath (Triangle p q r) = polygonToPath . unsafeFromPoints . map (&extra .~ ()) $ [p,q,r]
     path2tri p = case p^..pathSegments.traverse._PolygonPath of
                     []   -> Nothing
                     [pg] -> case polygonVertices pg of
@@ -162,16 +162,16 @@ _asSomePolygon = prism' embed pathToPolygon
 
 
 polygonToPath                      :: Polygon t () r -> Path r
-polygonToPath pg@(SimplePolygon _) = Path . fromSingleton . PolygonPath $ pg
+polygonToPath pg@SimplePolygon{}   = Path . fromSingleton . PolygonPath $ pg
 polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
-                                   $ (SimplePolygon vs) :| hs
+                                   $ vs :| hs
 
 
 pathToPolygon   :: Path r -> Maybe (Either (SimplePolygon () r) (MultiPolygon () r))
 pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
-                    []                   -> Nothing
-                    [pg]                 -> Just . Left  $ pg
-                    SimplePolygon vs: hs -> Just . Right $ MultiPolygon vs hs
+                    []    -> Nothing
+                    [pg]  -> Just . Left  $ pg
+                    vs:hs -> Just . Right $ MultiPolygon vs hs
 
 
 

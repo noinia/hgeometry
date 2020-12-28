@@ -8,7 +8,7 @@ import qualified Data.Vector.Circular as CV
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon (outerBoundary)
+import           Data.Geometry.Polygon (outerBoundaryVector)
 import           Data.Geometry.Polygon.Convex(ConvexPolygon(..), simplePolygon)
 import           Data.Ord (comparing)
 
@@ -93,7 +93,7 @@ leftMost = CV.rotateToMinimumBy (comparing (^.core))
 
 -- | Helper to get the vertices of a convex polygon
 getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
-getVertices = view (simplePolygon.outerBoundary)
+getVertices = view (simplePolygon.outerBoundaryVector)
 
 isRightOf           :: (Num r, Ord r)
                     => Point 2 r :+ p -> (Point 2 r :+ p', Point 2 r :+ p'') -> Bool

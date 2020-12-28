@@ -36,8 +36,8 @@ import           Data.Semigroup.Foldable
 -- and \(h\) is the complexity of the hull.
 convexHull            :: (Ord r, Num r)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
-convexHull pts       = ConvexPolygon . fromPoints $ uh <> reverse lh
+convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
+convexHull pts       = ConvexPolygon . unsafeFromPoints $ uh <> reverse lh
   where
     lh = case NonEmpty.nonEmpty (NonEmpty.init $ lowerHull pts) of
            Nothing       -> []

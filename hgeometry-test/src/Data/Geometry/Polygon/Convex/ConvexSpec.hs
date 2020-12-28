@@ -9,12 +9,14 @@ import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
+import           Data.Geometry.PolygonSpec ()
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.RealNumber.Rational
 import           Paths_hgeometry_test
 import           Test.Hspec
-import           Test.QuickCheck (Arbitrary(..), property, suchThat)
+import           Test.QuickCheck (Arbitrary(..), property, suchThat, (===), (==>))
 import           Test.QuickCheck.Instances ()
+import qualified Data.Vector.Circular as CV
 
 --------------------------------------------------------------------------------
 
@@ -22,7 +24,14 @@ type R = RealNumber 10
 
 
 spec :: Spec
-spec = testCases "src/Data/Geometry/Polygon/Convex/convexTests.ipe"
+spec = do
+  testCases "src/Data/Geometry/Polygon/Convex/convexTests.ipe"
+  specify "extremes convex == extremesLinear convex" $
+    property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
+      quadrance u > 0 ==>
+      let hull = over simplePolygon toCounterClockWiseOrder $
+            convexHull (CV.toNonEmpty (p^.outerBoundaryVector))
+      in extremes u hull === extremesLinear u (hull^.simplePolygon)
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
@@ -92,10 +101,10 @@ minkowskiTest p q = it "minkowskisum" $
 
 naiveMinkowski     :: (Fractional r, Ord r)
                    => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p, q) r
-naiveMinkowski p q = over (simplePolygon.outerBoundary) bottomMost
+naiveMinkowski p q = over (simplePolygon.unsafeOuterBoundaryVector) bottomMost
                    . toCCW . convexHull . NonEmpty.fromList
-                   $ [ v .+. w | v <- p^..simplePolygon.outerBoundary.traverse
-                               , w <- q^..simplePolygon.outerBoundary.traverse
+                   $ [ v .+. w | v <- p^..simplePolygon.outerBoundaryVector.traverse
+                               , w <- q^..simplePolygon.outerBoundaryVector.traverse
                      ]
   where
     (v :+ ve) .+. (w :+ we) = v .+^ (toVec w) :+ (ve,we)
@@ -114,4 +123,4 @@ newtype CP r = CP (ConvexPolygon () r) deriving (Eq,Show)
 
 instance (Arbitrary r, Fractional r, Ord r) => Arbitrary (CP r) where
   arbitrary =  CP . toCCW <$> suchThat (convexHull <$> arbitrary)
-                              (\p -> p^.simplePolygon.outerBoundary.to length > 2)
+                              (\p -> p^.simplePolygon.outerBoundaryVector.to length > 2)

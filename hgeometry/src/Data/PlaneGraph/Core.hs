@@ -178,8 +178,9 @@ fromSimplePolygon                            :: proxy s
                                              -> f -- ^ data inside
                                              -> f -- ^ data outside the polygon
                                              -> PlaneGraph s p () f r
-fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
+fromSimplePolygon p poly iD oD = PlaneGraph g'
   where
+    vs     = poly ^. outerBoundaryVector
     g      = fromVertices p vs
     fData' = V.fromList [iD, oD]
     g'     = g & PG.faceData .~ fData'
@@ -679,7 +680,7 @@ rawFaceBoundary      :: FaceId' s -> PlaneGraph s v e f r
                     -> SimplePolygon v r :+ f
 rawFaceBoundary i ps = pg :+ (ps^.dataOf i)
   where
-    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
+    pg = unsafeFromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
        . boundaryVertices i $ ps
 
 -- | Alias for rawFace Boundary

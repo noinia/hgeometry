@@ -2,7 +2,7 @@
 module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Lens                                ((^.), (^..), over)
+import           Control.Lens                                (over, view, (^.), (^..))
 import           Control.Monad
 import qualified Data.ByteString                             as BS
 import           Data.Ext
@@ -12,6 +12,8 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Geometry.Triangle
+import           Data.Ord
+import           Data.Coerce
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Serialize
@@ -32,7 +34,7 @@ allSimplePolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
@@ -46,12 +48,11 @@ allMultiPolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ MultiPolygon (CV.unsafeFromList [ ext (Point2 x y) | (x,y) <- boundary ])
-          (map toSimple holes)
+      [ MultiPolygon (toSimple boundary) (map toSimple holes)
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = fromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
 
 allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
@@ -68,15 +69,23 @@ instance Arbitrary (MultiPolygon () Rational) where
 simplifyP :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 simplifyP p
       -- Scale up polygon such that each coordinate is a whole number.
-    | lcmP /= 1 = [SimplePolygon $ CV.map (over core (multP lcmP)) vs]
+    | lcmP /= 1 = [unsafeFromCircularVector $ CV.map (over core (multP lcmP)) vs]
       -- Scale down polygon maintaining each coordinate as a whole number
-    | gcdP /= 1 = [SimplePolygon $ CV.map (over core (divP gcdP)) vs]
-    -- | otherwise = [SimplePolygon $ CV.map (over core div2) vs]
-    | otherwise = []
+    | gcdP /= 1 = [unsafeFromCircularVector $ CV.map (over core (divP gcdP)) vs]
+    | minX /= 0 || minY /= 0
+      = [unsafeFromCircularVector $ CV.map (over core align) vs]
+    | otherwise =
+      let p' = unsafeFromCircularVector $ CV.map (over core _div2) vs
+      in [ p' | not (hasSelfIntersections p') ]
+    -- otherwise = []
   where
-    vs = p ^. outerBoundary
+    minX = F.minimumBy (comparing (view (core.xCoord))) vs ^. core.xCoord
+    minY = F.minimumBy (comparing (view (core.yCoord))) vs ^. core.yCoord
+    vs = p ^. outerBoundaryVector
     lcmP = lcmPoint p
     gcdP = gcdPoint p
+    align :: Point 2 Rational -> Point 2 Rational
+    align v = coerce (v .-. Point2 minX minY)
     multP v (Point2 c d) = Point2 (c*v) (d*v)
     divP v (Point2 c d) = Point2 (c/v) (d/v)
     _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
@@ -84,21 +93,21 @@ simplifyP p
 lcmPoint :: SimplePolygon () Rational -> Rational
 lcmPoint p = realToFrac t
   where
-    vs = F.toList (p^.outerBoundary)
+    vs = F.toList (p^.outerBoundaryVector)
     lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
     t = foldl1 lcm lst
 
 gcdPoint :: SimplePolygon () Rational -> Rational
 gcdPoint p = realToFrac t
   where
-    vs = F.toList (p^.outerBoundary)
+    vs = F.toList (p^.outerBoundaryVector)
     lst = concatMap (\(Point2 x y :+ ()) -> [denominator x, denominator y]) vs
     t = foldl1 gcd lst
 
 cutEarAt :: SimplePolygon () Rational -> Int -> SimplePolygon () Rational
-cutEarAt p n = SimplePolygon $ CV.unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
+cutEarAt p n = unsafeFromVector $ V.drop 1 $ CV.toVector $ CV.rotateRight n vs
   where
-    vs = p^.outerBoundary
+    vs = p^.outerBoundaryVector
 
 cutEars :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 cutEars p | isTriangle p = []
@@ -114,7 +123,7 @@ cutEars p = map (cutEarAt p) ears
       , ccw' prev cur next == CCW -- left turn.
       , CV.all (\pt -> pt `elem` [prev,cur,next] || not (onTriangle (_core pt) triangle)) vs
       ]
-    vs = p^.outerBoundary
+    vs = p^.outerBoundaryVector
 
 
 
@@ -123,11 +132,12 @@ spec = do
   testCases "src/Data/Geometry/pointInPolygon.ipe"
   it "read . show = id (SimplePolygon)" $ do
     property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let p = SimplePolygon pts in
+      let p = unsafeFromCircularVector pts in
       read (show p) == p
   it "read . show = id (MultiPolygon)" $ do
     property $ \(pts :: CircularVector (Point 2 Rational :+ ())) ->
-      let p = MultiPolygon pts [SimplePolygon pts] in
+      let simple = unsafeFromCircularVector pts
+          p = MultiPolygon simple [simple] in
       read (show p) == p
   it "valid polygons (Simple/Double)" $ do
     forM_ allSimplePolygons $ \poly -> do
