@@ -42,6 +42,8 @@ jobs:
         cabal v2-build hgeometry-combinatorial
         cabal v2-build hgeometry
         cabal v2-build hgeometry-test
+        cabal v2-build hgeometry-svg
+        cabal v2-build hgeometry-examples
     - name: Test hgeometry
       if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
       run: |
@@ -53,5 +55,13 @@ jobs:
     - name: Test hgeometry-test
       run: |
         cabal v2-test --test-show-details=streaming hgeometry-test
+    - name: Test hgeometry-ipe
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
+      run: |
+        cabal v2-test --test-show-details=always hgeometry-ipe
+    - name: Test hgeometry-svg
+      if: ${{ !(matrix.os == 'macOS-latest' && matrix.ghc == '8.4') }}
+      run: |
+        cabal v2-test --test-show-details=always hgeometry-svg
     # - name: Check documentation syntax
     #   run: cabal v2-haddock hgeometry-test
