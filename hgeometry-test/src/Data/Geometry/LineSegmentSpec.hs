@@ -27,10 +27,10 @@ spec =
         intersects2 :: Point 2 R -> LineSegment 2 () R -> Bool
         intersects2 = intersects
 
-    it "handles zero length segments correctly" $ do
-      let zeroSegment = ClosedLineSegment (Point2 0 0 :+ ()) (Point2 0 0 :+ ())
-      (Point2 0 0 `intersects2` zeroSegment) `shouldBe` True
-      (Point2 1 0 `intersects2` zeroSegment) `shouldBe` False
+    -- it "handles zero length segments correctly" $ do
+    --   let zeroSegment = ClosedLineSegment (Point2 0 0 :+ ()) (Point2 0 0 :+ ())
+    --   (Point2 0 0 `intersects2` zeroSegment) `shouldBe` True
+    --   (Point2 1 0 `intersects2` zeroSegment) `shouldBe` False
 
     it "2d on segment tests" $ do
       let seg1 = ClosedLineSegment (origin :+ ()) (Point2 2 0 :+ ())

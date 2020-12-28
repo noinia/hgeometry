@@ -27,6 +27,7 @@ module Data.Geometry.LineSegment.Internal
   , flipSegment
 
   , interpolate
+  , validSegment
   ) where
 
 import           Control.Arrow ((&&&))
@@ -46,7 +47,7 @@ import           Data.Ord (comparing)
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.TypeLits
-import           Test.QuickCheck (Arbitrary(..))
+import           Test.QuickCheck (Arbitrary(..), suchThatMap)
 import           Text.Read
 
 --------------------------------------------------------------------------------
@@ -58,6 +59,8 @@ import           Text.Read
 --
 --
 -- >>>  data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p)) (EndPoint (Point d r :+ p))
+--
+-- it is assumed that the two endpoints of the line segment are disjoint. This is not checked.
 newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r) }
 
 makeLenses ''LineSegment
@@ -99,8 +102,10 @@ instance HasEnd (LineSegment d p r) where
   type EndExtra (LineSegment d p r) = p
   end = unLineSeg.end
 
-instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) where
-  arbitrary = LineSegment <$> arbitrary <*> arbitrary
+instance (Arbitrary r, Arbitrary p, Eq r, Arity d) => Arbitrary (LineSegment d p r) where
+  arbitrary = suchThatMap ((,) <$> arbitrary <*> arbitrary)
+                          (uncurry validSegment)
+
 
 deriving instance (Arity d, NFData r, NFData p) => NFData (LineSegment d p r)
 
@@ -237,16 +242,13 @@ instance {-# OVERLAPPABLE #-} (Ord r, Fractional r, Arity d)
 -- As a user, you should typically just use 'intersects' instead.
 onSegment :: (Ord r, Fractional r, Arity d) => Point d r -> LineSegment d p r -> Bool
 p `onSegment` (LineSegment up vp) =
-      maybe False inRange' (scalarMultiple (p .-. u) (v .-. u)) && whenDegenerate
+      maybe False inRange' (scalarMultiple (p .-. u) (v .-. u))
     where
       u = up^.unEndPoint.core
       v = vp^.unEndPoint.core
 
       atMostUpperBound  = if isClosed vp then (<= 1) else (< 1)
       atLeastLowerBound = if isClosed up then (0 <=) else (0 <)
-      whenDegenerate = (u == v) `implies` (p == u && isClosed up && isClosed vp)
-
-      a `implies` b = not a || b
 
       inRange' x = atLeastLowerBound x && atMostUpperBound x
   -- the type of test we use for the 2D version might actually also
@@ -301,13 +303,11 @@ onSegment2                          :: (Ord r, Num r)
 p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEndPoint) of
     CoLinear -> let su = p `onSide` lu
                     sv = p `onSide` lv
-                in su /= sv || isDegen
+                in su /= sv
                 && ((su == OnLine) `implies` isClosed u)
                 && ((sv == OnLine) `implies` isClosed v)
     _        -> False
   where
-    isDegen = u^.unEndPoint.core == v^.unEndPoint.core
-
     (Line _ w) = perpendicularTo $ supportingLine s
     lu = Line (u^.unEndPoint.core) w
     lv = Line (v^.unEndPoint.core) w
@@ -385,3 +385,12 @@ interpolate                      :: (Fractional r, Arity d) => r -> LineSegment 
 interpolate t (LineSegment' p q) = Point $ (asV p ^* (1-t)) ^+^ (asV q ^* t)
   where
     asV = (^.core.vector)
+
+
+-- | smart constructor that creates a valid segment, i.e. it validates
+-- that the endpoints are disjoint.
+validSegment     :: (Eq r, Arity d)
+                 => EndPoint (Point d r :+ p) -> EndPoint (Point d r :+ p)
+                 -> Maybe (LineSegment d p r)
+validSegment u v = let s = LineSegment u v
+                   in if s^.start.core /= s^.end.core then Just s else Nothing
