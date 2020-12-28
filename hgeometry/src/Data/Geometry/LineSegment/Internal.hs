@@ -48,6 +48,7 @@ import           Data.Vinyl.CoRec
 import           GHC.TypeLits
 import           Test.QuickCheck (Arbitrary(..))
 import           Text.Read
+
 --------------------------------------------------------------------------------
 -- * d-dimensional LineSegments
 
@@ -57,7 +58,7 @@ import           Text.Read
 --
 --
 -- >>>  data LineSegment d p r = LineSegment (EndPoint (Point d r :+ p)) (EndPoint (Point d r :+ p))
-newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r)}
+newtype LineSegment d p r = GLineSegment { _unLineSeg :: Interval p (Point d r) }
 
 makeLenses ''LineSegment
 
@@ -216,6 +217,21 @@ type instance IntersectionOf (LineSegment 2 p r) (Line 2 r) = [ NoIntersection
                                                               , LineSegment 2 p r
                                                               ]
 
+
+instance {-# OVERLAPPING #-} (Ord r, Num r)
+         => Point 2 r `IsIntersectableWith` LineSegment 2 p r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  intersects = onSegment2
+  p `intersect` seg | p `intersects` seg = coRec p
+                    | otherwise          = coRec NoIntersection
+
+instance {-# OVERLAPPABLE #-} (Ord r, Fractional r, Arity d)
+         => Point d r `IsIntersectableWith` LineSegment d p r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+  intersects = onSegment
+  p `intersect` seg | p `intersects` seg = coRec p
+                    | otherwise          = coRec NoIntersection
+
 -- | Test if a point lies on a line segment.
 --
 -- As a user, you should typically just use 'intersects' instead.
@@ -233,13 +249,11 @@ p `onSegment` (LineSegment up vp) =
       a `implies` b = not a || b
 
       inRange' x = atLeastLowerBound x && atMostUpperBound x
+  -- the type of test we use for the 2D version might actually also
+  -- work in higher dimensions that might allow us to drop the
+  -- Fractional constraint
 
 
-instance (Ord r, Fractional r, Arity d) => Point d r `IsIntersectableWith` LineSegment d p r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
-  intersects = onSegment
-  p `intersect` seg | p `intersects` seg = coRec p
-                    | otherwise          = coRec NoIntersection
 
 instance (Ord r, Fractional r) =>
          LineSegment 2 p r `IsIntersectableWith` LineSegment 2 p r where
