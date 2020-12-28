@@ -9,13 +9,9 @@ import           Data.Data
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry
-import           Data.Geometry.Ball
 import           Data.Geometry.Ipe
-import           Data.Geometry.Line
-import qualified Data.LSeq as LSeq
 import qualified Data.Traversable as Tr
 import           Options.Applicative
-import           System.Random
 
 --------------------------------------------------------------------------------
 

@@ -9,13 +9,13 @@ import           Data.Ext
 import qualified Data.Geometry.Web.ICanvas as ICanvas
 import           Data.Geometry.Web.ICanvas hiding (update, view)
 
-import           Data.Geometry.Web.Writer
 import           Data.Geometry.Ipe (IpePage, content, readSinglePageFile, _IpePath)
-import           Data.Geometry.Ipe.Attributes (Sing(..),_Attr)
+import           Data.Geometry.Ipe.Attributes (pattern SFill, _Attr)
 import           Data.Geometry.Ipe.Color
 import           Data.Geometry.Ipe.FromIpe (_withAttrs, _asSomePolygon)
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Polygon
+import           Data.Geometry.Web.Writer
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Language.Javascript.JSaddle.Warp as JSaddle

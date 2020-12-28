@@ -10,6 +10,7 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Vector.Circular as C
 import qualified Data.Vector.Circular.Util as C
 import           Linear.Affine (distanceA)
 
@@ -99,7 +100,7 @@ escape (Input l h ds) = case convexHull . NonEmpty.fromList $
                                (l :+ Luke) : (h :+ Hatch) : map (:+ Dalton) ds of
     -- all positions are distinct, so the hull has at least two elements
     ConvexPolygon poly -> case C.findRotateTo (\p -> p^.extra == Luke) $
-                                 poly^.outerBoundary of
+                                 poly^.outerBoundaryVector of
       Nothing -> Impossible
       Just h  -> (distanceToHatch $ C.leftElements h)
                  `min`
