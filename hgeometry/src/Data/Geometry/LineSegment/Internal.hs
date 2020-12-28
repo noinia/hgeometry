@@ -312,7 +312,7 @@ p `onSegment2` s@(LineSegment u v) = case ccw' (ext p) (u^.unEndPoint) (v^.unEnd
     lu = Line (u^.unEndPoint.core) w
     lv = Line (v^.unEndPoint.core) w
 
-    a `implies` b = not a || b
+    a `implies` b = b || not a
 
 
 -- | The left and right end point (or left below right if they have equal x-coords)

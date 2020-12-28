@@ -103,13 +103,13 @@ visibilityPolygon' q segs = fromPoints . reverse . snd
   where
     statusStruct = let res = fromListByDistTo q s segs in traceShow ("initial SS", res) res
     events       = computeEvents q segs
-    s            = startingDirection events
+    s            = let res = startingDirection events in traceShow ("start",res) res
 
 startingDirection    :: Fractional r => [Event p e r] -> Point 2 r
 startingDirection es = mid (List.head vs) (List.last vs)
   where
     vs = map (view core . _eventVtx) es
-    mid p q = p .+^ (q .-. p ^/ 2)
+    mid p q = p .+^ ((q .-. p) ^/ 2)
 
 
 -- | Computes the events in the sweep
@@ -203,17 +203,26 @@ handleEvent q (ss,out) (Event (p :+ z) is dels) = (ss', newVtx <> out)
     newVtx = let (a :+ sa) = firstHitAt' q p ss
                  (b :+ sb) = firstHitAt' q p ss'
                  ae        = valOf a sa
+                 be        = valOf b sb
              in case (a /= b, a == p) of
-                  (True, _)     -> [ b :+ Right (a :+ ae,sb)
-                                   , a :+ Left  ae -- a must be a vertex!
-                                   ] -- new window of the output polygon discovered
+                  (True, _)     -> -- new window of the output polygon discovered
+                                   -- figure out who is the closest vertex, (the reflex vtx)
+                                   -- and add the appropriate two vertices
+                    case squaredEuclideanDist q a < squaredEuclideanDist q b of
+                      True  -> [ b :+ Right (a :+ ae, sb)
+                               , a :+ Left  ae  -- a must be a vertex!
+                               ]
+                      False -> [ b :+ Left  be
+                               , a :+ Right (b :+ be, sa)
+                               ]
                   (False,True)  -> [ p :+ Left z]
                     -- sweeping over a regular vertex of the visibility polygon
                   (False,False) -> []    -- sweeping over a vertex not in output
 
-
     valOf a (LineSegment' (b :+ be) (_ :+ ce) :+ _ ) | a == b    = be
                                                      | otherwise = ce
+
+
 
 --------------------------------------------------------------------------------
 

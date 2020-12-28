@@ -47,7 +47,7 @@ spec = do
 
 
 testPgAnswer :: CVec.CircularVector (Either P (P,E))
-testPgAnswer = CVec.unsafeFromList [Left 1,Left 2,Right (2,(3,4)),Left 4,Right (4,(6,7)),Left 7,Left 8]
+testPgAnswer = CVec.unsafeFromList [Left 1,Left 2,Right (2,(3,4)),Right (6,(3,4)),Left 6,Left 7,Left 8]
 
 testPg :: SimplePolygon Int R
 testPg = fromPoints [ Point2 3    1     :+ 1
@@ -68,9 +68,9 @@ querySpike = Point2 252 704
 spike :: SimplePolygon Int R
 spike = read "SimplePolygon [Point2 160 656 :+ 1,Point2 288 640 :+ 2,Point2 320 704 :+ 3,Point2 368 640 :+ 4,Point2 368 736 :+ 5,Point2 288 752 :+ 6,Point2 256 704 :+ 7,Point2 224 768 :+ 8]"
 
-spikeEasy = CVec.unsafeFromList [Left 5,Left 6,Left 7,Right (7,(3,4)),Left 4]
+spikeEasy = CVec.unsafeFromList [Left 5,Left 6, Right (3,(6,7)), Left 3, Left 4]
 
-spikeAnswer = CVec.unsafeFromList [Left 7,Left 8,Left 1,Left 2,Left 3]
+spikeAnswer = CVec.unsafeFromList [Right (7,(2,3)), Left 7, Left 8,Left 1,Left 2]
 
 
 
