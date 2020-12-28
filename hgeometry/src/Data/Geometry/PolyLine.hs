@@ -119,9 +119,9 @@ edgeSegments pl = let vs = pl^.points
 -- running time: \(O(\log n)\)
 --
 -- >>> interpolatePoly 0.5 myPolyLine
--- Point2 [5.0,5.0]
+-- Point2 5.0 5.0
 -- >>> interpolatePoly 1.5 myPolyLine
--- Point2 [10.0,15.0]
+-- Point2 10.0 15.0
 interpolatePoly      :: (RealFrac r, Arity d) => r -> PolyLine d p r -> Point d r
 interpolatePoly t pl = let i = floor t in case edgeSegments pl^?ix i of
                          Nothing -> pl^.points.to LSeq.last.core

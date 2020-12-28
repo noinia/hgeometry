@@ -1,5 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -22,41 +22,42 @@ module Data.Geometry.Ipe.Writer( writeIpeFile, writeIpeFile', writeIpePage
                                , ipeWriteAttrs, writeAttrValues
                                ) where
 
-import           Control.Lens (view, (^.), (^..), (.~), (&))
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as C
-import           Data.Colour.SRGB (RGB(..))
+import           Control.Lens                 (view, (&), (.~), (^.), (^..))
+import qualified Data.ByteString              as B
+import qualified Data.ByteString.Char8        as C
+import           Data.Colour.SRGB             (RGB (..))
 import           Data.Ext
 import           Data.Fixed
-import qualified Data.Foldable as F
+import qualified Data.Foldable                as F
+import           Data.Geometry.BezierSpline
 import           Data.Geometry.Box
-import           Data.Geometry.Ellipse(ellipseMatrix)
+import           Data.Geometry.Ellipse        (ellipseMatrix)
 import           Data.Geometry.Ipe.Attributes
 import qualified Data.Geometry.Ipe.Attributes as IA
-import           Data.Geometry.Ipe.Color (IpeColor(..))
-import           Data.Geometry.Ipe.Types
+import           Data.Geometry.Ipe.Color      (IpeColor (..))
 import           Data.Geometry.Ipe.Path
+import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Value
 import           Data.Geometry.LineSegment
+import qualified Data.Geometry.Matrix         as Matrix
 import           Data.Geometry.Point
-import           Data.Geometry.BezierSpline
 import           Data.Geometry.PolyLine
-import           Data.Geometry.Polygon (Polygon, outerBoundary, holeList, asSimplePolygon)
-import qualified Data.Geometry.Matrix as Matrix
+import           Data.Geometry.Polygon        (Polygon, holeList, outerBoundary,
+                                               outerBoundaryVector)
 import           Data.Geometry.Vector
-import qualified Data.LSeq as LSeq
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (catMaybes, mapMaybe, fromMaybe)
+import qualified Data.LSeq                    as LSeq
+import           Data.List.NonEmpty           (NonEmpty (..))
+import           Data.Maybe                   (catMaybes, fromMaybe, mapMaybe)
 import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Singletons
-import           Data.Text (Text)
-import qualified Data.Text as Text
-import           Data.Vinyl hiding (Label)
+import           Data.Text                    (Text)
+import qualified Data.Text                    as Text
+import           Data.Vinyl                   hiding (Label)
 import           Data.Vinyl.Functor
 import           Data.Vinyl.TypeLevel
-import           System.IO (hPutStrLn,stderr)
-import           Text.XML.Expat.Format (format')
+import           System.IO                    (hPutStrLn, stderr)
+import           Text.XML.Expat.Format        (format')
 import           Text.XML.Expat.Tree
 
 --------------------------------------------------------------------------------
@@ -297,9 +298,9 @@ instance IpeWriteText r => IpeWriteText (PolyLine 2 () r) where
     -- the polyline type guarantees that there is at least one point
 
 instance IpeWriteText r => IpeWriteText (Polygon t () r) where
-  ipeWriteText pg = fmap mconcat . traverse f $ asSimplePolygon pg : holeList pg
+  ipeWriteText pg = fmap mconcat . traverse f $ pg^.outerBoundary : holeList pg
     where
-      f pg' = case pg'^..outerBoundary.traverse.core of
+      f pg' = case pg'^..outerBoundaryVector.traverse.core of
         (p : rest) -> unlines' . map ipeWriteText
                     $ MoveTo p : map LineTo rest ++ [ClosePath]
         _          -> Nothing

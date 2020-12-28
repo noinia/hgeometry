@@ -65,7 +65,7 @@ following algorithms are currently available:
 (using divide and conquer),
 * an *O(n log n)* time algorithm for computing the Euclidean Minimum Spanning
 Tree (EMST), based on computing the Delaunay Triangulation,
-* an *O(log² n)* time algorithm to find extremal points and tangents on/to a
+* an *O(log n)* time algorithm to find extremal points and tangents on/to a
   convex polygon,
 * an optimal *O(n+m)* time algorithm to compute the Minkowski sum of two convex
 polygons,

@@ -36,7 +36,8 @@ import           Linear.Affine                     (Affine (..), distanceA, qdA)
 import           Linear.Metric                     (dot, norm, quadrance, signorm)
 import           Linear.Vector                     as LV hiding (E (..))
 import           System.Random                     (Random (..))
-import           Test.QuickCheck                   (Arbitrary (..), infiniteList)
+import           Test.QuickCheck                   (Arbitrary (..), Arbitrary1 (..), infiniteList,
+                                                    infiniteListOf)
 
 --------------------------------------------------------------------------------
 
@@ -48,6 +49,9 @@ type instance NumType   (Vector d r) = r
 
 instance (Arbitrary r, Arity d) => Arbitrary (Vector d r) where
   arbitrary = vectorFromListUnsafe <$> infiniteList
+
+instance (Arity d) => Arbitrary1 (Vector d) where
+  liftArbitrary gen = vectorFromListUnsafe <$> infiniteListOf gen
 
 instance (Random r, Arity d) => Random (Vector d r) where
   randomR (lows,highs) g0 = flip runState g0 $

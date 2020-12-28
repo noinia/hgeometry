@@ -88,7 +88,7 @@ horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 -- oriented such that v points into the left halfplane of m.
 --
 -- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
--- Line (Point2 [3,4]) (Vector2 [-2,-1])
+-- Line (Point2 3 4) (Vector2 [-2,-1])
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 

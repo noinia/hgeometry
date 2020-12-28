@@ -178,8 +178,9 @@ fromSimplePolygon                            :: proxy s
                                              -> f -- ^ data inside
                                              -> f -- ^ data outside the polygon
                                              -> PlaneGraph s p () f r
-fromSimplePolygon p (SimplePolygon vs) iD oD = PlaneGraph g'
+fromSimplePolygon p poly iD oD = PlaneGraph g'
   where
+    vs     = poly ^. outerBoundaryVector
     g      = fromVertices p vs
     fData' = V.fromList [iD, oD]
     g'     = g & PG.faceData .~ fData'
@@ -268,10 +269,10 @@ vertices' = PG.vertices' . _graph
 -- | Enumerate all vertices, together with their vertex data
 --
 -- >>> mapM_ print $ vertices smallG
--- (VertexId 0,VertexData {_location = Point2 [0,0], _vData = 0})
--- (VertexId 1,VertexData {_location = Point2 [2,2], _vData = 1})
--- (VertexId 2,VertexData {_location = Point2 [2,0], _vData = 2})
--- (VertexId 3,VertexData {_location = Point2 [-1,4], _vData = 3})
+-- (VertexId 0,VertexData {_location = Point2 0 0, _vData = 0})
+-- (VertexId 1,VertexData {_location = Point2 2 2, _vData = 1})
+-- (VertexId 2,VertexData {_location = Point2 2 0, _vData = 2})
+-- (VertexId 3,VertexData {_location = Point2 (-1) 4, _vData = 3})
 vertices   :: PlaneGraph s v e f r  -> V.Vector (VertexId' s, VertexData r v)
 vertices = PG.vertices . _graph
 
@@ -646,11 +647,11 @@ outerFaceDart ps = d
 -- | Reports all edges as line segments
 --
 -- >>> mapM_ print $ edgeSegments smallG
--- (Dart (Arc 0) +1,LineSegment (Closed (Point2 [0,0] :+ 0)) (Closed (Point2 [2,0] :+ 2)) :+ "0->2")
--- (Dart (Arc 1) +1,LineSegment (Closed (Point2 [0,0] :+ 0)) (Closed (Point2 [2,2] :+ 1)) :+ "0->1")
--- (Dart (Arc 2) +1,LineSegment (Closed (Point2 [0,0] :+ 0)) (Closed (Point2 [-1,4] :+ 3)) :+ "0->3")
--- (Dart (Arc 4) +1,LineSegment (Closed (Point2 [2,2] :+ 1)) (Closed (Point2 [2,0] :+ 2)) :+ "1->2")
--- (Dart (Arc 3) +1,LineSegment (Closed (Point2 [2,2] :+ 1)) (Closed (Point2 [-1,4] :+ 3)) :+ "1->3")
+-- (Dart (Arc 0) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 2 0 :+ 2)) :+ "0->2")
+-- (Dart (Arc 1) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 2 2 :+ 1)) :+ "0->1")
+-- (Dart (Arc 2) +1,LineSegment (Closed (Point2 0 0 :+ 0)) (Closed (Point2 (-1) 4 :+ 3)) :+ "0->3")
+-- (Dart (Arc 4) +1,LineSegment (Closed (Point2 2 2 :+ 1)) (Closed (Point2 2 0 :+ 2)) :+ "1->2")
+-- (Dart (Arc 3) +1,LineSegment (Closed (Point2 2 2 :+ 1)) (Closed (Point2 (-1) 4 :+ 3)) :+ "1->3")
 edgeSegments    :: PlaneGraph s v e f r -> V.Vector (Dart s, LineSegment 2 v r :+ e)
 edgeSegments ps = fmap withSegment . edges $ ps
   where
@@ -679,7 +680,7 @@ rawFaceBoundary      :: FaceId' s -> PlaneGraph s v e f r
                     -> SimplePolygon v r :+ f
 rawFaceBoundary i ps = pg :+ (ps^.dataOf i)
   where
-    pg = fromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
+    pg = unsafeFromPoints . F.toList . fmap (\j -> ps^.graph.dataOf j.to vtxDataToExt)
        . boundaryVertices i $ ps
 
 -- | Alias for rawFace Boundary

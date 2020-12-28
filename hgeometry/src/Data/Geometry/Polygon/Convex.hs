@@ -31,7 +31,8 @@ import           Data.Function                  (on)
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (SimplePolygon, fromPoints, outerBoundary)
+import           Data.Geometry.Polygon.Core     (SimplePolygon, outerBoundaryVector,
+                                                 unsafeFromPoints)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -41,8 +42,6 @@ import qualified Data.List.NonEmpty             as NonEmpty
 import           Data.Maybe                     (fromJust)
 import           Data.Ord                       (comparing)
 import           Data.Semigroup.Foldable        (Foldable1 (..))
-import           Data.Sequence                  (ViewL (..), ViewR (..), viewl, viewr)
-import qualified Data.Sequence                  as S
 import           Data.Util
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
@@ -119,9 +118,36 @@ extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
 --
 -- pre: The input polygon is strictly convex.
 --
--- running time: \(O(\log^2 n)\)
+-- running time: \(O(\log n)\)
 maxInDirection   :: (Num r, Ord r) => Vector 2 r -> ConvexPolygon p r -> Point 2 r :+ p
 maxInDirection u = findMaxWith (cmpExtreme u)
+
+-- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
+--        Use unsafe indexing.
+-- O(log n)
+findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
+             -> ConvexPolygon p r -> Point 2 r :+ p
+findMaxWith cmp p = CV.index v (worker 0 (F.length v))
+  where
+    v = p ^. simplePolygon.outerBoundaryVector
+    a `icmp` b = CV.index v a `cmp` CV.index v b
+    worker a b
+      | localMaximum c = c
+      | a+1==b         = b
+      | otherwise      =
+        case  (isUpwards a, isUpwards c, c `icmp` a /= LT) of
+          (True, False, _)      -> worker a c -- A is up, C is down, pick [a,c]
+          (True, True, True)    -> worker c b -- A is up, C is up, C is GTE A, pick [c,b]
+          (True, True, False)   -> worker a c -- A is up, C is LT A, pick [a,c]
+          (False, True, _)      -> worker c b -- A is down, C is up, pick [c,b]
+          (False, False, False) -> worker c b -- A is down, C is down, C is LT A, pick [c,b]
+          (False, _, True)      -> worker a c -- A is down, C is GTE A, pick [a,c]
+      where
+        c = (a+b) `div` 2
+        localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
+    isUpwards idx = idx `icmp` (idx+1) /= GT
+
+{- Convex binary search using sequences in O(log^2 n)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
@@ -144,7 +170,7 @@ findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
       | otherwise          = binSearch ac c cb
 
     -- | Given the vertices [a..] c [..b] find the exteral vtx
-    binSearch ac@(viewl -> a:<r) c cb = case (isUpwards a r, isUpwards c cb, a >=. c) of
+    binSearch ac@(viewl -> a:<r) c cb = case (isUpwards a (r |> c), isUpwards c cb, a >=. c) of
         (True,False,_)      -> findMax (ac |> c)
         (True,True,True)    -> findMax (ac |> c)
         (True,True,False)   -> findMax (c <| cb)
@@ -161,7 +187,7 @@ findMaxWith cmp = findMaxStart . S.fromList . F.toList . getVertices
     -- the Edge from a to b is upwards w.r.t b if a is not larger than b
     isUpwards a (viewl -> b :< _) = (a `cmp` b) /= GT
     isUpwards _ _                 = error "isUpwards: no edge endpoint"
-
+-}
 
 tangentCmp       :: (Num r, Ord r)
                  => Point 2 r -> Point 2 r :+ p -> Point 2 r :+ q -> Ordering
@@ -213,7 +239,7 @@ rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 merge       :: (Num r, Ord r) => ConvexPolygon p r  -> ConvexPolygon p r
             -> (ConvexPolygon p r, LineSegment 2 p r, LineSegment 2 p r)
-merge lp rp = (ConvexPolygon . fromPoints $ r' ++ l', lt, ut)
+merge lp rp = (ConvexPolygon . unsafeFromPoints $ r' ++ l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
@@ -337,7 +363,7 @@ upperTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 -- running time: \(O(n+m)\).
 minkowskiSum     :: (Ord r, Num r)
                  => ConvexPolygon p r -> ConvexPolygon q r -> ConvexPolygon (p,q) r
-minkowskiSum p q = ConvexPolygon . fromPoints $ merge' (f p) (f q)
+minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
   where
     f p' = let (v:xs) = F.toList . bottomMost . getVertices $ p'
            in v:xs++[v]
@@ -379,7 +405,7 @@ bottomMost = CV.rotateToMinimumBy (comparing f)
 
 -- | Helper to get the vertices of a convex polygon
 getVertices :: ConvexPolygon p r -> CircularVector (Point 2 r :+ p)
-getVertices = view (simplePolygon.outerBoundary)
+getVertices = view (simplePolygon.outerBoundaryVector)
 
 -- -- | rotate right while p 'current' 'rightNeibhour' is true
 -- rotateRWhile      :: (a -> a -> Bool) -> C.CList a -> C.CList a
