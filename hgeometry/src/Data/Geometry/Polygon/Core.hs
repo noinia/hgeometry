@@ -26,7 +26,7 @@ module Data.Geometry.Polygon.Core
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
-  , toList
+  , toPoints
 
   , size
   , polygonVertices, listEdges
@@ -453,8 +453,8 @@ toVector (MultiPolygon s hs) = foldr (<>) (toVector s) (map toVector hs)
 
 -- | \( O(n) \)
 --   Polygon points, from left to right.
-toList :: Polygon t p r -> [Point 2 r :+ p]
-toList = V.toList . toVector
+toPoints :: Polygon t p r -> [Point 2 r :+ p]
+toPoints = V.toList . toVector
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --

@@ -26,7 +26,7 @@ module Data.Geometry.Polygon
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
-  , toList
+  , toPoints
 
     -- * Accessors
 
