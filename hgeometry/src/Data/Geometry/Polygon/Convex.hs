@@ -426,11 +426,11 @@ inConvex p (ConvexPolygon poly)
     p'        = p :+ undefined
     n         = size poly - 1
     point0    = point 0
-    leftEdge  = OpenLineSegment point0 (point n)
-    rightEdge = OpenLineSegment point0 (point 1)
+    leftEdge  = ClosedLineSegment point0 (point n)
+    rightEdge = ClosedLineSegment point0 (point 1)
     worker a b
       | a+1 == b                        =
-        if onSegment p (OpenLineSegment (point a) (point b))
+        if onSegment p (ClosedLineSegment (point a) (point b))
           then OnBoundary
           else
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside
