@@ -13,13 +13,15 @@
 --
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.SoS
-  ( module Algorithms.Geometry.SoS.Sign
+  ( SoS
+  , simulateSimplicity
+  , sideTest, ccw'
+  , module Algorithms.Geometry.SoS.Sign
   , module Algorithms.Geometry.SoS.Determinant
   , module Algorithms.Geometry.SoS.AsPoint
-  , SoS
-  , simulateSimplicity
-  , sideTest
+  , module Control.CanAquire
   ) where
+
 
 import           Algorithms.Geometry.SoS.AsPoint
 import           Algorithms.Geometry.SoS.Determinant
@@ -28,6 +30,7 @@ import           Algorithms.Geometry.SoS.Orientation (SoS)
 import qualified Algorithms.Geometry.SoS.Orientation as Orientation
 import           Algorithms.Geometry.SoS.Sign
 import           Control.CanAquire
+import           Data.Geometry.Point.Orientation
 import           Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
@@ -38,6 +41,12 @@ import           Data.Geometry.Vector
 sideTest      :: (SoS d, Num r, Ord r, CanAquire (P i d r e))
               => P i d r e -> Vector d (P i d r e) -> Sign
 sideTest q ps = Orientation.sideTest (asPointWithIndex q) (fmap asPointWithIndex ps)
+
+-- | Given three points p q and r determine the orientation when going from p to r via q.
+ccw'       :: (Ord r, Num r, CanAquire (P i 2 r e))
+           => P i 2 r e -> P i 2 r e -> P i 2 r e -> StrictCCW
+ccw' p q r = ccw (asPointWithIndex p) (asPointWithIndex q) (asPointWithIndex r)
+
 
 
 -- sideTest'             :: ( SoS p, Dimension p ~ 2, r ~ NumType p

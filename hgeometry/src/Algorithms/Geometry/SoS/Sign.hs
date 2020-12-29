@@ -14,6 +14,13 @@ flipSign = \case
   Negative -> Positive
   Positive -> Negative
 
+-- | Convert into an Ordering value. Negative mapping to LT, positive
+-- to GT. This never produces EQ.
+toOrdering :: Sign -> Ordering
+toOrdering = \case
+  Negative -> LT
+  Positive -> GT
+
 --------------------------------------------------------------------------------
 
 -- | Given the terms, in decreasing order of significance, computes the sign

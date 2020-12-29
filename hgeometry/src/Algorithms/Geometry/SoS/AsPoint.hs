@@ -8,7 +8,12 @@ import Data.Geometry.Properties
 import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
--- | a P is a 'read only' (Point d r :+ e)
+
+-- | P is a pointer to a (Point d r :+ e). It essentially acts as a
+-- 'read only' (Point d r :+ e)..
+--
+-- Note that the Eq and Ord instance only evaluate the
+-- equality/ordering of the pointers, not the points themselves!
 newtype P i d r e = P (I i (Point d r :+ e)) deriving (Show,Eq,Ord)
 
 -- | We use ints as indices

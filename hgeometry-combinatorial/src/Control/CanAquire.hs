@@ -9,6 +9,7 @@
 module Control.CanAquire(
       runAcquire
     , CanAquire(..)
+    , replaceByOriginal
 
     , replaceByIndex, labelWithIndex
     , I
@@ -40,12 +41,19 @@ class CanAquire i where
   -- | A value of type i can obtain something of type 'a'
   aquire  :: i -> AquiredVal i
 
+
+-- | Lookup the original a values
+replaceByOriginal :: (Functor t, CanAquire i) => t i -> t (AquiredVal i)
+replaceByOriginal = fmap aquire
+
 --------------------------------------------------------------------------------
 
 -- | Replaces every element by an index. Returns the new traversable
 -- containing only these indices, as well as a vector with the
 -- values. (such that indexing in this value gives the original
 -- value).
+--
+-- note that every a is treated as a *new*, *unique* element.
 replaceByIndex     :: forall t a. Traversable t => t a -> (V.Vector a, t Int)
 replaceByIndex ts' = runST $ do
                                v <- MV.new n
@@ -67,6 +75,10 @@ labelWithIndex = flip runState 0 . traverse lbl
                put $ i+1
                pure (i,x)
 
+
+-- -- | Undo the labeling by index.
+-- replaceByOriginal'   :: Functor t => V.Vector a -> t Int -> t a
+-- replaceByOriginal' v = fmap (v V.!)
 
 --------------------------------------------------------------------------------
 
