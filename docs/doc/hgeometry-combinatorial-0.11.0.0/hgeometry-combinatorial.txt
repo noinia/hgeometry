@@ -256,6 +256,98 @@ splitIncr :: (a -> a -> Ordering) -> [a] -> ([a], [a])
 isShiftOf :: Eq a => CList a -> CList a -> Bool
 
 
+module Data.DynamicOrd
+
+-- | Values of type <tt>a</tt> in our dynamically constructed <a>Ord</a>
+--   instance
+newtype O (s :: *) (a :: *)
+O :: a -> O (s :: *) (a :: *)
+[runO] :: O (s :: *) (a :: *) -> a
+
+-- | An Ord Dictionary
+newtype OrdDict a
+OrdDict :: (a -> a -> Ordering) -> OrdDict a
+[compare_] :: OrdDict a -> a -> a -> Ordering
+
+-- | Run a computation with a given ordering
+withOrd :: (a -> a -> Ordering) -> (forall s. Reifies s (OrdDict a) => O s b) -> b
+
+-- | Lifts a container f whose values (of type a) depend on <tt>s</tt> into
+--   a more general computation in that produces a 'f a' (depending on s).
+--   
+--   running time: &lt;math&gt;
+extractOrd1 :: f (O s a) -> O s (f a)
+
+-- | Introduce dynamic order in a container <tt>f</tt>.
+--   
+--   running time: &lt;math&gt;
+introOrd1 :: f a -> f (O s a)
+
+-- | Lifts a function that works on a container <tt>f</tt> of
+--   orderable-things into one that works on dynamically ordered ones.
+liftOrd1 :: (f (O s a) -> f (O s a)) -> f a -> O s (f a)
+
+-- | Lifts a container f whose keys (of type k) depend on <tt>s</tt> into a
+--   more general computation in that produces a 'f k v' (depending on s).
+--   
+--   running time: &lt;math&gt;
+extractOrd2 :: f (O s k) v -> O s (f k v)
+
+-- | Introduce dynamic order in a container <tt>f</tt> that has keys of
+--   type k.
+--   
+--   running time: &lt;math&gt;
+introOrd2 :: f k v -> f (O s k) v
+instance GHC.Show.Show a => GHC.Show.Show (Data.DynamicOrd.O s a)
+instance Data.Reflection.Reifies s (Data.DynamicOrd.OrdDict a) => GHC.Classes.Eq (Data.DynamicOrd.O s a)
+instance (GHC.Classes.Eq (Data.DynamicOrd.O s a), Data.Reflection.Reifies s (Data.DynamicOrd.OrdDict a)) => GHC.Classes.Ord (Data.DynamicOrd.O s a)
+
+
+-- | A pair-like data type to represent a <a>core</a> type that has extra
+--   information as well.
+module Data.Ext
+
+-- | Our Ext type that represents the core datatype core extended with
+--   extra information of type <a>extra</a>.
+data core :+ extra
+(:+) :: core -> extra -> (:+) core extra
+infixr 1 :+
+infixr 1 :+
+
+-- | Access the core of an extended value.
+_core :: (core :+ extra) -> core
+
+-- | Access the extra part of an extended value.
+_extra :: (core :+ extra) -> extra
+
+-- | Lens access to the core of an extended value.
+core :: Lens (core :+ extra) (core' :+ extra) core core'
+
+-- | Lens access to the extra part of an extended value.
+extra :: Lens (core :+ extra) (core :+ extra') extra extra'
+
+-- | Tag a value with the unit type.
+ext :: a -> a :+ ()
+instance (Control.DeepSeq.NFData core, Control.DeepSeq.NFData extra) => Control.DeepSeq.NFData (core Data.Ext.:+ extra)
+instance GHC.Generics.Generic (core Data.Ext.:+ extra)
+instance (GHC.Enum.Bounded core, GHC.Enum.Bounded extra) => GHC.Enum.Bounded (core Data.Ext.:+ extra)
+instance (GHC.Classes.Ord core, GHC.Classes.Ord extra) => GHC.Classes.Ord (core Data.Ext.:+ extra)
+instance (GHC.Classes.Eq core, GHC.Classes.Eq extra) => GHC.Classes.Eq (core Data.Ext.:+ extra)
+instance (GHC.Read.Read core, GHC.Read.Read extra) => GHC.Read.Read (core Data.Ext.:+ extra)
+instance (GHC.Show.Show core, GHC.Show.Show extra) => GHC.Show.Show (core Data.Ext.:+ extra)
+instance Data.Bifunctor.Bifunctor (Data.Ext.:+)
+instance Data.Functor.Bind.Class.Biapply (Data.Ext.:+)
+instance Data.Biapplicative.Biapplicative (Data.Ext.:+)
+instance Data.Bifoldable.Bifoldable (Data.Ext.:+)
+instance Data.Bitraversable.Bitraversable (Data.Ext.:+)
+instance Data.Semigroup.Foldable.Class.Bifoldable1 (Data.Ext.:+)
+instance Data.Semigroup.Traversable.Class.Bitraversable1 (Data.Ext.:+)
+instance (GHC.Base.Semigroup core, GHC.Base.Semigroup extra) => GHC.Base.Semigroup (core Data.Ext.:+ extra)
+instance (Data.Aeson.Types.ToJSON.ToJSON core, Data.Aeson.Types.ToJSON.ToJSON extra) => Data.Aeson.Types.ToJSON.ToJSON (core Data.Ext.:+ extra)
+instance (Data.Aeson.Types.FromJSON.FromJSON core, Data.Aeson.Types.FromJSON.FromJSON extra) => Data.Aeson.Types.FromJSON.FromJSON (core Data.Ext.:+ extra)
+instance (Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary e) => Test.QuickCheck.Arbitrary.Arbitrary (c Data.Ext.:+ e)
+
+
 module Data.CircularSeq
 
 -- | Nonempty circular sequence
@@ -281,7 +373,8 @@ fromList :: [a] -> CSeq a
 --   running time: O(1)
 focus :: CSeq a -> a
 
--- | Access the i^th item (w.r.t the focus) in the CSeq (indices modulo n).
+-- | Access the i^th item (w.r.t the focus; elements numbered in increasing
+--   order towards the right) in the CSeq (indices modulo n).
 --   
 --   running time: &lt;math&gt;
 --   
@@ -405,6 +498,14 @@ leftElements :: CSeq a -> Seq a
 -- | Convert to a single Seq, starting with the focus.
 asSeq :: CSeq a -> Seq a
 
+-- | Label the elements with indices.
+--   
+--   <pre>
+--   &gt;&gt;&gt; withIndices $ fromList [0..5]
+--   CSeq [0 :+ 0,1 :+ 1,2 :+ 2,3 :+ 3,4 :+ 4,5 :+ 5]
+--   </pre>
+withIndices :: CSeq a -> CSeq (Int :+ a)
+
 -- | Reverses the direction of the CSeq
 --   
 --   running time: &lt;math&gt;
@@ -504,98 +605,6 @@ instance Data.Semigroup.Foldable.Class.Foldable1 Data.CircularSeq.CSeq
 instance Data.Foldable.Foldable Data.CircularSeq.CSeq
 instance GHC.Base.Functor Data.CircularSeq.CSeq
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.CircularSeq.CSeq a)
-
-
-module Data.DynamicOrd
-
--- | Values of type <tt>a</tt> in our dynamically constructed <a>Ord</a>
---   instance
-newtype O (s :: *) (a :: *)
-O :: a -> O (s :: *) (a :: *)
-[runO] :: O (s :: *) (a :: *) -> a
-
--- | An Ord Dictionary
-newtype OrdDict a
-OrdDict :: (a -> a -> Ordering) -> OrdDict a
-[compare_] :: OrdDict a -> a -> a -> Ordering
-
--- | Run a computation with a given ordering
-withOrd :: (a -> a -> Ordering) -> (forall s. Reifies s (OrdDict a) => O s b) -> b
-
--- | Lifts a container f whose values (of type a) depend on <tt>s</tt> into
---   a more general computation in that produces a 'f a' (depending on s).
---   
---   running time: &lt;math&gt;
-extractOrd1 :: f (O s a) -> O s (f a)
-
--- | Introduce dynamic order in a container <tt>f</tt>.
---   
---   running time: &lt;math&gt;
-introOrd1 :: f a -> f (O s a)
-
--- | Lifts a function that works on a container <tt>f</tt> of
---   orderable-things into one that works on dynamically ordered ones.
-liftOrd1 :: (f (O s a) -> f (O s a)) -> f a -> O s (f a)
-
--- | Lifts a container f whose keys (of type k) depend on <tt>s</tt> into a
---   more general computation in that produces a 'f k v' (depending on s).
---   
---   running time: &lt;math&gt;
-extractOrd2 :: f (O s k) v -> O s (f k v)
-
--- | Introduce dynamic order in a container <tt>f</tt> that has keys of
---   type k.
---   
---   running time: &lt;math&gt;
-introOrd2 :: f k v -> f (O s k) v
-instance GHC.Show.Show a => GHC.Show.Show (Data.DynamicOrd.O s a)
-instance Data.Reflection.Reifies s (Data.DynamicOrd.OrdDict a) => GHC.Classes.Eq (Data.DynamicOrd.O s a)
-instance (GHC.Classes.Eq (Data.DynamicOrd.O s a), Data.Reflection.Reifies s (Data.DynamicOrd.OrdDict a)) => GHC.Classes.Ord (Data.DynamicOrd.O s a)
-
-
--- | A pair-like data type to represent a <a>core</a> type that has extra
---   information as well.
-module Data.Ext
-
--- | Our Ext type that represents the core datatype core extended with
---   extra information of type <a>extra</a>.
-data core :+ extra
-(:+) :: core -> extra -> (:+) core extra
-infixr 1 :+
-infixr 1 :+
-
--- | Access the core of an extended value.
-_core :: (core :+ extra) -> core
-
--- | Access the extra part of an extended value.
-_extra :: (core :+ extra) -> extra
-
--- | Lens access to the core of an extended value.
-core :: Lens (core :+ extra) (core' :+ extra) core core'
-
--- | Lens access to the extra part of an extended value.
-extra :: Lens (core :+ extra) (core :+ extra') extra extra'
-
--- | Tag a value with the unit type.
-ext :: a -> a :+ ()
-instance (Control.DeepSeq.NFData core, Control.DeepSeq.NFData extra) => Control.DeepSeq.NFData (core Data.Ext.:+ extra)
-instance GHC.Generics.Generic (core Data.Ext.:+ extra)
-instance (GHC.Enum.Bounded core, GHC.Enum.Bounded extra) => GHC.Enum.Bounded (core Data.Ext.:+ extra)
-instance (GHC.Classes.Ord core, GHC.Classes.Ord extra) => GHC.Classes.Ord (core Data.Ext.:+ extra)
-instance (GHC.Classes.Eq core, GHC.Classes.Eq extra) => GHC.Classes.Eq (core Data.Ext.:+ extra)
-instance (GHC.Read.Read core, GHC.Read.Read extra) => GHC.Read.Read (core Data.Ext.:+ extra)
-instance (GHC.Show.Show core, GHC.Show.Show extra) => GHC.Show.Show (core Data.Ext.:+ extra)
-instance Data.Bifunctor.Bifunctor (Data.Ext.:+)
-instance Data.Functor.Bind.Class.Biapply (Data.Ext.:+)
-instance Data.Biapplicative.Biapplicative (Data.Ext.:+)
-instance Data.Bifoldable.Bifoldable (Data.Ext.:+)
-instance Data.Bitraversable.Bitraversable (Data.Ext.:+)
-instance Data.Semigroup.Foldable.Class.Bifoldable1 (Data.Ext.:+)
-instance Data.Semigroup.Traversable.Class.Bitraversable1 (Data.Ext.:+)
-instance (GHC.Base.Semigroup core, GHC.Base.Semigroup extra) => GHC.Base.Semigroup (core Data.Ext.:+ extra)
-instance (Data.Aeson.Types.ToJSON.ToJSON core, Data.Aeson.Types.ToJSON.ToJSON extra) => Data.Aeson.Types.ToJSON.ToJSON (core Data.Ext.:+ extra)
-instance (Data.Aeson.Types.FromJSON.FromJSON core, Data.Aeson.Types.FromJSON.FromJSON extra) => Data.Aeson.Types.FromJSON.FromJSON (core Data.Ext.:+ extra)
-instance (Test.QuickCheck.Arbitrary.Arbitrary c, Test.QuickCheck.Arbitrary.Arbitrary e) => Test.QuickCheck.Arbitrary.Arbitrary (c Data.Ext.:+ e)
 
 
 -- | Defines a data type for representing intersections. Mostly useful for
@@ -1278,8 +1287,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHvB a_aHOq. Lens (Permutation a_aHvB) (Permutation a_aHOq) (Vector (Orbit a_aHvB)) (Vector (Orbit a_aHOq))
-indexes :: forall a_aHvB. Lens' (Permutation a_aHvB) (Vector (Int, Int))
+orbits :: forall a_aHwC a_aHPr. Lens (Permutation a_aHwC) (Permutation a_aHPr) (Vector (Orbit a_aHwC)) (Vector (Orbit a_aHPr))
+indexes :: forall a_aHwC. Lens' (Permutation a_aHwC) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1391,8 +1400,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKM7. Lens' (Dart s_aKM7) Direction
-arc :: forall s_aKM7 s_aLcv. Lens (Dart s_aKM7) (Dart s_aLcv) (Arc s_aKM7) (Arc s_aLcv)
+direction :: forall s_aKN6. Lens' (Dart s_aKN6) Direction
+arc :: forall s_aKN6 s_aLdu. Lens (Dart s_aKN6) (Dart s_aLdu) (Arc s_aKN6) (Arc s_aLdu)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2001,8 +2010,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKM7 s_aLcv. Lens (Dart s_aKM7) (Dart s_aLcv) (Arc s_aKM7) (Arc s_aLcv)
-direction :: forall s_aKM7. Lens' (Dart s_aKM7) Direction
+arc :: forall s_aKN6 s_aLdu. Lens (Dart s_aKN6) (Dart s_aLdu) (Arc s_aKN6) (Arc s_aLdu)
+direction :: forall s_aKN6. Lens' (Dart s_aKN6) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2453,8 +2462,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aR7r. Lens' (Range a_aR7r) (EndPoint a_aR7r)
-upper :: forall a_aR7r. Lens' (Range a_aR7r) (EndPoint a_aR7r)
+lower :: forall a_aR8q. Lens' (Range a_aR8q) (EndPoint a_aR8q)
+upper :: forall a_aR8q. Lens' (Range a_aR8q) (EndPoint a_aR8q)
 
 -- | Test if a value lies in a range.
 --   
@@ -3048,10 +3057,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZu3 a_a117r. Traversal (UnBounded a_aZu3) (UnBounded a_a117r) a_aZu3 a_a117r
-_MinInfinity :: forall a_aZu3. Prism' (UnBounded a_aZu3) ()
-_Val :: forall a_aZu3 a_a11ak. Prism (UnBounded a_a11ak) (UnBounded a_aZu3) a_a11ak a_aZu3
-_MaxInfinity :: forall a_aZu3. Prism' (UnBounded a_aZu3) ()
+unUnBounded :: forall a_aZv2 a_a118q. Traversal (UnBounded a_aZv2) (UnBounded a_a118q) a_aZv2 a_a118q
+_MinInfinity :: forall a_aZv2. Prism' (UnBounded a_aZv2) ()
+_Val :: forall a_aZv2 a_a11bj. Prism (UnBounded a_a11bj) (UnBounded a_aZv2) a_a11bj a_aZv2
+_MaxInfinity :: forall a_aZv2. Prism' (UnBounded a_aZv2) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
@@ -3364,6 +3373,13 @@ findRotateTo :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 --   the sizes of the lists.
 isShiftOf :: Eq a => CircularVector a -> CircularVector a -> Bool
 map :: (a -> b) -> CircularVector a -> CircularVector b
+
+-- | label the circular vector with indices, starting from zero at the
+--   current focus, going right.
+--   
+--   Running time: &lt;math&gt;
+withIndicesRight :: CircularVector a -> CircularVector (Int :+ a)
+imap :: (Int -> a -> b) -> CircularVector a -> CircularVector b
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
 
