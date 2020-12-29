@@ -169,7 +169,7 @@ fromListBy cmp = foldr (insertBy cmp) mempty
 fromListByOrd :: Ord a => [a] -> OrdSeq a
 fromListByOrd = fromListBy compare
 
--- | O(n)
+-- | \( O(n) \)
 fromAscList :: [a] -> OrdSeq a
 fromAscList = OrdSeq . fromList . fmap Elem
 
@@ -183,22 +183,19 @@ memberBy        :: Compare a -> a -> OrdSeq a -> Bool
 memberBy cmp x = isJust . lookupBy cmp x
 
 
--- | Fmap, assumes the order does not change
--- O(n)
+-- | \( O(n) \) Fmap, assumes the order does not change
 mapMonotonic   :: (a -> b) -> OrdSeq a -> OrdSeq b
 mapMonotonic f = fromAscList . map f . F.toList
 
 
--- | Gets the first element from the sequence
--- \(O(1)\)
+-- | \(O(1)\) Gets the first element from the sequence
 viewl :: OrdSeq a -> ViewL OrdSeq a
 viewl = f . FT.viewl . _asFingerTree
   where
     f EmptyL        = EmptyL
     f (Elem x :< s) = x :< OrdSeq s
 
--- | Gets the last element from the sequence
--- \(O(1)\)
+-- | \(O(1)\) Gets the last element from the sequence
 viewr :: OrdSeq a -> ViewR OrdSeq a
 viewr = f . FT.viewr . _asFingerTree
   where

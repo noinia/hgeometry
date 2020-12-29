@@ -16,7 +16,7 @@ newtype GLowerEnvelope f = GLowerEnvelope (f (Segment r))
 type Segment r = (Interval r, LineSegment 2 r)
 
 -- Given a non-empty set of non-vertical lines, compute the lower envelope in
--- O(n log n) time.
+-- \( O(n log n) \) time.
 lowerEnvelope :: NonEmpty (Line 2 r) -> LowerEnvelope r
 lowerEnvelope = unM . divideAndConquer1 (Merge . single)
 
