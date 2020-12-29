@@ -709,17 +709,17 @@ pattern Vector3 :: r -> r -> r -> Vector 3 r
 -- | Constant sized vector with 4 elements.
 pattern Vector4 :: r -> r -> r -> r -> Vector 4 r
 
--- | <i>O(n)</i> Convert from a list to a non-empty vector.
+-- | &lt;math&gt; Convert from a list to a non-empty vector.
 vectorFromList :: Arity d => [r] -> Maybe (Vector d r)
 
--- | <i>O(n)</i> Convert from a list to a non-empty vector.
+-- | &lt;math&gt; Convert from a list to a non-empty vector.
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 
--- | <i>O(n)</i> Pop the first element off a vector.
+-- | &lt;math&gt; Pop the first element off a vector.
 destruct :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> (r, Vector d r)
 
--- | <i>O(1)</i> First element. Since arity is at least 1, this function is
---   total.
+-- | &lt;math&gt; First element. Since arity is at least 1, this function
+--   is total.
 head :: (Arity d, 1 <= d) => Vector d r -> r
 
 -- | Lens into the i th element
@@ -730,7 +730,7 @@ element :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d) => proxy i ->
 --   Traversal
 element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 
--- | <i>O(n)</i> Prepend an element.
+-- | &lt;math&gt; Prepend an element.
 cons :: (Arity d, Arity (d + 1)) => r -> Vector d r -> Vector (d + 1) r
 
 -- | Add an element at the back of the vector
@@ -738,6 +738,9 @@ snoc :: (Arity (d + 1), Arity d) => Vector d r -> r -> Vector (d + 1) r
 
 -- | Get a vector of the first d - 1 elements.
 init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
+
+-- | &lt;math&gt; Last element. Since the vector is non-empty, runtime
+--   bounds checks are bypassed.
 last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
 
 -- | Get a prefix of i elements of a vector
@@ -1202,23 +1205,21 @@ ccwCmpAroundWith' :: (Ord r, Num r) => Vector 2 r -> (Point 2 r :+ c) -> (Point 
 cwCmpAroundWith :: (Ord r, Num r) => Vector 2 r -> Point 2 r -> Point 2 r -> Point 2 r -> Ordering
 cwCmpAroundWith' :: (Ord r, Num r) => Vector 2 r -> (Point 2 r :+ a) -> (Point 2 r :+ b) -> (Point 2 r :+ c) -> Ordering
 
--- | Sort the points arround the given point p in counter clockwise order
---   with respect to the rightward horizontal ray starting from p. If two
---   points q and r are colinear with p, the closest one to p is reported
---   first. running time: O(n log n)
+-- | &lt;math&gt; Sort the points arround the given point p in counter
+--   clockwise order with respect to the rightward horizontal ray starting
+--   from p. If two points q and r are colinear with p, the closest one to
+--   p is reported first.
 sortAround :: (Ord r, Num r) => Point 2 r -> [Point 2 r] -> [Point 2 r]
 
--- | Sort the points arround the given point p in counter clockwise order
---   with respect to the rightward horizontal ray starting from p. If two
---   points q and r are colinear with p, the closest one to p is reported
---   first. running time: O(n log n)
+-- | &lt;math&gt; Sort the points arround the given point p in counter
+--   clockwise order with respect to the rightward horizontal ray starting
+--   from p. If two points q and r are colinear with p, the closest one to
+--   p is reported first.
 sortAround' :: (Ord r, Num r) => (Point 2 r :+ q) -> [Point 2 r :+ p] -> [Point 2 r :+ p]
 
--- | Given a center c, a new point p, and a list of points ps, sorted in
---   counter clockwise order around c. Insert p into the cyclic order. The
---   focus of the returned cyclic list is the new point p.
---   
---   running time: O(n)
+-- | &lt;math&gt; Given a center c, a new point p, and a list of points ps,
+--   sorted in counter clockwise order around c. Insert p into the cyclic
+--   order. The focus of the returned cyclic list is the new point p.
 insertIntoCyclicOrder :: (Ord r, Num r) => (Point 2 r :+ q) -> (Point 2 r :+ p) -> CList (Point 2 r :+ p) -> CList (Point 2 r :+ p)
 
 -- | Quadrants of two dimensional points. in CCW order
@@ -3247,8 +3248,8 @@ lowerTangent' :: (Ord r, Num r, Foldable1 f) => f (Point 2 r :+ p) -> f (Point 2
 --   disjoint, and there is a vertical line separating the two polygons. -
 --   The vertices of the polygons are given in clockwise order
 --   
---   Running time: O(n+m), where n and m are the sizes of the two polygons
---   respectively
+--   Running time: &lt;math&gt;, where n and m are the sizes of the two
+--   polygons respectively
 upperTangent :: (Num r, Ord r) => ConvexPolygon p r -> ConvexPolygon p r -> LineSegment 2 p r
 
 -- | Compute the upper tangent of the two convex chains lp and rp
@@ -3416,8 +3417,9 @@ wellSeparatedPairs :: (Floating r, Ord r, Arity d, Arity (d + 1)) => r -> SplitT
 -- | Given the points, sorted in every dimension, recursively build a split
 --   tree
 --   
---   The algorithm works in rounds. Each round takes O(n) time, and halves
---   the number of points. Thus, the total running time is O(n log n).
+--   The algorithm works in rounds. Each round takes &lt;math&gt; time, and
+--   halves the number of points. Thus, the total running time is
+--   &lt;math&gt;.
 --   
 --   The algorithm essentially builds a path in the split tree; at every
 --   node on the path that we construct, we split the point set into two
@@ -3625,7 +3627,7 @@ module Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 --   simplification of pl (i.e. with vertices from pl) s.t. all other
 --   vertices are within dist eps to the original polyline.
 --   
---   Running time: O(n^2) worst case, O(n log n) expected.
+--   Running time: &lt;math&gt; worst case, &lt;math&gt; expected.
 douglasPeucker :: (Ord r, Fractional r, Arity d) => r -> PolyLine d p r -> PolyLine d p r
 
 -- | Concatenate the two polylines, dropping their shared vertex
@@ -3766,27 +3768,26 @@ type MultiPolygon = Polygon Multi
 -- | Either a simple or multipolygon
 type SomePolygon p r = Either (Polygon Simple p r) (Polygon Multi p r)
 
--- | <i>O(n)</i>. Creates a polygon from the given list of vertices.
+-- | &lt;math&gt; Creates a polygon from the given list of vertices.
 --   
 --   The points are placed in CCW order if they are not already.
 --   Overlapping edges and repeated vertices are allowed.
 fromPoints :: forall p r. (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
 
--- | <i>O(n)</i>. Creates a polygon from the given vector of vertices.
+-- | &lt;math&gt; Creates a polygon from the given vector of vertices.
 --   
 --   The points are placed in CCW order if they are not already.
 --   Overlapping edges and repeated vertices are allowed.
 fromCircularVector :: forall p r. (Eq r, Num r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(n log n)</i>. Creates a simple polygon from the given list of
---   vertices.
+-- | &lt;math&gt; Creates a simple polygon from the given list of vertices.
 --   
 --   The points are placed in CCW order if they are not already.
 --   Overlapping edges and repeated vertices are <i>not</i> allowed and
 --   will trigger an exception.
 simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> SimplePolygon p r
 
--- | <i>O(n log n)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   The points are placed in CCW order if they are not already.
@@ -3794,18 +3795,18 @@ simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> Sim
 --   will trigger an exception.
 simpleFromCircularVector :: forall p r. (Ord r, Fractional r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(n)</i>. Creates a simple polygon from the given list of vertices.
+-- | &lt;math&gt; Creates a simple polygon from the given list of vertices.
 --   
 --   pre: the input list constains no repeated vertices.
 unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 
--- | <i>O(1)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   pre: the input list constains no repeated vertices.
 unsafeFromCircularVector :: CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(1)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   pre: the input list constains no repeated vertices.
@@ -3817,21 +3818,19 @@ toVector :: Polygon t p r -> Vector (Point 2 r :+ p)
 -- | &lt;math&gt; Polygon points, from left to right.
 toPoints :: Polygon t p r -> [Point 2 r :+ p]
 
--- | Vertex count.
+-- | &lt;math&gt; Vertex count. Includes the vertices of holes.
 size :: Polygon t p r -> Int
 
--- | The vertices in the polygon. No guarantees are given on the order in
---   which they appear!
+-- | &lt;math&gt; The vertices in the polygon. No guarantees are given on
+--   the order in which they appear!
 polygonVertices :: Polygon t p r -> NonEmpty (Point 2 r :+ p)
 
--- | Lists all edges. The edges on the outer boundary are given before the
---   ones on the holes. However, no other guarantees are given on the
---   order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Lists all edges. The edges on the outer boundary are
+--   given before the ones on the holes. However, no other guarantees are
+--   given on the order.
 listEdges :: Polygon t p r -> [LineSegment 2 p r]
 
--- | Lens access to the outer boundary of a polygon.
+-- | &lt;math&gt; Lens access to the outer boundary of a polygon.
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (SimplePolygon p r)
 
 -- | Getter access to the outer boundary vector of a polygon.
@@ -3855,13 +3854,11 @@ outerBoundaryVector :: forall t p r. Getter (Polygon t p r) (CircularVector (Poi
 --   </pre>
 unsafeOuterBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 
--- | The edges along the outer boundary of the polygon. The edges are half
---   open.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; The edges along the outer boundary of the polygon. The
+--   edges are half open.
 outerBoundaryEdges :: Polygon t p r -> CircularVector (LineSegment 2 p r)
 
--- | <i>O(1)</i> Access the i^th vertex on the outer boundary
+-- | &lt;math&gt; Access the i^th vertex on the outer boundary
 --   
 --   <pre>
 --   &gt;&gt;&gt; simplePoly ^. outerVertex 0
@@ -3869,10 +3866,8 @@ outerBoundaryEdges :: Polygon t p r -> CircularVector (LineSegment 2 p r)
 --   </pre>
 outerVertex :: Int -> Getter (Polygon t p r) (Point 2 r :+ p)
 
--- | Get the n^th edge along the outer boundary of the polygon. The edge is
---   half open.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Get the n^th edge along the outer boundary of the
+--   polygon. The edge is half open.
 outerBoundaryEdge :: Int -> Polygon t p r -> LineSegment 2 p r
 
 -- | Lens access for polygon holes.
@@ -3883,8 +3878,8 @@ outerBoundaryEdge :: Int -> Polygon t p r -> LineSegment 2 p r
 --   </pre>
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 
--- | <i>O(1)</i>. Traversal lens for polygon holes. Does nothing for simple
---   polygons.
+-- | &lt;math&gt;. Traversal lens for polygon holes. Does nothing for
+--   simple polygons.
 polygonHoles' :: Traversal' (Polygon t p r) [Polygon Simple p r]
 
 -- | Get all holes in a polygon
@@ -3934,7 +3929,7 @@ inPolygon :: forall t p r. (Fractional r, Ord r) => Point 2 r -> Polygon t p r -
 -- | Test if a point lies strictly inside the polgyon.
 insidePolygon :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
 
--- | Test if q lies on the boundary of the polygon. Running time: O(n)
+-- | &lt;math&gt; Test if q lies on the boundary of the polygon.
 --   
 --   <pre>
 --   &gt;&gt;&gt; Point2 1 1 `onBoundary` simplePoly
@@ -3962,9 +3957,7 @@ insidePolygon :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
 --   TODO: testcases multipolygon
 onBoundary :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
 
--- | Test if the polygon is a triangle
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Test if the polygon is a triangle
 isTriangle :: Polygon p t r -> Bool
 
 -- | Test if a Simple polygon is star-shaped. Returns a point in the kernel
@@ -3973,33 +3966,28 @@ isTriangle :: Polygon p t r -> Bool
 --   &lt;math&gt; expected time
 isStarShaped :: (MonadRandom m, Ord r, Fractional r) => SimplePolygon p r -> m (Maybe (Point 2 r))
 
--- | Test if the outer boundary of the polygon is in clockwise or counter
---   clockwise order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Test if the outer boundary of the polygon is in clockwise
+--   or counter clockwise order.
 isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
 
--- | Make sure that every edge has the polygon's interior on its left, by
---   orienting the outer boundary into counter-clockwise order, and the
---   inner borders (i.e. any holes, if they exist) into clockwise order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Make sure that every edge has the polygon's interior on
+--   its left, by orienting the outer boundary into counter-clockwise
+--   order, and the inner borders (i.e. any holes, if they exist) into
+--   clockwise order.
 toCounterClockWiseOrder :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Orient the outer boundary into counter-clockwise order. Leaves any
---   holes as they are.
+-- | &lt;math&gt; Orient the outer boundary into counter-clockwise order.
+--   Leaves any holes as they are.
 toCounterClockWiseOrder' :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Make sure that every edge has the polygon's interior on its right, by
---   orienting the outer boundary into clockwise order, and the inner
---   borders (i.e. any holes, if they exist) into counter-clockwise order.
---   
---   running time: &lt;math&gt; | Orient the outer boundary of the polygon
---   to clockwise order
+-- | &lt;math&gt; Make sure that every edge has the polygon's interior on
+--   its right, by orienting the outer boundary into clockwise order, and
+--   the inner borders (i.e. any holes, if they exist) into
+--   counter-clockwise order.
 toClockwiseOrder :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Orient the outer boundary into clockwise order. Leaves any holes as
---   they are.
+-- | &lt;math&gt; Orient the outer boundary into clockwise order. Leaves
+--   any holes as they are.
 toClockwiseOrder' :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
 -- | Reorient the outer boundary from clockwise order to counter-clockwise
@@ -4007,21 +3995,17 @@ toClockwiseOrder' :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 --   holes as they are.
 reverseOuterBoundary :: Polygon t p r -> Polygon t p r
 
--- | Pick a point that is inside the polygon.
+-- | &lt;math&gt; Pick a point that is inside the polygon.
 --   
 --   (note: if the polygon is degenerate; i.e. has &lt;3 vertices, we
 --   report a vertex of the polygon instead.)
 --   
 --   pre: the polygon is given in CCW order
---   
---   running time: &lt;math&gt;
 pickPoint :: (Ord r, Fractional r) => Polygon p t r -> Point 2 r
 
--- | Find a diagonal of the polygon.
+-- | &lt;math&gt; Find a diagonal of the polygon.
 --   
 --   pre: the polygon is given in CCW order
---   
---   running time: &lt;math&gt;
 findDiagonal :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
 
 -- | Pairs every vertex with its incident edges. The first one is its
@@ -4276,17 +4260,17 @@ pattern Vector :: VectorFamilyF (Peano d) r -> Vector d r
 --   <a>VectorFamily</a>.
 unV :: Iso (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (Peano d) s)
 
--- | <i>O(n)</i> Convert from a list to a non-empty vector.
+-- | &lt;math&gt; Convert from a list to a non-empty vector.
 vectorFromList :: Arity d => [r] -> Maybe (Vector d r)
 
--- | <i>O(n)</i> Convert from a list to a non-empty vector.
+-- | &lt;math&gt; Convert from a list to a non-empty vector.
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 
--- | <i>O(n)</i> Pop the first element off a vector.
+-- | &lt;math&gt; Pop the first element off a vector.
 destruct :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> (r, Vector d r)
 
--- | <i>O(1)</i> First element. Since arity is at least 1, this function is
---   total.
+-- | &lt;math&gt; First element. Since arity is at least 1, this function
+--   is total.
 head :: (Arity d, 1 <= d) => Vector d r -> r
 
 -- | Lens into the i th element
@@ -4297,7 +4281,7 @@ element :: forall proxy i d r. (Arity d, KnownNat i, (i + 1) <= d) => proxy i ->
 --   Traversal
 element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 
--- | <i>O(n)</i> Prepend an element.
+-- | &lt;math&gt; Prepend an element.
 cons :: (Arity d, Arity (d + 1)) => r -> Vector d r -> Vector (d + 1) r
 
 -- | Add an element at the back of the vector
@@ -4491,7 +4475,7 @@ outerBoundaryVector :: forall t p r. Getter (Polygon t p r) (CircularVector (Poi
 --   </pre>
 unsafeOuterBoundaryVector :: forall t p r. Lens' (Polygon t p r) (CircularVector (Point 2 r :+ p))
 
--- | Lens access to the outer boundary of a polygon.
+-- | &lt;math&gt; Lens access to the outer boundary of a polygon.
 outerBoundary :: forall t p r. Lens' (Polygon t p r) (SimplePolygon p r)
 
 -- | Lens access for polygon holes.
@@ -4502,11 +4486,11 @@ outerBoundary :: forall t p r. Lens' (Polygon t p r) (SimplePolygon p r)
 --   </pre>
 polygonHoles :: forall p r. Lens' (Polygon Multi p r) [Polygon Simple p r]
 
--- | <i>O(1)</i>. Traversal lens for polygon holes. Does nothing for simple
---   polygons.
+-- | &lt;math&gt;. Traversal lens for polygon holes. Does nothing for
+--   simple polygons.
 polygonHoles' :: Traversal' (Polygon t p r) [Polygon Simple p r]
 
--- | <i>O(1)</i> Access the i^th vertex on the outer boundary
+-- | &lt;math&gt; Access the i^th vertex on the outer boundary
 --   
 --   <pre>
 --   &gt;&gt;&gt; simplePoly ^. outerVertex 0
@@ -4514,37 +4498,34 @@ polygonHoles' :: Traversal' (Polygon t p r) [Polygon Simple p r]
 --   </pre>
 outerVertex :: Int -> Getter (Polygon t p r) (Point 2 r :+ p)
 
--- | Get the n^th edge along the outer boundary of the polygon. The edge is
---   half open.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Get the n^th edge along the outer boundary of the
+--   polygon. The edge is half open.
 outerBoundaryEdge :: Int -> Polygon t p r -> LineSegment 2 p r
 
 -- | Get all holes in a polygon
 holeList :: Polygon t p r -> [Polygon Simple p r]
 
--- | Vertex count.
+-- | &lt;math&gt; Vertex count. Includes the vertices of holes.
 size :: Polygon t p r -> Int
 
--- | The vertices in the polygon. No guarantees are given on the order in
---   which they appear!
+-- | &lt;math&gt; The vertices in the polygon. No guarantees are given on
+--   the order in which they appear!
 polygonVertices :: Polygon t p r -> NonEmpty (Point 2 r :+ p)
 
--- | <i>O(n)</i>. Creates a polygon from the given vector of vertices.
+-- | &lt;math&gt; Creates a polygon from the given vector of vertices.
 --   
 --   The points are placed in CCW order if they are not already.
 --   Overlapping edges and repeated vertices are allowed.
 fromCircularVector :: forall p r. (Eq r, Num r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(n log n)</i>. Creates a simple polygon from the given list of
---   vertices.
+-- | &lt;math&gt; Creates a simple polygon from the given list of vertices.
 --   
 --   The points are placed in CCW order if they are not already.
 --   Overlapping edges and repeated vertices are <i>not</i> allowed and
 --   will trigger an exception.
 simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> SimplePolygon p r
 
--- | <i>O(n log n)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   The points are placed in CCW order if they are not already.
@@ -4552,18 +4533,18 @@ simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> Sim
 --   will trigger an exception.
 simpleFromCircularVector :: forall p r. (Ord r, Fractional r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(n)</i>. Creates a simple polygon from the given list of vertices.
+-- | &lt;math&gt; Creates a simple polygon from the given list of vertices.
 --   
 --   pre: the input list constains no repeated vertices.
 unsafeFromPoints :: [Point 2 r :+ p] -> SimplePolygon p r
 
--- | <i>O(1)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   pre: the input list constains no repeated vertices.
 unsafeFromCircularVector :: CircularVector (Point 2 r :+ p) -> SimplePolygon p r
 
--- | <i>O(1)</i>. Creates a simple polygon from the given vector of
+-- | &lt;math&gt; Creates a simple polygon from the given vector of
 --   vertices.
 --   
 --   pre: the input list constains no repeated vertices.
@@ -4575,17 +4556,13 @@ toVector :: Polygon t p r -> Vector (Point 2 r :+ p)
 -- | &lt;math&gt; Polygon points, from left to right.
 toPoints :: Polygon t p r -> [Point 2 r :+ p]
 
--- | The edges along the outer boundary of the polygon. The edges are half
---   open.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; The edges along the outer boundary of the polygon. The
+--   edges are half open.
 outerBoundaryEdges :: Polygon t p r -> CircularVector (LineSegment 2 p r)
 
--- | Lists all edges. The edges on the outer boundary are given before the
---   ones on the holes. However, no other guarantees are given on the
---   order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Lists all edges. The edges on the outer boundary are
+--   given before the ones on the holes. However, no other guarantees are
+--   given on the order.
 listEdges :: Polygon t p r -> [LineSegment 2 p r]
 
 -- | Pairs every vertex with its incident edges. The first one is its
@@ -4602,7 +4579,7 @@ listEdges :: Polygon t p r -> [LineSegment 2 p r]
 --   </pre>
 withIncidentEdges :: Polygon t p r -> Polygon t (Two (LineSegment 2 p r)) r
 
--- | Test if q lies on the boundary of the polygon. Running time: O(n)
+-- | &lt;math&gt; Test if q lies on the boundary of the polygon.
 --   
 --   <pre>
 --   &gt;&gt;&gt; Point2 1 1 `onBoundary` simplePoly
@@ -4674,55 +4651,44 @@ signedArea :: Fractional r => SimplePolygon p r -> r
 -- | Compute the centroid of a simple polygon.
 centroid :: Fractional r => SimplePolygon p r -> Point 2 r
 
--- | Pick a point that is inside the polygon.
+-- | &lt;math&gt; Pick a point that is inside the polygon.
 --   
 --   (note: if the polygon is degenerate; i.e. has &lt;3 vertices, we
 --   report a vertex of the polygon instead.)
 --   
 --   pre: the polygon is given in CCW order
---   
---   running time: &lt;math&gt;
 pickPoint :: (Ord r, Fractional r) => Polygon p t r -> Point 2 r
 
--- | Test if the polygon is a triangle
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Test if the polygon is a triangle
 isTriangle :: Polygon p t r -> Bool
 
--- | Find a diagonal of the polygon.
+-- | &lt;math&gt; Find a diagonal of the polygon.
 --   
 --   pre: the polygon is given in CCW order
---   
---   running time: &lt;math&gt;
 findDiagonal :: (Ord r, Fractional r) => Polygon t p r -> LineSegment 2 p r
 
--- | Test if the outer boundary of the polygon is in clockwise or counter
---   clockwise order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Test if the outer boundary of the polygon is in clockwise
+--   or counter clockwise order.
 isCounterClockwise :: (Eq r, Num r) => Polygon t p r -> Bool
 
--- | Make sure that every edge has the polygon's interior on its right, by
---   orienting the outer boundary into clockwise order, and the inner
---   borders (i.e. any holes, if they exist) into counter-clockwise order.
---   
---   running time: &lt;math&gt; | Orient the outer boundary of the polygon
---   to clockwise order
+-- | &lt;math&gt; Make sure that every edge has the polygon's interior on
+--   its right, by orienting the outer boundary into clockwise order, and
+--   the inner borders (i.e. any holes, if they exist) into
+--   counter-clockwise order.
 toClockwiseOrder :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Orient the outer boundary into clockwise order. Leaves any holes as
---   they are.
+-- | &lt;math&gt; Orient the outer boundary into clockwise order. Leaves
+--   any holes as they are.
 toClockwiseOrder' :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Make sure that every edge has the polygon's interior on its left, by
---   orienting the outer boundary into counter-clockwise order, and the
---   inner borders (i.e. any holes, if they exist) into clockwise order.
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Make sure that every edge has the polygon's interior on
+--   its left, by orienting the outer boundary into counter-clockwise
+--   order, and the inner borders (i.e. any holes, if they exist) into
+--   clockwise order.
 toCounterClockWiseOrder :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
--- | Orient the outer boundary into counter-clockwise order. Leaves any
---   holes as they are.
+-- | &lt;math&gt; Orient the outer boundary into counter-clockwise order.
+--   Leaves any holes as they are.
 toCounterClockWiseOrder' :: (Eq r, Num r) => Polygon t p r -> Polygon t p r
 
 -- | Reorient the outer boundary from clockwise order to counter-clockwise
@@ -4760,9 +4726,10 @@ isStarShaped :: (MonadRandom m, Ord r, Fractional r) => SimplePolygon p r -> m (
 --   of points in &lt;math&gt;
 module Algorithms.Geometry.SmallestEnclosingBall.Naive
 
--- | Horrible O(n^4) implementation that simply tries all disks, checks if
---   they enclose all points, and takes the largest one. Basically, this is
---   only useful to check correctness of the other algorithm(s)
+-- | Horrible &lt;math&gt; implementation that simply tries all disks,
+--   checks if they enclose all points, and takes the largest one.
+--   Basically, this is only useful to check correctness of the other
+--   algorithm(s)
 smallestEnclosingDisk :: (Ord r, Fractional r) => [Point 2 r :+ p] -> DiskResult p r
 
 -- | check if a disk encloses all points
@@ -4838,10 +4805,10 @@ diametralPairWith :: Ord r => (Point d r -> Point d r -> r) -> [Point d r :+ p] 
 
 module Algorithms.Geometry.SSSP.Naive
 
--- | O(n^3) Single-Source Shortest Path.
+-- | &lt;math&gt; Single-Source Shortest Path.
 sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
 
--- | O(n^3) Single-Source Shortest Path from all vertices.
+-- | &lt;math&gt; Single-Source Shortest Path from all vertices.
 sssp' :: (Real r, Fractional r) => SimplePolygon p r -> Vector SSSP
 
 
@@ -6966,7 +6933,7 @@ module Algorithms.Geometry.SSSP
 type SSSP = Vector Int
 triangulate :: (Ord r, Fractional r) => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
 
--- | O(n) Single-Source shortest path.
+-- | &lt;math&gt; Single-Source shortest path.
 sssp :: (Ord r, Fractional r) => PlaneGraph s Int PolygonEdgeType PolygonFaceData r -> SSSP
 instance GHC.Show.Show (Algorithms.Geometry.SSSP.Dual r)
 instance GHC.Show.Show (Algorithms.Geometry.SSSP.DualTree r)
@@ -7042,9 +7009,9 @@ instance (GHC.Show.Show r, GHC.Show.Show p) => GHC.Show.Show (Algorithms.Geometr
 
 module Algorithms.Geometry.DelaunayTriangulation.Naive
 
--- | Naive O(n^4) time implementation of the delaunay triangulation. Simply
---   tries each triple (p,q,r) and tests if it is delaunay, i.e. if there
---   are no other points in the circle defined by p, q, and r.
+-- | Naive &lt;math&gt; time implementation of the delaunay triangulation.
+--   Simply tries each triple (p,q,r) and tests if it is delaunay, i.e. if
+--   there are no other points in the circle defined by p, q, and r.
 --   
 --   pre: the input is a *SET*, i.e. contains no duplicate points. (If the
 --   input does contain duplicate points, the implementation throws them
@@ -7056,15 +7023,15 @@ delaunayTriangulation :: (Ord r, Fractional r) => NonEmpty (Point 2 r :+ p) -> T
 toAdjLists :: (Num r, Ord r) => Mapping p r -> [(VertexID, VertexID)] -> Vector (CList VertexID)
 
 -- | Given a particular point u and a list of points vs, sort the points vs
---   in CW order around u. running time: O(m log m), where m=|vs| is the
+--   in CW order around u. running time: &lt;math&gt;, where m=|vs| is the
 --   number of vertices to sort.
 sortAroundMapping :: (Num r, Ord r) => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
 
 -- | Given a list of faces, construct a list of edges
 extractEdges :: [(VertexID, VertexID, VertexID)] -> [(VertexID, VertexID)]
 
--- | Test if the given three points form a triangle in the delaunay
---   triangulation. running time: O(n)
+-- | &lt;math&gt; Test if the given three points form a triangle in the
+--   delaunay triangulation.
 isDelaunay :: (Fractional r, Ord r) => Mapping p r -> VertexID -> VertexID -> VertexID -> Bool
 
 

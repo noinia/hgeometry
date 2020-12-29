@@ -119,7 +119,7 @@ module Algorithms.FloydWarshall
 mkIndex :: Num a => a -> (a, a) -> a
 mkGraph :: (Unbox a, Num a) => Int -> a -> [(Int, Int, a)] -> ST s (MVector s (a, Int))
 
--- | O(n^3)
+-- | &lt;math&gt;
 floydWarshall :: (Unbox a, Fractional a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
 
 
@@ -710,18 +710,18 @@ infix 5 ><
 --   </pre>
 eval :: forall proxy n m a. KnownNat n => proxy n -> LSeq m a -> Maybe (LSeq n a)
 
--- | get the element with index i, counting from the left and starting at
---   0. O(log(min(i,n-i)))
+-- | &lt;math&gt; Get the element with index i, counting from the left and
+--   starting at 0.
 index :: LSeq n a -> Int -> a
 
--- | <i>O(log(min(i,n−i)))</i> Update the element at the specified
---   position. If the position is out of range, the original sequence is
---   returned. adjust can lead to poor performance and even memory leaks,
---   because it does not force the new value before installing it in the
---   sequence. adjust' should usually be preferred.
+-- | &lt;math&gt; Update the element at the specified position. If the
+--   position is out of range, the original sequence is returned. adjust
+--   can lead to poor performance and even memory leaks, because it does
+--   not force the new value before installing it in the sequence. adjust'
+--   should usually be preferred.
 adjust :: (a -> a) -> Int -> LSeq n a -> LSeq n a
 
--- | <i>O(n)</i> The partition function takes a predicate p and a sequence
+-- | &lt;math&gt; The partition function takes a predicate p and a sequence
 --   xs and returns sequences of those elements which do and do not satisfy
 --   the predicate.
 partition :: (a -> Bool) -> LSeq n a -> (LSeq 0 a, LSeq 0 a)
@@ -918,35 +918,25 @@ data Set a
 -- | Creates a singleton set.
 singleton :: a -> Set a
 
--- | Inserts an element in the set
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Inserts an element in the set
 insert :: Eq a => a -> Set a -> Set a
 
--- | Deletes an element from the set
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Deletes an element from the set
 delete :: Eq a => a -> Set a -> Set a
 
--- | Computes the union of two sets
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Computes the union of two sets
 union :: Eq a => Set a -> Set a -> Set a
 
--- | Computes the intersection of two sets
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Computes the intersection of two sets
 intersection :: Eq a => Set a -> Set a -> Set a
 
--- | Computes the difference of two sets
---   
---   running time: &lt;math&gt;
+-- | &lt;math&gt; Computes the difference of two sets
 difference :: Eq a => Set a -> Set a -> Set a
 
--- | O(n^2). Create a set from a finite list of elements.
+-- | &lt;math&gt; Create a set from a finite list of elements.
 fromList :: Eq a => [a] -> Set a
 
--- | O(n^2). Insert an element in a set.
+-- | &lt;math&gt; Insert an element in a set.
 insertAll :: Eq a => [a] -> Set a -> Set a
 instance Data.Traversable.Traversable Data.List.Set.Set
 instance Data.Foldable.Foldable Data.List.Set.Set
@@ -1224,7 +1214,7 @@ fromListBy :: Compare a -> [a] -> OrdSeq a
 -- | inserts all eleements in order &lt;math&gt;
 fromListByOrd :: Ord a => [a] -> OrdSeq a
 
--- | O(n)
+-- | &lt;math&gt;
 fromAscList :: [a] -> OrdSeq a
 
 -- | &lt;math&gt;
@@ -1234,13 +1224,13 @@ lookupBy :: Compare a -> a -> OrdSeq a -> Maybe a
 --   as equal to <tt>x</tt>.
 memberBy :: Compare a -> a -> OrdSeq a -> Bool
 
--- | Fmap, assumes the order does not change O(n)
+-- | &lt;math&gt; Fmap, assumes the order does not change
 mapMonotonic :: (a -> b) -> OrdSeq a -> OrdSeq b
 
--- | Gets the first element from the sequence &lt;math&gt;
+-- | &lt;math&gt; Gets the first element from the sequence
 viewl :: OrdSeq a -> ViewL OrdSeq a
 
--- | Gets the last element from the sequence &lt;math&gt;
+-- | &lt;math&gt; Gets the last element from the sequence
 viewr :: OrdSeq a -> ViewR OrdSeq a
 
 -- | &lt;math&gt;
