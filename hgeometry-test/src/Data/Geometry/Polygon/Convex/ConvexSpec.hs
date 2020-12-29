@@ -2,21 +2,33 @@
 module Data.Geometry.Polygon.Convex.ConvexSpec (spec) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
-import           Control.Arrow ((&&&))
+import           Control.Arrow                             ((&&&))
 import           Control.Lens
+import           Control.Monad.Random
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                             as F
 import           Data.Geometry
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.PolygonSpec ()
-import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Geometry.PolygonSpec                 ()
+import qualified Data.List.NonEmpty                        as NonEmpty
 import           Data.RealNumber.Rational
+import qualified Data.Vector.Circular                      as CV
 import           Paths_hgeometry_test
 import           Test.Hspec
-import           Test.QuickCheck (Arbitrary(..), property, suchThat, (===), (==>))
-import           Test.QuickCheck.Instances ()
-import qualified Data.Vector.Circular as CV
+import           Test.QuickCheck                           (Arbitrary (..), property, sized,
+                                                            suchThat, (===), (==>), choose)
+import           Test.QuickCheck.Instances                 ()
+
+--------------------------------------------------------------------------------
+
+instance Arbitrary (ConvexPolygon () Rational) where
+  arbitrary = sized $ \n -> do
+    k <- choose (3, max 3 n)
+    stdgen <- arbitrary
+    pure $ evalRand (randomConvex k granularity) (mkStdGen stdgen)
+    where
+      granularity = 1000000
 
 --------------------------------------------------------------------------------
 
@@ -26,12 +38,23 @@ type R = RealNumber 10
 spec :: Spec
 spec = do
   testCases "src/Data/Geometry/Polygon/Convex/convexTests.ipe"
-  specify "extremes convex == extremesLinear convex" $
+  specify "∀ convex. verifyConvex convex == True" $
+    property $ \(convex :: ConvexPolygon () Rational) ->
+      verifyConvex convex
+  specify "∀ convex. extremes convex == extremesLinear convex" $
+    property $ \(convex :: ConvexPolygon () Rational, u :: Vector 2 Rational) ->
+      quadrance u > 0 ==>
+      let fastMax = snd (extremes u convex)
+          slowMax = snd (extremesLinear u (convex^.simplePolygon))
+      in cmpExtreme u fastMax slowMax === EQ
+  specify "∀ poly. extremes (convexHull poly) == extremesLinear poly" $
     property $ \(p :: SimplePolygon () Rational, u :: Vector 2 Rational) ->
       quadrance u > 0 ==>
       let hull = over simplePolygon toCounterClockWiseOrder $
             convexHull (CV.toNonEmpty (p^.outerBoundaryVector))
-      in extremes u hull === extremesLinear u (hull^.simplePolygon)
+          fastMax = snd (extremes u hull)
+          slowMax = snd (extremesLinear u p)
+      in cmpExtreme u fastMax slowMax === EQ
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
