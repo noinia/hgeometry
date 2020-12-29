@@ -156,21 +156,21 @@ pattern Vector4 x y z w = (Vector (L4.V4 x y z w))
 
 --------------------------------------------------------------------------------
 
--- | /O(n)/ Convert from a list to a non-empty vector.
+-- | \( O(n) \) Convert from a list to a non-empty vector.
 vectorFromList :: Arity d => [r] -> Maybe (Vector d r)
 vectorFromList = V.fromListM
 
--- | /O(n)/ Convert from a list to a non-empty vector.
+-- | \( O(n) \) Convert from a list to a non-empty vector.
 vectorFromListUnsafe :: Arity d => [r] -> Vector d r
 vectorFromListUnsafe = V.fromList
 
--- | /O(n)/ Pop the first element off a vector.
+-- | \( O(n) \) Pop the first element off a vector.
 destruct   :: (Arity d, Arity (d + 1))
            => Vector (d + 1) r -> (r, Vector d r)
 destruct v = (L.head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
   -- FIXME: this implementaion of tail is not particularly nice
 
--- | /O(1)/ First element. Since arity is at least 1, this function is total.
+-- | \( O(1) \) First element. Since arity is at least 1, this function is total.
 head   :: (Arity d, 1 <= d) => Vector d r -> r
 head = view $ element (C :: C 0)
 
@@ -196,7 +196,7 @@ element' i = unV.e (C :: C d) i
 --------------------------------------------------------------------------------
 -- * Snoccing and consindg
 
--- | /O(n)/ Prepend an element.
+-- | \( O(n) \) Prepend an element.
 cons   :: (Arity d, Arity (d+1)) => r -> Vector d r -> Vector (d + 1) r
 cons x = vectorFromListUnsafe . (x:) . F.toList
 
@@ -209,7 +209,7 @@ snoc v x = vectorFromListUnsafe . (++ [x]) $ F.toList v
 init :: (Arity d, Arity (d + 1)) => Vector (d + 1) r -> Vector d r
 init = vectorFromListUnsafe . L.init . F.toList
 
--- O(1) Last element. Since the vector is non-empty, runtime bounds checks are bypassed.
+-- | \( O(1) \) Last element. Since the vector is non-empty, runtime bounds checks are bypassed.
 last :: forall d r. (KnownNat d, Arity (d + 1)) => Vector (d + 1) r -> r
 last = view $ element (C :: C d)
 

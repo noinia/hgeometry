@@ -3,14 +3,12 @@ module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                (over, view, (^.), (^..))
-import           Control.Monad
 import qualified Data.ByteString                             as BS
 import           Data.Ext
 import qualified Data.Foldable                               as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Geometry.Triangle
 import           Data.Ord
 import           Data.Coerce
@@ -34,7 +32,7 @@ allSimplePolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
@@ -52,19 +50,19 @@ allMultiPolygons = unsafePerformIO $ do
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
 
 allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Arbitrary (SimplePolygon () Rational) where
-  arbitrary = fmap realToFrac <$> elements allSimplePolygons
+  arbitrary = elements allSimplePolygons'
   shrink p
     | isTriangle p = simplifyP p
     | otherwise = cutEars p ++ simplifyP p
 
 instance Arbitrary (MultiPolygon () Rational) where
-  arbitrary = fmap realToFrac <$> elements allMultiPolygons
+  arbitrary = elements allMultiPolygons'
 
 simplifyP :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 simplifyP p
@@ -159,9 +157,6 @@ spec = do
 data ShowPoly a b = ShowPoly a b deriving Show
 instance Eq b => Eq (ShowPoly a b) where
   (ShowPoly _ a) == (ShowPoly _ b) = a == b
-
-
-
 
 
 testCases    :: FilePath -> Spec
