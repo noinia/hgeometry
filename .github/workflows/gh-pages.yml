@@ -3,6 +3,8 @@ name: GitHub Page
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
@@ -55,6 +57,11 @@ jobs:
         cat haddock.txt
         cat haddock_badge.json
 
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    needs: build
+    steps:
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
