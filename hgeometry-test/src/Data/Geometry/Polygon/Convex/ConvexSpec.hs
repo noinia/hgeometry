@@ -3,22 +3,29 @@ module Data.Geometry.Polygon.Convex.ConvexSpec (spec) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
 import           Control.Arrow                             ((&&&))
-import           Control.Lens
+import           Control.Lens                              (over, to, (^.), (^..))
 import           Control.Monad.Random
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                             as F
 import           Data.Geometry
+import           Data.Geometry.Boundary
+import           Data.Geometry.Box                         (boundingBox)
+import           Data.Geometry.BoxSpec                     (arbitraryPointInBoundingBox)
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.PolygonSpec                 ()
 import qualified Data.List.NonEmpty                        as NonEmpty
+import           Data.Maybe
 import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular                      as CV
 import           Paths_hgeometry_test
 import           Test.Hspec
-import           Test.QuickCheck                           (Arbitrary (..), property, sized,
-                                                            suchThat, (===), (==>), choose)
+import           Test.QuickCheck                           (Arbitrary (..), choose, elements,
+                                                            forAll, property, sized, suchThat,
+                                                            (===), (==>))
 import           Test.QuickCheck.Instances                 ()
+import           Test.Util                                 (ZeroToOne (..))
 
 --------------------------------------------------------------------------------
 
@@ -29,6 +36,7 @@ instance Arbitrary (ConvexPolygon () Rational) where
     pure $ evalRand (randomConvex k granularity) (mkStdGen stdgen)
     where
       granularity = 1000000
+  shrink convex = mapMaybe convexPolygon (shrink (convex^.simplePolygon))
 
 --------------------------------------------------------------------------------
 
@@ -55,6 +63,43 @@ spec = do
           fastMax = snd (extremes u hull)
           slowMax = snd (extremesLinear u p)
       in cmpExtreme u fastMax slowMax === EQ
+
+  -- Check that vertices are always considered to be OnBoundary.
+  specify "inConvex boundary convex == OnBoundary" $
+    property $ \(convex :: ConvexPolygon () Rational) ->
+      let s = convex^.simplePolygon in
+      forAll (choose (0, size s-1)) $ \n ->
+        inConvex (s^.outerVertex n.core) convex === OnBoundary
+
+  -- Check that all edge points are considered to be OnBoundary.
+  specify "inConvex edge_point convex == OnBoundary" $
+    property $ \(convex :: ConvexPolygon () Rational, ZeroToOne r) ->
+      let s = convex^.simplePolygon in
+      forAll (elements (listEdges s)) $ \(LineSegment' a b) ->
+        let pt = Point $ lerp r (coerce $ a^.core) (coerce $ b^.core) in
+        inConvex pt convex === OnBoundary
+
+  -- Check that inConvex matches inPolygon inside the bounding box.
+  specify "inConvex pt convex == inPolygon pt convex" $
+    property $ \(convex :: ConvexPolygon () Rational) ->
+      let s = convex^.simplePolygon in
+      let bb = boundingBox convex in
+      forAll (arbitraryPointInBoundingBox bb) $ \pt ->
+        inConvex pt convex === inPolygon pt s
+
+  -- Points that lie on straight lines between vertices are a corner case.
+  -- Make sure that they work as expected.
+  specify "inConvex inner edge convex == inPolygon pt convex" $
+    property $ \(convex :: ConvexPolygon () Rational) ->
+      let s = convex^.simplePolygon in
+      forAll (choose (0, size s-1)) $ \a ->
+      forAll (choose (0, size s-1)) $ \b ->
+      size s > 3 && abs (a-b) >= 2 && abs (a-b) /= size s-1 ==>
+      let aPt = s ^. outerVertex a.core
+          bPt = s ^. outerVertex b.core
+          cPt = Point $ lerp 0.5 (coerce aPt) (coerce bPt)
+      in inConvex cPt convex === Inside
+
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case

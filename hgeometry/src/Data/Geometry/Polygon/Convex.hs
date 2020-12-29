@@ -24,6 +24,7 @@ module Data.Geometry.Polygon.Convex
 
   , minkowskiSum
   , bottomMost
+  , inConvex
   , randomConvex
   ) where
 
@@ -34,15 +35,17 @@ import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
 import           Data.Function                  (on)
+import           Data.Geometry.Boundary
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
-                                                 outerBoundaryVector, unsafeFromPoints,
-                                                 unsafeOuterBoundaryVector)
+                                                 outerBoundaryVector, outerVertex, size,
+                                                 unsafeFromPoints, unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Geometry.Triangle
 import           Data.Geometry.Vector
 import qualified Data.IntSet                    as IS
 import           Data.List.NonEmpty             (NonEmpty (..))
@@ -400,7 +403,43 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
     merge' _         _         = error "minkowskiSum: Should not happen"
 
 
+--------------------------------------------------------------------------------
+-- inConvex
 
+-- 1. Check if p is on left edge or right edge.
+-- 2. Do binary search:
+--       Find the largest n where p is on the right of 0 to n.
+-- 3. Check if p is on segment n,n+1
+-- 4. Check if p is in triangle 0,n,n+1
+
+-- | \( O(\log n) \)
+--   Check if a point lies inside a convex polygon, on the boundary, or outside of the
+--   convex polygon.
+inConvex :: forall p r. (Fractional r, Ord r)
+         => Point 2 r -> ConvexPolygon p r
+         -> PointLocationResult
+inConvex p (ConvexPolygon poly)
+  | onSegment p leftEdge  = OnBoundary
+  | onSegment p rightEdge = OnBoundary
+  | otherwise             = worker 1 n
+  where
+    p'        = p :+ undefined
+    n         = size poly - 1
+    point0    = point 0
+    leftEdge  = OpenLineSegment point0 (point n)
+    rightEdge = OpenLineSegment point0 (point 1)
+    worker a b
+      | a+1 == b                        =
+        if onSegment p (OpenLineSegment (point a) (point b))
+          then OnBoundary
+          else
+            if inTriangle p (Triangle point0 (point a) (point b)) == Outside
+              then Outside
+              else Inside
+      | ccw' point0 (point c) p' == CCW = worker c b
+      | otherwise                       = worker a c
+      where c = (a+b) `div` 2
+    point x = poly ^. outerVertex x
 
 --------------------------------------------------------------------------------
 
