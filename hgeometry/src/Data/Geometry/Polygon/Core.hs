@@ -147,7 +147,7 @@ data Polygon (t :: PolygonType) p r where
   MultiPolygon  :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon  p r
 
 newtype Vertices a = Vertices (CircularVector a)
-  deriving (Functor, Foldable, Traversable, NFData, Eq, Ord)
+  deriving (Functor, Foldable, Foldable1, Traversable, NFData, Eq, Ord)
 
 -- | Prism to 'test' if we are a simple polygon
 --
