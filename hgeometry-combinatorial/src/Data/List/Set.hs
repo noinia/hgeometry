@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Set
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.List.Set( Set, singleton
                     , insert, delete
                     , union, intersection, difference
@@ -35,9 +42,11 @@ insert                           :: Eq a => a -> Set a -> Set a
 insert x s@(Set xs) | x `elem` s = s
                     | otherwise  = Set (x:xs)
 
+-- | O(n^2). Insert an element in a set.
 insertAll      :: Eq a => [a] -> Set a -> Set a
 insertAll xs s = List.foldl' (flip insert) s xs
 
+-- | O(n^2). Create a set from a finite list of elements.
 fromList :: Eq a => [a] -> Set a
 fromList = flip insertAll mempty
 

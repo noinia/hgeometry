@@ -56,6 +56,7 @@ instance Traversable (NodeData d r) where
 --------------------------------------------------------------------------------
 -- * Implementation types
 
+-- | Non-empty sequence of points.
 type PointSeq d p r = LSeq.LSeq 1 (Point d r :+ p)
 
 
@@ -66,7 +67,6 @@ makeLenses ''Level
 
 nextLevel             :: Level -> Level
 nextLevel (Level i _) = Level (i+1) Nothing
-
 
 
 type Idx = Int

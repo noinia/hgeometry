@@ -8,7 +8,6 @@ module Data.Geometry.Web.StaticCanvas(
     ) where
 
 import           Control.Lens
-import qualified Data.ByteString as B
 import           Data.Geometry.Point
 import           Data.Geometry.Svg.MathCoordinateSystem ( Canvas(..)
                                                         , center
@@ -18,7 +17,6 @@ import           Data.Geometry.Svg.MathCoordinateSystem ( Canvas(..)
                                                         , realWorldCoordinates
                                                         )
 import           Data.Geometry.Vector
-import qualified Data.List as List
 import qualified Data.Map as Map
 import           Miso
 import qualified Miso.Svg as Miso

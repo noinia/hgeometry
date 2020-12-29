@@ -75,6 +75,7 @@ unitBall = Ball (ext origin) 1
 
 -- * Querying if a point lies in a ball
 
+-- | Query location of a point relative to a d-dimensional ball.
 inBall                 :: (Arity d, Ord r, Num r)
                        => Point d r -> Ball d p r -> PointLocationResult
 p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
@@ -153,7 +154,7 @@ pattern Circle c r = Sphere c r
 -- input points are colinear we return Nothing
 --
 -- >>> disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
--- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
+-- Just (Ball {_center = Point2 0.0 0.0 :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 disk p q r = match (f p `intersect` f q) $

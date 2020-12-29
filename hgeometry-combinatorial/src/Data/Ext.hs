@@ -74,22 +74,27 @@ instance (FromJSON core, FromJSON extra) => FromJSON (core :+ extra) where
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
 
+-- | Access the core of an extended value.
 _core :: (core :+ extra) -> core
 _core (c :+ _) = c
 {-# INLINABLE _core #-}
 
+-- | Access the extra part of an extended value.
 _extra :: (core :+ extra) -> extra
 _extra (_ :+ e) = e
 {-# INLINABLE _extra #-}
 
+-- | Lens access to the core of an extended value.
 core :: Lens (core :+ extra) (core' :+ extra) core core'
 core = lens _core (\(_ :+ e) c -> c :+ e)
 {-# INLINABLE core #-}
 
+-- | Lens access to the extra part of an extended value.
 extra :: Lens (core :+ extra) (core :+ extra') extra extra'
 extra = lens _extra (\(c :+ _) e -> c :+ e)
 {-# INLINABLE extra #-}
 
+-- | Tag a value with the unit type.
 ext   :: a -> a :+ ()
 ext x = x :+ ()
 {-# INLINABLE ext #-}

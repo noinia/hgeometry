@@ -9,7 +9,7 @@ import qualified Data.Geometry.Ipe as Ipe
 import qualified Data.Geometry.Ipe.Attributes as IA
 import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.Value
-import           Data.Geometry.Transformation (Matrix)
+import           Data.Geometry.Matrix (Matrix)
 import qualified Data.List as List
 import           Data.Singletons (Apply)
 import           Miso.String (ToMisoString(..), FromMisoString(..))

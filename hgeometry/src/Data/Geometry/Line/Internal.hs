@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
@@ -34,7 +33,14 @@ import           Test.QuickCheck
 data Line d r = Line { _anchorPoint :: !(Point  d r)
                      , _direction   :: !(Vector d r)
                      } deriving Generic
-makeLenses ''Line
+
+-- | Line anchor point.
+anchorPoint :: Lens' (Line d r) (Point d r)
+anchorPoint = lens _anchorPoint (\line pt -> line{_anchorPoint=pt})
+
+-- | Line direction.
+direction :: Lens' (Line d r) (Vector d r)
+direction = lens _direction (\line dir -> line{_direction=dir})
 
 instance (Show r, Arity d) => Show (Line d r) where
   show (Line p v) = concat [ "Line (", show p, ") (", show v, ")" ]
@@ -69,9 +75,11 @@ type instance NumType   (Line d r) = r
 lineThrough     :: (Num r, Arity d) => Point d r -> Point d r -> Line d r
 lineThrough p q = Line p (q .-. p)
 
+-- | Vertical line with a given X-coordinate.
 verticalLine   :: Num r => r -> Line 2 r
 verticalLine x = Line (Point2 x 0) (Vector2 0 1)
 
+-- | Horizontal line with a given Y-coordinate.
 horizontalLine   :: Num r => r -> Line 2 r
 horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 
@@ -80,7 +88,7 @@ horizontalLine y = Line (Point2 0 y) (Vector2 1 0)
 -- oriented such that v points into the left halfplane of m.
 --
 -- >>> perpendicularTo $ Line (Point2 3 4) (Vector2 (-1) 2)
--- Line (Point2 [3,4]) (Vector2 [-2,-1])
+-- Line (Point2 3 4) (Vector2 [-2,-1])
 perpendicularTo                           :: Num r => Line 2 r -> Line 2 r
 perpendicularTo (Line p ~(Vector2 vx vy)) = Line p (Vector2 (-vy) vx)
 

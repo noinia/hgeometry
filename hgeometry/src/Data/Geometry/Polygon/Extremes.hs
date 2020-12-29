@@ -12,11 +12,10 @@ module Data.Geometry.Polygon.Extremes( cmpExtreme
                                      , extremesLinear
                                      ) where
 
-import           Control.Lens hiding (Simple)
+import           Control.Lens hiding (Simple,simple)
 import           Data.Ext
-import qualified Data.Foldable as F
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core
+import           Data.Geometry.Polygon.Core as P
 import           Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
@@ -34,6 +33,6 @@ cmpExtreme u p q = u `dot` (p^.core .-. q^.core) `compare` 0
 -- running time: \(O(n)\)
 extremesLinear     :: (Ord r, Num r) => Vector 2 r -> Polygon t p r
                    -> (Point 2 r :+ p, Point 2 r :+ p)
-extremesLinear u p = let vs = p^.outerBoundary
+extremesLinear u p = let simple = p^.outerBoundary
                          f  = cmpExtreme u
-                     in (F.minimumBy f vs, F.maximumBy f vs)
+                     in (P.minimumBy f simple, P.maximumBy f simple)

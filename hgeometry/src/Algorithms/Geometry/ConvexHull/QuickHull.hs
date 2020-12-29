@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.QuickHull
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.QuickHull( convexHull ) where
 
 import           Control.Lens ((^.))
@@ -26,8 +33,8 @@ import           Data.Util
 -- running time: \(O(n^2)\)
 convexHull            :: (Ord r, Fractional r, Show r, Show p)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
-convexHull ps        = ConvexPolygon . fromPoints
+convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
+convexHull ps        = ConvexPolygon . unsafeFromPoints
                      $ [l] <> hull l r above <> [r] <> reverse (hull l r below)
   where
     STR l r mids  = findExtremes ps

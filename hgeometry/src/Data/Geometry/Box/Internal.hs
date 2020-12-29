@@ -234,6 +234,7 @@ widthIn' i = preview (V.element' (i-1)) . size
 
 type Rectangle = Box 2
 
+-- |
 -- >>> width (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 1
 -- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
@@ -241,6 +242,7 @@ type Rectangle = Box 2
 width :: Num r => Rectangle p r -> r
 width = widthIn (C :: C 1)
 
+-- |
 -- >>> height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 2
 -- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
@@ -257,7 +259,7 @@ height = widthIn (C :: C 2)
 class IsBoxable g where
   boundingBox :: Ord (NumType g) => g -> Box (Dimension g) () (NumType g)
 
-
+-- | Create a bounding box that encapsulates a list of objects.
 boundingBoxList :: (IsBoxable g, F.Foldable1 c, Ord (NumType g), Arity (Dimension g))
                 => c g -> Box (Dimension g) () (NumType g)
 boundingBoxList = F.foldMap1 boundingBox

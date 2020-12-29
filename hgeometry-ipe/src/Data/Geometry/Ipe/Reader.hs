@@ -205,7 +205,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r))
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
-                                      poly = Polygon.fromPoints . dropRepeats $ pts
+                                      poly = Polygon.unsafeFromPoints . dropRepeats $ pts
                                       pl   = fromPointsUnsafe pts
                                   in case xs of
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
