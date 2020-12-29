@@ -90,11 +90,11 @@ viewL = F.toList
 viewR :: ExpSet a -> [a]
 viewR = reverseFoldMap (: []) . tree
 
--- | O(log n)
+-- | \( O(log n) \)
 minimum :: ExpSet a -> Maybe a
 minimum = listToMaybe . viewL
 
--- | O(log n)
+-- | \( O(log n) \)
 maximum :: ExpSet a -> Maybe a
 maximum = listToMaybe . viewR
 

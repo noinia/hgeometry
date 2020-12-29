@@ -18,7 +18,7 @@ import           Data.Ext                  (_core, core)
 import qualified Data.Foldable             as F
 import           Data.Geometry.Interval    (EndPoint (Closed, Open), end, start)
 import           Data.Geometry.LineSegment (LineSegment (..), sqSegmentLength)
-import           Data.Geometry.Point       (ccwCmpAroundWith)
+import           Data.Geometry.Point       (ccwCmpAroundWith')
 import           Data.Geometry.Polygon     (SimplePolygon, listEdges, outerBoundaryVector)
 import           Data.Intersection         (IsIntersectableWith (intersect),
                                             NoIntersection (NoIntersection))
@@ -32,11 +32,11 @@ import           Linear.Affine             ((.-.))
 
 type SSSP = VU.Vector Int
 
--- | O(n^3) Single-Source Shortest Path.
+-- | \( O(n^3) \) Single-Source Shortest Path.
 sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
 sssp p = V.head . sssp' $ p
 
--- | O(n^3) Single-Source Shortest Path from all vertices.
+-- | \( O(n^3) \) Single-Source Shortest Path from all vertices.
 sssp' :: (Real r, Fractional r) => SimplePolygon p r -> Vector SSSP
 sssp' p = runST $ do
     -- Create an n*n matrix containing paths and distances between vertices.
@@ -53,7 +53,7 @@ sssp' p = runST $ do
     infinity = read "Infinity" :: Double
     n = F.length (p ^. outerBoundaryVector)
 
--- O(n^3)
+-- \( O(n^3) \)
 visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Double)]
 visibleEdges p = concat
   [
@@ -62,7 +62,7 @@ visibleEdges p = concat
     , let endPt = CV.index vs j
     , let line = LineSegment (Closed pt) (Open endPt)
       -- Check if the line goes through the inside of the polygon.
-    , ccwCmpAroundWith ((_core prev) .-. (_core pt)) pt endPt next == GT
+    , ccwCmpAroundWith' ((_core prev) .-. (_core pt)) pt endPt next == GT
       -- Check if there are any intersections not the line end points.
     , not (interiorIntersection line edges)
     ]

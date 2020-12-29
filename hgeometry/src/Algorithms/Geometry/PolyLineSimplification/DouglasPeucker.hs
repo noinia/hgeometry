@@ -25,7 +25,7 @@ import           Data.Ord (comparing)
 -- vertices from pl) s.t. all other vertices are within dist eps to the
 -- original polyline.
 --
--- Running time: O(n^2) worst case, O(n log n) expected.
+-- Running time: \( O(n^2) \) worst case, \( O(n log n) \) expected.
 douglasPeucker         :: (Ord r, Fractional r, Arity d)
                        => r -> PolyLine d p r -> PolyLine d p r
 douglasPeucker eps pl

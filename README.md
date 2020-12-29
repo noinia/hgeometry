@@ -76,6 +76,8 @@ polygons,
 * an *O(nm)* time algorithm to compute the discrete Fréchet
   distance of two sequences of points (curves) of length *n* and
   *m*, respectively.
+* an *O(n)* time single-source shortest path algorithm on triangulated polygons.
+* an *O(n log n)* time algorithm for generating uniformly random convex polygons.
 
 Available Geometric Data Structures
 -----------------------------------

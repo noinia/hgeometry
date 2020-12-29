@@ -25,7 +25,6 @@ import qualified Data.Foldable                                   as F
 import           Data.Function                                   (on)
 import           Data.Geometry                                   hiding (rotateTo)
 import           Data.Geometry.Ball                              (disk, insideBall)
-import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
 import qualified Data.Geometry.Polygon.Convex                    as Convex
 import qualified Data.IntMap.Strict                              as IM
@@ -243,8 +242,8 @@ insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
                       . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
-    insert'' bi ai = CU.insertOrdBy (cwCmpAround' (ptMap V.! ai) `on` (ptMap V.!)) bi
-    cwCmpAround' c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
+    insert'' bi ai = CU.insertOrdBy (cmp (ptMap V.! ai) `on` (ptMap V.!)) bi
+    cmp c p q = cwCmpAround' c p q <> cmpByDistanceTo' c p q
 
 
 -- | Deletes an edge

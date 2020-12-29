@@ -26,4 +26,5 @@ spec :: Spec
 spec = do
   specify "Fast.sssp == Naive.sssp" $
     property $ \(poly :: SimplePolygon () Rational) ->
+      size poly < 50 ==>
       sssp (triangulate poly) === Naive.sssp poly
