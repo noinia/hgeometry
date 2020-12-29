@@ -139,10 +139,10 @@ spec = do
       let simple = unsafeFromCircularVector pts
           p = MultiPolygon simple [simple] in
       read (show p) == p
-  it "valid polygons (Simple/Double)" $ do
-    forM_ allSimplePolygons $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Simple/Double)" $ do
+  --   forM_ allSimplePolygons $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
   it "valid polygons (Simple/Rational)" $ do
     forM_ allSimplePolygons' $ \poly -> do
       hasSelfIntersections poly `shouldBe` False
