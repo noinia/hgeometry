@@ -17,12 +17,11 @@ import           Test.QuickCheck.Instances                        ()
 spec :: Spec
 spec = do
     describe "ClosestPairSpec Algorithms" $ do
-      modifyMaxSuccess (const 1000) $
-        it "Naive and DivideAnd Conquer report same closest pair distance (quickcheck)" $
-          property $ \pts ->
-            (squaredEuclideanDist' $ Naive.closestPair pts)
-            ==
-            (squaredEuclideanDist' $ DivideAndConquer.closestPair pts)
+      it "Naive and DivideAnd Conquer report same closest pair distance (quickcheck)" $
+        property $ \pts ->
+          (squaredEuclideanDist' $ Naive.closestPair pts)
+          ==
+          (squaredEuclideanDist' $ DivideAndConquer.closestPair pts)
       it "Naive and DivideAnd Conquer report same closest pair distance (manual)" $ do
         let myPts = toLSeq myTest in
           (squaredEuclideanDist' $ Naive.closestPair myPts)
