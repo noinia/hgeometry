@@ -9,34 +9,42 @@
 -- Convex Polygons
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon.Convex( ConvexPolygon(..), simplePolygon
-                                   , merge
-                                   , lowerTangent, lowerTangent'
-                                   , upperTangent, upperTangent'
+module Data.Geometry.Polygon.Convex
+  ( ConvexPolygon(..), simplePolygon
+  , convexPolygon
+  , isConvex, verifyConvex
+  , merge
+  , lowerTangent, lowerTangent'
+  , upperTangent, upperTangent'
 
-                                   , extremes
-                                   , maxInDirection
+  , extremes
+  , maxInDirection
 
-                                   , leftTangent, rightTangent
+  , leftTangent, rightTangent
 
-                                   , minkowskiSum
-                                   , bottomMost
-                                   ) where
+  , minkowskiSum
+  , bottomMost
+  , randomConvex
+  ) where
 
-import           Control.DeepSeq
-import           Control.Lens                   hiding ((:<), (:>))
+import           Control.DeepSeq                (NFData)
+import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
+import           Control.Monad.Random
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
 import           Data.Function                  (on)
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (SimplePolygon, outerBoundaryVector,
-                                                 unsafeFromPoints)
+import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
+                                                 outerBoundaryVector, unsafeFromPoints,
+                                                 unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
+import qualified Data.IntSet                    as IS
 import           Data.List.NonEmpty             (NonEmpty (..))
 import qualified Data.List.NonEmpty             as NonEmpty
 import           Data.Maybe                     (fromJust)
@@ -46,7 +54,7 @@ import           Data.Util
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
-
+import qualified Data.Vector.Unboxed            as VU
 -- import           Data.Geometry.Ipe
 -- import           Debug.Trace
 
@@ -76,13 +84,22 @@ instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
 
--- convexPolygon   :: SimplePolygon p r -> Maybe (ConvexPolygon p r)
--- convexPolygon p = if isConvex p then Just p else Nothing
+convexPolygon :: (Ord r, Num r) => Polygon t p r -> Maybe (ConvexPolygon p r)
+convexPolygon p@SimplePolygon{} =
+  let convex = ConvexPolygon p in
+  if verifyConvex convex then Just convex else Nothing
+convexPolygon (MultiPolygon b []) = convexPolygon b
+convexPolygon _ = Nothing
 
--- isConvex   :: SimplePolygon p r -> Bool
--- isConvex p = let ch = convexHull $ p^.vertices
---              in p^.vertices.size == ch^.simplePolygon.vertices.size
+isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
+isConvex = verifyConvex . ConvexPolygon
 
+verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
+verifyConvex (ConvexPolygon s) =
+    CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
+  where
+    f a b c = ccw' a b c == CCW
+    vs = s ^. outerBoundaryVector
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
@@ -370,7 +387,7 @@ minkowskiSum p q = ConvexPolygon . unsafeFromPoints $ merge' (f p) (f q)
     (v :+ ve) .+. (w :+ we) = v .+^ toVec w :+ (ve,we)
 
     cmpAngle v v' w w' =
-      ccwCmpAround (ext origin) (ext . Point $ v' .-. v) (ext . Point $ w' .-. w)
+      ccwCmpAround origin (Point $ v' .-. v) (Point $ w' .-. w)
 
     merge' [_]       [_]       = []
     merge' vs@[v]    (w:ws)    = v .+. w : merge' vs ws
@@ -429,3 +446,76 @@ getVertices = view (simplePolygon.outerBoundaryVector)
 
 -- testB :: Num r => ConvexPolygon () r
 -- testB = ConvexPolygon . fromPoints . map ext $ [origin, Point2 5 3, Point2 (-2) 2, Point2 (-2) 1]
+
+
+
+
+--------------------------------------------------------------------------------
+-- Random convex polygons
+
+-- This is true for all convex polygons:
+--   1. the sum of all edge vectors is (0,0). This is even true for all polygons.
+--   2. edges are sorted by angle. Ie. all vertices are convex, not reflex.
+--
+-- So, if we can generate a set of vectors that sum to zero then we can sort them
+-- and place them end-to-end and the result will be a convex polygon.
+--
+-- So, we need to generate N points that sum to 0. This can be done by generating
+-- two sets of N points that sum to M, and the subtracting them from each other.
+--
+-- Generating N points that sum to M is done like this: Generate (N-1) unique points
+-- between (but not including) 0 and M. Write down the distance between the points.
+-- Imagine a scale from 0 to M:
+--   0            M
+--   |            |
+-- Then we add two randomly selected points:
+--   0            M
+--   |  *      *  |
+-- Then we look at the distance between 0 and point1, point1 and point2, and point2 to M:
+--   0            M
+--   |--*------*--|
+--    2     6    2
+-- 2+6+2 = 10 = M
+--
+-- Doing this again might yield [5,2,3]. Subtract them:
+--     [2,   6,   2  ]
+--   - [5,   2,   3  ]
+--   = [2-5, 6-2, 2-3]
+--   = [-3,  4,   -1 ]
+-- And the sum of [-3, 4, -1] = -3+4-1 = 0.
+
+-- O(n log n)
+randomBetween :: RandomGen g => Int -> Int -> Rand g (VU.Vector Int)
+randomBetween n vMax | vMax < n+1 = pure $ VU.replicate vMax 1
+randomBetween n vMax = worker (n-1) IS.empty
+  where
+    gen from []     = [vMax-from]
+    gen from (x:xs) = (x-from) : gen x xs
+    worker 0 seen = pure (VU.fromList (gen 0 $ IS.elems seen))
+    worker i seen = do
+      v <- liftRand (randomR (1, vMax-1))
+      if IS.member v seen
+        then worker i seen
+        else worker (i-1) (IS.insert v seen)
+
+randomBetweenZero :: RandomGen g => Int -> Int -> Rand g (VU.Vector Int)
+randomBetweenZero n vMax = VU.zipWith (-) <$> randomBetween n vMax <*> randomBetween n vMax
+
+randomEdges :: RandomGen g => Int -> Int -> Rand g [Vector 2 Int]
+randomEdges n vMax = do
+  zipWith Vector2
+    <$> fmap VU.toList (randomBetweenZero n vMax)
+    <*> fmap VU.toList (randomBetweenZero n vMax)
+
+-- | \( O(n \log n) \)
+--   Generate a uniformly random ConvexPolygon with @N@ vertices and a granularity of @vMax@.
+randomConvex :: RandomGen g => Int -> Int -> Rand g (ConvexPolygon () Rational)
+randomConvex n _vMax | n < 3 =
+  error "Data.Geometry.Polygon.Convex.randomConvex: At least 3 edges are required."
+randomConvex n vMax = do
+  ~(v:vs) <- coerce . sortAround origin . coerce <$> randomEdges n vMax
+  let vertices = fmap ((/ realToFrac vMax) . realToFrac) <$> scanl (.+^) (Point v) vs
+      pRational = unsafeFromPoints $ map ext vertices
+      Point c = centroid pRational
+      pFinal = pRational & unsafeOuterBoundaryVector %~ CV.map (over core (.-^ c))
+  pure $ ConvexPolygon pFinal

@@ -59,14 +59,14 @@ toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
     addAt    v i j = updateAt v i (j:)
 
     -- convert to a CList, sorted in CCW order around point u
-    toCList u = C.fromList . sortAround' m u
+    toCList u = C.fromList . sortAroundMapping m u
 
 -- | Given a particular point u and a list of points vs, sort the points vs in
 -- CW order around u.
 -- running time: O(m log m), where m=|vs| is the number of vertices to sort.
-sortAround'               :: (Num r, Ord r)
+sortAroundMapping               :: (Num r, Ord r)
                           => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
-sortAround' (_,ptsV) u vs = reverse . map (^.extra) $ sortAround (f u) (map f vs)
+sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround' (f u) (map f vs)
   where
     f v = (ptsV V.! v)&extra .~ v
 
