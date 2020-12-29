@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.Geometry.RangeTree.Measure</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.RangeTree.Measure</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Measured.Class</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Product</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Product</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Classes</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">class</span><span> </span><span id="LabeledMeasure"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-var">LabeledMeasure</span></a></span></span><span> </span><span id="local-6989586621679931486"><span class="annot"><a href="#local-6989586621679931486"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>  </span><span id="local-6989586621679931488"><span id="labeledMeasure"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#labeledMeasure"><span class="hs-identifier hs-type">labeledMeasure</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931488"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679931486"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931488"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">newtype</span><span> </span><span id="Report"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-var">Report</span></a></span></span><span> </span><span id="local-6989586621679931432"><span class="annot"><a href="#local-6989586621679931432"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Report"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-var">Report</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="reportList"><span class="annot"><span class="annottext">Report p -&gt; [p]
+</span><a href="Data.Geometry.RangeTree.Measure.html#reportList"><span class="hs-identifier hs-var hs-var">reportList</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931432"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679931424"><span id="local-6989586621679931426"><span id="local-6989586621679931428"><span class="annot"><span class="annottext">Int -&gt; Report p -&gt; ShowS
+[Report p] -&gt; ShowS
+Report p -&gt; String
+(Int -&gt; Report p -&gt; ShowS)
+-&gt; (Report p -&gt; String) -&gt; ([Report p] -&gt; ShowS) -&gt; Show (Report p)
+forall p. Show p =&gt; Int -&gt; Report p -&gt; ShowS
+forall p. Show p =&gt; [Report p] -&gt; ShowS
+forall p. Show p =&gt; Report p -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Report p] -&gt; ShowS
+$cshowList :: forall p. Show p =&gt; [Report p] -&gt; ShowS
+show :: Report p -&gt; String
+$cshow :: forall p. Show p =&gt; Report p -&gt; String
+showsPrec :: Int -&gt; Report p -&gt; ShowS
+$cshowsPrec :: forall p. Show p =&gt; Int -&gt; Report p -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931419"><span id="local-6989586621679931421"><span class="annot"><span class="annottext">Report p -&gt; Report p -&gt; Bool
+(Report p -&gt; Report p -&gt; Bool)
+-&gt; (Report p -&gt; Report p -&gt; Bool) -&gt; Eq (Report p)
+forall p. Eq p =&gt; Report p -&gt; Report p -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Report p -&gt; Report p -&gt; Bool
+$c/= :: forall p. Eq p =&gt; Report p -&gt; Report p -&gt; Bool
+== :: Report p -&gt; Report p -&gt; Bool
+$c== :: forall p. Eq p =&gt; Report p -&gt; Report p -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931403"><span id="local-6989586621679931405"><span id="local-6989586621679931407"><span id="local-6989586621679931409"><span id="local-6989586621679931411"><span id="local-6989586621679931413"><span id="local-6989586621679931415"><span class="annot"><span class="annottext">Eq (Report p)
+Eq (Report p) =&gt;
+(Report p -&gt; Report p -&gt; Ordering)
+-&gt; (Report p -&gt; Report p -&gt; Bool)
+-&gt; (Report p -&gt; Report p -&gt; Bool)
+-&gt; (Report p -&gt; Report p -&gt; Bool)
+-&gt; (Report p -&gt; Report p -&gt; Bool)
+-&gt; (Report p -&gt; Report p -&gt; Report p)
+-&gt; (Report p -&gt; Report p -&gt; Report p)
+-&gt; Ord (Report p)
+Report p -&gt; Report p -&gt; Bool
+Report p -&gt; Report p -&gt; Ordering
+Report p -&gt; Report p -&gt; Report p
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall p. Ord p =&gt; Eq (Report p)
+forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Bool
+forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Ordering
+forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Report p
+min :: Report p -&gt; Report p -&gt; Report p
+$cmin :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Report p
+max :: Report p -&gt; Report p -&gt; Report p
+$cmax :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Report p
+&gt;= :: Report p -&gt; Report p -&gt; Bool
+$c&gt;= :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Bool
+&gt; :: Report p -&gt; Report p -&gt; Bool
+$c&gt; :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Bool
+&lt;= :: Report p -&gt; Report p -&gt; Bool
+$c&lt;= :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Bool
+&lt; :: Report p -&gt; Report p -&gt; Bool
+$c&lt; :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Bool
+compare :: Report p -&gt; Report p -&gt; Ordering
+$ccompare :: forall p. Ord p =&gt; Report p -&gt; Report p -&gt; Ordering
+$cp1Ord :: forall p. Ord p =&gt; Eq (Report p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931398"><span id="local-6989586621679931400"><span class="annot"><span class="annottext">a -&gt; Report b -&gt; Report a
+(a -&gt; b) -&gt; Report a -&gt; Report b
+(forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b)
+-&gt; (forall a b. a -&gt; Report b -&gt; Report a) -&gt; Functor Report
+forall a b. a -&gt; Report b -&gt; Report a
+forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+&lt;$ :: a -&gt; Report b -&gt; Report a
+$c&lt;$ :: forall a b. a -&gt; Report b -&gt; Report a
+fmap :: (a -&gt; b) -&gt; Report a -&gt; Report b
+$cfmap :: forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931363"><span id="local-6989586621679931365"><span id="local-6989586621679931367"><span id="local-6989586621679931369"><span id="local-6989586621679931371"><span id="local-6989586621679931373"><span id="local-6989586621679931375"><span id="local-6989586621679931377"><span id="local-6989586621679931379"><span id="local-6989586621679931381"><span id="local-6989586621679931383"><span id="local-6989586621679931385"><span id="local-6989586621679931387"><span id="local-6989586621679931389"><span id="local-6989586621679931391"><span id="local-6989586621679931393"><span id="local-6989586621679931395"><span class="annot"><span class="annottext">a -&gt; Report a -&gt; Bool
+Report m -&gt; m
+Report a -&gt; [a]
+Report a -&gt; Bool
+Report a -&gt; Int
+Report a -&gt; a
+Report a -&gt; a
+Report a -&gt; a
+Report a -&gt; a
+(a -&gt; m) -&gt; Report a -&gt; m
+(a -&gt; m) -&gt; Report a -&gt; m
+(a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+(a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+(b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+(a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+(a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+(forall m. Monoid m =&gt; Report m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a)
+-&gt; (forall a. Report a -&gt; [a])
+-&gt; (forall a. Report a -&gt; Bool)
+-&gt; (forall a. Report a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Report a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Report a -&gt; a)
+-&gt; (forall a. Num a =&gt; Report a -&gt; a)
+-&gt; (forall a. Num a =&gt; Report a -&gt; a)
+-&gt; Foldable Report
+forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool
+forall a. Num a =&gt; Report a -&gt; a
+forall a. Ord a =&gt; Report a -&gt; a
+forall m. Monoid m =&gt; Report m -&gt; m
+forall a. Report a -&gt; Bool
+forall a. Report a -&gt; Int
+forall a. Report a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+product :: Report a -&gt; a
+$cproduct :: forall a. Num a =&gt; Report a -&gt; a
+sum :: Report a -&gt; a
+$csum :: forall a. Num a =&gt; Report a -&gt; a
+minimum :: Report a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Report a -&gt; a
+maximum :: Report a -&gt; a
+$cmaximum :: forall a. Ord a =&gt; Report a -&gt; a
+elem :: a -&gt; Report a -&gt; Bool
+$celem :: forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool
+length :: Report a -&gt; Int
+$clength :: forall a. Report a -&gt; Int
+null :: Report a -&gt; Bool
+$cnull :: forall a. Report a -&gt; Bool
+toList :: Report a -&gt; [a]
+$ctoList :: forall a. Report a -&gt; [a]
+foldl1 :: (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+foldr1 :: (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+foldl' :: (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldr' :: (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldMap' :: (a -&gt; m) -&gt; Report a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+foldMap :: (a -&gt; m) -&gt; Report a -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+fold :: Report m -&gt; m
+$cfold :: forall m. Monoid m =&gt; Report m -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931356"><span id="local-6989586621679931358"><span id="local-6989586621679931360"><span class="annot"><span class="annottext">b -&gt; Report p -&gt; Report p
+NonEmpty (Report p) -&gt; Report p
+Report p -&gt; Report p -&gt; Report p
+(Report p -&gt; Report p -&gt; Report p)
+-&gt; (NonEmpty (Report p) -&gt; Report p)
+-&gt; (forall b. Integral b =&gt; b -&gt; Report p -&gt; Report p)
+-&gt; Semigroup (Report p)
+forall b. Integral b =&gt; b -&gt; Report p -&gt; Report p
+forall p. NonEmpty (Report p) -&gt; Report p
+forall p. Report p -&gt; Report p -&gt; Report p
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (NonEmpty a -&gt; a)
+-&gt; (forall b. Integral b =&gt; b -&gt; a -&gt; a)
+-&gt; Semigroup a
+forall p b. Integral b =&gt; b -&gt; Report p -&gt; Report p
+stimes :: b -&gt; Report p -&gt; Report p
+$cstimes :: forall p b. Integral b =&gt; b -&gt; Report p -&gt; Report p
+sconcat :: NonEmpty (Report p) -&gt; Report p
+$csconcat :: forall p. NonEmpty (Report p) -&gt; Report p
+&lt;&gt; :: Report p -&gt; Report p -&gt; Report p
+$c&lt;&gt; :: forall p. Report p -&gt; Report p -&gt; Report p
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931348"><span id="local-6989586621679931350"><span id="local-6989586621679931352"><span class="annot"><span class="annottext">Semigroup (Report p)
+Report p
+Semigroup (Report p) =&gt;
+Report p
+-&gt; (Report p -&gt; Report p -&gt; Report p)
+-&gt; ([Report p] -&gt; Report p)
+-&gt; Monoid (Report p)
+[Report p] -&gt; Report p
+Report p -&gt; Report p -&gt; Report p
+forall p. Semigroup (Report p)
+forall p. Report p
+forall a.
+Semigroup a =&gt;
+a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+forall p. [Report p] -&gt; Report p
+forall p. Report p -&gt; Report p -&gt; Report p
+mconcat :: [Report p] -&gt; Report p
+$cmconcat :: forall p. [Report p] -&gt; Report p
+mappend :: Report p -&gt; Report p -&gt; Report p
+$cmappend :: forall p. Report p -&gt; Report p -&gt; Report p
+mempty :: Report p
+$cmempty :: forall p. Report p
+$cp1Monoid :: forall p. Semigroup (Report p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monoid</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931343"><span id="local-6989586621679931345"><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Report a -&gt; ShowS
+(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [Report a] -&gt; ShowS
+(forall a.
+ (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Report a -&gt; ShowS)
+-&gt; (forall a.
+    (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [Report a] -&gt; ShowS)
+-&gt; Show1 Report
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Report a -&gt; ShowS
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [Report a] -&gt; ShowS
+forall (f :: * -&gt; *).
+(forall a.
+ (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; f a -&gt; ShowS)
+-&gt; (forall a.
+    (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [f a] -&gt; ShowS)
+-&gt; Show1 f
+liftShowList :: (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [Report a] -&gt; ShowS
+$cliftShowList :: forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; [Report a] -&gt; ShowS
+liftShowsPrec :: (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Report a -&gt; ShowS
+$cliftShowsPrec :: forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Report a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Show1</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931340"><span class="annot"><span class="annottext">(a -&gt; b -&gt; Bool) -&gt; Report a -&gt; Report b -&gt; Bool
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; Report a -&gt; Report b -&gt; Bool)
+-&gt; Eq1 Report
+forall a b. (a -&gt; b -&gt; Bool) -&gt; Report a -&gt; Report b -&gt; Bool
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; f a -&gt; f b -&gt; Bool) -&gt; Eq1 f
+liftEq :: (a -&gt; b -&gt; Bool) -&gt; Report a -&gt; Report b -&gt; Bool
+$cliftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; Report a -&gt; Report b -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Eq1</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679931338"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Measured</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931338"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931338"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>  </span><span id="local-6989586621679931334"><span class="annot"><span class="annottext">measure :: Report p -&gt; Report p
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Report p -&gt; Report p
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-type">LabeledMeasure</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>  </span><span id="local-6989586621679931329"><span class="annot"><span class="annottext">labeledMeasure :: [a] -&gt; Report a
+</span><a href="#local-6989586621679931329"><span class="hs-identifier hs-var hs-var hs-var hs-var">labeledMeasure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Report a
+forall a. [a] -&gt; Report a
+</span><a href="Data.Geometry.RangeTree.Measure.html#Report"><span class="hs-identifier hs-var">Report</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">newtype</span><span> </span><span id="Count"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span></span><span> </span><span id="local-6989586621679931464"><span class="annot"><a href="#local-6989586621679931464"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Count"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="getCount"><span class="annot"><span class="annottext">Count a -&gt; Int
+</span><a href="Data.Geometry.RangeTree.Measure.html#getCount"><span class="hs-identifier hs-var hs-var">getCount</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679931321"><span id="local-6989586621679931323"><span id="local-6989586621679931325"><span class="annot"><span class="annottext">Int -&gt; Count a -&gt; ShowS
+[Count a] -&gt; ShowS
+Count a -&gt; String
+(Int -&gt; Count a -&gt; ShowS)
+-&gt; (Count a -&gt; String) -&gt; ([Count a] -&gt; ShowS) -&gt; Show (Count a)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (a :: k). Int -&gt; Count a -&gt; ShowS
+forall k (a :: k). [Count a] -&gt; ShowS
+forall k (a :: k). Count a -&gt; String
+showList :: [Count a] -&gt; ShowS
+$cshowList :: forall k (a :: k). [Count a] -&gt; ShowS
+show :: Count a -&gt; String
+$cshow :: forall k (a :: k). Count a -&gt; String
+showsPrec :: Int -&gt; Count a -&gt; ShowS
+$cshowsPrec :: forall k (a :: k). Int -&gt; Count a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931313"><span id="local-6989586621679931315"><span id="local-6989586621679931317"><span id="local-6989586621679931319"><span class="annot"><span class="annottext">ReadPrec [Count a]
+ReadPrec (Count a)
+Int -&gt; ReadS (Count a)
+ReadS [Count a]
+(Int -&gt; ReadS (Count a))
+-&gt; ReadS [Count a]
+-&gt; ReadPrec (Count a)
+-&gt; ReadPrec [Count a]
+-&gt; Read (Count a)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall k (a :: k). ReadPrec [Count a]
+forall k (a :: k). ReadPrec (Count a)
+forall k (a :: k). Int -&gt; ReadS (Count a)
+forall k (a :: k). ReadS [Count a]
+readListPrec :: ReadPrec [Count a]
+$creadListPrec :: forall k (a :: k). ReadPrec [Count a]
+readPrec :: ReadPrec (Count a)
+$creadPrec :: forall k (a :: k). ReadPrec (Count a)
+readList :: ReadS [Count a]
+$creadList :: forall k (a :: k). ReadS [Count a]
+readsPrec :: Int -&gt; ReadS (Count a)
+$creadsPrec :: forall k (a :: k). Int -&gt; ReadS (Count a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931308"><span id="local-6989586621679931310"><span class="annot"><span class="annottext">Count a -&gt; Count a -&gt; Bool
+(Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool) -&gt; Eq (Count a)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+/= :: Count a -&gt; Count a -&gt; Bool
+$c/= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+== :: Count a -&gt; Count a -&gt; Bool
+$c== :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931293"><span id="local-6989586621679931295"><span id="local-6989586621679931297"><span id="local-6989586621679931299"><span id="local-6989586621679931301"><span id="local-6989586621679931303"><span id="local-6989586621679931305"><span class="annot"><span class="annottext">Eq (Count a)
+Eq (Count a) =&gt;
+(Count a -&gt; Count a -&gt; Ordering)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Count a)
+-&gt; (Count a -&gt; Count a -&gt; Count a)
+-&gt; Ord (Count a)
+Count a -&gt; Count a -&gt; Bool
+Count a -&gt; Count a -&gt; Ordering
+Count a -&gt; Count a -&gt; Count a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (a :: k). Eq (Count a)
+forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+forall k (a :: k). Count a -&gt; Count a -&gt; Ordering
+forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+min :: Count a -&gt; Count a -&gt; Count a
+$cmin :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+max :: Count a -&gt; Count a -&gt; Count a
+$cmax :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+&gt;= :: Count a -&gt; Count a -&gt; Bool
+$c&gt;= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&gt; :: Count a -&gt; Count a -&gt; Bool
+$c&gt; :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&lt;= :: Count a -&gt; Count a -&gt; Bool
+$c&lt;= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&lt; :: Count a -&gt; Count a -&gt; Bool
+$c&lt; :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+compare :: Count a -&gt; Count a -&gt; Ordering
+$ccompare :: forall k (a :: k). Count a -&gt; Count a -&gt; Ordering
+$cp1Ord :: forall k (a :: k). Eq (Count a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931290"><span class="annot"><span class="hs-identifier hs-type">Show1</span></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679931289"><span class="annot"><span class="annottext">liftShowsPrec :: (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; Count a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftShowsPrec</span></span></span><span> </span><span class="hs-identifier">_</span><span>  </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Count a -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq1</span></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679931285"><span class="annot"><span class="annottext">liftEq :: (a -&gt; b -&gt; Bool) -&gt; Count a -&gt; Count b -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">liftEq</span></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679931283"><span class="annot"><span class="annottext">a :: Int
+</span><a href="#local-6989586621679931283"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679931282"><span class="annot"><span class="annottext">b :: Int
+</span><a href="#local-6989586621679931282"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679931283"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679931282"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-type">LabeledMeasure</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621679931280"><span class="annot"><span class="annottext">labeledMeasure :: [a] -&gt; Count a
+</span><a href="#local-6989586621679931280"><span class="hs-identifier hs-var hs-var hs-var hs-var">labeledMeasure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Count a
+forall k (a :: k). Int -&gt; Count a
+</span><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Count a) -&gt; ([a] -&gt; Int) -&gt; [a] -&gt; Count a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679931277"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931271"><span id="local-6989586621679931273"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931277"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621679931270"><span class="annot"><span class="annottext">mempty :: Count a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Count a
+forall k (a :: k). Int -&gt; Count a
+</span><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679931269"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931264"><span id="local-6989586621679931266"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931269"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679931263"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679931263"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679931262"><span class="annot"><span class="annottext">&lt;&gt; :: Count a -&gt; Count a -&gt; Count a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679931261"><span class="annot"><span class="annottext">r :: Int
+</span><a href="#local-6989586621679931261"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Count a
+forall k (a :: k). Int -&gt; Count a
+</span><a href="Data.Geometry.RangeTree.Measure.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Count a) -&gt; Int -&gt; Count a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679931263"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679931261"><span class="hs-identifier hs-var">r</span></a></span></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">type</span><span> </span><span id="%3A%2A%3A"><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#%3A%2A%3A"><span class="hs-operator hs-var">(:*:)</span></a></span></span><span> </span><span id="local-6989586621679931259"><span class="annot"><a href="#local-6989586621679931259"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span id="local-6989586621679931258"><span class="annot"><a href="#local-6989586621679931258"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Product</span></span><span> </span><span class="annot"><a href="#local-6989586621679931259"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931258"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679931256"><span id="local-6989586621679931257"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-type">LabeledMeasure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931257"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-type">LabeledMeasure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931256"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#LabeledMeasure"><span class="hs-identifier hs-type">LabeledMeasure</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931257"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#%3A%2A%3A"><span class="hs-operator hs-type">:*:</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931256"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679931254"><span class="annot"><span class="annottext">labeledMeasure :: [a] -&gt; (:*:) l r a
+</span><a href="#local-6989586621679931254"><span class="hs-identifier hs-var hs-var hs-var hs-var">labeledMeasure</span></a></span></span><span> </span><span id="local-6989586621679931253"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679931253"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l a -&gt; r a -&gt; (:*:) l r a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k).
+f a -&gt; g a -&gt; Product f g a
+</span><span class="hs-identifier hs-var">Pair</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; l a
+forall (v :: * -&gt; *) a. LabeledMeasure v =&gt; [a] -&gt; v a
+</span><a href="Data.Geometry.RangeTree.Measure.html#labeledMeasure"><span class="hs-identifier hs-var">labeledMeasure</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679931253"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; r a
+forall (v :: * -&gt; *) a. LabeledMeasure v =&gt; [a] -&gt; v a
+</span><a href="Data.Geometry.RangeTree.Measure.html#labeledMeasure"><span class="hs-identifier hs-var">labeledMeasure</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679931253"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679931249"><span id="local-6989586621679931250"><span id="local-6989586621679931251"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931244"><span id="local-6989586621679931246"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931251"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931250"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931249"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931250"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931251"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#%3A%2A%3A"><span class="hs-operator hs-type">:*:</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931249"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679931250"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679931243"><span class="annot"><span class="annottext">l :: l a
+</span><a href="#local-6989586621679931243"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679931242"><span class="annot"><span class="annottext">r :: r a
+</span><a href="#local-6989586621679931242"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679931241"><span class="annot"><span class="annottext">&lt;&gt; :: (:*:) l r a -&gt; (:*:) l r a -&gt; (:*:) l r a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679931240"><span class="annot"><span class="annottext">l' :: l a
+</span><a href="#local-6989586621679931240"><span class="hs-identifier hs-var">l'</span></a></span></span><span> </span><span id="local-6989586621679931239"><span class="annot"><span class="annottext">r' :: r a
+</span><a href="#local-6989586621679931239"><span class="hs-identifier hs-var">r'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l a -&gt; r a -&gt; (:*:) l r a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k).
+f a -&gt; g a -&gt; Product f g a
+</span><span class="hs-identifier hs-var">Pair</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">l a
+</span><a href="#local-6989586621679931243"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">l a -&gt; l a -&gt; l a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">l a
+</span><a href="#local-6989586621679931240"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r a
+</span><a href="#local-6989586621679931242"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">r a -&gt; r a -&gt; r a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">r a
+</span><a href="#local-6989586621679931239"><span class="hs-identifier hs-var">r'</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679931236"><span id="local-6989586621679931237"><span id="local-6989586621679931238"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931230"><span id="local-6989586621679931232"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931238"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931237"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931236"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931237"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679931238"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="Data.Geometry.RangeTree.Measure.html#%3A%2A%3A"><span class="hs-operator hs-type">:*:</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931236"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679931237"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679931229"><span class="annot"><span class="annottext">mempty :: (:*:) l r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">l a -&gt; r a -&gt; (:*:) l r a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k).
+f a -&gt; g a -&gt; Product f g a
+</span><span class="hs-identifier hs-var">Pair</span></span><span> </span><span class="annot"><span class="annottext">l a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">r a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span></span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- newtype All (ls :: [* -&gt; *]) a = All (Map ls a)</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- type family Map (ls :: [* -&gt; *]) (a :: *) where</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--   Map '[]</span><span>
+</span><span id="line-68"></span></pre></body></html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Geometry.Polygon.Extremes</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Finding the Extremal vertex of a polygon in a given direction.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Polygon.Extremes</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier">cmpExtreme</span></a></span><span>
+</span><span id="line-12"></span><span>                                     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#extremesLinear"><span class="hs-identifier">extremesLinear</span></a></span><span>
+</span><span id="line-13"></span><span>                                     </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Simple</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">simple</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html"><span class="hs-identifier">Data.Geometry.Polygon.Core</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">{- HLINT ignore cmpExtreme -}</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Comparison that compares which point is 'larger' in the direction given by</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- the vector u.</span><span>
+</span><span id="line-26"></span><span id="local-6989586621679950934"><span id="local-6989586621679950935"><span id="local-6989586621679950936"><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-type">cmpExtreme</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679950936"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679950936"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950936"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950936"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679950935"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950936"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679950934"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span><span>
+</span><span id="line-28"></span><span id="cmpExtreme"><span class="annot"><span class="annottext">cmpExtreme :: Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var hs-var">cmpExtreme</span></a></span></span><span> </span><span id="local-6989586621679950926"><span class="annot"><span class="annottext">u :: Vector 2 r
+</span><a href="#local-6989586621679950926"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679950925"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679950925"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679950924"><span class="annot"><span class="annottext">q :: Point 2 r :+ q
+</span><a href="#local-6989586621679950924"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679950926"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r -&gt; r
+forall (f :: * -&gt; *) a. (Metric f, Num a) =&gt; f a -&gt; f a -&gt; a
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679950925"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Diff (Point 2) r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; p a -&gt; Diff p a
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679950924"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; Getting (Point 2 r) (Point 2 r :+ q) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ q) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- | Finds the extreme points, minimum and maximum, in a given direction</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679950916"><span id="local-6989586621679950917"><span id="local-6989586621679950918"><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html#extremesLinear"><span class="hs-identifier hs-type">extremesLinear</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679950917"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679950916"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-35"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679950916"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679950918"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679950916"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-36"></span><span id="extremesLinear"><span class="annot"><span class="annottext">extremesLinear :: Vector 2 r -&gt; Polygon t p r -&gt; (Point 2 r :+ p, Point 2 r :+ p)
+</span><a href="Data.Geometry.Polygon.Extremes.html#extremesLinear"><span class="hs-identifier hs-var hs-var">extremesLinear</span></a></span></span><span> </span><span id="local-6989586621679950915"><span class="annot"><span class="annottext">u :: Vector 2 r
+</span><a href="#local-6989586621679950915"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679950914"><span class="annot"><span class="annottext">p :: Polygon t p r
+</span><a href="#local-6989586621679950914"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679950913"><span class="annot"><span class="annottext">simple :: SimplePolygon p r
+</span><a href="#local-6989586621679950913"><span class="hs-identifier hs-var hs-var">simple</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679950914"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Polygon t p r
+-&gt; Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+-&gt; SimplePolygon p r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+forall (t :: PolygonType) p r.
+Lens' (Polygon t p r) (SimplePolygon p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
+</span><span id="line-37"></span><span>                         </span><span id="local-6989586621679950911"><span class="annot"><span class="annottext">f :: (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679950911"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall r p q.
+(Num r, Ord r) =&gt;
+Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var">cmpExtreme</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679950915"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-38"></span><span>                     </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; SimplePolygon p r -&gt; Point 2 r :+ p
+forall r p (t :: PolygonType).
+((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; Polygon t p r -&gt; Point 2 r :+ p
+</span><a href="Data.Geometry.Polygon.Core.html#minimumBy"><span class="hs-identifier hs-var">P.minimumBy</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679950911"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679950913"><span class="hs-identifier hs-var">simple</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; SimplePolygon p r -&gt; Point 2 r :+ p
+forall r p (t :: PolygonType).
+((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; Polygon t p r -&gt; Point 2 r :+ p
+</span><a href="Data.Geometry.Polygon.Core.html#maximumBy"><span class="hs-identifier hs-var">P.maximumBy</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+</span><a href="#local-6989586621679950911"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679950913"><span class="hs-identifier hs-var">simple</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span></pre></body></html>

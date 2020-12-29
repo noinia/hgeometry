@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE PartialTypeSignatures #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Geometry.PlanarSubdivision</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Data type to represent a PlanarSubdivision</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.PlanarSubdivision</span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Basic</span></a></span><span>
+</span><span id="line-14"></span><span>                                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons"><span class="hs-identifier">fromPolygons</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons%27"><span class="hs-identifier">fromPolygons'</span></a></span><span>
+</span><span id="line-15"></span><span>                                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier">fromPolygon</span></a></span><span>
+</span><span id="line-16"></span><span>                                      </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- import           Algorithms.Geometry.PolygonTriangulation.Triangulate</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup.Foldable</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Basic</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Merge.html"><span class="hs-identifier">Data.Geometry.PlanarSubdivision.Merge</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- import Data.Geometry.Point</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- import qualified Data.List.NonEmpty as NonEmpty</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- import Debug.Trace</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Constructs a planar subdivision from a collection of \(k\)</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- disjoint polygons of total complexity \(O(n)\).</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- pre: The boundary of the polygons is given in counterclockwise orientation</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- runningtime: \(O(n\log n\log k)\) in case of polygons with holes,</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- and \(O(n\log k)\) in case of simple polygons.</span><span>
+</span><span id="line-44"></span><span id="local-6989586621679961342"><span id="local-6989586621679961343"><span id="local-6989586621679961344"><span id="local-6989586621679961345"><span id="local-6989586621679961346"><span id="local-6989586621679961347"><span id="local-6989586621679961348"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons"><span class="hs-identifier hs-type">fromPolygons</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679961348"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679961347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961346"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961345"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-46"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961344"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-comment">-- ^ outer face data</span><span>
+</span><span id="line-47"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961348"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961343"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961342"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961347"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679961344"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ the disjoint polygons</span><span>
+</span><span id="line-48"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961345"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961342"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961344"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961347"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span><span>
+</span><span id="line-49"></span><span id="fromPolygons"><span class="annot"><span class="annottext">fromPolygons :: proxy s
+-&gt; f -&gt; c (Polygon t p r :+ f) -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons"><span class="hs-identifier hs-var hs-var">fromPolygons</span></a></span></span><span> </span><span id="local-6989586621679961341"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679961341"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679961340"><span class="annot"><span class="annottext">oD :: f
+</span><a href="#local-6989586621679961340"><span class="hs-identifier hs-var">oD</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(f -&gt; f -&gt; f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+-&gt; PlanarSubdivision s p () f r
+forall k (t :: * -&gt; *) f (s :: k) v e r.
+Foldable1 t =&gt;
+(f -&gt; f -&gt; f)
+-&gt; t (PlanarSubdivision s v e f r) -&gt; PlanarSubdivision s v e f r
+</span><a href="Data.Geometry.PlanarSubdivision.Merge.html#mergeAllWith"><span class="hs-identifier hs-var">mergeAllWith</span></a></span><span> </span><span class="annot"><span class="annottext">f -&gt; f -&gt; f
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span>
+</span><span id="line-50"></span><span>                   </span><span class="annot"><span class="annottext">(NonEmpty (PlanarSubdivision s p () f r)
+ -&gt; PlanarSubdivision s p () f r)
+-&gt; (c (Polygon t p r :+ f)
+    -&gt; NonEmpty (PlanarSubdivision s p () f r))
+-&gt; c (Polygon t p r :+ f)
+-&gt; PlanarSubdivision s p () f r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Polygon t p r :+ f) -&gt; PlanarSubdivision s p () f r)
+-&gt; NonEmpty (Polygon t p r :+ f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679961336"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679961336"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679961334"><span class="annot"><span class="annottext">iD :: f
+</span><a href="#local-6989586621679961334"><span class="hs-identifier hs-var">iD</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">proxy s -&gt; Polygon t p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+forall k (proxy :: k -&gt; *) (t :: PolygonType) p f r (s :: k).
+(Ord r, Fractional r) =&gt;
+proxy s -&gt; Polygon t p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier hs-var">fromPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679961341"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679961336"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961334"><span class="hs-identifier hs-var">iD</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961340"><span class="hs-identifier hs-var">oD</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Polygon t p r :+ f)
+ -&gt; NonEmpty (PlanarSubdivision s p () f r))
+-&gt; (c (Polygon t p r :+ f) -&gt; NonEmpty (Polygon t p r :+ f))
+-&gt; c (Polygon t p r :+ f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">c (Polygon t p r :+ f) -&gt; NonEmpty (Polygon t p r :+ f)
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | Version of 'fromPolygons' that accepts 'SomePolygon's as input.</span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons%27"><span class="hs-identifier hs-type">fromPolygons'</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679961332"><span class="annot"><a href="#local-6989586621679961332"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679961331"><span class="annot"><a href="#local-6989586621679961331"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span id="local-6989586621679961330"><span class="annot"><a href="#local-6989586621679961330"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679961329"><span class="annot"><a href="#local-6989586621679961329"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679961328"><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679961327"><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679961331"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961332"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961330"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-55"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-comment">-- ^ outer face data</span><span>
+</span><span id="line-56"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961331"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SomePolygon"><span class="hs-identifier hs-type">SomePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961329"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ the disjoint polygons</span><span>
+</span><span id="line-57"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961330"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961329"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-58"></span><span id="fromPolygons%27"><span class="annot"><span class="annottext">fromPolygons' :: proxy s
+-&gt; f -&gt; c (SomePolygon p r :+ f) -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.html#fromPolygons%27"><span class="hs-identifier hs-var hs-var">fromPolygons'</span></a></span></span><span> </span><span id="local-6989586621679961326"><span class="annot"><span class="annottext">px :: proxy s
+</span><a href="#local-6989586621679961326"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679961325"><span class="annot"><span class="annottext">oD :: f
+</span><a href="#local-6989586621679961325"><span class="hs-identifier hs-var">oD</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="annottext">(f -&gt; f -&gt; f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+-&gt; PlanarSubdivision s p () f r
+forall k (t :: * -&gt; *) f (s :: k) v e r.
+Foldable1 t =&gt;
+(f -&gt; f -&gt; f)
+-&gt; t (PlanarSubdivision s v e f r) -&gt; PlanarSubdivision s v e f r
+</span><a href="Data.Geometry.PlanarSubdivision.Merge.html#mergeAllWith"><span class="hs-identifier hs-var">mergeAllWith</span></a></span><span> </span><span class="annot"><span class="annottext">f -&gt; f -&gt; f
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (PlanarSubdivision s p () f r)
+ -&gt; PlanarSubdivision s p () f r)
+-&gt; (c (SomePolygon p r :+ f)
+    -&gt; NonEmpty (PlanarSubdivision s p () f r))
+-&gt; c (SomePolygon p r :+ f)
+-&gt; PlanarSubdivision s p () f r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((SomePolygon p r :+ f) -&gt; PlanarSubdivision s p () f r)
+-&gt; NonEmpty (SomePolygon p r :+ f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679961324"><span class="annot"><span class="annottext">pg :: SomePolygon p r
+</span><a href="#local-6989586621679961324"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679961323"><span class="annot"><span class="annottext">iD :: f
+</span><a href="#local-6989586621679961323"><span class="hs-identifier hs-var">iD</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Polygon 'Simple p r -&gt; PlanarSubdivision s p () f r)
+-&gt; (Polygon 'Multi p r -&gt; PlanarSubdivision s p () f r)
+-&gt; SomePolygon p r
+-&gt; PlanarSubdivision s p () f r
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f -&gt; Polygon 'Simple p r -&gt; PlanarSubdivision s p () f r
+forall (t :: PolygonType).
+f -&gt; Polygon t p r -&gt; PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961321"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961323"><span class="hs-identifier hs-var">iD</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f -&gt; Polygon 'Multi p r -&gt; PlanarSubdivision s p () f r
+forall (t :: PolygonType).
+f -&gt; Polygon t p r -&gt; PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961321"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961323"><span class="hs-identifier hs-var">iD</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SomePolygon p r
+</span><a href="#local-6989586621679961324"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (SomePolygon p r :+ f)
+ -&gt; NonEmpty (PlanarSubdivision s p () f r))
+-&gt; (c (SomePolygon p r :+ f) -&gt; NonEmpty (SomePolygon p r :+ f))
+-&gt; c (SomePolygon p r :+ f)
+-&gt; NonEmpty (PlanarSubdivision s p () f r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">c (SomePolygon p r :+ f) -&gt; NonEmpty (SomePolygon p r :+ f)
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679961413"><span class="annot"><a href="#local-6989586621679961321"><span class="hs-identifier hs-type">build</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961413"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961329"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961330"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961329"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961327"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961328"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679961321"><span class="annot"><span class="annottext">build :: f -&gt; Polygon t p r -&gt; PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961321"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679961320"><span class="annot"><span class="annottext">iD :: f
+</span><a href="#local-6989586621679961320"><span class="hs-identifier hs-var">iD</span></a></span></span><span> </span><span id="local-6989586621679961319"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679961319"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s -&gt; Polygon t p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+forall k (proxy :: k -&gt; *) (t :: PolygonType) p f r (s :: k).
+(Ord r, Fractional r) =&gt;
+proxy s -&gt; Polygon t p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier hs-var">fromPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679961326"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621679961319"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961320"><span class="hs-identifier hs-var">iD</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961325"><span class="hs-identifier hs-var">oD</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | Construct a planar subdivision from a polygon. Since our PlanarSubdivision</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- models only connected planar subdivisions, this may add dummy/invisible</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- edges.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- pre: The outer boundary of the polygons is given in counterclockwise orientation</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- running time: \(O(n)\) for a simple polygon, \(O(n\log n)\) for a</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- polygon with holes.</span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier hs-type">fromPolygon</span></a></span><span>                              </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679961433"><span class="annot"><a href="#local-6989586621679961433"><span class="hs-identifier hs-type">proxy</span></a></span></span><span> </span><span id="local-6989586621679961431"><span class="annot"><a href="#local-6989586621679961431"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span id="local-6989586621679961430"><span class="annot"><a href="#local-6989586621679961430"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621679961429"><span class="annot"><a href="#local-6989586621679961429"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679961434"><span class="annot"><a href="#local-6989586621679961434"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679961432"><span class="annot"><a href="#local-6989586621679961432"><span class="hs-identifier hs-type">s</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961434"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679961434"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>                                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961433"><span class="hs-identifier hs-type">proxy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961432"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-74"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961431"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961430"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961434"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-75"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961429"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-comment">-- ^ data inside</span><span>
+</span><span id="line-76"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961429"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-comment">-- ^ data outside the polygon</span><span>
+</span><span id="line-77"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Basic.html#PlanarSubdivision"><span class="hs-identifier hs-type">PlanarSubdivision</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961432"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961430"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961429"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961434"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-78"></span><span id="fromPolygon"><span class="annot"><span class="annottext">fromPolygon :: proxy s -&gt; Polygon t p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier hs-var hs-var">fromPolygon</span></a></span></span><span> </span><span id="local-6989586621679961318"><span class="annot"><span class="annottext">p :: proxy s
+</span><a href="#local-6989586621679961318"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679961317"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621679961317"><span class="hs-identifier hs-var">pg</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span id="local-6989586621679961315"><span class="annot"><span class="annottext">iD :: f
+</span><a href="#local-6989586621679961315"><span class="hs-identifier hs-var">iD</span></a></span></span><span> </span><span id="local-6989586621679961314"><span class="annot"><span class="annottext">oD :: f
+</span><a href="#local-6989586621679961314"><span class="hs-identifier hs-var">oD</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+forall k r (proxy :: k -&gt; *) (s :: k) p f.
+(Ord r, Fractional r) =&gt;
+proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#fromSimplePolygon"><span class="hs-identifier hs-var">fromSimplePolygon</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679961318"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+SimplePolygon p r
+</span><a href="#local-6989586621679961317"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961315"><span class="hs-identifier hs-var">iD</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961314"><span class="hs-identifier hs-var">oD</span></a></span><span>
+</span><span id="line-79"></span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#fromPolygon"><span class="hs-identifier hs-var">fromPolygon</span></a></span><span> </span><span id="local-6989586621679961312"><span class="annot"><span class="annottext">p :: proxy s
+</span><a href="#local-6989586621679961312"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#MultiPolygon"><span class="hs-identifier hs-type">MultiPolygon</span></a></span><span> </span><span id="local-6989586621679961310"><span class="annot"><span class="annottext">vs :: SimplePolygon p r
+</span><a href="#local-6989586621679961310"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621679961309"><span class="annot"><span class="annottext">hs :: [SimplePolygon p r]
+</span><a href="#local-6989586621679961309"><span class="hs-identifier hs-var">hs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679961308"><span class="annot"><span class="annottext">iD :: f
+</span><a href="#local-6989586621679961308"><span class="hs-identifier hs-var">iD</span></a></span></span><span> </span><span id="local-6989586621679961307"><span class="annot"><span class="annottext">oD :: f
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">oD</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon p r] -&gt; Maybe (NonEmpty (SimplePolygon p r))
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon p r]
+</span><a href="#local-6989586621679961309"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961305"><span class="hs-identifier hs-var">outerPG</span></a></span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679961304"><span class="annot"><span class="annottext">hs' :: NonEmpty (SimplePolygon p r)
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var">hs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679961303"><span class="annot"><span class="annottext">hs'' :: NonEmpty (PlanarSubdivision (Wrap s) p () f r)
+</span><a href="#local-6989586621679961303"><span class="hs-identifier hs-var hs-var">hs''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679961302"><span class="annot"><span class="annottext">pg :: SimplePolygon p r
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Proxy (Wrap s)
+-&gt; SimplePolygon p r
+-&gt; f
+-&gt; f
+-&gt; PlanarSubdivision (Wrap s) p () f r
+forall k r (proxy :: k -&gt; *) (s :: k) p f.
+(Ord r, Fractional r) =&gt;
+proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#fromSimplePolygon"><span class="hs-identifier hs-var">fromSimplePolygon</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy (Wrap s)
+</span><a href="#local-6989586621679961301"><span class="hs-identifier hs-var">wp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; SimplePolygon p r
+forall r (t :: PolygonType) p.
+(Eq r, Num r) =&gt;
+Polygon t p r -&gt; Polygon t p r
+</span><a href="Data.Geometry.Polygon.Core.html#toCounterClockWiseOrder"><span class="hs-identifier hs-var">toCounterClockWiseOrder</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">oD</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961308"><span class="hs-identifier hs-var">iD</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; PlanarSubdivision (Wrap s) p () f r)
+-&gt; NonEmpty (SimplePolygon p r)
+-&gt; NonEmpty (PlanarSubdivision (Wrap s) p () f r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (SimplePolygon p r)
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var">hs'</span></a></span><span>
+</span><span id="line-82"></span><span>                </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmpty (PlanarSubdivision (Wrap s) p () f r)
+-&gt; (NonEmpty f -&gt; f -&gt; f)
+-&gt; FaceId' s
+-&gt; PlanarSubdivision s p () f r
+-&gt; PlanarSubdivision s p () f r
+forall k1 k2 (t :: * -&gt; *) (s :: k1) (h :: k2) v e f r.
+(Foldable1 t, Functor t) =&gt;
+t (PlanarSubdivision h v e f r)
+-&gt; (t f -&gt; f -&gt; f)
+-&gt; FaceId' s
+-&gt; PlanarSubdivision s v e f r
+-&gt; PlanarSubdivision s v e f r
+</span><a href="Data.Geometry.PlanarSubdivision.Merge.html#embedAsHolesIn"><span class="hs-identifier hs-var">embedAsHolesIn</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (PlanarSubdivision (Wrap s) p () f r)
+</span><a href="#local-6989586621679961303"><span class="hs-identifier hs-var">hs''</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679961297"><span class="annot"><span class="annottext">x :: f
+</span><a href="#local-6989586621679961297"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961297"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FaceId' s
+</span><a href="#local-6989586621679961296"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961305"><span class="hs-identifier hs-var">outerPG</span></a></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-84"></span><span>    </span><span id="local-6989586621679961301"><span class="annot"><span class="annottext">wp :: Proxy (Wrap s)
+</span><a href="#local-6989586621679961301"><span class="hs-identifier hs-var hs-var">wp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Proxy (Wrap s)
+forall k (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.Raw.html#Wrap"><span class="hs-identifier hs-type">Wrap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961432"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679961305"><span class="annot"><span class="annottext">outerPG :: PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961305"><span class="hs-identifier hs-var hs-var">outerPG</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+forall k r (proxy :: k -&gt; *) (s :: k) p f.
+(Ord r, Fractional r) =&gt;
+proxy s
+-&gt; SimplePolygon p r -&gt; f -&gt; f -&gt; PlanarSubdivision s p () f r
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#fromSimplePolygon"><span class="hs-identifier hs-var">fromSimplePolygon</span></a></span><span> </span><span class="annot"><span class="annottext">proxy s
+</span><a href="#local-6989586621679961312"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679961310"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961308"><span class="hs-identifier hs-var">iD</span></a></span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">oD</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679961296"><span class="annot"><span class="annottext">i :: FaceId' s
+</span><a href="#local-6989586621679961296"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (FaceId' s) -&gt; FaceId' s
+forall a. Vector a -&gt; a
+</span><span class="hs-identifier hs-var">V.last</span></span><span> </span><span class="annot"><span class="annottext">(Vector (FaceId' s) -&gt; FaceId' s)
+-&gt; Vector (FaceId' s) -&gt; FaceId' s
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s p () f r -&gt; Vector (FaceId' s)
+forall k (s :: k) v e f r.
+PlanarSubdivision s v e f r -&gt; Vector (FaceId' s)
+</span><a href="Data.Geometry.PlanarSubdivision.Basic.html#faces%27"><span class="hs-identifier hs-var">faces'</span></a></span><span> </span><span class="annot"><span class="annottext">PlanarSubdivision s p () f r
+</span><a href="#local-6989586621679961305"><span class="hs-identifier hs-var">outerPG</span></a></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-comment">-- subd&amp;planeGraph.faceData .~ faceData'</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-comment">--                            &amp;planeGraph.vertexData.traverse %~ getP</span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-comment">-- where</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-comment">--   faceData' = fmap (\(fi, FaceData hs _) -&gt; FaceData hs (getFData fi)) . faces $ subd</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-comment">--   -- given a faceId lookup the</span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-comment">--   getFData fi = let v = boundaryVertices fi subd V.! 0</span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-comment">--                 in subd^.dataOf v.to holeData</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-comment">--   -- note that we intentionally reverse the order of iDd and oD in the call below,</span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-comment">--   -- as our holes are now outside</span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-comment">--   subd = fromPolygon px (MultiPolygon (CSeq.fromList [a,b,c,d]) holes') (Just oD) Nothing</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-comment">--   -- for every polygon, construct a hole.</span><span>
+</span><span id="line-108"></span><span>  </span><span class="hs-comment">--   holes' = map withF . F.toList $ pgs</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-comment">--   -- add the facedata to the vertex data</span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-comment">--   withF (pg :+ f) = bimap (\p -&gt; Hole f p) id pg</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-comment">--   -- corners of the slightly enlarged boundingbox</span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-comment">--   (a,b,c,d) = corners . bimap (const $ Outer oD) id</span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-comment">--             . grow 1 . boundingBoxList . fmap (^.core) $ pgs</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-comment">--TODO: We need to mark the edges of the outer square as invisible.</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">-- Main Idea: Assign the vertices the hole-number on which they occur. For</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-comment">-- each face we then find an incident vertex to find the data corresponding</span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-comment">-- to that face.</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-keyword">data</span><span> </span><span id="HoleData"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#HoleData"><span class="hs-identifier hs-var">HoleData</span></a></span></span><span> </span><span id="local-6989586621679961292"><span class="annot"><a href="#local-6989586621679961292"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679961291"><span class="annot"><a href="#local-6989586621679961291"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Outer"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Outer"><span class="hs-identifier hs-var">Outer</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679961292"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Hole"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Hole"><span class="hs-identifier hs-var">Hole</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679961292"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679961291"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679961283"><span id="local-6989586621679961285"><span id="local-6989586621679961287"><span class="annot"><span class="annottext">Int -&gt; HoleData f p -&gt; ShowS
+[HoleData f p] -&gt; ShowS
+HoleData f p -&gt; String
+(Int -&gt; HoleData f p -&gt; ShowS)
+-&gt; (HoleData f p -&gt; String)
+-&gt; ([HoleData f p] -&gt; ShowS)
+-&gt; Show (HoleData f p)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall f p. (Show f, Show p) =&gt; Int -&gt; HoleData f p -&gt; ShowS
+forall f p. (Show f, Show p) =&gt; [HoleData f p] -&gt; ShowS
+forall f p. (Show f, Show p) =&gt; HoleData f p -&gt; String
+showList :: [HoleData f p] -&gt; ShowS
+$cshowList :: forall f p. (Show f, Show p) =&gt; [HoleData f p] -&gt; ShowS
+show :: HoleData f p -&gt; String
+$cshow :: forall f p. (Show f, Show p) =&gt; HoleData f p -&gt; String
+showsPrec :: Int -&gt; HoleData f p -&gt; ShowS
+$cshowsPrec :: forall f p. (Show f, Show p) =&gt; Int -&gt; HoleData f p -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679961278"><span id="local-6989586621679961280"><span class="annot"><span class="annottext">HoleData f p -&gt; HoleData f p -&gt; Bool
+(HoleData f p -&gt; HoleData f p -&gt; Bool)
+-&gt; (HoleData f p -&gt; HoleData f p -&gt; Bool) -&gt; Eq (HoleData f p)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall f p. (Eq f, Eq p) =&gt; HoleData f p -&gt; HoleData f p -&gt; Bool
+/= :: HoleData f p -&gt; HoleData f p -&gt; Bool
+$c/= :: forall f p. (Eq f, Eq p) =&gt; HoleData f p -&gt; HoleData f p -&gt; Bool
+== :: HoleData f p -&gt; HoleData f p -&gt; Bool
+$c== :: forall f p. (Eq f, Eq p) =&gt; HoleData f p -&gt; HoleData f p -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span id="local-6989586621679961275"><span id="local-6989586621679961276"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#_holeData"><span class="hs-identifier hs-type">_holeData</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#HoleData"><span class="hs-identifier hs-type">HoleData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961276"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961275"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679961276"><span class="hs-identifier hs-type">f</span></a></span></span></span><span>
+</span><span id="line-125"></span><span id="_holeData"><span class="annot"><span class="annottext">_holeData :: HoleData f p -&gt; f
+</span><a href="Data.Geometry.PlanarSubdivision.html#_holeData"><span class="hs-identifier hs-var hs-var">_holeData</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Outer"><span class="hs-identifier hs-type">Outer</span></a></span><span> </span><span id="local-6989586621679961273"><span class="annot"><span class="annottext">f :: f
+</span><a href="#local-6989586621679961273"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961273"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#_holeData"><span class="hs-identifier hs-var">_holeData</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Hole"><span class="hs-identifier hs-type">Hole</span></a></span><span> </span><span id="local-6989586621679961272"><span class="annot"><span class="annottext">f :: f
+</span><a href="#local-6989586621679961272"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621679961272"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span id="local-6989586621679961270"><span id="local-6989586621679961271"><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#_getP"><span class="hs-identifier hs-type">_getP</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#HoleData"><span class="hs-identifier hs-type">HoleData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961271"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961270"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679961270"><span class="hs-identifier hs-type">p</span></a></span></span></span><span>
+</span><span id="line-129"></span><span id="_getP"><span class="annot"><span class="annottext">_getP :: HoleData f p -&gt; Maybe p
+</span><a href="Data.Geometry.PlanarSubdivision.html#_getP"><span class="hs-identifier hs-var hs-var">_getP</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Outer"><span class="hs-identifier hs-type">Outer</span></a></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe p
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-130"></span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#_getP"><span class="hs-identifier hs-var">_getP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.PlanarSubdivision.html#Hole"><span class="hs-identifier hs-type">Hole</span></a></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679961268"><span class="annot"><span class="annottext">p :: p
+</span><a href="#local-6989586621679961268"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; Maybe p
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679961268"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- data Test = Test</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- data Id a = Id a</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- simplePg  = fromSimplePolygon (Id Test) simplePg' Inside Outside</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- simplePg' = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 160 736</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--                                                              , Point2 128 688</span><span>
+</span><span id="line-141"></span><span class="hs-comment">--                                                              , Point2 176 672</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--                                                              , Point2 256 672</span><span>
+</span><span id="line-143"></span><span class="hs-comment">--                                                              , Point2 272 608</span><span>
+</span><span id="line-144"></span><span class="hs-comment">--                                                              , Point2 384 656</span><span>
+</span><span id="line-145"></span><span class="hs-comment">--                                                              , Point2 336 768</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--                                                              , Point2 272 720</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--                                                              ]</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- triangle :: PlanarSubdivision Test () () PolygonFaceData Rational</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- triangle = (\pg -&gt; fromSimplePolygon (Id Test) pg Inside Outside)</span><span>
+</span><span id="line-151"></span><span class="hs-comment">--          $ trianglePG</span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- trianglePG = fromPoints . map ext $ [origin, Point2 10 0, Point2 10 10]</span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- mySubDiv = fromSimplePolygons (Id Test)</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--                               0</span><span>
+</span><span id="line-158"></span><span class="hs-comment">--                               (NonEmpty.fromList [simplePg' :+ 1, trianglePG :+ 2])</span><span>
+</span><span id="line-159"></span></pre></body></html>

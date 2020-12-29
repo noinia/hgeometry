@@ -1,0 +1,465 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Geometry.HalfSpace</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- \(d\)-dimensional HalfSpaces</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.HalfSpace</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.HalfLine.html"><span class="hs-identifier">Data.Geometry.HalfLine</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.HyperPlane.html"><span class="hs-identifier">Data.Geometry.HyperPlane</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html"><span class="hs-identifier">Data.Geometry.Transformation</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Boundary.html"><span class="hs-identifier">Data.Geometry.Boundary</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vinyl.CoRec</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vinyl.Core</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- let myVector :: Vector 3 Int</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--     myVector = Vector3 1 2 3</span><span>
+</span><span id="line-35"></span><span class="hs-comment">--     myPoint = Point myVector</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- | A Halfspace in \(d\) dimensions. Note that the intended side of</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- the halfspace is already indicated by the normal vector of the</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- bounding plane.</span><span>
+</span><span id="line-44"></span><span id="local-6989586621679946969"><span id="local-6989586621679946970"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="HalfSpace"><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span id="local-6989586621679947046"><span class="annot"><a href="#local-6989586621679947046"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679947045"><span class="annot"><a href="#local-6989586621679947045"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HalfSpace"><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_boundingPlane"><span class="annot"><span class="annottext">HalfSpace d r -&gt; HyperPlane d r
+</span><a href="Data.Geometry.HalfSpace.html#_boundingPlane"><span class="hs-identifier hs-var hs-var">_boundingPlane</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.HyperPlane.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947046"><span class="hs-identifier hs-type">d</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679947045"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-45"></span><span>                       </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="annottext">(forall x. HalfSpace d r -&gt; Rep (HalfSpace d r) x)
+-&gt; (forall x. Rep (HalfSpace d r) x -&gt; HalfSpace d r)
+-&gt; Generic (HalfSpace d r)
+forall x. Rep (HalfSpace d r) x -&gt; HalfSpace d r
+forall x. HalfSpace d r -&gt; Rep (HalfSpace d r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall (d :: Nat) r x. Rep (HalfSpace d r) x -&gt; HalfSpace d r
+forall (d :: Nat) r x. HalfSpace d r -&gt; Rep (HalfSpace d r) x
+$cto :: forall (d :: Nat) r x. Rep (HalfSpace d r) x -&gt; HalfSpace d r
+$cfrom :: forall (d :: Nat) r x. HalfSpace d r -&gt; Rep (HalfSpace d r) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span>
+</span><span id="line-46"></span><span id="boundingPlane"><span id="local-6989586621679947043"><span id="local-6989586621679947044"><span id="local-6989586621679947045"><span id="local-6989586621679947046"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">HalfSpace</span></span></span></span></span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679946955"><span id="local-6989586621679946957"><span id="local-6989586621679946959"><span id="local-6989586621679946961"><span id="local-6989586621679946962"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946962"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679946961"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946962"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946961"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- deriving instance (NFData r, Arity d) =&gt; NFData  (HalfSpace d r)</span><span>
+</span><span id="line-50"></span><span id="local-6989586621679946949"><span id="local-6989586621679946951"><span id="local-6989586621679946953"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946953"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span>     </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946953"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679946913"><span id="local-6989586621679946915"><span id="local-6989586621679946917"><span id="local-6989586621679946919"><span id="local-6989586621679946921"><span id="local-6989586621679946923"><span id="local-6989586621679946925"><span id="local-6989586621679946927"><span id="local-6989586621679946929"><span id="local-6989586621679946931"><span id="local-6989586621679946933"><span id="local-6989586621679946935"><span id="local-6989586621679946937"><span id="local-6989586621679946939"><span id="local-6989586621679946941"><span id="local-6989586621679946943"><span id="local-6989586621679946945"><span id="local-6989586621679946947"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946947"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946947"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-52"></span><span id="local-6989586621679946901"><span id="local-6989586621679946903"><span id="local-6989586621679946905"><span id="local-6989586621679946907"><span id="local-6989586621679946911"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946911"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946911"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679946899"><span class="annot"><a href="#local-6989586621679946899"><span class="hs-identifier hs-type hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679946898"><span class="annot"><a href="#local-6989586621679946898"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679946898"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="Data.Geometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679946897"><span class="annot"><a href="#local-6989586621679946897"><span class="hs-identifier hs-type hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679946896"><span class="annot"><a href="#local-6989586621679946896"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679946897"><span class="hs-identifier hs-type">d</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679946892"><span id="local-6989586621679946894"><span id="local-6989586621679946895"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946895"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679946895"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679946894"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946895"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946894"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679946889"><span id="local-6989586621679946890"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679946886"><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946890"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679946889"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679946889"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946890"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946889"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679946884"><span class="annot"><span class="annottext">h :: HyperPlane d r
+</span><a href="#local-6989586621679946884"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679946883"><span class="annot"><span class="annottext">== :: HalfSpace d r -&gt; HalfSpace d r -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679946882"><span class="annot"><span class="annottext">h' :: HyperPlane d r
+</span><a href="#local-6989586621679946882"><span class="hs-identifier hs-var">h'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679946881"><span class="annot"><span class="annottext">u :: Vector d r
+</span><a href="#local-6989586621679946881"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679946884"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HyperPlane d r
+-&gt; Getting (Vector d r) (HyperPlane d r) (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector d r) (HyperPlane d r) (Vector d r)
+forall (d :: Nat) r. Lens' (HyperPlane d r) (Vector d r)
+</span><a href="Data.Geometry.HyperPlane.html#normalVec"><span class="hs-identifier hs-var">normalVec</span></a></span><span>
+</span><span id="line-61"></span><span>                                        </span><span id="local-6989586621679946878"><span class="annot"><span class="annottext">v :: Vector d r
+</span><a href="#local-6989586621679946878"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679946882"><span class="hs-identifier hs-var">h'</span></a></span><span class="annot"><span class="annottext">HyperPlane d r
+-&gt; Getting (Vector d r) (HyperPlane d r) (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector d r) (HyperPlane d r) (Vector d r)
+forall (d :: Nat) r. Lens' (HyperPlane d r) (Vector d r)
+</span><a href="Data.Geometry.HyperPlane.html#normalVec"><span class="hs-identifier hs-var">normalVec</span></a></span><span>
+</span><span id="line-62"></span><span>                                        </span><span id="local-6989586621679946877"><span class="annot"><span class="annottext">d :: r
+</span><a href="#local-6989586621679946877"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; r
+forall (f :: * -&gt; *) a. (Metric f, Num a) =&gt; f a -&gt; a
+</span><span class="hs-identifier hs-var">quadrance</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679946881"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; Vector d r
+forall (f :: * -&gt; *) a. (Additive f, Num a) =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679946878"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; r
+forall (f :: * -&gt; *) a. (Metric f, Num a) =&gt; f a -&gt; a
+</span><span class="hs-identifier hs-var">quadrance</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679946881"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-63"></span><span>                                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679946884"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r -&gt; HyperPlane d r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679946882"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">signum</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679946877"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span></span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span id="HalfPlane"><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfPlane"><span class="hs-identifier hs-var">HalfPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">{- HLINT ignore leftOf -}</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | Get the halfplane left of a line (i.e. &quot;above&quot;) a line</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- &gt;&gt;&gt; leftOf $ horizontalLine 4</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 [0,1]}}</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679946872"><span class="annot"><a href="Data.Geometry.HalfSpace.html#leftOf"><span class="hs-identifier hs-type">leftOf</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679946872"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679946872"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946872"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-76"></span><span id="leftOf"><span class="annot"><span class="annottext">leftOf :: Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#leftOf"><span class="hs-identifier hs-var hs-var">leftOf</span></a></span></span><span> </span><span id="local-6989586621679946870"><span class="annot"><span class="annottext">l :: Line 2 r
+</span><a href="#local-6989586621679946870"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfPlane r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier hs-var">rightOf</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946870"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">HalfPlane r -&gt; (HalfPlane r -&gt; HalfPlane r) -&gt; HalfPlane r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(HyperPlane 2 r -&gt; Identity (HyperPlane 2 r))
+-&gt; HalfPlane r -&gt; Identity (HalfPlane r)
+forall (d :: Nat) r (d :: Nat) r.
+Iso
+  (HalfSpace d r) (HalfSpace d r) (HyperPlane d r) (HyperPlane d r)
+</span><a href="Data.Geometry.HalfSpace.html#boundingPlane"><span class="hs-identifier hs-var">boundingPlane</span></a></span><span class="annot"><span class="annottext">((HyperPlane 2 r -&gt; Identity (HyperPlane 2 r))
+ -&gt; HalfPlane r -&gt; Identity (HalfPlane r))
+-&gt; ((Vector 2 r -&gt; Identity (Vector 2 r))
+    -&gt; HyperPlane 2 r -&gt; Identity (HyperPlane 2 r))
+-&gt; (Vector 2 r -&gt; Identity (Vector 2 r))
+-&gt; HalfPlane r
+-&gt; Identity (HalfPlane r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Identity (Vector 2 r))
+-&gt; HyperPlane 2 r -&gt; Identity (HyperPlane 2 r)
+forall (d :: Nat) r. Lens' (HyperPlane d r) (Vector d r)
+</span><a href="Data.Geometry.HyperPlane.html#normalVec"><span class="hs-identifier hs-var">normalVec</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector 2 r -&gt; Identity (Vector 2 r))
+ -&gt; HalfPlane r -&gt; Identity (HalfPlane r))
+-&gt; (Vector 2 r -&gt; Vector 2 r) -&gt; HalfPlane r -&gt; HalfPlane r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">%~</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 2 r -&gt; Vector 2 r
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">*^</span></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | Get the halfplane right of a line (i.e. &quot;below&quot;) a line</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; rightOf $ horizontalLine 4</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 [0,-1]}}</span><span>
+</span><span id="line-82"></span><span id="local-6989586621679947050"><span class="annot"><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier hs-type">rightOf</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679947050"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679947050"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947050"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-83"></span><span id="rightOf"><span class="annot"><span class="annottext">rightOf :: Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier hs-var hs-var">rightOf</span></a></span></span><span> </span><span id="local-6989586621679946864"><span class="annot"><span class="annottext">l :: Line 2 r
+</span><a href="#local-6989586621679946864"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HyperPlane 2 r -&gt; HalfPlane r
+forall (d :: Nat) r. HyperPlane d r -&gt; HalfSpace d r
+</span><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">(HyperPlane 2 r -&gt; HalfPlane r) -&gt; HyperPlane 2 r -&gt; HalfPlane r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946864"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">Line 2 r
+-&gt; Getting (HyperPlane 2 r) (Line 2 r) (HyperPlane 2 r)
+-&gt; HyperPlane 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">AReview (HyperPlane 2 r) (Line 2 r)
+-&gt; Getter (Line 2 r) (HyperPlane 2 r)
+forall t b. AReview t b -&gt; Getter b t
+</span><span class="hs-identifier hs-var">re</span></span><span> </span><span class="annot"><span class="annottext">AReview (HyperPlane 2 r) (Line 2 r)
+forall r. Num r =&gt; Iso' (HyperPlane 2 r) (Line 2 r)
+</span><a href="Data.Geometry.HyperPlane.html#_asLine"><span class="hs-identifier hs-var">_asLine</span></a></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679946861"><span class="annot"><a href="Data.Geometry.HalfSpace.html#above"><span class="hs-identifier hs-type">above</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679946861"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679946861"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946861"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-86"></span><span id="above"><span class="annot"><span class="annottext">above :: Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#above"><span class="hs-identifier hs-var hs-var">above</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfPlane r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#leftOf"><span class="hs-identifier hs-var">leftOf</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679946859"><span class="annot"><a href="Data.Geometry.HalfSpace.html#below"><span class="hs-identifier hs-type">below</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679946859"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679946859"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946859"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-89"></span><span id="below"><span class="annot"><span class="annottext">below :: Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#below"><span class="hs-identifier hs-var hs-var">below</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; HalfPlane r
+forall r. Num r =&gt; Line 2 r -&gt; HalfPlane r
+</span><a href="Data.Geometry.HalfSpace.html#rightOf"><span class="hs-identifier hs-var">rightOf</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- type HalfPlane r = GHalfSpace (Line 2 r)</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- type HalfSpace d r = GHalfSpace (HyperPlane d r)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- TODO: Property test that in 2d this is the same as CCW</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679946857"><span class="annot"><a href="#local-6989586621679946857"><span class="hs-identifier hs-type hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679946856"><span class="annot"><a href="#local-6989586621679946856"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946857"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946856"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946857"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946856"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679946854"><span id="local-6989586621679946855"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679946855"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679946855"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946854"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946854"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946855"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946854"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946855"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>  </span><span id="local-6989586621679946849"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Point d r)
+-&gt; proxy (HalfSpace d r)
+-&gt; Intersection (Point d r) (HalfSpace d r)
+-&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Point d r)
+-&gt; proxy (HalfSpace d r)
+-&gt; Intersection (Point d r) (HalfSpace d r)
+-&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621679946846"><span class="annot"><span class="annottext">q :: Point d r
+</span><a href="#local-6989586621679946846"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679946845"><span class="annot"><span class="annottext">intersects :: Point d r -&gt; HalfSpace d r -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></span></span><span> </span><span id="local-6989586621679946843"><span class="annot"><span class="annottext">h :: HalfSpace d r
+</span><a href="#local-6989586621679946843"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679946846"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; HalfSpace d r -&gt; PointLocationResult
+forall r (d :: Nat).
+(Num r, Ord r, Arity d) =&gt;
+Point d r -&gt; HalfSpace d r -&gt; PointLocationResult
+</span><a href="Data.Geometry.HalfSpace.html#inHalfSpace"><span class="hs-operator hs-var">`inHalfSpace`</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpace d r
+</span><a href="#local-6989586621679946843"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679946839"><span class="annot"><span class="annottext">q :: Point d r
+</span><a href="#local-6989586621679946839"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679946838"><span class="annot"><span class="annottext">intersect :: Point d r
+-&gt; HalfSpace d r -&gt; Intersection (Point d r) (HalfSpace d r)
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></span></span><span> </span><span id="local-6989586621679946836"><span class="annot"><span class="annottext">h :: HalfSpace d r
+</span><a href="#local-6989586621679946836"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679946839"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; HalfSpace d r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfSpace d r
+</span><a href="#local-6989586621679946836"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; CoRec Identity '[NoIntersection, Point d r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679946839"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-107"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NoIntersection -&gt; CoRec Identity '[NoIntersection, Point d r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+</span><span class="hs-identifier hs-var">NoIntersection</span></span></span></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IntersectionOf"><span class="annot"><span class="hs-identifier hs-var">IntersectionOf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span id="local-6989586621679946833"><span class="annot"><a href="#local-6989586621679946833"><span class="hs-identifier hs-type hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679946832"><span class="annot"><a href="#local-6989586621679946832"><span class="hs-identifier hs-type hs-type">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946833"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946832"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946833"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946832"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946833"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679946832"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span id="local-6989586621679946831"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679946828"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679946831"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679946831"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679946831"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679946831"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-116"></span><span>  </span><span id="local-6989586621679946826"><span class="annot"><span class="annottext">nonEmptyIntersection :: proxy (Line 2 r)
+-&gt; proxy (HalfSpace 2 r)
+-&gt; Intersection (Line 2 r) (HalfSpace 2 r)
+-&gt; Bool
+</span><a href="#local-6989586621679946826"><span class="hs-identifier hs-var hs-var hs-var hs-var">nonEmptyIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">proxy (Line 2 r)
+-&gt; proxy (HalfSpace 2 r)
+-&gt; Intersection (Line 2 r) (HalfSpace 2 r)
+-&gt; Bool
+forall g h (proxy :: * -&gt; *).
+(NoIntersection &#8712; IntersectionOf g h,
+ RecApplicative (IntersectionOf g h)) =&gt;
+proxy g -&gt; proxy h -&gt; Intersection g h -&gt; Bool
+</span><span class="hs-identifier hs-var">defaultNonEmptyIntersection</span></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621679946825"><span class="annot"><span class="annottext">l :: Line 2 r
+</span><a href="#local-6989586621679946825"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-type">Line</span></a></span><span> </span><span id="local-6989586621679946823"><span class="annot"><span class="annottext">o :: Point 2 r
+</span><a href="#local-6989586621679946823"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679946822"><span class="annot"><span class="annottext">v :: Vector 2 r
+</span><a href="#local-6989586621679946822"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679946821"><span class="annot"><span class="annottext">intersect :: Line 2 r
+-&gt; HalfSpace 2 r -&gt; Intersection (Line 2 r) (HalfSpace 2 r)
+</span><a href="#local-6989586621679946821"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679946820"><span class="annot"><span class="annottext">h :: HalfSpace 2 r
+</span><a href="#local-6989586621679946820"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CoRec Identity '[NoIntersection, Point 2 r, Line 2 r]
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, Line 2 r]
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall (ts :: [*]) b. CoRec Identity ts -&gt; Handlers ts b -&gt; b
+</span><span class="hs-identifier hs-var">match</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946825"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r -&gt; Line 2 r -&gt; Intersection (Line 2 r) (Line 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946818"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Handlers
+   '[NoIntersection, Point 2 r, Line 2 r]
+   (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+ -&gt; Intersection (Line 2 r) (HalfSpace 2 r))
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, Line 2 r]
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; Intersection (Line 2 r) (HalfSpace 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-119"></span><span>         </span><span class="annot"><span class="annottext">(NoIntersection
+ -&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+     NoIntersection
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679946823"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfSpace 2 r
+</span><a href="#local-6989586621679946820"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-120"></span><span>                                   </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Line 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946825"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-121"></span><span>                                   </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">NoIntersection
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">NoIntersection
+</span><span class="hs-identifier hs-var">NoIntersection</span></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>      </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+  NoIntersection
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+     '[Point 2 r, Line 2 r]
+-&gt; Handlers
+     '[NoIntersection, Point 2 r, Line 2 r]
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r
+ -&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+     (Point 2 r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679946815"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679946815"><span class="hs-identifier hs-var">p</span></a></span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679946815"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">Diff (Point 2) r
+Vector 2 r
+</span><a href="#local-6989586621679946822"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpace 2 r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfSpace 2 r
+</span><a href="#local-6989586621679946820"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-123"></span><span>                                   </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">HalfLine 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">(HalfLine 2 r
+ -&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; HalfLine 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; HalfLine 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; HalfLine d r
+</span><a href="Data.Geometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679946815"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679946822"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-124"></span><span>                                   </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">HalfLine 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">(HalfLine 2 r
+ -&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; HalfLine 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; HalfLine 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; HalfLine d r
+</span><a href="Data.Geometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679946815"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 2 r -&gt; Vector 2 r
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679946822"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>      </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+  (Point 2 r)
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+     '[Line 2 r]
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+     '[Point 2 r, Line 2 r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Line 2 r
+ -&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+-&gt; Handler
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+     (Line 2 r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679946812"><span class="annot"><span class="annottext">_l :: Line 2 r
+</span><a href="#local-6989586621679946812"><span class="hs-identifier hs-var">_l</span></a></span></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Line 2 r
+-&gt; CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]
+forall a (as :: [*]). (a &#8712; as) =&gt; a -&gt; CoRec Identity as
+</span><span class="hs-identifier hs-var">coRec</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679946825"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>      </span><span class="annot"><span class="annottext">Handler
+  (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r])
+  (Line 2 r)
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+     '[]
+-&gt; Rec
+     (Handler
+        (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+     '[Line 2 r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">Rec
+  (Handler
+     (CoRec Identity '[NoIntersection, HalfLine 2 r, Line 2 r]))
+  '[]
+forall u (a :: u -&gt; *). Rec a '[]
+</span><span class="hs-identifier hs-var">RNil</span></span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-128"></span><span>      </span><span id="local-6989586621679946818"><span class="annot"><span class="annottext">m :: Line 2 r
+</span><a href="#local-6989586621679946818"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfSpace 2 r
+</span><a href="#local-6989586621679946820"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfSpace 2 r
+-&gt; Getting (Line 2 r) (HalfSpace 2 r) (Line 2 r) -&gt; Line 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(HyperPlane 2 r -&gt; Const (Line 2 r) (HyperPlane 2 r))
+-&gt; HalfSpace 2 r -&gt; Const (Line 2 r) (HalfSpace 2 r)
+forall (d :: Nat) r (d :: Nat) r.
+Iso
+  (HalfSpace d r) (HalfSpace d r) (HyperPlane d r) (HyperPlane d r)
+</span><a href="Data.Geometry.HalfSpace.html#boundingPlane"><span class="hs-identifier hs-var">boundingPlane</span></a></span><span class="annot"><span class="annottext">((HyperPlane 2 r -&gt; Const (Line 2 r) (HyperPlane 2 r))
+ -&gt; HalfSpace 2 r -&gt; Const (Line 2 r) (HalfSpace 2 r))
+-&gt; ((Line 2 r -&gt; Const (Line 2 r) (Line 2 r))
+    -&gt; HyperPlane 2 r -&gt; Const (Line 2 r) (HyperPlane 2 r))
+-&gt; Getting (Line 2 r) (HalfSpace 2 r) (Line 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Line 2 r -&gt; Const (Line 2 r) (Line 2 r))
+-&gt; HyperPlane 2 r -&gt; Const (Line 2 r) (HyperPlane 2 r)
+forall r. Num r =&gt; Iso' (HyperPlane 2 r) (Line 2 r)
+</span><a href="Data.Geometry.HyperPlane.html#_asLine"><span class="hs-identifier hs-var">_asLine</span></a></span></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- | Test if a point lies in a halfspace</span><span>
+</span><span id="line-132"></span><span id="local-6989586621679947001"><span id="local-6989586621679947002"><span class="annot"><a href="Data.Geometry.HalfSpace.html#inHalfSpace"><span class="hs-identifier hs-type">inHalfSpace</span></a></span><span>                                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679947002"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679947002"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947001"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>                                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947001"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947002"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947001"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679947002"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-134"></span><span>                                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Boundary.html#PointLocationResult"><span class="hs-identifier hs-type">PointLocationResult</span></a></span></span></span><span>
+</span><span id="line-135"></span><span id="local-6989586621679946810"><span class="annot"><span class="annottext">q :: Point d r
+</span><a href="#local-6989586621679946810"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="inHalfSpace"><span class="annot"><span class="annottext">inHalfSpace :: Point d r -&gt; HalfSpace d r -&gt; PointLocationResult
+</span><a href="Data.Geometry.HalfSpace.html#inHalfSpace"><span class="hs-operator hs-var hs-var">`inHalfSpace`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.HyperPlane.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span id="local-6989586621679946808"><span class="annot"><span class="annottext">p :: Point d r
+</span><a href="#local-6989586621679946808"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679946807"><span class="annot"><span class="annottext">n :: Vector d r
+</span><a href="#local-6989586621679946807"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679946807"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; r
+forall (f :: * -&gt; *) a. (Metric f, Num a) =&gt; f a -&gt; f a -&gt; a
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679946810"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; Diff (Point d) r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; p a -&gt; Diff p a
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679946808"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-136"></span><span>                                                 </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-137"></span><span>                                                 </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#OnBoundary"><span class="hs-identifier hs-var">OnBoundary</span></a></span><span>
+</span><span id="line-138"></span><span>                                                 </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span>
+</span><span id="line-139"></span></pre></body></html>

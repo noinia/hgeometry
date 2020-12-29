@@ -1,0 +1,579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Graphics.Camera</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description :  Data type to represent a camera and some functions for working with it.</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Camera</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier">Camera</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier">Camera</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#cameraPosition"><span class="hs-identifier">cameraPosition</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#rawCameraNormal"><span class="hs-identifier">rawCameraNormal</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#rawViewUp"><span class="hs-identifier">rawViewUp</span></a></span><span>
+</span><span id="line-12"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#viewPlaneDepth"><span class="hs-identifier">viewPlaneDepth</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#nearDist"><span class="hs-identifier">nearDist</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#farDist"><span class="hs-identifier">farDist</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#screenDimensions"><span class="hs-identifier">screenDimensions</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#cameraNormal"><span class="hs-identifier">cameraNormal</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#viewUp"><span class="hs-identifier">viewUp</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#cameraTransform"><span class="hs-identifier">cameraTransform</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#worldToView"><span class="hs-identifier">worldToView</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#toViewPort"><span class="hs-identifier">toViewPort</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#perspectiveProjection"><span class="hs-identifier">perspectiveProjection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#rotateCoordSystem"><span class="hs-identifier">rotateCoordSystem</span></a></span><span>
+</span><span id="line-19"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Camera.html#flipAxes"><span class="hs-identifier">flipAxes</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>                      </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Matrix.html"><span class="hs-identifier">Data.Geometry.Matrix</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html"><span class="hs-identifier">Data.Geometry.Transformation</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- | A basic camera data type. The fields stored are:</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- * the camera position,</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- * the raw camera normal, i.e. a unit vector into the center of the screen,</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- * the raw view up vector indicating which side points &quot;upwards&quot; in the scene,</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- * the viewplane depth (i.e. the distance from the camera position to the plane on which we project),</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- * the near distance (everything closer than this is clipped),</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- * the far distance (everything further away than this is clipped), and</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- * the screen dimensions.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="Camera"><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-var">Camera</span></a></span></span><span> </span><span id="local-6989586621679965340"><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Camera"><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-var">Camera</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_cameraPosition"><span class="annot"><span class="annottext">Camera r -&gt; Point 3 r
+</span><a href="Graphics.Camera.html#_cameraPosition"><span class="hs-identifier hs-var hs-var">_cameraPosition</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_rawCameraNormal"><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawCameraNormal"><span class="hs-identifier hs-var hs-var">_rawCameraNormal</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>                         </span><span class="hs-comment">-- ^ unit vector from camera into center of the screen</span><span>
+</span><span id="line-44"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_rawViewUp"><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawViewUp"><span class="hs-identifier hs-var hs-var">_rawViewUp</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>                       </span><span class="hs-comment">-- ^ viewUp; assumed to be unit vector</span><span>
+</span><span id="line-46"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_viewPlaneDepth"><span class="annot"><span class="annottext">Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_viewPlaneDepth"><span class="hs-identifier hs-var hs-var">_viewPlaneDepth</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-47"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_nearDist"><span class="annot"><span class="annottext">Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_nearDist"><span class="hs-identifier hs-var hs-var">_nearDist</span></a></span></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-48"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_farDist"><span class="annot"><span class="annottext">Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_farDist"><span class="hs-identifier hs-var hs-var">_farDist</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-49"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="_screenDimensions"><span class="annot"><span class="annottext">Camera r -&gt; Vector 2 r
+</span><a href="Graphics.Camera.html#_screenDimensions"><span class="hs-identifier hs-var hs-var">_screenDimensions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679965340"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>                       </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679965243"><span id="local-6989586621679965245"><span id="local-6989586621679965247"><span class="annot"><span class="annottext">Int -&gt; Camera r -&gt; ShowS
+[Camera r] -&gt; ShowS
+Camera r -&gt; String
+(Int -&gt; Camera r -&gt; ShowS)
+-&gt; (Camera r -&gt; String) -&gt; ([Camera r] -&gt; ShowS) -&gt; Show (Camera r)
+forall r. Show r =&gt; Int -&gt; Camera r -&gt; ShowS
+forall r. Show r =&gt; [Camera r] -&gt; ShowS
+forall r. Show r =&gt; Camera r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Camera r] -&gt; ShowS
+$cshowList :: forall r. Show r =&gt; [Camera r] -&gt; ShowS
+show :: Camera r -&gt; String
+$cshow :: forall r. Show r =&gt; Camera r -&gt; String
+showsPrec :: Int -&gt; Camera r -&gt; ShowS
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; Camera r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679965238"><span id="local-6989586621679965240"><span class="annot"><span class="annottext">Camera r -&gt; Camera r -&gt; Bool
+(Camera r -&gt; Camera r -&gt; Bool)
+-&gt; (Camera r -&gt; Camera r -&gt; Bool) -&gt; Eq (Camera r)
+forall r. Eq r =&gt; Camera r -&gt; Camera r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Camera r -&gt; Camera r -&gt; Bool
+$c/= :: forall r. Eq r =&gt; Camera r -&gt; Camera r -&gt; Bool
+== :: Camera r -&gt; Camera r -&gt; Bool
+$c== :: forall r. Eq r =&gt; Camera r -&gt; Camera r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679965222"><span id="local-6989586621679965224"><span id="local-6989586621679965226"><span id="local-6989586621679965228"><span id="local-6989586621679965230"><span id="local-6989586621679965232"><span id="local-6989586621679965234"><span class="annot"><span class="annottext">Eq (Camera r)
+Eq (Camera r) =&gt;
+(Camera r -&gt; Camera r -&gt; Ordering)
+-&gt; (Camera r -&gt; Camera r -&gt; Bool)
+-&gt; (Camera r -&gt; Camera r -&gt; Bool)
+-&gt; (Camera r -&gt; Camera r -&gt; Bool)
+-&gt; (Camera r -&gt; Camera r -&gt; Bool)
+-&gt; (Camera r -&gt; Camera r -&gt; Camera r)
+-&gt; (Camera r -&gt; Camera r -&gt; Camera r)
+-&gt; Ord (Camera r)
+Camera r -&gt; Camera r -&gt; Bool
+Camera r -&gt; Camera r -&gt; Ordering
+Camera r -&gt; Camera r -&gt; Camera r
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall r. Ord r =&gt; Eq (Camera r)
+forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Bool
+forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Ordering
+forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Camera r
+min :: Camera r -&gt; Camera r -&gt; Camera r
+$cmin :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Camera r
+max :: Camera r -&gt; Camera r -&gt; Camera r
+$cmax :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Camera r
+&gt;= :: Camera r -&gt; Camera r -&gt; Bool
+$c&gt;= :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Bool
+&gt; :: Camera r -&gt; Camera r -&gt; Bool
+$c&gt; :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Bool
+&lt;= :: Camera r -&gt; Camera r -&gt; Bool
+$c&lt;= :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Bool
+&lt; :: Camera r -&gt; Camera r -&gt; Bool
+$c&lt; :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Bool
+compare :: Camera r -&gt; Camera r -&gt; Ordering
+$ccompare :: forall r. Ord r =&gt; Camera r -&gt; Camera r -&gt; Ordering
+$cp1Ord :: forall r. Ord r =&gt; Eq (Camera r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">----------------------------------------</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- * Field Accessor Lenses</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- Lemmih: Writing out the lenses by hand so they can be documented.</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- makeLenses ''Camera</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | Camera position.</span><span>
+</span><span id="line-59"></span><span id="local-6989586621679965303"><span class="annot"><a href="Graphics.Camera.html#cameraPosition"><span class="hs-identifier hs-type">cameraPosition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965303"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965303"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-60"></span><span id="cameraPosition"><span class="annot"><span class="annottext">cameraPosition :: (Point 3 r -&gt; f (Point 3 r)) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#cameraPosition"><span class="hs-identifier hs-var hs-var">cameraPosition</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Point 3 r)
+-&gt; (Camera r -&gt; Point 3 r -&gt; Camera r)
+-&gt; Lens (Camera r) (Camera r) (Point 3 r) (Point 3 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Point 3 r
+forall r. Camera r -&gt; Point 3 r
+</span><a href="Graphics.Camera.html#_cameraPosition"><span class="hs-identifier hs-var hs-var">_cameraPosition</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965219"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965219"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965218"><span class="annot"><span class="annottext">p :: Point 3 r
+</span><a href="#local-6989586621679965218"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965219"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_cameraPosition :: Point 3 r
+</span><a href="Graphics.Camera.html#_cameraPosition"><span class="hs-identifier hs-var">_cameraPosition</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679965218"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- | Raw camera normal, i.e. a unit vector into the center of the screen.</span><span>
+</span><span id="line-63"></span><span id="local-6989586621679965217"><span class="annot"><a href="Graphics.Camera.html#rawCameraNormal"><span class="hs-identifier hs-type">rawCameraNormal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965217"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965217"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-64"></span><span id="rawCameraNormal"><span class="annot"><span class="annottext">rawCameraNormal :: (Vector 3 r -&gt; f (Vector 3 r)) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#rawCameraNormal"><span class="hs-identifier hs-var hs-var">rawCameraNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Vector 3 r)
+-&gt; (Camera r -&gt; Vector 3 r -&gt; Camera r)
+-&gt; Lens (Camera r) (Camera r) (Vector 3 r) (Vector 3 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+forall r. Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawCameraNormal"><span class="hs-identifier hs-var hs-var">_rawCameraNormal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965216"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965216"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965215"><span class="annot"><span class="annottext">r :: Vector 3 r
+</span><a href="#local-6989586621679965215"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965216"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_rawCameraNormal :: Vector 3 r
+</span><a href="Graphics.Camera.html#_rawCameraNormal"><span class="hs-identifier hs-var">_rawCameraNormal</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965215"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Raw view up vector indicating which side points &quot;upwards&quot; in the scene.</span><span>
+</span><span id="line-67"></span><span id="local-6989586621679965274"><span class="annot"><a href="Graphics.Camera.html#rawViewUp"><span class="hs-identifier hs-type">rawViewUp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965274"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965274"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-68"></span><span id="rawViewUp"><span class="annot"><span class="annottext">rawViewUp :: (Vector 3 r -&gt; f (Vector 3 r)) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#rawViewUp"><span class="hs-identifier hs-var hs-var">rawViewUp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Vector 3 r)
+-&gt; (Camera r -&gt; Vector 3 r -&gt; Camera r)
+-&gt; Lens (Camera r) (Camera r) (Vector 3 r) (Vector 3 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+forall r. Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawViewUp"><span class="hs-identifier hs-var hs-var">_rawViewUp</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965214"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965214"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965213"><span class="annot"><span class="annottext">r :: Vector 3 r
+</span><a href="#local-6989586621679965213"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965214"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_rawViewUp :: Vector 3 r
+</span><a href="Graphics.Camera.html#_rawViewUp"><span class="hs-identifier hs-var">_rawViewUp</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965213"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- | Viewplane depth (i.e. the distance from the camera position to the plane on which we project).</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679965212"><span class="annot"><a href="Graphics.Camera.html#viewPlaneDepth"><span class="hs-identifier hs-type">viewPlaneDepth</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965212"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679965212"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-72"></span><span id="viewPlaneDepth"><span class="annot"><span class="annottext">viewPlaneDepth :: (r -&gt; f r) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#viewPlaneDepth"><span class="hs-identifier hs-var hs-var">viewPlaneDepth</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; r)
+-&gt; (Camera r -&gt; r -&gt; Camera r) -&gt; Lens (Camera r) (Camera r) r r
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; r
+forall r. Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_viewPlaneDepth"><span class="hs-identifier hs-var hs-var">_viewPlaneDepth</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965211"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965211"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965210"><span class="annot"><span class="annottext">v :: r
+</span><a href="#local-6989586621679965210"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965211"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_viewPlaneDepth :: r
+</span><a href="Graphics.Camera.html#_viewPlaneDepth"><span class="hs-identifier hs-var">_viewPlaneDepth</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965210"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | Near distance (everything closer than this is clipped).</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679965281"><span class="annot"><a href="Graphics.Camera.html#nearDist"><span class="hs-identifier hs-type">nearDist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679965281"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-76"></span><span id="nearDist"><span class="annot"><span class="annottext">nearDist :: (r -&gt; f r) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#nearDist"><span class="hs-identifier hs-var hs-var">nearDist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; r)
+-&gt; (Camera r -&gt; r -&gt; Camera r) -&gt; Lens (Camera r) (Camera r) r r
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; r
+forall r. Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_nearDist"><span class="hs-identifier hs-var hs-var">_nearDist</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965209"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965209"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965208"><span class="annot"><span class="annottext">n :: r
+</span><a href="#local-6989586621679965208"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965209"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_nearDist :: r
+</span><a href="Graphics.Camera.html#_nearDist"><span class="hs-identifier hs-var">_nearDist</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965208"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | Far distance (everything further away than this is clipped).</span><span>
+</span><span id="line-79"></span><span id="local-6989586621679965207"><span class="annot"><a href="Graphics.Camera.html#farDist"><span class="hs-identifier hs-type">farDist</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965207"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679965207"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-80"></span><span id="farDist"><span class="annot"><span class="annottext">farDist :: (r -&gt; f r) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#farDist"><span class="hs-identifier hs-var hs-var">farDist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; r)
+-&gt; (Camera r -&gt; r -&gt; Camera r) -&gt; Lens (Camera r) (Camera r) r r
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; r
+forall r. Camera r -&gt; r
+</span><a href="Graphics.Camera.html#_farDist"><span class="hs-identifier hs-var hs-var">_farDist</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965206"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965206"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965205"><span class="annot"><span class="annottext">f :: r
+</span><a href="#local-6989586621679965205"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965206"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_farDist :: r
+</span><a href="Graphics.Camera.html#_farDist"><span class="hs-identifier hs-var">_farDist</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965205"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- | Screen dimensions.</span><span>
+</span><span id="line-83"></span><span id="local-6989586621679965284"><span class="annot"><a href="Graphics.Camera.html#screenDimensions"><span class="hs-identifier hs-type">screenDimensions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965284"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679965284"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-84"></span><span id="screenDimensions"><span class="annot"><span class="annottext">screenDimensions :: (Vector 2 r -&gt; f (Vector 2 r)) -&gt; Camera r -&gt; f (Camera r)
+</span><a href="Graphics.Camera.html#screenDimensions"><span class="hs-identifier hs-var hs-var">screenDimensions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Vector 2 r)
+-&gt; (Camera r -&gt; Vector 2 r -&gt; Camera r)
+-&gt; Lens (Camera r) (Camera r) (Vector 2 r) (Vector 2 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Vector 2 r
+forall r. Camera r -&gt; Vector 2 r
+</span><a href="Graphics.Camera.html#_screenDimensions"><span class="hs-identifier hs-var hs-var">_screenDimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965204"><span class="annot"><span class="annottext">cam :: Camera r
+</span><a href="#local-6989586621679965204"><span class="hs-identifier hs-var">cam</span></a></span></span><span> </span><span id="local-6989586621679965203"><span class="annot"><span class="annottext">d :: Vector 2 r
+</span><a href="#local-6989586621679965203"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965204"><span class="hs-identifier hs-var">cam</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">_screenDimensions :: Vector 2 r
+</span><a href="Graphics.Camera.html#_screenDimensions"><span class="hs-identifier hs-var">_screenDimensions</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679965203"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- * Accessor Lenses</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | Lens to get and set the Camera normal, makes sure that the vector remains</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- normalized.</span><span>
+</span><span id="line-92"></span><span id="local-6989586621679965202"><span class="annot"><a href="Graphics.Camera.html#cameraNormal"><span class="hs-identifier hs-type">cameraNormal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679965202"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965202"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965202"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-93"></span><span id="cameraNormal"><span class="annot"><span class="annottext">cameraNormal :: Lens' (Camera r) (Vector 3 r)
+</span><a href="Graphics.Camera.html#cameraNormal"><span class="hs-identifier hs-var hs-var">cameraNormal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Vector 3 r)
+-&gt; (Camera r -&gt; Vector 3 r -&gt; Camera r)
+-&gt; Lens' (Camera r) (Vector 3 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+forall r. Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawCameraNormal"><span class="hs-identifier hs-var hs-var">_rawCameraNormal</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965201"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965201"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679965200"><span class="annot"><span class="annottext">n :: Vector 3 r
+</span><a href="#local-6989586621679965200"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965201"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">_rawCameraNormal :: Vector 3 r
+</span><a href="Graphics.Camera.html#_rawCameraNormal"><span class="hs-identifier hs-var">_rawCameraNormal</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r
+forall (f :: * -&gt; *) a. (Metric f, Floating a) =&gt; f a -&gt; f a
+</span><span class="hs-identifier hs-var">signorm</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965200"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- | Lens to get and set the viewUp vector. Makes sure the vector remains</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- normalized.</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679965198"><span class="annot"><a href="Graphics.Camera.html#viewUp"><span class="hs-identifier hs-type">viewUp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679965198"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lens'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965198"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965198"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-99"></span><span id="viewUp"><span class="annot"><span class="annottext">viewUp :: Lens' (Camera r) (Vector 3 r)
+</span><a href="Graphics.Camera.html#viewUp"><span class="hs-identifier hs-var hs-var">viewUp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Camera r -&gt; Vector 3 r)
+-&gt; (Camera r -&gt; Vector 3 r -&gt; Camera r)
+-&gt; Lens' (Camera r) (Vector 3 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">lens</span></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Vector 3 r
+forall r. Camera r -&gt; Vector 3 r
+</span><a href="Graphics.Camera.html#_rawViewUp"><span class="hs-identifier hs-var hs-var">_rawViewUp</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679965197"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965197"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679965196"><span class="annot"><span class="annottext">n :: Vector 3 r
+</span><a href="#local-6989586621679965196"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965197"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">_rawViewUp :: Vector 3 r
+</span><a href="Graphics.Camera.html#_rawViewUp"><span class="hs-identifier hs-var">_rawViewUp</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r
+forall (f :: * -&gt; *) a. (Metric f, Floating a) =&gt; f a -&gt; f a
+</span><span class="hs-identifier hs-var">signorm</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965196"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- * Camera Transformation functions</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- | Full transformation that renders the figure</span><span>
+</span><span id="line-107"></span><span id="local-6989586621679965195"><span class="annot"><a href="Graphics.Camera.html#cameraTransform"><span class="hs-identifier hs-type">cameraTransform</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679965195"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965195"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965195"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-108"></span><span id="cameraTransform"><span class="annot"><span class="annottext">cameraTransform :: Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#cameraTransform"><span class="hs-identifier hs-var hs-var">cameraTransform</span></a></span></span><span> </span><span id="local-6989586621679965194"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965194"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Camera r -&gt; Transformation 3 r
+forall r. Fractional r =&gt; Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#toViewPort"><span class="hs-identifier hs-var">toViewPort</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965194"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-109"></span><span>                 </span><span class="annot"><span class="annottext">Transformation 3 r -&gt; Transformation 3 r -&gt; Transformation 3 r
+forall r (d :: Nat).
+(Num r, Arity (d + 1)) =&gt;
+Transformation d r -&gt; Transformation d r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#%7C.%7C"><span class="hs-operator hs-var">|.|</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Transformation 3 r
+forall r. Fractional r =&gt; Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#perspectiveProjection"><span class="hs-identifier hs-var">perspectiveProjection</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965194"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-110"></span><span>                 </span><span class="annot"><span class="annottext">Transformation 3 r -&gt; Transformation 3 r -&gt; Transformation 3 r
+forall r (d :: Nat).
+(Num r, Arity (d + 1)) =&gt;
+Transformation d r -&gt; Transformation d r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#%7C.%7C"><span class="hs-operator hs-var">|.|</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Transformation 3 r
+forall r. Fractional r =&gt; Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#worldToView"><span class="hs-identifier hs-var">worldToView</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965194"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- | Translates world coordinates into view coordinates</span><span>
+</span><span id="line-113"></span><span id="local-6989586621679965192"><span class="annot"><a href="Graphics.Camera.html#worldToView"><span class="hs-identifier hs-type">worldToView</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679965192"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965192"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965192"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-114"></span><span id="worldToView"><span class="annot"><span class="annottext">worldToView :: Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#worldToView"><span class="hs-identifier hs-var hs-var">worldToView</span></a></span></span><span> </span><span id="local-6989586621679965191"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965191"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Camera r -&gt; Transformation 3 r
+forall r. Num r =&gt; Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#rotateCoordSystem"><span class="hs-identifier hs-var">rotateCoordSystem</span></a></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965191"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Transformation 3 r -&gt; Transformation 3 r -&gt; Transformation 3 r
+forall r (d :: Nat).
+(Num r, Arity (d + 1)) =&gt;
+Transformation d r -&gt; Transformation d r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#%7C.%7C"><span class="hs-operator hs-var">|.|</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Transformation 3 r
+forall r (d :: Nat).
+(Num r, Arity d, Arity (d + 1)) =&gt;
+Vector d r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#translation"><span class="hs-identifier hs-var">translation</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 3 r -&gt; Vector 3 r
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965191"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r
+-&gt; Getting (Vector 3 r) (Camera r) (Vector 3 r) -&gt; Vector 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Point 3 r -&gt; Const (Vector 3 r) (Point 3 r))
+-&gt; Camera r -&gt; Const (Vector 3 r) (Camera r)
+forall r. Lens' (Camera r) (Point 3 r)
+</span><a href="Graphics.Camera.html#cameraPosition"><span class="hs-identifier hs-var">cameraPosition</span></a></span><span class="annot"><span class="annottext">((Point 3 r -&gt; Const (Vector 3 r) (Point 3 r))
+ -&gt; Camera r -&gt; Const (Vector 3 r) (Camera r))
+-&gt; ((Vector 3 r -&gt; Const (Vector 3 r) (Vector 3 r))
+    -&gt; Point 3 r -&gt; Const (Vector 3 r) (Point 3 r))
+-&gt; Getting (Vector 3 r) (Camera r) (Vector 3 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 3 r -&gt; Const (Vector 3 r) (Vector 3 r))
+-&gt; Point 3 r -&gt; Const (Vector 3 r) (Point 3 r)
+forall (d :: Nat) r r'.
+Lens (Point d r) (Point d r') (Vector d r) (Vector d r')
+</span><a href="Data.Geometry.Point.Internal.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- | Transformation into viewport coordinates</span><span>
+</span><span id="line-117"></span><span id="local-6989586621679965317"><span class="annot"><a href="Graphics.Camera.html#toViewPort"><span class="hs-identifier hs-type">toViewPort</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679965317"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965317"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965317"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-118"></span><span id="toViewPort"><span class="annot"><span class="annottext">toViewPort :: Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#toViewPort"><span class="hs-identifier hs-var hs-var">toViewPort</span></a></span></span><span> </span><span id="local-6989586621679965185"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965185"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix 4 4 r -&gt; Transformation 3 r
+forall (d :: Nat) r. Matrix (d + 1) (d + 1) r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-var">Transformation</span></a></span><span> </span><span class="annot"><span class="annottext">(Matrix 4 4 r -&gt; Transformation 3 r)
+-&gt; (Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r)
+-&gt; Vector 4 (Vector 4 r)
+-&gt; Transformation 3 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r
+forall (n :: Nat) (m :: Nat) r.
+Vector n (Vector m r) -&gt; Matrix n m r
+</span><a href="Data.Geometry.Matrix.html#Matrix"><span class="hs-identifier hs-var">Matrix</span></a></span><span>
+</span><span id="line-119"></span><span>             </span><span class="annot"><span class="annottext">(Vector 4 (Vector 4 r) -&gt; Transformation 3 r)
+-&gt; Vector 4 (Vector 4 r) -&gt; Transformation 3 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 4 r
+-&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 (Vector 4 r)
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965181"><span class="hs-identifier hs-var">w</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965179"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">0</span></span><span>     </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-123"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-124"></span><span>    </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679965181"><span class="annot"><span class="annottext">w :: r
+</span><a href="#local-6989586621679965181"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679965179"><span class="annot"><span class="annottext">h :: r
+</span><a href="#local-6989586621679965179"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965185"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r
+-&gt; Getting (Vector 2 r) (Camera r) (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector 2 r) (Camera r) (Vector 2 r)
+forall r. Lens' (Camera r) (Vector 2 r)
+</span><a href="Graphics.Camera.html#screenDimensions"><span class="hs-identifier hs-var">screenDimensions</span></a></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | constructs a perspective projection</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679965177"><span class="annot"><a href="Graphics.Camera.html#perspectiveProjection"><span class="hs-identifier hs-type">perspectiveProjection</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679965177"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965177"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965177"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-129"></span><span id="perspectiveProjection"><span class="annot"><span class="annottext">perspectiveProjection :: Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#perspectiveProjection"><span class="hs-identifier hs-var hs-var">perspectiveProjection</span></a></span></span><span> </span><span id="local-6989586621679965176"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965176"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix 4 4 r -&gt; Transformation 3 r
+forall (d :: Nat) r. Matrix (d + 1) (d + 1) r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-var">Transformation</span></a></span><span> </span><span class="annot"><span class="annottext">(Matrix 4 4 r -&gt; Transformation 3 r)
+-&gt; (Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r)
+-&gt; Vector 4 (Vector 4 r)
+-&gt; Transformation 3 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r
+forall (n :: Nat) (m :: Nat) r.
+Vector n (Vector m r) -&gt; Matrix n m r
+</span><a href="Data.Geometry.Matrix.html#Matrix"><span class="hs-identifier hs-var">Matrix</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 4 (Vector 4 r) -&gt; Transformation 3 r)
+-&gt; Vector 4 (Vector 4 r) -&gt; Transformation 3 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-130"></span><span>    </span><span class="annot"><span class="annottext">Vector 4 r
+-&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 (Vector 4 r)
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965174"><span class="hs-identifier hs-var">rx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="annot"><span class="hs-number">0</span></span><span>              </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965173"><span class="hs-identifier hs-var">ry</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>              </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965171"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965171"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">2</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965171"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679965171"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="annot"><span class="hs-number">0</span></span><span>       </span><span class="annot"><span class="hs-number">1</span></span><span>              </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679965175"><span class="annot"><span class="annottext">n :: r
+</span><a href="#local-6989586621679965175"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965176"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r -&gt; Getting r (Camera r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Camera r) r
+forall r. Lens' (Camera r) r
+</span><a href="Graphics.Camera.html#nearDist"><span class="hs-identifier hs-var">nearDist</span></a></span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679965171"><span class="annot"><span class="annottext">f :: r
+</span><a href="#local-6989586621679965171"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965176"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r -&gt; Getting r (Camera r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (Camera r) r
+forall r. Lens' (Camera r) r
+</span><a href="Graphics.Camera.html#farDist"><span class="hs-identifier hs-var">farDist</span></a></span><span>
+</span><span id="line-137"></span><span>    </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679965174"><span class="annot"><span class="annottext">rx :: r
+</span><a href="#local-6989586621679965174"><span class="hs-identifier hs-var">rx</span></a></span></span><span> </span><span id="local-6989586621679965173"><span class="annot"><span class="annottext">ry :: r
+</span><a href="#local-6989586621679965173"><span class="hs-identifier hs-var">ry</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(r -&gt; r) -&gt; Vector 2 r -&gt; Vector 2 r
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965176"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r
+-&gt; Getting (Vector 2 r) (Camera r) (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector 2 r) (Camera r) (Vector 2 r)
+forall r. Lens' (Camera r) (Vector 2 r)
+</span><a href="Graphics.Camera.html#screenDimensions"><span class="hs-identifier hs-var">screenDimensions</span></a></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | Rotates coordinate system around the camera, such that we look in the negative z</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- direction</span><span>
+</span><span id="line-141"></span><span id="local-6989586621679965312"><span class="annot"><a href="Graphics.Camera.html#rotateCoordSystem"><span class="hs-identifier hs-type">rotateCoordSystem</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679965312"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679965312"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965312"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-142"></span><span id="rotateCoordSystem"><span class="annot"><span class="annottext">rotateCoordSystem :: Camera r -&gt; Transformation 3 r
+</span><a href="Graphics.Camera.html#rotateCoordSystem"><span class="hs-identifier hs-var hs-var">rotateCoordSystem</span></a></span></span><span> </span><span id="local-6989586621679965168"><span class="annot"><span class="annottext">c :: Camera r
+</span><a href="#local-6989586621679965168"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 (Vector 3 r) -&gt; Transformation 3 r
+forall r. Num r =&gt; Vector 3 (Vector 3 r) -&gt; Transformation 3 r
+</span><a href="Data.Geometry.Transformation.html#rotateTo"><span class="hs-identifier hs-var">rotateTo</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 3 (Vector 3 r) -&gt; Transformation 3 r)
+-&gt; Vector 3 (Vector 3 r) -&gt; Transformation 3 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 (Vector 3 r)
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector3"><span class="hs-identifier hs-var">Vector3</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965165"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965164"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965163"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-143"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-144"></span><span>    </span><span id="local-6989586621679965165"><span class="annot"><span class="annottext">u :: Vector 3 r
+</span><a href="#local-6989586621679965165"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965168"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r
+-&gt; Getting (Vector 3 r) (Camera r) (Vector 3 r) -&gt; Vector 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector 3 r) (Camera r) (Vector 3 r)
+forall r. Lens' (Camera r) (Vector 3 r)
+</span><a href="Graphics.Camera.html#rawViewUp"><span class="hs-identifier hs-var">rawViewUp</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+forall r. Num r =&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#cross"><span class="hs-operator hs-var">`cross`</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965163"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-145"></span><span>    </span><span id="local-6989586621679965164"><span class="annot"><span class="annottext">v :: Vector 3 r
+</span><a href="#local-6989586621679965164"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965163"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+forall r. Num r =&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#cross"><span class="hs-operator hs-var">`cross`</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679965165"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679965163"><span class="annot"><span class="annottext">n :: Vector 3 r
+</span><a href="#local-6989586621679965163"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 3 r -&gt; Vector 3 r
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="annot"><span class="annottext">Camera r
+</span><a href="#local-6989586621679965168"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Camera r
+-&gt; Getting (Vector 3 r) (Camera r) (Vector 3 r) -&gt; Vector 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Vector 3 r) (Camera r) (Vector 3 r)
+forall r. Lens' (Camera r) (Vector 3 r)
+</span><a href="Graphics.Camera.html#rawCameraNormal"><span class="hs-identifier hs-var">rawCameraNormal</span></a></span><span> </span><span class="hs-comment">-- we need the normal from the scene *into* the camera</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- transformBy' (Transformation m) (Vector3 x y z) = m `mult` (Vector4 x y z (-z))</span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- | Flips the y and z axis.</span><span>
+</span><span id="line-154"></span><span id="local-6989586621679965161"><span class="annot"><a href="Graphics.Camera.html#flipAxes"><span class="hs-identifier hs-type">flipAxes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679965161"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-type">Transformation</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679965161"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-155"></span><span id="flipAxes"><span class="annot"><span class="annottext">flipAxes :: Transformation 3 r
+</span><a href="Graphics.Camera.html#flipAxes"><span class="hs-identifier hs-var hs-var">flipAxes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix 4 4 r -&gt; Transformation 3 r
+forall (d :: Nat) r. Matrix (d + 1) (d + 1) r -&gt; Transformation d r
+</span><a href="Data.Geometry.Transformation.html#Transformation"><span class="hs-identifier hs-var">Transformation</span></a></span><span> </span><span class="annot"><span class="annottext">(Matrix 4 4 r -&gt; Transformation 3 r)
+-&gt; (Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r)
+-&gt; Vector 4 (Vector 4 r)
+-&gt; Transformation 3 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector 4 (Vector 4 r) -&gt; Matrix 4 4 r
+forall (n :: Nat) (m :: Nat) r.
+Vector n (Vector m r) -&gt; Matrix n m r
+</span><a href="Data.Geometry.Matrix.html#Matrix"><span class="hs-identifier hs-var">Matrix</span></a></span><span>
+</span><span id="line-156"></span><span>             </span><span class="annot"><span class="annottext">(Vector 4 (Vector 4 r) -&gt; Transformation 3 r)
+-&gt; Vector 4 (Vector 4 r) -&gt; Transformation 3 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 4 r
+-&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 r -&gt; Vector 4 (Vector 4 r)
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+forall r. r -&gt; r -&gt; r -&gt; r -&gt; Vector 4 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector4"><span class="hs-identifier hs-var">Vector4</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span></pre></body></html>

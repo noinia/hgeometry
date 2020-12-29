@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Point.Orientation.Degenerate</span><span class="hs-special">(</span><span>
+</span><span id="line-2"></span><span>    </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier">CCW</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier">CCW</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier">CW</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier">CoLinear</span></a></span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier">ccw</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier">ccw'</span></a></span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#sortAround"><span class="hs-identifier">sortAround</span></a></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith"><span class="hs-identifier">ccwCmpAroundWith</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAroundWith"><span class="hs-identifier">cwCmpAroundWith</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier">ccwCmpAround</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAround"><span class="hs-identifier">cwCmpAround</span></a></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#insertIntoCyclicOrder"><span class="hs-identifier">insertIntoCyclicOrder</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.CircularList</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.CircularList.Util</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">CU</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.Internal.html"><span class="hs-identifier">Data.Geometry.Point.Internal</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | Data type for expressing the orientation of three points, with</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- the option of allowing Colinearities.</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">newtype</span><span> </span><span id="CCW"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-var">CCW</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CCWWrap"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCWWrap"><span class="hs-identifier hs-var">CCWWrap</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679936064"><span id="local-6989586621679936066"><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+(CCW -&gt; CCW -&gt; Bool) -&gt; (CCW -&gt; CCW -&gt; Bool) -&gt; Eq CCW
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: CCW -&gt; CCW -&gt; Bool
+$c/= :: CCW -&gt; CCW -&gt; Bool
+== :: CCW -&gt; CCW -&gt; Bool
+$c== :: CCW -&gt; CCW -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | CounterClockwise orientation. Also called a left-turn.</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bCCW"><span id="%24mCCW"><span id="CCW"><span class="annot"><span class="annottext">$bCCW :: CCW
+$mCCW :: forall r. CCW -&gt; (Void# -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#%24bCCW"><span class="hs-identifier hs-var hs-var hs-var">CCW</span></a></span></span></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCWWrap"><span class="hs-identifier hs-type">CCWWrap</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Clockwise orientation. Also called a right-turn.</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bCW"><span id="%24mCW"><span id="CW"><span class="annot"><span class="annottext">$bCW :: CCW
+$mCW :: forall r. CCW -&gt; (Void# -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#%24bCW"><span class="hs-identifier hs-var hs-var hs-var">CW</span></a></span></span></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCWWrap"><span class="hs-identifier hs-type">CCWWrap</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | CoLinear orientation. Also called a straight line.</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">pattern</span><span> </span><span id="%24bCoLinear"><span id="%24mCoLinear"><span id="CoLinear"><span class="annot"><span class="annottext">$bCoLinear :: CCW
+$mCoLinear :: forall r. CCW -&gt; (Void# -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#%24bCoLinear"><span class="hs-identifier hs-var hs-var hs-var">CoLinear</span></a></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCWWrap"><span class="hs-identifier hs-type">CCWWrap</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span>
+</span><span id="line-40"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-pragma hs-type">CCW</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-pragma hs-type">CW</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-pragma hs-type">CoLinear</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679936052"><span id="local-6989586621679936055"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679936050"><span class="annot"><span class="annottext">show :: CCW -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;CCW&quot;</span></span><span>
+</span><span id="line-45"></span><span>    </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;CW&quot;</span></span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;CoLinear&quot;</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- | Given three points p q and r determine the orientation when going from p to r via q.</span><span>
+</span><span id="line-50"></span><span id="local-6989586621679936132"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-type">ccw</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936132"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936132"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936132"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936132"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936132"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span></span><span>
+</span><span id="line-51"></span><span id="ccw"><span class="annot"><span class="annottext">ccw :: Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var hs-var">ccw</span></a></span></span><span> </span><span id="local-6989586621679936048"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679936048"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679936047"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621679936047"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679936046"><span class="annot"><span class="annottext">r :: Point 2 r
+</span><a href="#local-6989586621679936046"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCWWrap"><span class="hs-identifier hs-var">CCWWrap</span></a></span><span> </span><span class="annot"><span class="annottext">(Ordering -&gt; CCW) -&gt; Ordering -&gt; CCW
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936045"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>
+</span><span id="line-52"></span><span>            </span><span class="hs-comment">-- case z `compare` 0 of</span><span>
+</span><span id="line-53"></span><span>            </span><span class="hs-comment">--   LT -&gt; CW</span><span>
+</span><span id="line-54"></span><span>            </span><span class="hs-comment">--   GT -&gt; CCW</span><span>
+</span><span id="line-55"></span><span>            </span><span class="hs-comment">--   EQ -&gt; CoLinear</span><span>
+</span><span id="line-56"></span><span>     </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>       </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679936042"><span class="annot"><span class="annottext">ux :: r
+</span><a href="#local-6989586621679936042"><span class="hs-identifier hs-var">ux</span></a></span></span><span> </span><span id="local-6989586621679936041"><span class="annot"><span class="annottext">uy :: r
+</span><a href="#local-6989586621679936041"><span class="hs-identifier hs-var">uy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936047"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Diff (Point 2) r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; p a -&gt; Diff p a
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936048"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-58"></span><span>       </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679936039"><span class="annot"><span class="annottext">vx :: r
+</span><a href="#local-6989586621679936039"><span class="hs-identifier hs-var">vx</span></a></span></span><span> </span><span id="local-6989586621679936038"><span class="annot"><span class="annottext">vy :: r
+</span><a href="#local-6989586621679936038"><span class="hs-identifier hs-var">vy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936046"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Diff (Point 2) r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; p a -&gt; Diff p a
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936048"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-59"></span><span>       </span><span id="local-6989586621679936045"><span class="annot"><span class="annottext">z :: r
+</span><a href="#local-6989586621679936045"><span class="hs-identifier hs-var hs-var">z</span></a></span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936042"><span class="hs-identifier hs-var">ux</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936038"><span class="hs-identifier hs-var">vy</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936041"><span class="hs-identifier hs-var">uy</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936039"><span class="hs-identifier hs-var">vx</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Given three points p q and r determine the orientation when going from p to r via q.</span><span>
+</span><span id="line-62"></span><span id="local-6989586621679936033"><span id="local-6989586621679936034"><span id="local-6989586621679936035"><span id="local-6989586621679936036"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-type">ccw'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936036"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936036"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936035"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936034"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936033"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span></span></span></span></span><span>
+</span><span id="line-63"></span><span id="ccw%27"><span class="annot"><span class="annottext">ccw' :: (Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var hs-var">ccw'</span></a></span></span><span> </span><span id="local-6989586621679936032"><span class="annot"><span class="annottext">p :: Point 2 r :+ a
+</span><a href="#local-6989586621679936032"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679936031"><span class="annot"><span class="annottext">q :: Point 2 r :+ b
+</span><a href="#local-6989586621679936031"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679936030"><span class="annot"><span class="annottext">r :: Point 2 r :+ c
+</span><a href="#local-6989586621679936030"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679936032"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ a)
+-&gt; Getting (Point 2 r) (Point 2 r :+ a) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ a) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ b
+</span><a href="#local-6989586621679936031"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ b)
+-&gt; Getting (Point 2 r) (Point 2 r :+ b) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ b) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ c
+</span><a href="#local-6989586621679936030"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ c)
+-&gt; Getting (Point 2 r) (Point 2 r :+ c) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ c) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- | Sort the points arround the given point p in counter clockwise order with</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- respect to the rightward horizontal ray starting from p.  If two points q</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- and r are colinear with p, the closest one to p is reported first.</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- running time: O(n log n)</span><span>
+</span><span id="line-69"></span><span id="local-6989586621679936025"><span id="local-6989586621679936026"><span id="local-6989586621679936027"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#sortAround"><span class="hs-identifier hs-type">sortAround</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936027"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936027"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936027"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936026"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936027"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936025"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936027"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936025"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-71"></span><span id="sortAround"><span class="annot"><span class="annottext">sortAround :: (Point 2 r :+ q) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#sortAround"><span class="hs-identifier hs-var hs-var">sortAround</span></a></span></span><span> </span><span id="local-6989586621679936024"><span class="annot"><span class="annottext">c :: Point 2 r :+ q
+</span><a href="#local-6989586621679936024"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">L.sortBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall r qc p q.
+(Num r, Ord r) =&gt;
+(Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier hs-var">ccwCmpAround</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679936024"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; ((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p)
+-&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall r (d :: Nat) c p q.
+(Ord r, Num r, Arity d) =&gt;
+(Point d r :+ c)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Internal.html#cmpByDistanceTo"><span class="hs-identifier hs-var">cmpByDistanceTo</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679936024"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | Given a zero vector z, a center c, and two points p and q,</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- compute the ccw ordering of p and q around c with this vector as zero</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- direction.</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- pre: the points p,q /= c</span><span>
+</span><span id="line-79"></span><span id="local-6989586621679936093"><span id="local-6989586621679936094"><span id="local-6989586621679936095"><span id="local-6989586621679936096"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith"><span class="hs-identifier hs-type">ccwCmpAroundWith</span></a></span><span>                              </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>                                              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-81"></span><span>                                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936095"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-82"></span><span>                                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936094"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936096"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936093"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-83"></span><span>                                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span></span><span>
+</span><span id="line-84"></span><span id="ccwCmpAroundWith"><span class="annot"><span class="annottext">ccwCmpAroundWith :: Vector 2 r
+-&gt; (Point 2 r :+ c)
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ b)
+-&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith"><span class="hs-identifier hs-var hs-var">ccwCmpAroundWith</span></a></span></span><span> </span><span id="local-6989586621679936021"><span class="annot"><span class="annottext">z :: Vector 2 r
+</span><a href="#local-6989586621679936021"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679936020"><span class="annot"><span class="annottext">zx :: r
+</span><a href="#local-6989586621679936020"><span class="hs-identifier hs-var">zx</span></a></span></span><span> </span><span id="local-6989586621679936019"><span class="annot"><span class="annottext">zy :: r
+</span><a href="#local-6989586621679936019"><span class="hs-identifier hs-var">zy</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679936018"><span class="annot"><span class="annottext">c :: Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679936016"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621679936016"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679936015"><span class="annot"><span class="annottext">r :: Point 2 r
+</span><a href="#local-6989586621679936015"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936014"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936016"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936014"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936015"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679936013"><span class="hs-identifier hs-var">cmp</span></a></span><span>
+</span><span id="line-87"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-88"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679936012"><span class="hs-identifier hs-var">onZero</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936015"><span class="hs-identifier hs-var">r</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-89"></span><span>                     </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-92"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679936013"><span class="hs-identifier hs-var">cmp</span></a></span><span>
+</span><span id="line-93"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679936012"><span class="hs-identifier hs-var">onZero</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936016"><span class="hs-identifier hs-var">q</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-96"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-99"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679936012"><span class="hs-identifier hs-var">onZero</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936016"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679936012"><span class="hs-identifier hs-var">onZero</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936015"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-100"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-101"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-102"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-103"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679936014"><span class="annot"><span class="annottext">a :: Point 2 r
+</span><a href="#local-6989586621679936014"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">Diff (Point 2) r
+Vector 2 r
+</span><a href="#local-6989586621679936021"><span class="hs-identifier hs-var">z</span></a></span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679936010"><span class="annot"><span class="annottext">b :: Point 2 r
+</span><a href="#local-6989586621679936010"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Diff (Point 2) r -&gt; Point 2 r
+forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; Diff p a -&gt; p a
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936019"><span class="hs-identifier hs-var">zy</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679936020"><span class="hs-identifier hs-var">zx</span></a></span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-comment">-- b is on a perpendicular vector to z</span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>    </span><span class="hs-comment">-- test if the point lies on the ray defined by z, starting in c</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679936012"><span class="annot"><span class="annottext">onZero :: Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679936012"><span class="hs-identifier hs-var hs-var">onZero</span></a></span></span><span> </span><span id="local-6989586621679936009"><span class="annot"><span class="annottext">d :: Point 2 r
+</span><a href="#local-6989586621679936009"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936010"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936009"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>                 </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-112"></span><span>                 </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-113"></span><span>                 </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="hs-comment">-- this shouldh appen only when you ask for c itself</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679936013"><span class="annot"><span class="annottext">cmp :: Ordering
+</span><a href="#local-6989586621679936013"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall r.
+(Ord r, Num r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw"><span class="hs-identifier hs-var">ccw</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936018"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936016"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679936015"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-116"></span><span>            </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-type">CCW</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-117"></span><span>            </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CW"><span class="hs-identifier hs-type">CW</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#CoLinear"><span class="hs-identifier hs-type">CoLinear</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | Given a zero vector z, a center c, and two points p and q,</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- compute the cw ordering of p and q around c with this vector as zero</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- direction.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- pre: the points p,q /= c</span><span>
+</span><span id="line-125"></span><span id="local-6989586621679936005"><span id="local-6989586621679936006"><span id="local-6989586621679936007"><span id="local-6989586621679936008"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAroundWith"><span class="hs-identifier hs-type">cwCmpAroundWith</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-127"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936007"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-128"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936006"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936008"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936005"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-129"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span></span><span>
+</span><span id="line-130"></span><span id="cwCmpAroundWith"><span class="annot"><span class="annottext">cwCmpAroundWith :: Vector 2 r
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ b)
+-&gt; (Point 2 r :+ c)
+-&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAroundWith"><span class="hs-identifier hs-var hs-var">cwCmpAroundWith</span></a></span></span><span> </span><span id="local-6989586621679936004"><span class="annot"><span class="annottext">z :: Vector 2 r
+</span><a href="#local-6989586621679936004"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span id="local-6989586621679936003"><span class="annot"><span class="annottext">c :: Point 2 r :+ a
+</span><a href="#local-6989586621679936003"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ c) -&gt; (Point 2 r :+ b) -&gt; Ordering)
+-&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; Ordering
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ c)
+-&gt; (Point 2 r :+ b)
+-&gt; Ordering
+forall r c a b.
+(Ord r, Num r) =&gt;
+Vector 2 r
+-&gt; (Point 2 r :+ c)
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ b)
+-&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith"><span class="hs-identifier hs-var">ccwCmpAroundWith</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679936004"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ a
+</span><a href="#local-6989586621679936003"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- | Counter clockwise ordering of the points around c. Points are ordered with</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- respect to the positive x-axis.</span><span>
+</span><span id="line-134"></span><span id="local-6989586621679936117"><span id="local-6989586621679936118"><span id="local-6989586621679936119"><span id="local-6989586621679936120"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier hs-type">ccwCmpAround</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936120"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936120"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936120"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936119"><span class="hs-identifier hs-type">qc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936120"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936118"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936120"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936117"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span></span><span>
+</span><span id="line-136"></span><span id="ccwCmpAround"><span class="annot"><span class="annottext">ccwCmpAround :: (Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier hs-var hs-var">ccwCmpAround</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+-&gt; (Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p)
+-&gt; (Point 2 r :+ q)
+-&gt; Ordering
+forall r c a b.
+(Ord r, Num r) =&gt;
+Vector 2 r
+-&gt; (Point 2 r :+ c)
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ b)
+-&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith"><span class="hs-identifier hs-var">ccwCmpAroundWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- | Clockwise ordering of the points around c. Points are ordered with</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- respect to the positive x-axis.</span><span>
+</span><span id="line-140"></span><span id="local-6989586621679935998"><span id="local-6989586621679935999"><span id="local-6989586621679936000"><span id="local-6989586621679936001"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAround"><span class="hs-identifier hs-type">cwCmpAround</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679936001"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679936001"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936001"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679936000"><span class="hs-identifier hs-type">qc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936001"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935999"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679936001"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935998"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span></span><span>
+</span><span id="line-142"></span><span id="cwCmpAround"><span class="annot"><span class="annottext">cwCmpAround :: (Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAround"><span class="hs-identifier hs-var hs-var">cwCmpAround</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+-&gt; (Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p)
+-&gt; (Point 2 r :+ q)
+-&gt; Ordering
+forall r c a b.
+(Ord r, Num r) =&gt;
+Vector 2 r
+-&gt; (Point 2 r :+ c)
+-&gt; (Point 2 r :+ a)
+-&gt; (Point 2 r :+ b)
+-&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#cwCmpAroundWith"><span class="hs-identifier hs-var">cwCmpAroundWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- | Given a center c, a new point p, and a list of points ps, sorted in</span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- counter clockwise order around c. Insert p into the cyclic order. The focus</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- of the returned cyclic list is the new point p.</span><span>
+</span><span id="line-148"></span><span class="hs-comment">--</span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- running time: O(n)</span><span>
+</span><span id="line-150"></span><span id="local-6989586621679935995"><span id="local-6989586621679935996"><span id="local-6989586621679935997"><span class="annot"><a href="Data.Geometry.Point.Orientation.Degenerate.html#insertIntoCyclicOrder"><span class="hs-identifier hs-type">insertIntoCyclicOrder</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935996"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935995"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-152"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935995"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.CList</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679935997"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679935995"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-153"></span><span id="insertIntoCyclicOrder"><span class="annot"><span class="annottext">insertIntoCyclicOrder :: (Point 2 r :+ q)
+-&gt; (Point 2 r :+ p)
+-&gt; CList (Point 2 r :+ p)
+-&gt; CList (Point 2 r :+ p)
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#insertIntoCyclicOrder"><span class="hs-identifier hs-var hs-var">insertIntoCyclicOrder</span></a></span></span><span> </span><span id="local-6989586621679935994"><span class="annot"><span class="annottext">c :: Point 2 r :+ q
+</span><a href="#local-6989586621679935994"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; (Point 2 r :+ p)
+-&gt; CList (Point 2 r :+ p)
+-&gt; CList (Point 2 r :+ p)
+forall a. (a -&gt; a -&gt; Ordering) -&gt; a -&gt; CList a -&gt; CList a
+</span><span class="hs-identifier hs-var">CU.insertOrdBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall r qc p q.
+(Num r, Ord r) =&gt;
+(Point 2 r :+ qc)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAround"><span class="hs-identifier hs-var">ccwCmpAround</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679935994"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; ((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p)
+-&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall r (d :: Nat) c p q.
+(Ord r, Num r, Arity d) =&gt;
+(Point d r :+ c)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Point.Internal.html#cmpByDistanceTo"><span class="hs-identifier hs-var">cmpByDistanceTo</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679935994"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-154"></span></pre></body></html>

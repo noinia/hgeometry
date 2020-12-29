@@ -1,0 +1,684 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Data.Geometry.IntervalTree</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.IntervalTree</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier">NodeData</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#splitPoint"><span class="hs-identifier">splitPoint</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#intervalsLeft"><span class="hs-identifier">intervalsLeft</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#intervalsRight"><span class="hs-identifier">intervalsRight</span></a></span><span>
+</span><span id="line-11"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier">IntervalTree</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#unIntervalTree"><span class="hs-identifier">unIntervalTree</span></a></span><span>
+</span><span id="line-12"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier">IntervalLike</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#createTree"><span class="hs-identifier">createTree</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#fromIntervals"><span class="hs-identifier">fromIntervals</span></a></span><span>
+</span><span id="line-14"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#insert"><span class="hs-identifier">insert</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#delete"><span class="hs-identifier">delete</span></a></span><span>
+</span><span id="line-15"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#stab"><span class="hs-identifier">stab</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#search"><span class="hs-identifier">search</span></a></span><span>
+</span><span id="line-16"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#toList"><span class="hs-identifier">toList</span></a></span><span>
+</span><span id="line-17"></span><span>                                 </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.BinaryTree</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Interval.html"><span class="hs-identifier">Data.Geometry.Interval</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Interval.Util.html"><span class="hs-identifier">Data.Geometry.Interval.Util</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Information stored in a node of the Interval Tree</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679931055"><span id="local-6989586621679931056"></span></span><span class="hs-keyword">data</span><span> </span><span id="NodeData"><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span id="local-6989586621679931156"><span class="annot"><a href="#local-6989586621679931156"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679931157"><span class="annot"><a href="#local-6989586621679931157"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NodeData"><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_splitPoint"><span class="annot"><span class="annottext">NodeData i r -&gt; r
+</span><a href="Data.Geometry.IntervalTree.html#_splitPoint"><span class="hs-identifier hs-var hs-var">_splitPoint</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679931157"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-35"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_intervalsLeft"><span class="annot"><span class="annottext">NodeData i r -&gt; Map (L r) [i]
+</span><a href="Data.Geometry.IntervalTree.html#_intervalsLeft"><span class="hs-identifier hs-var hs-var">_intervalsLeft</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-type">L</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931157"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931156"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="_intervalsRight"><span class="annot"><span class="annottext">NodeData i r -&gt; Map (R r) [i]
+</span><a href="Data.Geometry.IntervalTree.html#_intervalsRight"><span class="hs-identifier hs-var hs-var">_intervalsRight</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">M.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-type">R</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931157"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931156"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>                             </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679931045"><span id="local-6989586621679931047"><span id="local-6989586621679931049"><span class="annot"><span class="annottext">Int -&gt; NodeData i r -&gt; ShowS
+[NodeData i r] -&gt; ShowS
+NodeData i r -&gt; String
+(Int -&gt; NodeData i r -&gt; ShowS)
+-&gt; (NodeData i r -&gt; String)
+-&gt; ([NodeData i r] -&gt; ShowS)
+-&gt; Show (NodeData i r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall i r. (Show r, Show i) =&gt; Int -&gt; NodeData i r -&gt; ShowS
+forall i r. (Show r, Show i) =&gt; [NodeData i r] -&gt; ShowS
+forall i r. (Show r, Show i) =&gt; NodeData i r -&gt; String
+showList :: [NodeData i r] -&gt; ShowS
+$cshowList :: forall i r. (Show r, Show i) =&gt; [NodeData i r] -&gt; ShowS
+show :: NodeData i r -&gt; String
+$cshow :: forall i r. (Show r, Show i) =&gt; NodeData i r -&gt; String
+showsPrec :: Int -&gt; NodeData i r -&gt; ShowS
+$cshowsPrec :: forall i r. (Show r, Show i) =&gt; Int -&gt; NodeData i r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931040"><span id="local-6989586621679931042"><span class="annot"><span class="annottext">NodeData i r -&gt; NodeData i r -&gt; Bool
+(NodeData i r -&gt; NodeData i r -&gt; Bool)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; Bool) -&gt; Eq (NodeData i r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall i r. (Eq r, Eq i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+/= :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c/= :: forall i r. (Eq r, Eq i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+== :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c== :: forall i r. (Eq r, Eq i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931024"><span id="local-6989586621679931026"><span id="local-6989586621679931028"><span id="local-6989586621679931030"><span id="local-6989586621679931032"><span id="local-6989586621679931034"><span id="local-6989586621679931036"><span class="annot"><span class="annottext">Eq (NodeData i r)
+Eq (NodeData i r) =&gt;
+(NodeData i r -&gt; NodeData i r -&gt; Ordering)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; Bool)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; Bool)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; Bool)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; Bool)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; NodeData i r)
+-&gt; (NodeData i r -&gt; NodeData i r -&gt; NodeData i r)
+-&gt; Ord (NodeData i r)
+NodeData i r -&gt; NodeData i r -&gt; Bool
+NodeData i r -&gt; NodeData i r -&gt; Ordering
+NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall i r. (Ord r, Ord i) =&gt; Eq (NodeData i r)
+forall i r. (Ord r, Ord i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+forall i r.
+(Ord r, Ord i) =&gt;
+NodeData i r -&gt; NodeData i r -&gt; Ordering
+forall i r.
+(Ord r, Ord i) =&gt;
+NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+min :: NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+$cmin :: forall i r.
+(Ord r, Ord i) =&gt;
+NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+max :: NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+$cmax :: forall i r.
+(Ord r, Ord i) =&gt;
+NodeData i r -&gt; NodeData i r -&gt; NodeData i r
+&gt;= :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c&gt;= :: forall i r. (Ord r, Ord i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+&gt; :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c&gt; :: forall i r. (Ord r, Ord i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+&lt;= :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c&lt;= :: forall i r. (Ord r, Ord i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+&lt; :: NodeData i r -&gt; NodeData i r -&gt; Bool
+$c&lt; :: forall i r. (Ord r, Ord i) =&gt; NodeData i r -&gt; NodeData i r -&gt; Bool
+compare :: NodeData i r -&gt; NodeData i r -&gt; Ordering
+$ccompare :: forall i r.
+(Ord r, Ord i) =&gt;
+NodeData i r -&gt; NodeData i r -&gt; Ordering
+$cp1Ord :: forall i r. (Ord r, Ord i) =&gt; Eq (NodeData i r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. NodeData i r -&gt; Rep (NodeData i r) x)
+-&gt; (forall x. Rep (NodeData i r) x -&gt; NodeData i r)
+-&gt; Generic (NodeData i r)
+forall x. Rep (NodeData i r) x -&gt; NodeData i r
+forall x. NodeData i r -&gt; Rep (NodeData i r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall i r x. Rep (NodeData i r) x -&gt; NodeData i r
+forall i r x. NodeData i r -&gt; Rep (NodeData i r) x
+$cto :: forall i r x. Rep (NodeData i r) x -&gt; NodeData i r
+$cfrom :: forall i r x. NodeData i r -&gt; Rep (NodeData i r) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span id="intervalsRight"><span id="intervalsLeft"><span id="splitPoint"><span id="local-6989586621679931156"><span id="local-6989586621679931157"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">NodeData</span></span></span></span></span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679931018"><span id="local-6989586621679931019"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679931016"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679931019"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679931018"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931019"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931018"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | IntervalTree type, storing intervals of type i</span><span>
+</span><span id="line-43"></span><span id="local-6989586621679931013"><span id="local-6989586621679931014"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="IntervalTree"><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-var">IntervalTree</span></a></span></span><span> </span><span id="local-6989586621679931165"><span class="annot"><a href="#local-6989586621679931165"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679931164"><span class="annot"><a href="#local-6989586621679931164"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>  </span><span id="IntervalTree"><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-var">IntervalTree</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_unIntervalTree"><span class="annot"><span class="annottext">IntervalTree i r -&gt; BinaryTree (NodeData i r)
+</span><a href="Data.Geometry.IntervalTree.html#_unIntervalTree"><span class="hs-identifier hs-var hs-var">_unIntervalTree</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BinaryTree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931165"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931164"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679931005"><span id="local-6989586621679931007"><span id="local-6989586621679931009"><span class="annot"><span class="annottext">Int -&gt; IntervalTree i r -&gt; ShowS
+[IntervalTree i r] -&gt; ShowS
+IntervalTree i r -&gt; String
+(Int -&gt; IntervalTree i r -&gt; ShowS)
+-&gt; (IntervalTree i r -&gt; String)
+-&gt; ([IntervalTree i r] -&gt; ShowS)
+-&gt; Show (IntervalTree i r)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall i r. (Show r, Show i) =&gt; Int -&gt; IntervalTree i r -&gt; ShowS
+forall i r. (Show r, Show i) =&gt; [IntervalTree i r] -&gt; ShowS
+forall i r. (Show r, Show i) =&gt; IntervalTree i r -&gt; String
+showList :: [IntervalTree i r] -&gt; ShowS
+$cshowList :: forall i r. (Show r, Show i) =&gt; [IntervalTree i r] -&gt; ShowS
+show :: IntervalTree i r -&gt; String
+$cshow :: forall i r. (Show r, Show i) =&gt; IntervalTree i r -&gt; String
+showsPrec :: Int -&gt; IntervalTree i r -&gt; ShowS
+$cshowsPrec :: forall i r. (Show r, Show i) =&gt; Int -&gt; IntervalTree i r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679931001"><span id="local-6989586621679931003"><span class="annot"><span class="annottext">IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+(IntervalTree i r -&gt; IntervalTree i r -&gt; Bool)
+-&gt; (IntervalTree i r -&gt; IntervalTree i r -&gt; Bool)
+-&gt; Eq (IntervalTree i r)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall i r.
+(Eq r, Eq i) =&gt;
+IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+/= :: IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+$c/= :: forall i r.
+(Eq r, Eq i) =&gt;
+IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+== :: IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+$c== :: forall i r.
+(Eq r, Eq i) =&gt;
+IntervalTree i r -&gt; IntervalTree i r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(forall x. IntervalTree i r -&gt; Rep (IntervalTree i r) x)
+-&gt; (forall x. Rep (IntervalTree i r) x -&gt; IntervalTree i r)
+-&gt; Generic (IntervalTree i r)
+forall x. Rep (IntervalTree i r) x -&gt; IntervalTree i r
+forall x. IntervalTree i r -&gt; Rep (IntervalTree i r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall i r x. Rep (IntervalTree i r) x -&gt; IntervalTree i r
+forall i r x. IntervalTree i r -&gt; Rep (IntervalTree i r) x
+$cto :: forall i r x. Rep (IntervalTree i r) x -&gt; IntervalTree i r
+$cfrom :: forall i r x. IntervalTree i r -&gt; Rep (IntervalTree i r) x
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span id="local-6989586621679930997"><span id="local-6989586621679930998"><span id="unIntervalTree"><span id="local-6989586621679931164"><span id="local-6989586621679931165"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">IntervalTree</span></span></span></span></span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679930995"><span id="local-6989586621679930996"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679930993"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679930996"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679930995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930996"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930995"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- | Given an ordered list of points, create an interval tree</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- \(O(n)\)</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679931144"><span id="local-6989586621679931145"><span class="annot"><a href="Data.Geometry.IntervalTree.html#createTree"><span class="hs-identifier hs-type">createTree</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679931145"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931145"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931144"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931145"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-54"></span><span id="createTree"><span class="annot"><span class="annottext">createTree :: [r] -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#createTree"><span class="hs-identifier hs-var hs-var">createTree</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; IntervalTree i r
+forall i r. BinaryTree (NodeData i r) -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-var">IntervalTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinaryTree (NodeData i r) -&gt; IntervalTree i r)
+-&gt; ([r] -&gt; BinaryTree (NodeData i r)) -&gt; [r] -&gt; IntervalTree i r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[NodeData i r] -&gt; BinaryTree (NodeData i r)
+forall a. [a] -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">asBalancedBinTree</span></span><span>
+</span><span id="line-55"></span><span>             </span><span class="annot"><span class="annottext">([NodeData i r] -&gt; BinaryTree (NodeData i r))
+-&gt; ([r] -&gt; [NodeData i r]) -&gt; [r] -&gt; BinaryTree (NodeData i r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; NodeData i r) -&gt; [r] -&gt; [NodeData i r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679930990"><span class="annot"><span class="annottext">m :: r
+</span><a href="#local-6989586621679930990"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+forall i r. r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+</span><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930990"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">Map (L r) [i]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">Map (R r) [i]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | Build an interval tree</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- \(O(n \log n)\)</span><span>
+</span><span id="line-61"></span><span id="local-6989586621679930988"><span id="local-6989586621679930989"><span class="annot"><a href="Data.Geometry.IntervalTree.html#fromIntervals"><span class="hs-identifier hs-type">fromIntervals</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679930989"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-type">IntervalLike</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930988"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930988"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679930989"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679930988"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930988"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930989"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-63"></span><span id="fromIntervals"><span class="annot"><span class="annottext">fromIntervals :: [i] -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#fromIntervals"><span class="hs-identifier hs-var hs-var">fromIntervals</span></a></span></span><span> </span><span id="local-6989586621679930987"><span class="annot"><span class="annottext">is :: [i]
+</span><a href="#local-6989586621679930987"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(i -&gt; IntervalTree i r -&gt; IntervalTree i r)
+-&gt; IntervalTree i r -&gt; [i] -&gt; IntervalTree i r
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">i -&gt; IntervalTree i r -&gt; IntervalTree i r
+forall r i.
+(Ord r, IntervalLike i, NumType i ~ r) =&gt;
+i -&gt; IntervalTree i r -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#insert"><span class="hs-identifier hs-var">insert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[r] -&gt; IntervalTree i r
+forall r i. Ord r =&gt; [r] -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#createTree"><span class="hs-identifier hs-var">createTree</span></a></span><span> </span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679930985"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930987"><span class="hs-identifier hs-var">is</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>    </span><span id="local-6989586621679930984"><span class="annot"><span class="annottext">endPoints :: i -&gt; [NumType i]
+</span><a href="#local-6989586621679930984"><span class="hs-identifier hs-var hs-var">endPoints</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; Range (NumType i)
+forall i. IntervalLike i =&gt; i -&gt; Range (NumType i)
+</span><a href="Data.Geometry.IntervalTree.html#asRange"><span class="hs-identifier hs-var">asRange</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range'</span></span><span> </span><span id="local-6989586621679930981"><span class="annot"><a href="#local-6989586621679930981"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679930980"><span class="annot"><a href="#local-6989586621679930980"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">NumType i
+</span><a href="#local-6989586621679930981"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">NumType i
+</span><a href="#local-6989586621679930980"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679930985"><span class="annot"><span class="annottext">pts :: [r]
+</span><a href="#local-6989586621679930985"><span class="hs-identifier hs-var hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[r] -&gt; [r]
+forall a. Ord a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.sort</span></span><span> </span><span class="annot"><span class="annottext">([r] -&gt; [r]) -&gt; ([i] -&gt; [r]) -&gt; [i] -&gt; [r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(i -&gt; [r]) -&gt; [i] -&gt; [r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">i -&gt; [r]
+forall i. IntervalLike i =&gt; i -&gt; [NumType i]
+</span><a href="#local-6989586621679930984"><span class="hs-identifier hs-var">endPoints</span></a></span><span> </span><span class="annot"><span class="annottext">([i] -&gt; [r]) -&gt; [i] -&gt; [r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930987"><span class="hs-identifier hs-var">is</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- | Lists the intervals. We don't guarantee anything about the order</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- running time: \(O(n)\).</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679930976"><span id="local-6989586621679930977"><span class="annot"><a href="Data.Geometry.IntervalTree.html#toList"><span class="hs-identifier hs-type">toList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930977"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930976"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679930977"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-72"></span><span id="toList"><span class="annot"><span class="annottext">toList :: IntervalTree i r -&gt; [i]
+</span><a href="Data.Geometry.IntervalTree.html#toList"><span class="hs-identifier hs-var hs-var">toList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; [i]
+forall a r. BinaryTree (NodeData a r) -&gt; [a]
+</span><a href="#local-6989586621679930975"><span class="hs-identifier hs-var">toList'</span></a></span><span> </span><span class="annot"><span class="annottext">(BinaryTree (NodeData i r) -&gt; [i])
+-&gt; (IntervalTree i r -&gt; BinaryTree (NodeData i r))
+-&gt; IntervalTree i r
+-&gt; [i]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IntervalTree i r -&gt; BinaryTree (NodeData i r)
+forall i r. IntervalTree i r -&gt; BinaryTree (NodeData i r)
+</span><a href="Data.Geometry.IntervalTree.html#_unIntervalTree"><span class="hs-identifier hs-var hs-var">_unIntervalTree</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679930975"><span class="annot"><span class="annottext">toList' :: BinaryTree (NodeData a r) -&gt; [a]
+</span><a href="#local-6989586621679930975"><span class="hs-identifier hs-var hs-var">toList'</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><a href="#local-6989586621679930975"><span class="hs-identifier hs-var">toList'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Internal</span></span><span> </span><span id="local-6989586621679930972"><span class="annot"><span class="annottext">l :: BinaryTree (NodeData a r)
+</span><a href="#local-6989586621679930972"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679930971"><span class="annot"><span class="annottext">v :: NodeData a r
+</span><a href="#local-6989586621679930971"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679930970"><span class="annot"><span class="annottext">r :: BinaryTree (NodeData a r)
+</span><a href="#local-6989586621679930970"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-76"></span><span>      </span><span class="annot"><span class="annottext">[[a]] -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[[a]] -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; [a]) -&gt; [[a]] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NodeData a r
+</span><a href="#local-6989586621679930971"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">NodeData a r -&gt; Getting (Endo [[a]]) (NodeData a r) [a] -&gt; [[a]]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><span class="hs-operator hs-var">^..</span></span><span class="annot"><span class="annottext">(Map (L r) [a] -&gt; Const (Endo [[a]]) (Map (L r) [a]))
+-&gt; NodeData a r -&gt; Const (Endo [[a]]) (NodeData a r)
+forall i r. Lens' (NodeData i r) (Map (L r) [i])
+</span><a href="Data.Geometry.IntervalTree.html#intervalsLeft"><span class="hs-identifier hs-var">intervalsLeft</span></a></span><span class="annot"><span class="annottext">((Map (L r) [a] -&gt; Const (Endo [[a]]) (Map (L r) [a]))
+ -&gt; NodeData a r -&gt; Const (Endo [[a]]) (NodeData a r))
+-&gt; (([a] -&gt; Const (Endo [[a]]) [a])
+    -&gt; Map (L r) [a] -&gt; Const (Endo [[a]]) (Map (L r) [a]))
+-&gt; Getting (Endo [[a]]) (NodeData a r) [a]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">([a] -&gt; Const (Endo [[a]]) [a])
+-&gt; Map (L r) [a] -&gt; Const (Endo [[a]]) (Map (L r) [a])
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData a r) -&gt; [a]
+</span><a href="#local-6989586621679930975"><span class="hs-identifier hs-var">toList'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData a r)
+</span><a href="#local-6989586621679930972"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData a r) -&gt; [a]
+</span><a href="#local-6989586621679930975"><span class="hs-identifier hs-var">toList'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData a r)
+</span><a href="#local-6989586621679930970"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- | Find all intervals that stab x</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- \(O(\log n + k)\), where k is the output size</span><span>
+</span><span id="line-83"></span><span id="local-6989586621679930965"><span id="local-6989586621679930966"><span class="annot"><a href="Data.Geometry.IntervalTree.html#search"><span class="hs-identifier hs-type">search</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679930966"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679930966"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930965"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930966"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679930965"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-84"></span><span id="search"><span class="annot"><span class="annottext">search :: r -&gt; IntervalTree i r -&gt; [i]
+</span><a href="Data.Geometry.IntervalTree.html#search"><span class="hs-identifier hs-var hs-var">search</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; IntervalTree i r -&gt; [i]
+forall r i. Ord r =&gt; r -&gt; IntervalTree i r -&gt; [i]
+</span><a href="Data.Geometry.IntervalTree.html#stab"><span class="hs-identifier hs-var">stab</span></a></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- | Find all intervals that stab x</span><span>
+</span><span id="line-87"></span><span class="hs-comment">--</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- \(O(\log n + k)\), where k is the output size</span><span>
+</span><span id="line-89"></span><span id="local-6989586621679931114"><span id="local-6989586621679931115"><span class="annot"><a href="Data.Geometry.IntervalTree.html#stab"><span class="hs-identifier hs-type">stab</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679931115"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679931115"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931114"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931115"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679931114"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-90"></span><span id="stab"><span class="annot"><span class="annottext">stab :: r -&gt; IntervalTree i r -&gt; [i]
+</span><a href="Data.Geometry.IntervalTree.html#stab"><span class="hs-identifier hs-var hs-var">stab</span></a></span></span><span> </span><span id="local-6989586621679930964"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679930964"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span id="local-6989586621679930963"><span class="annot"><span class="annottext">t :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930963"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; [i]
+</span><a href="#local-6989586621679930962"><span class="hs-identifier hs-var">stab'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930963"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621679930962"><span class="annot"><span class="annottext">stab' :: BinaryTree (NodeData i r) -&gt; [i]
+</span><a href="#local-6989586621679930962"><span class="hs-identifier hs-var hs-var">stab'</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-93"></span><span>    </span><span class="annot"><a href="#local-6989586621679930962"><span class="hs-identifier hs-var">stab'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Internal</span></span><span> </span><span id="local-6989586621679930961"><span class="annot"><span class="annottext">l :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930961"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621679930960"><span class="annot"><span class="annottext">m :: r
+</span><a href="#local-6989586621679930960"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679930959"><span class="annot"><span class="annottext">ll :: Map (L r) [i]
+</span><a href="#local-6989586621679930959"><span class="hs-identifier hs-var">ll</span></a></span></span><span> </span><span id="local-6989586621679930958"><span class="annot"><span class="annottext">rr :: Map (R r) [i]
+</span><a href="#local-6989586621679930958"><span class="hs-identifier hs-var">rr</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679930957"><span class="annot"><span class="annottext">r :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930957"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930964"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930960"><span class="hs-identifier hs-var">m</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679930955"><span class="annot"><span class="annottext">is :: [i]
+</span><a href="#local-6989586621679930955"><span class="hs-identifier hs-var hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(L r -&gt; Bool) -&gt; [(L r, [i])] -&gt; [i]
+forall a b. (a -&gt; Bool) -&gt; [(a, [b])] -&gt; [b]
+</span><a href="#local-6989586621679930954"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">L r -&gt; L r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; L r
+forall r. EndPoint r -&gt; L r
+</span><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; EndPoint r
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930964"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(L r, [i])] -&gt; [i])
+-&gt; (Map (L r) [i] -&gt; [(L r, [i])]) -&gt; Map (L r) [i] -&gt; [i]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (L r) [i] -&gt; [(L r, [i])]
+forall k a. Map k a -&gt; [(k, a)]
+</span><span class="hs-identifier hs-var">M.toAscList</span></span><span> </span><span class="annot"><span class="annottext">(Map (L r) [i] -&gt; [i]) -&gt; Map (L r) [i] -&gt; [i]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Map (L r) [i]
+</span><a href="#local-6989586621679930959"><span class="hs-identifier hs-var">ll</span></a></span><span>
+</span><span id="line-95"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930955"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; [i] -&gt; [i]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; [i]
+</span><a href="#local-6989586621679930962"><span class="hs-identifier hs-var">stab'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930961"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-96"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679930950"><span class="annot"><span class="annottext">is :: [i]
+</span><a href="#local-6989586621679930950"><span class="hs-identifier hs-var hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(R r -&gt; Bool) -&gt; [(R r, [i])] -&gt; [i]
+forall a b. (a -&gt; Bool) -&gt; [(a, [b])] -&gt; [b]
+</span><a href="#local-6989586621679930954"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">R r -&gt; R r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; R r
+forall r. EndPoint r -&gt; R r
+</span><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; EndPoint r
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930964"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(R r, [i])] -&gt; [i])
+-&gt; (Map (R r) [i] -&gt; [(R r, [i])]) -&gt; Map (R r) [i] -&gt; [i]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map (R r) [i] -&gt; [(R r, [i])]
+forall k a. Map k a -&gt; [(k, a)]
+</span><span class="hs-identifier hs-var">M.toDescList</span></span><span> </span><span class="annot"><span class="annottext">(Map (R r) [i] -&gt; [i]) -&gt; Map (R r) [i] -&gt; [i]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Map (R r) [i]
+</span><a href="#local-6989586621679930958"><span class="hs-identifier hs-var">rr</span></a></span><span>
+</span><span id="line-97"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930950"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; [i] -&gt; [i]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; [i]
+</span><a href="#local-6989586621679930962"><span class="hs-identifier hs-var">stab'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930957"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679930954"><span class="annot"><span class="annottext">f :: (a -&gt; Bool) -&gt; [(a, [b])] -&gt; [b]
+</span><a href="#local-6989586621679930954"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679930947"><span class="annot"><span class="annottext">p :: a -&gt; Bool
+</span><a href="#local-6989586621679930947"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, [b]) -&gt; [b]) -&gt; [(a, [b])] -&gt; [b]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">(a, [b]) -&gt; [b]
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">([(a, [b])] -&gt; [b])
+-&gt; ([(a, [b])] -&gt; [(a, [b])]) -&gt; [(a, [b])] -&gt; [b]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((a, [b]) -&gt; Bool) -&gt; [(a, [b])] -&gt; [(a, [b])]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679930947"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; ((a, [b]) -&gt; a) -&gt; (a, [b]) -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a, [b]) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- | Insert :</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- pre: the interval intersects some midpoint in the tree</span><span>
+</span><span id="line-104"></span><span class="hs-comment">--</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- \(O(\log n)\)</span><span>
+</span><span id="line-106"></span><span id="local-6989586621679931148"><span id="local-6989586621679931149"><span class="annot"><a href="Data.Geometry.IntervalTree.html#insert"><span class="hs-identifier hs-type">insert</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679931149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-type">IntervalLike</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931148"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931148"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679931149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679931148"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931148"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931149"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931148"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931149"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-108"></span><span id="insert"><span class="annot"><span class="annottext">insert :: i -&gt; IntervalTree i r -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#insert"><span class="hs-identifier hs-var hs-var">insert</span></a></span></span><span> </span><span id="local-6989586621679930945"><span class="annot"><span class="annottext">i :: i
+</span><a href="#local-6989586621679930945"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span id="local-6989586621679930944"><span class="annot"><span class="annottext">t :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930944"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; IntervalTree i r
+forall i r. BinaryTree (NodeData i r) -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-var">IntervalTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinaryTree (NodeData i r) -&gt; IntervalTree i r)
+-&gt; BinaryTree (NodeData i r) -&gt; IntervalTree i r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930943"><span class="hs-identifier hs-var">insert'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930944"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679930942"><span class="annot"><span class="annottext">ri :: Range r
+</span><a href="#local-6989586621679930942"><span class="hs-identifier hs-var">ri</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span id="local-6989586621679930940"><span class="annot"><span class="annottext">a :: EndPoint r
+</span><a href="#local-6989586621679930940"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679930939"><span class="annot"><span class="annottext">b :: EndPoint r
+</span><a href="#local-6989586621679930939"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">i -&gt; Range (NumType i)
+forall i. IntervalLike i =&gt; i -&gt; Range (NumType i)
+</span><a href="Data.Geometry.IntervalTree.html#asRange"><span class="hs-identifier hs-var">asRange</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679930945"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679930943"><span class="annot"><span class="annottext">insert' :: BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930943"><span class="hs-identifier hs-var hs-var">insert'</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+forall a. BinaryTree a
+</span><span class="hs-identifier hs-var">Nil</span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="annot"><a href="#local-6989586621679930943"><span class="hs-identifier hs-var">insert'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Internal</span></span><span> </span><span id="local-6989586621679930938"><span class="annot"><span class="annottext">l :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930938"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679930937"><span class="annot"><span class="annottext">nd :: NodeData i r
+</span><a href="#local-6989586621679930937"><span class="hs-identifier hs-var">nd</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData i r -&gt; r
+forall i r. NodeData i r -&gt; r
+</span><a href="Data.Geometry.IntervalTree.html#_splitPoint"><span class="hs-identifier hs-var hs-var">_splitPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679930936"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930936"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679930935"><span class="annot"><span class="annottext">r :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930935"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930936"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Range r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; Range a -&gt; Bool
+</span><span class="hs-operator hs-var">`inRange`</span></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679930942"><span class="hs-identifier hs-var">ri</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930938"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData i r -&gt; NodeData i r
+</span><a href="#local-6989586621679930933"><span class="hs-identifier hs-var">insert''</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930937"><span class="hs-identifier hs-var">nd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930935"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930939"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; EndPoint r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; EndPoint r
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930936"><span class="hs-identifier hs-var">m</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930943"><span class="hs-identifier hs-var">insert'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930938"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930937"><span class="hs-identifier hs-var">nd</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930935"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-116"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930938"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930937"><span class="hs-identifier hs-var">nd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930943"><span class="hs-identifier hs-var">insert'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930935"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>    </span><span id="local-6989586621679930933"><span class="annot"><span class="annottext">insert'' :: NodeData i r -&gt; NodeData i r
+</span><a href="#local-6989586621679930933"><span class="hs-identifier hs-var hs-var">insert''</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621679930932"><span class="annot"><span class="annottext">m :: r
+</span><a href="#local-6989586621679930932"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679930931"><span class="annot"><span class="annottext">l :: Map (L r) [i]
+</span><a href="#local-6989586621679930931"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679930930"><span class="annot"><span class="annottext">r :: Map (R r) [i]
+</span><a href="#local-6989586621679930930"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+forall i r. r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+</span><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930932"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([i] -&gt; [i] -&gt; [i]) -&gt; L r -&gt; [i] -&gt; Map (L r) [i] -&gt; Map (L r) [i]
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.insertWith</span></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; [i] -&gt; [i]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(++)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint r -&gt; L r
+forall r. EndPoint r -&gt; L r
+</span><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930940"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679930945"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Map (L r) [i]
+</span><a href="#local-6989586621679930931"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>                                           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([i] -&gt; [i] -&gt; [i]) -&gt; R r -&gt; [i] -&gt; Map (R r) [i] -&gt; Map (R r) [i]
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.insertWith</span></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; [i] -&gt; [i]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(++)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint r -&gt; R r
+forall r. EndPoint r -&gt; R r
+</span><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930939"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679930945"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Map (R r) [i]
+</span><a href="#local-6989586621679930930"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- | Delete an interval from the Tree</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- \(O(\log n)\) (under some general position assumption)</span><span>
+</span><span id="line-125"></span><span id="local-6989586621679930927"><span id="local-6989586621679930928"><span class="annot"><a href="Data.Geometry.IntervalTree.html#delete"><span class="hs-identifier hs-type">delete</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679930928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-type">IntervalLike</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679930928"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930928"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930927"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930928"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-127"></span><span id="delete"><span class="annot"><span class="annottext">delete :: i -&gt; IntervalTree i r -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#delete"><span class="hs-identifier hs-var hs-var">delete</span></a></span></span><span> </span><span id="local-6989586621679930926"><span class="annot"><span class="annottext">i :: i
+</span><a href="#local-6989586621679930926"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-type">IntervalTree</span></a></span><span> </span><span id="local-6989586621679930925"><span class="annot"><span class="annottext">t :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930925"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; IntervalTree i r
+forall i r. BinaryTree (NodeData i r) -&gt; IntervalTree i r
+</span><a href="Data.Geometry.IntervalTree.html#IntervalTree"><span class="hs-identifier hs-var">IntervalTree</span></a></span><span> </span><span class="annot"><span class="annottext">(BinaryTree (NodeData i r) -&gt; IntervalTree i r)
+-&gt; BinaryTree (NodeData i r) -&gt; IntervalTree i r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930924"><span class="hs-identifier hs-var">delete'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930925"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621679930923"><span class="annot"><span class="annottext">ri :: Range r
+</span><a href="#local-6989586621679930923"><span class="hs-identifier hs-var">ri</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span id="local-6989586621679930922"><span class="annot"><span class="annottext">a :: EndPoint r
+</span><a href="#local-6989586621679930922"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679930921"><span class="annot"><span class="annottext">b :: EndPoint r
+</span><a href="#local-6989586621679930921"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">i -&gt; Range (NumType i)
+forall i. IntervalLike i =&gt; i -&gt; Range (NumType i)
+</span><a href="Data.Geometry.IntervalTree.html#asRange"><span class="hs-identifier hs-var">asRange</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679930926"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621679930924"><span class="annot"><span class="annottext">delete' :: BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930924"><span class="hs-identifier hs-var hs-var">delete'</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nil</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+forall a. BinaryTree a
+</span><span class="hs-identifier hs-var">Nil</span></span><span>
+</span><span id="line-132"></span><span>    </span><span class="annot"><a href="#local-6989586621679930924"><span class="hs-identifier hs-var">delete'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Internal</span></span><span> </span><span id="local-6989586621679930920"><span class="annot"><span class="annottext">l :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930920"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679930919"><span class="annot"><span class="annottext">nd :: NodeData i r
+</span><a href="#local-6989586621679930919"><span class="hs-identifier hs-var">nd</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData i r -&gt; r
+forall i r. NodeData i r -&gt; r
+</span><a href="Data.Geometry.IntervalTree.html#_splitPoint"><span class="hs-identifier hs-var hs-var">_splitPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679930918"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930918"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679930917"><span class="annot"><span class="annottext">r :: BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930917"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930918"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Range r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; Range a -&gt; Bool
+</span><span class="hs-operator hs-var">`inRange`</span></span><span> </span><span class="annot"><span class="annottext">Range r
+</span><a href="#local-6989586621679930923"><span class="hs-identifier hs-var">ri</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930920"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NodeData i r -&gt; NodeData i r
+</span><a href="#local-6989586621679930916"><span class="hs-identifier hs-var">delete''</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930919"><span class="hs-identifier hs-var">nd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930917"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-134"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930921"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r -&gt; EndPoint r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; EndPoint r
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930918"><span class="hs-identifier hs-var">m</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930924"><span class="hs-identifier hs-var">delete'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930920"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930919"><span class="hs-identifier hs-var">nd</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930917"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+-&gt; NodeData i r
+-&gt; BinaryTree (NodeData i r)
+-&gt; BinaryTree (NodeData i r)
+forall a. BinaryTree a -&gt; a -&gt; BinaryTree a -&gt; BinaryTree a
+</span><span class="hs-identifier hs-var">Internal</span></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930920"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">NodeData i r
+</span><a href="#local-6989586621679930919"><span class="hs-identifier hs-var">nd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BinaryTree (NodeData i r) -&gt; BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930924"><span class="hs-identifier hs-var">delete'</span></a></span><span> </span><span class="annot"><span class="annottext">BinaryTree (NodeData i r)
+</span><a href="#local-6989586621679930917"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679930916"><span class="annot"><span class="annottext">delete'' :: NodeData i r -&gt; NodeData i r
+</span><a href="#local-6989586621679930916"><span class="hs-identifier hs-var hs-var">delete''</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-type">NodeData</span></a></span><span> </span><span id="local-6989586621679930915"><span class="annot"><span class="annottext">m :: r
+</span><a href="#local-6989586621679930915"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679930914"><span class="annot"><span class="annottext">l :: Map (L r) [i]
+</span><a href="#local-6989586621679930914"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679930913"><span class="annot"><span class="annottext">r :: Map (R r) [i]
+</span><a href="#local-6989586621679930913"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+forall i r. r -&gt; Map (L r) [i] -&gt; Map (R r) [i] -&gt; NodeData i r
+</span><a href="Data.Geometry.IntervalTree.html#NodeData"><span class="hs-identifier hs-var">NodeData</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679930915"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([i] -&gt; Maybe [i]) -&gt; L r -&gt; Map (L r) [i] -&gt; Map (L r) [i]
+forall k a. Ord k =&gt; (a -&gt; Maybe a) -&gt; k -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.update</span></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; Maybe [i]
+</span><a href="#local-6989586621679930911"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint r -&gt; L r
+forall r. EndPoint r -&gt; L r
+</span><a href="Data.Geometry.Interval.Util.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930922"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Map (L r) [i]
+</span><a href="#local-6989586621679930914"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([i] -&gt; Maybe [i]) -&gt; R r -&gt; Map (R r) [i] -&gt; Map (R r) [i]
+forall k a. Ord k =&gt; (a -&gt; Maybe a) -&gt; k -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.update</span></span><span> </span><span class="annot"><span class="annottext">[i] -&gt; Maybe [i]
+</span><a href="#local-6989586621679930911"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">EndPoint r -&gt; R r
+forall r. EndPoint r -&gt; R r
+</span><a href="Data.Geometry.Interval.Util.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">EndPoint r
+</span><a href="#local-6989586621679930921"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Map (R r) [i]
+</span><a href="#local-6989586621679930913"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621679930911"><span class="annot"><span class="annottext">f :: [i] -&gt; Maybe [i]
+</span><a href="#local-6989586621679930911"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679930910"><span class="annot"><span class="annottext">is :: [i]
+</span><a href="#local-6989586621679930910"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679930909"><span class="annot"><span class="annottext">is' :: [i]
+</span><a href="#local-6989586621679930909"><span class="hs-identifier hs-var hs-var">is'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">i -&gt; [i] -&gt; [i]
+forall a. Eq a =&gt; a -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.delete</span></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679930926"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930910"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930909"><span class="hs-identifier hs-var">is'</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe [i]
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; Maybe [i]
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679930909"><span class="hs-identifier hs-var">is'</span></a></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- | Anything that looks like an interval</span><span>
+</span><span id="line-146"></span><span class="hs-keyword">class</span><span> </span><span id="IntervalLike"><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-var">IntervalLike</span></a></span></span><span> </span><span id="local-6989586621679931141"><span class="annot"><a href="#local-6989586621679931141"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-147"></span><span>  </span><span id="asRange"><span class="annot"><a href="Data.Geometry.IntervalTree.html#asRange"><span class="hs-identifier hs-type">asRange</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679931141"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679931141"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span id="local-6989586621679930906"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-type">IntervalLike</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Range</span></span><span> </span><span class="annot"><a href="#local-6989586621679930906"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>  </span><span id="local-6989586621679930903"><span class="annot"><span class="annottext">asRange :: Range r -&gt; Range (NumType (Range r))
+</span><a href="#local-6989586621679930903"><span class="hs-identifier hs-var hs-var hs-var hs-var">asRange</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Range r -&gt; Range (NumType (Range r))
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span id="local-6989586621679930900"><span id="local-6989586621679930901"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Geometry.IntervalTree.html#IntervalLike"><span class="hs-identifier hs-type">IntervalLike</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Interval.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930901"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679930900"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-153"></span><span>  </span><span id="local-6989586621679930898"><span class="annot"><span class="annottext">asRange :: Interval p r -&gt; Range (NumType (Interval p r))
+</span><a href="#local-6989586621679930898"><span class="hs-identifier hs-var hs-var hs-var hs-var">asRange</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((r :+ p) -&gt; r) -&gt; Range (r :+ p) -&gt; Range r
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r :+ p) -&gt; Getting r (r :+ p) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting r (r :+ p) r
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Range (r :+ p) -&gt; Range r)
+-&gt; (Interval p r -&gt; Range (r :+ p)) -&gt; Interval p r -&gt; Range r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Interval p r -&gt; Range (r :+ p)
+forall a r. Interval a r -&gt; Range (r :+ a)
+</span><a href="Data.Geometry.Interval.html#toRange"><span class="hs-identifier hs-var hs-var">toRange</span></a></span></span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- test'' = fromIntervals test</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- test  = [Interval (Open (97 :+ ())) (Closed (228 :+ ())) ,Interval (Open (18 :+ ())) (Open (79 :+ ())),Interval (Closed (126 :+ ())) (Open (167 :+ ())),Interval (Closed (105 :+ ())) (Closed (158 :+ ())),Interval (Closed (126 :+ ())) (Closed (211 :+ ())),Interval (Closed (111 :+ ())) (Open (194 :+ ())),Interval (Closed (120 :+ ())) (Open (302 :+ ())),Interval (Closed (92 :+ ())) (Closed (140 :+ ()))]</span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- test = fromIntervals [ closedInterval 0 10</span><span>
+</span><span id="line-161"></span><span class="hs-comment">--                      , closedInterval 5 15</span><span>
+</span><span id="line-162"></span><span class="hs-comment">--                      , closedInterval 1 4</span><span>
+</span><span id="line-163"></span><span class="hs-comment">--                      , closedInterval 3 9</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--                      ]</span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- closedInterval a b = ClosedInterval (ext a) (ext b)</span><span>
+</span><span id="line-167"></span></pre></body></html>

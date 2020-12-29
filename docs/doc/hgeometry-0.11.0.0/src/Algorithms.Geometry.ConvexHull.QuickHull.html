@@ -1,0 +1,510 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.ConvexHull.QuickHull</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.ConvexHull.QuickHull</span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#convexHull"><span class="hs-identifier">convexHull</span></a></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.html"><span class="hs-identifier">Data.Geometry.Polygon</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Convex.html"><span class="hs-identifier">Data.Geometry.Polygon.Convex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Convex.html#ConvexPolygon"><span class="hs-identifier">ConvexPolygon</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Triangle.html"><span class="hs-identifier">Data.Geometry.Triangle</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Util</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- import Data.Ratio</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- import qualified Data.List.NonEmpty as NonEmpty</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GC</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- import Debug.Trace</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- | ConvexHull using Quickhull. The resulting polygon is given in</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- clockwise order.</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- running time: \(O(n^2)\)</span><span>
+</span><span id="line-34"></span><span id="local-6989586621679955162"><span id="local-6989586621679955163"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#convexHull"><span class="hs-identifier hs-type">convexHull</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955163"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679955163"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679955163"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679955162"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955163"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955162"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Convex.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955162"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679955163"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-36"></span><span id="convexHull"><span class="annot"><span class="annottext">convexHull :: NonEmpty (Point 2 r :+ p) -&gt; ConvexPolygon p r
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#convexHull"><span class="hs-identifier hs-var hs-var">convexHull</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679955161"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679955161"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; ConvexPolygon p r
+forall p r. SimplePolygon p r -&gt; ConvexPolygon p r
+</span><a href="Data.Geometry.Polygon.Convex.html#ConvexPolygon"><span class="hs-identifier hs-var">ConvexPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; ConvexPolygon p r)
+-&gt; ([Point 2 r :+ p] -&gt; SimplePolygon p r)
+-&gt; [Point 2 r :+ p]
+-&gt; ConvexPolygon p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; SimplePolygon p r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromPoints"><span class="hs-identifier hs-var">unsafeFromPoints</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; ConvexPolygon p r)
+-&gt; [Point 2 r :+ p] -&gt; ConvexPolygon p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955161"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-37"></span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#convexHull"><span class="hs-identifier hs-var">convexHull</span></a></span><span> </span><span id="local-6989586621679955156"><span class="annot"><span class="annottext">ps :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679955156"><span class="hs-identifier hs-var">ps</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; ConvexPolygon p r
+forall p r. SimplePolygon p r -&gt; ConvexPolygon p r
+</span><a href="Data.Geometry.Polygon.Convex.html#ConvexPolygon"><span class="hs-identifier hs-var">ConvexPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; ConvexPolygon p r)
+-&gt; ([Point 2 r :+ p] -&gt; SimplePolygon p r)
+-&gt; [Point 2 r :+ p]
+-&gt; ConvexPolygon p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; SimplePolygon p r
+forall r p. [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#unsafeFromPoints"><span class="hs-identifier hs-var">unsafeFromPoints</span></a></span><span>
+</span><span id="line-38"></span><span>                     </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; ConvexPolygon p r)
+-&gt; [Point 2 r :+ p] -&gt; ConvexPolygon p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955155"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall r p.
+(Fractional r, Ord r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var">hull</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955155"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955153"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955152"><span class="hs-identifier hs-var">above</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955153"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall r p.
+(Fractional r, Ord r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var">hull</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955155"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955153"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955150"><span class="hs-identifier hs-var">below</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">STR</span></span><span> </span><span id="local-6989586621679955155"><span class="annot"><span class="annottext">l :: Point 2 r :+ p
+</span><a href="#local-6989586621679955155"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679955153"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679955153"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679955148"><span class="annot"><span class="annottext">mids :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955148"><span class="hs-identifier hs-var">mids</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+-&gt; STR (Point 2 r :+ p) (Point 2 r :+ p) [Point 2 r :+ p]
+forall r q.
+Ord r =&gt;
+NonEmpty (Point 2 r :+ q)
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#findExtremes"><span class="hs-identifier hs-var">findExtremes</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679955156"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621679955146"><span class="annot"><span class="annottext">m :: Line 2 r
+</span><a href="#local-6989586621679955146"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Line 2 r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#lineThrough"><span class="hs-identifier hs-var">lineThrough</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955155"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955153"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679955152"><span class="annot"><span class="annottext">above :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955152"><span class="hs-identifier hs-var">above</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679955150"><span class="annot"><span class="annottext">below :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955150"><span class="hs-identifier hs-var">below</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool)
+-&gt; [Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679955142"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679955142"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679955142"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; Bool
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; Bool
+</span><a href="Data.Geometry.Line.Internal.html#liesAbove"><span class="hs-operator hs-var">`liesAbove`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679955146"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955148"><span class="hs-identifier hs-var">mids</span></a></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | Finds the leftmost and rightmost point in the list</span><span>
+</span><span id="line-45"></span><span id="local-6989586621679955219"><span id="local-6989586621679955220"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#findExtremes"><span class="hs-identifier hs-type">findExtremes</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955220"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-46"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955220"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955219"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">STR</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955220"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955219"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955220"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955219"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955220"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955219"><span class="hs-identifier hs-type">q</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-48"></span><span id="findExtremes"><span class="annot"><span class="annottext">findExtremes :: NonEmpty (Point 2 r :+ q)
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#findExtremes"><span class="hs-identifier hs-var hs-var">findExtremes</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679955139"><span class="annot"><span class="annottext">p :: Point 2 r :+ q
+</span><a href="#local-6989586621679955139"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679955138"><span class="annot"><span class="annottext">pts :: [Point 2 r :+ q]
+</span><a href="#local-6989586621679955138"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ q)
+ -&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+ -&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q])
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+-&gt; [Point 2 r :+ q]
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+forall r extra.
+Ord r =&gt;
+(Point 2 r :+ extra)
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+</span><a href="#local-6989586621679955136"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ q)
+-&gt; (Point 2 r :+ q)
+-&gt; [Point 2 r :+ q]
+-&gt; STR (Point 2 r :+ q) (Point 2 r :+ q) [Point 2 r :+ q]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679955139"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ q
+</span><a href="#local-6989586621679955139"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ q]
+</span><a href="#local-6989586621679955138"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679955136"><span class="annot"><span class="annottext">f :: (Point 2 r :+ extra)
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+</span><a href="#local-6989586621679955136"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679955135"><span class="annot"><span class="annottext">q :: Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STR</span></span><span> </span><span id="local-6989586621679955134"><span class="annot"><span class="annottext">l :: Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679955133"><span class="annot"><span class="annottext">r :: Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679955132"><span class="annot"><span class="annottext">ms :: [Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ extra) -&gt; (Point 2 r :+ extra) -&gt; Ordering
+forall r p q.
+Ord r =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#incXdecY"><span class="hs-identifier hs-var">incXdecY</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra) -&gt; (Point 2 r :+ extra) -&gt; Ordering
+forall r p q.
+Ord r =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#incXdecY"><span class="hs-identifier hs-var">incXdecY</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-51"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span class="hs-special">,</span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; [Point 2 r :+ extra]
+forall a extra extra.
+Eq a =&gt;
+(a :+ extra) -&gt; (a :+ extra) -&gt; [a :+ extra] -&gt; [a :+ extra]
+</span><a href="#local-6989586621679955130"><span class="hs-identifier hs-var">addIfNot</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span class="hs-special">,</span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="hs-comment">-- ditch q; it is the same as l</span><span>
+</span><span id="line-53"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; [Point 2 r :+ extra]
+forall a extra extra.
+Eq a =&gt;
+(a :+ extra) -&gt; (a :+ extra) -&gt; [a :+ extra] -&gt; [a :+ extra]
+</span><a href="#local-6989586621679955130"><span class="hs-identifier hs-var">addIfNot</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">EQ</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="hs-comment">-- ditch q; it is the same as r</span><span>
+</span><span id="line-55"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">GT</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">LT</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; (Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra]
+-&gt; STR
+     (Point 2 r :+ extra) (Point 2 r :+ extra) [Point 2 r :+ extra]
+forall a b c. a -&gt; b -&gt; c -&gt; STR a b c
+</span><span class="hs-identifier hs-var">STR</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955134"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955133"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679955135"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; [Point 2 r :+ extra] -&gt; [Point 2 r :+ extra]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Point 2 r :+ extra]
+</span><a href="#local-6989586621679955132"><span class="hs-identifier hs-var">ms</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679955130"><span class="annot"><span class="annottext">addIfNot :: (a :+ extra) -&gt; (a :+ extra) -&gt; [a :+ extra] -&gt; [a :+ extra]
+</span><a href="#local-6989586621679955130"><span class="hs-identifier hs-var hs-var">addIfNot</span></a></span></span><span> </span><span id="local-6989586621679955129"><span class="annot"><span class="annottext">y :: a :+ extra
+</span><a href="#local-6989586621679955129"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679955128"><span class="annot"><span class="annottext">x :: a :+ extra
+</span><a href="#local-6989586621679955128"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679955127"><span class="annot"><span class="annottext">xs :: [a :+ extra]
+</span><a href="#local-6989586621679955127"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a :+ extra
+</span><a href="#local-6989586621679955128"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">(a :+ extra) -&gt; Getting a (a :+ extra) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (a :+ extra) a
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a :+ extra
+</span><a href="#local-6989586621679955129"><span class="hs-identifier hs-var">y</span></a></span><span class="annot"><span class="annottext">(a :+ extra) -&gt; Getting a (a :+ extra) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting a (a :+ extra) a
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a :+ extra
+</span><a href="#local-6989586621679955128"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">(a :+ extra) -&gt; [a :+ extra] -&gt; [a :+ extra]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a :+ extra]
+</span><a href="#local-6989586621679955127"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-58"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a :+ extra]
+</span><a href="#local-6989586621679955127"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- findExtremesBy         :: (a -&gt; a -&gt; Ordering)</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--                        -&gt; NonEmpty a</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--                        -&gt; STR a a [a]</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- findExtremesBy cmp pts = let l = F.minimumBy cmp pts</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--                              r = F.maximumBy cmp pts</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--                              a /=. b = a `cmp` b /= EQ</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--                          in STR l r [p | p &lt;- F.toList pts, p /=. l, p /=. r]</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679955193"><span id="local-6989586621679955194"><span id="local-6989586621679955195"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#incXdecY"><span class="hs-identifier hs-type">incXdecY</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955195"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955195"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955194"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955195"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955193"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span><span>
+</span><span id="line-70"></span><span id="incXdecY"><span class="annot"><span class="annottext">incXdecY :: (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#incXdecY"><span class="hs-identifier hs-var hs-var">incXdecY</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679955124"><span class="annot"><span class="annottext">px :: r
+</span><a href="#local-6989586621679955124"><span class="hs-identifier hs-var">px</span></a></span></span><span> </span><span id="local-6989586621679955123"><span class="annot"><span class="annottext">py :: r
+</span><a href="#local-6989586621679955123"><span class="hs-identifier hs-var">py</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point2"><span class="hs-identifier hs-type">Point2</span></a></span><span> </span><span id="local-6989586621679955122"><span class="annot"><span class="annottext">qx :: r
+</span><a href="#local-6989586621679955122"><span class="hs-identifier hs-var">qx</span></a></span></span><span> </span><span id="local-6989586621679955121"><span class="annot"><span class="annottext">qy :: r
+</span><a href="#local-6989586621679955121"><span class="hs-identifier hs-var">qy</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679955124"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679955122"><span class="hs-identifier hs-var">qx</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679955121"><span class="hs-identifier hs-var">qy</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679955123"><span class="hs-identifier hs-var">py</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- | include neigher left or right</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679955223"><span id="local-6989586621679955224"><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-type">hull</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955223"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955223"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955223"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679955224"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679955223"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-77"></span><span id="hull"><span class="annot"><span class="annottext">hull :: (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var hs-var">hull</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-78"></span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var">hull</span></a></span><span> </span><span id="local-6989586621679955119"><span class="annot"><span class="annottext">l :: Point 2 r :+ p
+</span><a href="#local-6989586621679955119"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679955118"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679955118"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679955117"><span class="annot"><span class="annottext">pts :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955117"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall r p.
+(Fractional r, Ord r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var">hull</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955119"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955115"><span class="hs-identifier hs-var">ls</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall r p.
+(Fractional r, Ord r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+</span><a href="Algorithms.Geometry.ConvexHull.QuickHull.html#hull"><span class="hs-identifier hs-var">hull</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955118"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955114"><span class="hs-identifier hs-var">rs</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679955113"><span class="annot"><span class="annottext">m :: Line 2 r
+</span><a href="#local-6989586621679955113"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Line 2 r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#lineThrough"><span class="hs-identifier hs-var">lineThrough</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955119"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955118"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679955116"><span class="annot"><span class="annottext">mid :: Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var hs-var">mid</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering)
+-&gt; [Point 2 r :+ p] -&gt; Point 2 r :+ p
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">F.maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; r)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; r
+</span><a href="#local-6989586621679955111"><span class="hs-identifier hs-var">dist</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955117"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>    </span><span id="local-6989586621679955111"><span class="annot"><span class="annottext">dist :: (Point 2 r :+ p) -&gt; r
+</span><a href="#local-6989586621679955111"><span class="hs-identifier hs-var hs-var">dist</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679955110"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679955110"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679955110"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; r
+forall r (d :: Nat).
+(Fractional r, Arity d) =&gt;
+Point d r -&gt; Line d r -&gt; r
+</span><a href="Data.Geometry.Line.Internal.html#sqDistanceTo"><span class="hs-operator hs-var">`sqDistanceTo`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679955113"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-84"></span><span>    </span><span id="local-6989586621679955108"><span class="annot"><span class="annottext">t :: Triangle 2 p r
+</span><a href="#local-6989586621679955108"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; Triangle 2 p r
+forall (d :: Nat) p r.
+(Point d r :+ p)
+-&gt; (Point d r :+ p) -&gt; (Point d r :+ p) -&gt; Triangle d p r
+</span><a href="Data.Geometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955119"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955118"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-comment">-- line through l and mid, which splits the remaining points in a left half and a right half.</span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679955106"><span class="annot"><span class="annottext">splitL :: Line 2 r
+</span><a href="#local-6989586621679955106"><span class="hs-identifier hs-var hs-var">splitL</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Line 2 r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#lineThrough"><span class="hs-identifier hs-var">lineThrough</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955119"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955116"><span class="hs-identifier hs-var">mid</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679955105"><span class="annot"><span class="annottext">rightSide :: SideTest
+</span><a href="#local-6989586621679955105"><span class="hs-identifier hs-var hs-var">rightSide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679955118"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; SideTest
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; SideTest
+</span><a href="Data.Geometry.Line.Internal.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679955106"><span class="hs-identifier hs-var">splitL</span></a></span><span> </span><span class="hs-comment">-- define the side containing r the right side</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679955115"><span class="annot"><span class="annottext">ls :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955115"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679955114"><span class="annot"><span class="annottext">rs :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679955114"><span class="hs-identifier hs-var">rs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool)
+-&gt; [Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679955103"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679955103"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679955103"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Line 2 r -&gt; SideTest
+forall r. (Ord r, Num r) =&gt; Point 2 r -&gt; Line 2 r -&gt; SideTest
+</span><a href="Data.Geometry.Line.Internal.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679955106"><span class="hs-identifier hs-var">splitL</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="#local-6989586621679955105"><span class="hs-identifier hs-var">rightSide</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>            </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p]))
+-&gt; ([Point 2 r :+ p] -&gt; [Point 2 r :+ p])
+-&gt; [Point 2 r :+ p]
+-&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Bool) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679955102"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679955102"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; Bool -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679955102"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+forall r p.
+(Ord r, Fractional r) =&gt;
+Point 2 r -&gt; Triangle 2 p r -&gt; Bool
+</span><a href="Data.Geometry.Triangle.html#onTriangle"><span class="hs-operator hs-var">`onTriangle`</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle 2 p r
+</span><a href="#local-6989586621679955108"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p]))
+-&gt; [Point 2 r :+ p] -&gt; ([Point 2 r :+ p], [Point 2 r :+ p])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679955117"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- mPoint2 [x,y] = Point2 x y</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- -- testPoints = NonEmpty.fromList</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- --   [ mPoint2 [22536303956634 % 7570647828779,(-5816376064439) % 1228319866920] :+ 1</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- --   , mPoint2 [(-3136920648983) % 824638230353,(-14583744643665) % 9604445576558] :+ 2</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- --   , mPoint2 [(-11653462784667) % 6525086575987,(-598434515815) % 1364557986096] :+ 3</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- --   , mPoint2 [(-7841595901661) % 3282967141364,(-207167076115) % 482378191549] :+ 4</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- --   ]</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- testPoints :: NonEmpty (Point 2 Rational :+ Int)</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- testPoints = read &quot;(Point2 [(-11199966464450) % 1365514034959,4065659138075 % 2296468530516] :+ 1) :| [Point2 [86686001553073 % 2736621704548,(-63774454571048) % 1880665081093] :+ 2,Point2 [(-77322324895231) % 8260610289790,(-41165682123514) % 2291705829063] :+ 3,Point2 [2292642905947 % 2659329735076,87045289726355 % 2752214350419] :+ 4]&quot;</span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- toDouble          :: Point 2 Rational :+ a -&gt; Point 2 Double :+ a</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- toDouble (p :+ x) = (realToFrac &lt;$&gt; p) :+ x</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">--        -- Falsified (after 36 tests and 4 shrinks):</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- testPoints2 :: NonEmpty (Point 2 Rational :+ Int)</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- testPoints2 = read &quot;(Point2 [(-9876468593885) % 9254762894818,(-34982972348716) % 7450362538495] :+ 1) :| [Point2 [(-11974177119403) % 7705693443554,(-37634868551543) % 9311528788922] :+ 2,Point2 [(-32383659855458) % 9565531378857,20253950785876 % 8268868939819] :+ 3,Point2 [42425655100996 % 8786996213535,(-7972873491283) % 1604043452399] :+ 4]&quot;</span><span>
+</span><span id="line-117"></span></pre></body></html>

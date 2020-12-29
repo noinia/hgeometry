@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DefaultSignatures #-}</span><span class="hs-cpp">
+#if __GLASGOW_HASKELL__ &gt;= 706
+</span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span class="hs-cpp">
+#endif
+</span><span class="hs-cpp">#if __GLASGOW_HASKELL__ &gt;= 702 &amp;&amp; __GLASGOW_HASKELL__ &lt; 710
+</span><span class="hs-pragma">{-# LANGUAGE Trustworthy #-}</span><span class="hs-cpp">
+#endif
+</span><span class="hs-comment">---------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Copyright   :  (C) 2012-2015 Edward Kmett</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD-style (see the file LICENSE)</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- Portability :  non-portable</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Simple matrix operation for low-dimensional primitives.</span><span>
+</span><span id="line-20"></span><span class="hs-comment">---------------------------------------------------------------------------</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Linear.Trace</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier">Trace</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Trace.html#frobenius"><span class="hs-identifier">frobenius</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Monad</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V0.html"><span class="hs-identifier">Linear.V0</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V1.html"><span class="hs-identifier">Linear.V1</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V2.html"><span class="hs-identifier">Linear.V2</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V3.html"><span class="hs-identifier">Linear.V3</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V4.html"><span class="hs-identifier">Linear.V4</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.Plucker.html"><span class="hs-identifier">Linear.Plucker</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.Quaternion.html"><span class="hs-identifier">Linear.Quaternion</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.V.html"><span class="hs-identifier">Linear.V</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Linear.Vector.html"><span class="hs-identifier">Linear.Vector</span></a></span><span class="hs-cpp">
+#if defined(__GLASGOW_HASKELL__) &amp;&amp; __GLASGOW_HASKELL__ &gt; 704
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Complex</span></span><span class="hs-cpp">
+#endif
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Distributive</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Foldable</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Bind</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Bind</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Compose</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Product</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Hashable</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Lazy</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.IntMap</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Complex</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.IntMap</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- &gt;&gt;&gt; import Debug.SimpleReflect.Vars</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">class</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="Trace"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-var">Trace</span></a></span></span><span> </span><span id="local-6989586621679265060"><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-comment">-- | Compute the trace of a matrix</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; trace (V2 (V2 a b) (V2 c d))</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-comment">-- a + d</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679265047"><span id="trace"><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-type">trace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679265047"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265047"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265047"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-cpp">
+#ifndef HLINT
+</span><span>  </span><span id="local-6989586621679264931"><span class="hs-keyword">default</span><span> </span><span id="trace"><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-type">trace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679264931"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264931"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679264931"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679264930"><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var hs-var">trace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m a -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">Foldable.sum</span></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; a) -&gt; (m (m a) -&gt; m a) -&gt; m (m a) -&gt; a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m (m a) -&gt; m a
+forall (m :: * -&gt; *) a. Trace m =&gt; m (m a) -&gt; m a
+</span><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var">diagonal</span></a></span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-pragma hs-type">trace</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- | Compute the diagonal of a matrix</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; diagonal (V2 (V2 a b) (V2 c d))</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-comment">-- V2 a d</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679265052"><span id="diagonal"><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-type">diagonal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265052"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265052"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-cpp">
+#ifndef HLINT
+</span><span>  </span><span id="local-6989586621679264926"><span class="hs-keyword">default</span><span> </span><span id="diagonal"><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-type">diagonal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264926"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265060"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264926"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679264925"><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var hs-var">diagonal</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (m a) -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; m (m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Monad.join</span></span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264922"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntMap</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679264919"><span class="annot"><span class="annottext">diagonal :: IntMap (IntMap a) -&gt; IntMap a
+</span><a href="#local-6989586621679264919"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntMap (IntMap a) -&gt; IntMap a
+forall (m :: * -&gt; *) a. Bind m =&gt; m (m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Bind.join</span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679264917"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264914"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679264917"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="#local-6989586621679264917"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679264912"><span class="annot"><span class="annottext">diagonal :: Map k (Map k a) -&gt; Map k a
+</span><a href="#local-6989586621679264912"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map k (Map k a) -&gt; Map k a
+forall (m :: * -&gt; *) a. Bind m =&gt; m (m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Bind.join</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679264911"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264908"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679264911"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Hashable</span></span><span> </span><span class="annot"><a href="#local-6989586621679264911"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679264911"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679264906"><span class="annot"><span class="annottext">diagonal :: HashMap k (HashMap k a) -&gt; HashMap k a
+</span><a href="#local-6989586621679264906"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HashMap k (HashMap k a) -&gt; HashMap k a
+forall (m :: * -&gt; *) a. Bind m =&gt; m (m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Bind.join</span></span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679264905"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264900"><span id="local-6989586621679264902"><span class="annot"><a href="Linear.V.html#Dim"><span class="hs-identifier hs-type">Dim</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264905"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.V.html#V"><span class="hs-identifier hs-type">V</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264905"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-90"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264895"><span id="local-6989586621679264897"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.V0.html#V0"><span class="hs-identifier hs-type">V0</span></a></span></span></span><span>
+</span><span id="line-91"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264890"><span id="local-6989586621679264892"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.V1.html#V1"><span class="hs-identifier hs-type">V1</span></a></span></span></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264885"><span id="local-6989586621679264887"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.V2.html#V2"><span class="hs-identifier hs-type">V2</span></a></span></span></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264880"><span id="local-6989586621679264882"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.V3.html#V3"><span class="hs-identifier hs-type">V3</span></a></span></span></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264875"><span id="local-6989586621679264877"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.V4.html#V4"><span class="hs-identifier hs-type">V4</span></a></span></span></span><span>
+</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264870"><span id="local-6989586621679264872"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.Plucker.html#Plucker"><span class="hs-identifier hs-type">Plucker</span></a></span></span></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679264865"><span id="local-6989586621679264867"><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="Linear.Quaternion.html#Quaternion"><span class="hs-identifier hs-type">Quaternion</span></a></span></span></span><span class="hs-cpp">
+
+#if defined(__GLASGOW_HASKELL__) &amp;&amp; __GLASGOW_HASKELL__ &gt; 704
+</span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Complex</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621679264861"><span class="annot"><span class="annottext">trace :: Complex (Complex a) -&gt; a
+</span><a href="#local-6989586621679264861"><span class="hs-identifier hs-var hs-var hs-var hs-var">trace</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679264860"><span class="annot"><span class="annottext">a :: a
+</span><a href="#local-6989586621679264860"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679264858"><span class="annot"><span class="annottext">b :: a
+</span><a href="#local-6989586621679264858"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264860"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264858"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-pragma hs-type">trace</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-102"></span><span>  </span><span id="local-6989586621679264856"><span class="annot"><span class="annottext">diagonal :: Complex (Complex a) -&gt; Complex a
+</span><a href="#local-6989586621679264856"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679264855"><span class="annot"><span class="annottext">a :: a
+</span><a href="#local-6989586621679264855"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679264854"><span class="annot"><span class="annottext">b :: a
+</span><a href="#local-6989586621679264854"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264855"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Complex a
+forall a. a -&gt; a -&gt; Complex a
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679264854"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-106"></span><span id="local-6989586621679264852"><span id="local-6989586621679264853"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264853"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264852"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Product</span></span><span> </span><span class="annot"><a href="#local-6989586621679264853"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264852"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-107"></span><span>  </span><span id="local-6989586621679264848"><span class="annot"><span class="annottext">trace :: Product f g (Product f g a) -&gt; a
+</span><a href="#local-6989586621679264848"><span class="hs-identifier hs-var hs-var hs-var hs-var">trace</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679264846"><span class="annot"><span class="annottext">xx :: f (Product f g a)
+</span><a href="#local-6989586621679264846"><span class="hs-identifier hs-var">xx</span></a></span></span><span> </span><span id="local-6989586621679264845"><span class="annot"><span class="annottext">yy :: g (Product f g a)
+</span><a href="#local-6989586621679264845"><span class="hs-identifier hs-var">yy</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (f a) -&gt; a
+forall (m :: * -&gt; *) a. (Trace m, Num a) =&gt; m (m a) -&gt; a
+</span><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var">trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Product f g a -&gt; f a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k). Product f g a -&gt; f a
+</span><a href="#local-6989586621679264844"><span class="hs-identifier hs-var">pfst</span></a></span><span> </span><span class="annot"><span class="annottext">(Product f g a -&gt; f a) -&gt; f (Product f g a) -&gt; f (f a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (Product f g a)
+</span><a href="#local-6989586621679264846"><span class="hs-identifier hs-var">xx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">g (g a) -&gt; a
+forall (m :: * -&gt; *) a. (Trace m, Num a) =&gt; m (m a) -&gt; a
+</span><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var">trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Product f g a -&gt; g a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k). Product f g a -&gt; g a
+</span><a href="#local-6989586621679264842"><span class="hs-identifier hs-var">psnd</span></a></span><span> </span><span class="annot"><span class="annottext">(Product f g a -&gt; g a) -&gt; g (Product f g a) -&gt; g (g a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">g (Product f g a)
+</span><a href="#local-6989586621679264845"><span class="hs-identifier hs-var">yy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679264844"><span class="annot"><span class="annottext">pfst :: Product f g a -&gt; f a
+</span><a href="#local-6989586621679264844"><span class="hs-identifier hs-var hs-var">pfst</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679264841"><span class="annot"><span class="annottext">x :: f a
+</span><a href="#local-6989586621679264841"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679264841"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621679264842"><span class="annot"><span class="annottext">psnd :: Product f g a -&gt; g a
+</span><a href="#local-6989586621679264842"><span class="hs-identifier hs-var hs-var">psnd</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679264840"><span class="annot"><span class="annottext">y :: g a
+</span><a href="#local-6989586621679264840"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g a
+</span><a href="#local-6989586621679264840"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-pragma hs-type">trace</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-111"></span><span>  </span><span id="local-6989586621679264839"><span class="annot"><span class="annottext">diagonal :: Product f g (Product f g a) -&gt; Product f g a
+</span><a href="#local-6989586621679264839"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679264838"><span class="annot"><span class="annottext">xx :: f (Product f g a)
+</span><a href="#local-6989586621679264838"><span class="hs-identifier hs-var">xx</span></a></span></span><span> </span><span id="local-6989586621679264837"><span class="annot"><span class="annottext">yy :: g (Product f g a)
+</span><a href="#local-6989586621679264837"><span class="hs-identifier hs-var">yy</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (f a) -&gt; f a
+forall (m :: * -&gt; *) a. Trace m =&gt; m (m a) -&gt; m a
+</span><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var">diagonal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Product f g a -&gt; f a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k). Product f g a -&gt; f a
+</span><a href="#local-6989586621679264836"><span class="hs-identifier hs-var">pfst</span></a></span><span> </span><span class="annot"><span class="annottext">(Product f g a -&gt; f a) -&gt; f (Product f g a) -&gt; f (f a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (Product f g a)
+</span><a href="#local-6989586621679264838"><span class="hs-identifier hs-var">xx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f a -&gt; g a -&gt; Product f g a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k).
+f a -&gt; g a -&gt; Product f g a
+</span><span class="hs-operator hs-var">`Pair`</span></span><span> </span><span class="annot"><span class="annottext">g (g a) -&gt; g a
+forall (m :: * -&gt; *) a. Trace m =&gt; m (m a) -&gt; m a
+</span><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var">diagonal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Product f g a -&gt; g a
+forall k (f :: k -&gt; *) (g :: k -&gt; *) (a :: k). Product f g a -&gt; g a
+</span><a href="#local-6989586621679264835"><span class="hs-identifier hs-var">psnd</span></a></span><span> </span><span class="annot"><span class="annottext">(Product f g a -&gt; g a) -&gt; g (Product f g a) -&gt; g (g a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">g (Product f g a)
+</span><a href="#local-6989586621679264837"><span class="hs-identifier hs-var">yy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679264836"><span class="annot"><span class="annottext">pfst :: Product f g a -&gt; f a
+</span><a href="#local-6989586621679264836"><span class="hs-identifier hs-var hs-var">pfst</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span id="local-6989586621679264834"><span class="annot"><span class="annottext">x :: f a
+</span><a href="#local-6989586621679264834"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679264834"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span id="local-6989586621679264835"><span class="annot"><span class="annottext">psnd :: Product f g a -&gt; g a
+</span><a href="#local-6989586621679264835"><span class="hs-identifier hs-var hs-var">psnd</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span> </span><span class="hs-identifier">_</span><span> </span><span id="local-6989586621679264833"><span class="annot"><span class="annottext">y :: g a
+</span><a href="#local-6989586621679264833"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g a
+</span><a href="#local-6989586621679264833"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span id="local-6989586621679264831"><span id="local-6989586621679264832"><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Distributive</span></span><span> </span><span class="annot"><a href="#local-6989586621679264832"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264832"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264831"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Compose</span></span><span> </span><span class="annot"><a href="#local-6989586621679264832"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264831"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-117"></span><span>  </span><span id="local-6989586621679264827"><span class="annot"><span class="annottext">trace :: Compose g f (Compose g f a) -&gt; a
+</span><a href="#local-6989586621679264827"><span class="hs-identifier hs-var hs-var hs-var hs-var">trace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g (g a) -&gt; a
+forall (m :: * -&gt; *) a. (Trace m, Num a) =&gt; m (m a) -&gt; a
+</span><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var">trace</span></a></span><span> </span><span class="annot"><span class="annottext">(g (g a) -&gt; a)
+-&gt; (Compose g f (Compose g f a) -&gt; g (g a))
+-&gt; Compose g f (Compose g f a)
+-&gt; a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(f (g (f a)) -&gt; g a) -&gt; g (f (g (f a))) -&gt; g (g a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(f (f a) -&gt; a) -&gt; g (f (f a)) -&gt; g a
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">f (f a) -&gt; a
+forall (m :: * -&gt; *) a. (Trace m, Num a) =&gt; m (m a) -&gt; a
+</span><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var">trace</span></a></span><span> </span><span class="annot"><span class="annottext">(g (f (f a)) -&gt; g a)
+-&gt; (f (g (f a)) -&gt; g (f (f a))) -&gt; f (g (f a)) -&gt; g a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f (g (f a)) -&gt; g (f (f a))
+forall (g :: * -&gt; *) (f :: * -&gt; *) a.
+(Distributive g, Functor f) =&gt;
+f (g a) -&gt; g (f a)
+</span><span class="hs-identifier hs-var">distribute</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(g (f (g (f a))) -&gt; g (g a))
+-&gt; (Compose g f (Compose g f a) -&gt; g (f (g (f a))))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (g a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Compose g f (g (f a)) -&gt; g (f (g (f a)))
+forall k1 (f :: k1 -&gt; *) k2 (g :: k2 -&gt; k1) (a :: k2).
+Compose f g a -&gt; f (g a)
+</span><span class="hs-identifier hs-var hs-var">getCompose</span></span><span> </span><span class="annot"><span class="annottext">(Compose g f (g (f a)) -&gt; g (f (g (f a))))
+-&gt; (Compose g f (Compose g f a) -&gt; Compose g f (g (f a)))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (f (g (f a)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Compose g f a -&gt; g (f a))
+-&gt; Compose g f (Compose g f a) -&gt; Compose g f (g (f a))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Compose g f a -&gt; g (f a)
+forall k1 (f :: k1 -&gt; *) k2 (g :: k2 -&gt; k1) (a :: k2).
+Compose f g a -&gt; f (g a)
+</span><span class="hs-identifier hs-var hs-var">getCompose</span></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#trace"><span class="hs-pragma hs-type">trace</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-119"></span><span>  </span><span id="local-6989586621679264824"><span class="annot"><span class="annottext">diagonal :: Compose g f (Compose g f a) -&gt; Compose g f a
+</span><a href="#local-6989586621679264824"><span class="hs-identifier hs-var hs-var hs-var hs-var">diagonal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g (f a) -&gt; Compose g f a
+forall k k1 (f :: k -&gt; *) (g :: k1 -&gt; k) (a :: k1).
+f (g a) -&gt; Compose f g a
+</span><span class="hs-identifier hs-var">Compose</span></span><span> </span><span class="annot"><span class="annottext">(g (f a) -&gt; Compose g f a)
+-&gt; (Compose g f (Compose g f a) -&gt; g (f a))
+-&gt; Compose g f (Compose g f a)
+-&gt; Compose g f a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(f (f a) -&gt; f a) -&gt; g (f (f a)) -&gt; g (f a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">f (f a) -&gt; f a
+forall (m :: * -&gt; *) a. Trace m =&gt; m (m a) -&gt; m a
+</span><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var">diagonal</span></a></span><span> </span><span class="annot"><span class="annottext">(g (f (f a)) -&gt; g (f a))
+-&gt; (Compose g f (Compose g f a) -&gt; g (f (f a)))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (f a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">g (g (f (f a))) -&gt; g (f (f a))
+forall (m :: * -&gt; *) a. Trace m =&gt; m (m a) -&gt; m a
+</span><a href="Linear.Trace.html#diagonal"><span class="hs-identifier hs-var">diagonal</span></a></span><span> </span><span class="annot"><span class="annottext">(g (g (f (f a))) -&gt; g (f (f a)))
+-&gt; (Compose g f (Compose g f a) -&gt; g (g (f (f a))))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (f (f a))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(f (g (f a)) -&gt; g (f (f a))) -&gt; g (f (g (f a))) -&gt; g (g (f (f a)))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">f (g (f a)) -&gt; g (f (f a))
+forall (g :: * -&gt; *) (f :: * -&gt; *) a.
+(Distributive g, Functor f) =&gt;
+f (g a) -&gt; g (f a)
+</span><span class="hs-identifier hs-var">distribute</span></span><span> </span><span class="annot"><span class="annottext">(g (f (g (f a))) -&gt; g (g (f (f a))))
+-&gt; (Compose g f (Compose g f a) -&gt; g (f (g (f a))))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (g (f (f a)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Compose g f (g (f a)) -&gt; g (f (g (f a)))
+forall k1 (f :: k1 -&gt; *) k2 (g :: k2 -&gt; k1) (a :: k2).
+Compose f g a -&gt; f (g a)
+</span><span class="hs-identifier hs-var hs-var">getCompose</span></span><span> </span><span class="annot"><span class="annottext">(Compose g f (g (f a)) -&gt; g (f (g (f a))))
+-&gt; (Compose g f (Compose g f a) -&gt; Compose g f (g (f a)))
+-&gt; Compose g f (Compose g f a)
+-&gt; g (f (g (f a)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Compose g f a -&gt; g (f a))
+-&gt; Compose g f (Compose g f a) -&gt; Compose g f (g (f a))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Compose g f a -&gt; g (f a)
+forall k1 (f :: k1 -&gt; *) k2 (g :: k2 -&gt; k1) (a :: k2).
+Compose f g a -&gt; f (g a)
+</span><span class="hs-identifier hs-var hs-var">getCompose</span></span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Linear.Trace.html#diagonal"><span class="hs-pragma hs-type">diagonal</span></a></span><span> </span><span class="hs-pragma">#-}</span></span></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- | Compute the &lt;http://mathworld.wolfram.com/FrobeniusNorm.html Frobenius norm&gt; of a matrix.</span><span>
+</span><span id="line-123"></span><span id="local-6989586621679264820"><span id="local-6989586621679264821"><span id="local-6989586621679264822"><span class="annot"><a href="Linear.Trace.html#frobenius"><span class="hs-identifier hs-type">frobenius</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679264822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679264821"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Vector.html#Additive"><span class="hs-identifier hs-type">Additive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264821"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Vector.html#Additive"><span class="hs-identifier hs-type">Additive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264820"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Distributive</span></span><span> </span><span class="annot"><a href="#local-6989586621679264820"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Linear.Trace.html#Trace"><span class="hs-identifier hs-type">Trace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264820"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679264821"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679264820"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679264822"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679264822"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-124"></span><span id="frobenius"><span class="annot"><span class="annottext">frobenius :: f (g a) -&gt; a
+</span><a href="Linear.Trace.html#frobenius"><span class="hs-identifier hs-var hs-var">frobenius</span></a></span></span><span> </span><span id="local-6989586621679264819"><span class="annot"><span class="annottext">m :: f (g a)
+</span><a href="#local-6989586621679264819"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">g (g a) -&gt; a
+forall (m :: * -&gt; *) a. (Trace m, Num a) =&gt; m (m a) -&gt; a
+</span><a href="Linear.Trace.html#trace"><span class="hs-identifier hs-var">trace</span></a></span><span> </span><span class="annot"><span class="annottext">(g (g a) -&gt; a) -&gt; g (g a) -&gt; a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(f a -&gt; g a) -&gt; g (f a) -&gt; g (g a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679264818"><span class="annot"><span class="annottext">f' :: f a
+</span><a href="#local-6989586621679264818"><span class="hs-identifier hs-var">f'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(g a -&gt; g a -&gt; g a) -&gt; g a -&gt; f (g a) -&gt; g a
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">Foldable.foldl'</span></span><span> </span><span class="annot"><span class="annottext">g a -&gt; g a -&gt; g a
+forall (f :: * -&gt; *) a. (Additive f, Num a) =&gt; f a -&gt; f a -&gt; f a
+</span><a href="Linear.Vector.html#%5E%2B%5E"><span class="hs-operator hs-var">(^+^)</span></a></span><span> </span><span class="annot"><span class="annottext">g a
+forall (f :: * -&gt; *) a. (Additive f, Num a) =&gt; f a
+</span><a href="Linear.Vector.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span> </span><span class="annot"><span class="annottext">(f (g a) -&gt; g a) -&gt; f (g a) -&gt; g a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; g a -&gt; g a) -&gt; f a -&gt; f (g a) -&gt; f (g a)
+forall (f :: * -&gt; *) a b c.
+Additive f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><a href="Linear.Vector.html#liftI2"><span class="hs-identifier hs-var">liftI2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; g a -&gt; g a
+forall (f :: * -&gt; *) a. (Functor f, Num a) =&gt; a -&gt; f a -&gt; f a
+</span><a href="Linear.Vector.html#%2A%5E"><span class="hs-operator hs-var">(*^)</span></a></span><span> </span><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679264818"><span class="hs-identifier hs-var">f'</span></a></span><span> </span><span class="annot"><span class="annottext">f (g a)
+</span><a href="#local-6989586621679264819"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f (g a) -&gt; g (f a)
+forall (g :: * -&gt; *) (f :: * -&gt; *) a.
+(Distributive g, Functor f) =&gt;
+f (g a) -&gt; g (f a)
+</span><span class="hs-identifier hs-var">distribute</span></span><span> </span><span class="annot"><span class="annottext">f (g a)
+</span><a href="#local-6989586621679264819"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span></pre></body></html>

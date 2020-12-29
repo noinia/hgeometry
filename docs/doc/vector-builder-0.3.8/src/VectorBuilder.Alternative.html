@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-|
+Alternative utilities.
+For instance, they can be applied with parsing libraries.
+-}</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">VectorBuilder.Alternative</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="VectorBuilder.Prelude.html"><span class="hs-identifier">VectorBuilder.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">many</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">some</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="VectorBuilder.Builder.html"><span class="hs-identifier">VectorBuilder.Builder</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="VectorBuilder.Vector.html"><span class="hs-identifier">VectorBuilder.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.Alternative.html#many"><span class="hs-pragma hs-type">many</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-16"></span><span id="local-6989586621679077440"><span id="local-6989586621679077441"><span id="local-6989586621679077442"><span class="annot"><a href="VectorBuilder.Alternative.html#many"><span class="hs-identifier hs-type">many</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="annot"><a href="#local-6989586621679077442"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077441"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077440"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077442"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077440"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077442"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077441"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077440"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-17"></span><span id="many"><span class="annot"><span class="annottext">many :: m a -&gt; m (vector a)
+</span><a href="VectorBuilder.Alternative.html#many"><span class="hs-identifier hs-var hs-var">many</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; vector a) -&gt; m (Builder a) -&gt; m (vector a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; vector a
+forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">B.build</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Builder a) -&gt; m (vector a))
+-&gt; (m a -&gt; m (Builder a)) -&gt; m a -&gt; m (vector a)
+forall k (cat :: k -&gt; k -&gt; *) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; m (Builder a)
+forall (m :: * -&gt; *) a. Alternative m =&gt; m a -&gt; m (Builder a)
+</span><a href="VectorBuilder.Alternative.html#manyBuilder"><span class="hs-identifier hs-var">manyBuilder</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.Alternative.html#manyBuilder"><span class="hs-pragma hs-type">manyBuilder</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-20"></span><span id="local-6989586621679077466"><span id="local-6989586621679077468"><span class="annot"><a href="VectorBuilder.Alternative.html#manyBuilder"><span class="hs-identifier hs-type">manyBuilder</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="annot"><a href="#local-6989586621679077468"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077468"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077468"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">A.Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077466"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-21"></span><span id="manyBuilder"><span class="annot"><span class="annottext">manyBuilder :: m a -&gt; m (Builder a)
+</span><a href="VectorBuilder.Alternative.html#manyBuilder"><span class="hs-identifier hs-var hs-var">manyBuilder</span></a></span></span><span> </span><span id="local-6989586621679077436"><span class="annot"><span class="annottext">m :: m a
+</span><a href="#local-6989586621679077436"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621679077435"><span class="annot"><span class="annottext">loop :: m (Builder a)
+</span><a href="#local-6989586621679077435"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder a -&gt; Builder a -&gt; Builder a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; Builder a -&gt; Builder a)
+-&gt; (a -&gt; Builder a) -&gt; a -&gt; Builder a -&gt; Builder a
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Builder a
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Builder a -&gt; Builder a) -&gt; m a -&gt; m (Builder a -&gt; Builder a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679077436"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">m (Builder a -&gt; Builder a) -&gt; m (Builder a) -&gt; m (Builder a)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (Builder a)
+</span><a href="#local-6989586621679077435"><span class="hs-identifier hs-var">loop</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m (Builder a) -&gt; m (Builder a) -&gt; m (Builder a)
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; m (Builder a)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Builder a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">m (Builder a)
+</span><a href="#local-6989586621679077435"><span class="hs-identifier hs-var">loop</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.Alternative.html#some"><span class="hs-pragma hs-type">some</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-26"></span><span id="local-6989586621679077428"><span id="local-6989586621679077429"><span id="local-6989586621679077430"><span class="annot"><a href="VectorBuilder.Alternative.html#some"><span class="hs-identifier hs-type">some</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="annot"><a href="#local-6989586621679077430"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679077429"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077428"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077430"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077428"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077430"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679077429"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077428"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-27"></span><span id="some"><span class="annot"><span class="annottext">some :: m a -&gt; m (vector a)
+</span><a href="VectorBuilder.Alternative.html#some"><span class="hs-identifier hs-var hs-var">some</span></a></span></span><span> </span><span id="local-6989586621679077427"><span class="annot"><span class="annottext">m :: m a
+</span><a href="#local-6989586621679077427"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; vector a
+forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">B.build</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; vector a) -&gt; m (Builder a) -&gt; m (vector a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; m (Builder a)
+forall (m :: * -&gt; *) a. Alternative m =&gt; m a -&gt; m (Builder a)
+</span><a href="VectorBuilder.Alternative.html#someBuilder"><span class="hs-identifier hs-var">someBuilder</span></a></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679077427"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="VectorBuilder.Alternative.html#someBuilder"><span class="hs-pragma hs-type">someBuilder</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-30"></span><span id="local-6989586621679077424"><span id="local-6989586621679077425"><span class="annot"><a href="VectorBuilder.Alternative.html#someBuilder"><span class="hs-identifier hs-type">someBuilder</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="annot"><a href="#local-6989586621679077425"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077425"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077424"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679077425"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="VectorBuilder.Core.Builder.html#Builder"><span class="hs-identifier hs-type">A.Builder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679077424"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-31"></span><span id="someBuilder"><span class="annot"><span class="annottext">someBuilder :: m a -&gt; m (Builder a)
+</span><a href="VectorBuilder.Alternative.html#someBuilder"><span class="hs-identifier hs-var hs-var">someBuilder</span></a></span></span><span> </span><span id="local-6989586621679077423"><span class="annot"><span class="annottext">m :: m a
+</span><a href="#local-6989586621679077423"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; Builder a -&gt; Builder a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; Builder a -&gt; Builder a)
+-&gt; (a -&gt; Builder a) -&gt; a -&gt; Builder a -&gt; Builder a
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Builder a
+forall element. element -&gt; Builder element
+</span><a href="VectorBuilder.Core.Builder.html#singleton"><span class="hs-identifier hs-var">A.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Builder a -&gt; Builder a) -&gt; m a -&gt; m (Builder a -&gt; Builder a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679077423"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">m (Builder a -&gt; Builder a) -&gt; m (Builder a) -&gt; m (Builder a)
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; m (Builder a)
+forall (m :: * -&gt; *) a. Alternative m =&gt; m a -&gt; m (Builder a)
+</span><a href="VectorBuilder.Alternative.html#manyBuilder"><span class="hs-identifier hs-var">manyBuilder</span></a></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679077423"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-32"></span></pre></body></html>

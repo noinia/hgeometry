@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.SmallestEnclosingBall.RIC</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- An randomized algorithm to compute the smallest enclosing disk of a set of</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- \(n\) points in \(\mathbb{R}^2\). The expected running time is \(O(n)\).</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.SmallestEnclosingBall.RIC</span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk%27"><span class="hs-identifier">smallestEnclosingDisk'</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk"><span class="hs-identifier">smallestEnclosingDisk</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoint"><span class="hs-identifier">smallestEnclosingDiskWithPoint</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoints"><span class="hs-identifier">smallestEnclosingDiskWithPoints</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html"><span class="hs-identifier">Algorithms.Geometry.SmallestEnclosingBall.Types</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Random.Class</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.html"><span class="hs-identifier">Data.Geometry</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Ball.html"><span class="hs-identifier">Data.Geometry.Ball</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">System.Random.Shuffle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">shuffle</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- import Data.RealNumber.Rational</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- import Debug.Trace</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Compute the smallest enclosing disk of a set of points,</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- implemented using randomized incremental construction.</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- pre: the input has at least two points.</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- running time: expected \(O(n)\) time, where \(n\) is the number of input points.</span><span>
+</span><span id="line-43"></span><span id="local-6989586621679954666"><span id="local-6989586621679954667"><span id="local-6989586621679954668"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk"><span class="hs-identifier hs-type">smallestEnclosingDisk</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679954668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679954667"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-44"></span><span>                                               </span><span class="hs-comment">-- , Show r, Show p</span><span>
+</span><span id="line-45"></span><span>                                   </span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>                                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954668"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954666"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-47"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679954667"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954666"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span id="smallestEnclosingDisk"><span class="annot"><span class="annottext">smallestEnclosingDisk :: [Point 2 r :+ p] -&gt; m (DiskResult p r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk"><span class="hs-identifier hs-var hs-var">smallestEnclosingDisk</span></a></span></span><span> </span><span id="local-6989586621679954665"><span class="annot"><span class="annottext">pts :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954665"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679954664"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679954664"><span class="hs-identifier hs-var">p</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679954663"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679954663"><span class="hs-identifier hs-var">q</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679954662"><span class="annot"><span class="annottext">pts' :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954662"><span class="hs-identifier hs-var">pts'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; DiskResult p r
+forall r p.
+(Ord r, Fractional r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk%27"><span class="hs-identifier hs-var">smallestEnclosingDisk'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954664"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954663"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954662"><span class="hs-identifier hs-var">pts'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>                                    </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; DiskResult p r)
+-&gt; (Vector (Point 2 r :+ p) -&gt; [Point 2 r :+ p])
+-&gt; Vector (Point 2 r :+ p)
+-&gt; DiskResult p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Point 2 r :+ p) -&gt; [Point 2 r :+ p]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Point 2 r :+ p) -&gt; DiskResult p r)
+-&gt; m (Vector (Point 2 r :+ p)) -&gt; m (DiskResult p r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; m (Vector (Point 2 r :+ p))
+forall (f :: * -&gt; *) (m :: * -&gt; *) a.
+(Foldable f, MonadRandom m) =&gt;
+f a -&gt; m (Vector a)
+</span><span class="hs-identifier hs-var">shuffle</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954665"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk"><span class="hs-identifier hs-var">smallestEnclosingDisk</span></a></span><span> </span><span class="hs-identifier">_</span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; m (DiskResult p r)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;smallestEnclosingDisk: Too few points&quot;</span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Smallest enclosing disk.</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679954787"><span id="local-6989586621679954788"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk%27"><span class="hs-identifier hs-type">smallestEnclosingDisk'</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span>                                               </span><span class="hs-comment">-- , Show r, Show p</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>                              </span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954787"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954787"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954787"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-59"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954787"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954788"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-60"></span><span id="smallestEnclosingDisk%27"><span class="annot"><span class="annottext">smallestEnclosingDisk' :: (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDisk%27"><span class="hs-identifier hs-var hs-var">smallestEnclosingDisk'</span></a></span></span><span> </span><span id="local-6989586621679954657"><span class="annot"><span class="annottext">a :: Point 2 r :+ p
+</span><a href="#local-6989586621679954657"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679954656"><span class="annot"><span class="annottext">b :: Point 2 r :+ p
+</span><a href="#local-6989586621679954656"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; DiskResult p r -&gt; DiskResult p r)
+-&gt; DiskResult p r -&gt; [[Point 2 r :+ p]] -&gt; DiskResult p r
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; DiskResult p r -&gt; DiskResult p r
+</span><a href="#local-6989586621679954654"><span class="hs-identifier hs-var">addPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; DiskResult p r
+forall r p.
+Fractional r =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#initial"><span class="hs-identifier hs-var">initial</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954657"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954656"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([[Point 2 r :+ p]] -&gt; DiskResult p r)
+-&gt; ([Point 2 r :+ p] -&gt; [[Point 2 r :+ p]])
+-&gt; [Point 2 r :+ p]
+-&gt; DiskResult p r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [[Point 2 r :+ p]]
+forall a. [a] -&gt; [[a]]
+</span><span class="hs-identifier hs-var">List.tails</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- The empty case occurs only initially</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679954654"><span class="annot"><span class="annottext">addPoint :: [Point 2 r :+ p] -&gt; DiskResult p r -&gt; DiskResult p r
+</span><a href="#local-6989586621679954654"><span class="hs-identifier hs-var hs-var">addPoint</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span id="local-6989586621679954651"><span class="annot"><span class="annottext">br :: DiskResult p r
+</span><a href="#local-6989586621679954651"><span class="hs-identifier hs-var">br</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskResult p r
+</span><a href="#local-6989586621679954651"><span class="hs-identifier hs-var">br</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><a href="#local-6989586621679954654"><span class="hs-identifier hs-var">addPoint</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679954650"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679954650"><span class="hs-identifier hs-var">p</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679954649"><span class="annot"><span class="annottext">pts :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954649"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679954648"><span class="annot"><span class="annottext">br :: DiskResult p r
+</span><a href="#local-6989586621679954648"><span class="hs-identifier hs-var">br</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span id="local-6989586621679954646"><span class="annot"><span class="annottext">d :: Disk () r
+</span><a href="#local-6989586621679954646"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954650"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Disk () r -&gt; Bool
+forall (d :: Nat) r p.
+(Arity d, Ord r, Num r) =&gt;
+Point d r -&gt; Ball d p r -&gt; Bool
+</span><a href="Data.Geometry.Ball.html#inClosedBall"><span class="hs-operator hs-var">`inClosedBall`</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954646"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskResult p r
+</span><a href="#local-6989586621679954648"><span class="hs-identifier hs-var">br</span></a></span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r) -&gt; DiskResult p r
+forall a. Maybe a -&gt; a
+</span><a href="#local-6989586621679954642"><span class="hs-identifier hs-var">fromJust'</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (DiskResult p r) -&gt; DiskResult p r)
+-&gt; Maybe (DiskResult p r) -&gt; DiskResult p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p) -&gt; Maybe (DiskResult p r)
+forall r p.
+(Ord r, Fractional r) =&gt;
+(Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p) -&gt; Maybe (DiskResult p r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoint"><span class="hs-identifier hs-var">smallestEnclosingDiskWithPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954650"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954657"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; NonEmpty (Point 2 r :+ p)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954656"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954649"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679954642"><span class="annot"><span class="annottext">fromJust' :: Maybe a -&gt; a
+</span><a href="#local-6989586621679954642"><span class="hs-identifier hs-var hs-var">fromJust'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a -&gt; a
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; a
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="hs-string">&quot;smallestEncosingDisk' : fromJust, absurd&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Smallest enclosing disk, given that p should be on it.</span><span>
+</span><span id="line-70"></span><span id="local-6989586621679954744"><span id="local-6989586621679954745"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoint"><span class="hs-identifier hs-type">smallestEnclosingDiskWithPoint</span></a></span><span>              </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679954745"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-71"></span><span>                                               </span><span class="hs-comment">-- , Show r, Show p</span><span>
+</span><span id="line-72"></span><span>                                               </span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>                                            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954745"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954744"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954745"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954744"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>                                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954744"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954745"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-75"></span><span id="smallestEnclosingDiskWithPoint"><span class="annot"><span class="annottext">smallestEnclosingDiskWithPoint :: (Point 2 r :+ p)
+-&gt; NonEmpty (Point 2 r :+ p) -&gt; Maybe (DiskResult p r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoint"><span class="hs-identifier hs-var hs-var">smallestEnclosingDiskWithPoint</span></a></span></span><span> </span><span id="local-6989586621679954640"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679954640"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679954639"><span class="annot"><span class="annottext">a :: Point 2 r :+ p
+</span><a href="#local-6989586621679954639"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679954638"><span class="annot"><span class="annottext">pts :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954638"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p]
+ -&gt; Maybe (DiskResult p r) -&gt; Maybe (DiskResult p r))
+-&gt; Maybe (DiskResult p r)
+-&gt; [[Point 2 r :+ p]]
+-&gt; Maybe (DiskResult p r)
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+-&gt; Maybe (DiskResult p r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954637"><span class="hs-identifier hs-var">addPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DiskResult p r -&gt; Maybe (DiskResult p r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(DiskResult p r -&gt; Maybe (DiskResult p r))
+-&gt; DiskResult p r -&gt; Maybe (DiskResult p r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; DiskResult p r
+forall r p.
+Fractional r =&gt;
+(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#initial"><span class="hs-identifier hs-var">initial</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954640"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954639"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([[Point 2 r :+ p]] -&gt; Maybe (DiskResult p r))
+-&gt; [[Point 2 r :+ p]] -&gt; Maybe (DiskResult p r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; [[Point 2 r :+ p]]
+forall a. [a] -&gt; [[a]]
+</span><span class="hs-identifier hs-var">List.tails</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954638"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679954637"><span class="annot"><span class="annottext">addPoint :: [Point 2 r :+ p]
+-&gt; Maybe (DiskResult p r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954637"><span class="hs-identifier hs-var hs-var">addPoint</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>       </span><span id="local-6989586621679954636"><span class="annot"><span class="annottext">br :: Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954636"><span class="hs-identifier hs-var">br</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954636"><span class="hs-identifier hs-var">br</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="#local-6989586621679954637"><span class="hs-identifier hs-var">addPoint</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679954635"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679954635"><span class="hs-identifier hs-var">q</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679954634"><span class="annot"><span class="annottext">pts' :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954634"><span class="hs-identifier hs-var">pts'</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679954633"><span class="annot"><span class="annottext">br :: Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954633"><span class="hs-identifier hs-var">br</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span id="local-6989586621679954632"><span class="annot"><span class="annottext">d :: Disk () r
+</span><a href="#local-6989586621679954632"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954635"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Disk () r -&gt; Bool
+forall (d :: Nat) r p.
+(Arity d, Ord r, Num r) =&gt;
+Point d r -&gt; Ball d p r -&gt; Bool
+</span><a href="Data.Geometry.Ball.html#inClosedBall"><span class="hs-operator hs-var">`inClosedBall`</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954632"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954633"><span class="hs-identifier hs-var">br</span></a></span><span>
+</span><span id="line-80"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; Maybe (DiskResult p r)
+forall r p.
+(Ord r, Fractional r) =&gt;
+(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; Maybe (DiskResult p r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoints"><span class="hs-identifier hs-var">smallestEnclosingDiskWithPoints</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954640"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954635"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954639"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r :+ p]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954634"><span class="hs-identifier hs-var">pts'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="#local-6989586621679954637"><span class="hs-identifier hs-var">addPoint</span></a></span><span> </span><span class="hs-identifier">_</span><span>        </span><span id="local-6989586621679954631"><span class="annot"><span class="annottext">br :: Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954631"><span class="hs-identifier hs-var">br</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954631"><span class="hs-identifier hs-var">br</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- | Smallest enclosing disk, given that p and q should be on it</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-87"></span><span id="local-6989586621679954737"><span id="local-6989586621679954738"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoints"><span class="hs-identifier hs-type">smallestEnclosingDiskWithPoints</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-88"></span><span>                                          </span><span class="hs-comment">-- , Show r, Show p</span><span>
+</span><span id="line-89"></span><span>                                          </span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>                                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954737"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954737"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954737"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-91"></span><span>                                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954737"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954738"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-92"></span><span id="smallestEnclosingDiskWithPoints"><span class="annot"><span class="annottext">smallestEnclosingDiskWithPoints :: (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p) -&gt; [Point 2 r :+ p] -&gt; Maybe (DiskResult p r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#smallestEnclosingDiskWithPoints"><span class="hs-identifier hs-var hs-var">smallestEnclosingDiskWithPoints</span></a></span></span><span> </span><span id="local-6989586621679954630"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679954629"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679954628"><span class="annot"><span class="annottext">ps :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679954628"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskResult p r -&gt; r) -&gt; [DiskResult p r] -&gt; Maybe (DiskResult p r)
+forall b a. Ord b =&gt; (a -&gt; b) -&gt; [a] -&gt; Maybe a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#minimumOn"><span class="hs-identifier hs-var">minimumOn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DiskResult p r -&gt; Getting r (DiskResult p r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Disk () r -&gt; Const r (Disk () r))
+-&gt; DiskResult p r -&gt; Const r (DiskResult p r)
+forall p r. Lens' (DiskResult p r) (Disk () r)
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#enclosingDisk"><span class="hs-identifier hs-var">enclosingDisk</span></a></span><span class="annot"><span class="annottext">((Disk () r -&gt; Const r (Disk () r))
+ -&gt; DiskResult p r -&gt; Const r (DiskResult p r))
+-&gt; ((r -&gt; Const r r) -&gt; Disk () r -&gt; Const r (Disk () r))
+-&gt; Getting r (DiskResult p r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Disk () r -&gt; Const r (Disk () r)
+forall (d :: Nat) p r. Lens' (Ball d p r) r
+</span><a href="Data.Geometry.Ball.html#squaredRadius"><span class="hs-identifier hs-var">squaredRadius</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>                                       </span><span class="annot"><span class="annottext">([DiskResult p r] -&gt; Maybe (DiskResult p r))
+-&gt; [DiskResult p r] -&gt; Maybe (DiskResult p r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Maybe (DiskResult p r)] -&gt; [DiskResult p r]
+forall a. [Maybe a] -&gt; [a]
+</span><span class="hs-identifier hs-var">catMaybes</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954624"><span class="hs-identifier hs-var">mkEnclosingDisk</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954623"><span class="hs-identifier hs-var">dl</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954624"><span class="hs-identifier hs-var">mkEnclosingDisk</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954622"><span class="hs-identifier hs-var">dr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954621"><span class="hs-identifier hs-var">mdc</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679954620"><span class="annot"><span class="annottext">centers :: [(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954620"><span class="hs-identifier hs-var hs-var">centers</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Maybe ((Point 2 r :+ p) :+ Disk () r))
+-&gt; [Point 2 r :+ p] -&gt; [(Point 2 r :+ p) :+ Disk () r]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954619"><span class="hs-identifier hs-var">disk'</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954628"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-comment">-- generate a disk with p q and r</span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679954619"><span class="annot"><span class="annottext">disk' :: (Point 2 r :+ p) -&gt; Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954619"><span class="hs-identifier hs-var hs-var">disk'</span></a></span></span><span> </span><span id="local-6989586621679954618"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679954618"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954618"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Disk () r -&gt; (Point 2 r :+ p) :+ Disk () r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Disk () r -&gt; (Point 2 r :+ p) :+ Disk () r)
+-&gt; Maybe (Disk () r) -&gt; Maybe ((Point 2 r :+ p) :+ Disk () r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Maybe (Disk () r)
+forall r.
+(Eq r, Fractional r) =&gt;
+Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; Maybe (Disk () r)
+</span><a href="Data.Geometry.Ball.html#disk"><span class="hs-identifier hs-var">disk</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954618"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-comment">-- partition the points in to those on the left and those on the</span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-comment">-- right.  Note that centers still contains only those points (and</span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-comment">-- disks) for which the three points are not colinear. So the</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-comment">-- points are either on the left or on the right.</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679954615"><span class="annot"><span class="annottext">leftCenters :: [(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954615"><span class="hs-identifier hs-var">leftCenters</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679954614"><span class="annot"><span class="annottext">rightCenters :: [(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954614"><span class="hs-identifier hs-var">rightCenters</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ p) :+ Disk () r) -&gt; Bool)
+-&gt; [(Point 2 r :+ p) :+ Disk () r]
+-&gt; ([(Point 2 r :+ p) :+ Disk () r],
+    [(Point 2 r :+ p) :+ Disk () r])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679954612"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679954612"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954612"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-var">CCW</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954620"><span class="hs-identifier hs-var">centers</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-comment">-- note that we consider 'leftmost' with respect to going from p</span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-comment">-- to q. This does not really have a global meaning.</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-comment">-- we need to find the leftmost and rightmost center on the</span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-comment">-- bisector. In case there are left-centers, this means that among</span><span>
+</span><span id="line-109"></span><span>    </span><span class="hs-comment">-- the left centers we want to find the point that is furthest way</span><span>
+</span><span id="line-110"></span><span>    </span><span class="hs-comment">-- from p (or q). If there are no left-centers, we with to find</span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-comment">-- the closest one among the right-centers.</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679954609"><span class="annot"><span class="annottext">leftDist :: ((Point 2 r :+ p) :+ Disk () r) -&gt; r
+</span><a href="#local-6989586621679954609"><span class="hs-identifier hs-var hs-var">leftDist</span></a></span></span><span> </span><span id="local-6989586621679954608"><span class="annot"><span class="annottext">z :: (Point 2 r :+ p) :+ Disk () r
+</span><a href="#local-6989586621679954608"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679954607"><span class="annot"><span class="annottext">c :: Point 2 r :+ ()
+</span><a href="#local-6989586621679954607"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) :+ Disk () r
+</span><a href="#local-6989586621679954608"><span class="hs-identifier hs-var">z</span></a></span><span class="annot"><span class="annottext">((Point 2 r :+ p) :+ Disk () r)
+-&gt; Getting
+     (Point 2 r :+ ()) ((Point 2 r :+ p) :+ Disk () r) (Point 2 r :+ ())
+-&gt; Point 2 r :+ ()
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(Disk () r -&gt; Const (Point 2 r :+ ()) (Disk () r))
+-&gt; ((Point 2 r :+ p) :+ Disk () r)
+-&gt; Const (Point 2 r :+ ()) ((Point 2 r :+ p) :+ Disk () r)
+forall core extra extra'.
+Lens (core :+ extra) (core :+ extra') extra extra'
+</span><span class="hs-identifier hs-var">extra</span></span><span class="annot"><span class="annottext">((Disk () r -&gt; Const (Point 2 r :+ ()) (Disk () r))
+ -&gt; ((Point 2 r :+ p) :+ Disk () r)
+ -&gt; Const (Point 2 r :+ ()) ((Point 2 r :+ p) :+ Disk () r))
+-&gt; (((Point 2 r :+ ())
+     -&gt; Const (Point 2 r :+ ()) (Point 2 r :+ ()))
+    -&gt; Disk () r -&gt; Const (Point 2 r :+ ()) (Disk () r))
+-&gt; Getting
+     (Point 2 r :+ ()) ((Point 2 r :+ p) :+ Disk () r) (Point 2 r :+ ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; Const (Point 2 r :+ ()) (Point 2 r :+ ()))
+-&gt; Disk () r -&gt; Const (Point 2 r :+ ()) (Disk () r)
+forall (d :: Nat) p r (d2 :: Nat) p2.
+Lens
+  (Ball d p r) (Ball d2 p2 r) (Point d r :+ p) (Point d2 r :+ p2)
+</span><a href="Data.Geometry.Ball.html#center"><span class="hs-identifier hs-var">center</span></a></span><span>
+</span><span id="line-113"></span><span>                     </span><span id="local-6989586621679954604"><span class="annot"><span class="annottext">s :: r
+</span><a href="#local-6989586621679954604"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ ()) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679954607"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-var">CCW</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-114"></span><span>                 </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679954604"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; r
+forall r (d :: Nat).
+(Num r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; r
+</span><a href="Data.Geometry.Point.Internal.html#squaredEuclideanDist"><span class="hs-identifier hs-var">squaredEuclideanDist</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679954607"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ ())
+-&gt; Getting (Point 2 r) (Point 2 r :+ ()) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ ()) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span>    </span><span id="local-6989586621679954623"><span class="annot"><span class="annottext">dl :: Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954623"><span class="hs-identifier hs-var hs-var">dl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ p) :+ Disk () r) -&gt; r)
+-&gt; [(Point 2 r :+ p) :+ Disk () r]
+-&gt; Maybe ((Point 2 r :+ p) :+ Disk () r)
+forall b a. Ord b =&gt; (a -&gt; b) -&gt; [a] -&gt; Maybe a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#maximumOn"><span class="hs-identifier hs-var">maximumOn</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) :+ Disk () r) -&gt; r
+</span><a href="#local-6989586621679954609"><span class="hs-identifier hs-var">leftDist</span></a></span><span> </span><span class="annot"><span class="annottext">[(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954615"><span class="hs-identifier hs-var">leftCenters</span></a></span><span>  </span><span class="hs-comment">-- disk that has the &quot;leftmost&quot; center</span><span>
+</span><span id="line-117"></span><span>    </span><span id="local-6989586621679954622"><span class="annot"><span class="annottext">dr :: Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954622"><span class="hs-identifier hs-var hs-var">dr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ p) :+ Disk () r) -&gt; r)
+-&gt; [(Point 2 r :+ p) :+ Disk () r]
+-&gt; Maybe ((Point 2 r :+ p) :+ Disk () r)
+forall b a. Ord b =&gt; (a -&gt; b) -&gt; [a] -&gt; Maybe a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#minimumOn"><span class="hs-identifier hs-var">minimumOn</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) :+ Disk () r) -&gt; r
+</span><a href="#local-6989586621679954609"><span class="hs-identifier hs-var">leftDist</span></a></span><span> </span><span class="annot"><span class="annottext">[(Point 2 r :+ p) :+ Disk () r]
+</span><a href="#local-6989586621679954614"><span class="hs-identifier hs-var">rightCenters</span></a></span><span> </span><span class="hs-comment">-- disk that has the &quot;rightmost&quot; center</span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-comment">-- diameteral disk</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679954600"><span class="annot"><span class="annottext">dd :: Disk () r
+</span><a href="#local-6989586621679954600"><span class="hs-identifier hs-var hs-var">dd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Disk () r
+forall (d :: Nat) r.
+(Arity d, Fractional r) =&gt;
+Point d r -&gt; Point d r -&gt; Ball d () r
+</span><a href="Data.Geometry.Ball.html#fromDiameter"><span class="hs-identifier hs-var">fromDiameter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>    </span><span id="local-6989586621679954621"><span class="annot"><span class="annottext">mdc :: Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954621"><span class="hs-identifier hs-var hs-var">mdc</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Disk () r -&gt; [Point 2 r :+ p] -&gt; Bool
+forall (t :: * -&gt; *) r p extra.
+(Foldable t, Ord r, Num r) =&gt;
+Disk p r -&gt; t (Point 2 r :+ extra) -&gt; Bool
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#isEnclosingDisk"><span class="hs-identifier hs-var">isEnclosingDisk</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954600"><span class="hs-identifier hs-var">dd</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954628"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskResult p r -&gt; Maybe (DiskResult p r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(DiskResult p r -&gt; Maybe (DiskResult p r))
+-&gt; DiskResult p r -&gt; Maybe (DiskResult p r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+forall p r.
+Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-var">DiskResult</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954600"><span class="hs-identifier hs-var">dd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; TwoOrThree (Point 2 r :+ p)
+forall a. a -&gt; a -&gt; TwoOrThree a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#Two"><span class="hs-identifier hs-var">Two</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-comment">-- test if d is an enclosing disk.</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621679954624"><span class="annot"><span class="annottext">mkEnclosingDisk :: Maybe ((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954624"><span class="hs-identifier hs-var hs-var">mkEnclosingDisk</span></a></span></span><span>  </span><span id="local-6989586621679954596"><span class="annot"><span class="annottext">md :: Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954596"><span class="hs-identifier hs-var">md</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r)
+</span><a href="#local-6989586621679954596"><span class="hs-identifier hs-var">md</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe ((Point 2 r :+ p) :+ Disk () r)
+-&gt; (((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r))
+-&gt; Maybe (DiskResult p r)
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954595"><span class="hs-identifier hs-var">mkEnclosingDisk'</span></a></span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679954595"><span class="annot"><span class="annottext">mkEnclosingDisk' :: ((Point 2 r :+ p) :+ Disk () r) -&gt; Maybe (DiskResult p r)
+</span><a href="#local-6989586621679954595"><span class="hs-identifier hs-var hs-var">mkEnclosingDisk'</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679954594"><span class="annot"><span class="annottext">r :: Point 2 r :+ p
+</span><a href="#local-6989586621679954594"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span id="local-6989586621679954593"><span class="annot"><span class="annottext">d :: Disk () r
+</span><a href="#local-6989586621679954593"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Disk () r -&gt; [Point 2 r :+ p] -&gt; Bool
+forall (t :: * -&gt; *) r p extra.
+(Foldable t, Ord r, Num r) =&gt;
+Disk p r -&gt; t (Point 2 r :+ extra) -&gt; Bool
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#isEnclosingDisk"><span class="hs-identifier hs-var">isEnclosingDisk</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954593"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679954628"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskResult p r -&gt; Maybe (DiskResult p r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+forall p r.
+Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-var">DiskResult</span></a></span><span> </span><span class="annot"><span class="annottext">Disk () r
+</span><a href="#local-6989586621679954593"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; (Point 2 r :+ p)
+-&gt; (Point 2 r :+ p)
+-&gt; TwoOrThree (Point 2 r :+ p)
+forall a. a -&gt; a -&gt; a -&gt; TwoOrThree a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#Three"><span class="hs-identifier hs-var">Three</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954630"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954629"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954594"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>                              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskResult p r)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span id="local-6989586621679954699"><span id="local-6989586621679954700"><span id="local-6989586621679954701"><span id="local-6989586621679954702"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#isEnclosingDisk"><span class="hs-identifier hs-type">isEnclosingDisk</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679954702"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954701"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679954701"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Ball.html#Disk"><span class="hs-identifier hs-type">Disk</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954700"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954701"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679954702"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954701"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954699"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span></span><span>
+</span><span id="line-132"></span><span id="isEnclosingDisk"><span class="annot"><span class="annottext">isEnclosingDisk :: Disk p r -&gt; t (Point 2 r :+ extra) -&gt; Bool
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#isEnclosingDisk"><span class="hs-identifier hs-var hs-var">isEnclosingDisk</span></a></span></span><span> </span><span id="local-6989586621679954591"><span class="annot"><span class="annottext">d :: Disk p r
+</span><a href="#local-6989586621679954591"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ extra) -&gt; Bool) -&gt; t (Point 2 r :+ extra) -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679954589"><span class="annot"><span class="annottext">s :: Point 2 r :+ extra
+</span><a href="#local-6989586621679954589"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ extra
+</span><a href="#local-6989586621679954589"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ extra)
+-&gt; Getting (Point 2 r) (Point 2 r :+ extra) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ extra) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Disk p r -&gt; Bool
+forall (d :: Nat) r p.
+(Arity d, Ord r, Num r) =&gt;
+Point d r -&gt; Ball d p r -&gt; Bool
+</span><a href="Data.Geometry.Ball.html#inClosedBall"><span class="hs-operator hs-var">`inClosedBall`</span></a></span><span> </span><span class="annot"><span class="annottext">Disk p r
+</span><a href="#local-6989586621679954591"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- | Constructs the initial 'DiskResult' from two points</span><span>
+</span><span id="line-135"></span><span id="local-6989586621679954765"><span id="local-6989586621679954766"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#initial"><span class="hs-identifier hs-type">initial</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679954766"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954766"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954765"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679954766"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679954765"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-type">DiskResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954765"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679954766"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-136"></span><span id="initial"><span class="annot"><span class="annottext">initial :: (Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#initial"><span class="hs-identifier hs-var hs-var">initial</span></a></span></span><span> </span><span id="local-6989586621679954588"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679954588"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679954587"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679954587"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+forall p r.
+Disk () r -&gt; TwoOrThree (Point 2 r :+ p) -&gt; DiskResult p r
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#DiskResult"><span class="hs-identifier hs-var">DiskResult</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Disk () r
+forall (d :: Nat) r.
+(Arity d, Fractional r) =&gt;
+Point d r -&gt; Point d r -&gt; Ball d () r
+</span><a href="Data.Geometry.Ball.html#fromDiameter"><span class="hs-identifier hs-var">fromDiameter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954588"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954587"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; (Point 2 r :+ p) -&gt; TwoOrThree (Point 2 r :+ p)
+forall a. a -&gt; a -&gt; TwoOrThree a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.Types.html#Two"><span class="hs-identifier hs-var">Two</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954588"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679954587"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span id="local-6989586621679954585"><span id="local-6989586621679954586"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#maximumOn"><span class="hs-identifier hs-type">maximumOn</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954586"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679954585"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679954586"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679954585"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679954585"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-139"></span><span id="maximumOn"><span class="annot"><span class="annottext">maximumOn :: (a -&gt; b) -&gt; [a] -&gt; Maybe a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#maximumOn"><span class="hs-identifier hs-var hs-var">maximumOn</span></a></span></span><span> </span><span id="local-6989586621679954584"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679954584"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679954583"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679954583"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe a) -&gt; a -&gt; Maybe a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">List.maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; a -&gt; a -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679954584"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679954583"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span id="local-6989586621679954733"><span id="local-6989586621679954734"><span class="annot"><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#minimumOn"><span class="hs-identifier hs-type">minimumOn</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679954734"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679954733"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679954734"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679954733"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679954733"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-144"></span><span id="minimumOn"><span class="annot"><span class="annottext">minimumOn :: (a -&gt; b) -&gt; [a] -&gt; Maybe a
+</span><a href="Algorithms.Geometry.SmallestEnclosingBall.RIC.html#minimumOn"><span class="hs-identifier hs-var hs-var">minimumOn</span></a></span></span><span> </span><span id="local-6989586621679954581"><span class="annot"><span class="annottext">f :: a -&gt; b
+</span><a href="#local-6989586621679954581"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679954580"><span class="annot"><span class="annottext">xs :: [a]
+</span><a href="#local-6989586621679954580"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe a) -&gt; a -&gt; Maybe a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">List.minimumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; a -&gt; a -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679954581"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679954580"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- test :: Maybe (DiskResult () Rational)</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- test = smallestEnclosingDiskWithPoints p q myPts</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-154"></span><span class="hs-comment">--     p = ext $ Point2 0 (-6)</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--     q = ext $ Point2 0 6</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- myPts = map ext [Point2 5 1, Point2 3 3, Point2 (-2) 2, Point2 (-4) 5]</span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- disk'' r = (r:+) &lt;$&gt; disk (p^.core) (q^.core) (r^.core)</span><span>
+</span><span id="line-161"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-162"></span><span class="hs-comment">--     p = ext $ Point2 0 (-6)</span><span>
+</span><span id="line-163"></span><span class="hs-comment">--     q = ext $ Point2 0 6</span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- maartenBug :: DiskResult () Double</span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- maartenBug = let (p:q:rest) = maartenBug'</span><span>
+</span><span id="line-168"></span><span class="hs-comment">--              in smallestEnclosingDisk' p q rest</span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span class="hs-comment">-- maartenBug' :: [Point 2 Double :+ ()]</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- maartenBug' = [ Point2 (7.2784424e-3) (249.23) :+ ()</span><span>
+</span><span id="line-172"></span><span class="hs-comment">--               , Point2 (-5.188493   ) (249.23) :+ ()</span><span>
+</span><span id="line-173"></span><span class="hs-comment">--               , Point2 (-10.382694  ) (249.23) :+ ()</span><span>
+</span><span id="line-174"></span><span class="hs-comment">--               , Point2 (-15.575621  ) (249.23) :+ ()</span><span>
+</span><span id="line-175"></span><span class="hs-comment">--               , Point2 (0.0         ) (249.23) :+ ()</span><span>
+</span><span id="line-176"></span><span class="hs-comment">--               , Point2 (0.0         ) (239.9031) :+ ()</span><span>
+</span><span id="line-177"></span><span class="hs-comment">--               , Point2 (0.0         ) (230.37791) :+ ()</span><span>
+</span><span id="line-178"></span><span class="hs-comment">--               , Point2 (0.0         ) (220.67882) :+ ()</span><span>
+</span><span id="line-179"></span><span class="hs-comment">--               ]</span><span>
+</span><span id="line-180"></span></pre></body></html>
