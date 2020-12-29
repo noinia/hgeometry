@@ -3,12 +3,13 @@ module Data.Vector.Circular.Util where
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.Lens
+import           Data.Ext
 import           Data.Maybe
 import           Data.Semigroup.Foldable
-import qualified Data.Vector                 as V
-import           Data.Vector.Circular        as CV
-import qualified Data.Vector.NonEmpty        as NV
-import           Test.QuickCheck             (Arbitrary (..), NonEmptyList (..))
+import qualified Data.Vector as V
+import           Data.Vector.Circular as CV
+import qualified Data.Vector.NonEmpty as NV
+import           Test.QuickCheck (Arbitrary (..), NonEmptyList (..))
 
 
 -- FIXME: Upstream this to the non-empty vector library?
@@ -57,3 +58,14 @@ instance Arbitrary a => Arbitrary (CircularVector a) where
 
 map :: (a -> b) -> CircularVector a -> CircularVector b
 map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot
+
+
+-- | label the circular vector with indices, starting from zero at the
+-- current focus, going right.
+--
+-- Running time: \(O(n)\)
+withIndicesRight                      :: CircularVector a -> CircularVector (Int :+ a)
+withIndicesRight (CircularVector v s) = CircularVector v' s
+  where
+    n  = length v
+    v' = NV.imap (\i x -> ((i-s) `mod` n) :+ x) v
