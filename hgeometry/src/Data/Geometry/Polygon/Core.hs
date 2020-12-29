@@ -74,7 +74,7 @@ import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable                                              as F
+import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box                                          (IsBoxable (..),
                                                                              boundingBoxList')
@@ -88,20 +88,20 @@ import           Data.Geometry.Triangle                                     (Tri
 import           Data.Geometry.Vector                                       (Additive (zero, (^+^)),
                                                                              Affine ((.+^), (.-.)),
                                                                              (*^), (^*), (^/))
-import qualified Data.List                                                  as List
-import qualified Data.List.NonEmpty                                         as NonEmpty
-import           Data.Maybe                                                 (catMaybes, mapMaybe)
-import           Data.Ord                                                   (comparing)
+import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (catMaybes, mapMaybe)
+import           Data.Ord (comparing)
 import           Data.Ratio
-import           Data.Semigroup                                             (sconcat)
+import           Data.Semigroup (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence                                              as Seq
+import qualified Data.Sequence as Seq
 import           Data.Util
-import           Data.Vector                                                (Vector)
-import           Data.Vector.Circular                                       (CircularVector)
-import qualified Data.Vector.Circular                                       as CV
-import qualified Data.Vector.Circular.Util                                  as CV
-import           Data.Vinyl.CoRec                                           (asA)
+import           Data.Vector (Vector)
+import           Data.Vector.Circular (CircularVector)
+import qualified Data.Vector.Circular as CV
+import qualified Data.Vector.Circular.Util as CV
+import           Data.Vinyl.CoRec (asA)
 
 -- import Data.RealNumber.Rational
 
@@ -142,7 +142,7 @@ data Polygon (t :: PolygonType) p r where
   MultiPolygon  :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon  p r
 
 newtype Vertices a = Vertices (CircularVector a)
-  deriving (Functor, Foldable, Traversable, NFData, Eq, Ord)
+  deriving (Functor, Foldable, Foldable1, Traversable, NFData, Eq, Ord)
 
 -- | Prism to 'test' if we are a simple polygon
 --

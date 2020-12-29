@@ -86,7 +86,7 @@ Main Algorithm
 > maxBaseArea    :: PointSet -> Area
 > maxBaseArea [] = 0
 > maxBaseArea p  = case convexHull . NonEmpty.fromList $ map ext p of
->     ch@(ConvexPolygon h) -> case F.toList $ h ^. outerBoundary of
+>     ch@(ConvexPolygon h) -> case F.toList $ h ^. outerBoundaryVector  of
 >                               [_,_]   -> 0
 >                               [a,b,c] -> triangArea $ Triangle a b c
 >                               _       -> maxAreaQuadrangle ch
@@ -117,8 +117,8 @@ vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 > allChains (ConvexPolygon ch) =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
 >   where
->     n   = F.length $ ch^.outerBoundary
->     chA = listArray (1,n) . map (^.core) . F.toList $ ch^.outerBoundary
+>     n   = F.length $ ch^.outerBoundaryVector
+>     chA = listArray (1,n) . map (^.core) . F.toList $ ch^.outerBoundaryVector
 >     rest i = [i+2.. if i == 1 then n - 1 else n ]
 
 we make sure that we only select non-neighbouring pairs. Hence the i+2 in rest
