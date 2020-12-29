@@ -27,8 +27,8 @@ testLP = LinearProgram (Vector2 0 (-1)) [ above $ Line (Point2 0 0) (Vector2 2  
                                         ]
 
 
-test :: IO (Maybe (Point 2 Rational))
-test = solveBoundedLinearProgram testLP
+-- test :: IO (Maybe (Point 2 Rational))
+-- test = solveBoundedLinearProgram testLP
 
 --------------------------------------------------------------------------------
 
