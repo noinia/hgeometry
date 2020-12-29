@@ -436,8 +436,8 @@ inConvex p (ConvexPolygon poly)
             if inTriangle p (Triangle point0 (point a) (point b)) == Outside
               then Outside
               else Inside
-      | ccw' point0 (point c) p' == CCW = worker a c
-      | otherwise                       = worker c b
+      | ccw' point0 (point c) p' == CCW = worker c b
+      | otherwise                       = worker a c
       where c = (a+b) `div` 2
     point x = poly ^. outerVertex x
 
