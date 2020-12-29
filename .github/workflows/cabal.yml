@@ -29,6 +29,7 @@ jobs:
         path: ~/.cabal
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
         restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.ghc }}-
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
