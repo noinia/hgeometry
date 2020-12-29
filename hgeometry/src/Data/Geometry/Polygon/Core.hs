@@ -898,7 +898,6 @@ strictlyConvexVertices = \case
     map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
       strictlyConvexVertices' vs <> concatMap reflexVertices' hs
 
-
 ----------------------------------------
 
 -- | Return (the indices of) all reflex vertices, in increasing order

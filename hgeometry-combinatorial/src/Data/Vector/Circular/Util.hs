@@ -59,7 +59,6 @@ instance Arbitrary a => Arbitrary (CircularVector a) where
 map :: (a -> b) -> CircularVector a -> CircularVector b
 map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot
 
-
 -- | label the circular vector with indices, starting from zero at the
 -- current focus, going right.
 --
@@ -69,3 +68,6 @@ withIndicesRight (CircularVector v s) = CircularVector v' s
   where
     n  = length v
     v' = NV.imap (\i x -> ((i-s) `mod` n) :+ x) v
+
+imap :: (Int -> a -> b) -> CircularVector a -> CircularVector b
+imap f = fromVector . NV.imap f . toNonEmptyVector
