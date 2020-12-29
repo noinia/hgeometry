@@ -10,7 +10,6 @@ import           Data.Geometry.SegmentTree (I(..))
 import qualified Data.Geometry.SegmentTree as SegTree
 import qualified Data.List.NonEmpty as NonEmpty
 import           Test.Hspec
-import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 import           Test.Util
@@ -42,7 +41,7 @@ allSameAsNaiveIT is = all (sameAsNaive is (\q t -> IntTree.search q t
                                          , IntTree.fromIntervals $ F.toList is))
 
 spec :: Spec
-spec = modifyMaxSuccess (const 1000) $ do
+spec = do
     describe "Same as Naive" $ do
       it "quickcheck segmentTree" $
         property $ \(Intervals is :: Intervals Word) -> allSameAsNaive is

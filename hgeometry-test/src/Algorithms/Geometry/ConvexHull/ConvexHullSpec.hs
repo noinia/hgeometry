@@ -21,7 +21,7 @@ import           Test.QuickCheck.Instances ()
 spec :: Spec
 spec = do
     describe "ConvexHull Algorithms" $ do
-      modifyMaxSize (const 1000) . modifyMaxSuccess (const 1000) $ do
+      modifyMaxSize (const 1000) $ do
         describe "GrahamScan and DivideAnd Conquer are the same" $ do
           it "quickcheck convex hull " $
             property $ \pts ->
