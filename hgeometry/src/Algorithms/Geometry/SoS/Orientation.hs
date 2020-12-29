@@ -73,4 +73,4 @@ sideTest'' = signDet . Matrix . fmap mkLambdaRow
 -- in a homogeneous matrix represetnation. I.e. we add a 1 as an
 -- additonal column at the end.
 mkLambdaRow :: (Num r, Arity d, Arity (d+1)) => Point d r -> Vector (d+1) r
-mkLambdaRow = flip snoc 1 . view vector'
+mkLambdaRow = flip snoc 1 . view vector

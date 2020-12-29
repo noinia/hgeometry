@@ -1,4 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.PolygonTriangulation.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.PolygonTriangulation.Types where
 
 import           Control.Lens
@@ -15,6 +22,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
+-- | After triangulation, edges are either from the original polygon or a new diagonal.
 data PolygonEdgeType = Original | Diagonal
                      deriving (Show,Read,Eq)
 

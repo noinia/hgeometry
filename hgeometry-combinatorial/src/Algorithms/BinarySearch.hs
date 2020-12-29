@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.BinarySearch
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.BinarySearch where
 
 import Data.Sequence(Seq, ViewL(..),ViewR(..))

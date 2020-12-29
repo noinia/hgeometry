@@ -29,10 +29,9 @@ import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import           Data.Geometry.Polygon
 import           Data.Geometry.Svg.MathCoordinateSystem
-import           Data.Geometry.Transformation (Matrix)
+import           Data.Geometry.Matrix (Matrix)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
-import           Data.Monoid (mconcat)
 import           Data.Proxy
 import           Data.Ratio
 import           Data.Semigroup.Foldable (toNonEmpty)
@@ -127,7 +126,7 @@ instance Integral a => ToValue (Ratio a) where
 instance Real r => ToValue (PathSegment r) where
   toValue = \case
     PolyLineSegment pl -> Svg.mkPath . toPath $ pl^.points.to toNonEmpty
-    PolygonPath  pg    -> Svg.mkPath $ do toPath $ pg^.outerBoundary.to toNonEmpty
+    PolygonPath  pg    -> Svg.mkPath $ do toPath $ pg^.outerBoundaryVector.to toNonEmpty
                                           Svg.z
     EllipseSegment _   -> undefined
     _                  -> error "toValue: not implemented yet"

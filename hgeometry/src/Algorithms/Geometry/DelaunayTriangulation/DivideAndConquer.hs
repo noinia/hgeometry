@@ -1,30 +1,41 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+  (
+    -- * Divide & Conqueror Delaunay Triangulation
+    delaunayTriangulation
+  ) where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
+import           Algorithms.Geometry.ConvexHull.GrahamScan       as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.BinaryTree
-import qualified Data.CircularList as CL
-import qualified Data.CircularList.Util as CU
-import qualified Data.CircularSeq as CS
+import qualified Data.CircularList                               as CL
+import qualified Data.CircularList.Util                          as CU
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry hiding (rotateTo)
-import           Data.Geometry.Ball (disk, insideBall)
+import qualified Data.Foldable                                   as F
+import           Data.Function                                   (on)
+import           Data.Geometry                                   hiding (rotateTo)
+import           Data.Geometry.Ball                              (disk, insideBall)
 import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..), simplePolygon)
-import qualified Data.Geometry.Polygon.Convex as Convex
-import qualified Data.IntMap.Strict as IM
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Maybe (fromJust, fromMaybe)
+import           Data.Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
+import qualified Data.Geometry.Polygon.Convex                    as Convex
+import qualified Data.IntMap.Strict                              as IM
+import qualified Data.List                                       as L
+import qualified Data.List.NonEmpty                              as NonEmpty
+import qualified Data.Map                                        as M
+import           Data.Maybe                                      (fromJust, fromMaybe)
 import           Data.Measured.Size
-import qualified Data.Vector as V
+import qualified Data.Vector                                     as V
+import qualified Data.Vector.Circular.Util                       as CV
 
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
@@ -41,7 +52,6 @@ import qualified Data.Vector as V
 -- successor (i.e. its predecessor) on the convex hull
 --
 -- Rotating Right <-> rotate clockwise
-
 
 -- | Computes the delaunay triangulation of a set of points.
 --
@@ -73,7 +83,7 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, ConvexPolygon $ fromPoints [withID p i])
+                     in (IM.singleton i CL.empty, ConvexPolygon $ unsafeFromPoints [withID p i])
   | size' pts <= 3 = let pts'  = NonEmpty.fromList
                                . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                . F.toList $ pts
@@ -99,8 +109,8 @@ firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
 -- pre: at least two elements
 fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . F.toList . CS.rightElements
-                                         $ p^.simplePolygon.outerBoundary
+                                         . F.toList . CV.rightElements
+                                         $ p^.simplePolygon.outerBoundaryVector
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
                         in IM.fromList es
@@ -284,6 +294,7 @@ pred' = CL.rotR
 succ' :: CL.CList a -> CL.CList a
 succ' = CL.rotL
 
+-- | Return the focus of the CList, throwing an exception if the list is empty.
 focus' :: CL.CList a -> a
 focus' = fromJust . CL.focus
 
@@ -296,4 +307,4 @@ withID     :: c :+ e -> e' -> c :+ (e :+ e')
 withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
-lookup'' k = fromJust . IM.lookup k
+lookup'' k m = m IM.! k

@@ -1,4 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Graph.DFS
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Graph.DFS where
 
 import           Control.Monad.ST (ST,runST)

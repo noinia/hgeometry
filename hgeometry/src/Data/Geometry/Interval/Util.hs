@@ -1,4 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Interval.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Interval.Util where
 
 import Control.DeepSeq

@@ -9,11 +9,8 @@ import           Data.Geometry.Ipe.IpeOut
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.QuadTree
 import           Data.Geometry.QuadTree.Cell
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Text as T
 import           Data.Tree.Util (TreeNode(..))
-import           Data.Vinyl.Notation
-import           Data.Vinyl.Core
 --------------------------------------------------------------------------------
 
 drawCell :: Fractional r => IpeOut (Cell r) Path r

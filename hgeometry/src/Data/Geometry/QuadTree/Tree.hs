@@ -1,5 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.QuadTree.Tree
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.QuadTree.Tree where
 
 

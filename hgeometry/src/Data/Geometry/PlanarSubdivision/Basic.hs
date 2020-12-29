@@ -281,7 +281,7 @@ numDarts = V.length . _rawDartData
 numEdges :: PlanarSubdivision s v e f r  -> Int
 numEdges = (`div` 2) . V.length . _rawDartData
 
--- | Get the number of faces
+-- | \( O(1) \). Get the number of faces
 --
 -- >>> numFaces myGraph
 -- 4
@@ -328,11 +328,12 @@ edges' = V.filter isPositive . darts'
 edges    :: PlanarSubdivision s v e f r  -> V.Vector (Dart s, e)
 edges ps = (\e -> (e,ps^.dataOf e)) <$> edges' ps
 
-
+-- | \( O(n) \). Vector of all primal faces.
 faces'    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s)
 faces' ps = let n = numFaces ps
             in V.fromList $ map (FaceId . VertexId) [0..n-1]
 
+-- | \( O(n) \). Vector of all primal faces with associated data.
 faces    :: PlanarSubdivision s v e f r -> V.Vector (FaceId' s, FaceData (Dart s) f)
 faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
@@ -641,7 +642,7 @@ boundary' d ps = let (_,d',g) = asLocalD d ps
 --
 -- \(O(k)\), where \(k\) is the complexity of the outer boundary of the face
 rawFaceBoundary      :: FaceId' s -> PlanarSubdivision s v e f r -> SimplePolygon v r :+ f
-rawFaceBoundary i ps = fromPoints pts :+ (ps^.dataOf i)
+rawFaceBoundary i ps = unsafeFromPoints pts :+ (ps^.dataOf i)
   where
     d   = V.head $ outerBoundaryDarts i ps
     pts = (\d' -> PG.vtxDataToExt $ ps^.vertexDataOf (headOf d' ps))
@@ -655,9 +656,9 @@ rawFacePolygon      :: FaceId' s -> PlanarSubdivision s v e f r
                     -> SomePolygon v r :+ f
 rawFacePolygon i ps = case F.toList $ holesOf i ps of
                         [] -> Left  res                               :+ x
-                        hs -> Right (MultiPolygon vs $ map toHole hs) :+ x
+                        hs -> Right (MultiPolygon res $ map toHole hs) :+ x
   where
-    res@(SimplePolygon vs) :+ x = rawFaceBoundary i ps
+    res :+ x = rawFaceBoundary i ps
     toHole d = rawFaceBoundary (leftFace d ps) ps ^. core
 
 -- | Lists all *internal* faces of the planar subdivision.

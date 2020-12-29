@@ -1,3 +1,11 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.SoS.Symbolic
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.SoS.Symbolic(
     EpsFold
   , eps, mkEpsFold
@@ -362,4 +370,4 @@ maxMultiplicity (Bag m) = maximum . (0:) . map (1+) . Map.elems $ m
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
 toSymbolic          :: (Ord i, Arity d) => Point d r :+ i -> Point d (Symbolic (i,Int) r)
-toSymbolic (p :+ i) = p&vector' %~ imap (\j x -> symbolic x (i,j))
+toSymbolic (p :+ i) = p&vector %~ imap (\j x -> symbolic x (i,j))

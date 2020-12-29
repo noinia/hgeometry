@@ -3,12 +3,13 @@ name: GitHub Page
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ] # only used for testing
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      STACK_YAML: stack-haddock.yaml
 
     steps:
     - uses: actions/checkout@v2
@@ -46,12 +47,16 @@ jobs:
             \"message\": \"$COVERAGE%\", \
             \"color\": \"success\" \
           }" > haddock_badge.json
+        mkdir --parents ../pages/docs/
+        cp -r `stack path --local-doc-root`/ ../pages/docs/
+        cp haddock.txt ../pages/docs/
+        cp haddock_badge.json ../pages/docs/
         cat haddock.txt
         cat haddock_badge.json
 
-    # - name: Deploy 🚀
-    #   uses: JamesIves/github-pages-deploy-action@3.5.9
-    #   with:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     BRANCH: gh-pages # The branch the action should deploy to.
-    #     FOLDER: pages # The folder the action should deploy.
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: docs # The branch the action should deploy to.
+        FOLDER: pages # The folder the action should deploy.
