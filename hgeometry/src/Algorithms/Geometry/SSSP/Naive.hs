@@ -32,11 +32,11 @@ import           Linear.Affine             ((.-.))
 
 type SSSP = VU.Vector Int
 
--- | O(n^3) Single-Source Shortest Path.
+-- | \( O(n^3) \) Single-Source Shortest Path.
 sssp :: (Real r, Fractional r) => SimplePolygon p r -> SSSP
 sssp p = V.head . sssp' $ p
 
--- | O(n^3) Single-Source Shortest Path from all vertices.
+-- | \( O(n^3) \) Single-Source Shortest Path from all vertices.
 sssp' :: (Real r, Fractional r) => SimplePolygon p r -> Vector SSSP
 sssp' p = runST $ do
     -- Create an n*n matrix containing paths and distances between vertices.
@@ -53,7 +53,7 @@ sssp' p = runST $ do
     infinity = read "Infinity" :: Double
     n = F.length (p ^. outerBoundaryVector)
 
--- O(n^3)
+-- \( O(n^3) \)
 visibleEdges :: (Real r, Fractional r) => SimplePolygon p r -> [(Int, Int, Double)]
 visibleEdges p = concat
   [

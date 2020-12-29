@@ -42,7 +42,6 @@ import qualified Data.Vector.Mutable                                        as M
 
 
 -- import Debug.Trace
--- import qualified          Data.CircularSeq as CC
 ----------------------------------------------------------------------------------
 
 data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)

@@ -24,7 +24,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
--- | Naive O(n^4) time implementation of the delaunay triangulation. Simply
+-- | Naive \( O(n^4) \) time implementation of the delaunay triangulation. Simply
 -- tries each triple (p,q,r) and tests if it is delaunay, i.e. if there are no
 -- other points in the circle defined by p, q, and r.
 --
@@ -63,7 +63,7 @@ toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
 
 -- | Given a particular point u and a list of points vs, sort the points vs in
 -- CW order around u.
--- running time: O(m log m), where m=|vs| is the number of vertices to sort.
+-- running time: \( O(m log m) \), where m=|vs| is the number of vertices to sort.
 sortAroundMapping               :: (Num r, Ord r)
                           => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
 sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround' (f u) (map f vs)
@@ -78,8 +78,7 @@ extractEdges = map L.head . L.group . L.sort
                -- we sort, group, and take the head of the lists
 
 
--- | Test if the given three points form a triangle in the delaunay triangulation.
--- running time: O(n)
+-- | \( O(n) \) Test if the given three points form a triangle in the delaunay triangulation.
 isDelaunay                :: (Fractional r, Ord r)
                           => Mapping p r -> VertexID -> VertexID -> VertexID -> Bool
 isDelaunay (_,ptsV) p q r = case disk (pt p) (pt q) (pt r) of

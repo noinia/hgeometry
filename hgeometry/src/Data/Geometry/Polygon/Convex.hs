@@ -144,7 +144,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
 --        Use unsafe indexing.
--- O(log n)
+-- \( O(log n) \)
 findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
 findMaxWith cmp p = CV.index v (worker 0 (F.length v))
@@ -167,7 +167,7 @@ findMaxWith cmp p = CV.index v (worker 0 (F.length v))
         localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
     isUpwards idx = idx `icmp` (idx+1) /= GT
 
-{- Convex binary search using sequences in O(log^2 n)
+{- Convex binary search using sequences in \( O(log^2 n) \)
 
 findMaxWith       :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
                   -> ConvexPolygon p r -> Point 2 r :+ p
@@ -335,7 +335,7 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --          the two polygons.
 --        - The vertices of the polygons are given in clockwise order
 --
--- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
+-- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent       :: (Num r, Ord r)
                    => ConvexPolygon p r
                    -> ConvexPolygon p r
