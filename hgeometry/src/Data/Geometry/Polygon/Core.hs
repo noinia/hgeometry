@@ -17,10 +17,16 @@ module Data.Geometry.Polygon.Core
 
     -- * Construction
   , fromPoints
+  , fromCircularVector
+
+  , simpleFromPoints
+  , simpleFromCircularVector
+
   , unsafeFromPoints
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
+  , toPoints
 
   , size
   , polygonVertices, listEdges
@@ -64,7 +70,6 @@ module Data.Geometry.Polygon.Core
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BO
 import           Control.DeepSeq
-import           Control.Exception
 import           Control.Lens                                               (Getter, Lens', Prism',
                                                                              Traversal', lens, over,
                                                                              prism', to, toListOf,
@@ -92,12 +97,12 @@ import qualified Data.List                                                  as L
 import qualified Data.List.NonEmpty                                         as NonEmpty
 import           Data.Maybe                                                 (catMaybes, mapMaybe)
 import           Data.Ord                                                   (comparing)
-import           Data.Ratio
 import           Data.Semigroup                                             (sconcat)
 import           Data.Semigroup.Foldable
 import qualified Data.Sequence                                              as Seq
 import           Data.Util
 import           Data.Vector                                                (Vector)
+import qualified Data.Vector                                                as V
 import           Data.Vector.Circular                                       (CircularVector)
 import qualified Data.Vector.Circular                                       as CV
 import qualified Data.Vector.Circular.Util                                  as CV
@@ -142,7 +147,7 @@ data Polygon (t :: PolygonType) p r where
   MultiPolygon  :: SimplePolygon p r -> [SimplePolygon p r] -> MultiPolygon  p r
 
 newtype Vertices a = Vertices (CircularVector a)
-  deriving (Functor, Foldable, Traversable, NFData, Eq, Ord)
+  deriving (Functor, Foldable, Foldable1, Traversable, NFData, Eq, Ord)
 
 -- | Prism to 'test' if we are a simple polygon
 --
@@ -372,68 +377,50 @@ polygonVertices (MultiPolygon vs hs) =
   sconcat $ toNonEmpty (polygonVertices vs) NonEmpty.:| map polygonVertices hs
 
 
+requireThree :: String -> [a] -> [a]
+requireThree _ lst@(_:_:_:_) = lst
+requireThree label _ = error $
+  "Data.Geometry.Polygon." ++ label ++ ": Polygons must have at least three points."
 
-
--- Non-reducing ratio.
+-- | /O(n)/. Creates a polygon from the given list of vertices.
 --
--- We can take any instance of Num and turn it into a Fractional by wrapping it in
--- PlainRatio. Thus we can query for edge intersections without imposing a Fractional
--- constraint on our point-type.
--- Why not use Data.Ratio, you ask? Well, Data.Ratio imposes a Integral constraint in
--- order to reduce the fraction as much as possible. We don't care about reducing the
--- fraction, we just want a boolean answer to whether some lines intersect or not.
-data PlainRatio a = Over a a deriving (Show)
+-- The points are placed in CCW order if they are not already. Overlapping
+-- edges and repeated vertices are allowed.
+--
+fromPoints :: forall p r. (Eq r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
+fromPoints = fromCircularVector . CV.unsafeFromList . requireThree "fromPoints"
 
-instance Num a => Num (PlainRatio a) where
-  (x `Over` y) + (x' `Over` y') = (x*y' + x'*y) `Over` (y*y')
-  (x `Over` y) - (x' `Over` y') = (x*y' - x'*y) `Over` (y*y')
-  (x `Over` y) * (x' `Over` y') = (x*x') `Over` (y*y')
-  negate (x `Over` y)           = negate x `Over` y
-  abs (x `Over` y)              = abs x `Over` y
-  signum (x `Over` _)           = signum x `Over` 1
-  fromInteger x                 = fromInteger x `Over` 1
-
-instance (Num a, Ord a) => Fractional (PlainRatio a) where
-  (x `Over` y) / (x' `Over` y')
-    | x' < 0    = negate (x*y') `Over` negate (y*x')
-    | otherwise = (x*y') `Over` (y*x')
-  recip (0 `Over` _) = throw RatioZeroDenominator
-  recip (x `Over` y)
-    | x < 0          = negate y `Over` negate x
-    | otherwise      = y `Over` x
-  fromRational r = fromInteger (numerator r) `Over` fromInteger (denominator r)
-
-instance (Num a, Eq a) => Eq (PlainRatio a) where
-  (x `Over` y) == (x' `Over` y') = x*y' == x'*y
-
-instance (Num a, Ord a) => Ord (PlainRatio a) where
-  (x `Over` y) `compare` (x' `Over` y') =
-    compare (x*y') (x'*y)
-
-
+-- | /O(n)/. Creates a polygon from the given vector of vertices.
+--
+-- The points are placed in CCW order if they are not already. Overlapping
+-- edges and repeated vertices are allowed.
+--
+fromCircularVector :: forall p r. (Eq r, Num r) => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
+fromCircularVector = toCounterClockWiseOrder . unsafeFromCircularVector
 
 -- | /O(n log n)/. Creates a simple polygon from the given list of vertices.
 --
--- The following conditions must be true and are checked:
+-- The points are placed in CCW order if they are not already. Overlapping
+-- edges and repeated vertices are /not/ allowed and will trigger an exception.
 --
---  * The polygon has at least three vertices.
---  * Polygon edges may not intersect.
---  * Vertices may not be repeated.
+simpleFromPoints :: forall p r. (Ord r, Fractional r) => [Point 2 r :+ p] -> SimplePolygon p r
+simpleFromPoints =
+  simpleFromCircularVector . CV.unsafeFromList . requireThree "simpleFromPoints"
+
+-- | /O(n log n)/. Creates a simple polygon from the given vector of vertices.
 --
--- Note: Using 'Double' or 'Float' for coordinates may trigger the
---       self-intersection check if edges are very close together.
---       If this happens, you may want to use `unsafeFromPoints` or
---       switch to `Rational`.
-fromPoints :: forall p r. (Ord r, Num r) => [Point 2 r :+ p] -> SimplePolygon p r
-fromPoints lst@(_:_:_:_) =
-  let p = toCounterClockWiseOrder . unsafeFromCircularVector . CV.unsafeFromList $ lst
-      plainEdges :: [LineSegment 2 p (PlainRatio r)]
-      plainEdges = map (fmap (\v -> Over v 1)) (listEdges p)
+-- The points are placed in CCW order if they are not already. Overlapping
+-- edges and repeated vertices are /not/ allowed and will trigger an exception.
+--
+simpleFromCircularVector :: forall p r. (Ord r, Fractional r)
+  => CircularVector (Point 2 r :+ p) -> SimplePolygon p r
+simpleFromCircularVector v =
+  let p = fromCircularVector v
       hasInteriorIntersections = not . null . BO.interiorIntersections
-  in if hasInteriorIntersections plainEdges
-      then error "Data.Geometry.Polygon.fromPoints: Found self-intersections or repeated vertices."
+  in if hasInteriorIntersections (listEdges p)
+      then error "Data.Geometry.Polygon.simpleFromCircularVector: \
+                 \Found self-intersections or repeated vertices."
       else p
-fromPoints _ = error "Data.Geometry.Polygon.fromPoints: Polygons must have at least three points."
 
 -- | /O(n)/. Creates a simple polygon from the given list of vertices.
 --
@@ -458,10 +445,16 @@ unsafeFromVector = unsafeFromCircularVector . CV.unsafeFromVector
 -- toList (SimplePolygon c)   = F.toList c
 -- toList (MultiPolygon s hs) = toList s ++ concatMap toList hs
 
--- | Polygon points, from left to right.
+-- | \( O(n) \)
+--   Polygon points, from left to right.
 toVector :: Polygon t p r -> Vector (Point 2 r :+ p)
 toVector p@SimplePolygon{}   = CV.toVector $ p^.outerBoundaryVector
 toVector (MultiPolygon s hs) = foldr (<>) (toVector s) (map toVector hs)
+
+-- | \( O(n) \)
+--   Polygon points, from left to right.
+toPoints :: Polygon t p r -> [Point 2 r :+ p]
+toPoints = V.toList . toVector
 
 -- | The edges along the outer boundary of the polygon. The edges are half open.
 --

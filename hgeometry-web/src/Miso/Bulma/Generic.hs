@@ -19,7 +19,7 @@ bulmaLink = link_ [ rel_ "stylesheet"
 iconLink :: View action
 iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
                         , defer_ "true"
-                        ] []
+                        ] mempty
 
 --------------------------------------------------------------------------------
 

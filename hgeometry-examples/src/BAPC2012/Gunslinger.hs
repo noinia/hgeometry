@@ -2,7 +2,8 @@ module BAPC2012.Gunslinger where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan
 import           Control.Lens
-import qualified Data.CircularSeq as C
+import qualified Data.Vector.Circular as C
+import qualified Data.Vector.Circular.Util as C
 import           Data.Ext
 import           Data.Fixed
 import qualified Data.Foldable as F
@@ -100,7 +101,7 @@ escape (Input l h ds) = case convexHull . NonEmpty.fromList $
                                (l :+ Luke) : (h :+ Hatch) : map (:+ Dalton) ds of
     -- all positions are distinct, so the hull has at least two elements
     ConvexPolygon poly -> case C.findRotateTo (\p -> p^.extra == Luke) $
-                                 poly^.outerBoundary of
+                                 poly^.outerBoundaryVector of
       Nothing -> Impossible
       Just h  -> (distanceToHatch $ C.leftElements h)
                  `min`
