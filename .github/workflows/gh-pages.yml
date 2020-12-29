@@ -57,12 +57,8 @@ jobs:
         cat haddock.txt
         cat haddock_badge.json
 
-  deploy:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    needs: build
-    steps:
     - name: Deploy 🚀
+      if: github.ref == 'refs/heads/master'
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
