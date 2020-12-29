@@ -16,7 +16,6 @@ import           Control.Monad (forM_)
 import           Data.Aeson
 import           Data.Bifunctor
 import qualified Data.ByteString as B
-import           Data.Ext
 import           Data.Geometry.Point
 import qualified Data.List as List
 import qualified Data.PlanarGraph.AdjRep as PGA
@@ -123,11 +122,11 @@ makeCCW (Gr vs fs) = Gr (map sort' vs) fs
     location' = V.create $ do
                    a <- MV.new (length vs)
                    forM_ vs $ \(Vtx i p _ _) ->
-                     MV.write a i $ ext p
+                     MV.write a i p
                    pure a
     -- sort the adjacencies around every vertex v
     sort' (Vtx v p ajs x) = Vtx v p (List.sortBy (around p) ajs) x
-    around p (a,_) (b,_) = ccwCmpAround (ext p) (location' V.! a) (location' V.! b)
+    around p (a,_) (b,_) = ccwCmpAround p (location' V.! a) (location' V.! b)
                            -- note: since the graph is planar, there should not be
                            -- any pairs of points for which ccwCmpAround returns EQ
                            -- hence, no need to pick a secondary comparison

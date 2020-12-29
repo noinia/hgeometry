@@ -3,6 +3,8 @@ name: GitHub Page
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
@@ -39,7 +41,8 @@ jobs:
     - name: Haddock Badge
       run: |
         cd hgeometry
-        stack haddock 2>&1 | grep ") in " | cut -c25- | sort -hr > haddock.txt
+        stack haddock &> haddock.raw.txt
+        grep ") in " haddock.raw.txt | cut -c25- | sort -hr > haddock.txt
         COVERAGE=$(awk '{good += $3; total += $5} END {printf "%.0f", good/total*100}' haddock.txt)
         echo "\
           { \"schemaVersion\": 1, \
@@ -55,6 +58,7 @@ jobs:
         cat haddock_badge.json
 
     - name: Deploy 🚀
+      if: github.ref == 'refs/heads/master'
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
