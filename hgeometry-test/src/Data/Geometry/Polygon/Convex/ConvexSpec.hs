@@ -16,7 +16,6 @@ import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.PolygonSpec                 ()
 import qualified Data.List.NonEmpty                        as NonEmpty
-import           Data.Maybe
 import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular                      as CV
 import           Paths_hgeometry_test
@@ -36,7 +35,7 @@ instance Arbitrary (ConvexPolygon () Rational) where
     pure $ evalRand (randomConvex k granularity) (mkStdGen stdgen)
     where
       granularity = 1000000
-  shrink convex = mapMaybe convexPolygon (shrink (convex^.simplePolygon))
+  shrink convex = map convexPolygon (shrink (convex^.simplePolygon))
 
 --------------------------------------------------------------------------------
 
@@ -99,6 +98,19 @@ spec = do
           bPt = s ^. outerVertex b.core
           cPt = Point $ lerp 0.5 (coerce aPt) (coerce bPt)
       in inConvex cPt convex === Inside
+
+  -- Verify that convexPolygon always returns convex polygons.
+  specify "verifyConvex (convexPolygon p)" $
+    property $ \(p :: SimplePolygon () Rational) ->
+      verifyConvex (convexPolygon p)
+
+  specify "area (convexPolygon p) >= area p" $
+    property $ \(p :: SimplePolygon () Rational) ->
+      area (convexPolygon p ^. simplePolygon) >= area p
+
+  specify "size (convexPolygon p) <= size p" $
+    property $ \(p :: SimplePolygon () Rational) ->
+      size (convexPolygon p ^. simplePolygon) <= size p
 
 
 testCases    :: FilePath -> Spec

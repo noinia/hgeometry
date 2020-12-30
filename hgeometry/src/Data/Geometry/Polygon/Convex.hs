@@ -39,9 +39,10 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
-                                                 outerBoundaryVector, outerVertex, size,
-                                                 unsafeFromPoints, unsafeOuterBoundaryVector)
+import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid, fromPoints,
+                                                 outerBoundary, outerBoundaryVector, outerVertex,
+                                                 size, toPoints, unsafeFromPoints,
+                                                 unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -86,23 +87,34 @@ instance Fractional r => IsTransformable (ConvexPolygon p r) where
 instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
+-- FIXME: Could be a /lot/ faster.
+-- | \( O(n) \) Convex hull of a simple polygon.
+--
+--   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
+convexPolygon :: (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
+convexPolygon = ConvexPolygon . fromPoints . worker [] . toPoints . view outerBoundary . rot
+  where
+    worker (s1:s2:ss) []
+      | ccw' s2 s1 (Prelude.last ss) /= CCW = worker (s2:ss) []
+      | otherwise                   = reverse (s1:s2:ss)
+    worker stack [] = reverse stack
+    worker (s1:s2:ss) (x:xs)
+      | ccw' s2 s1 x /= CCW = worker (s2:ss) (x:xs) -- Not convex, pop stack
+      | otherwise           = worker (x:s1:s2:ss) xs -- Convex, push new vertex on stack
+    worker ss (x:xs) = worker (x:ss) xs
+    rot = over unsafeOuterBoundaryVector (CV.rotateToMaximumBy (compare `on` _core))
 
-convexPolygon :: (Ord r, Num r) => Polygon t p r -> Maybe (ConvexPolygon p r)
-convexPolygon p@SimplePolygon{} =
-  let convex = ConvexPolygon p in
-  if verifyConvex convex then Just convex else Nothing
-convexPolygon (MultiPolygon b []) = convexPolygon b
-convexPolygon _ = Nothing
-
+-- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
-isConvex = verifyConvex . ConvexPolygon
-
-verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
-verifyConvex (ConvexPolygon s) =
+isConvex s =
     CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
   where
     f a b c = ccw' a b c == CCW
     vs = s ^. outerBoundaryVector
+
+-- | \( O(n) \) Verify that a convex polygon is strictly convex.
+verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
+verifyConvex = isConvex . _simplePolygon
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
