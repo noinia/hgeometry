@@ -5,16 +5,17 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals, David Himmelstrup
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.Diameter.ConvexHull where
+module Algorithms.Geometry.Diameter.ConvexHull
+  ( diameter
+  , diametralPair
+  ) where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan
-import qualified Algorithms.Geometry.Diameter.Naive   as Naive
-import           Control.Lens
-import           Data.Ext
-import           Data.Geometry
-import qualified Data.Geometry.Polygon.Convex as Convex
-import           Data.List                                 (maximumBy)
-import           Data.List.NonEmpty                        (NonEmpty (..))
+import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
+import qualified Algorithms.Geometry.Diameter.Naive        as Naive
+import           Control.Lens                              ((^.))
+import           Data.Ext                                  (core, type (:+))
+import           Data.Geometry                             (Point, euclideanDist)
+import qualified Data.Geometry.Polygon.Convex              as Convex
 import qualified Data.List.NonEmpty                        as NonEmpty
 
 --------------------------------------------------------------------------------
