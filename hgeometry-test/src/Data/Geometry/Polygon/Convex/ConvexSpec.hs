@@ -105,6 +105,12 @@ spec = do
     property $ \(p :: SimplePolygon () Rational) ->
       verifyConvex (convexPolygon p)
 
+  specify "convexPolygon convex == convex" $
+    property $ \(p :: ConvexPolygon () Rational) ->
+      size (convexPolygon (p^.simplePolygon)^.simplePolygon)
+      ===
+      size (p^.simplePolygon)
+
   specify "area (convexPolygon p) >= area p" $
     property $ \(p :: SimplePolygon () Rational) ->
       area (convexPolygon p ^. simplePolygon) >= area p

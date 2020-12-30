@@ -35,6 +35,7 @@ module Data.Geometry.Polygon.Convex
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
+import           Control.Monad.ST
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
@@ -43,9 +44,9 @@ import           Data.Geometry.Boundary
 import           Data.Geometry.Box              (IsBoxable (..))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid, fromPoints,
-                                                 outerBoundary, outerBoundaryVector, outerVertex,
-                                                 size, toPoints, unsafeFromPoints,
+import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
+                                                 outerBoundaryVector, outerVertex, size,
+                                                 unsafeFromPoints, unsafeFromVector,
                                                  unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
@@ -63,6 +64,8 @@ import qualified Data.Vector                    as V
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
+import qualified Data.Vector.Mutable            as Mut
+import qualified Data.Vector.NonEmpty           as NE
 import qualified Data.Vector.Unboxed            as VU
 -- import           Data.Geometry.Ipe
 -- import           Debug.Trace
@@ -93,21 +96,67 @@ instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
 -- FIXME: Could be a /lot/ faster.
+-- \( O(n) \) Convex hull of a simple polygon.
+--
+--   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
+-- convexPolygon' :: (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
+-- convexPolygon' = ConvexPolygon . fromPoints . worker [] . toPoints . view outerBoundary . rot
+--   where
+--     worker (s1:s2:ss) []
+--       | ccw' s2 s1 (Prelude.last ss) /= CCW = worker (s2:ss) []
+--       | otherwise                   = reverse (s1:s2:ss)
+--     worker stack [] = reverse stack
+--     worker (s1:s2:ss) (x:xs)
+--       | ccw' s2 s1 x /= CCW = worker (s2:ss) (x:xs) -- Not convex, pop stack
+--       | otherwise           = worker (x:s1:s2:ss) xs -- Convex, push new vertex on stack
+--     worker ss (x:xs) = worker (x:ss) xs
+--     rot = over unsafeOuterBoundaryVector (CV.rotateToMaximumBy (compare `on` _core))
+
+-- Faster algorithm:
+--  1. Allocate output array. We know the convex polygon can at most have N vertices.
+--  2. Build the convex polygon by pushing vertices to the mutable output vector,
+--     maintaining the invariant that each vertex is convex.
+--  3. Once we've gone through all vertices of the simple polygon, we can freeze the mutable
+--     array since it'll never be written to again.
+--  4. But we're not done. The first and last vertex in the output array might not be convex.
+--     Drop the first or last vertex repeatedly until the output endpoints are convex.
+
 -- | \( O(n) \) Convex hull of a simple polygon.
 --
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
-convexPolygon :: (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
-convexPolygon = ConvexPolygon . fromPoints . worker [] . toPoints . view outerBoundary . rot
+convexPolygon :: forall t p r. (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
+convexPolygon p = ConvexPolygon $ unsafeFromVector $ reduce $ V.create $ do
+    v <- Mut.unsafeNew (size p) :: ST s (Mut.MVector s (Point 2 r :+ p))
+    build v 0 0
   where
-    worker (s1:s2:ss) []
-      | ccw' s2 s1 (Prelude.last ss) /= CCW = worker (s2:ss) []
-      | otherwise                   = reverse (s1:s2:ss)
-    worker stack [] = reverse stack
-    worker (s1:s2:ss) (x:xs)
-      | ccw' s2 s1 x /= CCW = worker (s2:ss) (x:xs) -- Not convex, pop stack
-      | otherwise           = worker (x:s1:s2:ss) xs -- Convex, push new vertex on stack
-    worker ss (x:xs) = worker (x:ss) xs
-    rot = over unsafeOuterBoundaryVector (CV.rotateToMaximumBy (compare `on` _core))
+    vs = CV.vector (p^.outerBoundaryVector)
+    build :: Mut.MVector s (Point 2 r :+ p) -> Int -> Int -> ST s (Mut.MVector s (Point 2 r :+ p))
+    build v convexI polyI
+      | polyI == NE.length vs = return $ Mut.unsafeTake convexI v
+      | convexI < 2 = do
+          let elt = NE.unsafeIndex vs polyI
+          Mut.unsafeWrite v convexI elt
+          build v (convexI+1) (polyI+1)
+      | otherwise = do
+          let elt = NE.unsafeIndex vs polyI
+          p2 <- Mut.unsafeRead v (convexI-1)
+          p1 <- Mut.unsafeRead v (convexI-2)
+          if ccw' p1 p2 elt == CCW
+            then do
+              Mut.unsafeWrite v convexI elt
+              build v (convexI+1) (polyI+1)
+            else build v (convexI-1) polyI
+    reduce v
+      | ccw' p1 p2 p3 /= CCW = reduce (V.unsafeInit v)
+      | ccw' p2 p3 p4 /= CCW = reduce (V.unsafeTail v)
+      | otherwise            = v
+      where
+        p1 = V.unsafeIndex v (V.length v-2)
+        p2 = V.unsafeIndex v (V.length v-1)
+        p3 = V.unsafeIndex v 0
+        p4 = V.unsafeIndex v 1
+
+
 
 -- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
