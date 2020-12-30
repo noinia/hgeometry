@@ -26,6 +26,10 @@ module Data.Geometry.Polygon.Convex
   , bottomMost
   , inConvex
   , randomConvex
+
+  , diameter
+  , diametralPair
+  , diametralIndexPair
   ) where
 
 import           Control.DeepSeq                (NFData)
@@ -54,6 +58,7 @@ import           Data.Maybe                     (fromJust)
 import           Data.Ord                       (comparing)
 import           Data.Semigroup.Foldable        (Foldable1 (..))
 import           Data.Util
+import qualified Data.Vector                    as V
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
@@ -440,6 +445,55 @@ inConvex p (ConvexPolygon poly)
       | otherwise                       = worker a c
       where c = (a+b) `div` 2
     point x = poly ^. outerVertex x
+
+--------------------------------------------------------------------------------
+-- Diameter
+
+-- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
+diameter :: (Ord r, Floating r) => ConvexPolygon p r -> r
+diameter p = euclideanDist (a^.core) (b^.core)
+  where
+    (a,b) = diametralPair p
+
+-- | \( O(n) \)
+--   Computes the Euclidean diametral pair by scanning antipodal pairs.
+diametralPair :: (Ord r, Num r) => ConvexPolygon p r -> (Point 2 r :+ p, Point 2 r :+ p)
+diametralPair p = (p^.simplePolygon.outerVertex a, p^.simplePolygon.outerVertex b)
+  where
+    (a,b) = diametralIndexPair p
+
+-- | \( O(n) \)
+--   Computes the Euclidean diametral pair by scanning antipodal pairs.
+diametralIndexPair :: (Ord r, Num r) => ConvexPolygon p r -> (Int, Int)
+diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
+  where
+    fn (a1,b1) (a2,b2) =
+      squaredEuclideanDist (p^.simplePolygon.outerVertex a1.core) (p^.simplePolygon.outerVertex b1.core)
+        `compare`
+      squaredEuclideanDist (p^.simplePolygon.outerVertex a2.core) (p^.simplePolygon.outerVertex b2.core)
+
+antipodalPairs :: forall p r. (Ord r, Num r) => ConvexPolygon p r -> [(Int, Int)]
+antipodalPairs p = worker 0 (CV.index vectors 0) 1
+  where
+    n = size (p^.simplePolygon)
+    vs = p^.simplePolygon.outerBoundaryVector
+
+    worker a aElt b
+      | a == n = []
+      | otherwise =
+        case ccw aElt (Point2 0 0) (CV.index vectors b) of
+          CW -> worker a aElt (b+1)
+          _  ->
+            (a, b `mod` n) :
+            worker (a+1) (CV.index vectors (a+1)) b
+
+    vectors :: CircularVector (Point 2 r)
+    vectors = CV.unsafeFromVector $ V.generate n $ \i ->
+      let Point p1 = point i
+          p2 = point (i+1)
+      in p2 .-^ p1
+
+    point x = CV.index vs x ^. core
 
 --------------------------------------------------------------------------------
 
