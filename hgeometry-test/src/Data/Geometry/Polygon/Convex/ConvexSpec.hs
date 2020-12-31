@@ -23,7 +23,7 @@ import qualified Data.Vector.Circular         as CV
 import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.QuickCheck              (Arbitrary (..), choose, elements, forAll, property,
-                                               sized, suchThat, (===), (==>))
+                                               sized, suchThat, (=/=), (===), (==>))
 import           Test.QuickCheck.Instances    ()
 import           Test.Util                    (ZeroToOne (..))
 
@@ -104,6 +104,11 @@ spec = do
   specify "verifyConvex (convexPolygon p)" $
     property $ \(p :: SimplePolygon () Rational) ->
       verifyConvex (convexPolygon p)
+
+  specify "convexPolygon p `superset` p" $
+    property $ \(p :: SimplePolygon () Rational) ->
+      forAll (choose (0, size p-1)) $ \n ->
+        inConvex (p^.outerVertex n.core) (convexPolygon p) =/= Outside
 
   specify "convexPolygon convex == convex" $
     property $ \(p :: ConvexPolygon () Rational) ->
