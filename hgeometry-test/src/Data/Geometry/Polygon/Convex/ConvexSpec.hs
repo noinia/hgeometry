@@ -23,7 +23,7 @@ import qualified Data.Vector.Circular         as CV
 import           Paths_hgeometry_test
 import           Test.Hspec
 import           Test.QuickCheck              (Arbitrary (..), choose, elements, forAll, property,
-                                               sized, suchThat, (=/=), (===), (==>))
+                                               sized, suchThat, (=/=), (===), (==>), (.&&.))
 import           Test.QuickCheck.Instances    ()
 import           Test.Util                    (ZeroToOne (..))
 
@@ -102,11 +102,12 @@ spec = do
 
   -- Verify that convexPolygon always returns convex polygons.
   specify "verifyConvex (convexPolygon p)" $
-    property $ \(p :: SimplePolygon () Rational) ->
-      verifyConvex (convexPolygon p)
+    property $ \(p :: SimplePolygon () R) ->
+      verifyConvex (convexPolygon p) .&&.
+      isSimple (convexPolygon p ^. simplePolygon)
 
   specify "convexPolygon p `superset` p" $
-    property $ \(p :: SimplePolygon () Rational) ->
+    property $ \(p :: SimplePolygon () R) ->
       forAll (choose (0, size p-1)) $ \n ->
         inConvex (p^.outerVertex n.core) (convexPolygon p) =/= Outside
 
@@ -117,11 +118,11 @@ spec = do
       size (p^.simplePolygon)
 
   specify "area (convexPolygon p) >= area p" $
-    property $ \(p :: SimplePolygon () Rational) ->
+    property $ \(p :: SimplePolygon () R) ->
       area (convexPolygon p ^. simplePolygon) >= area p
 
   specify "size (convexPolygon p) <= size p" $
-    property $ \(p :: SimplePolygon () Rational) ->
+    property $ \(p :: SimplePolygon () R) ->
       size (convexPolygon p ^. simplePolygon) <= size p
 
   -- Check that Convex.diameter gives the same result as Naive.diameter

@@ -28,6 +28,8 @@ module Data.Geometry.Polygon
   , toVector
   , toPoints
 
+  , isSimple
+
     -- * Accessors
 
   , size

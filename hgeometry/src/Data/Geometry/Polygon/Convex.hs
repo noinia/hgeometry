@@ -32,10 +32,12 @@ module Data.Geometry.Polygon.Convex
   , diametralIndexPair
   ) where
 
+
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
 import           Control.Monad.ST
+import           Control.Monad.State
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
@@ -68,7 +70,9 @@ import qualified Data.Vector.Mutable            as Mut
 import qualified Data.Vector.NonEmpty           as NE
 import qualified Data.Vector.Unboxed            as VU
 -- import           Data.Geometry.Ipe
--- import           Debug.Trace
+-- import Data.Ratio
+-- import Data.RealNumber.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -95,66 +99,86 @@ instance Fractional r => IsTransformable (ConvexPolygon p r) where
 instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
--- FIXME: Could be a /lot/ faster.
--- \( O(n) \) Convex hull of a simple polygon.
---
---   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
--- convexPolygon' :: (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
--- convexPolygon' = ConvexPolygon . fromPoints . worker [] . toPoints . view outerBoundary . rot
---   where
---     worker (s1:s2:ss) []
---       | ccw' s2 s1 (Prelude.last ss) /= CCW = worker (s2:ss) []
---       | otherwise                   = reverse (s1:s2:ss)
---     worker stack [] = reverse stack
---     worker (s1:s2:ss) (x:xs)
---       | ccw' s2 s1 x /= CCW = worker (s2:ss) (x:xs) -- Not convex, pop stack
---       | otherwise           = worker (x:s1:s2:ss) xs -- Convex, push new vertex on stack
---     worker ss (x:xs) = worker (x:ss) xs
---     rot = over unsafeOuterBoundaryVector (CV.rotateToMaximumBy (compare `on` _core))
 
--- Faster algorithm:
---  1. Allocate output array. We know the convex polygon can at most have N vertices.
---  2. Build the convex polygon by pushing vertices to the mutable output vector,
---     maintaining the invariant that each vertex is convex.
---  3. Once we've gone through all vertices of the simple polygon, we can freeze the mutable
---     array since it'll never be written to again.
---  4. But we're not done. The first and last vertex in the output array might not be convex.
---     Drop the first or last vertex repeatedly until the output endpoints are convex.
+
+--------------------------------------------------------------------------------
+-- Convex hull of simple polygon.
+
+type M s v a = StateT (Mut.MVector s v, Int) (ST s) a
+
+runM :: Int -> M s v () -> ST s (Mut.MVector s v)
+runM s action = do
+  v <- Mut.new (2*s)
+  (v', f) <- execStateT action (Mut.drop s v, 0)
+  return $ Mut.tail $ Mut.take f v'
+
+dequeRemove :: M s a ()
+dequeRemove = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset+1) (len-1) arr, f-1)
+
+dequeInsert :: a -> M s a ()
+dequeInsert a = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset-1) (len+1) arr, f+1)
+  (v,_) <- get
+  Mut.write v 0 a
+
+dequePush :: a -> M s a ()
+dequePush a = do
+  (v, f) <- get
+  Mut.write v f a
+  put (v,f+1)
+
+dequePop :: M s a ()
+dequePop = do
+  modify $ \(v,f) -> (v,f-1)
+
+dequeBottom :: Int -> M s a a
+dequeBottom idx = do
+  (v,_) <- get
+  Mut.read v idx
+
+dequeTop :: Int -> M s a a
+dequeTop idx = do
+  (v,f) <- get
+  Mut.read v (f-idx-1)
+
+-- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&rep=rep1&type=pdf
 
 -- | \( O(n) \) Convex hull of a simple polygon.
 --
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
-convexPolygon :: forall t p r. (Ord r, Num r) => Polygon t p r -> ConvexPolygon p r
-convexPolygon p = ConvexPolygon $ unsafeFromVector $ reduce $ V.create $ do
-    v <- Mut.unsafeNew (size p) :: ST s (Mut.MVector s (Point 2 r :+ p))
-    build v 0 0
+convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -> ConvexPolygon p r
+convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $ do
+    let v1 = NE.unsafeIndex vs 0
+        v2 = NE.unsafeIndex vs 1
+        v3 = NE.unsafeIndex vs 2
+    if ccw' v1 v2 v3 == CCW
+      then dequePush v1 >> dequePush v2
+      else dequePush v2 >> dequePush v1
+    dequePush v3; dequeInsert v3
+    V.mapM_ build (NE.drop 3 vs)
   where
     vs = CV.vector (p^.outerBoundaryVector)
-    build :: Mut.MVector s (Point 2 r :+ p) -> Int -> Int -> ST s (Mut.MVector s (Point 2 r :+ p))
-    build v convexI polyI
-      | polyI == NE.length vs = return $ Mut.unsafeTake convexI v
-      | convexI < 2 = do
-          let elt = NE.unsafeIndex vs polyI
-          Mut.unsafeWrite v convexI elt
-          build v (convexI+1) (polyI+1)
-      | otherwise = do
-          let elt = NE.unsafeIndex vs polyI
-          p2 <- Mut.unsafeRead v (convexI-1)
-          p1 <- Mut.unsafeRead v (convexI-2)
-          if ccw' p1 p2 elt == CCW
-            then do
-              Mut.unsafeWrite v convexI elt
-              build v (convexI+1) (polyI+1)
-            else build v (convexI-1) polyI
-    reduce v
-      | ccw' p1 p2 p3 /= CCW = reduce (V.unsafeInit v)
-      | ccw' p2 p3 p4 /= CCW = reduce (V.unsafeTail v)
-      | otherwise            = v
-      where
-        p1 = V.unsafeIndex v (V.length v-2)
-        p2 = V.unsafeIndex v (V.length v-1)
-        p3 = V.unsafeIndex v 0
-        p4 = V.unsafeIndex v 1
+    build v = do
+      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      when (botTurn == CW || topTurn == CW) $ do
+        backtrackTop v; dequePush v
+        backtrackBot v; dequeInsert v
+    backtrackTop v = do
+      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      unless (turn == CCW) $ do
+        dequePop
+        backtrackTop v
+    backtrackBot v = do
+      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      unless (turn == CCW) $ do
+        dequeRemove
+        backtrackBot v
+
+
+
+
 
 
 
