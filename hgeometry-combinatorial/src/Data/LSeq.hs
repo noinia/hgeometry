@@ -175,19 +175,19 @@ sa `append` sb = LSeq $ toSeq sa <> toSeq sb
 
 --------------------------------------------------------------------------------
 
--- | get the element with index i, counting from the left and starting at 0.
--- O(log(min(i,n-i)))
+-- | \( O(log(min(i,n-i))) \)
+--   Get the element with index i, counting from the left and starting at 0.
 index     :: LSeq n a -> Int -> a
 index s i = s^?!ix i
 
--- | /O(log(min(i,n−i)))/ Update the element at the specified position. If the
+-- | \( O(log(min(i,n−i))) \) Update the element at the specified position. If the
 --   position is out of range, the original sequence is returned. adjust can lead
 --   to poor performance and even memory leaks, because it does not force the new
 --   value before installing it in the sequence. adjust' should usually be preferred.
 adjust       :: (a -> a) -> Int -> LSeq n a -> LSeq n a
 adjust f i s = s&ix i %~ f
 
--- | /O(n)/ The partition function takes a predicate p and a sequence xs and
+-- | \( O(n) \) The partition function takes a predicate p and a sequence xs and
 --   returns sequences of those elements which do and do not satisfy the predicate.
 partition   :: (a -> Bool) -> LSeq n a -> (LSeq 0 a, LSeq 0 a)
 partition p = bimap LSeq LSeq . S.partition p . toSeq

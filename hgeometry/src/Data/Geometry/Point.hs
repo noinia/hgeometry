@@ -22,12 +22,16 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
                           , CCW, ccw, ccw'
                           , pattern CCW, pattern CW, pattern CoLinear
 
-                          , ccwCmpAround, cwCmpAround, ccwCmpAroundWith, cwCmpAroundWith
-                          , sortAround, insertIntoCyclicOrder
+                          , ccwCmpAround, ccwCmpAround'
+                          , cwCmpAround, cwCmpAround'
+                          , ccwCmpAroundWith, ccwCmpAroundWith'
+                          , cwCmpAroundWith, cwCmpAroundWith'
+                          , sortAround, sortAround'
+                          , insertIntoCyclicOrder
 
                           , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
-                          , cmpByDistanceTo
+                          , cmpByDistanceTo, cmpByDistanceTo'
 
                           , squaredEuclideanDist, euclideanDist
 

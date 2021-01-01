@@ -11,7 +11,7 @@ import           Data.Geometry.Ipe
 import qualified Data.List.NonEmpty                                         as NonEmpty
 import qualified Data.Map                                                   as M
 import           Data.Maybe                                                 (fromJust, mapMaybe)
-import           Data.RealNumber.Rational
+-- import           Data.RealNumber.Rational
 import qualified Data.Vector                                                as V
 import           Paths_hgeometry_test
 import           Test.Hspec
@@ -122,6 +122,7 @@ myPoints' = NonEmpty.fromList . map ext $
 -- Issue #28 mentions that these sets loop.
 
 -- for Doubles I guess.
+{-
 
 buggyPoints :: NonEmpty.NonEmpty (Point 2 (RealNumber 10) :+ Int)
 buggyPoints = NonEmpty.fromList $ [ Point2 38.5 3.5  :+ 0
@@ -152,3 +153,4 @@ buggyPoints3 = NonEmpty.fromList
                , Point2 (-16) (-128)                                        :+ 4
                , Point2 64 96                                               :+ 5
                ]
+-}

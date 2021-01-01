@@ -22,7 +22,7 @@ import           Data.Ord (comparing)
 --          the two polygons.
 --        - The vertices of the polygons are given in clockwise order
 --
--- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
+-- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 lowerTangent                                       :: (Num r, Ord r)
                                                    => ConvexPolygon p r
                                                    -> ConvexPolygon p r
@@ -53,7 +53,7 @@ lowerTangent (getVertices -> l) (getVertices -> r) = rotate xx yy zz zz''
 --          the two polygons.
 --        - The vertices of the polygons are given in clockwise order
 --
--- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
+-- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent                                       :: (Num r, Ord r)
                                                    => ConvexPolygon p r
                                                    -> ConvexPolygon p r

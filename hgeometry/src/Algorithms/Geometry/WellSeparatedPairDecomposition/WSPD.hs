@@ -97,8 +97,8 @@ wellSeparatedPairs s = f
 
 -- | Given the points, sorted in every dimension, recursively build a split tree
 --
--- The algorithm works in rounds. Each round takes O(n) time, and halves the
--- number of points. Thus, the total running time is O(n log n).
+-- The algorithm works in rounds. Each round takes \( O(n) \) time, and halves the
+-- number of points. Thus, the total running time is \( O(n log n) \).
 --
 -- The algorithm essentially builds a path in the split tree; at every node on
 -- the path that we construct, we split the point set into two sets (L,R)

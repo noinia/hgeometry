@@ -21,7 +21,7 @@ import           Control.Monad.ST            (ST)
 import           Data.Vector.Unboxed.Mutable as V (MVector, length, replicate, unsafeRead,
                                                    unsafeWrite, Unbox)
 
--- | O(n^3)
+-- | \( O(n^3) \)
 floydWarshall :: (Unbox a, Fractional a, Ord a) => Int -> MVector s (a, Int) -> ST s ()
 floydWarshall n graph = do
     let nSq = V.length graph
