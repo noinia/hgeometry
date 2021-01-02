@@ -4,150 +4,110 @@
 {-# LANGUAGE TypeFamilies      #-}
 module Data.Vector.Unpacked where
 
-import           Control.DeepSeq
-import           Control.Lens
-import           Data.Coerce
-import           Data.Ratio
+import Control.Monad.Primitive (PrimMonad, PrimState)
+import Data.Coerce             (coerce)
+-- import           Data.Ratio
+import           Data.Tree
 import qualified Data.Vector         as V
+import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed as VU
 import           GHC.Real
-import           Linear.V2
-import Data.Tree
 
-newtype NoPacking a = NoPacking {unNoPacking :: a} deriving (Show)
+import           Data.Vector.Unpacked.Mutable (NoPacking, Unpack)
+import qualified Data.Vector.Unpacked.Mutable as Mutable
 
-newtype Vector a = Vector (Unpacked (S a))
+newtype Vector a = Vector (Unpacked (Mutable.S a))
 
-instance (Show a, Unpack a) => Show (Vector a) where
-  show = show . v_toList
+instance (Unpack a, Show a) => Show (Vector a) where
+  show = show . G.toList
 
--- test_extend :: Vector Double -> Vector (Double, Bool)
-test_extend :: Unpack b => Vector b -> Vector (b, Bool)
-test_extend = v_extend (const True)
-
+type instance G.Mutable Vector = Mutable.MVector
+type instance G.Mutable Unpacked = Mutable.Unpacked
 
 data Unpacked a where
   Rational :: !(V.Vector Integer) -> !(V.Vector Integer) -> Unpacked Rational
-  Point2 :: !(Unpacked a) -> !(Unpacked a) -> Unpacked (V2 a)
-  Tuple :: !(Unpacked a) -> !(Unpacked b) -> Unpacked (a,b)
-  Unboxed :: VU.Unbox a => !(VU.Vector a) -> Unpacked a
-  Packed :: !(V.Vector a) -> Unpacked (NoPacking a)
+  Tuple    :: !(Unpacked a) -> !(Unpacked b) -> Unpacked (a,b)
+  Unboxed  :: VU.Unbox a => !(VU.Vector a) -> Unpacked a
+  Boxed    :: !(V.Vector a) -> Unpacked (NoPacking a)
 
-v_length :: Vector a -> Int
-v_length (Vector xs) = ulength xs
+-- instance VU.Unbox (MVector s a)
+instance (Unpack a) => G.Vector Vector a where
+  basicUnsafeFreeze :: PrimMonad m => Mutable.MVector (PrimState m) a -> m (Vector a)
+  basicUnsafeFreeze = fmap coerce . uUnsafeFreeze . coerce
+  basicUnsafeThaw :: PrimMonad m => Vector a -> m (G.Mutable Vector (PrimState m) a)
+  basicUnsafeThaw = fmap coerce . uUnsafeThaw . coerce
+  basicLength :: Vector a -> Int
+  basicLength = uLength . coerce
+  basicUnsafeSlice :: Int -> Int -> Vector a -> Vector a
+  basicUnsafeSlice i l = coerce . uUnsafeSlice i l . coerce
 
-v_index :: Unpack a => Vector a -> Int -> a
-v_index (Vector xs) i = coerce (uget xs i)
+  basicUnsafeIndexM :: Monad m => Vector a -> Int -> m a
+  basicUnsafeIndexM v i = coerce <$> uUnsafeIndexM (coerce v) i
+  basicUnsafeCopy :: PrimMonad m => G.Mutable Vector (PrimState m) a -> Vector a -> m ()
+  basicUnsafeCopy mut immut = uUnsafeCopy (coerce mut) (coerce immut)
+  -- elemseq :: Vector a -> a -> b -> b
 
-v_toList :: Unpack a => Vector a -> [a]
-v_toList v = [ v_index v i | i <- [0..v_length v-1]]
+uUnsafeSlice :: Int -> Int -> Unpacked a -> Unpacked a
+uUnsafeSlice i j (Rational a b) =
+  Rational (G.basicUnsafeSlice i j a) (G.basicUnsafeSlice i j b)
+uUnsafeSlice i j (Tuple a b) =
+  Tuple (uUnsafeSlice i j a) (uUnsafeSlice i j b)
+uUnsafeSlice i j (Unboxed u) =
+  Unboxed (G.basicUnsafeSlice i j u)
+uUnsafeSlice i j (Boxed u) =
+  Boxed (G.basicUnsafeSlice i j u)
+
+uUnsafeCopy :: PrimMonad m => Mutable.Unpacked (PrimState m) a -> Unpacked a -> m ()
+uUnsafeCopy (Mutable.Rational a1 b1) (Rational a2 b2) = do
+  G.basicUnsafeCopy a1 a2
+  G.basicUnsafeCopy b1 b2
+uUnsafeCopy (Mutable.Tuple a1 b1) (Tuple a2 b2) = do
+  uUnsafeCopy a1 a2
+  uUnsafeCopy b1 b2
+uUnsafeCopy (Mutable.Unboxed u1) (Unboxed u2) = do
+  G.basicUnsafeCopy u1 u2
+uUnsafeCopy (Mutable.Boxed u1) (Boxed u2) = do
+  G.basicUnsafeCopy u1 u2
+uUnsafeCopy _ _ = error "Impossible"
+
+uUnsafeIndexM :: Monad m => Unpacked a -> Int -> m a
+uUnsafeIndexM arr i = case arr of
+  Rational a b -> (:%) <$> G.basicUnsafeIndexM a i <*> G.basicUnsafeIndexM b i
+  Tuple a b    -> (,) <$> uUnsafeIndexM a i <*> uUnsafeIndexM b i
+  Unboxed u    -> G.basicUnsafeIndexM u i
+  Boxed u      -> coerce <$> G.basicUnsafeIndexM u i
+
+uUnsafeFreeze :: PrimMonad m => Mutable.Unpacked (PrimState m) a -> m (Unpacked a)
+uUnsafeFreeze mut = case mut of
+  Mutable.Rational a b -> do
+    a' <- G.basicUnsafeFreeze a
+    b' <- G.basicUnsafeFreeze b
+    return $ Rational a' b'
+  Mutable.Tuple a b -> Tuple <$> uUnsafeFreeze a <*> uUnsafeFreeze b
+  Mutable.Unboxed u -> Unboxed <$> G.basicUnsafeFreeze u
+  Mutable.Boxed u -> Boxed <$> G.basicUnsafeFreeze u
+
+uUnsafeThaw :: PrimMonad m => Unpacked a -> m (Mutable.Unpacked (PrimState m) a)
+uUnsafeThaw arr = case arr of
+  Rational a b -> do
+    a' <- G.basicUnsafeThaw a
+    b' <- G.basicUnsafeThaw b
+    return $ Mutable.Rational a' b'
+  Tuple a b -> Mutable.Tuple <$> uUnsafeThaw a <*> uUnsafeThaw b
+  Unboxed u -> Mutable.Unboxed <$> G.basicUnsafeThaw u
+  Boxed u -> Mutable.Boxed <$> G.basicUnsafeThaw u
 
 rep :: Vector a -> Tree String
 rep (Vector xs) = urep xs
 
-ulength :: Unpacked a -> Int
-ulength (Rational a _) = V.length a
-ulength (Point2 a _)    = ulength a
-ulength (Unboxed u)    = VU.length u
-ulength (Packed v)    = V.length v
-ulength (Tuple a _)    = ulength a
+uLength :: Unpacked a -> Int
+uLength (Rational a _) = V.length a
+uLength (Unboxed u)    = VU.length u
+uLength (Boxed v)      = V.length v
+uLength (Tuple a _)    = uLength a
 
 urep :: Unpacked a -> Tree String
-urep (Rational a b) = Node "Rational" [Node "UNBOXED" [], Node "UNBOXED" []]
-urep (Point2 a b)   = Node "Point2" [urep a, urep b]
-urep (Unboxed u)    = Node "UNBOXED" []
-urep (Packed v)     = Node "BOXED" []
-urep (Tuple a b)    = Node "Tuple" [urep a, urep b]
-
-uget :: Unpacked a -> Int -> a
-uget (Rational a b) i = (a V.! i) :% (b V.! i)
-uget (Tuple a b) i    = (uget a i, uget b i)
-uget (Unboxed u) i    = u VU.! i
-uget (Packed v) i     = NoPacking (v V.! i)
-uget _ _              = undefined
-
-umap :: Unpack b => (a -> b) -> Unpacked a -> Unpacked (S b)
-umap fn packed = pack $ map fn $ toList packed
-
-v_map :: (Unpack a, Unpack b) => (a -> b) -> Vector a -> Vector b
-v_map fn = pack' . map fn . v_toList
-
-toList :: Unpacked a -> [a]
-toList packed = [ uget packed i | i <- [0..ulength packed-1] ]
-
-extend :: Unpack p => Unpacked a -> (a -> p) -> Unpacked (a, S p)
-extend arr f = Tuple arr (umap f arr)
-
-v_extend :: (Unpack a, Unpack b) => (a -> b) -> Vector a -> Vector (a,b)
-v_extend fn (Vector xs) = Vector $ Tuple xs (umap (fn . coerce) xs)
-
-unextend :: Unpacked (a, p) -> Unpacked a
-unextend (Tuple a _p) = a
-unextend Unboxed{} = error "shouldn't happen"
--- unextend (Packed v) = Packed (V.map fst v)
-
-instance Show (Unpacked a) where
-  show (Rational a b) = "R " ++ show a ++ " " ++ show b
-  show (Point2 a b)   = show a ++ " " ++ show b
-  show (Tuple a b)    = show a ++ " " ++ show b
-  show Unboxed{}      = "unboxed"
-  show Packed{}       = "other"
-
-class (Coercible (S a) a) => Unpack a where
-  pack :: [a] -> Unpacked (S a)
-  pack' :: [a] -> Vector a
-  pack' = Vector . pack
-
-instance Unpack () where
-  pack xs = Unboxed (VU.fromList xs)
-
-instance Unpack Rational where
-  pack xs = Rational (V.fromList $!! map numerator xs) (V.fromList $!! map denominator xs)
-
-instance Unpack Double where
-  pack xs = Unboxed (VU.fromList xs)
-
-instance (Unpack a) => Unpack (V2 a) where
-  pack xs =
-    Point2 (pack $ map (view _x) xs) (pack $ map (view _y) xs)
-  
-instance (Unpack a, Unpack b) => Unpack (a,b) where
-  pack xs =
-    let (ls,rs) = unzip xs
-    in Tuple (pack ls) (pack rs)
-
-instance {-# OVERLAPS #-} (S a ~ NoPacking a) => Unpack a where
-  pack xs = Packed (V.fromListN (length xs) xs)
-
-type family S a where
-  S Rational = Rational
-  S (V2 a) = V2 (S a)
-  S () = ()
-  S Double = Double
-  S (a,b) = (S a, S b)
-  S a = NoPacking a
-
--- Element cost of boxed [Point 2 Double :+ ()]:   11 words
--- Element cost of unboxed [Point 2 Double :+ ()]: 2 words
--- Element cost of boxed [Point 2 Rational :+ ()]: 61 words
--- Element cost of packed [Point 2 Rational :+ ()]: 8 words
-{-
-boxedElementSize :: [a] -> IO Word
-boxedElementSize lst =
-  (-) <$> computeSize (V.fromListN 2 lst) <*> computeSize (V.fromListN 1 lst)
-
-unboxedElementSize :: VU.Unbox a => [a] -> IO Word
-unboxedElementSize lst =
-  (-) <$> computeSize (VU.fromListN 2 lst) <*> computeSize (VU.fromListN 1 lst)
-
-packedElementSize :: Unpack a => [a] -> IO Word
-packedElementSize lst =
-  (-) <$> computeSize (pack $ take 2 lst) <*> computeSize (pack $ take 1 lst)
-
-computeSize :: a -> IO Word
-computeSize v
-    | v `seq` False = undefined
-    | otherwise = do
-      size <- recursiveSize v
-      return (size `div` 8)
--}
+urep Rational{}  = Node "Rational" [Node "UNBOXED" [], Node "UNBOXED" []]
+urep Unboxed{}   = Node "UNBOXED" []
+urep Boxed{}     = Node "BOXED" []
+urep (Tuple a b) = Node "Tuple" [urep a, urep b]

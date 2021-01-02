@@ -25,8 +25,6 @@ data Unpacked s a where
   Unboxed  :: VU.Unbox a => !(VU.MVector s a) -> Unpacked s a
   Boxed    :: !(V.MVector s a) -> Unpacked s (NoPacking a)
 
--- instance VU.Unbox (MVector s a)
-
 instance Unpack a => GM.MVector MVector a where
   basicLength = uLength . coerce
   basicUnsafeSlice i n = coerce . uUnsafeSlice i n . coerce
