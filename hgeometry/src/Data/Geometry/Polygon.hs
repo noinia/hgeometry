@@ -57,6 +57,12 @@ module Data.Geometry.Polygon
   , toClockwiseOrder, toClockwiseOrder'
   , reverseOuterBoundary
 
+  , rotateLeft
+  , rotateRight
+  , maximumBy
+  , minimumBy
+
+
    -- * Misc
   , pickPoint
   , findDiagonal

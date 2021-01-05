@@ -1,17 +1,30 @@
-module Main where
+{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators       #-}
+module Main (main) where
 
-import           Control.Monad
-import           Data.List
-import qualified Data.Vector            as V
-import           Debug.Trace
-import           Linear.V2
-import           Linear.Vector
+import           Codec.Picture             (PixelRGBA8 (..))
+import           Control.Lens
+import qualified Data.Foldable             as F
+import           Data.List                 (nub, transpose)
+import           Data.Ord
+import qualified Data.Vector               as V
+import qualified Data.Vector.Circular      as CV
+import qualified Data.Vector.Circular.Util as CV
+import qualified Data.Vector.Unboxed       as VU
+import           Linear.V2                 (V2 (V2))
+import           Linear.Vector             (Additive (lerp))
 import           Reanimate
-import           Reanimate.Animation
-import           Reanimate.Math.Polygon
-import           Reanimate.Math.SSSP
-import           Reanimate.Morph.Common
-import           Reanimate.Morph.Linear
+import           Reanimate.Animation       (Sync (SyncFreeze))
+
+import Algorithms.Geometry.SSSP
+import Data.Ext
+import Data.Geometry.Interval
+import Data.Geometry.LineSegment
+import Data.Geometry.Point
+import Data.Geometry.Polygon
+import Data.Geometry.Vector
 
 {- GIFs:
  1. SSSP from a single point.
@@ -20,7 +33,8 @@ import           Reanimate.Morph.Linear
 -}
 
 main :: IO ()
-main = reanimate $ mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
+main = reanimate $
+  mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
   scene $ do
     newSpriteSVG_ $ mkBackground bgColor
     -- play $ ssspSingle
@@ -28,49 +42,104 @@ main = reanimate $ mapA (withViewBox (screenBottom, screenBottom, screenHeight, 
     -- play $ ssspMorph
     -- wait 1
 
-targetPolygon :: Polygon
-targetPolygon = pScale 2 $ pAtCenter shape2
+scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
+scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
+
+scalePoint :: Num r => r -> Point 2 r -> Point 2 r
+scalePoint s p = s *^ p
+
+pScale :: (Num r, Eq r) => r -> SimplePolygon p r -> SimplePolygon p r
+pScale v p = fromPoints
+  [ scalePoint v pt :+ e
+  | (pt :+ e) <- toPoints p
+  ]
+
+pTranslate :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
+pTranslate v p = fromPoints
+  [ (pt .+^ v :+ e)
+  | (pt :+ e) <- toPoints p
+  ]
+
+pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
+pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
+  where
+    Point2 maxX _ :+ _ = maximumBy (comparing (view (core.xCoord))) p
+    Point2 minX _ :+ _ = minimumBy (comparing (view (core.xCoord))) p
+    Point2 _ maxY :+ _ = maximumBy (comparing (view (core.yCoord))) p
+    Point2 _ minY :+ _ = minimumBy (comparing (view (core.yCoord))) p
+
+pAtCenter :: (Fractional r, Ord r) => SimplePolygon p r -> SimplePolygon p r
+pAtCenter p = pTranslate (neg $ toVec $ pCenter p) p
+  where
+    neg (Vector2 a b) = Vector2 (-a) (-b)
+
+
+targetPolygon :: SimplePolygon () Rational
+targetPolygon = pScale 2 $ pAtCenter $ simpleFromPoints $ map ext
+  [ Point2 0 0
+  , Point2 1 0
+  , Point2 1 1, Point2 2 1, Point2 2 (-1)
+  , Point2 0 (-1), Point2 0 (-2)
+  , Point2 3 (-2), Point2 3 2, Point2 0 2 ]
 
 ssspSingle :: Animation
 ssspSingle = pauseAtEnd 1 $ scene $ do
     newSpriteSVG_ $ ppPolygonOutline targetPolygon
     nodes <- newSpriteSVG $ mkGroup
       [ ppPolygonNodes targetPolygon
-      , withFillColor rootColor $  ppPolygonNode targetPolygon 0 ]
+      , withFillColorPixel rootColor $  ppPolygonNode targetPolygon 0 ]
     spriteZ nodes 1
     case t of
       T idx sub -> mapM_ (worker idx) sub
     wait 3
   where
     worker origin (T target sub) = do
-      let V2 oX oY = realToFrac <$> pAccess targetPolygon origin
-          V2 tX tY = realToFrac <$> pAccess targetPolygon target
+      let Point2 oX oY = realToFrac <$> targetPolygon ^. outerVertex origin . core
+          Point2 tX tY = realToFrac <$> targetPolygon ^. outerVertex target . core
       fork $ do
         wait 0.7
         dot <- fork $ newSpriteA' SyncFreeze $ animate $ \t -> mkGroup $
           [ translate tX tY $
-            withFillColor pathColor $ mkCircle (fromToS 0 (nodeRadius/2) t)
+            withFillColorPixel pathColor $ mkCircle (fromToS 0 (nodeRadius/2) t)
           ]
         spriteZ dot 2
         spriteE dot (overEnding 0.2 fadeOutE)
       l <- newSpriteA' SyncFreeze $ animate $ \t -> mkGroup $
-        [ withStrokeColor pathColor $ partialSvg t $
+        [ withStrokeColorPixel pathColor $ partialSvg t $
           pathify $ mkLine (oX, oY) (tX, tY)
         , translate tX tY $
-          withFillColor pathColor $ mkCircle (fromToS 0 (nodeRadius/2) t)
+          withFillColorPixel pathColor $ mkCircle (fromToS 0 (nodeRadius/2) t)
         ]
       spriteE l (overEnding 0.2 fadeOutE)
       mapM_ (worker target) sub
     t = ssspTree targetPolygon
 
+addPointAt :: forall p r. (Fractional r, Real r, Monoid p, Ord r) => Double -> SimplePolygon p r -> SimplePolygon p r
+addPointAt t origin = worker (cir*realToFrac t) origin
+  where
+    -- worker :: Double -> SimplePolygon p r -> SimplePolygon p r
+    worker d p
+      | frac <= 0 = p
+      | frac >= 1 = worker (d-len) (rotateRight 1 p)
+      | otherwise =
+          let (x:xs) = toPoints p
+              x' = interpolate frac edge :+ mempty
+          in rotateRight 1 $ fromPoints (x:x':xs)
+      where
+        edge = outerBoundaryEdge 0 p
+        len = sqrt . realToFrac . sqSegmentLength $ edge
+        frac = realToFrac (d / len)
+    cir = CV.sum (CV.map approxLength (outerBoundaryEdges origin))
+    approxLength = sqrt . realToFrac . sqSegmentLength
+
 ssspMulti :: Animation
 ssspMulti = mkAnimation 20 $ \t ->
-  let p = pCycle targetPolygon t in
+  let p = addPointAt t targetPolygon in
   mkGroup
   [ ppPolygonOutline p
   , ppSSSP p
   , ppPolygonNodes p
-  , withFillColor rootColor $ ppPolygonNode p 0
+  , withFillColorPixel rootColor $ ppPolygonNode p 0
   ]
 
 ssspMorph :: Animation
@@ -81,33 +150,48 @@ ssspMorph =
     ppPolyGroup t p = mkGroup
         [ --withGroupOpacity (max 0.3 (1-t)) $
           ppPolygonOutline p
-        , ppSSSP p
+        , ppSSSP' tree p
         , ppPolygonNodes p
-        , withFillColor rootColor $  ppPolygonNode p 0
+        , withFillColorPixel rootColor $  ppPolygonNode p 0
         ]
+    p' = fromPoints $ toPoints $ targetPolygon
+    tree = sssp (triangulate p')
     mPolygon = pScale 2 $ morphSSSP targetPolygon
 
 
 ------------------------------------------------------------------
 -- Parameters
 
+red :: PixelRGBA8
+red = PixelRGBA8 0xFF 0x63 0x84 0xFF
+
+grey :: PixelRGBA8
+grey = PixelRGBA8 0xC7 0xC8 0xCD 0xFF
+
+green :: PixelRGBA8
+green = PixelRGBA8 0x4B 0xC0 0x4B 0XFF
+
+black :: PixelRGBA8
+black = PixelRGBA8 0x33 0x35 0x38 0xFF
+
 bgColor :: String
 bgColor = "white"
 
-polyColor :: String
-polyColor = "grey"
+-- grey
+polyColor :: PixelRGBA8
+polyColor = grey
 
-outlineColor :: String
-outlineColor = "black"
+outlineColor :: PixelRGBA8
+outlineColor = black
 
-pathColor :: String
-pathColor = "red"
+pathColor :: PixelRGBA8
+pathColor = red
 
-rootColor :: String
-rootColor = "green"
+rootColor :: PixelRGBA8
+rootColor = green
 
-nodeColor :: String
-nodeColor = "white"
+nodeColor :: PixelRGBA8
+nodeColor = PixelRGBA8 0xFF 0xFF 0xFF 0xFF -- polyColorP -- "white"
 
 nodeRadius :: Double
 nodeRadius = 0.2
@@ -115,58 +199,66 @@ nodeRadius = 0.2
 ------------------------------------------------------------------
 -- Graphical utils
 
-ppPolygonOutline :: Polygon -> SVG
+ppPolygonOutline :: SimplePolygon p Rational -> SVG
 ppPolygonOutline p = withFillOpacity 1 $
-  withFillColor polyColor $
-  withStrokeColor outlineColor $
+  withFillColorPixel polyColor $
+  withStrokeColorPixel outlineColor $
   withStrokeWidth (defaultStrokeWidth*3) $ mkLinePathClosed
   [ (x, y)
-  | V2 x y <- map (fmap realToFrac) $ V.toList (polygonPoints p)
+  | Point2 x y <- map (fmap realToFrac) $ map _core $ toPoints p
   ]
 
-ppPolygonNodes :: Polygon -> SVG
+ppPolygonNodes :: SimplePolygon p Rational -> SVG
 ppPolygonNodes p = mkGroup $
-  map (ppPolygonNode p) [0 .. pSize p-1]
+  map (ppPolygonNode p) [0 .. size p-1]
 
-ppPolygonNode :: Polygon -> Int -> SVG
+ppPolygonNode :: SimplePolygon p Rational -> Int -> SVG
 ppPolygonNode p idx =
-  withFillColor outlineColor $
+  withFillColorPixel outlineColor $
   withStrokeWidth (defaultStrokeWidth*1) $
-  withStrokeColor nodeColor $
-  let V2 x y = realToFrac <$> pAccess p idx
+  withStrokeColorPixel nodeColor $
+  let Point2 x y = realToFrac <$> p^.outerVertex idx.core
   in translate x y $ mkCircle nodeRadius
 
-ppSSSP :: Polygon -> SVG
-ppSSSP p = mkGroup $
-  map (ppPathTo p) [1 .. pSize p - 1]
+ppSSSP :: SimplePolygon p Rational -> SVG
+ppSSSP p = ppSSSP' tree p'
+  where
+    p' = fromPoints $ toPoints p
+    tree = sssp (triangulate p')
 
-ppPathTo :: Polygon -> Int -> SVG
-ppPathTo p nth = withFillOpacity 0 $ withStrokeColor pathColor $ mkLinePath
+ppSSSP' :: SSSP -> SimplePolygon p Rational -> SVG
+ppSSSP' tree p = mkGroup $
+  map (ppPathTo tree p) [1 .. size p - 1]
+
+ppPathTo :: SSSP -> SimplePolygon p Rational -> Int -> SVG
+ppPathTo t p nth = withFillOpacity 0 $ withStrokeColorPixel pathColor $ mkLinePath
     [ (x,y)
-    | V2 x y <- map (fmap realToFrac . pAccess p) (reverse $ path nth)
+    | i <- reverse $ path nth
+    , let Point2 x y = realToFrac <$> p^.outerVertex i.core
     ]
   where
-    t = polygonSSSP p V.! polygonOffset p
     path 0   = [0]
-    path idx = idx : path (t V.! idx)
+    path idx = idx : path (t VU.! idx)
 
 data T = T Int [T] deriving (Show)
 
-ssspTree :: Polygon -> T
+ssspTree :: SimplePolygon p Rational -> T
 ssspTree p = worker 0
   where
-    t = polygonSSSP p V.! polygonOffset p
-    worker idx = T idx [ worker n | n <- [0 .. pSize p-1], t V.! n == idx, n /= idx]
+    p' = fromPoints $ toPoints p
+    t = sssp (triangulate p')
+    worker idx = T idx [ worker n | n <- [0 .. size p-1], t VU.! n == idx, n /= idx]
 
-morphSSSP :: Polygon -> Polygon
+morphSSSP :: SimplePolygon p Rational -> SimplePolygon p Rational
 morphSSSP p = pAtCenter $
-    p{ polygonPoints = V.generate (pSize p) $ \idx ->
-        case lookup idx pos of
-          Nothing -> error $ "invalid position: " ++ show idx
-          Just (x, y, rowLength) ->
-            let leftMost = negate ((rowLength-1)/2)
-            in V2 (leftMost + x) (negate y)
-      }
+    fromPoints
+    [ case lookup idx pos of
+        Nothing -> error $ "invalid position: " ++ show idx
+        Just (x, y, rowLength) ->
+          let leftMost = negate ((rowLength-1)/2)
+          in Point2 (leftMost + x) (negate y) :+ (p^.outerVertex idx.extra)
+    | idx <- [0 .. size p-1]
+    ]
   where
     t = ssspTree p
     flat = flatten t
@@ -179,6 +271,9 @@ morphSSSP p = pAtCenter $
 flatten :: T -> [[Int]]
 flatten (T n sub) = [n] : map concat (transpose (map flatten sub))
 
-lerpPolygon :: Double -> Polygon -> Polygon -> Polygon
-lerpPolygon t a b =
-  a { polygonPoints = V.zipWith (lerp $ realToFrac t) (polygonPoints b) (polygonPoints a) }
+lerpPolygon :: forall p r. (Fractional r, Eq r) => Double -> SimplePolygon p r -> SimplePolygon p r -> SimplePolygon p r
+lerpPolygon t a b = fromPoints $
+  zipWith fn (toPoints b) (toPoints a)
+  where
+    fn :: Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
+    fn (a :+ p) (b :+ _) = (Point (lerp (realToFrac t) (toVec a) (toVec b))) :+ p
