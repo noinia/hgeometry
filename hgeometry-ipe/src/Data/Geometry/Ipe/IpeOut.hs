@@ -200,6 +200,9 @@ ipeCircle = ipeEllipse . circleToEllipse
 ipeDisk   :: Floating r => IpeOut (Disk p r) Path r
 ipeDisk d = ipeCircle (Boundary d) ! attr SFill (IpeColor "0.722 0.145 0.137")
 
+ipeBezier :: IpeOut (BezierSpline 3 2 r) Path r
+ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
+
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r
 path = Path . LSeq.fromNonEmpty . (:| [])
