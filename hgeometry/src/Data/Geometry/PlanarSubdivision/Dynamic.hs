@@ -29,7 +29,7 @@ import Debug.Trace
 
 import Data.Geometry.PlanarSubdivision.Basic
 
-tracingOn = True
+tracingOn = False
 
 tr :: Show a => String -> a -> a
 tr s a | tracingOn = trace ("\9608 " ++ s ++ ": " ++ show a) a
