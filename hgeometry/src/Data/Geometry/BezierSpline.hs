@@ -449,7 +449,7 @@ extremal pos i b =
 --   Can only be solved exactly for degree 4 or smaller.
 --   Only gives rational result for degree 2 or smaller.
 --   Currentlly implemented for degree 3.
-splitMonotone :: (Arity d, Ord r, Floating r, Show r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
+splitMonotone :: (Arity d, Ord r, Enum r, Floating r, Show r) => Int -> BezierSpline 3 d r -> [BezierSpline 3 d r]
 splitMonotone i b = splitMany (locallyExtremalParameters i b) b
 
 {-
@@ -463,7 +463,7 @@ type family RealTypeConstraint (n :: Nat) (r :: *) :: Constraint where
 -}
 
 -- | Report all parameter values at which the derivative of the $i$th coordinate is 0.
-locallyExtremalParameters :: (Arity d, Ord r, Floating r) => Int -> BezierSpline 3 d r -> [r]
+locallyExtremalParameters :: (Arity d, Ord r, Enum r, Floating r, Show r) => Int -> BezierSpline 3 d r -> [r]
 locallyExtremalParameters i curve = 
   let [x1, x2, x3, x4] = map (view $ unsafeCoord i) $ F.toList $ _controlPoints curve
       a = 3 * x4 -  9 * x3 + 9 * x2 - 3 * x1
@@ -473,17 +473,35 @@ locallyExtremalParameters i curve =
 
 
 -- | Solve equation of the form ax^2 + bx + c = 0.
-solveQuadraticEquation :: (Ord r, Floating r, Show r) => r -> r -> r -> [r]
-solveQuadraticEquation 0 0 0 = [0] -- error "infinite solutions"
+--   If there are multiple solutions, report in ascending order.
+--   Attempt at a somewhat robust implementation.
+solveQuadraticEquation :: (Ord r, Enum r, Floating r, Show r) => r -> r -> r -> [r]
+solveQuadraticEquation 0 0 0 = [0..] -- error "infinite solutions"
+solveQuadraticEquation a 0 0 = [0]
+solveQuadraticEquation 0 b 0 = [0]
 solveQuadraticEquation 0 0 c = []
+solveQuadraticEquation a b 0 = sort [0, -b / a]
+solveQuadraticEquation a 0 c | (-c / a) <  0 = []
+                             | (-c / a) == 0 = [0]
+                             | (-c / a) >  0 = [sqrt (-c / a)]
 solveQuadraticEquation 0 b c = [-c / b]
+solveQuadraticEquation a b c | almostzero a || almostzero (a / b) || almostzero (a / c) = solveQuadraticEquation 0 b c
 solveQuadraticEquation a b c = 
   let d = b^2 - 4 * a * c
       result | d == 0 = [-b / (2 * a)]
-             | d >  0 = [(-b + sqrt d) / (2 * a), (-b - sqrt d) / (2 * a)]
+             | d >  0 = [(-b - sqrt d) / (2 * a), (-b + sqrt d) / (2 * a)]
              | otherwise = []
   in result
   -- trace ("soving equation " ++ show a ++ "x^2 + " ++ show b ++ "x + " ++ show c ++ " = 0") $ result  
+
+-- | Test whether a floating point number is close enough to zero, taking rounding errors into account.
+almostzero :: (Floating r, Ord r) => r -> Bool
+almostzero x = abs x < epsilon
+
+-- | Treshold for rounding errors in almostzero test.
+--   TODO: Should be different depending on the type.
+epsilon :: Floating r => r
+epsilon = 0.0001
 
 
 
