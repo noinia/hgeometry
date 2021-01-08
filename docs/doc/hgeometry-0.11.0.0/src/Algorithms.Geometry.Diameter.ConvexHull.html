@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.Diameter.ConvexHull</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) David Himmelstrup</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals, David Himmelstrup</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.Diameter.ConvexHull</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diameter"><span class="hs-identifier">diameter</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diametralPair"><span class="hs-identifier">diametralPair</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.GrahamScan.html"><span class="hs-identifier">Algorithms.Geometry.ConvexHull.GrahamScan</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Algorithms.Geometry.ConvexHull.GrahamScan.html#convexHull"><span class="hs-identifier">convexHull</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Algorithms.Geometry.Diameter.Naive.html"><span class="hs-identifier">Algorithms.Geometry.Diameter.Naive</span></a></span><span>        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Naive</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>                              </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(^.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">core</span></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">type</span><span> </span><span class="annot"><span class="hs-operator">(:+)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.html"><span class="hs-identifier">Data.Geometry</span></a></span><span>                             </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier">Point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#euclideanDist"><span class="hs-identifier">euclideanDist</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Convex.html"><span class="hs-identifier">Data.Geometry.Polygon.Convex</span></a></span><span>              </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Convex</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span>                        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- | Computes the Euclidean diameter by first finding the convex hull.</span><span>
+</span><span id="line-24"></span><span class="hs-comment">--</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-26"></span><span id="local-6989586621679964087"><span id="local-6989586621679964088"><span class="annot"><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diameter"><span class="hs-identifier hs-type">diameter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679964088"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="annot"><a href="#local-6989586621679964088"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679964088"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679964087"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679964088"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-27"></span><span id="diameter"><span class="annot"><span class="annottext">diameter :: [Point 2 r :+ p] -&gt; r
+</span><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diameter"><span class="hs-identifier hs-var hs-var">diameter</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+-&gt; ((Point 2 r :+ p, Point 2 r :+ p) -&gt; r)
+-&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+-&gt; r
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679964085"><span class="annot"><span class="annottext">p :: Point 2 r :+ p
+</span><a href="#local-6989586621679964085"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679964084"><span class="annot"><span class="annottext">q :: Point 2 r :+ p
+</span><a href="#local-6989586621679964084"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; r
+forall r (d :: Nat).
+(Floating r, Arity d) =&gt;
+Point d r -&gt; Point d r -&gt; r
+</span><a href="Data.Geometry.Point.Internal.html#euclideanDist"><span class="hs-identifier hs-var">euclideanDist</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679964085"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679964084"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">(Point 2 r :+ p)
+-&gt; Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ p) (Point 2 r)
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Point 2 r :+ p, Point 2 r :+ p) -&gt; r)
+-&gt; ([Point 2 r :+ p] -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p))
+-&gt; [Point 2 r :+ p]
+-&gt; r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+forall r p.
+(Ord r, Num r) =&gt;
+[Point 2 r :+ p] -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diametralPair"><span class="hs-identifier hs-var">diametralPair</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | Computes the Euclidean diameter by first finding the convex hull.</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-32"></span><span id="local-6989586621679964111"><span id="local-6989586621679964112"><span class="annot"><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diametralPair"><span class="hs-identifier hs-type">diametralPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679964112"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679964112"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679964112"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679964111"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679964112"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679964111"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679964112"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679964111"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-34"></span><span id="diametralPair"><span class="annot"><span class="annottext">diametralPair :: [Point 2 r :+ p] -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diametralPair"><span class="hs-identifier hs-var hs-var">diametralPair</span></a></span></span><span> </span><span id="local-6989586621679964082"><span class="annot"><span class="annottext">lst :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679964082"><span class="hs-identifier hs-var">lst</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p, Point 2 r :+ p)
+-&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ p, Point 2 r :+ p)
+ -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p))
+-&gt; (ConvexPolygon p r -&gt; (Point 2 r :+ p, Point 2 r :+ p))
+-&gt; ConvexPolygon p r
+-&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ConvexPolygon p r -&gt; (Point 2 r :+ p, Point 2 r :+ p)
+forall r p.
+(Ord r, Num r) =&gt;
+ConvexPolygon p r -&gt; (Point 2 r :+ p, Point 2 r :+ p)
+</span><a href="Data.Geometry.Polygon.Convex.html#diametralPair"><span class="hs-identifier hs-var">Convex.diametralPair</span></a></span><span> </span><span class="annot"><span class="annottext">(ConvexPolygon p r -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p))
+-&gt; ConvexPolygon p r -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p) -&gt; ConvexPolygon p r
+forall r p.
+(Ord r, Num r) =&gt;
+NonEmpty (Point 2 r :+ p) -&gt; ConvexPolygon p r
+</span><a href="Algorithms.Geometry.ConvexHull.GrahamScan.html#convexHull"><span class="hs-identifier hs-var">convexHull</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r :+ p) -&gt; ConvexPolygon p r)
+-&gt; NonEmpty (Point 2 r :+ p) -&gt; ConvexPolygon p r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; NonEmpty (Point 2 r :+ p)
+forall a. [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679964082"><span class="hs-identifier hs-var">lst</span></a></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Algorithms.Geometry.Diameter.ConvexHull.html#diametralPair"><span class="hs-identifier hs-var">diametralPair</span></a></span><span> </span><span id="local-6989586621679964079"><span class="annot"><span class="annottext">lst :: [Point 2 r :+ p]
+</span><a href="#local-6989586621679964079"><span class="hs-identifier hs-var">lst</span></a></span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p] -&gt; Maybe (Point 2 r :+ p, Point 2 r :+ p)
+forall r (d :: Nat) p.
+(Ord r, Num r, Arity d) =&gt;
+[Point d r :+ p] -&gt; Maybe (Point d r :+ p, Point d r :+ p)
+</span><a href="Algorithms.Geometry.Diameter.Naive.html#diametralPair"><span class="hs-identifier hs-var">Naive.diametralPair</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ p]
+</span><a href="#local-6989586621679964079"><span class="hs-identifier hs-var">lst</span></a></span><span>
+</span><span id="line-36"></span></pre></body></html>
