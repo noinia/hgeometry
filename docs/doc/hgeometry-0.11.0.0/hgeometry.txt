@@ -4054,6 +4054,12 @@ extremesLinear :: (Ord r, Num r) => Vector 2 r -> Polygon t p r -> (Point 2 r :+
 --   direction given by the vector u.
 cmpExtreme :: (Num r, Ord r) => Vector 2 r -> (Point 2 r :+ p) -> (Point 2 r :+ q) -> Ordering
 
+-- | &lt;math&gt; Rotate the polygon to the left by n number of points.
+rotateLeft :: Int -> SimplePolygon p r -> SimplePolygon p r
+
+-- | &lt;math&gt; Rotate the polygon to the right by n number of points.
+rotateRight :: Int -> SimplePolygon p r -> SimplePolygon p r
+
 
 -- | Basic Geometry Types
 module Data.Geometry
@@ -4719,6 +4725,12 @@ reverseOuterBoundary :: Polygon t p r -> Polygon t p r
 --   SimplePolygon [Point2 0 0 :+ SP 0 (),Point2 10 0 :+ SP 1 (),Point2 10 10 :+ SP 2 (),Point2 5 15 :+ SP 3 (),Point2 1 11 :+ SP 4 ()]
 --   </pre>
 numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
+
+-- | &lt;math&gt; Rotate the polygon to the left by n number of points.
+rotateLeft :: Int -> SimplePolygon p r -> SimplePolygon p r
+
+-- | &lt;math&gt; Rotate the polygon to the right by n number of points.
+rotateRight :: Int -> SimplePolygon p r -> SimplePolygon p r
 
 -- | Comparison that compares which point is <tt>larger</tt> in the
 --   direction given by the vector u.
@@ -6945,6 +6957,8 @@ module Algorithms.Geometry.SSSP
 --   parentOf(i) = sssp[i]
 --   </pre>
 type SSSP = Vector Int
+
+-- | &lt;math&gt;
 triangulate :: (Ord r, Fractional r) => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
 
 -- | &lt;math&gt; Single-Source shortest path.
