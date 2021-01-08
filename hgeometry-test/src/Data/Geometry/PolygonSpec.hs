@@ -56,7 +56,10 @@ allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Arbitrary (SimplePolygon () Rational) where
-  arbitrary = elements allSimplePolygons'
+  arbitrary = do
+    p <- elements allSimplePolygons'
+    n <- chooseInt (0, size p-1)
+    pure $ rotateLeft n p
   shrink p
     | isTriangle p = simplifyP p
     | otherwise = cutEars p ++ simplifyP p
