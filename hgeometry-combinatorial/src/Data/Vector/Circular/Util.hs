@@ -71,3 +71,9 @@ withIndicesRight (CircularVector v s) = CircularVector v' s
 
 imap :: (Int -> a -> b) -> CircularVector a -> CircularVector b
 imap f = fromVector . NV.imap f . toNonEmptyVector
+
+ifilter
+    :: (Int -> a -> Bool)
+    -> CircularVector a
+    -> V.Vector a
+ifilter f = NV.ifilter f . toNonEmptyVector
