@@ -2612,6 +2612,9 @@ Lossy :: !Fixed p -> AsFixed p
 asFixed :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
 toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
 fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
+
+-- | (Kind) This is the kind of type-level natural numbers.
+data Nat
 instance GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
 instance Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
 instance Data.Hashable.Class.Hashable (Data.RealNumber.Rational.RealNumber p)
