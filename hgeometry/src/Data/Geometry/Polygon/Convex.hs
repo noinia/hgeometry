@@ -32,9 +32,12 @@ module Data.Geometry.Polygon.Convex
   , diametralIndexPair
   ) where
 
+
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
+import           Control.Monad.ST
+import           Control.Monad.State
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
@@ -45,7 +48,8 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
                                                  outerBoundaryVector, outerVertex, size,
-                                                 unsafeFromPoints, unsafeOuterBoundaryVector)
+                                                 unsafeFromPoints, unsafeFromVector,
+                                                 unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -62,9 +66,13 @@ import qualified Data.Vector                    as V
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
+import qualified Data.Vector.Mutable            as Mut
+import qualified Data.Vector.NonEmpty           as NE
 import qualified Data.Vector.Unboxed            as VU
 -- import           Data.Geometry.Ipe
--- import           Debug.Trace
+-- import Data.Ratio
+-- import Data.RealNumber.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -92,22 +100,99 @@ instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
 
-convexPolygon :: (Ord r, Num r) => Polygon t p r -> Maybe (ConvexPolygon p r)
-convexPolygon p@SimplePolygon{} =
-  let convex = ConvexPolygon p in
-  if verifyConvex convex then Just convex else Nothing
-convexPolygon (MultiPolygon b []) = convexPolygon b
-convexPolygon _ = Nothing
 
+--------------------------------------------------------------------------------
+-- Convex hull of simple polygon.
+
+type M s v a = StateT (Mut.MVector s v, Int) (ST s) a
+
+runM :: Int -> M s v () -> ST s (Mut.MVector s v)
+runM s action = do
+  v <- Mut.new (2*s)
+  (v', f) <- execStateT action (Mut.drop s v, 0)
+  return $ Mut.tail $ Mut.take f v'
+
+dequeRemove :: M s a ()
+dequeRemove = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset+1) (len-1) arr, f-1)
+
+dequeInsert :: a -> M s a ()
+dequeInsert a = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset-1) (len+1) arr, f+1)
+  (v,_) <- get
+  Mut.write v 0 a
+
+dequePush :: a -> M s a ()
+dequePush a = do
+  (v, f) <- get
+  Mut.write v f a
+  put (v,f+1)
+
+dequePop :: M s a ()
+dequePop = do
+  modify $ \(v,f) -> (v,f-1)
+
+dequeBottom :: Int -> M s a a
+dequeBottom idx = do
+  (v,_) <- get
+  Mut.read v idx
+
+dequeTop :: Int -> M s a a
+dequeTop idx = do
+  (v,f) <- get
+  Mut.read v (f-idx-1)
+
+-- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&rep=rep1&type=pdf
+
+-- | \( O(n) \) Convex hull of a simple polygon.
+--
+--   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
+convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -> ConvexPolygon p r
+convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $ do
+    let v1 = NE.unsafeIndex vs 0
+        v2 = NE.unsafeIndex vs 1
+        v3 = NE.unsafeIndex vs 2
+    if ccw' v1 v2 v3 == CCW
+      then dequePush v1 >> dequePush v2
+      else dequePush v2 >> dequePush v1
+    dequePush v3; dequeInsert v3
+    V.mapM_ build (NE.drop 3 vs)
+  where
+    vs = CV.vector (p^.outerBoundaryVector)
+    build v = do
+      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      when (botTurn == CW || topTurn == CW) $ do
+        backtrackTop v; dequePush v
+        backtrackBot v; dequeInsert v
+    backtrackTop v = do
+      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      unless (turn == CCW) $ do
+        dequePop
+        backtrackTop v
+    backtrackBot v = do
+      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      unless (turn == CCW) $ do
+        dequeRemove
+        backtrackBot v
+
+
+
+
+
+
+
+-- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
-isConvex = verifyConvex . ConvexPolygon
-
-verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
-verifyConvex (ConvexPolygon s) =
+isConvex s =
     CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
   where
     f a b c = ccw' a b c == CCW
     vs = s ^. outerBoundaryVector
+
+-- | \( O(n) \) Verify that a convex polygon is strictly convex.
+verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
+verifyConvex = isConvex . _simplePolygon
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile

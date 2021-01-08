@@ -28,6 +28,8 @@ module Data.Geometry.Polygon.Core
   , toVector
   , toPoints
 
+  , isSimple
+
   , size
   , polygonVertices, listEdges
 
@@ -377,6 +379,13 @@ polygonVertices p@SimplePolygon{}    = toNonEmpty $ p^.outerBoundaryVector
 polygonVertices (MultiPolygon vs hs) =
   sconcat $ toNonEmpty (polygonVertices vs) NonEmpty.:| map polygonVertices hs
 
+-- FIXME: Get rid of 'Fractional r' constraint.
+-- | \( O(n \log n) \) Check if a polygon has any holes, duplicate points, or
+--   self-intersections.
+isSimple :: (Ord r, Fractional r) => Polygon p t r -> Bool
+isSimple p@SimplePolygon{}   = null . BO.interiorIntersections $ listEdges p
+isSimple (MultiPolygon b []) = isSimple b
+isSimple MultiPolygon{}      = False
 
 requireThree :: String -> [a] -> [a]
 requireThree _ lst@(_:_:_:_) = lst
