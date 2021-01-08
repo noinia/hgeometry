@@ -64,6 +64,10 @@ module Data.Geometry.Polygon
   , withIncidentEdges, numberVertices
 
   , extremesLinear, cmpExtreme
+
+  , rotateLeft
+  , rotateRight
+
   ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC
