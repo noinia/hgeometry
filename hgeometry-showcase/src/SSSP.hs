@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
-module Main (main) where
+module SSSP () where
 
 import           Control.Lens
 import qualified Data.Foldable             as F

@@ -6,27 +6,30 @@ module Common where
 
 import           Codec.Picture             (PixelRGBA8 (..))
 import           Control.Lens
+import           Control.Monad.Random
 import qualified Data.Foldable             as F
 import           Data.List                 (nub, transpose)
 import           Data.Ord
+import           Data.Ratio
 import qualified Data.Vector               as V
 import qualified Data.Vector.Circular      as CV
 import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Unboxed       as VU
+import           Graphics.SvgTree          (LineJoin (..))
 import           Linear.V2                 (V2 (V2))
 import           Linear.Vector             (Additive (lerp))
 import           Reanimate
 import           Reanimate.Animation       (Sync (SyncFreeze))
-import           Graphics.SvgTree (LineJoin(..))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
 import Data.Geometry.Interval
+import Data.RealNumber.Rational
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon
-import Data.Geometry.Vector
 import Data.Geometry.Polygon.Inflate
+import Data.Geometry.Vector
 
 scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
 scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
@@ -106,6 +109,9 @@ green = PixelRGBA8 0x4B 0xC0 0x4B 0XFF
 
 black :: PixelRGBA8
 black = PixelRGBA8 0x33 0x35 0x38 0xFF
+
+white :: PixelRGBA8
+white = PixelRGBA8 0xFF 0xFF 0xFF 0xFF
 
 bgColor :: String
 bgColor = "white"
@@ -218,4 +224,25 @@ lerpPolygon t a b = fromPoints $
   zipWith fn (toPoints b) (toPoints a)
   where
     fn :: Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
-    fn (a :+ p) (b :+ _) = (Point (lerp (realToFrac t) (toVec a) (toVec b))) :+ p
+    fn (a :+ p) (b :+ _) = lerpPoint t a b :+ p
+
+lerpPoint :: Fractional r => Double -> Point 2 r -> Point 2 r -> Point 2 r
+lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
+
+------------------------------------------------------------------
+-- Random data
+
+granularity :: Integer
+granularity = 10000000
+
+-- Random point between screenTop/screenBottom.
+genPoint :: RandomGen g => Rand g (Point 2 Rational)
+genPoint = do
+  x <- liftRand $ randomR (0, granularity)
+  y <- liftRand $ randomR (0, granularity)
+  pure $ Point2
+    ((x % granularity) * screenHeight - screenTop)
+    ((y % granularity) * screenHeight - screenTop)
+
+genPoints :: RandomGen g => Int -> Rand g [Point 2 Rational]
+genPoints n = replicateM n genPoint

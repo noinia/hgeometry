@@ -5,7 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeOperators         #-}
-module Main (main) where
+module Inflate () where
 
 import Control.Lens                  ((&), (^.))
 import Data.Ext                      (core, ext, type (:+) ((:+)))
