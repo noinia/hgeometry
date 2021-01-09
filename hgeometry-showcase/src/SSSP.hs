@@ -1,43 +1,23 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators       #-}
-module SSSP () where
+module SSSP (ssspMulti) where
 
-import           Control.Lens
-import qualified Data.Foldable             as F
-import           Data.List                 (nub, transpose)
-import qualified Data.Vector               as V
-import qualified Data.Vector.Circular      as CV
-import qualified Data.Vector.Circular.Util as CV
-import qualified Data.Vector.Unboxed       as VU
-import           Linear.V2                 (V2 (V2))
-import           Linear.Vector             (Additive (lerp))
-import           Reanimate
+import           Control.Lens              ((^.))
+import           Reanimate                 (Animation, animate, curveS, fadeOutE, fork, fromToS,
+                                            mkAnimation, mkCircle, mkGroup, mkLine, newSpriteA',
+                                            newSpriteSVG, newSpriteSVG_, overEnding, partialSvg,
+                                            pathify, pauseAround, pauseAtEnd, playThenReverseA,
+                                            scene, signalA, spriteE, spriteZ, translate, wait,
+                                            withFillColorPixel, withStrokeColorPixel)
 import           Reanimate.Animation       (Sync (SyncFreeze))
 
-import Algorithms.Geometry.SSSP
-import Data.Ext
-import Data.Geometry.Point
-import Data.Geometry.Polygon
+import Algorithms.Geometry.SSSP (sssp, triangulate)
+import Data.Ext                 (core, ext)
+import Data.Geometry.Point      (Point (Point2))
+import Data.Geometry.Polygon    (SimplePolygon, fromPoints, outerVertex, simpleFromPoints, toPoints)
 
 import Common
-
-{- GIFs:
- 1. SSSP from a single point.
- 2. SSSP from all points.
- 3. Morph to tree.
--}
-
-main :: IO ()
-main = reanimate $
-  mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
-  scene $ do
-    newSpriteSVG_ $ mkBackground bgColor
-    -- play $ ssspSingle
-    play $ ssspMulti
-    -- play $ ssspMorph
-    -- wait 1
 
 targetPolygon :: SimplePolygon () Rational
 targetPolygon = pScale 2 $ pAtCenter $ simpleFromPoints $ map ext
@@ -47,15 +27,15 @@ targetPolygon = pScale 2 $ pAtCenter $ simpleFromPoints $ map ext
   , Point2 0 (-1), Point2 0 (-2)
   , Point2 3 (-2), Point2 3 2, Point2 0 2 ]
 
-ssspSingle :: Animation
-ssspSingle = pauseAtEnd 1 $ scene $ do
+_ssspSingle :: Animation
+_ssspSingle = pauseAtEnd 1 $ scene $ do
     newSpriteSVG_ $ ppPolygonBody grey targetPolygon
     newSpriteSVG_ $ ppPolygonOutline black targetPolygon
     nodes <- newSpriteSVG $ mkGroup
       [ ppPolygonNodes targetPolygon
       , withFillColorPixel rootColor $  ppPolygonNode targetPolygon 0 ]
     spriteZ nodes 1
-    case t of
+    case tree of
       T idx sub -> mapM_ (worker idx) sub
     wait 3
   where
@@ -64,13 +44,13 @@ ssspSingle = pauseAtEnd 1 $ scene $ do
           Point2 tX tY = realToFrac <$> targetPolygon ^. outerVertex target . core
       fork $ do
         wait 0.7
-        dot <- fork $ newSpriteA' SyncFreeze $ animate $ \t -> mkGroup $
+        dot <- fork $ newSpriteA' SyncFreeze $ animate $ \t -> mkGroup
           [ translate tX tY $
             withFillColorPixel pathColor $ mkCircle (fromToS 0 (nodeRadius/2) t)
           ]
         spriteZ dot 2
         spriteE dot (overEnding 0.2 fadeOutE)
-      l <- newSpriteA' SyncFreeze $ animate $ \t -> mkGroup $
+      l <- newSpriteA' SyncFreeze $ animate $ \t -> mkGroup
         [ withStrokeColorPixel pathColor $ partialSvg t $
           pathify $ mkLine (oX, oY) (tX, tY)
         , translate tX tY $
@@ -78,7 +58,7 @@ ssspSingle = pauseAtEnd 1 $ scene $ do
         ]
       spriteE l (overEnding 0.2 fadeOutE)
       mapM_ (worker target) sub
-    t = ssspTree targetPolygon
+    tree = ssspTree targetPolygon
 
 ssspMulti :: Animation
 ssspMulti = mkAnimation 20 $ \t ->
@@ -91,12 +71,12 @@ ssspMulti = mkAnimation 20 $ \t ->
   , withFillColorPixel rootColor $ ppPolygonNode p 0
   ]
 
-ssspMorph :: Animation
-ssspMorph =
+_ssspMorph :: Animation
+_ssspMorph =
     playThenReverseA $ pauseAround 1 3 $ signalA (curveS 2) $ mkAnimation 2 $ \t ->
       ppPolyGroup t (lerpPolygon t targetPolygon mPolygon)
   where
-    ppPolyGroup t p = mkGroup
+    ppPolyGroup _t p = mkGroup
         [ --withGroupOpacity (max 0.3 (1-t)) $
           ppPolygonBody grey p
         , ppPolygonOutline black p
@@ -104,6 +84,6 @@ ssspMorph =
         , ppPolygonNodes p
         , withFillColorPixel rootColor $  ppPolygonNode p 0
         ]
-    p' = fromPoints $ toPoints $ targetPolygon
+    p' = fromPoints $ toPoints targetPolygon
     tree = sssp (triangulate p')
     mPolygon = pScale 2 $ morphSSSP targetPolygon

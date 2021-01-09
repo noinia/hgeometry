@@ -51,8 +51,8 @@ pScaleV v p = fromPoints
 
 pTranslate :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
 pTranslate v p = fromPoints
-  [ (pt .+^ v :+ e)
-  | (pt :+ e) <- toPoints p
+  [ pt .+^ v :+ e
+  | pt :+ e <- toPoints p
   ]
 
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
@@ -144,7 +144,7 @@ ppPolygonOutline color p = withFillOpacity 0 $
   withStrokeLineJoin JoinRound $
   withStrokeWidth (defaultStrokeWidth*3) $ mkLinePathClosed
   [ (x, y)
-  | Point2 x y <- map (fmap realToFrac) $ map _core $ toPoints p
+  | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
 ppPolygonBody :: Real r => PixelRGBA8 -> SimplePolygon p r -> SVG
@@ -153,7 +153,7 @@ ppPolygonBody color p = withFillOpacity 1 $
   withStrokeLineJoin JoinRound $
   mkLinePathClosed
   [ (x, y)
-  | Point2 x y <- map (fmap realToFrac) $ map _core $ toPoints p
+  | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
 ppPolygonNodes :: (Real r) => SimplePolygon p r -> SVG
@@ -163,7 +163,6 @@ ppPolygonNodes p = mkGroup $
 ppPolygonNode :: (Real r) => SimplePolygon p r -> Int -> SVG
 ppPolygonNode p idx =
   withFillColorPixel outlineColor $
-  withStrokeWidth (defaultStrokeWidth*1) $
   withStrokeColorPixel nodeColor $
   let Point2 x y = realToFrac <$> p^.outerVertex idx.core
   in translate x y $ mkCircle nodeRadius

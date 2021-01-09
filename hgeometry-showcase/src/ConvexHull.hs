@@ -1,37 +1,21 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE PatternSynonyms       #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-module ConvexHull where
+{-# LANGUAGE DataKinds #-}
+module ConvexHull (convexHullShowcase) where
 
 import Algorithms.Geometry.ConvexHull.GrahamScan
 
-import           Control.Lens                  ((&), (^.))
-import           Control.Monad.Random
-import           Data.Ext                      (core, ext, type (:+) ((:+)))
-import           Data.Geometry.Ball            (Touching (Touching), pattern Circle)
-import           Data.Geometry.Interval        ()
-import           Data.Geometry.LineSegment     (LineSegment (OpenLineSegment), sqSegmentLength)
-import           Data.Geometry.Point           (Point (Point2))
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Polygon.Inflate (Arc (Arc), inflate)
-import           Data.Geometry.Vector          (pattern Vector2)
-import           Data.Intersection
-import qualified Data.List.NonEmpty            as NonEmpty
-import           Data.RealNumber.Rational      (RealNumber)
-import qualified Data.Vector.Circular          as CV
-import           Data.Vinyl                    (Rec (RNil, (:&)))
-import           Data.Vinyl.CoRec              (Handler (H), match)
-import           Graphics.SvgTree              (LineJoin (..), Origin (..), PathCommand (..))
-import           Linear.V2                     (V2 (V2))
-import           Linear.Vector
-import           Reanimate
+import           Control.Lens                 ((&), (^.))
+import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
+import           Data.Ext                     (ext)
+import           Data.Geometry.Point          (Point (Point2))
+import           Data.Geometry.Polygon.Convex (simplePolygon)
+import qualified Data.List.NonEmpty           as NonEmpty
+import qualified Data.Vector.Circular         as CV
+import           Reanimate                    (Animation, SVG, animate, curveS, mkCircle, mkGroup,
+                                               pauseAtEnd, play, scene, setDuration, signalA,
+                                               translate, withFillColorPixel, withStrokeColorPixel)
 
-import Common
+import Common (black, genPoints, green, grey, lerpPoint, nodeRadius, ppPolygonBody,
+               ppPolygonOutline, scalePoint)
 
 -- mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
 convexHullShowcase :: Animation
@@ -80,7 +64,6 @@ points = CV.unsafeFromList $ map (map $ scalePoint 0.9) $ flip evalRand (mkStdGe
 ppPoint :: Real r => Point 2 r -> SVG
 ppPoint (Point2 x y) =
   withFillColorPixel green $
-  withStrokeWidth (defaultStrokeWidth*1) $
   withStrokeColorPixel black $
   translate (realToFrac x) (realToFrac y) $
   mkCircle nodeRadius
