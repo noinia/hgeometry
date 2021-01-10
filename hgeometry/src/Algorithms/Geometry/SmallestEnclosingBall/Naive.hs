@@ -27,7 +27,7 @@ import Data.Util(uniquePairs, uniqueTriplets)
 import qualified Data.Util as Util
 --------------------------------------------------------------------------------
 
--- | Horrible O(n^4) implementation that simply tries all disks, checks if they
+-- | Horrible \( O(n^4) \) implementation that simply tries all disks, checks if they
 -- enclose all points, and takes the largest one. Basically, this is only useful
 -- to check correctness of the other algorithm(s)
 smallestEnclosingDisk          :: (Ord r, Fractional r)

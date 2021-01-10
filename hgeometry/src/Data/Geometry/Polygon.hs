@@ -17,10 +17,18 @@ module Data.Geometry.Polygon
 
     -- * Conversion
   , fromPoints
+  , fromCircularVector
+
+  , simpleFromPoints
+  , simpleFromCircularVector
+
   , unsafeFromPoints
   , unsafeFromCircularVector
   , unsafeFromVector
   , toVector
+  , toPoints
+
+  , isSimple
 
     -- * Accessors
 
@@ -51,6 +59,12 @@ module Data.Geometry.Polygon
   , toClockwiseOrder, toClockwiseOrder'
   , reverseOuterBoundary
 
+  , rotateLeft
+  , rotateRight
+  , maximumBy
+  , minimumBy
+
+
    -- * Misc
   , pickPoint
   , findDiagonal
@@ -58,6 +72,10 @@ module Data.Geometry.Polygon
   , withIncidentEdges, numberVertices
 
   , extremesLinear, cmpExtreme
+
+  , rotateLeft
+  , rotateRight
+
   ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC

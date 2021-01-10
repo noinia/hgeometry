@@ -19,28 +19,6 @@ tested-with:         GHC >= 8.2
 category:            Geometry
 build-type:          Simple
 
-data-files:          test/Algorithms/Geometry/LineSegmentIntersection/manual.ipe
-                     test/Algorithms/Geometry/LineSegmentIntersection/selfIntersections.ipe
-                     test/Algorithms/Geometry/LowerEnvelope/manual.ipe
-                     test/Algorithms/Geometry/PolygonTriangulation/monotone.ipe
-                     test/Algorithms/Geometry/PolygonTriangulation/simplepolygon6.ipe
-                     test/Algorithms/Geometry/SmallestEnclosingDisk/manual.ipe
-                     test/Algorithms/Geometry/LinearProgramming/manual.ipe
-                     test/Algorithms/Geometry/RedBlueSeparator/manual.ipe
-                     test/Data/Geometry/pointInPolygon.ipe
-                     test/Data/Geometry/pointInTriangle.ipe
-                     test/Data/Geometry/Polygon/star_shaped.ipe
-                     test/Data/Geometry/Polygon/Convex/convexTests.ipe
-                     test/Data/Geometry/arrangement.ipe
-                     test/Data/Geometry/arrangement.ipe.out.ipe
-                     test/Data/PlaneGraph/myPlaneGraph.yaml
-                     test/Data/PlaneGraph/small.yaml
-                     test/Data/PlaneGraph/testsegs.png
-
-                     -- in the future (cabal >=2.4) we can use
-                     -- examples/**/*.in
-                     -- examples/**/*.out
-
 extra-source-files:  README.md
                      changelog.org
 
@@ -101,6 +79,7 @@ library
                     Data.Geometry.Ellipse
 
                     Data.Geometry.Polygon
+                    Data.Geometry.Polygon.Inflate
                     Data.Geometry.Polygon.Convex
 
                     Data.Geometry.BezierSpline
@@ -161,6 +140,7 @@ library
                     Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 
                     Algorithms.Geometry.Diameter.Naive
+                    Algorithms.Geometry.Diameter.ConvexHull
 
                     -- Algorithms.Geometry.Sweep
 

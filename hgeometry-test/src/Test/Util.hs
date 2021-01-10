@@ -13,6 +13,7 @@ import           Data.Functor.Classes
 import           Data.Geometry.Ipe
 import qualified Data.List              as List
 import           Data.Proxy
+import           Data.Ratio
 import qualified Data.Set               as Set
 import           Data.Singletons        (Apply)
 import           Data.Vinyl
@@ -69,6 +70,23 @@ x ==== y =
     res = x `eq1` y
     interpret True  = " == "
     interpret False = " /= "
+
+--------------------------------------------------------------------------------
+
+newtype ZeroToOne = ZeroToOne Rational
+
+instance Show ZeroToOne where
+  show (ZeroToOne r) = show r
+
+instance Arbitrary ZeroToOne where
+  arbitrary = do
+    k <- chooseInteger (0, granularity)
+    pure $ ZeroToOne $ k % granularity
+    where
+      granularity = 1000000
+  shrink (ZeroToOne 1) = []
+  shrink (ZeroToOne 0) = []
+  shrink (ZeroToOne r) = [ ZeroToOne $ div (numerator r) 2 % div (denominator r) 2]
 
 --------------------------------------------------------------------------------
 

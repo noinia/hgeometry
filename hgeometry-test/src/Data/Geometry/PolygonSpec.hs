@@ -3,19 +3,18 @@ module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                (over, view, (^.), (^..))
-import           Control.Monad
 import qualified Data.ByteString                             as BS
+import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                               as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
-import           Data.Geometry.Polygon                       (fromPoints)
 import           Data.Geometry.Triangle
 import           Data.Ord
-import           Data.Coerce
 import           Data.Proxy
 import           Data.Ratio
+import           Data.RealNumber.Rational
 import           Data.Serialize
 import qualified Data.Vector                                 as V
 import           Data.Vector.Circular                        (CircularVector)
@@ -34,7 +33,7 @@ allSimplePolygons = unsafePerformIO $ do
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
@@ -52,19 +51,29 @@ allMultiPolygons = unsafePerformIO $ do
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = unsafeFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
 
 allMultiPolygons' :: [MultiPolygon () Rational]
 allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Arbitrary (SimplePolygon () Rational) where
-  arbitrary = fmap realToFrac <$> elements allSimplePolygons
+  arbitrary = do
+    p <- elements allSimplePolygons'
+    n <- chooseInt (0, size p-1)
+    pure $ rotateLeft n p
   shrink p
     | isTriangle p = simplifyP p
     | otherwise = cutEars p ++ simplifyP p
 
+instance Arbitrary (SimplePolygon () (RealNumber (p::Nat))) where
+  arbitrary = elements (map (fmap realToFrac) allSimplePolygons')
+  shrink = map (fmap realToFrac) . shrink . trunc
+    where
+      trunc :: SimplePolygon () (RealNumber (p::Nat)) -> SimplePolygon () Rational
+      trunc = fmap realToFrac
+
 instance Arbitrary (MultiPolygon () Rational) where
-  arbitrary = fmap realToFrac <$> elements allMultiPolygons
+  arbitrary = elements allMultiPolygons'
 
 simplifyP :: SimplePolygon () Rational -> [SimplePolygon () Rational]
 simplifyP p
@@ -139,23 +148,6 @@ spec = do
       let simple = unsafeFromCircularVector pts
           p = MultiPolygon simple [simple] in
       read (show p) == p
-  it "valid polygons (Simple/Double)" $ do
-    forM_ allSimplePolygons $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Simple/Rational)" $ do
-    forM_ allSimplePolygons' $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Multi/Double)" $ do
-    forM_ allMultiPolygons $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Multi/Rational)" $ do
-    forM_ allMultiPolygons' $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
-
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case

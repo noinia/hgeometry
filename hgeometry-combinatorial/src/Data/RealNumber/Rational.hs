@@ -11,6 +11,7 @@ module Data.RealNumber.Rational(RealNumber(..)
                                -- * Converting to and from RealNumber's
                                , AsFixed(..), asFixed
                                , toFixed, fromFixed
+                               , Nat
                                ) where
 
 import Data.Data

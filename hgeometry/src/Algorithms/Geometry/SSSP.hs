@@ -44,13 +44,16 @@ import qualified Data.Vector.Unboxed                                  as VU
 --   @parentOf(i) = sssp[i]@
 type SSSP = Vector Int
 
-
+-- FIXME: The code for generating the dual cannot deal with offsets so
+--        we're running 'unsafeFromPoints . toPoints' to reset the polygon.
+--        Super silly. Please fix.
+-- | \( O(n \log n) \)
 triangulate :: (Ord r, Fractional r) => SimplePolygon p r -> PlaneGraph s Int PolygonEdgeType PolygonFaceData r
 triangulate p =
-  let poly' = snd $ bimapAccumL (\a _ -> (a+1,a)) (,) 0 p
+  let poly' = snd $ bimapAccumL (\a _ -> (a+1,a)) (,) 0 $ unsafeFromPoints $ toPoints p
   in triangulate' Proxy poly'
 
--- | O(n) Single-Source shortest path.
+-- | \( O(n) \) Single-Source shortest path.
 sssp :: (Ord r, Fractional r)
   => PlaneGraph s Int PolygonEdgeType PolygonFaceData r
   -> SSSP
@@ -205,7 +208,7 @@ splitFunnel x Funnel{..}
 -- FIXME: Turning a list of pairs into a vector is incredibly inefficient.
 --        Would be much faster to write directly into a mutable vector and
 --        then freeze it at the end.
--- O(n)
+-- \( O(n) \)
 ssspFinger :: (Fractional r, Ord r) => Dual r -> SSSP
 ssspFinger d = toSSSP $
     case d of
