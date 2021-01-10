@@ -1,15 +1,44 @@
 -- We'll move this to Data.Geometry.Polygon.Monotone in the final version.
-module Algorithms.Geometry.MonotonePolygon.MonotonePolygon where
+module Algorithms.Geometry.MonotonePolygon.MonotonePolygon
+  ( isMonotone
+  , randomMonotone
+  , randomMonotoneAny
+  ) where
 
-import Control.Monad.Random
-import Data.Geometry.Polygon.Core
-import Data.Geometry.Vector
+import           Control.Monad.Random
+import           Data.Ext
+import qualified Data.Foldable              as F
+import           Data.Geometry.Line         (Line (..))
+import           Data.Geometry.LineSegment
+import           Data.Geometry.Point
+import           Data.Geometry.Polygon.Core
+import           Data.Geometry.Vector
+import           Data.Intersection
+
+import Data.Vinyl
+import Data.Vinyl.CoRec
 
 -- | \( O(n \log n) \)
 --   A polygon is monotone if a straight line in a given direction
 --   cannot have more than two intersections.
-isMonotone :: Vector 2 r -> SimplePolygon p r -> Bool
-isMonotone = error "not implemented yet"
+isMonotone :: (Fractional r, Ord r) => Vector 2 r -> SimplePolygon p r -> Bool
+-- Check for each vertex that the number of intersections with the
+-- line starting at the vertex and going out in the given direction
+-- intersects with the edges of the polygon no more than 2 times.
+isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
+  where
+    isMonotoneAt pt =
+      sum (map (intersectionsThrough pt) (F.toList $ outerBoundaryEdges p)) <= 2
+    intersectionsThrough pt edge =
+      match (edge `intersect` line) $
+           H (\NoIntersection -> 0)
+        :& H (\Point{} -> 1)
+        -- This happens when an edge is parallel with the given direction.
+        -- I think it's correct to count it as a single intersection.
+        :& H (\LineSegment{} -> 1)
+        :& RNil
+      where
+        line = Line pt direction
 
 {- Algorithm overview:
 
