@@ -28,6 +28,8 @@ module Data.Geometry.Polygon.Core
   , toVector
   , toPoints
 
+  , isSimple
+
   , size
   , polygonVertices, listEdges
 
@@ -58,9 +60,12 @@ module Data.Geometry.Polygon.Core
 
   , withIncidentEdges, numberVertices
 
+  -- * Testing for Reflex or Convex
+
+  , isReflexVertex, isConvexVertex, isStrictlyConvexVertex
+  , reflexVertices, convexVertices, strictlyConvexVertices
+
     -- * Specialized folds
-  -- , Data.Geometry.Polygon.Core.maximum
-  -- , Data.Geometry.Polygon.Core.minimum
   , maximumBy
   , minimumBy
   , findRotateTo
@@ -332,7 +337,7 @@ polygonHoles' = \f -> \case
   p@SimplePolygon{}  -> pure p
   MultiPolygon vs hs -> MultiPolygon vs <$> f hs
 
--- | \( O(1) \) Access the i^th vertex on the outer boundary
+-- | /O(1)/ Access the i^th vertex on the outer boundary. Indices are modulo \(n\).
 --
 -- >>> simplePoly ^. outerVertex 0
 -- Point2 0 0 :+ ()
@@ -374,6 +379,13 @@ polygonVertices p@SimplePolygon{}    = toNonEmpty $ p^.outerBoundaryVector
 polygonVertices (MultiPolygon vs hs) =
   sconcat $ toNonEmpty (polygonVertices vs) NonEmpty.:| map polygonVertices hs
 
+-- FIXME: Get rid of 'Fractional r' constraint.
+-- | \( O(n \log n) \) Check if a polygon has any holes, duplicate points, or
+--   self-intersections.
+isSimple :: (Ord r, Fractional r) => Polygon p t r -> Bool
+isSimple p@SimplePolygon{}   = null . BO.interiorIntersections $ listEdges p
+isSimple (MultiPolygon b []) = isSimple b
+isSimple MultiPolygon{}      = False
 
 requireThree :: String -> [a] -> [a]
 requireThree _ lst@(_:_:_:_) = lst
@@ -756,8 +768,6 @@ numberVertices :: Polygon t p r -> Polygon t (SP Int p) r
 numberVertices = snd . bimapAccumL (\a p -> (a+1,SP a p)) (,) 0
   -- TODO: Make sure that this does not have the same issues as foldl vs foldl'
 
-
-
 --------------------------------------------------------------------------------
 -- Specialized folds
 
@@ -808,3 +818,109 @@ rotateLeft n = over unsafeOuterBoundaryVector (CV.rotateLeft n)
 -- | \( O(1) \) Rotate the polygon to the right by n number of points.
 rotateRight :: Int -> SimplePolygon p r -> SimplePolygon p r
 rotateRight n = over unsafeOuterBoundaryVector (CV.rotateRight n)
+
+--------------------------------------------------------------------------------
+-- Testing for reflex or convex
+
+-- | Test if a given vertex is a reflex vertex.
+--
+-- \(O(1)\)
+isReflexVertex      :: (Ord r, Num r) => Int -> Polygon Simple p r -> Bool
+isReflexVertex i pg = ccw' u  v w == CW
+  where
+    u = pg^.outerVertex (i-1)
+    v = pg^.outerVertex i
+    w = pg^.outerVertex (i+1)
+
+-- | Test if a given vertex is a convex vertex (i.e. not a reflex vertex).
+--
+-- \(O(1)\)
+isConvexVertex   :: (Ord r, Num r) => Int -> Polygon Simple p r -> Bool
+isConvexVertex i = not . isReflexVertex i
+
+-- | Test if a given vertex is a strictly convex vertex.
+--
+-- \(O(1)\)
+isStrictlyConvexVertex      :: (Ord r, Num r) => Int -> Polygon t p r -> Bool
+isStrictlyConvexVertex i pg = ccw' u  v w == CCW
+  where
+    u = pg^.outerVertex (i-1)
+    v = pg^.outerVertex i
+    w = pg^.outerVertex (i+1)
+
+
+-- | Computes all reflex vertices of the polygon.
+--
+-- \(O(n)\)
+reflexVertices  :: (Ord r, Num r) => Polygon t p r -> [Int :+ (Point 2 r :+ p)]
+reflexVertices p@(SimplePolygon _)                    = reflexVertices' p
+reflexVertices (numberVertices -> MultiPolygon vs hs) =
+  map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
+    reflexVertices' vs <> concatMap strictlyConvexVertices' hs
+
+-- | Computes all convex (i.e. non-reflex) vertices of the polygon.
+--
+-- \(O(n)\)
+convexVertices :: (Ord r, Num r) => Polygon t p r -> [Int :+ (Point 2 r :+ p)]
+convexVertices = \case
+  p@(SimplePolygon _)                    -> convexVertices' p
+  (numberVertices -> MultiPolygon vs hs) ->
+    map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
+      convexVertices' vs <> concatMap reflexVertices' hs
+
+-- | Computes all strictly convex vertices of the polygon.
+--
+-- \(O(n)\)
+strictlyConvexVertices :: (Ord r, Num r) => Polygon t p r -> [Int :+ (Point 2 r :+ p)]
+strictlyConvexVertices = \case
+  p@(SimplePolygon _)                    -> convexVertices' p
+  (numberVertices -> MultiPolygon vs hs) ->
+    map (\(_ :+ (p :+ SP i e)) -> i :+ (p :+ e)) $
+      strictlyConvexVertices' vs <> concatMap reflexVertices' hs
+
+----------------------------------------
+
+-- | Return (the indices of) all reflex vertices, in increasing order
+-- along the boundary.
+--
+-- \(O(n)\)
+reflexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+reflexVertices' = filterReflexConvexWorker asReflex
+  where
+    asReflex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) == CW = Just v
+                   | otherwise                                   = Nothing
+
+-- | Return (the indices of) all strictly convex vertices, in
+-- increasing order along the boundary.
+--
+-- \(O(n)\)
+strictlyConvexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+strictlyConvexVertices' = filterReflexConvexWorker asStrictlyConvex
+  where
+    asStrictlyConvex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) == CCW = Just v
+                           | otherwise                                    = Nothing
+
+-- | Return (the indices of) all convex (= non-reflex) vertices, in increasing order
+-- along the boundary.
+--
+-- \(O(n)\)
+convexVertices' :: (Ord r, Num r) => SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+convexVertices' = filterReflexConvexWorker asConvex
+  where
+    asConvex u v w | ccw' (u^.extra) (v^.extra) (w^.extra) /= CW = Just v
+                   | otherwise                                   = Nothing
+
+-- | Helper function to implement convexVertices, reflexVertices, and
+-- strictlyConvexVertices
+filterReflexConvexWorker      :: (Ord r, Num r)
+                              => (    Int :+ (Point 2 r :+ p)
+                                   -> Int :+ (Point 2 r :+ p)
+                                   -> Int :+ (Point 2 r :+ p)
+                                   -> Maybe (Int :+ (Point 2 r :+ p))
+                                 )
+                              -> SimplePolygon p r -> [Int :+ (Point 2 r :+ p)]
+filterReflexConvexWorker g pg =
+    catMaybes $ zip3RWith g (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
+  where
+    vs = CV.withIndicesRight $ pg^.outerBoundaryVector
+    zip3RWith f us' vs' ws' = zipWith3 f (F.toList us') (F.toList vs') (F.toList ws')

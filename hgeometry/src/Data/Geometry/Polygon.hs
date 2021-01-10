@@ -28,6 +28,8 @@ module Data.Geometry.Polygon
   , toVector
   , toPoints
 
+  , isSimple
+
     -- * Accessors
 
   , size
@@ -57,6 +59,12 @@ module Data.Geometry.Polygon
   , toClockwiseOrder, toClockwiseOrder'
   , reverseOuterBoundary
 
+  , rotateLeft
+  , rotateRight
+  , maximumBy
+  , minimumBy
+
+
    -- * Misc
   , pickPoint
   , findDiagonal
@@ -64,6 +72,10 @@ module Data.Geometry.Polygon
   , withIncidentEdges, numberVertices
 
   , extremesLinear, cmpExtreme
+
+  , rotateLeft
+  , rotateRight
+
   ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC

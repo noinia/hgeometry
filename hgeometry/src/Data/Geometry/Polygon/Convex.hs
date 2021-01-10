@@ -26,11 +26,18 @@ module Data.Geometry.Polygon.Convex
   , bottomMost
   , inConvex
   , randomConvex
+
+  , diameter
+  , diametralPair
+  , diametralIndexPair
   ) where
+
 
 import           Control.DeepSeq                (NFData)
 import           Control.Lens                   (Iso, iso, over, view, (%~), (&), (^.))
 import           Control.Monad.Random
+import           Control.Monad.ST
+import           Control.Monad.State
 import           Data.Coerce
 import           Data.Ext
 import qualified Data.Foldable                  as F
@@ -41,7 +48,8 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core     (Polygon (..), SimplePolygon, centroid,
                                                  outerBoundaryVector, outerVertex, size,
-                                                 unsafeFromPoints, unsafeOuterBoundaryVector)
+                                                 unsafeFromPoints, unsafeFromVector,
+                                                 unsafeOuterBoundaryVector)
 import           Data.Geometry.Polygon.Extremes (cmpExtreme)
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
@@ -54,12 +62,17 @@ import           Data.Maybe                     (fromJust)
 import           Data.Ord                       (comparing)
 import           Data.Semigroup.Foldable        (Foldable1 (..))
 import           Data.Util
+import qualified Data.Vector                    as V
 import           Data.Vector.Circular           (CircularVector)
 import qualified Data.Vector.Circular           as CV
 import qualified Data.Vector.Circular.Util      as CV
+import qualified Data.Vector.Mutable            as Mut
+import qualified Data.Vector.NonEmpty           as NE
 import qualified Data.Vector.Unboxed            as VU
 -- import           Data.Geometry.Ipe
--- import           Debug.Trace
+-- import Data.Ratio
+-- import Data.RealNumber.Rational
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -87,22 +100,99 @@ instance IsBoxable (ConvexPolygon p r) where
   boundingBox = boundingBox . _simplePolygon
 
 
-convexPolygon :: (Ord r, Num r) => Polygon t p r -> Maybe (ConvexPolygon p r)
-convexPolygon p@SimplePolygon{} =
-  let convex = ConvexPolygon p in
-  if verifyConvex convex then Just convex else Nothing
-convexPolygon (MultiPolygon b []) = convexPolygon b
-convexPolygon _ = Nothing
 
+--------------------------------------------------------------------------------
+-- Convex hull of simple polygon.
+
+type M s v a = StateT (Mut.MVector s v, Int) (ST s) a
+
+runM :: Int -> M s v () -> ST s (Mut.MVector s v)
+runM s action = do
+  v <- Mut.new (2*s)
+  (v', f) <- execStateT action (Mut.drop s v, 0)
+  return $ Mut.tail $ Mut.take f v'
+
+dequeRemove :: M s a ()
+dequeRemove = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset+1) (len-1) arr, f-1)
+
+dequeInsert :: a -> M s a ()
+dequeInsert a = do
+  modify $ \(Mut.MVector offset len arr, f) -> (Mut.MVector (offset-1) (len+1) arr, f+1)
+  (v,_) <- get
+  Mut.write v 0 a
+
+dequePush :: a -> M s a ()
+dequePush a = do
+  (v, f) <- get
+  Mut.write v f a
+  put (v,f+1)
+
+dequePop :: M s a ()
+dequePop = do
+  modify $ \(v,f) -> (v,f-1)
+
+dequeBottom :: Int -> M s a a
+dequeBottom idx = do
+  (v,_) <- get
+  Mut.read v idx
+
+dequeTop :: Int -> M s a a
+dequeTop idx = do
+  (v,f) <- get
+  Mut.read v (f-idx-1)
+
+-- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&rep=rep1&type=pdf
+
+-- | \( O(n) \) Convex hull of a simple polygon.
+--
+--   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
+convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -> ConvexPolygon p r
+convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $ do
+    let v1 = NE.unsafeIndex vs 0
+        v2 = NE.unsafeIndex vs 1
+        v3 = NE.unsafeIndex vs 2
+    if ccw' v1 v2 v3 == CCW
+      then dequePush v1 >> dequePush v2
+      else dequePush v2 >> dequePush v1
+    dequePush v3; dequeInsert v3
+    V.mapM_ build (NE.drop 3 vs)
+  where
+    vs = CV.vector (p^.outerBoundaryVector)
+    build v = do
+      botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
+      topTurn <- ccw' <$> dequeTop 1 <*> dequeTop 0    <*> pure v
+      when (botTurn == CW || topTurn == CW) $ do
+        backtrackTop v; dequePush v
+        backtrackBot v; dequeInsert v
+    backtrackTop v = do
+      turn <- ccw' <$> dequeTop 1 <*> dequeTop 0 <*> pure v
+      unless (turn == CCW) $ do
+        dequePop
+        backtrackTop v
+    backtrackBot v = do
+      turn <- ccw' <$> pure v <*> dequeBottom 0 <*> dequeBottom 1
+      unless (turn == CCW) $ do
+        dequeRemove
+        backtrackBot v
+
+
+
+
+
+
+
+-- | \( O(n) \) Check if a polygon is strictly convex.
 isConvex :: (Ord r, Num r) => SimplePolygon p r -> Bool
-isConvex = verifyConvex . ConvexPolygon
-
-verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
-verifyConvex (ConvexPolygon s) =
+isConvex s =
     CV.and (CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs))
   where
     f a b c = ccw' a b c == CCW
     vs = s ^. outerBoundaryVector
+
+-- | \( O(n) \) Verify that a convex polygon is strictly convex.
+verifyConvex :: (Ord r, Num r) => ConvexPolygon p r -> Bool
+verifyConvex = isConvex . _simplePolygon
 
 -- mainWith inFile outFile = do
 --     ePage <- readSinglePageFile inFile
@@ -144,7 +234,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
 --        Use unsafe indexing.
--- \( O(log n) \)
+-- \( O(\log n) \)
 findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
 findMaxWith cmp p = CV.index v (worker 0 (F.length v))
@@ -221,7 +311,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 --  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
@@ -229,7 +319,7 @@ leftTangent poly q = findMaxWith (tangentCmp q) poly
 --  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 
@@ -440,6 +530,55 @@ inConvex p (ConvexPolygon poly)
       | otherwise                       = worker a c
       where c = (a+b) `div` 2
     point x = poly ^. outerVertex x
+
+--------------------------------------------------------------------------------
+-- Diameter
+
+-- | \( O(n) \) Computes the Euclidean diameter by scanning antipodal pairs.
+diameter :: (Ord r, Floating r) => ConvexPolygon p r -> r
+diameter p = euclideanDist (a^.core) (b^.core)
+  where
+    (a,b) = diametralPair p
+
+-- | \( O(n) \)
+--   Computes the Euclidean diametral pair by scanning antipodal pairs.
+diametralPair :: (Ord r, Num r) => ConvexPolygon p r -> (Point 2 r :+ p, Point 2 r :+ p)
+diametralPair p = (p^.simplePolygon.outerVertex a, p^.simplePolygon.outerVertex b)
+  where
+    (a,b) = diametralIndexPair p
+
+-- | \( O(n) \)
+--   Computes the Euclidean diametral pair by scanning antipodal pairs.
+diametralIndexPair :: (Ord r, Num r) => ConvexPolygon p r -> (Int, Int)
+diametralIndexPair p = F.maximumBy fn $ antipodalPairs p
+  where
+    fn (a1,b1) (a2,b2) =
+      squaredEuclideanDist (p^.simplePolygon.outerVertex a1.core) (p^.simplePolygon.outerVertex b1.core)
+        `compare`
+      squaredEuclideanDist (p^.simplePolygon.outerVertex a2.core) (p^.simplePolygon.outerVertex b2.core)
+
+antipodalPairs :: forall p r. (Ord r, Num r) => ConvexPolygon p r -> [(Int, Int)]
+antipodalPairs p = worker 0 (CV.index vectors 0) 1
+  where
+    n = size (p^.simplePolygon)
+    vs = p^.simplePolygon.outerBoundaryVector
+
+    worker a aElt b
+      | a == n = []
+      | otherwise =
+        case ccw aElt (Point2 0 0) (CV.index vectors b) of
+          CW -> worker a aElt (b+1)
+          _  ->
+            (a, b `mod` n) :
+            worker (a+1) (CV.index vectors (a+1)) b
+
+    vectors :: CircularVector (Point 2 r)
+    vectors = CV.unsafeFromVector $ V.generate n $ \i ->
+      let Point p1 = point i
+          p2 = point (i+1)
+      in p2 .-^ p1
+
+    point x = CV.index vs x ^. core
 
 --------------------------------------------------------------------------------
 

@@ -2,30 +2,30 @@
 module Data.Geometry.Polygon.Convex.ConvexSpec (spec) where
 
 import           Algorithms.Geometry.ConvexHull.GrahamScan (convexHull)
-import           Control.Arrow                             ((&&&))
-import           Control.Lens                              (over, to, (^.), (^..))
+import qualified Algorithms.Geometry.Diameter.Naive        as Naive
+
+import           Control.Arrow                ((&&&))
+import           Control.Lens                 (over, to, (^.), (^..))
 import           Control.Monad.Random
 import           Data.Coerce
 import           Data.Ext
-import qualified Data.Foldable                             as F
+import qualified Data.Foldable                as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
-import           Data.Geometry.Box                         (boundingBox)
-import           Data.Geometry.BoxSpec                     (arbitraryPointInBoundingBox)
+import           Data.Geometry.Box            (boundingBox)
+import           Data.Geometry.BoxSpec        (arbitraryPointInBoundingBox)
 import           Data.Geometry.Ipe
 import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.PolygonSpec                 ()
-import qualified Data.List.NonEmpty                        as NonEmpty
-import           Data.Maybe
+import           Data.Geometry.PolygonSpec    ()
+import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.RealNumber.Rational
-import qualified Data.Vector.Circular                      as CV
+import qualified Data.Vector.Circular         as CV
 import           Paths_hgeometry_test
 import           Test.Hspec
-import           Test.QuickCheck                           (Arbitrary (..), choose, elements,
-                                                            forAll, property, sized, suchThat,
-                                                            (===), (==>))
-import           Test.QuickCheck.Instances                 ()
-import           Test.Util                                 (ZeroToOne (..))
+import           Test.QuickCheck              (Arbitrary (..), choose, elements, forAll, property,
+                                               sized, suchThat, (=/=), (===), (==>), (.&&.))
+import           Test.QuickCheck.Instances    ()
+import           Test.Util                    (ZeroToOne (..))
 
 --------------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ instance Arbitrary (ConvexPolygon () Rational) where
     pure $ evalRand (randomConvex k granularity) (mkStdGen stdgen)
     where
       granularity = 1000000
-  shrink convex = mapMaybe convexPolygon (shrink (convex^.simplePolygon))
+  shrink convex = map convexPolygon (shrink (convex^.simplePolygon))
 
 --------------------------------------------------------------------------------
 
@@ -99,6 +99,40 @@ spec = do
           bPt = s ^. outerVertex b.core
           cPt = Point $ lerp 0.5 (coerce aPt) (coerce bPt)
       in inConvex cPt convex === Inside
+
+  -- Verify that convexPolygon always returns convex polygons.
+  specify "verifyConvex (convexPolygon p)" $
+    property $ \(p :: SimplePolygon () R) ->
+      verifyConvex (convexPolygon p) .&&.
+      isSimple (convexPolygon p ^. simplePolygon)
+
+  specify "convexPolygon p `superset` p" $
+    property $ \(p :: SimplePolygon () R) ->
+      forAll (choose (0, size p-1)) $ \n ->
+        inConvex (p^.outerVertex n.core) (convexPolygon p) =/= Outside
+
+  specify "convexPolygon convex == convex" $
+    property $ \(p :: ConvexPolygon () Rational) ->
+      size (convexPolygon (p^.simplePolygon)^.simplePolygon)
+      ===
+      size (p^.simplePolygon)
+
+  specify "area (convexPolygon p) >= area p" $
+    property $ \(p :: SimplePolygon () R) ->
+      area (convexPolygon p ^. simplePolygon) >= area p
+
+  specify "size (convexPolygon p) <= size p" $
+    property $ \(p :: SimplePolygon () R) ->
+      size (convexPolygon p ^. simplePolygon) <= size p
+
+  -- Check that Convex.diameter gives the same result as Naive.diameter
+  specify "Convex.diameter == Naive.diameter" $
+    property $ \(convex :: ConvexPolygon () Rational) ->
+      let (fastA, fastB) = diametralPair convex
+          Just (slowA, slowB) = Naive.diametralPair (toPoints (convex^.simplePolygon))
+      in
+        squaredEuclideanDist (fastA^.core) (fastB^.core) ===
+        squaredEuclideanDist (slowA^.core) (slowB^.core)
 
 
 testCases    :: FilePath -> Spec
