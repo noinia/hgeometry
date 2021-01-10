@@ -118,8 +118,8 @@ computeEvents        :: (Ord r, Fractional r, Show r, Show p, Show e)
                      -> [LineSegment 2 p r :+ e]
                      -> [Event p e r]
 computeEvents q segs = map (mkEvent q)
-                     . groupBy'    (ccwCmpAround (ext q))
-                     . List.sortBy (ccwCmpAround (ext q) <> cmpByDistanceTo (ext q))
+                     . groupBy'    (ccwCmpAround' (ext q))
+                     . List.sortBy (ccwCmpAround' (ext q) <> cmpByDistanceTo' (ext q))
                      $ endPoints'
   where
     endPoints' = concatMap (\s@(LineSegment' u v :+ _) -> [ u&extra %~ (,v,s)
@@ -151,7 +151,7 @@ determineEventType                  :: (Ord r, Fractional r, Show r, Show p, Sho
                                     -> (Point 2 r :+ (p, Point 2 r :+ p, LineSegment 2 p r :+ e))
                                     -> Maybe (EventType (LineSegment 2 p r :+ e))
 determineEventType q (u :+ (_,v,s)) =
-    case (ccwCmpAround (ext q) (ext u) v, isJust $ initialIntersection q (q .+^ Vector2 1 0) s) of
+    case (ccwCmpAround' (ext q) (ext u) v, isJust $ initialIntersection q (q .+^ Vector2 1 0) s) of
       (EQ, _)     -> Nothing -- colinear, so do nothing
       (LT, False) -> Just $ Insertion s -- normal mode && u before v => insertion at u
       (GT, False) -> Just $ Deletion s  -- normal mode && u after v  => deletion  at u
@@ -349,10 +349,10 @@ compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
 compareAroundEndPoint (sa@(LineSegment' p q) :+ _)
                       (sb@(LineSegment' s t) :+ _)
     -- | traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
-    | p^.core == s^.core = ccwCmpAround p q t
-    | p^.core == t^.core = ccwCmpAround p q s
-    | q^.core == s^.core = ccwCmpAround q p t
-    | q^.core == t^.core = ccwCmpAround q p s
+    | p^.core == s^.core = ccwCmpAround' p q t
+    | p^.core == t^.core = ccwCmpAround' p q s
+    | q^.core == s^.core = ccwCmpAround' q p t
+    | q^.core == t^.core = ccwCmpAround' q p s
     | otherwise          = error $ "compareAroundEndPoint: precondition failed!" <> show (sa,sb)
 
 
