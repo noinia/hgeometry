@@ -2,7 +2,7 @@
 module Algorithms.Geometry.MonotonePolygon.MonotonePolygon
   ( isMonotone
   , randomMonotone
-  , randomMonotoneAny
+  , randomMonotoneDirected
   ) where
 
 import           Control.Monad.Random
@@ -62,5 +62,5 @@ randomMonotone nVertices direction = error "not implemented yet"
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
-randomMonotoneAny :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
-randomMonotoneAny nVertices = error "not implemented yet"
+randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
+randomMonotoneDirected nVertices = error "not implemented yet"
