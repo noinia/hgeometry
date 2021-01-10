@@ -1,5 +1,6 @@
 module Algorithms.Geometry.SoSSpec where
 
+import qualified Algorithms.Geometry.ConvexHull.GrahamScan
 import           Algorithms.Geometry.SoS.Symbolic
 -- import           Control.Lens
 -- import           Control.Monad (forM_)
@@ -35,6 +36,11 @@ instance Arbitrary SmallInt where
 -- unfortunately, it seems that this is not really feasilbe to explicitly evaluate thee things.
 spec :: Spec
 spec = pure ()
+  -- describe "Symbolic Ord, Eq, Num tests using convex-hull" $ do
+  --        it "quickcheck convex hull " $
+  --           property $ \pts ->
+  --             (PG $ convexHull pts) == (PG $ convexHull $ map (fmap constant) pts)
+
 
 -- spec :: Spec
 -- spec = describe "SoS Symoblic" $ do

@@ -1,27 +1,31 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Algorithms.Geometry.SoS.AsPoint where
 
-import           Control.CanAquire
-import           Data.Ext
-import           Data.Geometry.Point.Internal
-import           Data.Geometry.Properties
-import           Data.Geometry.Vector
+import Control.CanAquire
+import Data.Ext
+import Data.Geometry.Point.Internal
+import Data.Geometry.Properties
+import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
--- | a P is a 'read only' point in d dimensions
-newtype P i d r = P i deriving (Eq, Show)
 
--- | Indxec type that can disambiguate points
-newtype SoSIndex i = SoSIndex i deriving (Show,Eq,Ord)
+-- | P is a pointer to a (Point d r :+ e). It essentially acts as a
+-- 'read only' (Point d r :+ e)..
+--
+-- Note that the Eq and Ord instance only evaluate the
+-- equality/ordering of the pointers, not the points themselves!
+newtype P i d r e = P (I i (Point d r :+ e)) deriving (Show,Eq,Ord)
 
-instance HasIndex (P i d r) i where
-  indexOf (P i) = i
+-- | We use ints as indices
+newtype SoSIndex = SoSIndex Int deriving (Show,Eq,Ord)
 
-instance Int `CanAquire` Point d r => P Int d r `CanAquire` Point d r where
+type instance NumType   (P i d r e) = r
+type instance Dimension (P i d r e) = d
+
+instance CanAquire (I i (Point d r :+ e)) => CanAquire (P i d r e) where
+  type AquiredVal (P i d r e) = Point d r :+ e
   aquire (P i) = aquire i
 
-type instance NumType   (P i d r) = r
-type instance Dimension (P i d r) = d
-
-asPointWithIndex       :: (Arity d, i `CanAquire` Point d r)
-                       => P i d r -> Point d r :+ SoSIndex i
-asPointWithIndex (P i) = aquire i :+ SoSIndex i
+asPointWithIndex         :: (Arity d, CanAquire (P i d r e))
+                         => P i d r e -> Point d r :+ SoSIndex
+asPointWithIndex p@(P i) = let pt :+ _ = aquire p in pt :+ SoSIndex (fromEnum i)
