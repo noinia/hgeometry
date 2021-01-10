@@ -64,11 +64,10 @@ lowerHull = undefined
 
 --------------------------------------------------------------------------------
 
-myPoints = NonEmpty.fromList . flip zipWith [1..] $ [ Point2 0 0
-                                                    , Point2 3 3
-                                                    , Point2
-
-                                                    ]
+myPoints = NonEmpty.fromList . zipWith (flip (:+)) [1..] $ [ Point2 0 0
+                                                           , Point2 3 3
+                                                             -- , Point2
+                                                           ]
 
 
 ----------------------------------------
