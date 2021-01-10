@@ -36,7 +36,7 @@ import           Data.Util
 -- | Classical divide and conquer algorithm to compute the closest pair among
 -- \(n\) points.
 --
--- running time: \(O(n)\)
+-- running time: \(O(n \log n)\)
 closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
 closestPair = f . divideAndConquer1 mkCCP . toNonEmpty
             . LSeq.unstableSortBy (comparing (^.core))
