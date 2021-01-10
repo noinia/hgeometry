@@ -7,6 +7,7 @@ import System.IO          (hPutStrLn, stderr)
 import ClosestPair (closestPairShowcase)
 import Common
 import ConvexHull  (convexHullShowcase)
+import BentleyOttmann
 
 import Reanimate
 
@@ -14,9 +15,10 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    "convexhull":rest  -> withArgs rest $ runReanimate convexHullShowcase
-    "closestpair":rest -> withArgs rest $ runReanimate closestPairShowcase
-    _                  -> printUsage
+    "convexhull":rest     -> withArgs rest $ runReanimate convexHullShowcase
+    "closestpair":rest    -> withArgs rest $ runReanimate closestPairShowcase
+    "bentleyottmann":rest -> withArgs rest $ runReanimate bentleyOttmannShowcase
+    _                     -> printUsage
 
 runReanimate :: Animation -> IO ()
 runReanimate animation = reanimate $

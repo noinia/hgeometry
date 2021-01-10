@@ -31,6 +31,12 @@ import Data.Geometry.Polygon
 import Data.Geometry.Polygon.Inflate
 import Data.Geometry.Vector
 
+scaleLineSegment :: Num r => r -> LineSegment 2 p r -> LineSegment 2 p r
+scaleLineSegment v (LineSegment a b) =
+  LineSegment
+    (over (unEndPoint.core) (scalePoint v) a)
+    (over (unEndPoint.core) (scalePoint v) b)
+
 scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
 scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
 
@@ -225,6 +231,11 @@ lerpPolygon t a b = fromPoints $
     fn :: Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
     fn (a :+ p) (b :+ _) = lerpPoint t a b :+ p
 
+lerpLineSegment :: Fractional r => Double -> LineSegment 2 p r -> LineSegment 2 p r -> LineSegment 2 p r
+lerpLineSegment t (LineSegment' (a1 :+ p1) (b1 :+ p2)) (LineSegment' (a2 :+ _) (b2 :+ _)) =
+  ClosedLineSegment (lerpPoint t a1 a2 :+ p1) (lerpPoint t b1 b2 :+ p2)
+
+
 lerpPoint :: Fractional r => Double -> Point 2 r -> Point 2 r -> Point 2 r
 lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
 
@@ -245,3 +256,9 @@ genPoint = do
 
 genPoints :: RandomGen g => Int -> Rand g [Point 2 Rational]
 genPoints n = replicateM n genPoint
+
+genLineSegment :: RandomGen g => Rand g (LineSegment 2 () Rational)
+genLineSegment = do
+  a <- genPoint
+  b <- genPoint
+  pure $ ClosedLineSegment (ext a) (ext b)
