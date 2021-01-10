@@ -152,18 +152,18 @@ spec = do
   --   forM_ allSimplePolygons $ \poly -> do
   --     hasSelfIntersections poly `shouldBe` False
   --     isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Simple/Rational)" $ do
-    forM_ allSimplePolygons' $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Simple/Rational)" $ do
+  --   forM_ allSimplePolygons' $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
   -- it "valid polygons (Multi/Double)" $ do
   --   forM_ allMultiPolygons $ \poly -> do
   --     ShowPoly poly (hasSelfIntersections poly) `shouldBe` ShowPoly poly False
   --     isCounterClockwise poly `shouldBe` True
-  it "valid polygons (Multi/Rational)" $ do
-    forM_ allMultiPolygons' $ \poly -> do
-      hasSelfIntersections poly `shouldBe` False
-      isCounterClockwise poly `shouldBe` True
+  -- it "valid polygons (Multi/Rational)" $ do
+  --   forM_ allMultiPolygons' $ \poly -> do
+  --     hasSelfIntersections poly `shouldBe` False
+  --     isCounterClockwise poly `shouldBe` True
 
 data ShowPoly a b = ShowPoly a b deriving Show
 instance Eq b => Eq (ShowPoly a b) where
