@@ -30,3 +30,8 @@ isMonotone = error "not implemented yet"
 -- | \( O(n \log n) \)
 randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
 randomMonotone nVertices direction = error "not implemented yet"
+
+-- Pick a random vector and then call 'randomMonotone'.
+-- | \( O(n \log n) \)
+randomMonotoneAny :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
+randomMonotoneAny nVertices = error "not implemented yet"
