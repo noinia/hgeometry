@@ -6,27 +6,36 @@ module Common where
 
 import           Codec.Picture             (PixelRGBA8 (..))
 import           Control.Lens
+import           Control.Monad.Random
 import qualified Data.Foldable             as F
 import           Data.List                 (nub, transpose)
 import           Data.Ord
+import           Data.Ratio
 import qualified Data.Vector               as V
 import qualified Data.Vector.Circular      as CV
 import qualified Data.Vector.Circular.Util as CV
 import qualified Data.Vector.Unboxed       as VU
+import           Graphics.SvgTree          (LineJoin (..))
 import           Linear.V2                 (V2 (V2))
 import           Linear.Vector             (Additive (lerp))
 import           Reanimate
 import           Reanimate.Animation       (Sync (SyncFreeze))
-import           Graphics.SvgTree (LineJoin(..))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
 import Data.Geometry.Interval
+import Data.RealNumber.Rational
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon
-import Data.Geometry.Vector
 import Data.Geometry.Polygon.Inflate
+import Data.Geometry.Vector
+
+scaleLineSegment :: Num r => r -> LineSegment 2 p r -> LineSegment 2 p r
+scaleLineSegment v (LineSegment a b) =
+  LineSegment
+    (over (unEndPoint.core) (scalePoint v) a)
+    (over (unEndPoint.core) (scalePoint v) b)
 
 scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
 scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
@@ -48,8 +57,8 @@ pScaleV v p = fromPoints
 
 pTranslate :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
 pTranslate v p = fromPoints
-  [ (pt .+^ v :+ e)
-  | (pt :+ e) <- toPoints p
+  [ pt .+^ v :+ e
+  | pt :+ e <- toPoints p
   ]
 
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
@@ -107,6 +116,9 @@ green = PixelRGBA8 0x4B 0xC0 0x4B 0XFF
 black :: PixelRGBA8
 black = PixelRGBA8 0x33 0x35 0x38 0xFF
 
+white :: PixelRGBA8
+white = PixelRGBA8 0xFF 0xFF 0xFF 0xFF
+
 bgColor :: String
 bgColor = "white"
 
@@ -138,7 +150,7 @@ ppPolygonOutline color p = withFillOpacity 0 $
   withStrokeLineJoin JoinRound $
   withStrokeWidth (defaultStrokeWidth*3) $ mkLinePathClosed
   [ (x, y)
-  | Point2 x y <- map (fmap realToFrac) $ map _core $ toPoints p
+  | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
 ppPolygonBody :: Real r => PixelRGBA8 -> SimplePolygon p r -> SVG
@@ -147,7 +159,7 @@ ppPolygonBody color p = withFillOpacity 1 $
   withStrokeLineJoin JoinRound $
   mkLinePathClosed
   [ (x, y)
-  | Point2 x y <- map (fmap realToFrac) $ map _core $ toPoints p
+  | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
 ppPolygonNodes :: (Real r) => SimplePolygon p r -> SVG
@@ -157,7 +169,6 @@ ppPolygonNodes p = mkGroup $
 ppPolygonNode :: (Real r) => SimplePolygon p r -> Int -> SVG
 ppPolygonNode p idx =
   withFillColorPixel outlineColor $
-  withStrokeWidth (defaultStrokeWidth*1) $
   withStrokeColorPixel nodeColor $
   let Point2 x y = realToFrac <$> p^.outerVertex idx.core
   in translate x y $ mkCircle nodeRadius
@@ -218,4 +229,36 @@ lerpPolygon t a b = fromPoints $
   zipWith fn (toPoints b) (toPoints a)
   where
     fn :: Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
-    fn (a :+ p) (b :+ _) = (Point (lerp (realToFrac t) (toVec a) (toVec b))) :+ p
+    fn (a :+ p) (b :+ _) = lerpPoint t a b :+ p
+
+lerpLineSegment :: Fractional r => Double -> LineSegment 2 p r -> LineSegment 2 p r -> LineSegment 2 p r
+lerpLineSegment t (LineSegment' (a1 :+ p1) (b1 :+ p2)) (LineSegment' (a2 :+ _) (b2 :+ _)) =
+  ClosedLineSegment (lerpPoint t a1 a2 :+ p1) (lerpPoint t b1 b2 :+ p2)
+
+
+lerpPoint :: Fractional r => Double -> Point 2 r -> Point 2 r -> Point 2 r
+lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
+
+------------------------------------------------------------------
+-- Random data
+
+granularity :: Integer
+granularity = 10000000
+
+-- Random point between screenTop/screenBottom.
+genPoint :: RandomGen g => Rand g (Point 2 Rational)
+genPoint = do
+  x <- liftRand $ randomR (0, granularity)
+  y <- liftRand $ randomR (0, granularity)
+  pure $ Point2
+    ((x % granularity) * screenHeight - screenTop)
+    ((y % granularity) * screenHeight - screenTop)
+
+genPoints :: RandomGen g => Int -> Rand g [Point 2 Rational]
+genPoints n = replicateM n genPoint
+
+genLineSegment :: RandomGen g => Rand g (LineSegment 2 () Rational)
+genLineSegment = do
+  a <- genPoint
+  b <- genPoint
+  pure $ ClosedLineSegment (ext a) (ext b)

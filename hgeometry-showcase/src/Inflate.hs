@@ -1,37 +1,29 @@
 {-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE PatternSynonyms       #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-module Main (main) where
+module Inflate (animateInflate) where
 
 import Control.Lens                  ((&), (^.))
-import Data.Ext                      (core, ext, type (:+) ((:+)))
+import Data.Ext                      (core, ext, (:+) ((:+)))
 import Data.Geometry.Ball            (Touching (Touching), pattern Circle)
 import Data.Geometry.Interval        ()
 import Data.Geometry.LineSegment     (LineSegment (OpenLineSegment), sqSegmentLength)
 import Data.Geometry.Point           (Point (Point2))
-import Data.Geometry.Polygon
+import Data.Geometry.Polygon         (SimplePolygon, outerVertex, simpleFromPoints, size)
 import Data.Geometry.Polygon.Inflate (Arc (Arc), inflate)
 import Data.Geometry.Vector          (pattern Vector2)
-import Data.Intersection
+import Data.Intersection             (IsIntersectableWith (intersect),
+                                      NoIntersection (NoIntersection))
 import Data.RealNumber.Rational      (RealNumber)
 import Data.Vinyl                    (Rec (RNil, (:&)))
 import Data.Vinyl.CoRec              (Handler (H), match)
 import Graphics.SvgTree              (LineJoin (..), Origin (..), PathCommand (..))
 import Linear.V2                     (V2 (V2))
-import Reanimate
+import Reanimate                     (Animation, adjustZ, animate, applyE, fadeOutE, mkPath,
+                                      newSpriteSVG_, overEnding, pauseAtEnd, play, scene,
+                                      setDuration, withFillColorPixel, withFillOpacity,
+                                      withStrokeColorPixel, withStrokeLineJoin)
 
-import Common
-
-main :: IO ()
-main = reanimate $
-  mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
-  scene $ do
-    newSpriteSVG_ $ mkBackground bgColor
-    play animateInflate
+import Common (black, green, outlineColor, pAtCenter, pScaleV, ppPolygonOutline)
 
 testPolygon1 :: SimplePolygon () (RealNumber 10)
 testPolygon1 = pScaleV (Vector2 1 3) $ pAtCenter $ simpleFromPoints $ map ext
@@ -46,8 +38,8 @@ testPolygon1 = pScaleV (Vector2 1 3) $ pAtCenter $ simpleFromPoints $ map ext
 
 animateInflate :: Animation
 animateInflate = scene $ do
-  adjustZ (succ) $ newSpriteSVG_ $ ppPolygonOutline black testPolygon1
-  play $ (animate $ \t ->
+  adjustZ succ $ newSpriteSVG_ $ ppPolygonOutline black testPolygon1
+  play $ animate (\t ->
     let p = inflate t testPolygon1
     in withStrokeLineJoin JoinRound $
       withStrokeColorPixel outlineColor $
@@ -83,7 +75,7 @@ lowerArc p =
         minSqRadius = min radiusThis radiusNext
         radius = sqrt $ realToFrac maxSqRadius
         next = p ^. outerVertex (i+1) . core
-        circle = Circle (ext $ realToFrac <$> c) (radius)
+        circle = Circle (ext $ realToFrac <$> c) radius
         Point2 dst_x dst_y = realToFrac <$> next
         arcTo x y = EllipticalArc OriginAbsolute
           [ (radius,radius, 0, False, True, V2 x y) ]

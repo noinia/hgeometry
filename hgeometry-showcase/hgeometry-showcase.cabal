@@ -33,32 +33,24 @@ build-type:          Simple
 --   hs-source-dirs:      lib
 --   default-language:    Haskell2010
 
-executable hgeometry-sssp
-  main-is:             SSSP.hs
-  other-modules:       Common
+executable hgeometry-showcase
+  main-is:             Showcase.hs
+  other-modules:       Common,
+                       SSSP,
+                       Inflate,
+                       ClosestPair,
+                       BentleyOttmann,
+                       ConvexHull
   -- other-extensions:
   build-depends:       base,
-                       reanimate >= 1.1.3.0,reanimate-svg,
+                       reanimate >= 1.1.3.0, reanimate-svg,
                        linear,
                        vector,
+                       MonadRandom,
+                       hashable,
                        lens,
+                       containers,
                        vector-circular >= 0.1.1,
-                       JuicyPixels,
-                       hgeometry-combinatorial,
-                       hgeometry
-  hs-source-dirs:      src, lib
-  default-language:    Haskell2010
-
-executable hgeometry-inflate
-  main-is:             Inflate.hs
-  other-modules:       Common
-  -- other-extensions:
-  build-depends:       base,
-                       reanimate,reanimate-svg,
-                       linear,
-                       vector,
-                       lens,
-                       vector-circular,
                        JuicyPixels,
                        vinyl,
                        hgeometry-combinatorial,

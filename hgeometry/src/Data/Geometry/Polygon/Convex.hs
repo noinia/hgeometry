@@ -234,7 +234,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
 --        Use unsafe indexing.
--- \( O(log n) \)
+-- \( O(\log n) \)
 findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
 findMaxWith cmp p = CV.index v (worker 0 (F.length v))
@@ -311,7 +311,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 --  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
@@ -319,7 +319,7 @@ leftTangent poly q = findMaxWith (tangentCmp q) poly
 --  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 
