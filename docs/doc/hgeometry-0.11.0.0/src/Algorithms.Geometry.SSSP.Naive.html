@@ -33,10 +33,10 @@
 </span><span id="line-33"></span><span class="hs-keyword">type</span><span> </span><span id="SSSP"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#SSSP"><span class="hs-identifier hs-var">SSSP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VU.Vector</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="hs-comment">-- | \( O(n^3) \) Single-Source Shortest Path.</span><span>
-</span><span id="line-36"></span><span id="local-6989586621679963480"><span id="local-6989586621679963481"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#sssp"><span class="hs-identifier hs-type">sssp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963481"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963481"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963480"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963481"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#SSSP"><span class="hs-identifier hs-type">SSSP</span></a></span></span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679963565"><span id="local-6989586621679963566"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#sssp"><span class="hs-identifier hs-type">sssp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963566"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963566"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963565"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963566"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#SSSP"><span class="hs-identifier hs-type">SSSP</span></a></span></span></span><span>
 </span><span id="line-37"></span><span id="sssp"><span class="annot"><span class="annottext">sssp :: SimplePolygon p r -&gt; SSSP
-</span><a href="Algorithms.Geometry.SSSP.Naive.html#sssp"><span class="hs-identifier hs-var hs-var">sssp</span></a></span></span><span> </span><span id="local-6989586621679963479"><span class="annot"><span class="annottext">p :: SimplePolygon p r
-</span><a href="#local-6989586621679963479"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector SSSP -&gt; SSSP
+</span><a href="Algorithms.Geometry.SSSP.Naive.html#sssp"><span class="hs-identifier hs-var hs-var">sssp</span></a></span></span><span> </span><span id="local-6989586621679963564"><span class="annot"><span class="annottext">p :: SimplePolygon p r
+</span><a href="#local-6989586621679963564"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector SSSP -&gt; SSSP
 forall a. Vector a -&gt; a
 </span><span class="hs-identifier hs-var">V.head</span></span><span> </span><span class="annot"><span class="annottext">(Vector SSSP -&gt; SSSP)
 -&gt; (SimplePolygon p r -&gt; Vector SSSP) -&gt; SimplePolygon p r -&gt; SSSP
@@ -48,51 +48,51 @@ SimplePolygon p r -&gt; Vector SSSP
 </span><a href="Algorithms.Geometry.SSSP.Naive.html#sssp%27"><span class="hs-identifier hs-var">sssp'</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; SSSP) -&gt; SimplePolygon p r -&gt; SSSP
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679963479"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679963564"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-38"></span><span>
 </span><span id="line-39"></span><span class="hs-comment">-- | \( O(n^3) \) Single-Source Shortest Path from all vertices.</span><span>
-</span><span id="line-40"></span><span id="local-6989586621679963623"><span id="local-6989586621679963624"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#sssp%27"><span class="hs-identifier hs-type">sssp'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963624"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963624"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963623"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963624"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#SSSP"><span class="hs-identifier hs-type">SSSP</span></a></span></span></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679963708"><span id="local-6989586621679963709"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#sssp%27"><span class="hs-identifier hs-type">sssp'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963709"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963709"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963708"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963709"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#SSSP"><span class="hs-identifier hs-type">SSSP</span></a></span></span></span><span>
 </span><span id="line-41"></span><span id="sssp%27"><span class="annot"><span class="annottext">sssp' :: SimplePolygon p r -&gt; Vector SSSP
-</span><a href="Algorithms.Geometry.SSSP.Naive.html#sssp%27"><span class="hs-identifier hs-var hs-var">sssp'</span></a></span></span><span> </span><span id="local-6989586621679963476"><span class="annot"><span class="annottext">p :: SimplePolygon p r
-</span><a href="#local-6989586621679963476"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (Vector SSSP)) -&gt; Vector SSSP
+</span><a href="Algorithms.Geometry.SSSP.Naive.html#sssp%27"><span class="hs-identifier hs-var hs-var">sssp'</span></a></span></span><span> </span><span id="local-6989586621679963561"><span class="annot"><span class="annottext">p :: SimplePolygon p r
+</span><a href="#local-6989586621679963561"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (Vector SSSP)) -&gt; Vector SSSP
 forall a. (forall s. ST s a) -&gt; a
 </span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (Vector SSSP)) -&gt; Vector SSSP)
 -&gt; (forall s. ST s (Vector SSSP)) -&gt; Vector SSSP
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-42"></span><span>    </span><span class="hs-comment">-- Create an n*n matrix containing paths and distances between vertices.</span><span>
-</span><span id="line-43"></span><span>    </span><span id="local-6989586621679963475"><span class="annot"><span class="annottext">MVector s (Double, Int)
-</span><a href="#local-6989586621679963475"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-43"></span><span>    </span><span id="local-6989586621679963560"><span class="annot"><span class="annottext">MVector s (Double, Int)
+</span><a href="#local-6989586621679963560"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int
 -&gt; Double -&gt; [(Int, Int, Double)] -&gt; ST s (MVector s (Double, Int))
 forall a s.
 (Unbox a, Num a) =&gt;
 Int -&gt; a -&gt; [(Int, Int, a)] -&gt; ST s (MVector s (a, Int))
 </span><span class="hs-identifier hs-var">mkGraph</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679963473"><span class="hs-identifier hs-var">infinity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [(Int, Int, Double)]
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679963558"><span class="hs-identifier hs-var">infinity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [(Int, Int, Double)]
 forall r p.
 (Real r, Fractional r) =&gt;
 SimplePolygon p r -&gt; [(Int, Int, Double)]
 </span><a href="Algorithms.Geometry.SSSP.Naive.html#visibleEdges"><span class="hs-identifier hs-var">visibleEdges</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679963476"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679963561"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-44"></span><span>    </span><span class="hs-comment">-- Use FloydWarshall O(n^3) to complete the matrix.</span><span>
 </span><span id="line-45"></span><span>    </span><span class="annot"><span class="annottext">Int -&gt; MVector s (Double, Int) -&gt; ST s ()
 forall a s.
 (Unbox a, Fractional a, Ord a) =&gt;
 Int -&gt; MVector s (a, Int) -&gt; ST s ()
 </span><span class="hs-identifier hs-var">floydWarshall</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s (Double, Int)
-</span><a href="#local-6989586621679963475"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s (Double, Int)
+</span><a href="#local-6989586621679963560"><span class="hs-identifier hs-var">graph</span></a></span><span>
 </span><span id="line-46"></span><span>    </span><span class="hs-comment">-- Create a tree describing the shortest path from any node to the 0th node.</span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621679963471"><span class="annot"><span class="annottext">Vector (Double, Int)
-</span><a href="#local-6989586621679963471"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Double, Int)
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679963556"><span class="annot"><span class="annottext">Vector (Double, Int)
+</span><a href="#local-6989586621679963556"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (Double, Int)
 -&gt; ST s (Vector (Double, Int))
 forall a (m :: * -&gt; *).
 (Unbox a, PrimMonad m) =&gt;
 MVector (PrimState m) a -&gt; m (Vector a)
 </span><span class="hs-identifier hs-var">VU.unsafeFreeze</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Double, Int)
 MVector (PrimState (ST s)) (Double, Int)
-</span><a href="#local-6989586621679963475"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><a href="#local-6989586621679963560"><span class="hs-identifier hs-var">graph</span></a></span><span>
 </span><span id="line-48"></span><span>    </span><span class="annot"><span class="annottext">Vector SSSP -&gt; ST s (Vector SSSP)
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Vector SSSP -&gt; ST s (Vector SSSP))
@@ -101,40 +101,40 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int -&gt; SSSP) -&gt; Vector SSSP
 forall a. Int -&gt; (Int -&gt; a) -&gt; Vector a
 </span><span class="hs-identifier hs-var">V.generate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; SSSP) -&gt; Vector SSSP) -&gt; (Int -&gt; SSSP) -&gt; Vector SSSP
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; SSSP) -&gt; Vector SSSP) -&gt; (Int -&gt; SSSP) -&gt; Vector SSSP
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679963468"><span class="annot"><span class="annottext">origin :: Int
-</span><a href="#local-6989586621679963468"><span class="hs-identifier hs-var">origin</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679963553"><span class="annot"><span class="annottext">origin :: Int
+</span><a href="#local-6989586621679963553"><span class="hs-identifier hs-var">origin</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-49"></span><span>      </span><span class="annot"><span class="annottext">Int -&gt; (Int -&gt; Int) -&gt; SSSP
 forall a. Unbox a =&gt; Int -&gt; (Int -&gt; a) -&gt; Vector a
 </span><span class="hs-identifier hs-var">VU.generate</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Int) -&gt; SSSP) -&gt; (Int -&gt; Int) -&gt; SSSP
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Int) -&gt; SSSP) -&gt; (Int -&gt; Int) -&gt; SSSP
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679963466"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679963466"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-50"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963465"><span class="annot"><span class="annottext">_dist :: Double
-</span><a href="#local-6989586621679963465"><span class="hs-identifier hs-var">_dist</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679963464"><span class="annot"><span class="annottext">next :: Int
-</span><a href="#local-6989586621679963464"><span class="hs-identifier hs-var">next</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Double, Int)
-</span><a href="#local-6989586621679963471"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Double, Int) -&gt; Int -&gt; (Double, Int)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679963551"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679963551"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-50"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963550"><span class="annot"><span class="annottext">_dist :: Double
+</span><a href="#local-6989586621679963550"><span class="hs-identifier hs-var">_dist</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679963549"><span class="annot"><span class="annottext">next :: Int
+</span><a href="#local-6989586621679963549"><span class="hs-identifier hs-var">next</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Double, Int)
+</span><a href="#local-6989586621679963556"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Double, Int) -&gt; Int -&gt; (Double, Int)
 forall a. Unbox a =&gt; Vector a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">VU.!</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><span class="hs-identifier hs-var">mkIndex</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963466"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963468"><span class="hs-identifier hs-var">origin</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963551"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963553"><span class="hs-identifier hs-var">origin</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span><span>        </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963464"><span class="hs-identifier hs-var">next</span></a></span><span>
+</span><a href="#local-6989586621679963549"><span class="hs-identifier hs-var">next</span></a></span><span>
 </span><span id="line-52"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>    </span><span id="local-6989586621679963473"><span class="annot"><span class="annottext">infinity :: Double
-</span><a href="#local-6989586621679963473"><span class="hs-identifier hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Double
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679963558"><span class="annot"><span class="annottext">infinity :: Double
+</span><a href="#local-6989586621679963558"><span class="hs-identifier hs-var hs-var">infinity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Double
 forall a. Read a =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">read</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Infinity&quot;</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621679963474"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679963474"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679963559"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679963559"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679963476"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679963561"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
 -&gt; Getting
      (CircularVector (Point 2 r :+ p))
      (SimplePolygon p r)
@@ -150,39 +150,39 @@ Getter (Polygon t p r) (CircularVector (Point 2 r :+ p))
 </span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryVector"><span class="hs-identifier hs-var">outerBoundaryVector</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- \( O(n^3) \)</span><span>
-</span><span id="line-57"></span><span id="local-6989586621679963608"><span id="local-6989586621679963609"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#visibleEdges"><span class="hs-identifier hs-type">visibleEdges</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963609"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963609"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963608"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963609"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-57"></span><span id="local-6989586621679963693"><span id="local-6989586621679963694"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#visibleEdges"><span class="hs-identifier hs-type">visibleEdges</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679963694"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963694"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963693"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963694"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">]</span></span></span><span>
 </span><span id="line-58"></span><span id="visibleEdges"><span class="annot"><span class="annottext">visibleEdges :: SimplePolygon p r -&gt; [(Int, Int, Double)]
-</span><a href="Algorithms.Geometry.SSSP.Naive.html#visibleEdges"><span class="hs-identifier hs-var hs-var">visibleEdges</span></a></span></span><span> </span><span id="local-6989586621679963459"><span class="annot"><span class="annottext">p :: SimplePolygon p r
-</span><a href="#local-6989586621679963459"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(Int, Int, Double)]] -&gt; [(Int, Int, Double)]
+</span><a href="Algorithms.Geometry.SSSP.Naive.html#visibleEdges"><span class="hs-identifier hs-var hs-var">visibleEdges</span></a></span></span><span> </span><span id="local-6989586621679963544"><span class="annot"><span class="annottext">p :: SimplePolygon p r
+</span><a href="#local-6989586621679963544"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(Int, Int, Double)]] -&gt; [(Int, Int, Double)]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">concat</span></span><span>
 </span><span id="line-59"></span><span>  </span><span class="hs-special">[</span><span>
 </span><span id="line-60"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963456"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963541"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
 forall a. Floating a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">sqrt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Double
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; r
 forall (d :: Nat) r p. (Arity d, Num r) =&gt; LineSegment d p r -&gt; r
 </span><a href="Data.Geometry.LineSegment.html#sqSegmentLength"><span class="hs-identifier hs-var">sqSegmentLength</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963454"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-61"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679963456"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963456"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679963539"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679963541"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963541"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963452"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679963537"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
-</span><span id="line-62"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963451"><span class="annot"><span class="annottext">endPt :: Point 2 r :+ p
-</span><a href="#local-6989586621679963451"><span class="hs-identifier hs-var hs-var">endPt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
+</span><span id="line-62"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963536"><span class="annot"><span class="annottext">endPt :: Point 2 r :+ p
+</span><a href="#local-6989586621679963536"><span class="hs-identifier hs-var hs-var">endPt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
 forall a. CircularVector a -&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">CV.index</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963456"><span class="hs-identifier hs-var">j</span></a></span><span>
-</span><span id="line-63"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963454"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
-</span><a href="#local-6989586621679963454"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963541"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963539"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
+</span><a href="#local-6989586621679963539"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
 -&gt; EndPoint (Point 2 r :+ p) -&gt; LineSegment 2 p r
 forall (d :: Nat) r p.
 EndPoint (Point d r :+ p)
@@ -190,10 +190,10 @@ EndPoint (Point d r :+ p)
 </span><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-var">LineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
 forall a. a -&gt; EndPoint a
 </span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963447"><span class="hs-identifier hs-var">pt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
+</span><a href="#local-6989586621679963532"><span class="hs-identifier hs-var">pt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
 forall a. a -&gt; EndPoint a
 </span><span class="hs-identifier hs-var">Open</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963451"><span class="hs-identifier hs-var">endPt</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679963536"><span class="hs-identifier hs-var">endPt</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-64"></span><span>      </span><span class="hs-comment">-- Check if the line goes through the inside of the polygon.</span><span>
 </span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
 -&gt; (Point 2 r :+ p)
@@ -210,15 +210,15 @@ Vector 2 r
 </span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccwCmpAroundWith%27"><span class="hs-identifier hs-var">ccwCmpAroundWith'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Point 2 r
 forall core extra. (core :+ extra) -&gt; core
 </span><span class="hs-identifier hs-var">_core</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963446"><span class="hs-identifier hs-var">prev</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Diff (Point 2) r
+</span><a href="#local-6989586621679963531"><span class="hs-identifier hs-var">prev</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Diff (Point 2) r
 forall (p :: * -&gt; *) a. (Affine p, Num a) =&gt; p a -&gt; p a -&gt; Diff p a
 </span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Point 2 r
 forall core extra. (core :+ extra) -&gt; core
 </span><span class="hs-identifier hs-var">_core</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963447"><span class="hs-identifier hs-var">pt</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963447"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963451"><span class="hs-identifier hs-var">endPt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
-</span><a href="#local-6989586621679963445"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Bool
+</span><a href="#local-6989586621679963532"><span class="hs-identifier hs-var">pt</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679963532"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679963536"><span class="hs-identifier hs-var">endPt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621679963530"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span>
@@ -229,34 +229,34 @@ forall r p.
 (Ord r, Fractional r) =&gt;
 LineSegment 2 p r -&gt; [LineSegment 2 p r] -&gt; Bool
 </span><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-var">interiorIntersection</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963454"><span class="hs-identifier hs-var">line</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679963442"><span class="hs-identifier hs-var">edges</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679963539"><span class="hs-identifier hs-var">line</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679963527"><span class="hs-identifier hs-var">edges</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>    </span><span class="hs-special">]</span><span>
-</span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679963457"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963452"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679963542"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963537"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
-</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963447"><span class="annot"><span class="annottext">pt :: Point 2 r :+ p
-</span><a href="#local-6989586621679963447"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
+</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679963532"><span class="annot"><span class="annottext">pt :: Point 2 r :+ p
+</span><a href="#local-6989586621679963532"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
 forall a. CircularVector a -&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">CV.index</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-71"></span><span>        </span><span id="local-6989586621679963446"><span class="annot"><span class="annottext">prev :: Point 2 r :+ p
-</span><a href="#local-6989586621679963446"><span class="hs-identifier hs-var hs-var">prev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-71"></span><span>        </span><span id="local-6989586621679963531"><span class="annot"><span class="annottext">prev :: Point 2 r :+ p
+</span><a href="#local-6989586621679963531"><span class="hs-identifier hs-var hs-var">prev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
 forall a. CircularVector a -&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">CV.index</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span>        </span><span id="local-6989586621679963445"><span class="annot"><span class="annottext">next :: Point 2 r :+ p
-</span><a href="#local-6989586621679963445"><span class="hs-identifier hs-var hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
+</span><span id="line-72"></span><span>        </span><span id="local-6989586621679963530"><span class="annot"><span class="annottext">next :: Point 2 r :+ p
+</span><a href="#local-6989586621679963530"><span class="hs-identifier hs-var hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int -&gt; Point 2 r :+ p
 forall a. CircularVector a -&gt; Int -&gt; a
 </span><span class="hs-identifier hs-var">CV.index</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963457"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963542"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>  </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[(Int, Int, Double)]
@@ -264,31 +264,31 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span>
 </span><span id="line-74"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963441"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963441"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679963526"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679963526"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679963452"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="#local-6989586621679963537"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Double -&gt; Double
 forall a. Floating a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">sqrt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Double
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; r
 forall (d :: Nat) r p. (Arity d, Num r) =&gt; LineSegment d p r -&gt; r
 </span><a href="Data.Geometry.LineSegment.html#sqSegmentLength"><span class="hs-identifier hs-var">sqSegmentLength</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963439"><span class="hs-identifier hs-var">edge</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-75"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963441"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679963441"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679963439"><span class="annot"><span class="annottext">edge :: LineSegment 2 p r
-</span><a href="#local-6989586621679963439"><span class="hs-identifier hs-var">edge</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [LineSegment 2 p r] -&gt; [(Int, LineSegment 2 p r)]
+</span><a href="#local-6989586621679963524"><span class="hs-identifier hs-var">edge</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963526"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679963526"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679963524"><span class="annot"><span class="annottext">edge :: LineSegment 2 p r
+</span><a href="#local-6989586621679963524"><span class="hs-identifier hs-var">edge</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [LineSegment 2 p r] -&gt; [(Int, LineSegment 2 p r)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679963442"><span class="hs-identifier hs-var">edges</span></a></span><span>
+</span><a href="#local-6989586621679963527"><span class="hs-identifier hs-var">edges</span></a></span><span>
 </span><span id="line-76"></span><span>  </span><span class="hs-special">]</span><span>
 </span><span id="line-77"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-78"></span><span>    </span><span id="local-6989586621679963449"><span class="annot"><span class="annottext">vs :: CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679963459"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679963534"><span class="annot"><span class="annottext">vs :: CircularVector (Point 2 r :+ p)
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679963544"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon p r
 -&gt; Getting
      (CircularVector (Point 2 r :+ p))
      (SimplePolygon p r)
@@ -302,36 +302,36 @@ forall s a. s -&gt; Getting a s a -&gt; a
 forall (t :: PolygonType) p r.
 Getter (Polygon t p r) (CircularVector (Point 2 r :+ p))
 </span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryVector"><span class="hs-identifier hs-var">outerBoundaryVector</span></a></span><span>
-</span><span id="line-79"></span><span>    </span><span id="local-6989586621679963452"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679963452"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679963537"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679963537"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p) -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">CircularVector (Point 2 r :+ p)
-</span><a href="#local-6989586621679963449"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679963442"><span class="annot"><span class="annottext">edges :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679963442"><span class="hs-identifier hs-var hs-var">edges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [LineSegment 2 p r]
+</span><a href="#local-6989586621679963534"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679963527"><span class="annot"><span class="annottext">edges :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679963527"><span class="hs-identifier hs-var hs-var">edges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [LineSegment 2 p r]
 forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
 </span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
-</span><a href="#local-6989586621679963459"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679963544"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span id="local-6989586621679963546"><span id="local-6989586621679963547"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-type">interiorIntersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679963547"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963547"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679963546"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963547"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679963546"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963547"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-82"></span><span id="local-6989586621679963631"><span id="local-6989586621679963632"><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-type">interiorIntersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679963632"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679963632"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679963631"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963632"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679963631"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679963632"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
 </span><span id="line-83"></span><span id="interiorIntersection"><span class="annot"><span class="annottext">interiorIntersection :: LineSegment 2 p r -&gt; [LineSegment 2 p r] -&gt; Bool
 </span><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-var hs-var">interiorIntersection</span></a></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-84"></span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-var">interiorIntersection</span></a></span><span> </span><span id="local-6989586621679963438"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
-</span><a href="#local-6989586621679963438"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963437"><span class="annot"><span class="annottext">x :: LineSegment 2 p r
-</span><a href="#local-6989586621679963437"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679963436"><span class="annot"><span class="annottext">xs :: [LineSegment 2 p r]
-</span><a href="#local-6989586621679963436"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-84"></span><span class="annot"><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-var">interiorIntersection</span></a></span><span> </span><span id="local-6989586621679963523"><span class="annot"><span class="annottext">l :: LineSegment 2 p r
+</span><a href="#local-6989586621679963523"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679963522"><span class="annot"><span class="annottext">x :: LineSegment 2 p r
+</span><a href="#local-6989586621679963522"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679963521"><span class="annot"><span class="annottext">xs :: [LineSegment 2 p r]
+</span><a href="#local-6989586621679963521"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-85"></span><span>  </span><span class="annot"><span class="annottext">CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 p r]
 -&gt; Handlers '[NoIntersection, Point 2 r, LineSegment 2 p r] Bool
 -&gt; Bool
 forall (ts :: [*]) b. CoRec Identity ts -&gt; Handlers ts b -&gt; b
 </span><span class="hs-identifier hs-var">match</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963438"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679963523"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; LineSegment 2 p r
 -&gt; Intersection (LineSegment 2 p r) (LineSegment 2 p r)
 forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
 </span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963437"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span>
+</span><a href="#local-6989586621679963522"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-86"></span><span>       </span><span class="annot"><span class="annottext">(NoIntersection -&gt; Bool) -&gt; Handler Bool NoIntersection
 forall b a. (a -&gt; b) -&gt; Handler b a
 </span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -343,12 +343,12 @@ forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
 a r -&gt; Rec a rs -&gt; Rec a (r : rs)
 </span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Bool) -&gt; Handler Bool (Point 2 r)
 forall b a. (a -&gt; b) -&gt; Handler b a
-</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679963435"><span class="annot"><span class="annottext">pt :: Point 2 r
-</span><a href="#local-6989586621679963435"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679963435"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679963520"><span class="annot"><span class="annottext">pt :: Point 2 r
+</span><a href="#local-6989586621679963520"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679963520"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963438"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679963523"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
@@ -366,10 +366,10 @@ forall core extra core'.
 Lens (core :+ extra) (core' :+ extra) core core'
 </span><span class="hs-identifier hs-var">core</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679963435"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679963520"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963438"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679963523"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r
 -&gt; Getting (Point 2 r) (LineSegment 2 p r) (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Const (Point 2 r) (Point 2 r :+ p))
@@ -393,11 +393,11 @@ forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
 a r -&gt; Rec a rs -&gt; Rec a (r : rs)
 </span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Bool) -&gt; Handler Bool (LineSegment 2 p r)
 forall b a. (a -&gt; b) -&gt; Handler b a
-</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679963432"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
-</span><a href="#local-6989586621679963432"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; r
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679963517"><span class="annot"><span class="annottext">line :: LineSegment 2 p r
+</span><a href="#local-6989586621679963517"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; r
 forall (d :: Nat) r p. (Arity d, Num r) =&gt; LineSegment d p r -&gt; r
 </span><a href="Data.Geometry.LineSegment.html#sqSegmentLength"><span class="hs-identifier hs-var">sqSegmentLength</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963432"><span class="hs-identifier hs-var">line</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+</span><a href="#local-6989586621679963517"><span class="hs-identifier hs-var">line</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>    </span><span class="annot"><span class="annottext">Handler Bool (LineSegment 2 p r)
@@ -414,6 +414,6 @@ forall r p.
 (Ord r, Fractional r) =&gt;
 LineSegment 2 p r -&gt; [LineSegment 2 p r] -&gt; Bool
 </span><a href="Algorithms.Geometry.SSSP.Naive.html#interiorIntersection"><span class="hs-identifier hs-var">interiorIntersection</span></a></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
-</span><a href="#local-6989586621679963438"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
-</span><a href="#local-6989586621679963436"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679963523"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621679963521"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-91"></span></pre></body></html>
