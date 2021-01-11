@@ -32,13 +32,13 @@
 </span><span id="line-32"></span><span class="hs-comment">-- does contain duplicate points, the implementation throws them away)</span><span>
 </span><span id="line-33"></span><span class="hs-comment">--</span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
-</span><span id="line-35"></span><span id="local-6989586621679974048"><span id="local-6989586621679974049"><span class="annot"><a href="Algorithms.Geometry.EuclideanMST.EuclideanMST.html#euclideanMST"><span class="hs-identifier hs-type">euclideanMST</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679974049"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679974049"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679974049"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679974048"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679974049"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679974048"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-35"></span><span id="local-6989586621679974514"><span id="local-6989586621679974515"><span class="annot"><a href="Algorithms.Geometry.EuclideanMST.EuclideanMST.html#euclideanMST"><span class="hs-identifier hs-type">euclideanMST</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679974515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679974515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679974515"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679974514"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679974515"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="annot"><a href="#local-6989586621679974514"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-37"></span><span id="euclideanMST"><span class="annot"><span class="annottext">euclideanMST :: NonEmpty (Point 2 r :+ p) -&gt; Tree (Point 2 r :+ p)
-</span><a href="Algorithms.Geometry.EuclideanMST.EuclideanMST.html#euclideanMST"><span class="hs-identifier hs-var hs-var">euclideanMST</span></a></span></span><span> </span><span id="local-6989586621679974046"><span class="annot"><span class="annottext">pts :: NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621679974046"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679974045"><span class="annot"><span class="annottext">v :: VertexId' MSTW
-</span><a href="#local-6989586621679974045"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
-</span><a href="#local-6989586621679974044"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
+</span><a href="Algorithms.Geometry.EuclideanMST.EuclideanMST.html#euclideanMST"><span class="hs-identifier hs-var hs-var">euclideanMST</span></a></span></span><span> </span><span id="local-6989586621679974512"><span class="annot"><span class="annottext">pts :: NonEmpty (Point 2 r :+ p)
+</span><a href="#local-6989586621679974512"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679974511"><span class="annot"><span class="annottext">v :: VertexId' MSTW
+</span><a href="#local-6989586621679974511"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
+</span><a href="#local-6989586621679974510"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
 -&gt; Getting
      (Point 2 r) (PlaneGraph MSTW p (r :+ ()) () r) (Point 2 r)
 -&gt; Point 2 r
@@ -48,10 +48,10 @@ forall s a. s -&gt; Getting a s a -&gt; a
 forall k (s :: k) v e f r.
 VertexId' s -&gt; Lens' (PlaneGraph s v e f r) (Point 2 r)
 </span><a href="Data.PlaneGraph.Core.html#locationOf"><span class="hs-identifier hs-var">locationOf</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId' MSTW
-</span><a href="#local-6989586621679974045"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; p -&gt; Point 2 r :+ p
+</span><a href="#local-6989586621679974511"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; p -&gt; Point 2 r :+ p
 forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
-</span><a href="#local-6989586621679974044"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
+</span><a href="#local-6989586621679974510"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
 -&gt; Getting p (PlaneGraph MSTW p (r :+ ()) () r) p -&gt; p
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">VertexId' MSTW
@@ -60,17 +60,17 @@ forall s a. s -&gt; Getting a s a -&gt; a
      (DataOf (PlaneGraph MSTW p (r :+ ()) () r) (VertexId' MSTW))
 forall g i. HasDataOf g i =&gt; i -&gt; Lens' g (DataOf g i)
 </span><span class="hs-identifier hs-var">dataOf</span></span><span> </span><span class="annot"><span class="annottext">VertexId' MSTW
-</span><a href="#local-6989586621679974045"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(VertexId' MSTW -&gt; Point 2 r :+ p)
+</span><a href="#local-6989586621679974511"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(VertexId' MSTW -&gt; Point 2 r :+ p)
 -&gt; Tree (VertexId' MSTW) -&gt; Tree (Point 2 r :+ p)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Tree (VertexId' MSTW)
-</span><a href="#local-6989586621679974038"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679974504"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-38"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-39"></span><span>    </span><span class="hs-comment">-- since we care only about the relative order of the edges we can use the</span><span>
 </span><span id="line-40"></span><span>    </span><span class="hs-comment">-- squared Euclidean distance rather than the Euclidean distance, thus</span><span>
 </span><span id="line-41"></span><span>    </span><span class="hs-comment">-- avoiding the Floating constraint</span><span>
-</span><span id="line-42"></span><span>    </span><span id="local-6989586621679974044"><span class="annot"><span class="annottext">g :: PlaneGraph MSTW p (r :+ ()) () r
-</span><a href="#local-6989586621679974044"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; r)
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621679974510"><span class="annot"><span class="annottext">g :: PlaneGraph MSTW p (r :+ ()) () r
+</span><a href="#local-6989586621679974510"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r -&gt; r)
 -&gt; PlaneGraph MSTW p () () r -&gt; PlaneGraph MSTW p (r :+ ()) () r
 forall k r a (s :: k) p e f.
 (Point 2 r -&gt; Point 2 r -&gt; a)
@@ -103,9 +103,9 @@ NonEmpty (Point 2 r :+ p) -&gt; Triangulation p r
 -&gt; NonEmpty (Point 2 r :+ p) -&gt; PlaneGraph MSTW p (r :+ ()) () r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ p)
-</span><a href="#local-6989586621679974046"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-44"></span><span>    </span><span id="local-6989586621679974038"><span class="annot"><span class="annottext">t :: Tree (VertexId' MSTW)
-</span><a href="#local-6989586621679974038"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph MSTW 'Primal (VertexData r p) (r :+ ()) ()
+</span><a href="#local-6989586621679974512"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679974504"><span class="annot"><span class="annottext">t :: Tree (VertexId' MSTW)
+</span><a href="#local-6989586621679974504"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanarGraph MSTW 'Primal (VertexData r p) (r :+ ()) ()
 -&gt; Tree (VertexId' MSTW)
 forall k e (s :: k) (w :: World) v f.
 Ord e =&gt;
@@ -116,7 +116,7 @@ PlanarGraph s w v e f -&gt; Tree (VertexId s w)
 -&gt; Tree (VertexId' MSTW)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
-</span><a href="#local-6989586621679974044"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
+</span><a href="#local-6989586621679974510"><span class="hs-identifier hs-var">g</span></a></span><span class="annot"><span class="annottext">PlaneGraph MSTW p (r :+ ()) () r
 -&gt; Getting
      (PlanarGraph MSTW 'Primal (VertexData r p) (r :+ ()) ())
      (PlaneGraph MSTW p (r :+ ()) () r)

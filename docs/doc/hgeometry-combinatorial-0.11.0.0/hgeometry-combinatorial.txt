@@ -1287,8 +1287,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aHwC a_aHPr. Lens (Permutation a_aHwC) (Permutation a_aHPr) (Vector (Orbit a_aHwC)) (Vector (Orbit a_aHPr))
-indexes :: forall a_aHwC. Lens' (Permutation a_aHwC) (Vector (Int, Int))
+orbits :: forall a_aHzV a_aHSK. Lens (Permutation a_aHzV) (Permutation a_aHSK) (Vector (Orbit a_aHzV)) (Vector (Orbit a_aHSK))
+indexes :: forall a_aHzV. Lens' (Permutation a_aHzV) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -1400,8 +1400,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aKN6. Lens' (Dart s_aKN6) Direction
-arc :: forall s_aKN6 s_aLdu. Lens (Dart s_aKN6) (Dart s_aLdu) (Arc s_aKN6) (Arc s_aLdu)
+direction :: forall s_aKQp. Lens' (Dart s_aKQp) Direction
+arc :: forall s_aKQp s_aLgN. Lens (Dart s_aKQp) (Dart s_aLgN) (Arc s_aKQp) (Arc s_aLgN)
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2010,8 +2010,8 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aKN6 s_aLdu. Lens (Dart s_aKN6) (Dart s_aLdu) (Arc s_aKN6) (Arc s_aLdu)
-direction :: forall s_aKN6. Lens' (Dart s_aKN6) Direction
+arc :: forall s_aKQp s_aLgN. Lens (Dart s_aKQp) (Dart s_aLgN) (Arc s_aKQp) (Arc s_aLgN)
+direction :: forall s_aKQp. Lens' (Dart s_aKQp) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2462,8 +2462,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aR8q. Lens' (Range a_aR8q) (EndPoint a_aR8q)
-upper :: forall a_aR8q. Lens' (Range a_aR8q) (EndPoint a_aR8q)
+lower :: forall a_aRbJ. Lens' (Range a_aRbJ) (EndPoint a_aRbJ)
+upper :: forall a_aRbJ. Lens' (Range a_aRbJ) (EndPoint a_aRbJ)
 
 -- | Test if a value lies in a range.
 --   
@@ -3060,10 +3060,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZv2 a_a118q. Traversal (UnBounded a_aZv2) (UnBounded a_a118q) a_aZv2 a_a118q
-_MinInfinity :: forall a_aZv2. Prism' (UnBounded a_aZv2) ()
-_Val :: forall a_aZv2 a_a11bj. Prism (UnBounded a_a11bj) (UnBounded a_aZv2) a_a11bj a_aZv2
-_MaxInfinity :: forall a_aZv2. Prism' (UnBounded a_aZv2) ()
+unUnBounded :: forall a_aZyl a_a11bJ. Traversal (UnBounded a_aZyl) (UnBounded a_a11bJ) a_aZyl a_a11bJ
+_MinInfinity :: forall a_aZyl. Prism' (UnBounded a_aZyl) ()
+_Val :: forall a_aZyl a_a11eC. Prism (UnBounded a_a11eC) (UnBounded a_aZyl) a_a11eC a_aZyl
+_MaxInfinity :: forall a_aZyl. Prism' (UnBounded a_aZyl) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
@@ -3375,15 +3375,12 @@ findRotateTo :: (a -> Bool) -> CircularVector a -> Maybe (CircularVector a)
 --   Running time: &lt;math&gt;, where &lt;math&gt; and &lt;math&gt; are
 --   the sizes of the lists.
 isShiftOf :: Eq a => CircularVector a -> CircularVector a -> Bool
-map :: (a -> b) -> CircularVector a -> CircularVector b
 
 -- | label the circular vector with indices, starting from zero at the
 --   current focus, going right.
 --   
 --   Running time: &lt;math&gt;
 withIndicesRight :: CircularVector a -> CircularVector (Int :+ a)
-imap :: (Int -> a -> b) -> CircularVector a -> CircularVector b
-ifilter :: (Int -> a -> Bool) -> CircularVector a -> Vector a
 instance Data.Semigroup.Foldable.Class.Foldable1 Data.Vector.NonEmpty.Internal.NonEmptyVector
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.Vector.Circular.CircularVector a)
 

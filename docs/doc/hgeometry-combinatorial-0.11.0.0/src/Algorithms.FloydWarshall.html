@@ -22,26 +22,26 @@
 </span><span id="line-22"></span><span>                                                   </span><span class="annot"><span class="hs-identifier">unsafeWrite</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Unbox</span></span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span>
 </span><span id="line-24"></span><span class="hs-comment">-- | \( O(n^3) \)</span><span>
-</span><span id="line-25"></span><span id="local-6989586621679318869"><span id="local-6989586621679318870"><span class="annot"><a href="Algorithms.FloydWarshall.html#floydWarshall"><span class="hs-identifier hs-type">floydWarshall</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679318870"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679318870"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679318870"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679318869"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679318870"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679318869"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679319243"><span id="local-6989586621679319244"><span class="annot"><a href="Algorithms.FloydWarshall.html#floydWarshall"><span class="hs-identifier hs-type">floydWarshall</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679319244"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679319244"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679319244"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679319243"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679319244"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679319243"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-26"></span><span id="floydWarshall"><span class="annot"><span class="annottext">floydWarshall :: Int -&gt; MVector s (a, Int) -&gt; ST s ()
-</span><a href="Algorithms.FloydWarshall.html#floydWarshall"><span class="hs-identifier hs-var hs-var">floydWarshall</span></a></span></span><span> </span><span id="local-6989586621679318868"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679318867"><span class="annot"><span class="annottext">graph :: MVector s (a, Int)
-</span><a href="#local-6989586621679318867"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-27"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679318866"><span class="annot"><span class="annottext">nSq :: Int
-</span><a href="#local-6989586621679318866"><span class="hs-identifier hs-var hs-var">nSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int) -&gt; Int
+</span><a href="Algorithms.FloydWarshall.html#floydWarshall"><span class="hs-identifier hs-var hs-var">floydWarshall</span></a></span></span><span> </span><span id="local-6989586621679319242"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679319241"><span class="annot"><span class="annottext">graph :: MVector s (a, Int)
+</span><a href="#local-6989586621679319241"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679319240"><span class="annot"><span class="annottext">nSq :: Int
+</span><a href="#local-6989586621679319240"><span class="hs-identifier hs-var hs-var">nSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int) -&gt; Int
 forall a s. Unbox a =&gt; MVector s a -&gt; Int
 </span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
-</span><a href="#local-6989586621679318867"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><a href="#local-6989586621679319241"><span class="hs-identifier hs-var">graph</span></a></span><span>
 </span><span id="line-28"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; ST s () -&gt; ST s ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318866"><span class="hs-identifier hs-var">nSq</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
+</span><a href="#local-6989586621679319240"><span class="hs-identifier hs-var">nSq</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; ST s ()
 forall a. HasCallStack =&gt; [Char] -&gt; a
@@ -51,150 +51,150 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s ()) -&gt; ST s ()) -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679318862"><span class="annot"><span class="annottext">k :: Int
-</span><a href="#local-6989586621679318862"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679319236"><span class="annot"><span class="annottext">k :: Int
+</span><a href="#local-6989586621679319236"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-30"></span><span>      </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s ()) -&gt; ST s ()) -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679318861"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679318861"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679319235"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679319235"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-31"></span><span>        </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s ()) -&gt; ST s ()) -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679318860"><span class="annot"><span class="annottext">j :: Int
-</span><a href="#local-6989586621679318860"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-32"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679318859"><span class="annot"><span class="annottext">distIJ :: a
-</span><a href="#local-6989586621679318859"><span class="hs-identifier hs-var">distIJ</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
-</span><a href="#local-6989586621679318858"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318861"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318860"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-33"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679318857"><span class="annot"><span class="annottext">distIK :: a
-</span><a href="#local-6989586621679318857"><span class="hs-identifier hs-var">distIK</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679318856"><span class="annot"><span class="annottext">pathIK :: Int
-</span><a href="#local-6989586621679318856"><span class="hs-identifier hs-var">pathIK</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
-</span><a href="#local-6989586621679318858"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318861"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318862"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679318855"><span class="annot"><span class="annottext">distKJ :: a
-</span><a href="#local-6989586621679318855"><span class="hs-identifier hs-var">distKJ</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
-</span><a href="#local-6989586621679318858"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318862"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318860"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679318854"><span class="annot"><span class="annottext">indirectDist :: a
-</span><a href="#local-6989586621679318854"><span class="hs-identifier hs-var hs-var">indirectDist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318857"><span class="hs-identifier hs-var">distIK</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679319234"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679319234"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-32"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679319233"><span class="annot"><span class="annottext">distIJ :: a
+</span><a href="#local-6989586621679319233"><span class="hs-identifier hs-var">distIJ</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
+</span><a href="#local-6989586621679319232"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319235"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319234"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679319231"><span class="annot"><span class="annottext">distIK :: a
+</span><a href="#local-6989586621679319231"><span class="hs-identifier hs-var">distIK</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679319230"><span class="annot"><span class="annottext">pathIK :: Int
+</span><a href="#local-6989586621679319230"><span class="hs-identifier hs-var">pathIK</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
+</span><a href="#local-6989586621679319232"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319235"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319236"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>          </span><span class="hs-special">(</span><span id="local-6989586621679319229"><span class="annot"><span class="annottext">distKJ :: a
+</span><a href="#local-6989586621679319229"><span class="hs-identifier hs-var">distKJ</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; ST s (a, Int)
+</span><a href="#local-6989586621679319232"><span class="hs-identifier hs-var">access</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319236"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319234"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679319228"><span class="annot"><span class="annottext">indirectDist :: a
+</span><a href="#local-6989586621679319228"><span class="hs-identifier hs-var hs-var">indirectDist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319231"><span class="hs-identifier hs-var">distIK</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318855"><span class="hs-identifier hs-var">distKJ</span></a></span><span>
+</span><a href="#local-6989586621679319229"><span class="hs-identifier hs-var">distKJ</span></a></span><span>
 </span><span id="line-36"></span><span>          </span><span class="annot"><span class="annottext">Bool -&gt; ST s () -&gt; ST s ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318859"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679319233"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318854"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679319228"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318854"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679319228"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318851"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679319225"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318859"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679319233"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318857"><span class="hs-identifier hs-var">distIK</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679319231"><span class="hs-identifier hs-var">distIK</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318859"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679319233"><span class="hs-identifier hs-var">distIJ</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318855"><span class="hs-identifier hs-var">distKJ</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
+</span><a href="#local-6989586621679319229"><span class="hs-identifier hs-var">distKJ</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ST s () -&gt; ST s ()) -&gt; ST s () -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-37"></span><span>            </span><span class="annot"><span class="annottext">(Int, Int) -&gt; (a, Int) -&gt; ST s ()
-</span><a href="#local-6989586621679318849"><span class="hs-identifier hs-var">put</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318861"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318860"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318854"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318856"><span class="hs-identifier hs-var">pathIK</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679319223"><span class="hs-identifier hs-var">put</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319235"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319234"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319228"><span class="hs-identifier hs-var">indirectDist</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319230"><span class="hs-identifier hs-var">pathIK</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>    </span><span id="local-6989586621679318858"><span class="annot"><span class="annottext">access :: (Int, Int) -&gt; ST s (a, Int)
-</span><a href="#local-6989586621679318858"><span class="hs-identifier hs-var hs-var">access</span></a></span></span><span> </span><span id="local-6989586621679318848"><span class="annot"><span class="annottext">idx :: (Int, Int)
-</span><a href="#local-6989586621679318848"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; ST s (a, Int)
+</span><span id="line-39"></span><span>    </span><span id="local-6989586621679319232"><span class="annot"><span class="annottext">access :: (Int, Int) -&gt; ST s (a, Int)
+</span><a href="#local-6989586621679319232"><span class="hs-identifier hs-var hs-var">access</span></a></span></span><span> </span><span id="local-6989586621679319222"><span class="annot"><span class="annottext">idx :: (Int, Int)
+</span><a href="#local-6989586621679319222"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; ST s (a, Int)
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m a
 </span><span class="hs-identifier hs-var">V.unsafeRead</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
 MVector (PrimState (ST s)) (a, Int)
-</span><a href="#local-6989586621679318867"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
+</span><a href="#local-6989586621679319241"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var">mkIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int)
-</span><a href="#local-6989586621679318848"><span class="hs-identifier hs-var">idx</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>    </span><span id="local-6989586621679318849"><span class="annot"><span class="annottext">put :: (Int, Int) -&gt; (a, Int) -&gt; ST s ()
-</span><a href="#local-6989586621679318849"><span class="hs-identifier hs-var hs-var">put</span></a></span></span><span> </span><span id="local-6989586621679318847"><span class="annot"><span class="annottext">idx :: (Int, Int)
-</span><a href="#local-6989586621679318847"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span id="local-6989586621679318846"><span class="annot"><span class="annottext">e :: (a, Int)
-</span><a href="#local-6989586621679318846"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; (a, Int) -&gt; ST s ()
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int)
+</span><a href="#local-6989586621679319222"><span class="hs-identifier hs-var">idx</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679319223"><span class="annot"><span class="annottext">put :: (Int, Int) -&gt; (a, Int) -&gt; ST s ()
+</span><a href="#local-6989586621679319223"><span class="hs-identifier hs-var hs-var">put</span></a></span></span><span> </span><span id="local-6989586621679319221"><span class="annot"><span class="annottext">idx :: (Int, Int)
+</span><a href="#local-6989586621679319221"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span id="local-6989586621679319220"><span class="annot"><span class="annottext">e :: (a, Int)
+</span><a href="#local-6989586621679319220"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; (a, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">V.unsafeWrite</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
 MVector (PrimState (ST s)) (a, Int)
-</span><a href="#local-6989586621679318867"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
+</span><a href="#local-6989586621679319241"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var">mkIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318868"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int)
-</span><a href="#local-6989586621679318847"><span class="hs-identifier hs-var">idx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int)
-</span><a href="#local-6989586621679318846"><span class="hs-identifier hs-var">e</span></a></span><span>
-</span><span id="line-41"></span><span>    </span><span id="local-6989586621679318851"><span class="annot"><span class="annottext">eps :: a
-</span><a href="#local-6989586621679318851"><span class="hs-identifier hs-var hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1e-10</span></span><span> </span><span class="hs-comment">-- When two paths are nearly the same length, pick the one with the fewest segments.</span><span>
+</span><a href="#local-6989586621679319242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int)
+</span><a href="#local-6989586621679319221"><span class="hs-identifier hs-var">idx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int)
+</span><a href="#local-6989586621679319220"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621679319225"><span class="annot"><span class="annottext">eps :: a
+</span><a href="#local-6989586621679319225"><span class="hs-identifier hs-var hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">1e-10</span></span><span> </span><span class="hs-comment">-- When two paths are nearly the same length, pick the one with the fewest segments.</span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span id="local-6989586621679318890"><span class="annot"><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-type">mkIndex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679318890"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679318890"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679318890"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679318890"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679318890"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679319264"><span class="annot"><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-type">mkIndex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679319264"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679319264"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679319264"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679319264"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679319264"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-44"></span><span id="mkIndex"><span class="annot"><span class="annottext">mkIndex :: a -&gt; (a, a) -&gt; a
-</span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var hs-var">mkIndex</span></a></span></span><span> </span><span id="local-6989586621679318845"><span class="annot"><span class="annottext">n :: a
-</span><a href="#local-6989586621679318845"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679318844"><span class="annot"><span class="annottext">i :: a
-</span><a href="#local-6989586621679318844"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679318843"><span class="annot"><span class="annottext">j :: a
-</span><a href="#local-6989586621679318843"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318844"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var hs-var">mkIndex</span></a></span></span><span> </span><span id="local-6989586621679319219"><span class="annot"><span class="annottext">n :: a
+</span><a href="#local-6989586621679319219"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679319218"><span class="annot"><span class="annottext">i :: a
+</span><a href="#local-6989586621679319218"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679319217"><span class="annot"><span class="annottext">j :: a
+</span><a href="#local-6989586621679319217"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319218"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318845"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679319219"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318843"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><a href="#local-6989586621679319217"><span class="hs-identifier hs-var">j</span></a></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679318841"><span id="local-6989586621679318842"><span class="annot"><a href="Algorithms.FloydWarshall.html#mkGraph"><span class="hs-identifier hs-type">mkGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679318842"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679318842"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679318842"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679318842"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679318841"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679318841"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679318842"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679319215"><span id="local-6989586621679319216"><span class="annot"><a href="Algorithms.FloydWarshall.html#mkGraph"><span class="hs-identifier hs-type">mkGraph</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbox</span></span><span> </span><span class="annot"><a href="#local-6989586621679319216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679319216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679319216"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679319216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679319215"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679319215"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679319216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-47"></span><span id="mkGraph"><span class="annot"><span class="annottext">mkGraph :: Int -&gt; a -&gt; [(Int, Int, a)] -&gt; ST s (MVector s (a, Int))
-</span><a href="Algorithms.FloydWarshall.html#mkGraph"><span class="hs-identifier hs-var hs-var">mkGraph</span></a></span></span><span> </span><span id="local-6989586621679318840"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679318839"><span class="annot"><span class="annottext">maxValue :: a
-</span><a href="#local-6989586621679318839"><span class="hs-identifier hs-var">maxValue</span></a></span></span><span> </span><span id="local-6989586621679318838"><span class="annot"><span class="annottext">edges :: [(Int, Int, a)]
-</span><a href="#local-6989586621679318838"><span class="hs-identifier hs-var">edges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-48"></span><span>  </span><span id="local-6989586621679318837"><span class="annot"><span class="annottext">MVector s (a, Int)
-</span><a href="#local-6989586621679318837"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (a, Int) -&gt; ST s (MVector (PrimState (ST s)) (a, Int))
+</span><a href="Algorithms.FloydWarshall.html#mkGraph"><span class="hs-identifier hs-var hs-var">mkGraph</span></a></span></span><span> </span><span id="local-6989586621679319214"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679319213"><span class="annot"><span class="annottext">maxValue :: a
+</span><a href="#local-6989586621679319213"><span class="hs-identifier hs-var">maxValue</span></a></span></span><span> </span><span id="local-6989586621679319212"><span class="annot"><span class="annottext">edges :: [(Int, Int, a)]
+</span><a href="#local-6989586621679319212"><span class="hs-identifier hs-var">edges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679319211"><span class="annot"><span class="annottext">MVector s (a, Int)
+</span><a href="#local-6989586621679319211"><span class="hs-identifier hs-var">graph</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (a, Int) -&gt; ST s (MVector (PrimState (ST s)) (a, Int))
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 Int -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><span class="hs-identifier hs-var">V.replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318839"><span class="hs-identifier hs-var">maxValue</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319213"><span class="hs-identifier hs-var">maxValue</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 forall a. Bounded a =&gt; a
 </span><span class="hs-identifier hs-var">maxBound</span></span><span class="hs-special">)</span><span>
 </span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
@@ -202,67 +202,67 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s ()) -&gt; ST s ()) -&gt; (Int -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679318835"><span class="annot"><span class="annottext">v :: Int
-</span><a href="#local-6989586621679318835"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679319209"><span class="annot"><span class="annottext">v :: Int
+</span><a href="#local-6989586621679319209"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-50"></span><span>    </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; (a, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">unsafeWrite</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
 MVector (PrimState (ST s)) (a, Int)
-</span><a href="#local-6989586621679318837"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
+</span><a href="#local-6989586621679319211"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var">mkIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318835"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318835"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318835"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319209"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319209"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319209"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span><span>  </span><span class="annot"><span class="annottext">[(Int, Int, a)] -&gt; ((Int, Int, a) -&gt; ST s ()) -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[(Int, Int, a)]
-</span><a href="#local-6989586621679318838"><span class="hs-identifier hs-var">edges</span></a></span><span> </span><span class="annot"><span class="annottext">(((Int, Int, a) -&gt; ST s ()) -&gt; ST s ())
+</span><a href="#local-6989586621679319212"><span class="hs-identifier hs-var">edges</span></a></span><span> </span><span class="annot"><span class="annottext">(((Int, Int, a) -&gt; ST s ()) -&gt; ST s ())
 -&gt; ((Int, Int, a) -&gt; ST s ()) -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679318834"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679318834"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679318833"><span class="annot"><span class="annottext">j :: Int
-</span><a href="#local-6989586621679318833"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679318832"><span class="annot"><span class="annottext">cost :: a
-</span><a href="#local-6989586621679318832"><span class="hs-identifier hs-var">cost</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679319208"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679319208"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679319207"><span class="annot"><span class="annottext">j :: Int
+</span><a href="#local-6989586621679319207"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679319206"><span class="annot"><span class="annottext">cost :: a
+</span><a href="#local-6989586621679319206"><span class="hs-identifier hs-var">cost</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-52"></span><span>    </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; (a, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">unsafeWrite</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
 MVector (PrimState (ST s)) (a, Int)
-</span><a href="#local-6989586621679318837"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
+</span><a href="#local-6989586621679319211"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var">mkIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318834"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318833"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318832"><span class="hs-identifier hs-var">cost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318833"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319208"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319207"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319206"><span class="hs-identifier hs-var">cost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319207"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) (a, Int) -&gt; Int -&gt; (a, Int) -&gt; ST s ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><span class="hs-identifier hs-var">unsafeWrite</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
 MVector (PrimState (ST s)) (a, Int)
-</span><a href="#local-6989586621679318837"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
+</span><a href="#local-6989586621679319211"><span class="hs-identifier hs-var">graph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; (Int, Int) -&gt; Int
 forall a. Num a =&gt; a -&gt; (a, a) -&gt; a
 </span><a href="Algorithms.FloydWarshall.html#mkIndex"><span class="hs-identifier hs-var">mkIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318840"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318833"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318834"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679318832"><span class="hs-identifier hs-var">cost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679318834"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679319214"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319207"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319208"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679319206"><span class="hs-identifier hs-var">cost</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679319208"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>  </span><span class="annot"><span class="annottext">MVector s (a, Int) -&gt; ST s (MVector s (a, Int))
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">MVector s (a, Int)
-</span><a href="#local-6989586621679318837"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><a href="#local-6989586621679319211"><span class="hs-identifier hs-var">graph</span></a></span><span>
 </span><span id="line-55"></span></pre></body></html>
