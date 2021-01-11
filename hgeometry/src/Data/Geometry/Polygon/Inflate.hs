@@ -15,7 +15,7 @@ import           Data.Intersection          (IsIntersectableWith (intersect),
                                              NoIntersection (NoIntersection))
 import           Data.Maybe                 (catMaybes)
 import qualified Data.Vector                as V
-import qualified Data.Vector.Circular.Util  as CV
+import qualified Data.Vector.Circular       as CV
 import qualified Data.Vector.Unboxed        as VU
 import           Data.Vinyl                 (Rec (RNil, (:&)))
 import           Data.Vinyl.CoRec           (Handler (H), match)

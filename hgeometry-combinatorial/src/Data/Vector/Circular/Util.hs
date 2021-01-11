@@ -56,9 +56,6 @@ xs `isShiftOf` ys = let twice zs    = let zs' = leftElements zs in zs' <> zs'
 instance Arbitrary a => Arbitrary (CircularVector a) where
   arbitrary = unsafeFromList <$> (getNonEmpty <$> arbitrary)
 
-map :: (a -> b) -> CircularVector a -> CircularVector b
-map fn (CircularVector ne rot) = CircularVector (NV.map fn ne) rot
-
 -- | label the circular vector with indices, starting from zero at the
 -- current focus, going right.
 --
@@ -68,12 +65,3 @@ withIndicesRight (CircularVector v s) = CircularVector v' s
   where
     n  = length v
     v' = NV.imap (\i x -> ((i-s) `mod` n) :+ x) v
-
-imap :: (Int -> a -> b) -> CircularVector a -> CircularVector b
-imap f = fromVector . NV.imap f . toNonEmptyVector
-
-ifilter
-    :: (Int -> a -> Bool)
-    -> CircularVector a
-    -> V.Vector a
-ifilter f = NV.ifilter f . toNonEmptyVector
