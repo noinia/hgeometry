@@ -1,22 +1,23 @@
 {-# LANGUAGE DataKinds #-}
-module BentleyOttmann where
+module BentleyOttmann (bentleyOttmannShowcase) where
 
-import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (intersections)
 
-import           Control.Lens
-import           Control.Monad.Random
-import           Data.Ext
-import Data.Hashable
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon.Convex
+import           Control.Lens                 ((&), (.~), (^.))
+import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
+import           Data.Ext                     (core)
+import           Data.Geometry.LineSegment    (LineSegment (LineSegment'))
+import           Data.Geometry.Point          (Point (Point2))
+import           Data.Geometry.Transformation (scaleUniformlyBy)
+import           Data.Hashable                (Hashable (hash))
 import qualified Data.List.NonEmpty           as NonEmpty
+import qualified Data.Map                     as Map
 import qualified Data.Vector.Circular         as CV
-import           Reanimate
-import           Graphics.SvgTree          (LineJoin (..), Cap(..), strokeLineCap)
-import qualified Data.Map as Map
+import           Graphics.SvgTree             (Cap (..), LineJoin (..), strokeLineCap)
 
-import Common
+import Common    (black, genLineSegment, green, lerpLineSegment, nodeRadius, red)
+import Reanimate (Animation, SVG, animate, curveS, mkCircle, mkGroup, mkLine, pauseAtEnd, play,
+                  scene, setDuration, signalA, translate, withFillColorPixel, withStrokeColorPixel)
 
 -- intersections    :: (Ord r, Fractional r)
 --                  => [LineSegment 2 p r] -> Intersections p r
@@ -79,7 +80,7 @@ nLines :: Int
 nLines = 8
 
 lineSegments :: CV.CircularVector [LineSegment 2 () Rational]
-lineSegments = CV.unsafeFromList $ map (map $ scaleLineSegment 0.9) $ flip evalRand (mkStdGen seed) $
+lineSegments = CV.unsafeFromList $ map (map $ scaleUniformlyBy 0.9) $ flip evalRand (mkStdGen seed) $
   replicateM nSets (replicateM nLines genLineSegment)
 
 ppPoint :: Real r => Point 2 r -> SVG

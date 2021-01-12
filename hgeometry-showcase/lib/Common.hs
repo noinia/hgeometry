@@ -23,43 +23,11 @@ import           Reanimate.Animation       (Sync (SyncFreeze))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
-import Data.Geometry.Interval
-import Data.RealNumber.Rational
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon
-import Data.Geometry.Polygon.Inflate
+import Data.Geometry.Transformation
 import Data.Geometry.Vector
-
-scaleLineSegment :: Num r => r -> LineSegment 2 p r -> LineSegment 2 p r
-scaleLineSegment v (LineSegment a b) =
-  LineSegment
-    (over (unEndPoint.core) (scalePoint v) a)
-    (over (unEndPoint.core) (scalePoint v) b)
-
-scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
-scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
-
-scalePoint :: Num r => r -> Point 2 r -> Point 2 r
-scalePoint s p = s *^ p
-
-pScale :: (Num r, Eq r) => r -> SimplePolygon p r -> SimplePolygon p r
-pScale v p = fromPoints
-  [ scalePoint v pt :+ e
-  | (pt :+ e) <- toPoints p
-  ]
-
-pScaleV :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
-pScaleV v p = fromPoints
-  [ scalePointV v pt :+ e
-  | (pt :+ e) <- toPoints p
-  ]
-
-pTranslate :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
-pTranslate v p = fromPoints
-  [ pt .+^ v :+ e
-  | pt :+ e <- toPoints p
-  ]
 
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
 pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
@@ -70,7 +38,7 @@ pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
     Point2 _ minY :+ _ = minimumBy (comparing (view (core.yCoord))) p
 
 pAtCenter :: (Fractional r, Ord r) => SimplePolygon p r -> SimplePolygon p r
-pAtCenter p = pTranslate (neg $ toVec $ pCenter p) p
+pAtCenter p = translateBy (neg $ toVec $ pCenter p) p
   where
     neg (Vector2 a b) = Vector2 (-a) (-b)
 
