@@ -1,6 +1,6 @@
 -- We'll move this to Data.Geometry.Polygon.Monotone in the final version.
 <<<<<<< HEAD
-module Algorithms.Geometry.MonotonePolygon.MonotonePolygon(isMonotone, randomMonotone) where
+module Algorithms.Geometry.MonotonePolygon.MonotonePolygon(isMonotone, randomMonotone, randomMonotoneDirected) where
 
 import Control.Monad.Random
 import Data.Geometry.Polygon.Core
@@ -84,6 +84,12 @@ randomMonotone nVertices direction = polygon
         -- 7
         polygon = SimplePolygon $ Data.CircularSeq.fromList (min : leftHalf : max : rightHalf) 
 
+
+-- Pick a random vector and then call 'randomMonotone'.
+-- | \( O(n \log n) \)
+randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
+randomMonotoneDirected nVertices = randomMonotone nVertices createRandomRationalVec2
+
 -------------------------------------------------------------------------------------------------
 -- helper functions
 
@@ -113,7 +119,3 @@ linearInterpolation p1 p2 x =
         offset = (yCoord p1) - (slope * (xcoord p1))
         point = pointFromList (x : [slope * x + offset]) :: Maybe (Point 2 Rational)
 
--- Pick a random vector and then call 'randomMonotone'.
--- | \( O(n \log n) \)
-randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
-randomMonotoneDirected nVertices = error "not implemented yet"
