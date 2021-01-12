@@ -1,12 +1,3 @@
--- We'll move this to Data.Geometry.Polygon.Monotone in the final version.
-<<<<<<< HEAD
-module Algorithms.Geometry.MonotonePolygon.MonotonePolygon(isMonotone, randomMonotone, randomMonotoneDirected) where
-
-import Control.Monad.Random
-import Data.Geometry.Polygon.Core
-import Data.Geometry.Vector
-import Data.CircularSeq
-import Data.List
 module Algorithms.Geometry.MonotonePolygon.MonotonePolygon
   ( isMonotone
   , randomMonotone
@@ -22,6 +13,8 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Vector
 import           Data.Intersection
+import           Data.CircularSeq
+import           Data.List
 
 import Data.Vinyl
 import Data.Vinyl.CoRec
