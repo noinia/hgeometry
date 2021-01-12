@@ -7,25 +7,26 @@ module ClosestPair (closestPairShowcase) where
 
 import Algorithms.Geometry.ClosestPair.DivideAndConquer (closestPair)
 
-import           Control.Lens                  ((&))
-import           Control.Monad.Random          (evalRand, forM_, mkStdGen, replicateM)
-import           Data.Ext                      (ext, type (:+) ((:+)))
-import           Data.Geometry.Point           (Point (Point2, toVec), euclideanDist)
-import           Data.Geometry.Vector          (Affine ((.+^), (.-^)), (^/))
-import           Data.Hashable                 (Hashable (hash))
-import qualified Data.LSeq                     as LSeq
-import qualified Data.Vector.Circular          as CV
-import           Linear.V2                     (V2 (V2), unangle)
-import           Reanimate                     (Animation, SVG, animate, applyE, curveS,
-                                                defaultStrokeWidth, destroySprite, fadeOutE,
-                                                mkCircle, mkEllipse, mkGroup, newSpriteA',
-                                                overEnding, partialSvg, pathify, pauseAtEnd, play,
-                                                rotate, scene, setDuration, signalA, translate,
-                                                withFillColorPixel, withFillOpacity,
-                                                withStrokeColorPixel, withStrokeWidth)
-import           Reanimate.Animation           (Sync (SyncFreeze))
+import           Control.Lens                 ((&))
+import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replicateM)
+import           Data.Ext                     (ext, type (:+) ((:+)))
+import           Data.Geometry.Point          (Point (Point2, toVec), euclideanDist)
+import           Data.Geometry.Transformation (scaleUniformlyBy)
+import           Data.Geometry.Vector         (Affine ((.+^), (.-^)), (^/))
+import           Data.Hashable                (Hashable (hash))
+import qualified Data.LSeq                    as LSeq
+import qualified Data.Vector.Circular         as CV
+import           Linear.V2                    (V2 (V2), unangle)
+import           Reanimate                    (Animation, SVG, animate, applyE, curveS,
+                                               defaultStrokeWidth, destroySprite, fadeOutE,
+                                               mkCircle, mkEllipse, mkGroup, newSpriteA',
+                                               overEnding, partialSvg, pathify, pauseAtEnd, play,
+                                               rotate, scene, setDuration, signalA, translate,
+                                               withFillColorPixel, withFillOpacity,
+                                               withStrokeColorPixel, withStrokeWidth)
+import           Reanimate.Animation          (Sync (SyncFreeze))
 
-import Common (black, genPoints, green, lerpPoint, nodeRadius, scalePoint)
+import Common (black, genPoints, green, lerpPoint, nodeRadius)
 
 -- closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
 
@@ -84,7 +85,7 @@ nPoints :: Int
 nPoints = 10
 
 points :: CV.CircularVector [Point 2 Rational]
-points = CV.unsafeFromList $ map (map $ scalePoint 0.9) $ flip evalRand (mkStdGen seed) $
+points = CV.unsafeFromList $ map (map $ scaleUniformlyBy 0.9) $ flip evalRand (mkStdGen seed) $
   replicateM nSets (genPoints nPoints)
 
 ppPoint :: Real r => Point 2 r -> SVG

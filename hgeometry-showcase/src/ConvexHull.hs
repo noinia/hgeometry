@@ -8,6 +8,7 @@ import           Control.Monad.Random         (evalRand, forM_, mkStdGen, replic
 import           Data.Ext                     (ext)
 import           Data.Geometry.Point          (Point (Point2))
 import           Data.Geometry.Polygon.Convex (simplePolygon)
+import           Data.Geometry.Transformation (scaleUniformlyBy)
 import qualified Data.List.NonEmpty           as NonEmpty
 import qualified Data.Vector.Circular         as CV
 import           Reanimate                    (Animation, SVG, animate, curveS, mkCircle, mkGroup,
@@ -15,7 +16,7 @@ import           Reanimate                    (Animation, SVG, animate, curveS, 
                                                translate, withFillColorPixel, withStrokeColorPixel)
 
 import Common (black, genPoints, green, grey, lerpPoint, nodeRadius, ppPolygonBody,
-               ppPolygonOutline, scalePoint)
+               ppPolygonOutline)
 
 -- mapA (withViewBox (screenBottom, screenBottom, screenHeight, screenHeight)) $
 convexHullShowcase :: Animation
@@ -58,7 +59,7 @@ nPoints :: Int
 nPoints = 10
 
 points :: CV.CircularVector [Point 2 Rational]
-points = CV.unsafeFromList $ map (map $ scalePoint 0.9) $ flip evalRand (mkStdGen seed) $
+points = CV.unsafeFromList $ map (map $ scaleUniformlyBy 0.9) $ flip evalRand (mkStdGen seed) $
   replicateM nSets (genPoints nPoints)
 
 ppPoint :: Real r => Point 2 r -> SVG

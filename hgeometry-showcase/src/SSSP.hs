@@ -3,24 +3,25 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module SSSP (ssspMulti) where
 
-import           Control.Lens              ((^.))
-import           Reanimate                 (Animation, animate, curveS, fadeOutE, fork, fromToS,
-                                            mkAnimation, mkCircle, mkGroup, mkLine, newSpriteA',
-                                            newSpriteSVG, newSpriteSVG_, overEnding, partialSvg,
-                                            pathify, pauseAround, pauseAtEnd, playThenReverseA,
-                                            scene, signalA, spriteE, spriteZ, translate, wait,
-                                            withFillColorPixel, withStrokeColorPixel)
-import           Reanimate.Animation       (Sync (SyncFreeze))
+import Control.Lens        ((^.))
+import Reanimate           (Animation, animate, curveS, fadeOutE, fork, fromToS, mkAnimation,
+                            mkCircle, mkGroup, mkLine, newSpriteA', newSpriteSVG, newSpriteSVG_,
+                            overEnding, partialSvg, pathify, pauseAround, pauseAtEnd,
+                            playThenReverseA, scene, signalA, spriteE, spriteZ, translate, wait,
+                            withFillColorPixel, withStrokeColorPixel)
+import Reanimate.Animation (Sync (SyncFreeze))
 
-import Algorithms.Geometry.SSSP (sssp, triangulate)
-import Data.Ext                 (core, ext)
-import Data.Geometry.Point      (Point (Point2))
-import Data.Geometry.Polygon    (SimplePolygon, fromPoints, outerVertex, simpleFromPoints, toPoints)
+import Algorithms.Geometry.SSSP     (sssp, triangulate)
+import Data.Ext                     (core, ext)
+import Data.Geometry.Point          (Point (Point2))
+import Data.Geometry.Polygon        (SimplePolygon, fromPoints, outerVertex, simpleFromPoints,
+                                     toPoints)
+import Data.Geometry.Transformation
 
 import Common
 
 targetPolygon :: SimplePolygon () Rational
-targetPolygon = pScale 2 $ pAtCenter $ simpleFromPoints $ map ext
+targetPolygon = scaleUniformlyBy 2 $ pAtCenter $ simpleFromPoints $ map ext
   [ Point2 0 0
   , Point2 1 0
   , Point2 1 1, Point2 2 1, Point2 2 (-1)
@@ -86,4 +87,4 @@ _ssspMorph =
         ]
     p' = fromPoints $ toPoints targetPolygon
     tree = sssp (triangulate p')
-    mPolygon = pScale 2 $ morphSSSP targetPolygon
+    mPolygon = scaleUniformlyBy 2 $ morphSSSP targetPolygon
