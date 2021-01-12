@@ -31,7 +31,7 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
     isMonotoneAt pt =
       sum (map (intersectionsThrough pt) (F.toList $ outerBoundaryEdges p)) <= 2
     intersectionsThrough pt edge =
-      match (edge `intersect` line) $
+      match (Data.Intersection.intersect edge line) $
            H (\NoIntersection -> 0)
         :& H (\Point{} -> 1)
         -- This happens when an edge is parallel with the given direction.
@@ -62,10 +62,10 @@ randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolyg
 randomMonotone nVertices direction = polygon
     where
         -- 1, skip 2 in this function bc `direction` is given
-        points = replicate createRandomPoint nVertices
+        points = Data.List.replicate createRandomPoint nVertices
         -- 3
-        min = minimumBy (cmpExtreme direction) points
-        max = maximumBy (cmpExtreme direction) points
+        min = Data.Geometry.Polygon.Core.minimumBy (cmpExtreme direction) points
+        max = Data.Geometry.Polygon.Core.maximumBy (cmpExtreme direction) points
         -- 4
         pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
         line = linearInterpolation min max
@@ -92,7 +92,7 @@ createRandomPoint = do
     let point = pointFromList coords :: Maybe (Point 2 Rational)
     case point of
         Just a -> a
-        None -> origin :: Point 2 Rational
+        Nothing -> origin :: Point 2 Rational
     return ()
 
 createRandomRationalVec2 :: [Rational]
@@ -106,7 +106,7 @@ linearInterpolation :: Point -> Point -> Rational -> Point
 linearInterpolation p1 p2 x = 
     case point of
         Just a -> a
-        None -> origin :: Point 2 Rational
+        Nothing -> origin :: Point 2 Rational
     where
         slope = (yCoord p2) - (yCoord p1) / (xCoord p2) - (xCoord p1)
         offset = (yCoord p1) - (slope * (xcoord p1))
