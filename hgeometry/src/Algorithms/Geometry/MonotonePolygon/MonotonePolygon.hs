@@ -1,9 +1,11 @@
 -- We'll move this to Data.Geometry.Polygon.Monotone in the final version.
-module Algorithms.Geometry.MonotonePolygon.MonotonePolygon where
+module Algorithms.Geometry.MonotonePolygon.MonotonePolygon(isMonotone, randomMonotone) where
 
 import Control.Monad.Random
 import Data.Geometry.Polygon.Core
 import Data.Geometry.Vector
+import Data.CircularSeq
+import Data.List
 
 -- | \( O(n \log n) \)
 --   A polygon is monotone if a straight line in a given direction
@@ -29,4 +31,49 @@ isMonotone = error "not implemented yet"
 -}
 -- | \( O(n \log n) \)
 randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
-randomMonotone nVertices direction = error "not implemented yet"
+randomMonotone nVertices direction = polygon
+    where
+        -- 1, skip 2 in this function bc `direction` is given
+        points = replicate createRandomPoint nVertices
+        -- 3
+        min = minimumBy (cmpExtreme direction) points
+        max = maximumBy (cmpExtreme direction) points
+        -- 4
+        pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
+        line = linearInterpolation min max
+        positions = map line (map xCoord pointsWithoutExtremes)
+        lineAndPoints = zip poistions pointsWithoutExtremes
+        -- 5, 6
+        leftHalf = sortBy (cmpExtreme direction) (filter (\(a,b) -> a <= b) lineAndPoints)
+        rightHalf = sortBy (cmpExtreme (reverse direction)) (pointsWithoutExtremes \\ leftHalf)
+        -- 7
+        polygon = SimplePolygon $ Data.CircularSeq.fromList (min : leftHalf : max : rightHalf) 
+
+-------------------------------------------------------------------------------------------------
+-- helper functions
+
+createRandomPoint :: Point 2 Rational
+createRandomPoint = do
+    let coords = createRandomRationalVec2
+    let point = pointFromList coords :: Maybe (Point 2 Rational)
+    case point of
+        Just a -> a
+        None -> origin :: Point 2 Rational
+    return ()
+
+createRandomRationalVec2 :: [Rational]
+createRandomRationalVec2 = do
+    g <- newStdGen
+    map toRational (take 2 $ randoms g :: [Double])
+    return ()
+
+-- interpolate a line between p1 and p2 and yield the y value at a given x
+linearInterpolation :: Point -> Point -> Rational -> Point
+linearInterpolation p1 p2 x = 
+    case point of
+        Just a -> a
+        None -> origin :: Point 2 Rational
+    where
+        slope = (yCoord p2) - (yCoord p1) / (xCoord p2) - (xCoord p1)
+        offset = (yCoord p1) - (slope * (xcoord p1))
+        point = pointFromList (x : [slope * x + offset]) :: Maybe (Point 2 Rational)
