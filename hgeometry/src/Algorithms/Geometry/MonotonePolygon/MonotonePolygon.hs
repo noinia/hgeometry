@@ -102,7 +102,7 @@ createRandomRationalVec2 = do
     return ()
 
 -- interpolate a line between p1 and p2 and yield the y value at a given x
-linearInterpolation :: Point -> Point -> Rational -> Point
+linearInterpolation :: Point 2 Rational -> Point 2 Rational -> Rational -> Point 2 Rational
 linearInterpolation p1 p2 x = 
     case point of
         Just a -> a
