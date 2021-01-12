@@ -2617,6 +2617,8 @@ fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 data Nat
 instance GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
 instance Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
+instance Data.Aeson.Types.FromJSON.FromJSON (Data.RealNumber.Rational.RealNumber p)
+instance Data.Aeson.Types.ToJSON.ToJSON (Data.RealNumber.Rational.RealNumber p)
 instance Data.Hashable.Class.Hashable (Data.RealNumber.Rational.RealNumber p)
 instance GHC.Generics.Generic (Data.RealNumber.Rational.RealNumber p)
 instance GHC.Real.RealFrac (Data.RealNumber.Rational.RealNumber p)
@@ -3060,10 +3062,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZyl a_a11bJ. Traversal (UnBounded a_aZyl) (UnBounded a_a11bJ) a_aZyl a_a11bJ
-_MinInfinity :: forall a_aZyl. Prism' (UnBounded a_aZyl) ()
-_Val :: forall a_aZyl a_a11eC. Prism (UnBounded a_a11eC) (UnBounded a_aZyl) a_a11eC a_aZyl
-_MaxInfinity :: forall a_aZyl. Prism' (UnBounded a_aZyl) ()
+unUnBounded :: forall a_aZCa a_a11fy. Traversal (UnBounded a_aZCa) (UnBounded a_a11fy) a_aZCa a_a11fy
+_MinInfinity :: forall a_aZCa. Prism' (UnBounded a_aZCa) ()
+_Val :: forall a_aZCa a_a11ir. Prism (UnBounded a_a11ir) (UnBounded a_aZCa) a_a11ir a_aZCa
+_MaxInfinity :: forall a_aZCa. Prism' (UnBounded a_aZCa) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
