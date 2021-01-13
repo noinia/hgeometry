@@ -8,12 +8,14 @@
 --------------------------------------------------------------------------------
 module Algorithms.Graph.DFS where
 
-import           Control.Monad.ST (ST,runST)
+import           Control.Monad
+import           Control.Monad.ST            (ST, runST)
+import           Control.Monad.ST.Unsafe
 import           Data.Maybe
 import           Data.PlanarGraph
 import           Data.Tree
-import qualified Data.Vector as V
-import qualified Data.Vector.Generic as GV
+import qualified Data.Vector                 as V
+import qualified Data.Vector.Generic         as GV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 
 
@@ -58,3 +60,20 @@ dfs' g start = runST $ do
                    False -> do
                               visit bv u
                               Just . Node u . catMaybes <$> mapM (dfs'' bv) (neighs u)
+
+-- | DFS, from a given vertex, on a graph in AdjacencyLists representation.
+--
+-- Running time: \(O(k)\), where \(k\) is the number of branches consumed.
+dfsSensitive          :: forall s w. Int -> (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
+dfsSensitive n neighs start = runST $ do
+  bv <- UMV.replicate n True -- bit vector of marks
+  dfs'' bv start
+ where
+  visit     bv (VertexId i) = UMV.write bv i False
+  needVisit bv (VertexId i) = UMV.read bv i
+  dfs'' :: UMV.MVector s' Bool -> VertexId s w -> ST s' (Tree (VertexId s w))
+  dfs'' bv u = do
+    visit bv u
+    forest <- unsafeInterleaveST $
+      mapM (dfs'' bv) =<< filterM (needVisit bv) (neighs u)
+    pure $ Node u forest
