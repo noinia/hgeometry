@@ -12,6 +12,8 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Vector
+import           Data.Geometry.Polygon.Extreme
+
 import           Data.Intersection
 import           Data.CircularSeq
 import           Data.List
@@ -70,7 +72,7 @@ randomMonotone nVertices direction = polygon
         pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
         line = linearInterpolation min max
         positions = map line (map xCoord pointsWithoutExtremes)
-        lineAndPoints = zip poistions pointsWithoutExtremes
+        lineAndPoints = zip positions pointsWithoutExtremes
         -- 5, 6
         leftHalf = sortBy (cmpExtreme direction) (filter (\(a,b) -> a <= b) lineAndPoints)
         rightHalf = sortBy (cmpExtreme (reverse direction)) (pointsWithoutExtremes \\ leftHalf)
@@ -81,7 +83,9 @@ randomMonotone nVertices direction = polygon
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
 randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
-randomMonotoneDirected nVertices = randomMonotone nVertices createRandomRationalVec2
+randomMonotoneDirected nVertices = randomMonotone nVertices direction
+    where
+        direction = Data.Geometry.Vector.fromList createRandomRationalVec2
 
 -------------------------------------------------------------------------------------------------
 -- helper functions
@@ -109,6 +113,6 @@ linearInterpolation p1 p2 x =
         Nothing -> origin :: Point 2 Rational
     where
         slope = (yCoord p2) - (yCoord p1) / (xCoord p2) - (xCoord p1)
-        offset = (yCoord p1) - (slope * (xcoord p1))
+        offset = (yCoord p1) - (slope * (xCoord p1))
         point = pointFromList (x : [slope * x + offset]) :: Maybe (Point 2 Rational)
 
