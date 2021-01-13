@@ -16,7 +16,7 @@ import           Test.Hspec            (Spec, anyErrorCall, describe, it, should
 1   2
 -}
 tree1 :: Tree (VertexId () Primal)
-tree1 = dfsSensitive 3 (\i -> case i of VertexId 0 -> [VertexId 1, VertexId 2]; _ -> error "fail!") (VertexId 0)
+tree1 = dfsSensitive (\i -> case i of VertexId 0 -> [VertexId 1, VertexId 2]; _ -> error "fail!") (VertexId 0)
 
 spec :: Spec
 spec = do

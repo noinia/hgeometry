@@ -8,16 +8,14 @@
 --------------------------------------------------------------------------------
 module Algorithms.Graph.DFS where
 
-import           Control.Monad
 import           Control.Monad.ST            (ST, runST)
-import           Control.Monad.ST.Unsafe
 import           Data.Maybe
 import           Data.PlanarGraph
 import           Data.Tree
 import qualified Data.Vector                 as V
 import qualified Data.Vector.Generic         as GV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-
+import qualified Data.IntSet as IntSet
 
 -- | DFS on a planar graph.
 --
@@ -61,19 +59,23 @@ dfs' g start = runST $ do
                               visit bv u
                               Just . Node u . catMaybes <$> mapM (dfs'' bv) (neighs u)
 
--- | DFS, from a given vertex, on a graph in AdjacencyLists representation.
+-- | DFS, from a given vertex, on a graph in AdjacencyLists representation. Cycles are not removed.
+-- If your graph may contain cycles, see 'dfsFilterCycles'.
 --
 -- Running time: \(O(k)\), where \(k\) is the number of branches consumed.
-dfsSensitive          :: forall s w. Int -> (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
-dfsSensitive n neighs start = runST $ do
-  bv <- UMV.replicate n True -- bit vector of marks
-  dfs'' bv start
+dfsSensitive          :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
+dfsSensitive neighs start =
+  dfs'' (_unVertexId start)
  where
-  visit     bv (VertexId i) = UMV.write bv i False
-  needVisit bv (VertexId i) = UMV.read bv i
-  dfs'' :: UMV.MVector s' Bool -> VertexId s w -> ST s' (Tree (VertexId s w))
-  dfs'' bv u = do
-    visit bv u
-    forest <- unsafeInterleaveST $
-      mapM (dfs'' bv) =<< filterM (needVisit bv) (neighs u)
-    pure $ Node u forest
+  dfs'' :: Int -> Tree (VertexId s w)
+  dfs'' u = Node (VertexId u) $ map (dfs'' . _unVertexId) (neighs (VertexId u))
+
+-- | Remove infinite cycles from a DFS search tree.
+dfsFilterCycles :: Tree (VertexId s w) -> Tree (VertexId s w)
+dfsFilterCycles = worker IntSet.empty
+  where
+    worker seen (Node root forest) = Node root
+      [ Node (VertexId v) (map (worker (IntSet.insert v seen)) sub)
+      | Node (VertexId v) sub <- forest
+      , v `IntSet.notMember` seen
+      ]
