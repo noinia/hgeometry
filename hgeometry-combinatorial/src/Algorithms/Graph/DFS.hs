@@ -62,7 +62,7 @@ dfs' g start = runST $ do
 -- | DFS, from a given vertex, on a graph in AdjacencyLists representation. Cycles are not removed.
 -- If your graph may contain cycles, see 'dfsFilterCycles'.
 --
--- Running time: \(O(k)\), where \(k\) is the number of branches consumed.
+-- Running time: \(O(k)\), where \(k\) is the number of nodes consumed.
 dfsSensitive          :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
 dfsSensitive neighs start =
   dfs'' (_unVertexId start)
