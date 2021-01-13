@@ -85,7 +85,7 @@ randomMonotone nVertices direction = polygon
 randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
 randomMonotoneDirected nVertices = randomMonotone nVertices direction
     where
-        direction = Data.Geometry.Vector.fromList createRandomRationalVec2
+        direction = Data.Geometry.Vector.vectorFromList createRandomRationalVec2
 
 -------------------------------------------------------------------------------------------------
 -- helper functions
