@@ -12,7 +12,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Vector
-import           Data.Geometry.Polygon.Extreme
+import           Data.Geometry.Polygon.Extremes
 
 import           Data.Intersection
 import           Data.CircularSeq
