@@ -63,12 +63,8 @@ dfs' g start = runST $ do
 -- If your graph may contain cycles, see 'dfsFilterCycles'.
 --
 -- Running time: \(O(k)\), where \(k\) is the number of nodes consumed.
-dfsSensitive          :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
-dfsSensitive neighs start =
-  dfs'' (_unVertexId start)
- where
-  dfs'' :: Int -> Tree (VertexId s w)
-  dfs'' u = Node (VertexId u) $ map (dfs'' . _unVertexId) (neighs (VertexId u))
+dfsSensitive :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
+dfsSensitive neighs u = Node u $ map (dfsSensitive neighs) (neighs u)
 
 -- | Remove infinite cycles from a DFS search tree.
 dfsFilterCycles :: Tree (VertexId s w) -> Tree (VertexId s w)
