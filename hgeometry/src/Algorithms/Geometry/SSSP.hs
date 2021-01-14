@@ -12,32 +12,45 @@ module Algorithms.Geometry.SSSP
   , sssp
   ) where
 
-import           Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate')
-import           Algorithms.Geometry.PolygonTriangulation.Types       (PolygonEdgeType)
-import           Algorithms.Graph.DFS                                 (adjacencyLists, dfs')
-import           Control.Lens                                         ((^.))
+import Algorithms.Geometry.PolygonTriangulation.Triangulate (triangulate')
+import Algorithms.Geometry.PolygonTriangulation.Types       (PolygonEdgeType)
+
+import           Algorithms.Graph.DFS            (adjacencyLists, dfs', dfsSensitive)
+import           Control.Lens                    ((^.))
 import           Data.Bitraversable
-import           Data.Ext                                             (extra, type (:+) (..))
-import qualified Data.FingerTree                                      as F
-import           Data.Geometry.PlanarSubdivision                      (PolygonFaceData (..))
-import           Data.Geometry.Point                                  (Point, ccw, pattern CCW,
-                                                                       pattern CW)
+import           Data.Ext                        (extra, type (:+) (..),ext)
+import qualified Data.FingerTree                 as F
+import           Data.Geometry.PlanarSubdivision (PolygonFaceData (..))
+import           Data.Geometry.Point             (Point, ccw, pattern CCW, pattern CW)
 import           Data.Geometry.Polygon
-import           Data.List                                            (sortOn, (\\))
-import           Data.Maybe                                           (fromMaybe)
-import           Data.PlanarGraph                                     ()
-import           Data.PlaneGraph                                      (FaceId (..), PlaneGraph,
-                                                                       VertexData (..), VertexId',
-                                                                       dual, graph, incidentEdges,
-                                                                       leftFace, vertices)
-import qualified Data.PlaneGraph                                      as PlaneGraph
+import           Data.List                       (sortOn, (\\))
+import           Data.Maybe                      (fromMaybe)
+import           Data.PlanarGraph                (PlanarGraph)
+import qualified Data.PlanarGraph as Graph
+import           Data.PlaneGraph                 (FaceId (..), PlaneGraph, VertexData (..),
+                                                  VertexId', dual, graph, incidentEdges, leftFace,
+                                                  neighboursOf, vertices, VertexId)
+import qualified Data.PlaneGraph                 as PlaneGraph
 import           Data.Proxy
-import           Data.Tree                                            (Tree (Node))
-import qualified Data.Vector                                          as V
-import qualified Data.Vector.Circular                                 as CV
-import qualified Data.Vector.Circular.Util                            as CV
-import           Data.Vector.Unboxed                                  (Vector)
-import qualified Data.Vector.Unboxed                                  as VU
+import           Data.Tree                       (Tree (Node))
+import qualified Data.Vector                     as V
+import qualified Data.Vector.Circular            as CV
+import qualified Data.Vector.Circular.Util       as CV
+import           Data.Vector.Unboxed             (Vector)
+import qualified Data.Vector.Unboxed             as VU
+import Data.Coerce
+
+{-
+type AbsOffset = Int
+
+data TriangulatedPolygon t p r = TriangulatedPolygon
+  { triangulatedMap   :: Map AbsOffset (VertexId () Primal)
+  , triangulatedGraph :: PlaneGraph () AbsOffset PolygonEdgeType PolygonFaceData r
+  , triangulatedPolygon :: Polygon t p r
+  }
+-}
+
+
 
 -- | Single-source shortest paths tree. Both keys and values are vertex offset ints.
 --
@@ -74,10 +87,83 @@ sssp trig =
       let cv = CV.reverse $ CV.unsafeFromVector v
       in CV.toVector $ fromMaybe cv $ CV.findRotateTo (== v0) cv
 
+{-
+1. Find the starting face.
+-}
+visibilitySensitive :: forall s p r. (Ord r, Fractional r)
+  => PlaneGraph s Int PolygonEdgeType PolygonFaceData r
+  -> SimplePolygon () r
+visibilitySensitive trig = fromPoints $ map ext $ visibilityFinger d
+  where
+    Just v0 = fst <$> V.find (\(_vid, VertexData _ idx) -> idx == 0) (vertices trig)
+    v0i = incidentEdges v0 trig
+    
+    outer :: VertexId s Graph.Dual
+    FaceId outer = PlaneGraph.outerFaceId trig
+
+    firstFace :: VertexId s Graph.Dual
+    Just (FaceId firstFace) = V.find (/= FaceId outer) $ V.map (`leftFace` trig) v0i    
+    
+    dualGraph :: PlanarGraph s Graph.Dual PolygonFaceData PolygonEdgeType (VertexData r Int)
+    dualGraph = trig^.graph.dual
+    
+    dualTree' :: Tree (VertexId s Graph.Dual)
+    dualTree' = dfsSensitive neigh firstFace
+
+    neigh :: VertexId s Graph.Dual -> [VertexId s Graph.Dual]
+    neigh v = V.toList $ V.filter (/=outer) $ Graph.neighboursOf v dualGraph
+
+    dualVS :: Tree (V.Vector (VertexId' s))
+    dualVS = fmap (\v -> toCCW $ PlaneGraph.boundaryVertices (FaceId v) trig) dualTree'
+    
+    trigTree :: Tree (Index r, Index r, Index r)
+    trigTree = toTrigTree trig dualVS
+
+    d :: Dual r
+    d = mkDual trigTree
+
+    toCCW v =
+      let cv = CV.reverse $ CV.unsafeFromVector v
+      in CV.toVector $ fromMaybe cv $ CV.findRotateTo (== v0) cv
 
 
-
-
+visibilityFinger :: (Fractional r, Ord r) => Dual r -> [Point 2 r]
+visibilityFinger d =
+    case d of
+      Dual (a,b,c) ab bc ca ->
+        ringAccess a :
+        loopLeft a c ca ++
+        worker (Funnel (F.singleton c) a (F.singleton b)) bc ++
+        loopRight a b ab
+  where
+    loopLeft a outer l =
+      case l of
+        EmptyDual -> []
+        NodeDual x l' r' ->
+          worker (Funnel (F.singleton x) a (F.singleton outer)) r' ++
+          loopLeft a x l'
+    loopRight a outer r =
+      case r of
+        EmptyDual -> []
+        NodeDual x l' r' ->
+          worker (Funnel (F.singleton outer) a (F.singleton x)) l' ++
+          loopRight a x r'
+    -- Final edge is the leftmost of each funnel.
+    -- The most visible are the rightmost of each funnel.
+    -- Cut line segment.
+    worker _ EmptyDual = []
+    worker f (NodeDual x l r) =
+      case splitFunnel x f of
+        
+        (_v, fL, fR, dir) -> case dir of
+          -- 'x' is to the left of the visibility cone. Everything further to the left cannot
+          -- be visible to just go right.
+          SplitLeft -> worker fR r -- assert cusp of fR == cusp of f
+          -- 'x' is visible from our cusp. Add it to the output and go both to the left and right.
+          NoSplit -> worker fR r ++ [ringAccess x] ++ worker fL r
+          -- 'x' is to the right of the visibility cone. Everything further to the right cannot
+          -- be visible to just go left.
+          SplitRight -> worker fL l -- assert cusp of fL == cusp of f
 
 
 --------------------------------------------------------------------------------
@@ -118,6 +204,8 @@ data Funnel r = Funnel
 
 instance F.Measured (MinMax r) (Index r) where
   measure i = MinMax i i
+
+data SplitDirection = SplitLeft | NoSplit | SplitRight
 
 -- Split a funnel w.r.t. a point 'x'. There are three cases:
 --   1. 'x' is visible from the cusp.
@@ -163,24 +251,27 @@ instance F.Measured (MinMax r) (Index r) where
 -- Once we've found the first point that can see 'x', we split the funnel in two: One funnel
 -- that will be used for points to the left of 'x' and one funnel for points to the right of
 -- 'x'. Oh, "left" and "right" here are used to indicate branches in the dual tree.
-splitFunnel :: (Fractional r, Ord r) => Index r -> Funnel r -> (Index r, Funnel r, Funnel r)
+splitFunnel :: (Fractional r, Ord r) => Index r -> Funnel r -> (Index r, Funnel r, Funnel r, SplitDirection)
 splitFunnel x Funnel{..}
     | isOnLeftChain =
       case doSearch isRightTurn funnelLeft of
         (lower, t, upper) ->
           ( t
           , Funnel upper t (F.singleton x)
-          , Funnel (lower F.|> t F.|> x) funnelCusp funnelRight)
+          , Funnel (lower F.|> t F.|> x) funnelCusp funnelRight
+          , SplitLeft)
     | isOnRightChain =
       case doSearch isLeftTurn funnelRight of
         (lower, t, upper) ->
           ( t
           , Funnel funnelLeft funnelCusp (lower F.|> t F.|> x)
-          , Funnel (F.singleton x) t upper)
+          , Funnel (F.singleton x) t upper
+          , SplitRight)
     | otherwise =
       ( funnelCusp
       , Funnel funnelLeft funnelCusp (F.singleton x)
-      , Funnel (F.singleton x) funnelCusp funnelRight)
+      , Funnel (F.singleton x) funnelCusp funnelRight
+      , NoSplit)
   where
     isOnLeftChain  = fromMaybe False $
       isLeftTurnOrLinear cuspElt <$> leftElt <*> pure targetElt
@@ -241,7 +332,7 @@ ssspFinger d = toSSSP $
     worker _ EmptyDual = []
     worker f (NodeDual x l r) =
       case splitFunnel x f of
-        (v, fL, fR) ->
+        (v, fL, fR, _) ->
           (x, v) :
           worker fL l ++
           worker fR r
