@@ -33,8 +33,8 @@ _ssspSingle = pauseAtEnd 1 $ scene $ do
     newSpriteSVG_ $ ppPolygonBody grey targetPolygon
     newSpriteSVG_ $ ppPolygonOutline black targetPolygon
     nodes <- newSpriteSVG $ mkGroup
-      [ ppPolygonNodes targetPolygon
-      , withFillColorPixel rootColor $  ppPolygonNode targetPolygon 0 ]
+      [ ppPolygonNodes red targetPolygon
+      , withFillColorPixel rootColor $  ppPolygonNode black targetPolygon 0 ]
     spriteZ nodes 1
     case tree of
       T idx sub -> mapM_ (worker idx) sub
@@ -68,8 +68,8 @@ ssspMulti = mkAnimation 20 $ \t ->
   [ ppPolygonBody grey p
   , ppPolygonOutline black p
   , ppSSSP p
-  , ppPolygonNodes p
-  , withFillColorPixel rootColor $ ppPolygonNode p 0
+  , ppPolygonNodes red p
+  , withFillColorPixel rootColor $ ppPolygonNode black p 0
   ]
 
 _ssspMorph :: Animation
@@ -82,8 +82,8 @@ _ssspMorph =
           ppPolygonBody grey p
         , ppPolygonOutline black p
         , ppSSSP' tree p
-        , ppPolygonNodes p
-        , withFillColorPixel rootColor $  ppPolygonNode p 0
+        , ppPolygonNodes black p
+        , withFillColorPixel rootColor $  ppPolygonNode black p 0
         ]
     p' = fromPoints $ toPoints targetPolygon
     tree = sssp (triangulate p')

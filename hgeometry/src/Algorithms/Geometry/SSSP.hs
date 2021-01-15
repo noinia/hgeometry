@@ -143,39 +143,26 @@ visibilityDual trig = d
 
 
 
-visibilityFinger :: forall r. (Fractional r, Ord r, Show r) => Dual r -> [Either (Index r, Index r, Index r) (Point 2 r)]
+visibilityFinger :: forall r. (Fractional r, Ord r, Show r) => Dual r -> [Either (Int, Int, Int) (Point 2 r)]
 visibilityFinger d =
     case d of
       Dual (a,b,c) ab bc ca ->
-        Left (a,b,c) :
-        loopLeft a c ca ++
-        Right (ringAccess a) :
+        Left (indexExtra a, indexExtra b, indexExtra c) :
+        worker (Funnel (F.singleton b) a F.empty) ab ++
         worker (Funnel (F.singleton c) a (F.singleton b)) bc ++
-        loopRight a b ab
+        worker (Funnel F.empty a (F.singleton c)) ca
   where
-    loopLeft a outer l =
-      case l of
-        EmptyDual -> []
-        NodeDual x l' r' ->
-          worker (Funnel (F.singleton x) a (F.singleton outer)) r' ++
-          loopLeft a x l'
-    loopRight a outer r =
-      case r of
-        EmptyDual -> []
-        NodeDual x l' r' ->
-          worker (Funnel (F.singleton outer) a (F.singleton x)) l' ++
-          loopRight a x r'
     -- Final edge is the leftmost of each funnel.
     -- The most visible are the rightmost of each funnel.
     -- Cut line segment.
-    worker (Funnel l cusp r) EmptyDual =
-      let edgeA = ringAccess $ fromMaybe cusp $ chainTop r
-          edgeB = ringAccess $ fromMaybe cusp $ chainTop l
+    worker f EmptyDual =
+      let edgeA = ringAccess $ funnelRightTop f
+          edgeB = ringAccess $ funnelLeftTop f
           edge = ClosedLineSegment (ext edgeA) (ext edgeB)
-          coneA = ringAccess $ fromMaybe cusp $ chainBottom r
-          coneB = ringAccess $ fromMaybe cusp $ chainBottom l
-          lineA = lineThrough (ringAccess cusp) coneA
-          lineB = lineThrough (ringAccess cusp) coneB
+          coneA = ringAccess $ funnelRightBottom f
+          coneB = ringAccess $ funnelLeftBottom f
+          lineA = lineThrough (ringAccess $ funnelCusp f) coneA
+          lineB = lineThrough (ringAccess $ funnelCusp f) coneB
           -- findIntersection :: Line 2 r -> Point 2 r
           findIntersection line =
             match (edge `intersect` line) $
@@ -183,11 +170,13 @@ visibilityFinger d =
             :& H (\pt -> Right pt)
             :& H (\LineSegment{} -> error "line intersection")
             :& RNil
-      in [findIntersection lineA, findIntersection lineB]
+      in [if edgeA == coneA then Right coneA else findIntersection lineA] ++
+         if edgeB == coneB then [] else [findIntersection lineB]
     worker f (NodeDual x l r) =
-      Left (fromMaybe (funnelCusp f) $ chainTop (funnelRight f), x, fromMaybe (funnelCusp f) $ chainTop (funnelLeft f)) :
+      Left (indexExtra $ fromMaybe (funnelCusp f) $ chainTop (funnelRight f)
+           ,indexExtra x
+           ,indexExtra $ fromMaybe (funnelCusp f) $ chainTop (funnelLeft f)) :
       case splitFunnel x f of
-
         (_v, fL, fR, dir) -> case dir of
           -- 'x' is to the left of the visibility cone. Everything further to the left cannot
           -- be visible to just go right.
@@ -217,7 +206,7 @@ instance Monoid (MinMax r) where
 
 -- Including the 'Point 2 r' here means we don't have to look it up.
 -- This mattered since lookups used to be O(log n) rather than O(1).
-newtype Index r = Index (Point 2 r :+ Int) -- deriving (Show)
+newtype Index r = Index { unIndex :: Point 2 r :+ Int} -- deriving (Show)
 
 instance Show (Index r) where
   show = show . indexExtra
@@ -234,6 +223,22 @@ data Funnel r = Funnel
   , funnelCusp  :: Index r
   , funnelRight :: Chain r -- Left-most element is furthest away from cusp.
   } deriving (Show)
+
+-- Left side of the funnel, furthest away from the cusp.
+funnelLeftTop :: Funnel r -> Index r
+funnelLeftTop f = fromMaybe (funnelCusp f) $ chainTop (funnelLeft f)
+
+-- Left side of the funnel, closest to the cusp.
+funnelLeftBottom :: Funnel r -> Index r
+funnelLeftBottom f = fromMaybe (funnelCusp f) $ chainBottom (funnelLeft f)
+
+-- Right side of the funnel, furthest away from the cusp.
+funnelRightTop :: Funnel r -> Index r
+funnelRightTop f = fromMaybe (funnelCusp f) $ chainTop (funnelRight f)
+
+-- Right side of the funnel, closest to the cusp.
+funnelRightBottom :: Funnel r -> Index r
+funnelRightBottom f = fromMaybe (funnelCusp f) $ chainBottom (funnelRight f)
 
 -- Element closest to the cusp.
 chainBottom :: Chain r -> Maybe (Index r)
