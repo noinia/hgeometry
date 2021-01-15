@@ -148,16 +148,26 @@ dequeTop idx = do
 --
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
 convexPolygon :: forall t p r. (Ord r, Num r, Show r, Show p) => Polygon t p r -> ConvexPolygon p r
-convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $ do
-    let v1 = NE.unsafeIndex vs 0
-        v2 = NE.unsafeIndex vs 1
-        v3 = NE.unsafeIndex vs 2
-    if ccw' v1 v2 v3 == CCW
-      then dequePush v1 >> dequePush v2
-      else dequePush v2 >> dequePush v1
-    dequePush v3; dequeInsert v3
-    V.mapM_ build (NE.drop 3 vs)
+convexPolygon p = ConvexPolygon $ unsafeFromVector $ V.create $ runM (size p) $
+    findStartingPoint 2
   where
+    -- Find the first spot where 0,n-1,n is not colinear.
+    findStartingPoint :: Int -> M s (Point 2 r :+ p) ()
+    findStartingPoint nth = do
+      let vPrev = NE.unsafeIndex vs (nth-1)
+          vNth = NE.unsafeIndex vs nth
+      case ccw' v1 vPrev vNth of
+        CoLinear -> findStartingPoint (nth+1)
+        CCW -> do
+          dequePush v1 >> dequePush vPrev
+          dequePush vNth; dequeInsert vNth
+          V.mapM_ build (NE.drop (nth+1) vs)
+        CW -> do
+          dequePush vPrev >> dequePush v1
+          dequePush vNth; dequeInsert vNth
+          V.mapM_ build (NE.drop (nth+1) vs)
+
+    v1 = NE.unsafeIndex vs 0
     vs = CV.vector (p^.outerBoundaryVector)
     build v = do
       botTurn <- ccw' <$> pure v     <*> dequeBottom 0 <*> dequeBottom 1
@@ -234,7 +244,7 @@ maxInDirection u = findMaxWith (cmpExtreme u)
 
 -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
 --        Use unsafe indexing.
--- \( O(log n) \)
+-- \( O(\log n) \)
 findMaxWith :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering)
              -> ConvexPolygon p r -> Point 2 r :+ p
 findMaxWith cmp p = CV.index v (worker 0 (F.length v))
@@ -311,7 +321,7 @@ tangentCmp o p q = case ccw o (p^.core) (q^.core) of
 --  left tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the right of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 leftTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 leftTangent poly q = findMaxWith (tangentCmp q) poly
 
@@ -319,7 +329,7 @@ leftTangent poly q = findMaxWith (tangentCmp q) poly
 --  right tangent of q and the polygon, i.e. the vertex v of the convex polygon
 --  s.t. the polygon lies completely to the left of the line from q to v.
 --
--- running time: \(O(\log^2 n)\).
+-- running time: \(O(\log n)\).
 rightTangent        :: (Ord r, Num r) => ConvexPolygon p r -> Point 2 r -> Point 2 r :+ p
 rightTangent poly q = findMaxWith (flip $ tangentCmp q) poly
 

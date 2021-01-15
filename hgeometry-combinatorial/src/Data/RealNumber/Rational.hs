@@ -14,13 +14,14 @@ module Data.RealNumber.Rational(RealNumber(..)
                                , Nat
                                ) where
 
+import Data.Aeson
 import Data.Data
 import Data.Fixed
 import Data.Hashable
 import Data.List (dropWhileEnd)
 import GHC.Generics (Generic(..))
 import GHC.TypeLits
-import Test.QuickCheck(Arbitrary(..))
+import Test.QuickCheck (Arbitrary(..))
 
 --------------------------------------------------------------------------------
 
@@ -35,8 +36,7 @@ import Test.QuickCheck(Arbitrary(..))
 -- If the number cannot be displayed exactly a '~' is printed after
 -- the number.
 newtype RealNumber (p :: Nat) = RealNumber Rational
-  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable)
-
+  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable,ToJSON,FromJSON)
 
 data NatPrec (p :: Nat) = NatPrec
 
@@ -58,6 +58,7 @@ instance KnownNat p => Read (RealNumber p) where
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
+
 
 --------------------------------------------------------------------------------
 
