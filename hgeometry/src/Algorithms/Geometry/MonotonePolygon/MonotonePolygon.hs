@@ -61,58 +61,45 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
 -}
 -- | \( O(n \log n) \)
 randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
-randomMonotone nVertices direction = polygon
-    where
-        -- 1, skip 2 in this function bc `direction` is given
-        points = Data.List.replicate createRandomPoint nVertices
-        -- 3
+randomMonotone nVertices direction = do
+    -- 1, skip 2 in this function bc `direction` is given
+    points <- Data.List.replicate createRandomPoint nVertices
+    -- 3
+    let 
         min = Data.Geometry.Polygon.Core.minimumBy (cmpExtreme direction) points
         max = Data.Geometry.Polygon.Core.maximumBy (cmpExtreme direction) points
         -- 4
         pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
-        line = linearInterpolation min max
-        positions = map line (map xCoord pointsWithoutExtremes)
-        lineAndPoints = zip positions pointsWithoutExtremes
         -- 5, 6
-        leftHalf = sortBy (cmpExtreme direction) (filter (\(a,b) -> a <= b) lineAndPoints)
-        rightHalf = sortBy (cmpExtreme (reverse direction)) (pointsWithoutExtremes \\ leftHalf)
-        -- 7
-        polygon = SimplePolygon $ Data.CircularSeq.fromList (min : leftHalf : max : rightHalf) 
-
+        (leftHalf,rightHalf) = Data.List.partition (\x -> ccw min max x == CCW) pointsWithoutExtremes
+        leftHalf = sortBy (cmpExtreme direction) leftHalf
+        rightHalf = sortBy (cmpExtreme (reverse direction)) rightHalf
+    fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf) 
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
 randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
 randomMonotoneDirected nVertices = randomMonotone nVertices direction
     where
-        direction = Data.Geometry.Vector.vectorFromList createRandomRationalVec2
+        direction = case (Data.Geometry.Vector.vectorFromList createRandomRationalVec2) of
+                        Just a -> a
+                        Nothing -> error "could not create random vector"
 
 -------------------------------------------------------------------------------------------------
 -- helper functions
 
-createRandomPoint :: Point 2 Rational
+granularity :: Integer
+granularity = 10000000
+
+createRandomPoint :: RandomGen g => Rand g (Point 2 Rational)
 createRandomPoint = do
-    let coords = createRandomRationalVec2
-    let point = pointFromList coords :: Maybe (Point 2 Rational)
-    case point of
-        Just a -> a
-        Nothing -> origin :: Point 2 Rational
-    return ()
+    x <- liftRand $ randomR (0, granularity)
+    y <- liftRand $ randomR (0, granularity)
+    pure $ Point2 (x % granularity) (y % granularity)
 
 createRandomRationalVec2 :: [Rational]
 createRandomRationalVec2 = do
     g <- newStdGen
     map toRational (take 2 $ randoms g :: [Double])
     return ()
-
--- interpolate a line between p1 and p2 and yield the y value at a given x
-linearInterpolation :: Point 2 Rational -> Point 2 Rational -> Rational -> Point 2 Rational
-linearInterpolation p1 p2 x = 
-    case point of
-        Just a -> a
-        Nothing -> origin :: Point 2 Rational
-    where
-        slope = (yCoord p2) - (yCoord p1) / (xCoord p2) - (xCoord p1)
-        offset = (yCoord p1) - (slope * (xCoord p1))
-        point = pointFromList (x : [slope * x + offset]) :: Maybe (Point 2 Rational)
 
