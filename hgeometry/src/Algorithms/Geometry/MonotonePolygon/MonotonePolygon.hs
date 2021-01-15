@@ -17,6 +17,7 @@ import           Data.Geometry.Polygon.Extremes
 import           Data.Intersection
 import           Data.CircularSeq
 import           Data.List
+import           Data.Ratio
 
 import Data.Vinyl
 import Data.Vinyl.CoRec
@@ -63,7 +64,7 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
 randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
 randomMonotone nVertices direction = do
     -- 1, skip 2 in this function bc `direction` is given
-    points <- Data.List.replicate createRandomPoint nVertices
+    points <- Data.List.replicateM createRandomPoint nVertices
     -- 3
     let 
         min = Data.Geometry.Polygon.Core.minimumBy (cmpExtreme direction) points
@@ -74,7 +75,7 @@ randomMonotone nVertices direction = do
         (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (\x -> ccw min max x == CCW) pointsWithoutExtremes
         leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
         rightHalf = sortBy (cmpExtreme (reverse direction)) rightHalfUnsorted
-    fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf) 
+    return (fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf))
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
@@ -101,5 +102,4 @@ createRandomRationalVec2 :: [Rational]
 createRandomRationalVec2 = do
     g <- newStdGen
     map toRational (take 2 $ randoms g :: [Double])
-    return ()
 
