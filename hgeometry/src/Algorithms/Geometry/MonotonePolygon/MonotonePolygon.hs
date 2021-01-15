@@ -71,9 +71,9 @@ randomMonotone nVertices direction = do
         -- 4
         pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
         -- 5, 6
-        (leftHalf,rightHalf) = Data.List.partition (\x -> ccw min max x == CCW) pointsWithoutExtremes
-        leftHalf = sortBy (cmpExtreme direction) leftHalf
-        rightHalf = sortBy (cmpExtreme (reverse direction)) rightHalf
+        (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (\x -> ccw min max x == CCW) pointsWithoutExtremes
+        leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
+        rightHalf = sortBy (cmpExtreme (reverse direction)) rightHalfUnsorted
     fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf) 
 
 -- Pick a random vector and then call 'randomMonotone'.
