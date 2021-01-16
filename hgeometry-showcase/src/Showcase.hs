@@ -10,6 +10,7 @@ import ConvexHull  (convexHullShowcase)
 import BentleyOttmann
 import FastVisibility
 import SSSP
+import RandomMonotone
 
 import Reanimate
 
@@ -22,6 +23,7 @@ main = do
     "closestpair":rest     -> withArgs rest $ runReanimate closestPairShowcase
     "bentleyottmann":rest  -> withArgs rest $ runReanimate bentleyOttmannShowcase
     "fast_visibility":rest -> withArgs rest $ runReanimate fastVisibilityShowcase
+    "random_monotone":rest -> withArgs rest $ runReanimate randomMonotoneShowcase
     _                      -> printUsage
 
 runReanimate :: Animation -> IO ()
