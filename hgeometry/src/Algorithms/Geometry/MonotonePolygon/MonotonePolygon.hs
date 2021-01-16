@@ -13,6 +13,8 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon.Core
 import           Data.Geometry.Vector
 import           Data.Geometry.Polygon.Extremes
+import           Data.Geometry.Point.Orientation.Degenerate
+
 
 import           Data.Intersection
 import           Data.CircularSeq
@@ -64,27 +66,37 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
 randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
 randomMonotone nVertices direction = do
     -- 1, skip 2 in this function bc `direction` is given
-    points <- Data.List.replicateM createRandomPoint nVertices
+    points <- replicateM nVertices createRandomPoint
     -- 3
     let 
-        min = Data.Geometry.Polygon.Core.minimumBy (cmpExtreme direction) points
-        max = Data.Geometry.Polygon.Core.maximumBy (cmpExtreme direction) points
+        specialPoints = map (\x -> x :+ ()) points
+        min = Data.List.minimumBy (cmpExtreme direction) specialPoints
+        max = Data.List.maximumBy (cmpExtreme direction) specialPoints
         -- 4
-        pointsWithoutExtremes = filter (\x -> x /= min && x /= max) points
+        pointsWithoutExtremes = filter (\x -> x /= min && x /= max) specialPoints
         -- 5, 6
-        (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (\x -> ccw min max x == CCW) pointsWithoutExtremes
+        (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (toTheLeft min max) pointsWithoutExtremes
         leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
-        rightHalf = sortBy (cmpExtreme (reverse direction)) rightHalfUnsorted
+        rightHalf = reverse (sortBy (cmpExtreme direction) rightHalfUnsorted)
     return (fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf))
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
 randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
-randomMonotoneDirected nVertices = randomMonotone nVertices direction
-    where
-        direction = case (Data.Geometry.Vector.vectorFromList createRandomRationalVec2) of
-                        Just a -> a
-                        Nothing -> error "could not create random vector"
+randomMonotoneDirected nVertices = do
+    points <- replicateM nVertices createRandomPoint
+    direction <- generateRandomVector2
+    let 
+        specialPoints = map (\x -> x :+ ()) points
+        min = Data.List.minimumBy (cmpExtreme direction) specialPoints
+        max = Data.List.maximumBy (cmpExtreme direction) specialPoints
+        -- 4
+        pointsWithoutExtremes = filter (\x -> x /= min && x /= max) specialPoints
+        -- 5, 6
+        (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (toTheLeft min max) pointsWithoutExtremes
+        leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
+        rightHalf = reverse (sortBy (cmpExtreme direction) rightHalfUnsorted)
+    return (fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf))
 
 -------------------------------------------------------------------------------------------------
 -- helper functions
@@ -92,14 +104,23 @@ randomMonotoneDirected nVertices = randomMonotone nVertices direction
 granularity :: Integer
 granularity = 10000000
 
+toTheLeft :: Point 2 Rational :+ () -> Point 2 Rational :+ () -> Point 2 Rational :+ () -> Bool
+toTheLeft min max x = Data.Geometry.Point.Orientation.Degenerate.ccw a b c == CCW
+    where
+        a = _core min
+        b = _core max
+        c = _core x
+
 createRandomPoint :: RandomGen g => Rand g (Point 2 Rational)
 createRandomPoint = do
     x <- liftRand $ randomR (0, granularity)
     y <- liftRand $ randomR (0, granularity)
     pure $ Point2 (x % granularity) (y % granularity)
 
-createRandomRationalVec2 :: [Rational]
-createRandomRationalVec2 = do
-    g <- newStdGen
-    map toRational (take 2 $ randoms g :: [Double])
+
+generateRandomVector2 :: RandomGen g => Rand g (Vector 2 Rational)
+generateRandomVector2 = do
+    a <- liftRand $ randomR(0, granularity)
+    b <- liftRand $ randomR(0, granularity)
+    pure $ Vector2 (a % granularity) (b % granularity)
 
