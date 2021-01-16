@@ -1,35 +1,32 @@
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DataKinds       #-}
+{-# LANGUAGE PatternSynonyms #-}
 module RandomMonotone (randomMonotoneShowcase ) where
 
-import           Algorithms.Geometry.MonotonePolygon.MonotonePolygon
+import Algorithms.Geometry.MonotonePolygon.MonotonePolygon (randomMonotone)
 
-import           Control.Lens
+import           Control.Lens                 ((&), (.~), (^.))
 import           Control.Monad.Random
-import           Data.Ext
-import           Data.Ratio
-import qualified Data.Foldable                                       as F
-import           Data.Geometry.Line                                  (Line (..))
-import           Data.Geometry.LineSegment
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon                               as P
-import           Data.Geometry.Polygon.Convex
-import           Data.Geometry.Transformation
-import           Data.Geometry.Vector
-import           Data.Hashable
-import           Data.Intersection
-import qualified Data.List.NonEmpty                                  as NonEmpty
-import           Data.Maybe
-import qualified Data.Vector.Circular                                as CV
+import           Data.Ext                     (_core, core)
+import qualified Data.Foldable                as F
+import           Data.Geometry.Line           (Line (..))
+import           Data.Geometry.LineSegment    (LineSegment (LineSegment))
+import           Data.Geometry.Point          (Point (Point2), squaredEuclideanDist)
+import           Data.Geometry.Polygon        as P
+import           Data.Geometry.Transformation (scaleUniformlyBy)
+import           Data.Geometry.Vector         (Vector, pattern Vector2)
+import           Data.Hashable                (Hashable (hash))
+import           Data.Intersection            (IsIntersectableWith (intersect),
+                                               NoIntersection (NoIntersection))
+import qualified Data.List.NonEmpty           as NonEmpty
+import           Data.Maybe                   (catMaybes)
+import           Data.Ratio                   ((%))
+import qualified Data.Vector.Circular         as CV
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           Graphics.SvgTree                                    (Cap (..),
-                                                                      LineJoin (..),
-                                                                      strokeLineCap)
+import           Graphics.SvgTree             (Cap (..), LineJoin (..), strokeLineCap)
 import           Reanimate
-import           Reanimate.Animation
 
-import           Common
-import           Data.RealNumber.Rational
+import Common
 
 type R = Rational -- RealNumber 5
 
