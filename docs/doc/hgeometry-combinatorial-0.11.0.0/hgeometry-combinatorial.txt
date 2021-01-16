@@ -2384,6 +2384,17 @@ adjacencyLists :: PlanarGraph s w v e f -> AdjacencyLists s w
 --   Running time: &lt;math&gt;
 dfs' :: forall s w. AdjacencyLists s w -> VertexId s w -> Tree (VertexId s w)
 
+-- | DFS, from a given vertex, on a graph in AdjacencyLists representation.
+--   Cycles are not removed. If your graph may contain cycles, see
+--   <a>dfsFilterCycles</a>.
+--   
+--   Running time: &lt;math&gt;, where &lt;math&gt; is the number of nodes
+--   consumed.
+dfsSensitive :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
+
+-- | Remove infinite cycles from a DFS search tree.
+dfsFilterCycles :: Tree (VertexId s w) -> Tree (VertexId s w)
+
 
 module Algorithms.Graph.MST
 
@@ -2462,8 +2473,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aRbJ. Lens' (Range a_aRbJ) (EndPoint a_aRbJ)
-upper :: forall a_aRbJ. Lens' (Range a_aRbJ) (EndPoint a_aRbJ)
+lower :: forall a_aRdV. Lens' (Range a_aRdV) (EndPoint a_aRdV)
+upper :: forall a_aRdV. Lens' (Range a_aRdV) (EndPoint a_aRdV)
 
 -- | Test if a value lies in a range.
 --   
@@ -3062,10 +3073,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZCa a_a11fy. Traversal (UnBounded a_aZCa) (UnBounded a_a11fy) a_aZCa a_a11fy
-_MinInfinity :: forall a_aZCa. Prism' (UnBounded a_aZCa) ()
-_Val :: forall a_aZCa a_a11ir. Prism (UnBounded a_a11ir) (UnBounded a_aZCa) a_a11ir a_aZCa
-_MaxInfinity :: forall a_aZCa. Prism' (UnBounded a_aZCa) ()
+unUnBounded :: forall a_aZEm a_a11hK. Traversal (UnBounded a_aZEm) (UnBounded a_a11hK) a_aZEm a_a11hK
+_MinInfinity :: forall a_aZEm. Prism' (UnBounded a_aZEm) ()
+_Val :: forall a_aZEm a_a11kD. Prism (UnBounded a_a11kD) (UnBounded a_aZEm) a_a11kD a_aZEm
+_MaxInfinity :: forall a_aZEm. Prism' (UnBounded a_aZEm) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
