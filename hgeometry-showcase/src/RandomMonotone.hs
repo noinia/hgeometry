@@ -21,8 +21,8 @@ import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.Maybe                   (catMaybes)
 import           Data.Ratio                   ((%))
 import qualified Data.Vector.Circular         as CV
-import           Data.Vinyl
-import           Data.Vinyl.CoRec
+import           Data.Vinyl                   (Rec (RNil, (:&)))
+import           Data.Vinyl.CoRec             (Handler (H), match)
 import           Graphics.SvgTree             (Cap (..), LineJoin (..), strokeLineCap)
 import           Reanimate
 
