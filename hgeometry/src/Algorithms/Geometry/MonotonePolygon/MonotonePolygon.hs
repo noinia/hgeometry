@@ -105,11 +105,7 @@ granularity :: Integer
 granularity = 10000000
 
 toTheLeft :: Point 2 Rational :+ () -> Point 2 Rational :+ () -> Point 2 Rational :+ () -> Bool
-toTheLeft min max x = Data.Geometry.Point.Orientation.Degenerate.ccw a b c == CCW
-    where
-        a = _core min
-        b = _core max
-        c = _core x
+toTheLeft min max x = Data.Geometry.Point.Orientation.Degenerate.ccw' min max x == CCW
 
 createRandomPoint :: RandomGen g => Rand g (Point 2 Rational)
 createRandomPoint = do
