@@ -6,32 +6,42 @@ import           Algorithms.Geometry.MonotonePolygon.MonotonePolygon
 import           Control.Lens
 import           Control.Monad.Random
 import           Data.Ext
+import qualified Data.Foldable                                       as F
+import           Data.Geometry.Line                                  (Line (..))
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import           Data.Geometry.Polygon as P
+import           Data.Geometry.Polygon                               as P
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Transformation
-import Data.Geometry.Vector
+import           Data.Geometry.Vector
 import           Data.Hashable
+import           Data.Intersection
 import qualified Data.List.NonEmpty                                  as NonEmpty
+import           Data.Maybe
 import qualified Data.Vector.Circular                                as CV
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
 import           Graphics.SvgTree                                    (Cap (..),
                                                                       LineJoin (..),
                                                                       strokeLineCap)
 import           Reanimate
 
 import           Common
-import Data.RealNumber.Rational
+import           Data.RealNumber.Rational
 
 type R = Rational -- RealNumber 5
 
+direction = Vector2 1 0
+p = pAtCenter $
+    scaleUniformlyBy (screenHeight*0.9) $
+    evalRand (randomMonotone 10 direction) (mkStdGen seed)
+
 randomMonotoneShowcase :: Animation
 randomMonotoneShowcase = scene $ do
-  let direction = Vector2 1 0
-      p = scaleUniformlyBy (screenTop*0.9) $
-        evalRand (randomMonotone 4 direction) (mkStdGen seed)
-      pts = map _core $ toPoints p
+  let pts = map _core $ toPoints p'
       minP = P.minimumBy (cmpExtreme direction) p
       maxP = P.maximumBy (cmpExtreme direction) p
+      Just p' = P.findRotateTo (==minP) p
   adjustZ (+2) $ newSpriteSVG_ $ mkGroup $ map ppPoint [_core minP, _core maxP]
   wait 1
   adjustZ succ $ newSpriteSVG_ $ mkGroup $ map ppPoint pts
@@ -39,6 +49,26 @@ randomMonotoneShowcase = scene $ do
   path <- newPath
   forM_ pts $ \pt -> pushPath path pt
   pushPath path (Prelude.head pts)
+  forM_ pts $ \pt -> do
+    newSpriteSVG $ withStrokeColorPixel black $ mkGroup
+      [ ppLine pt iPt
+      | iPt <- intersectionsAt p' direction pt
+      ]
+  wait 1
+
+intersectionsAt :: SimplePolygon () R -> Vector 2 R -> Point 2 R -> [Point 2 R]
+intersectionsAt p direction pt = catMaybes
+  [ match (Data.Intersection.intersect edge line) $
+           H (\NoIntersection -> Nothing)
+        :& H (\pt -> Just pt)
+        -- This happens when an edge is parallel with the given direction.
+        -- I think it's correct to count it as a single intersection.
+        :& H (\LineSegment{} -> Nothing)
+        :& RNil
+  | edge <- F.toList $ outerBoundaryEdges p ]
+  where
+    line = Line pt (rot90 direction)
+    rot90 (Vector2 x y) = Vector2 (-y) x
 
 newPath :: Scene s (Var s [Point 2 R])
 newPath = do

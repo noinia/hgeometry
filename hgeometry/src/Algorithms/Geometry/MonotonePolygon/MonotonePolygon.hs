@@ -44,7 +44,8 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
         :& H (\LineSegment{} -> 1)
         :& RNil
       where
-        line = Line pt direction
+        line = Line pt (rot90 direction)
+        rot90 (Vector2 x y) = Vector2 (-y) x
 
 {- Algorithm overview:
 
