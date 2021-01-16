@@ -8,14 +8,14 @@
 --------------------------------------------------------------------------------
 module Algorithms.Graph.DFS where
 
-import           Control.Monad.ST (ST,runST)
+import           Control.Monad.ST            (ST, runST)
 import           Data.Maybe
 import           Data.PlanarGraph
 import           Data.Tree
-import qualified Data.Vector as V
-import qualified Data.Vector.Generic as GV
+import qualified Data.Vector                 as V
+import qualified Data.Vector.Generic         as GV
 import qualified Data.Vector.Unboxed.Mutable as UMV
-
+import qualified Data.IntSet as IntSet
 
 -- | DFS on a planar graph.
 --
@@ -58,3 +58,20 @@ dfs' g start = runST $ do
                    False -> do
                               visit bv u
                               Just . Node u . catMaybes <$> mapM (dfs'' bv) (neighs u)
+
+-- | DFS, from a given vertex, on a graph in AdjacencyLists representation. Cycles are not removed.
+-- If your graph may contain cycles, see 'dfsFilterCycles'.
+--
+-- Running time: \(O(k)\), where \(k\) is the number of nodes consumed.
+dfsSensitive :: forall s w. (VertexId s w -> [VertexId s w]) -> VertexId s w -> Tree (VertexId s w)
+dfsSensitive neighs u = Node u $ map (dfsSensitive neighs) (neighs u)
+
+-- | Remove infinite cycles from a DFS search tree.
+dfsFilterCycles :: Tree (VertexId s w) -> Tree (VertexId s w)
+dfsFilterCycles = worker IntSet.empty
+  where
+    worker seen (Node root forest) = Node root
+      [ Node (VertexId v) (map (worker (IntSet.insert v seen)) sub)
+      | Node (VertexId v) sub <- forest
+      , v `IntSet.notMember` seen
+      ]

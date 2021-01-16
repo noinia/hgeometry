@@ -8,6 +8,8 @@ import ClosestPair (closestPairShowcase)
 import Common
 import ConvexHull  (convexHullShowcase)
 import BentleyOttmann
+import FastVisibility
+import SSSP
 
 import Reanimate
 
@@ -15,10 +17,12 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    "convexhull":rest     -> withArgs rest $ runReanimate convexHullShowcase
-    "closestpair":rest    -> withArgs rest $ runReanimate closestPairShowcase
-    "bentleyottmann":rest -> withArgs rest $ runReanimate bentleyOttmannShowcase
-    _                     -> printUsage
+    "sssp":rest            -> withArgs rest $ runReanimate ssspMulti
+    "convexhull":rest      -> withArgs rest $ runReanimate convexHullShowcase
+    "closestpair":rest     -> withArgs rest $ runReanimate closestPairShowcase
+    "bentleyottmann":rest  -> withArgs rest $ runReanimate bentleyOttmannShowcase
+    "fast_visibility":rest -> withArgs rest $ runReanimate fastVisibilityShowcase
+    _                      -> printUsage
 
 runReanimate :: Animation -> IO ()
 runReanimate animation = reanimate $

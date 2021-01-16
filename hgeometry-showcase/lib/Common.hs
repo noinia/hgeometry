@@ -104,7 +104,7 @@ rootColor :: PixelRGBA8
 rootColor = green
 
 nodeColor :: PixelRGBA8
-nodeColor = PixelRGBA8 0xFF 0xFF 0xFF 0xFF -- polyColorP -- "white"
+nodeColor = black -- PixelRGBA8 0xFF 0xFF 0xFF 0xFF -- polyColorP -- "white"
 
 nodeRadius :: Double
 nodeRadius = 0.2
@@ -130,14 +130,14 @@ ppPolygonBody color p = withFillOpacity 1 $
   | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
-ppPolygonNodes :: (Real r) => SimplePolygon p r -> SVG
-ppPolygonNodes p = mkGroup $
-  map (ppPolygonNode p) [0 .. size p-1]
+ppPolygonNodes :: (Real r) => PixelRGBA8 -> SimplePolygon p r -> SVG
+ppPolygonNodes color p = mkGroup $
+  map (ppPolygonNode color p) [0 .. size p-1]
 
-ppPolygonNode :: (Real r) => SimplePolygon p r -> Int -> SVG
-ppPolygonNode p idx =
+ppPolygonNode :: (Real r) => PixelRGBA8 -> SimplePolygon p r -> Int -> SVG
+ppPolygonNode color p idx =
   withFillColorPixel outlineColor $
-  withStrokeColorPixel nodeColor $
+  withStrokeColorPixel color $
   let Point2 x y = realToFrac <$> p^.outerVertex idx.core
   in translate x y $ mkCircle nodeRadius
 
@@ -150,6 +150,16 @@ ppSSSP p = ppSSSP' tree p'
 ppSSSP' :: Real r => SSSP -> SimplePolygon p r -> SVG
 ppSSSP' tree p = mkGroup $
   map (ppPathTo tree p) [1 .. size p - 1]
+
+ppLineSegment :: Real r => LineSegment 2 p r -> SVG
+ppLineSegment (LineSegment' a b) = ppLine (a^.core) (b^.core)
+
+ppLine :: Real r => Point 2 r -> Point 2 r -> SVG
+ppLine a b =
+    mkLine (x1,y1) (x2,y2)
+  where
+    Point2 x1 y1 = realToFrac <$> a
+    Point2 x2 y2 = realToFrac <$> b
 
 ppPathTo :: (Real r) => SSSP -> SimplePolygon p r -> Int -> SVG
 ppPathTo t p nth = withFillOpacity 0 $ withStrokeColorPixel pathColor $ mkLinePath
