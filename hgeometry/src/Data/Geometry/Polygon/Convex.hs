@@ -681,7 +681,7 @@ randomBetween n vMax = worker (n-1) IS.empty
     gen from (x:xs) = (x-from) : gen x xs
     worker 0 seen = pure (VU.fromList (gen 0 $ IS.elems seen))
     worker i seen = do
-      v <- liftRand (randomR (1, vMax-1))
+      v <- getRandomR (1, vMax-1)
       if IS.member v seen
         then worker i seen
         else worker (i-1) (IS.insert v seen)

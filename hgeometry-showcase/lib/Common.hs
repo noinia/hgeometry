@@ -223,7 +223,7 @@ lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
 genPoint :: (RandomGen g, Random r, Fractional r) => Rand g (Point 2 r)
 genPoint = Point2 <$> r <*> r
   where
-    r = liftRand $ randomR (screenBottom, screenTop)
+    r = getRandomR (screenBottom, screenTop)
 
 genPoints :: (RandomGen g, Random r, Fractional r) => Int -> Rand g [Point 2 r]
 genPoints n = replicateM n genPoint

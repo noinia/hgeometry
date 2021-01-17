@@ -65,11 +65,11 @@ instance KnownNat p => Arbitrary (RealNumber p) where
 instance Random (RealNumber p) where
   -- Generate a random number between a and b with 'maxBound `div` 2 :: Int' discrete increments.
   randomR (a,b) = runRand $ do
-    v <- liftRand random
+    v <- getRandom
     pure $ (b-a)*abs v + a
   -- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.
   random = runRand $ do
-    v <- liftRand random
+    v <- getRandom
     let fromInt :: Int -> Integer; fromInt = fromIntegral
     pure $ RealNumber $ fromInt v % fromInt maxBound
 
