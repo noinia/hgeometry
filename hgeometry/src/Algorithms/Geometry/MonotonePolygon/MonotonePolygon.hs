@@ -2,6 +2,7 @@ module Algorithms.Geometry.MonotonePolygon.MonotonePolygon
   ( isMonotone
   , randomMonotone
   , randomMonotoneDirected
+  , randomMonotoneFrom
   ) where
 
 import           Control.Monad.Random
@@ -64,31 +65,24 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
     down through the points that are decreasing in the direction of the vector.
 -}
 -- | \( O(n \log n) \)
-randomMonotone :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
-randomMonotone nVertices direction = do
-    -- 1, skip 2 in this function bc `direction` is given
+randomMonotone :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
+randomMonotone nVertices = do
     points <- replicateM nVertices createRandomPoint
-    -- 3
-    let 
-        specialPoints = map (\x -> x :+ ()) points
-        min = Data.List.minimumBy (cmpExtreme direction) specialPoints
-        max = Data.List.maximumBy (cmpExtreme direction) specialPoints
-        -- 4
-        pointsWithoutExtremes = filter (\x -> x /= min && x /= max) specialPoints
-        -- 5, 6
-        (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (toTheLeft min max) pointsWithoutExtremes
-        leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
-        rightHalf = reverse (sortBy (cmpExtreme direction) rightHalfUnsorted)
-    return (fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf))
+    direction <- generateRandomVector2
+    return (randomMonotoneFrom direction points)
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
-randomMonotoneDirected :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
-randomMonotoneDirected nVertices = do
+randomMonotoneDirected :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
+randomMonotoneDirected nVertices direction = do
     points <- replicateM nVertices createRandomPoint
-    direction <- generateRandomVector2
-    let 
-        specialPoints = map (\x -> x :+ ()) points
+    return (randomMonotoneFrom direction points)        
+
+-- General fuunction to create a monotone polygon
+randomMonotoneFrom :: Vector 2 Rational -> [Point 2 Rational] -> SimplePolygon () Rational
+randomMonotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
+    where
+        specialPoints = map (\x -> x :+ ()) vertices
         min = Data.List.minimumBy (cmpExtreme direction) specialPoints
         max = Data.List.maximumBy (cmpExtreme direction) specialPoints
         -- 4
@@ -97,24 +91,26 @@ randomMonotoneDirected nVertices = do
         (leftHalfUnsorted,rightHalfUnsorted) = Data.List.partition (toTheLeft min max) pointsWithoutExtremes
         leftHalf = sortBy (cmpExtreme direction) leftHalfUnsorted
         rightHalf = reverse (sortBy (cmpExtreme direction) rightHalfUnsorted)
-    return (fromPoints ([min] ++ leftHalf ++ [max] ++ rightHalf))
 
 -------------------------------------------------------------------------------------------------
 -- helper functions
 
+-- constant
 granularity :: Integer
 granularity = 10000000
 
+-- for partitioning points
 toTheLeft :: Point 2 Rational :+ () -> Point 2 Rational :+ () -> Point 2 Rational :+ () -> Bool
 toTheLeft min max x = Data.Geometry.Point.Orientation.Degenerate.ccw' min max x == CCW
 
+-- create a single random point
 createRandomPoint :: RandomGen g => Rand g (Point 2 Rational)
 createRandomPoint = do
     x <- liftRand $ randomR (0, granularity)
     y <- liftRand $ randomR (0, granularity)
     pure $ Point2 (x % granularity) (y % granularity)
 
-
+-- create a random vector 2 for direction
 generateRandomVector2 :: RandomGen g => Rand g (Vector 2 Rational)
 generateRandomVector2 = do
     a <- liftRand $ randomR(0, granularity)
