@@ -2,7 +2,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module RandomMonotone (randomMonotoneShowcase ) where
 
-import Algorithms.Geometry.MonotonePolygon.MonotonePolygon (randomMonotone)
+import Algorithms.Geometry.MonotonePolygon.MonotonePolygon (randomMonotoneDirected)
 
 import           Control.Lens                 ((&), (.~), (^.))
 import           Control.Monad.Random
@@ -13,13 +13,14 @@ import           Data.Geometry.LineSegment    (LineSegment (LineSegment))
 import           Data.Geometry.Point          (Point (Point2), squaredEuclideanDist)
 import           Data.Geometry.Polygon        as P
 import           Data.Geometry.Transformation (scaleUniformlyBy)
-import           Data.Geometry.Vector         (Vector, pattern Vector2)
+import           Data.Geometry.Vector         (Vector, pattern Vector2, quadrance)
 import           Data.Hashable                (Hashable (hash))
 import           Data.Intersection            (IsIntersectableWith (intersect),
                                                NoIntersection (NoIntersection))
 import qualified Data.List.NonEmpty           as NonEmpty
 import           Data.Maybe                   (catMaybes)
 import           Data.Ratio                   ((%))
+import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular         as CV
 import           Data.Vinyl                   (Rec (RNil, (:&)))
 import           Data.Vinyl.CoRec             (Handler (H), match)
@@ -28,7 +29,7 @@ import           Reanimate
 
 import Common
 
-type R = Rational -- RealNumber 5
+type R = RealNumber 5
 
 {- Animation overview:
 * Start with N random points.
@@ -132,15 +133,16 @@ monotonePolygons :: [(Vector 2 R, SimplePolygon () R)]
 monotonePolygons = flip evalRand (mkStdGen seed) $
   replicateM nPolygons $ do
     dir <- generateRandomVector2
-    p <- randomMonotone nPoints dir
+    p <- randomMonotoneDirected nPoints dir
     return (dir, pAtCenter $ scaleUniformlyBy (screenHeight*0.9) p)
 
 
-generateRandomVector2 :: RandomGen g => Rand g (Vector 2 Rational)
+generateRandomVector2 :: (RandomGen g, Random r, Eq r, Num r) => Rand g (Vector 2 r)
 generateRandomVector2 = do
-    a <- liftRand $ randomR(-granularity, granularity)
-    b <- liftRand $ randomR(-granularity, granularity)
-    pure $ Vector2 (a % granularity) (b % granularity)
+    v <- getRandom
+    if (quadrance v==0)
+      then generateRandomVector2
+      else pure v
 
 ppVertices :: Real r => [Point 2 r] -> SVG
 ppVertices = mkGroup . map ppPoint
@@ -157,4 +159,3 @@ ppMarker (Point2 x y) =
   withFillColorPixel red $
   translate (realToFrac x) (realToFrac y) $
   mkCircle (nodeRadius*0.25)
-

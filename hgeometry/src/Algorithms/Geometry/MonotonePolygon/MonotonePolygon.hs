@@ -65,7 +65,7 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
     down through the points that are decreasing in the direction of the vector.
 -}
 -- | \( O(n \log n) \)
-randomMonotone :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
+randomMonotone :: (RandomGen g, Random r, Ord r, Num r) => Int -> Rand g (SimplePolygon () r)
 randomMonotone nVertices = do
     points <- replicateM nVertices createRandomPoint
     direction <- generateRandomVector2
@@ -73,13 +73,14 @@ randomMonotone nVertices = do
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
-randomMonotoneDirected :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
+randomMonotoneDirected :: (RandomGen g, Random r, Ord r, Num r)
+  => Int -> Vector 2 r -> Rand g (SimplePolygon () r)
 randomMonotoneDirected nVertices direction = do
     points <- replicateM nVertices createRandomPoint
     return (monotoneFrom direction points)        
 
 -- General fuunction to create a monotone polygon
-monotoneFrom :: Vector 2 Rational -> [Point 2 Rational] -> SimplePolygon () Rational
+monotoneFrom :: (Ord r, Num r) => Vector 2 r -> [Point 2 r] -> SimplePolygon () r
 monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
     where
         specialPoints = map (\x -> x :+ ()) vertices
@@ -95,25 +96,18 @@ monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ lef
 -------------------------------------------------------------------------------------------------
 -- helper functions
 
--- constant
-granularity :: Integer
-granularity = 10000000
-
 -- for partitioning points
-toTheLeft :: Point 2 Rational :+ () -> Point 2 Rational :+ () -> Point 2 Rational :+ () -> Bool
+toTheLeft :: (Ord r, Num r) => Point 2 r :+ () -> Point 2 r :+ () -> Point 2 r :+ () -> Bool
 toTheLeft min max x = Data.Geometry.Point.Orientation.Degenerate.ccw' min max x == CCW
 
 -- create a single random point
-createRandomPoint :: RandomGen g => Rand g (Point 2 Rational)
-createRandomPoint = do
-    x <- liftRand $ randomR (0, granularity)
-    y <- liftRand $ randomR (0, granularity)
-    pure $ Point2 (x % granularity) (y % granularity)
+createRandomPoint :: (RandomGen g, Random r) => Rand g (Point 2 r)
+createRandomPoint = getRandom
 
 -- create a random vector 2 for direction
-generateRandomVector2 :: RandomGen g => Rand g (Vector 2 Rational)
+generateRandomVector2 :: (RandomGen g, Random r, Eq r, Num r) => Rand g (Vector 2 r)
 generateRandomVector2 = do
-    a <- liftRand $ randomR(0, granularity)
-    b <- liftRand $ randomR(0, granularity)
-    pure $ Vector2 (a % granularity) (b % granularity)
-
+    v <- getRandom
+    if (quadrance v==0)
+      then generateRandomVector2
+      else pure v
