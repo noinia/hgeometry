@@ -2,7 +2,7 @@ module Algorithms.Geometry.MonotonePolygon.MonotonePolygon
   ( isMonotone
   , randomMonotone
   , randomMonotoneDirected
-  , randomMonotoneFrom
+  , monotoneFrom
   ) where
 
 import           Control.Monad.Random
@@ -79,8 +79,8 @@ randomMonotoneDirected nVertices direction = do
     return (randomMonotoneFrom direction points)        
 
 -- General fuunction to create a monotone polygon
-randomMonotoneFrom :: Vector 2 Rational -> [Point 2 Rational] -> SimplePolygon () Rational
-randomMonotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
+monotoneFrom :: Vector 2 Rational -> [Point 2 Rational] -> SimplePolygon () Rational
+monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
     where
         specialPoints = map (\x -> x :+ ()) vertices
         min = Data.List.minimumBy (cmpExtreme direction) specialPoints
