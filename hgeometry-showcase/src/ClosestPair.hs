@@ -15,6 +15,7 @@ import           Data.Geometry.Transformation (scaleUniformlyBy)
 import           Data.Geometry.Vector         (Affine ((.+^), (.-^)), (^/))
 import           Data.Hashable                (Hashable (hash))
 import qualified Data.LSeq                    as LSeq
+import           Data.RealNumber.Rational
 import qualified Data.Vector.Circular         as CV
 import           Linear.V2                    (V2 (V2), unangle)
 import           Reanimate                    (Animation, SVG, animate, applyE, curveS,
@@ -27,6 +28,8 @@ import           Reanimate                    (Animation, SVG, animate, applyE, 
 import           Reanimate.Animation          (Sync (SyncFreeze))
 
 import Common (black, genPoints, green, lerpPoint, nodeRadius)
+
+type R = RealNumber 10
 
 -- closestPair :: (Ord r, Num r) => LSeq 2 (Point 2 r :+ p) -> Two (Point 2 r :+ p)
 
@@ -46,11 +49,11 @@ closestPairShowcase = scene $ do
       & applyE (overEnding 0.2 fadeOutE)
     destroySprite s
 
-animateTransition :: [(Point 2 Rational, Point 2 Rational)] -> Animation
+animateTransition :: [(Point 2 R, Point 2 R)] -> Animation
 animateTransition pairs = animate $ \t ->
   showPoints [ lerpPoint t b a | (a,b) <- pairs ]
 
-showPair :: [Point 2 Rational] -> Animation
+showPair :: [Point 2 R] -> Animation
 showPair pts = animate $ \t ->
     withStrokeColorPixel black $
     withFillOpacity 0 $
@@ -72,7 +75,7 @@ unanglePoint a b = unangle (V2 x y)
   where
     Point2 x y = a .-^ toVec b
 
-showPoints :: [Point 2 Rational] -> SVG
+showPoints :: [Point 2 R] -> SVG
 showPoints = mkGroup . map ppPoint
 
 seed :: Int
@@ -84,7 +87,7 @@ nSets = 10
 nPoints :: Int
 nPoints = 10
 
-points :: CV.CircularVector [Point 2 Rational]
+points :: CV.CircularVector [Point 2 R]
 points = CV.unsafeFromList $ map (map $ scaleUniformlyBy 0.9) $ flip evalRand (mkStdGen seed) $
   replicateM nSets (genPoints nPoints)
 

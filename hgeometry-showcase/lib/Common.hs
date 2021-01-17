@@ -220,22 +220,15 @@ lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
 ------------------------------------------------------------------
 -- Random data
 
-granularity :: Integer
-granularity = 10000000
+genPoint :: (RandomGen g, Random r, Fractional r) => Rand g (Point 2 r)
+genPoint = Point2 <$> r <*> r
+  where
+    r = liftRand $ randomR (screenBottom, screenTop)
 
--- Random point between screenTop/screenBottom.
-genPoint :: RandomGen g => Rand g (Point 2 Rational)
-genPoint = do
-  x <- liftRand $ randomR (0, granularity)
-  y <- liftRand $ randomR (0, granularity)
-  pure $ Point2
-    ((x % granularity) * screenHeight - screenTop)
-    ((y % granularity) * screenHeight - screenTop)
-
-genPoints :: RandomGen g => Int -> Rand g [Point 2 Rational]
+genPoints :: (RandomGen g, Random r, Fractional r) => Int -> Rand g [Point 2 r]
 genPoints n = replicateM n genPoint
 
-genLineSegment :: RandomGen g => Rand g (LineSegment 2 () Rational)
+genLineSegment :: (RandomGen g, Random r, Fractional r) => Rand g (LineSegment 2 () r)
 genLineSegment = do
   a <- genPoint
   b <- genPoint

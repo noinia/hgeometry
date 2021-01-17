@@ -18,10 +18,12 @@ import Data.Aeson
 import Data.Data
 import Data.Fixed
 import Data.Hashable
-import Data.List (dropWhileEnd)
-import GHC.Generics (Generic(..))
+import Data.List       (dropWhileEnd)
+import GHC.Generics    (Generic (..))
 import GHC.TypeLits
-import Test.QuickCheck (Arbitrary(..))
+import Test.QuickCheck (Arbitrary (..))
+import System.Random
+import Data.Ratio
 
 --------------------------------------------------------------------------------
 
@@ -59,6 +61,18 @@ instance KnownNat p => Read (RealNumber p) where
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
 
+
+instance Random (RealNumber p) where
+  -- Generate a random number between a and b with 'maxBound `div` 2 :: Int' discrete increments.
+  randomR (a,b) g =
+    let (v, g') = random g
+    in ((b-a)*abs v + a, g')
+  -- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.
+  random g =
+    let (v, g') = random g
+        fromInt :: Int -> Integer
+        fromInt = fromIntegral
+    in (RealNumber $ fromInt v % fromInt maxBound, g')
 
 --------------------------------------------------------------------------------
 
