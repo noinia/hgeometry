@@ -69,14 +69,14 @@ randomMonotone :: RandomGen g => Int -> Rand g (SimplePolygon () Rational)
 randomMonotone nVertices = do
     points <- replicateM nVertices createRandomPoint
     direction <- generateRandomVector2
-    return (randomMonotoneFrom direction points)
+    return (monotoneFrom direction points)
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
 randomMonotoneDirected :: RandomGen g => Int -> Vector 2 Rational -> Rand g (SimplePolygon () Rational)
 randomMonotoneDirected nVertices direction = do
     points <- replicateM nVertices createRandomPoint
-    return (randomMonotoneFrom direction points)        
+    return (monotoneFrom direction points)        
 
 -- General fuunction to create a monotone polygon
 monotoneFrom :: Vector 2 Rational -> [Point 2 Rational] -> SimplePolygon () Rational
