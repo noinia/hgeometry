@@ -2643,6 +2643,7 @@ instance GHC.TypeNats.KnownNat p => GHC.Show.Show (Data.RealNumber.Rational.Real
 instance GHC.TypeNats.KnownNat p => Data.Fixed.HasResolution (Data.RealNumber.Rational.NatPrec p)
 instance GHC.TypeNats.KnownNat p => GHC.Read.Read (Data.RealNumber.Rational.RealNumber p)
 instance GHC.TypeNats.KnownNat p => Test.QuickCheck.Arbitrary.Arbitrary (Data.RealNumber.Rational.RealNumber p)
+instance System.Random.Random (Data.RealNumber.Rational.RealNumber p)
 
 
 module Data.Sequence.Util
@@ -3073,10 +3074,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZEm a_a11hK. Traversal (UnBounded a_aZEm) (UnBounded a_a11hK) a_aZEm a_a11hK
-_MinInfinity :: forall a_aZEm. Prism' (UnBounded a_aZEm) ()
-_Val :: forall a_aZEm a_a11kD. Prism (UnBounded a_a11kD) (UnBounded a_aZEm) a_a11kD a_aZEm
-_MaxInfinity :: forall a_aZEm. Prism' (UnBounded a_aZEm) ()
+unUnBounded :: forall a_aZRV a_a11vj. Traversal (UnBounded a_aZRV) (UnBounded a_a11vj) a_aZRV a_a11vj
+_MinInfinity :: forall a_aZRV. Prism' (UnBounded a_aZRV) ()
+_Val :: forall a_aZRV a_a11yc. Prism (UnBounded a_a11yc) (UnBounded a_aZRV) a_a11yc a_aZRV
+_MaxInfinity :: forall a_aZRV. Prism' (UnBounded a_aZRV) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   

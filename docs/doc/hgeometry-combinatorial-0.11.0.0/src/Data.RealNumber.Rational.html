@@ -18,25 +18,27 @@
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Fixed</span></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Hashable</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">dropWhileEnd</span></span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">dropWhileEnd</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Test.QuickCheck</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Random</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Ratio</span></span><span>
 </span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-comment">-- | Real Numbers represented using Rational numbers. The number type</span><span>
-</span><span id="line-29"></span><span class="hs-comment">-- itself is exact in the sense that we can represent any rational</span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- number.</span><span>
-</span><span id="line-31"></span><span class="hs-comment">--</span><span>
-</span><span id="line-32"></span><span class="hs-comment">-- The parameter, a natural number, represents the precision (in</span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- number of decimals behind the period) with which we display the</span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- numbers when printing them (using Show).</span><span>
-</span><span id="line-35"></span><span class="hs-comment">--</span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- If the number cannot be displayed exactly a '~' is printed after</span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- the number.</span><span>
-</span><span id="line-38"></span><span id="local-6989586621679328833"><span id="local-6989586621679328834"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="RealNumber"><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328832"><span class="annot"><a href="#local-6989586621679328832"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RealNumber"><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
-</span><span id="line-39"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328827"><span id="local-6989586621679328829"><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; Bool
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- | Real Numbers represented using Rational numbers. The number type</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- itself is exact in the sense that we can represent any rational</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- number.</span><span>
+</span><span id="line-33"></span><span class="hs-comment">--</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- The parameter, a natural number, represents the precision (in</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- number of decimals behind the period) with which we display the</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- numbers when printing them (using Show).</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- If the number cannot be displayed exactly a '~' is printed after</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- the number.</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679329305"><span id="local-6989586621679329306"></span></span><span class="hs-keyword">newtype</span><span> </span><span id="RealNumber"><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679329304"><span class="annot"><a href="#local-6989586621679329304"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RealNumber"><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679329299"><span id="local-6989586621679329301"><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; Bool
 (RealNumber p -&gt; RealNumber p -&gt; Bool)
 -&gt; (RealNumber p -&gt; RealNumber p -&gt; Bool) -&gt; Eq (RealNumber p)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -45,7 +47,7 @@ forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; Bool
 $c/= :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; Bool
 == :: RealNumber p -&gt; RealNumber p -&gt; Bool
 $c== :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328811"><span id="local-6989586621679328813"><span id="local-6989586621679328815"><span id="local-6989586621679328817"><span id="local-6989586621679328819"><span id="local-6989586621679328821"><span id="local-6989586621679328823"><span class="annot"><span class="annottext">Eq (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329283"><span id="local-6989586621679329285"><span id="local-6989586621679329287"><span id="local-6989586621679329289"><span id="local-6989586621679329291"><span id="local-6989586621679329293"><span id="local-6989586621679329295"><span class="annot"><span class="annottext">Eq (RealNumber p)
 Eq (RealNumber p) =&gt;
 (RealNumber p -&gt; RealNumber p -&gt; Ordering)
 -&gt; (RealNumber p -&gt; RealNumber p -&gt; Bool)
@@ -87,7 +89,7 @@ $c&lt; :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; Bool
 compare :: RealNumber p -&gt; RealNumber p -&gt; Ordering
 $ccompare :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; Ordering
 $cp1Ord :: forall (p :: Nat). Eq (RealNumber p)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="%24cRealNumber"><span id="%24tRealNumber"><span id="local-6989586621679328781"><span id="local-6989586621679328783"><span id="local-6989586621679328785"><span id="local-6989586621679328787"><span id="local-6989586621679328789"><span id="local-6989586621679328791"><span id="local-6989586621679328793"><span id="local-6989586621679328795"><span id="local-6989586621679328797"><span id="local-6989586621679328799"><span id="local-6989586621679328801"><span id="local-6989586621679328803"><span id="local-6989586621679328805"><span id="local-6989586621679328807"><span class="annot"><span class="annottext">Typeable (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="%24cRealNumber"><span id="%24tRealNumber"><span id="local-6989586621679329253"><span id="local-6989586621679329255"><span id="local-6989586621679329257"><span id="local-6989586621679329259"><span id="local-6989586621679329261"><span id="local-6989586621679329263"><span id="local-6989586621679329265"><span id="local-6989586621679329267"><span id="local-6989586621679329269"><span id="local-6989586621679329271"><span id="local-6989586621679329273"><span id="local-6989586621679329275"><span id="local-6989586621679329277"><span id="local-6989586621679329279"><span class="annot"><span class="annottext">Typeable (RealNumber p)
 DataType
 Constr
 Typeable (RealNumber p) =&gt;
@@ -299,7 +301,7 @@ KnownNat p =&gt;
 (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
 -&gt; (forall g. g -&gt; c g) -&gt; RealNumber p -&gt; c (RealNumber p)
 $cp1Data :: forall (p :: Nat). KnownNat p =&gt; Typeable (RealNumber p)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328764"><span id="local-6989586621679328766"><span id="local-6989586621679328768"><span id="local-6989586621679328770"><span id="local-6989586621679328772"><span id="local-6989586621679328774"><span id="local-6989586621679328776"><span class="annot"><span class="annottext">Integer -&gt; RealNumber p
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329236"><span id="local-6989586621679329238"><span id="local-6989586621679329240"><span id="local-6989586621679329242"><span id="local-6989586621679329244"><span id="local-6989586621679329246"><span id="local-6989586621679329248"><span class="annot"><span class="annottext">Integer -&gt; RealNumber p
 RealNumber p -&gt; RealNumber p
 RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 (RealNumber p -&gt; RealNumber p -&gt; RealNumber p)
@@ -336,7 +338,7 @@ $c* :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 $c- :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 + :: RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 $c+ :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; RealNumber p
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328756"><span id="local-6989586621679328758"><span id="local-6989586621679328760"><span class="annot"><span class="annottext">Num (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329228"><span id="local-6989586621679329230"><span id="local-6989586621679329232"><span class="annot"><span class="annottext">Num (RealNumber p)
 Num (RealNumber p) =&gt;
 (RealNumber p -&gt; RealNumber p -&gt; RealNumber p)
 -&gt; (RealNumber p -&gt; RealNumber p)
@@ -359,7 +361,7 @@ $crecip :: forall (p :: Nat). RealNumber p -&gt; RealNumber p
 / :: RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 $c/ :: forall (p :: Nat). RealNumber p -&gt; RealNumber p -&gt; RealNumber p
 $cp1Fractional :: forall (p :: Nat). Num (RealNumber p)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Fractional</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328751"><span class="annot"><span class="annottext">Num (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Fractional</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329223"><span class="annot"><span class="annottext">Num (RealNumber p)
 Ord (RealNumber p)
 (Num (RealNumber p), Ord (RealNumber p)) =&gt;
 (RealNumber p -&gt; Rational) -&gt; Real (RealNumber p)
@@ -372,7 +374,7 @@ toRational :: RealNumber p -&gt; Rational
 $ctoRational :: forall (p :: Nat). RealNumber p -&gt; Rational
 $cp2Real :: forall (p :: Nat). Ord (RealNumber p)
 $cp1Real :: forall (p :: Nat). Num (RealNumber p)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679328738"><span id="local-6989586621679328740"><span id="local-6989586621679328742"><span id="local-6989586621679328744"><span id="local-6989586621679328746"><span class="annot"><span class="annottext">Fractional (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679329210"><span id="local-6989586621679329212"><span id="local-6989586621679329214"><span id="local-6989586621679329216"><span id="local-6989586621679329218"><span class="annot"><span class="annottext">Fractional (RealNumber p)
 Real (RealNumber p)
 (Real (RealNumber p), Fractional (RealNumber p)) =&gt;
 (forall b. Integral b =&gt; RealNumber p -&gt; (b, RealNumber p))
@@ -427,7 +429,7 @@ forall (p :: Nat) x. Rep (RealNumber p) x -&gt; RealNumber p
 forall (p :: Nat) x. RealNumber p -&gt; Rep (RealNumber p) x
 $cto :: forall (p :: Nat) x. Rep (RealNumber p) x -&gt; RealNumber p
 $cfrom :: forall (p :: Nat) x. RealNumber p -&gt; Rep (RealNumber p) x
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679328730"><span id="local-6989586621679328732"><span class="annot"><span class="annottext">Int -&gt; RealNumber p -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">Generic</span></span><span class="hs-special">,</span><span id="local-6989586621679329202"><span id="local-6989586621679329204"><span class="annot"><span class="annottext">Int -&gt; RealNumber p -&gt; Int
 RealNumber p -&gt; Int
 (Int -&gt; RealNumber p -&gt; Int)
 -&gt; (RealNumber p -&gt; Int) -&gt; Hashable (RealNumber p)
@@ -438,7 +440,7 @@ hash :: RealNumber p -&gt; Int
 $chash :: forall (p :: Nat). RealNumber p -&gt; Int
 hashWithSalt :: Int -&gt; RealNumber p -&gt; Int
 $chashWithSalt :: forall (p :: Nat). Int -&gt; RealNumber p -&gt; Int
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Hashable</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328721"><span id="local-6989586621679328723"><span id="local-6989586621679328725"><span id="local-6989586621679328727"><span class="annot"><span class="annottext">[RealNumber p] -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Hashable</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329193"><span id="local-6989586621679329195"><span id="local-6989586621679329197"><span id="local-6989586621679329199"><span class="annot"><span class="annottext">[RealNumber p] -&gt; Encoding
 [RealNumber p] -&gt; Value
 RealNumber p -&gt; Encoding
 RealNumber p -&gt; Value
@@ -465,7 +467,7 @@ toEncoding :: RealNumber p -&gt; Encoding
 $ctoEncoding :: forall (p :: Nat). RealNumber p -&gt; Encoding
 toJSON :: RealNumber p -&gt; Value
 $ctoJSON :: forall (p :: Nat). RealNumber p -&gt; Value
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328716"><span id="local-6989586621679328718"><span class="annot"><span class="annottext">Value -&gt; Parser [RealNumber p]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329188"><span id="local-6989586621679329190"><span class="annot"><span class="annottext">Value -&gt; Parser [RealNumber p]
 Value -&gt; Parser (RealNumber p)
 (Value -&gt; Parser (RealNumber p))
 -&gt; (Value -&gt; Parser [RealNumber p]) -&gt; FromJSON (RealNumber p)
@@ -478,11 +480,11 @@ $cparseJSONList :: forall (p :: Nat). Value -&gt; Parser [RealNumber p]
 parseJSON :: Value -&gt; Parser (RealNumber p)
 $cparseJSON :: forall (p :: Nat). Value -&gt; Parser (RealNumber p)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="NatPrec"><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328879"><span class="annot"><a href="#local-6989586621679328879"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NatPrec"><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span></span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span id="local-6989586621679328713"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328713"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasResolution</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328713"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621679328710"><span class="annot"><span class="annottext">resolution :: p (NatPrec p) -&gt; Integer
+</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="NatPrec"><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679329377"><span class="annot"><a href="#local-6989586621679329377"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NatPrec"><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679329185"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329185"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasResolution</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329185"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679329182"><span class="annot"><span class="annottext">resolution :: p (NatPrec p) -&gt; Integer
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">resolution</span></span></span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
@@ -493,20 +495,20 @@ KnownNat n =&gt;
 proxy n -&gt; Integer
 </span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NatPrec p
 forall (p :: Nat). NatPrec p
-</span><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679328713"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span>
-</span><span id="line-47"></span><span id="local-6989586621679328705"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679328700"><span id="local-6989586621679328703"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328705"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328705"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-48"></span><span>  </span><span id="local-6989586621679328698"><span class="annot"><span class="annottext">show :: RealNumber p -&gt; String
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span id="local-6989586621679328696"><span class="annot"><span class="annottext">r :: RealNumber p
-</span><a href="#local-6989586621679328696"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; AsFixed (NatPrec p)
+</span><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-var">NatPrec</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679329185"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679329177"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679329172"><span id="local-6989586621679329175"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329177"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329177"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679329170"><span class="annot"><span class="annottext">show :: RealNumber p -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span id="local-6989586621679329168"><span class="annot"><span class="annottext">r :: RealNumber p
+</span><a href="#local-6989586621679329168"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; AsFixed (NatPrec p)
 forall (p :: Nat).
 KnownNat p =&gt;
 RealNumber p -&gt; AsFixed (NatPrec p)
 </span><a href="Data.RealNumber.Rational.html#asFixed"><span class="hs-identifier hs-var">asFixed</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328696"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-49"></span><span>             </span><span class="annot"><a href="Data.RealNumber.Rational.html#Exact"><span class="hs-identifier hs-type">Exact</span></a></span><span> </span><span id="local-6989586621679328694"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
-</span><a href="#local-6989586621679328694"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; ShowS
+</span><a href="#local-6989586621679329168"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-51"></span><span>             </span><span class="annot"><a href="Data.RealNumber.Rational.html#Exact"><span class="hs-identifier hs-type">Exact</span></a></span><span> </span><span id="local-6989586621679329166"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
+</span><a href="#local-6989586621679329166"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; ShowS
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">dropWhileEnd</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
@@ -525,9 +527,9 @@ forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">(Fixed (NatPrec p) -&gt; String) -&gt; Fixed (NatPrec p) -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p)
-</span><a href="#local-6989586621679328694"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-50"></span><span>             </span><span class="annot"><a href="Data.RealNumber.Rational.html#Lossy"><span class="hs-identifier hs-type">Lossy</span></a></span><span> </span><span id="local-6989586621679328691"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
-</span><a href="#local-6989586621679328691"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679329166"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-52"></span><span>             </span><span class="annot"><a href="Data.RealNumber.Rational.html#Lossy"><span class="hs-identifier hs-type">Lossy</span></a></span><span> </span><span id="local-6989586621679329163"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
+</span><a href="#local-6989586621679329163"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;~&quot;</span></span><span class="hs-special">)</span><span>                                      </span><span class="annot"><span class="annottext">ShowS
 -&gt; (Fixed (NatPrec p) -&gt; String) -&gt; Fixed (NatPrec p) -&gt; String
@@ -537,48 +539,48 @@ forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">(Fixed (NatPrec p) -&gt; String) -&gt; Fixed (NatPrec p) -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p)
-</span><a href="#local-6989586621679328691"><span class="hs-identifier hs-var">p</span></a></span></span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span id="local-6989586621679328690"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679328683"><span id="local-6989586621679328685"><span id="local-6989586621679328687"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328690"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>  </span><span id="local-6989586621679328681"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (RealNumber p)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span id="local-6989586621679328679"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679328679"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Fixed (NatPrec p), String) -&gt; (RealNumber p, String))
+</span><a href="#local-6989586621679329163"><span class="hs-identifier hs-var">p</span></a></span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span id="local-6989586621679329162"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679329155"><span id="local-6989586621679329157"><span id="local-6989586621679329159"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329162"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329162"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679329153"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS (RealNumber p)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span id="local-6989586621679329151"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679329151"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Fixed (NatPrec p), String) -&gt; (RealNumber p, String))
 -&gt; [(Fixed (NatPrec p), String)] -&gt; [(RealNumber p, String)]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(Fixed (NatPrec p), String) -&gt; (RealNumber p, String)
 forall a (p :: Nat).
 Real a =&gt;
 (a, String) -&gt; (RealNumber p, String)
-</span><a href="#local-6989586621679328678"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">([(Fixed (NatPrec p), String)] -&gt; [(RealNumber p, String)])
+</span><a href="#local-6989586621679329150"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">([(Fixed (NatPrec p), String)] -&gt; [(RealNumber p, String)])
 -&gt; (String -&gt; [(Fixed (NatPrec p), String)])
 -&gt; ReadS (RealNumber p)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String -&gt; [(Fixed (NatPrec p), String)]
 forall a. Read a =&gt; Int -&gt; ReadS a
-</span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328690"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679328679"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-54"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-55"></span><span>      </span><span id="local-6989586621679328678"><span class="annot"><span class="annottext">wrap :: (a, String) -&gt; (RealNumber p, String)
-</span><a href="#local-6989586621679328678"><span class="hs-identifier hs-var hs-var">wrap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; RealNumber p
+</span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329162"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679329151"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>      </span><span id="local-6989586621679329150"><span class="annot"><span class="annottext">wrap :: (a, String) -&gt; (RealNumber p, String)
+</span><a href="#local-6989586621679329150"><span class="hs-identifier hs-var hs-var">wrap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; RealNumber p
 forall (p :: Nat). Rational -&gt; RealNumber p
 </span><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; RealNumber p) -&gt; (a -&gt; Rational) -&gt; a -&gt; RealNumber p
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
-</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679328677"><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328677"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679328676"><span class="annot"><span class="annottext">s' :: String
-</span><a href="#local-6989586621679328676"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679328676"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-56"></span><span>                                                 </span><span class="hs-char">'~'</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679328675"><span class="annot"><span class="annottext">s'' :: String
-</span><a href="#local-6989586621679328675"><span class="hs-identifier hs-var">s''</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328677"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679328675"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-57"></span><span>                                                 </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328677"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679328676"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span id="local-6989586621679328674"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679328671"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328674"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328674"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-60"></span><span>  </span><span id="local-6989586621679328669"><span class="annot"><span class="annottext">arbitrary :: Gen (RealNumber p)
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679329149"><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329149"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679329148"><span class="annot"><span class="annottext">s' :: String
+</span><a href="#local-6989586621679329148"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679329148"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-58"></span><span>                                                 </span><span class="hs-char">'~'</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679329147"><span class="annot"><span class="annottext">s'' :: String
+</span><a href="#local-6989586621679329147"><span class="hs-identifier hs-var">s''</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329149"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679329147"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>                                                 </span><span class="hs-identifier">_</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329149"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679329148"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span id="local-6989586621679329146"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679329143"><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329146"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arbitrary</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329146"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679329141"><span class="annot"><span class="annottext">arbitrary :: Gen (RealNumber p)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; RealNumber p
 forall (p :: Nat). KnownNat p =&gt; Fixed (NatPrec p) -&gt; RealNumber p
 </span><a href="Data.RealNumber.Rational.html#fromFixed"><span class="hs-identifier hs-var">fromFixed</span></a></span><span> </span><span class="annot"><span class="annottext">(Fixed (NatPrec p) -&gt; RealNumber p)
@@ -587,14 +589,81 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen (Fixed (NatPrec p))
 forall a. Arbitrary a =&gt; Gen a
 </span><span class="hs-identifier hs-var">arbitrary</span></span></span><span>
-</span><span id="line-61"></span><span>
-</span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span>
-</span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span class="hs-keyword">data</span><span> </span><span id="AsFixed"><span class="annot"><a href="Data.RealNumber.Rational.html#AsFixed"><span class="hs-identifier hs-var">AsFixed</span></a></span></span><span> </span><span id="local-6989586621679328839"><span class="annot"><a href="#local-6989586621679328839"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Exact"><span class="annot"><a href="Data.RealNumber.Rational.html#Exact"><span class="hs-identifier hs-var">Exact</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="annot"><a href="#local-6989586621679328839"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Lossy"><span class="annot"><a href="Data.RealNumber.Rational.html#Lossy"><span class="hs-identifier hs-var">Lossy</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="annot"><a href="#local-6989586621679328839"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679328661"><span id="local-6989586621679328663"><span id="local-6989586621679328665"><span class="annot"><span class="annottext">Int -&gt; AsFixed p -&gt; ShowS
+</span><span id="line-65"></span><span id="local-6989586621679329138"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679329128"><span id="local-6989586621679329130"><span id="local-6989586621679329132"><span id="local-6989586621679329134"><span class="annot"><span class="hs-identifier hs-type">Random</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329138"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- Generate a random number between a and b with 'maxBound `div` 2 :: Int' discrete increments.</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679329126"><span class="annot"><span class="annottext">randomR :: (RealNumber p, RealNumber p) -&gt; g -&gt; (RealNumber p, g)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">randomR</span></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679329124"><span class="annot"><span class="annottext">a :: RealNumber p
+</span><a href="#local-6989586621679329124"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679329123"><span class="annot"><span class="annottext">b :: RealNumber p
+</span><a href="#local-6989586621679329123"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g)
+forall g a. Rand g a -&gt; g -&gt; (a, g)
+</span><span class="hs-identifier hs-var">runRand</span></span><span> </span><span class="annot"><span class="annottext">(Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g))
+-&gt; Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679329121"><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329121"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Rand g (RealNumber p)
+forall (m :: * -&gt; *) a. (MonadRandom m, Random a) =&gt; m a
+</span><span class="hs-identifier hs-var">getRandom</span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">RealNumber p -&gt; Rand g (RealNumber p)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(RealNumber p -&gt; Rand g (RealNumber p))
+-&gt; RealNumber p -&gt; Rand g (RealNumber p)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329123"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; RealNumber p
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329124"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; RealNumber p
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329121"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; RealNumber p
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329124"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-comment">-- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679329117"><span class="annot"><span class="annottext">random :: g -&gt; (RealNumber p, g)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">random</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g)
+forall g a. Rand g a -&gt; g -&gt; (a, g)
+</span><span class="hs-identifier hs-var">runRand</span></span><span> </span><span class="annot"><span class="annottext">(Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g))
+-&gt; Rand g (RealNumber p) -&gt; g -&gt; (RealNumber p, g)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679329115"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679329115"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RandT g Identity Int
+forall (m :: * -&gt; *) a. (MonadRandom m, Random a) =&gt; m a
+</span><span class="hs-identifier hs-var">getRandom</span></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="annot"><a href="#local-6989586621679329114"><span class="hs-identifier hs-type">fromInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">;</span><span> </span><span id="local-6989586621679329114"><span class="annot"><span class="annottext">fromInt :: Int -&gt; Integer
+</span><a href="#local-6989586621679329114"><span class="hs-identifier hs-var hs-var">fromInt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><span class="annottext">RealNumber p -&gt; Rand g (RealNumber p)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(RealNumber p -&gt; Rand g (RealNumber p))
+-&gt; RealNumber p -&gt; Rand g (RealNumber p)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; RealNumber p
+forall (p :: Nat). Rational -&gt; RealNumber p
+</span><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-var">RealNumber</span></a></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; RealNumber p) -&gt; Rational -&gt; RealNumber p
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
+</span><a href="#local-6989586621679329114"><span class="hs-identifier hs-var">fromInt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679329115"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Rational
+forall a. Integral a =&gt; a -&gt; a -&gt; Ratio a
+</span><span class="hs-operator hs-var">%</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
+</span><a href="#local-6989586621679329114"><span class="hs-identifier hs-var">fromInt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+forall a. Bounded a =&gt; a
+</span><span class="hs-identifier hs-var">maxBound</span></span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">data</span><span> </span><span id="AsFixed"><span class="annot"><a href="Data.RealNumber.Rational.html#AsFixed"><span class="hs-identifier hs-var">AsFixed</span></a></span></span><span> </span><span id="local-6989586621679329311"><span class="annot"><a href="#local-6989586621679329311"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Exact"><span class="annot"><a href="Data.RealNumber.Rational.html#Exact"><span class="hs-identifier hs-var">Exact</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="annot"><a href="#local-6989586621679329311"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Lossy"><span class="annot"><a href="Data.RealNumber.Rational.html#Lossy"><span class="hs-identifier hs-var">Lossy</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="annot"><a href="#local-6989586621679329311"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679329106"><span id="local-6989586621679329108"><span id="local-6989586621679329110"><span class="annot"><span class="annottext">Int -&gt; AsFixed p -&gt; ShowS
 [AsFixed p] -&gt; ShowS
 AsFixed p -&gt; String
 (Int -&gt; AsFixed p -&gt; ShowS)
@@ -612,7 +681,7 @@ show :: AsFixed p -&gt; String
 $cshow :: forall p. HasResolution p =&gt; AsFixed p -&gt; String
 showsPrec :: Int -&gt; AsFixed p -&gt; ShowS
 $cshowsPrec :: forall p. HasResolution p =&gt; Int -&gt; AsFixed p -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679328657"><span id="local-6989586621679328659"><span class="annot"><span class="annottext">AsFixed p -&gt; AsFixed p -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679329102"><span id="local-6989586621679329104"><span class="annot"><span class="annottext">AsFixed p -&gt; AsFixed p -&gt; Bool
 (AsFixed p -&gt; AsFixed p -&gt; Bool)
 -&gt; (AsFixed p -&gt; AsFixed p -&gt; Bool) -&gt; Eq (AsFixed p)
 forall p. AsFixed p -&gt; AsFixed p -&gt; Bool
@@ -622,37 +691,37 @@ $c/= :: forall p. AsFixed p -&gt; AsFixed p -&gt; Bool
 == :: AsFixed p -&gt; AsFixed p -&gt; Bool
 $c== :: forall p. AsFixed p -&gt; AsFixed p -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span id="local-6989586621679328840"><span class="annot"><a href="Data.RealNumber.Rational.html#toFixed"><span class="hs-identifier hs-type">toFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328840"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328840"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328840"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-71"></span><span id="toFixed"><span class="annot"><span class="annottext">toFixed :: RealNumber p -&gt; Fixed (NatPrec p)
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span id="local-6989586621679329312"><span class="annot"><a href="Data.RealNumber.Rational.html#toFixed"><span class="hs-identifier hs-type">toFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329312"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329312"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329312"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-84"></span><span id="toFixed"><span class="annot"><span class="annottext">toFixed :: RealNumber p -&gt; Fixed (NatPrec p)
 </span><a href="Data.RealNumber.Rational.html#toFixed"><span class="hs-identifier hs-var hs-var">toFixed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; Fixed (NatPrec p)
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span>
-</span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span id="local-6989586621679328849"><span class="annot"><a href="Data.RealNumber.Rational.html#fromFixed"><span class="hs-identifier hs-type">fromFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328849"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328849"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328849"><span class="hs-identifier hs-type">p</span></a></span></span><span>
-</span><span id="line-74"></span><span id="fromFixed"><span class="annot"><span class="annottext">fromFixed :: Fixed (NatPrec p) -&gt; RealNumber p
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span id="local-6989586621679329347"><span class="annot"><a href="Data.RealNumber.Rational.html#fromFixed"><span class="hs-identifier hs-type">fromFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329347"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fixed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329347"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329347"><span class="hs-identifier hs-type">p</span></a></span></span><span>
+</span><span id="line-87"></span><span id="fromFixed"><span class="annot"><span class="annottext">fromFixed :: Fixed (NatPrec p) -&gt; RealNumber p
 </span><a href="Data.RealNumber.Rational.html#fromFixed"><span class="hs-identifier hs-var hs-var">fromFixed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; RealNumber p
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span id="local-6989586621679328873"><span class="annot"><a href="Data.RealNumber.Rational.html#asFixed"><span class="hs-identifier hs-type">asFixed</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679328873"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328873"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#AsFixed"><span class="hs-identifier hs-type">AsFixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679328873"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-77"></span><span id="asFixed"><span class="annot"><span class="annottext">asFixed :: RealNumber p -&gt; AsFixed (NatPrec p)
-</span><a href="Data.RealNumber.Rational.html#asFixed"><span class="hs-identifier hs-var hs-var">asFixed</span></a></span></span><span> </span><span id="local-6989586621679328656"><span class="annot"><span class="annottext">r :: RealNumber p
-</span><a href="#local-6989586621679328656"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679328655"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
-</span><a href="#local-6989586621679328655"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; Fixed (NatPrec p)
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679329371"><span class="annot"><a href="Data.RealNumber.Rational.html#asFixed"><span class="hs-identifier hs-type">asFixed</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679329371"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329371"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.RealNumber.Rational.html#AsFixed"><span class="hs-identifier hs-type">AsFixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.RealNumber.Rational.html#NatPrec"><span class="hs-identifier hs-type">NatPrec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679329371"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-90"></span><span id="asFixed"><span class="annot"><span class="annottext">asFixed :: RealNumber p -&gt; AsFixed (NatPrec p)
+</span><a href="Data.RealNumber.Rational.html#asFixed"><span class="hs-identifier hs-var hs-var">asFixed</span></a></span></span><span> </span><span id="local-6989586621679329101"><span class="annot"><span class="annottext">r :: RealNumber p
+</span><a href="#local-6989586621679329101"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679329100"><span class="annot"><span class="annottext">p :: Fixed (NatPrec p)
+</span><a href="#local-6989586621679329100"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; Fixed (NatPrec p)
 forall (p :: Nat). KnownNat p =&gt; RealNumber p -&gt; Fixed (NatPrec p)
 </span><a href="Data.RealNumber.Rational.html#toFixed"><span class="hs-identifier hs-var">toFixed</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328656"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">RealNumber p
-</span><a href="#local-6989586621679328656"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; Bool
+</span><a href="#local-6989586621679329101"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">RealNumber p
+</span><a href="#local-6989586621679329101"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">RealNumber p -&gt; RealNumber p -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; RealNumber p
 forall (p :: Nat). KnownNat p =&gt; Fixed (NatPrec p) -&gt; RealNumber p
 </span><a href="Data.RealNumber.Rational.html#fromFixed"><span class="hs-identifier hs-var">fromFixed</span></a></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p)
-</span><a href="#local-6989586621679328655"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; AsFixed (NatPrec p)
+</span><a href="#local-6989586621679329100"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; AsFixed (NatPrec p)
 forall p. Fixed p -&gt; AsFixed p
 </span><a href="Data.RealNumber.Rational.html#Exact"><span class="hs-identifier hs-var">Exact</span></a></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p)
-</span><a href="#local-6989586621679328655"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; AsFixed (NatPrec p)
+</span><a href="#local-6989586621679329100"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p) -&gt; AsFixed (NatPrec p)
 forall p. Fixed p -&gt; AsFixed p
 </span><a href="Data.RealNumber.Rational.html#Lossy"><span class="hs-identifier hs-var">Lossy</span></a></span><span> </span><span class="annot"><span class="annottext">Fixed (NatPrec p)
-</span><a href="#local-6989586621679328655"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-78"></span></pre></body></html>
+</span><a href="#local-6989586621679329100"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-91"></span></pre></body></html>
