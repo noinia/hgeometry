@@ -22,7 +22,7 @@ import Data.List       (dropWhileEnd)
 import GHC.Generics    (Generic (..))
 import GHC.TypeLits
 import Test.QuickCheck (Arbitrary (..))
-import System.Random
+import Control.Monad.Random
 import Data.Ratio
 
 --------------------------------------------------------------------------------
@@ -64,15 +64,14 @@ instance KnownNat p => Arbitrary (RealNumber p) where
 
 instance Random (RealNumber p) where
   -- Generate a random number between a and b with 'maxBound `div` 2 :: Int' discrete increments.
-  randomR (a,b) g =
-    let (v, g') = random g
-    in ((b-a)*abs v + a, g')
+  randomR (a,b) = runRand $ do
+    v <- liftRand random
+    pure $ (b-a)*abs v + a
   -- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.
-  random g =
-    let (v, g') = random g
-        fromInt :: Int -> Integer
-        fromInt = fromIntegral
-    in (RealNumber $ fromInt v % fromInt maxBound, g')
+  random = runRand $ do
+    v <- liftRand random
+    let fromInt :: Int -> Integer; fromInt = fromIntegral
+    pure $ RealNumber $ fromInt v % fromInt maxBound
 
 --------------------------------------------------------------------------------
 
