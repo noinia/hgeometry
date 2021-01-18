@@ -172,11 +172,6 @@ spec = do
   --   forM_ allMultiPolygons' $ \poly -> do
   --     hasSelfIntersections poly `shouldBe` False
   --     isCounterClockwise poly `shouldBe` True
-
-data ShowPoly a b = ShowPoly a b deriving Show
-instance Eq b => Eq (ShowPoly a b) where
-  (ShowPoly _ a) == (ShowPoly _ b) = a == b
-
   -- Hm, is this property always true? What happens when points are all colinear?
   specify "monotone is simple" $
     property $ forAll genMonotone $ \(_dir, mono :: SimplePolygon () R) ->
@@ -184,6 +179,11 @@ instance Eq b => Eq (ShowPoly a b) where
   it "is monotone" $
     property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
       isMonotone dir mono
+
+data ShowPoly a b = ShowPoly a b deriving Show
+instance Eq b => Eq (ShowPoly a b) where
+  (ShowPoly _ a) == (ShowPoly _ b) = a == b
+
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
