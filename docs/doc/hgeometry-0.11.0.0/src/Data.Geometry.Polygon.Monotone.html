@@ -1,0 +1,374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Data.Geometry.Polygon.Monotone</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) 1ndy</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  David Himmelstrup</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A polygon is monotone in a certain direction if rays orthogonal to that</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- direction intersects the polygon at most twice. See</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- &lt;https://en.wikipedia.org/wiki/Monotone_polygon&gt;</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Geometry.Polygon.Monotone</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#isMonotone"><span class="hs-identifier">isMonotone</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomMonotone"><span class="hs-identifier">randomMonotone</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomMonotoneDirected"><span class="hs-identifier">randomMonotoneDirected</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#monotoneFrom"><span class="hs-identifier">monotoneFrom</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier">randomNonZeroVector</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.Random</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>                  </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>             </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier">Line</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html"><span class="hs-identifier">Data.Geometry.Polygon.Core</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Extremes.html"><span class="hs-identifier">Data.Geometry.Polygon.Extremes</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Vector.html"><span class="hs-identifier">Data.Geometry.Vector</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Intersection</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl.CoRec</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>                        </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">max</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">min</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | \( O(n \log n) \)</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--   A polygon is monotone if a straight line in a given direction</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--   cannot have more than two intersections.</span><span>
+</span><span id="line-39"></span><span id="local-6989586621679961345"><span id="local-6989586621679961346"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#isMonotone"><span class="hs-identifier hs-type">isMonotone</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679961346"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961346"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961346"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961345"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679961346"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Check for each vertex that the number of intersections with the</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- line starting at the vertex and going out in the given direction</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- intersects with the edges of the polygon no more than 2 times.</span><span>
+</span><span id="line-43"></span><span id="isMonotone"><span class="annot"><span class="annottext">isMonotone :: Vector 2 r -&gt; SimplePolygon p r -&gt; Bool
+</span><a href="Data.Geometry.Polygon.Monotone.html#isMonotone"><span class="hs-identifier hs-var hs-var">isMonotone</span></a></span></span><span> </span><span id="local-6989586621679961344"><span class="annot"><span class="annottext">direction :: Vector 2 r
+</span><a href="#local-6989586621679961344"><span class="hs-identifier hs-var">direction</span></a></span></span><span> </span><span id="local-6989586621679961343"><span class="annot"><span class="annottext">p :: SimplePolygon p r
+</span><a href="#local-6989586621679961343"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Bool) -&gt; [Point 2 r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679961341"><span class="hs-identifier hs-var">isMonotoneAt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ p) -&gt; Point 2 r) -&gt; [Point 2 r :+ p] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; Point 2 r
+forall core extra. (core :+ extra) -&gt; core
+</span><span class="hs-identifier hs-var">_core</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r :+ p] -&gt; [Point 2 r])
+-&gt; [Point 2 r :+ p] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [Point 2 r :+ p]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [Point 2 r :+ p]
+</span><a href="Data.Geometry.Polygon.Core.html#toPoints"><span class="hs-identifier hs-var">toPoints</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679961343"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679961341"><span class="annot"><span class="annottext">isMonotoneAt :: Point 2 r -&gt; Bool
+</span><a href="#local-6989586621679961341"><span class="hs-identifier hs-var hs-var">isMonotoneAt</span></a></span></span><span> </span><span id="local-6989586621679961338"><span class="annot"><span class="annottext">pt :: Point 2 r
+</span><a href="#local-6989586621679961338"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-46"></span><span>      </span><span class="annot"><span class="annottext">[Integer] -&gt; Integer
+forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">sum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Integer) -&gt; [LineSegment 2 p r] -&gt; [Integer]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; LineSegment 2 p r -&gt; Integer
+</span><a href="#local-6989586621679961336"><span class="hs-identifier hs-var">intersectionsThrough</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679961338"><span class="hs-identifier hs-var">pt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CircularVector (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(CircularVector (LineSegment 2 p r) -&gt; [LineSegment 2 p r])
+-&gt; CircularVector (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; CircularVector (LineSegment 2 p r)
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; CircularVector (LineSegment 2 p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryEdges"><span class="hs-identifier hs-var">outerBoundaryEdges</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621679961343"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679961336"><span class="annot"><span class="annottext">intersectionsThrough :: Point 2 r -&gt; LineSegment 2 p r -&gt; Integer
+</span><a href="#local-6989586621679961336"><span class="hs-identifier hs-var hs-var">intersectionsThrough</span></a></span></span><span> </span><span id="local-6989586621679961332"><span class="annot"><span class="annottext">pt :: Point 2 r
+</span><a href="#local-6989586621679961332"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span id="local-6989586621679961331"><span class="annot"><span class="annottext">edge :: LineSegment 2 p r
+</span><a href="#local-6989586621679961331"><span class="hs-identifier hs-var">edge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-48"></span><span>      </span><span class="annot"><span class="annottext">CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 p r]
+-&gt; Handlers '[NoIntersection, Point 2 r, LineSegment 2 p r] Integer
+-&gt; Integer
+forall (ts :: [*]) b. CoRec Identity ts -&gt; Handlers ts b -&gt; b
+</span><span class="hs-identifier hs-var">match</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Line 2 r -&gt; Intersection (LineSegment 2 p r) (Line 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-identifier hs-var">Data.Intersection.intersect</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621679961331"><span class="hs-identifier hs-var">edge</span></a></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621679961328"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Handlers '[NoIntersection, Point 2 r, LineSegment 2 p r] Integer
+ -&gt; Integer)
+-&gt; Handlers '[NoIntersection, Point 2 r, LineSegment 2 p r] Integer
+-&gt; Integer
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-49"></span><span>           </span><span class="annot"><span class="annottext">(NoIntersection -&gt; Integer) -&gt; Handler Integer NoIntersection
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier hs-type">NoIntersection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>        </span><span class="annot"><span class="annottext">Handler Integer NoIntersection
+-&gt; Rec (Handler Integer) '[Point 2 r, LineSegment 2 p r]
+-&gt; Handlers '[NoIntersection, Point 2 r, LineSegment 2 p r] Integer
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Integer) -&gt; Handler Integer (Point 2 r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>        </span><span class="hs-comment">-- This happens when an edge is parallel with the given direction.</span><span>
+</span><span id="line-52"></span><span>        </span><span class="hs-comment">-- I think it's correct to count it as a single intersection.</span><span>
+</span><span id="line-53"></span><span>        </span><span class="annot"><span class="annottext">Handler Integer (Point 2 r)
+-&gt; Rec (Handler Integer) '[LineSegment 2 p r]
+-&gt; Rec (Handler Integer) '[Point 2 r, LineSegment 2 p r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Integer)
+-&gt; Handler Integer (LineSegment 2 p r)
+forall b a. (a -&gt; b) -&gt; Handler b a
+</span><span class="hs-identifier hs-var">H</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><a href="Data.Geometry.LineSegment.html#LineSegment"><span class="hs-identifier hs-type">LineSegment</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>        </span><span class="annot"><span class="annottext">Handler Integer (LineSegment 2 p r)
+-&gt; Rec (Handler Integer) '[]
+-&gt; Rec (Handler Integer) '[LineSegment 2 p r]
+forall u (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><span class="hs-operator hs-var">:&amp;</span></span><span> </span><span class="annot"><span class="annottext">Rec (Handler Integer) '[]
+forall u (a :: u -&gt; *). Rec a '[]
+</span><span class="hs-identifier hs-var">RNil</span></span><span>
+</span><span id="line-55"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>        </span><span id="local-6989586621679961328"><span class="annot"><span class="annottext">line :: Line 2 r
+</span><a href="#local-6989586621679961328"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Line 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; Line d r
+</span><a href="Data.Geometry.Line.Internal.html#Line"><span class="hs-identifier hs-var">Line</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679961332"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+forall r. Num r =&gt; Vector 2 r -&gt; Vector 2 r
+</span><a href="#local-6989586621679961320"><span class="hs-identifier hs-var">rot90</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961344"><span class="hs-identifier hs-var">direction</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>        </span><span id="local-6989586621679961320"><span class="annot"><span class="annottext">rot90 :: Vector 2 r -&gt; Vector 2 r
+</span><a href="#local-6989586621679961320"><span class="hs-identifier hs-var hs-var">rot90</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679961318"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679961318"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679961317"><span class="annot"><span class="annottext">y :: r
+</span><a href="#local-6989586621679961317"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="Data.Geometry.Vector.VectorFamily.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679961317"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679961318"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">{- Algorithm overview:
+
+  1. Create N `Point 2 Rational` (N &gt;= 3)
+  2. Create a random `Vector 2 Rational`
+  3. Find the extremes (min and max) of the points when sorted in the direction of the vector.
+      We already have code for this. See `maximumBy (cmpExtreme vector)` and
+      `minimumBy (cmpExtreme vector)`.
+  4. Take out the two extremal points from the set.
+  5. Partition the remaining points according to whether they're on the left side or right side
+    of the imaginary line between the two extremal points.
+  6. Sort the two partitioned sets, one in the direction of the vector and one in the opposite
+    direction.
+  7. Connect the points, starting from the minimal extreme point, going through the set of points
+    that are increasing in the direction of the vector, then to the maximal point, and finally
+    down through the points that are decreasing in the direction of the vector.
+-}</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- | \( O(n \log n) \)</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--   Generate a random N-sided polygon that is monotone in a random direction.</span><span>
+</span><span id="line-77"></span><span id="local-6989586621679961315"><span id="local-6989586621679961316"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomMonotone"><span class="hs-identifier hs-type">randomMonotone</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RandomGen</span></span><span> </span><span class="annot"><a href="#local-6989586621679961316"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Random</span></span><span> </span><span class="annot"><a href="#local-6989586621679961315"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961315"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679961315"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rand</span></span><span> </span><span class="annot"><a href="#local-6989586621679961316"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961315"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-78"></span><span id="randomMonotone"><span class="annot"><span class="annottext">randomMonotone :: Int -&gt; Rand g (SimplePolygon () r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomMonotone"><span class="hs-identifier hs-var hs-var">randomMonotone</span></a></span></span><span> </span><span id="local-6989586621679961314"><span class="annot"><span class="annottext">nVertices :: Int
+</span><a href="#local-6989586621679961314"><span class="hs-identifier hs-var">nVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector 2 r -&gt; Rand g (SimplePolygon () r)
+forall g r.
+(RandomGen g, Random r, Ord r, Num r) =&gt;
+Int -&gt; Vector 2 r -&gt; Rand g (SimplePolygon () r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomMonotoneDirected"><span class="hs-identifier hs-var">randomMonotoneDirected</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679961314"><span class="hs-identifier hs-var">nVertices</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Rand g (SimplePolygon () r))
+-&gt; RandT g Identity (Vector 2 r) -&gt; Rand g (SimplePolygon () r)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">RandT g Identity (Vector 2 r)
+forall g r.
+(RandomGen g, Random r, Eq r, Num r) =&gt;
+Rand g (Vector 2 r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier hs-var">randomNonZeroVector</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- Pick a random vector and then call 'randomMonotone'.</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- | \( O(n \log n) \)</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--   Generate a random N-sided polygon that is monotone in the given direction.</span><span>
+</span><span id="line-83"></span><span id="local-6989586621679961404"><span id="local-6989586621679961406"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomMonotoneDirected"><span class="hs-identifier hs-type">randomMonotoneDirected</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RandomGen</span></span><span> </span><span class="annot"><a href="#local-6989586621679961406"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Random</span></span><span> </span><span class="annot"><a href="#local-6989586621679961404"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961404"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679961404"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961404"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rand</span></span><span> </span><span class="annot"><a href="#local-6989586621679961406"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961404"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-85"></span><span id="randomMonotoneDirected"><span class="annot"><span class="annottext">randomMonotoneDirected :: Int -&gt; Vector 2 r -&gt; Rand g (SimplePolygon () r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomMonotoneDirected"><span class="hs-identifier hs-var hs-var">randomMonotoneDirected</span></a></span></span><span> </span><span id="local-6989586621679961312"><span class="annot"><span class="annottext">nVertices :: Int
+</span><a href="#local-6989586621679961312"><span class="hs-identifier hs-var">nVertices</span></a></span></span><span> </span><span id="local-6989586621679961311"><span class="annot"><span class="annottext">direction :: Vector 2 r
+</span><a href="#local-6989586621679961311"><span class="hs-identifier hs-var">direction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679961310"><span class="annot"><span class="annottext">[Point 2 r]
+</span><a href="#local-6989586621679961310"><span class="hs-identifier hs-var">points</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RandT g Identity (Point 2 r) -&gt; RandT g Identity [Point 2 r]
+forall (m :: * -&gt; *) a. Applicative m =&gt; Int -&gt; m a -&gt; m [a]
+</span><span class="hs-identifier hs-var">replicateM</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679961312"><span class="hs-identifier hs-var">nVertices</span></a></span><span> </span><span class="annot"><span class="annottext">RandT g Identity (Point 2 r)
+forall (m :: * -&gt; *) a. (MonadRandom m, Random a) =&gt; m a
+</span><span class="hs-identifier hs-var">getRandom</span></span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><span class="annottext">SimplePolygon () r -&gt; Rand g (SimplePolygon () r)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; [Point 2 r] -&gt; SimplePolygon () r
+forall r.
+(Ord r, Num r) =&gt;
+Vector 2 r -&gt; [Point 2 r] -&gt; SimplePolygon () r
+</span><a href="Data.Geometry.Polygon.Monotone.html#monotoneFrom"><span class="hs-identifier hs-var">monotoneFrom</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961311"><span class="hs-identifier hs-var">direction</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r]
+</span><a href="#local-6989586621679961310"><span class="hs-identifier hs-var">points</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | \( O(n \log n) \)</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--   Assemble a given set of points in a polygon that is monotone in the given direction.</span><span>
+</span><span id="line-91"></span><span id="local-6989586621679961386"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#monotoneFrom"><span class="hs-identifier hs-type">monotoneFrom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961386"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679961386"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961386"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961386"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679961386"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-92"></span><span id="monotoneFrom"><span class="annot"><span class="annottext">monotoneFrom :: Vector 2 r -&gt; [Point 2 r] -&gt; SimplePolygon () r
+</span><a href="Data.Geometry.Polygon.Monotone.html#monotoneFrom"><span class="hs-identifier hs-var hs-var">monotoneFrom</span></a></span></span><span> </span><span id="local-6989586621679961307"><span class="annot"><span class="annottext">direction :: Vector 2 r
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">direction</span></a></span></span><span> </span><span id="local-6989586621679961306"><span class="annot"><span class="annottext">vertices :: [Point 2 r]
+</span><a href="#local-6989586621679961306"><span class="hs-identifier hs-var">vertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; SimplePolygon () r
+forall p r. (Eq r, Num r) =&gt; [Point 2 r :+ p] -&gt; SimplePolygon p r
+</span><a href="Data.Geometry.Polygon.Core.html#fromPoints"><span class="hs-identifier hs-var">fromPoints</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var">min</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961303"><span class="hs-identifier hs-var">rightHalf</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var">max</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()] -&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961301"><span class="hs-identifier hs-var">leftHalf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>        </span><span id="local-6989586621679961300"><span class="annot"><span class="annottext">specialPoints :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961300"><span class="hs-identifier hs-var hs-var">specialPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r :+ ()) -&gt; [Point 2 r] -&gt; [Point 2 r :+ ()]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679961299"><span class="annot"><span class="annottext">x :: Point 2 r
+</span><a href="#local-6989586621679961299"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679961299"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; () -&gt; Point 2 r :+ ()
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><span class="hs-operator hs-var">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r]
+</span><a href="#local-6989586621679961306"><span class="hs-identifier hs-var">vertices</span></a></span><span>
+</span><span id="line-95"></span><span>        </span><span id="local-6989586621679961304"><span class="annot"><span class="annottext">min :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var hs-var">min</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; [Point 2 r :+ ()] -&gt; Point 2 r :+ ()
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">Data.List.minimumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering
+forall r p q.
+(Num r, Ord r) =&gt;
+Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var">cmpExtreme</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">direction</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961300"><span class="hs-identifier hs-var">specialPoints</span></a></span><span>
+</span><span id="line-96"></span><span>        </span><span id="local-6989586621679961302"><span class="annot"><span class="annottext">max :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var hs-var">max</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; [Point 2 r :+ ()] -&gt; Point 2 r :+ ()
+forall (t :: * -&gt; *) a.
+Foldable t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">Data.List.maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering
+forall r p q.
+(Num r, Ord r) =&gt;
+Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var">cmpExtreme</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">direction</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961300"><span class="hs-identifier hs-var">specialPoints</span></a></span><span>
+</span><span id="line-97"></span><span>        </span><span class="hs-comment">-- 4</span><span>
+</span><span id="line-98"></span><span>        </span><span id="local-6989586621679961294"><span class="annot"><span class="annottext">pointsWithoutExtremes :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961294"><span class="hs-identifier hs-var hs-var">pointsWithoutExtremes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; Bool)
+-&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679961293"><span class="annot"><span class="annottext">x :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961293"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961293"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var">min</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961293"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var">max</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961300"><span class="hs-identifier hs-var">specialPoints</span></a></span><span>
+</span><span id="line-99"></span><span>        </span><span class="hs-comment">-- 5, 6</span><span>
+</span><span id="line-100"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679961290"><span class="annot"><span class="annottext">leftHalfUnsorted :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961290"><span class="hs-identifier hs-var">leftHalfUnsorted</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679961289"><span class="annot"><span class="annottext">rightHalfUnsorted :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961289"><span class="hs-identifier hs-var">rightHalfUnsorted</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; Bool)
+-&gt; [Point 2 r :+ ()] -&gt; ([Point 2 r :+ ()], [Point 2 r :+ ()])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">Data.List.partition</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+forall r.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+</span><a href="Data.Geometry.Polygon.Monotone.html#toTheLeft"><span class="hs-identifier hs-var">toTheLeft</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961304"><span class="hs-identifier hs-var">min</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961302"><span class="hs-identifier hs-var">max</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961294"><span class="hs-identifier hs-var">pointsWithoutExtremes</span></a></span><span>
+</span><span id="line-101"></span><span>        </span><span id="local-6989586621679961301"><span class="annot"><span class="annottext">leftHalf :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961301"><span class="hs-identifier hs-var hs-var">leftHalf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">sortBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+ -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; ((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; (Point 2 r :+ ())
+-&gt; (Point 2 r :+ ())
+-&gt; Ordering
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering
+forall r p q.
+(Num r, Ord r) =&gt;
+Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var">cmpExtreme</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">direction</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961290"><span class="hs-identifier hs-var">leftHalfUnsorted</span></a></span><span>
+</span><span id="line-102"></span><span>        </span><span id="local-6989586621679961303"><span class="annot"><span class="annottext">rightHalf :: [Point 2 r :+ ()]
+</span><a href="#local-6989586621679961303"><span class="hs-identifier hs-var hs-var">rightHalf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering)
+-&gt; [Point 2 r :+ ()] -&gt; [Point 2 r :+ ()]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">sortBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Ordering
+forall r p q.
+(Num r, Ord r) =&gt;
+Vector 2 r -&gt; (Point 2 r :+ p) -&gt; (Point 2 r :+ q) -&gt; Ordering
+</span><a href="Data.Geometry.Polygon.Extremes.html#cmpExtreme"><span class="hs-identifier hs-var">cmpExtreme</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961307"><span class="hs-identifier hs-var">direction</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 r :+ ()]
+</span><a href="#local-6989586621679961289"><span class="hs-identifier hs-var">rightHalfUnsorted</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-comment">-------------------------------------------------------------------------------------------------</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- helper functions</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- for partitioning points</span><span>
+</span><span id="line-108"></span><span id="local-6989586621679961371"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#toTheLeft"><span class="hs-identifier hs-type">toTheLeft</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679961371"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679961371"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961371"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961371"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961371"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">:+</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-109"></span><span id="toTheLeft"><span class="annot"><span class="annottext">toTheLeft :: (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; Bool
+</span><a href="Data.Geometry.Polygon.Monotone.html#toTheLeft"><span class="hs-identifier hs-var hs-var">toTheLeft</span></a></span></span><span> </span><span id="local-6989586621679961284"><span class="annot"><span class="annottext">min :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961284"><span class="hs-identifier hs-var">min</span></a></span></span><span> </span><span id="local-6989586621679961283"><span class="annot"><span class="annottext">max :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961283"><span class="hs-identifier hs-var">max</span></a></span></span><span> </span><span id="local-6989586621679961282"><span class="annot"><span class="annottext">x :: Point 2 r :+ ()
+</span><a href="#local-6989586621679961282"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; (Point 2 r :+ ()) -&gt; CCW
+forall r a b c.
+(Ord r, Num r) =&gt;
+(Point 2 r :+ a) -&gt; (Point 2 r :+ b) -&gt; (Point 2 r :+ c) -&gt; CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#ccw%27"><span class="hs-identifier hs-var">ccw'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961284"><span class="hs-identifier hs-var">min</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961283"><span class="hs-identifier hs-var">max</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ ()
+</span><a href="#local-6989586621679961282"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="Data.Geometry.Point.Orientation.Degenerate.html#CCW"><span class="hs-identifier hs-var">CCW</span></a></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- | \( O(1) \)</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--   Create a random 2D vector which has a non-zero magnitude.</span><span>
+</span><span id="line-113"></span><span id="local-6989586621679961396"><span id="local-6989586621679961397"><span class="annot"><a href="Data.Geometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier hs-type">randomNonZeroVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RandomGen</span></span><span> </span><span class="annot"><a href="#local-6989586621679961397"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Random</span></span><span> </span><span class="annot"><a href="#local-6989586621679961396"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679961396"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679961396"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rand</span></span><span> </span><span class="annot"><a href="#local-6989586621679961397"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Vector.VectorFamily.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679961396"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-114"></span><span id="randomNonZeroVector"><span class="annot"><span class="annottext">randomNonZeroVector :: Rand g (Vector 2 r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier hs-var hs-var">randomNonZeroVector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679961279"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961279"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Rand g (Vector 2 r)
+forall (m :: * -&gt; *) a. (MonadRandom m, Random a) =&gt; m a
+</span><span class="hs-identifier hs-var">getRandom</span></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; r
+forall (f :: * -&gt; *) a. (Metric f, Num a) =&gt; f a -&gt; a
+</span><span class="hs-identifier hs-var">quadrance</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961279"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Rand g (Vector 2 r)
+forall g r.
+(RandomGen g, Random r, Eq r, Num r) =&gt;
+Rand g (Vector 2 r)
+</span><a href="Data.Geometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier hs-var">randomNonZeroVector</span></a></span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Rand g (Vector 2 r)
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679961279"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-119"></span></pre></body></html>
