@@ -2474,8 +2474,8 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aRfr. Lens' (Range a_aRfr) (EndPoint a_aRfr)
-upper :: forall a_aRfr. Lens' (Range a_aRfr) (EndPoint a_aRfr)
+lower :: forall a_aR98. Lens' (Range a_aR98) (EndPoint a_aR98)
+upper :: forall a_aR98. Lens' (Range a_aR98) (EndPoint a_aR98)
 
 -- | Test if a value lies in a range.
 --   
@@ -2584,6 +2584,9 @@ shiftLeft :: Num r => r -> Range r -> Range r
 --   </pre>
 shiftRight :: Num r => r -> Range r -> Range r
 instance GHC.Show.Show a => GHC.Show.Show (Data.Range.Range a)
+instance Data.Functor.Classes.Show1 Data.Range.Range
+instance GHC.Read.Read a => GHC.Read.Read (Data.Range.Range a)
+instance Data.Functor.Classes.Read1 Data.Range.Range
 instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.Range r)
 instance GHC.Classes.Ord a => Data.Intersection.IsIntersectableWith (Data.Range.Range a) (Data.Range.Range a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Range.Range a)
@@ -2598,8 +2601,10 @@ instance Data.Traversable.Traversable Data.Range.EndPoint
 instance Data.Foldable.Foldable Data.Range.EndPoint
 instance GHC.Base.Functor Data.Range.EndPoint
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Range.EndPoint a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Range.EndPoint a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Range.EndPoint a)
+instance Data.Functor.Classes.Show1 Data.Range.EndPoint
+instance GHC.Read.Read a => GHC.Read.Read (Data.Range.EndPoint a)
+instance Data.Functor.Classes.Read1 Data.Range.EndPoint
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Range.EndPoint a)
 instance Test.QuickCheck.Arbitrary.Arbitrary r => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.EndPoint r)
 
@@ -3075,10 +3080,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_aZTp a_a11wN. Traversal (UnBounded a_aZTp) (UnBounded a_a11wN) a_aZTp a_a11wN
-_MinInfinity :: forall a_aZTp. Prism' (UnBounded a_aZTp) ()
-_Val :: forall a_aZTp a_a11zG. Prism (UnBounded a_a11zG) (UnBounded a_aZTp) a_a11zG a_aZTp
-_MaxInfinity :: forall a_aZTp. Prism' (UnBounded a_aZTp) ()
+unUnBounded :: forall a_aZRI a_a11v6. Traversal (UnBounded a_aZRI) (UnBounded a_a11v6) a_aZRI a_a11v6
+_MinInfinity :: forall a_aZRI. Prism' (UnBounded a_aZRI) ()
+_Val :: forall a_aZRI a_a11xZ. Prism (UnBounded a_a11xZ) (UnBounded a_aZRI) a_a11xZ a_aZRI
+_MaxInfinity :: forall a_aZRI. Prism' (UnBounded a_aZRI) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
