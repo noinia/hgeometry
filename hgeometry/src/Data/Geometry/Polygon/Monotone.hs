@@ -61,18 +61,21 @@ isMonotone direction p = all isMonotoneAt (map _core $ toPoints p)
     down through the points that are decreasing in the direction of the vector.
 -}
 -- | \( O(n \log n) \)
+--   Generate a random N-sided polygon that is monotone in a random direction.
 randomMonotone :: (RandomGen g, Random r, Ord r, Num r) => Int -> Rand g (SimplePolygon () r)
 randomMonotone nVertices = randomMonotoneDirected nVertices =<< randomNonZeroVector
 
 -- Pick a random vector and then call 'randomMonotone'.
 -- | \( O(n \log n) \)
+--   Generate a random N-sided polygon that is monotone in the given direction.
 randomMonotoneDirected :: (RandomGen g, Random r, Ord r, Num r)
   => Int -> Vector 2 r -> Rand g (SimplePolygon () r)
 randomMonotoneDirected nVertices direction = do
     points <- replicateM nVertices getRandom
     return (monotoneFrom direction points)
 
--- General fuunction to create a monotone polygon
+-- | \( O(n \log n) \)
+--   Assemble a given set of points in a polygon that is monotone in the given direction.
 monotoneFrom :: (Ord r, Num r) => Vector 2 r -> [Point 2 r] -> SimplePolygon () r
 monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ leftHalf)
     where
@@ -93,7 +96,8 @@ monotoneFrom direction vertices = fromPoints ([min] ++ rightHalf ++ [max] ++ lef
 toTheLeft :: (Ord r, Num r) => Point 2 r :+ () -> Point 2 r :+ () -> Point 2 r :+ () -> Bool
 toTheLeft min max x = ccw' min max x == CCW
 
--- create a random vector 2 for direction
+-- | \( O(1) \)
+--   Create a random 2D vector which has a non-zero magnitude.
 randomNonZeroVector :: (RandomGen g, Random r, Eq r, Num r) => Rand g (Vector 2 r)
 randomNonZeroVector = do
     v <- getRandom
