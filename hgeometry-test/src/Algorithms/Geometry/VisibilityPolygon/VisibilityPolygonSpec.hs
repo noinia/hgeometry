@@ -162,3 +162,13 @@ spikeAnswer = CVec.unsafeFromList [Right (7,(2,3)), Left 7, Left 8,Left 1,Left 2
 --     where
 --       applyAts ats = id
 -- flattenGroups' o                            = [o]
+
+visibilityPg    :: SimplePolygon () R -> StarShapedPolygon (Definer () ((),()) R) R
+visibilityPg pg = visibilityPolygon (pickPoint pg)
+
+main = do poly <- generate
+          let outP = visibilityPg poly
+              out = singlePageFromContent [iO defIO outP
+                                          , iO defIO poly
+                                          ]
+          writeIpeFile "/tmp/out.ipe" out
