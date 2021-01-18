@@ -1,3 +1,15 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Polygon.Monotone
+-- Copyright   :  (C) 1ndy
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--
+-- A polygon is monotone in a certain direction if rays orthogonal to that
+-- direction intersects the polygon at most twice. See
+-- <https://en.wikipedia.org/wiki/Monotone_polygon>
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Monotone
   ( isMonotone
   , randomMonotone
