@@ -47,7 +47,7 @@ instance KnownNat p => HasResolution (NatPrec p) where
 
 
 instance KnownNat p => Show (RealNumber p) where
-  showsPrec d r = showParen (d > app_prec) $
+  showsPrec d r = showParen (d > app_prec && r < 0) $
     case asFixed r of
       Exact p -> showString (dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p)
       Lossy p -> shows p . showChar '~'
