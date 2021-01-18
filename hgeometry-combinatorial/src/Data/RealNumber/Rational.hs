@@ -43,13 +43,16 @@ newtype RealNumber (p :: Nat) = RealNumber Rational
 data NatPrec (p :: Nat) = NatPrec
 
 instance KnownNat p => HasResolution (NatPrec p) where
-  resolution _ = 10 ^ (1 + natVal (NatPrec @p))
+  resolution _ = 10 ^ (natVal (NatPrec @p))
 
 
 instance KnownNat p => Show (RealNumber p) where
-  show r = case asFixed r of
-             Exact p -> dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p
-             Lossy p -> (<> "~")                                      . show $ p
+  showsPrec d r = showParen (d > app_prec) $
+    case asFixed r of
+      Exact p -> showString (dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p)
+      Lossy p -> shows p . showChar '~'
+    where
+      app_prec = 10
 
 instance KnownNat p => Read (RealNumber p) where
   readsPrec i = map wrap . readsPrec @(Fixed (NatPrec p)) i
