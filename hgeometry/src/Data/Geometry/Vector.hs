@@ -10,8 +10,7 @@
 -- \(d\)-dimensional vectors.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector( Vector(.., Vector2, Vector3, Vector4)
-                           , module Data.Geometry.Vector.VectorFamily
+module Data.Geometry.Vector( module Data.Geometry.Vector.VectorFamily
                            , module LV
                            , C(..)
                            , Affine(..)

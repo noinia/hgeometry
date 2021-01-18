@@ -12,7 +12,38 @@
 -- vectors.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector.VectorFamily where
+module Data.Geometry.Vector.VectorFamily
+  (
+  -- * d dimensional Vectors
+
+    Vector(.., Vector, Vector1, Vector2, Vector3, Vector4)
+
+  , unV
+  , Arity
+
+    -- * Convenience "constructors"
+
+  , vectorFromList
+  , vectorFromListUnsafe
+  , destruct
+  , Data.Geometry.Vector.VectorFamily.head
+
+    -- * Indexing vectors
+
+  , element
+  , element'
+
+    -- * Snoccing and consindg
+
+  , Data.Geometry.Vector.VectorFamily.cons
+  , Data.Geometry.Vector.VectorFamily.snoc
+  , Data.Geometry.Vector.VectorFamily.init
+  , Data.Geometry.Vector.VectorFamily.last
+  , prefix
+
+    -- * Specific on 3-dimensional vectors
+  , cross
+  ) where
 
 import           Control.DeepSeq
 import           Control.Lens                           hiding (element)
