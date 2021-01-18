@@ -2,7 +2,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module RandomMonotone (randomMonotoneShowcase ) where
 
-import Algorithms.Geometry.MonotonePolygon.MonotonePolygon (randomMonotoneDirected)
+import Data.Geometry.Polygon.Monotone (randomMonotoneDirected, randomNonZeroVector)
 
 import           Control.Lens                 ((&), (.~), (^.))
 import           Control.Monad.Random
@@ -132,17 +132,9 @@ nPolygons = 5
 monotonePolygons :: [(Vector 2 R, SimplePolygon () R)]
 monotonePolygons = flip evalRand (mkStdGen seed) $
   replicateM nPolygons $ do
-    dir <- generateRandomVector2
+    dir <- randomNonZeroVector
     p <- randomMonotoneDirected nPoints dir
-    return (dir, pAtCenter $ scaleUniformlyBy (screenHeight*0.9) p)
-
-
-generateRandomVector2 :: (RandomGen g, Random r, Eq r, Num r) => Rand g (Vector 2 r)
-generateRandomVector2 = do
-    v <- getRandom
-    if (quadrance v==0)
-      then generateRandomVector2
-      else pure v
+    return (dir, pAtCenter $ scaleUniformlyBy (screenTop*0.9) p)
 
 ppVertices :: Real r => [Point 2 r] -> SVG
 ppVertices = mkGroup . map ppPoint
