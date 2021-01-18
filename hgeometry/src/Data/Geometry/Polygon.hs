@@ -73,8 +73,6 @@ module Data.Geometry.Polygon
 
   , extremesLinear, cmpExtreme
 
-  , rotateLeft
-  , rotateRight
   , findRotateTo
 
   ) where

@@ -155,7 +155,7 @@ origin = Point $ pure 0
 -- | Lens to access the vector corresponding to this point.
 --
 -- >>> (Point3 1 2 3) ^. vector
--- Vector3 [1,2,3]
+-- Vector3 1 2 3
 -- >>> origin & vector .~ Vector3 1 2 3
 -- Point3 1 2 3
 vector :: Lens (Point d r) (Point d r') (Vector d r) (Vector d r')

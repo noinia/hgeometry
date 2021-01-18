@@ -161,7 +161,7 @@ scalarMultiple' u v = g . F.foldr mappend mempty $ liftA2 f u v
 -- >>> Vector3 1 2 3 ^. xComponent
 -- 1
 -- >>> Vector2 1 2 & xComponent .~ 10
--- Vector2 [10,2]
+-- Vector2 10 2
 xComponent :: (1 <= d, Arity d) => Lens' (Vector d r) r
 xComponent = element (C :: C 0)
 {-# INLINABLE xComponent #-}
@@ -171,7 +171,7 @@ xComponent = element (C :: C 0)
 -- >>> Vector3 1 2 3 ^. yComponent
 -- 2
 -- >>> Vector2 1 2 & yComponent .~ 10
--- Vector2 [1,10]
+-- Vector2 1 10
 yComponent :: (2 <= d, Arity d) => Lens' (Vector d r) r
 yComponent = element (C :: C 1)
 {-# INLINABLE yComponent #-}
@@ -181,7 +181,7 @@ yComponent = element (C :: C 1)
 -- >>> Vector3 1 2 3 ^. zComponent
 -- 3
 -- >>> Vector3 1 2 3 & zComponent .~ 10
--- Vector3 [1,2,10]
+-- Vector3 1 2 10
 zComponent :: (3 <= d, Arity d) => Lens' (Vector d r) r
 zComponent = element (C :: C 2)
 {-# INLINABLE zComponent #-}

@@ -25,11 +25,13 @@ module Data.Range( EndPoint(..)
 
 import Control.DeepSeq
 import Control.Lens
+import Control.Applicative
 import Data.Intersection
 import Data.Vinyl.CoRec
 import GHC.Generics (Generic)
 import Test.QuickCheck
-import Text.Printf (printf)
+import Data.Functor.Classes
+import Text.Read
 
 --------------------------------------------------------------------------------
 -- * Representing Endpoints of a Range
@@ -37,7 +39,25 @@ import Text.Printf (printf)
 -- | Endpoints of a range may either be open or closed.
 data EndPoint a = Open   !a
                 | Closed !a
-                deriving (Show,Read,Eq,Functor,Foldable,Traversable,Generic,NFData)
+                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
+
+instance (Show a) => Show (EndPoint a) where
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance Show1 EndPoint where
+  liftShowsPrec sp _sl d (Open a)   = showsUnaryWith sp "Open" d a
+  liftShowsPrec sp _sl d (Closed a) = showsUnaryWith sp "Closed" d a
+
+instance (Read a) => Read (EndPoint a) where
+  readPrec     = liftReadPrec readPrec readListPrec
+  readListPrec = readListPrecDefault
+
+instance Read1 EndPoint where
+  liftReadPrec rp _rl = readData $
+      readUnaryWith rp "Open" Open <|>
+      readUnaryWith rp "Closed" Closed
+  liftReadListPrec = liftReadListPrecDefault
+
 
 instance Ord a => Ord (EndPoint a) where
   -- | order on the actual value, and Open before Closed
@@ -90,8 +110,24 @@ data Range a = Range { _lower :: !(EndPoint a)
                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
 makeLenses ''Range
 
-instance Show a => Show (Range a) where
-  show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
+-- instance Show a => Show (Range a) where
+--   show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
+
+instance (Show a) => Show (Range a) where
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance Show1 Range where
+  liftShowsPrec sp sl d (Range l u) =
+      showsBinaryWith (liftShowsPrec sp sl) (liftShowsPrec sp sl) "Range" d l u
+
+instance (Read a) => Read (Range a) where
+  readPrec     = liftReadPrec readPrec readListPrec
+  readListPrec = readListPrecDefault
+
+instance Read1 Range where
+  liftReadPrec rp rl = readData $
+      readBinaryWith (liftReadPrec rp rl) (liftReadPrec rp rl) "Range" Range
+  liftReadListPrec = liftReadListPrecDefault
 
 
 pattern OpenRange       :: a -> a -> Range a
