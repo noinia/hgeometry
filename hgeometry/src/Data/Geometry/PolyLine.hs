@@ -78,6 +78,16 @@ instance (ToJSON p, ToJSON r, Arity d) => ToJSON (PolyLine d p r) where
     toEncoding = genericToEncoding defaultOptions
 instance (FromJSON p, FromJSON r, Arity d, KnownNat d) => FromJSON (PolyLine d p r)
 
+instance HasStart (PolyLine d p r) where
+  type StartCore (PolyLine d p r)  = Point d r
+  type StartExtra (PolyLine d p r) = p
+  start = points.head1
+
+instance HasEnd (PolyLine d p r) where
+  type EndCore (PolyLine d p r)  = Point d r
+  type EndExtra (PolyLine d p r) = p
+  end = points.last1
+
 -- | Builds a Polyline from a list of points, if there are sufficiently many points
 fromPoints :: [Point d r :+ p] -> Maybe (PolyLine d p r)
 fromPoints = fmap PolyLine . LSeq.eval (C @ 2) . LSeq.fromList
