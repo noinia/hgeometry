@@ -84,7 +84,7 @@ pattern Plane p n = HyperPlane p n
 -- the normal vector of the resulting plane is pointing "upwards".
 --
 -- >>> from3Points origin (Point3 1 0 0) (Point3 0 1 0)
--- HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 [0,0,1]}
+-- HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 0 0 1}
 from3Points       :: Num r => Point 3 r -> Point 3 r -> Point 3 r -> HyperPlane 3 r
 from3Points p q r = let u = q .-. p
                         v = r .-. p

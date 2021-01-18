@@ -14,13 +14,16 @@ module Data.RealNumber.Rational(RealNumber(..)
                                , Nat
                                ) where
 
+import Data.Aeson
 import Data.Data
 import Data.Fixed
 import Data.Hashable
-import Data.List (dropWhileEnd)
-import GHC.Generics (Generic(..))
+import Data.List       (dropWhileEnd)
+import GHC.Generics    (Generic (..))
 import GHC.TypeLits
-import Test.QuickCheck(Arbitrary(..))
+import Test.QuickCheck (Arbitrary (..))
+import Control.Monad.Random
+import Data.Ratio
 
 --------------------------------------------------------------------------------
 
@@ -35,19 +38,21 @@ import Test.QuickCheck(Arbitrary(..))
 -- If the number cannot be displayed exactly a '~' is printed after
 -- the number.
 newtype RealNumber (p :: Nat) = RealNumber Rational
-  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable)
-
+  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable,ToJSON,FromJSON)
 
 data NatPrec (p :: Nat) = NatPrec
 
 instance KnownNat p => HasResolution (NatPrec p) where
-  resolution _ = 10 ^ (1 + natVal (NatPrec @p))
+  resolution _ = 10 ^ (natVal (NatPrec @p))
 
 
 instance KnownNat p => Show (RealNumber p) where
-  show r = case asFixed r of
-             Exact p -> dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p
-             Lossy p -> (<> "~")                                      . show $ p
+  showsPrec d r = showParen (d > app_prec && r < 0) $
+    case asFixed r of
+      Exact p -> showString (dropWhileEnd (== '.') . dropWhileEnd (== '0') . show $ p)
+      Lossy p -> shows p . showChar '~'
+    where
+      app_prec = 10
 
 instance KnownNat p => Read (RealNumber p) where
   readsPrec i = map wrap . readsPrec @(Fixed (NatPrec p)) i
@@ -58,6 +63,18 @@ instance KnownNat p => Read (RealNumber p) where
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
+
+
+instance Random (RealNumber p) where
+  -- Generate a random number between a and b with 'maxBound `div` 2 :: Int' discrete increments.
+  randomR (a,b) = runRand $ do
+    v <- getRandom
+    pure $ (b-a)*abs v + a
+  -- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.
+  random = runRand $ do
+    v <- getRandom
+    let fromInt :: Int -> Integer; fromInt = fromIntegral
+    pure $ RealNumber $ fromInt v % fromInt maxBound
 
 --------------------------------------------------------------------------------
 

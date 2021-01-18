@@ -193,7 +193,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
--- Vector3 [Range (Closed 1) (Closed 10),Range (Closed 2) (Closed 20),Range (Closed 3) (Closed 30)]
+-- Vector3 (Range (Closed 1) (Closed 10)) (Range (Closed 2) (Closed 20)) (Range (Closed 3) (Closed 30))
 extent                                 :: Arity d
                                        => Box d p r -> Vector d (R.Range r)
 extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
@@ -202,7 +202,7 @@ extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) 
 -- whereas one would normally count dimensions starting at zero.
 --
 -- >>> size (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
--- Vector3 [1,2,3]
+-- Vector3 1 2 3
 size :: (Arity d, Num r) => Box d p r -> Vector d r
 size = fmap R.width . extent
 

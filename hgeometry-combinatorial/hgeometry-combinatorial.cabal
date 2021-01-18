@@ -140,7 +140,7 @@ library
 
               , vector                  >= 0.11
               , data-clist              >= 0.1.2.3
-              , vector-circular         >= 0.1.1
+              , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
               , vector-builder          >= 0.3.7
 
@@ -209,12 +209,14 @@ test-suite hspec
 
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
+                 Algorithms.Graph.DFSSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
                  Data.OrdSeqSpec
                  Data.CircularSeqSpec
                  Data.IndexedDoublyLinkedListSpec
+                 Data.RealNumber.RationalSpec
 
 
   build-depends:        base
@@ -223,6 +225,7 @@ test-suite hspec
                       , quickcheck-instances    >= 0.3
                       , approximate-equality    >= 1.1.0.2
                       , hgeometry-combinatorial
+                      , deepseq
                       , lens
                       , data-clist
                       , linear

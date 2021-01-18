@@ -3,6 +3,7 @@ module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                (over, view, (^.), (^..))
+import           Control.Monad.Random (Random, evalRand, mkStdGen)
 import qualified Data.ByteString                             as BS
 import           Data.Coerce
 import           Data.Ext
@@ -11,6 +12,7 @@ import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
 import           Data.Geometry.Triangle
+import           Data.Geometry.Polygon.Monotone
 import           Data.Ord
 import           Data.Proxy
 import           Data.Ratio
@@ -19,12 +21,13 @@ import           Data.Serialize
 import qualified Data.Vector                                 as V
 import           Data.Vector.Circular                        (CircularVector)
 import qualified Data.Vector.Circular                        as CV
-import qualified Data.Vector.Circular.Util                   as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances                   ()
+
+type R = RealNumber 5
 
 {-# NOINLINE allSimplePolygons #-}
 allSimplePolygons :: [SimplePolygon () Double]
@@ -134,7 +137,12 @@ cutEars p = map (cutEarAt p) ears
       ]
     vs = p^.outerBoundaryVector
 
-
+genMonotone :: (Random r, Ord r, Num r) => Gen (Vector 2 r, SimplePolygon () r)
+genMonotone = do
+  n <- max 3 <$> getSize
+  seed <- mkStdGen <$> arbitrary
+  let v = evalRand randomNonZeroVector seed
+  pure (v, evalRand (randomMonotoneDirected n v) seed)
 
 spec :: Spec
 spec = do
@@ -169,6 +177,13 @@ data ShowPoly a b = ShowPoly a b deriving Show
 instance Eq b => Eq (ShowPoly a b) where
   (ShowPoly _ a) == (ShowPoly _ b) = a == b
 
+  -- Hm, is this property always true? What happens when points are all colinear?
+  specify "monotone is simple" $
+    property $ forAll genMonotone $ \(_dir, mono :: SimplePolygon () R) ->
+      isSimple mono
+  it "is monotone" $
+    property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
+      isMonotone dir mono
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case

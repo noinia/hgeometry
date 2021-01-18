@@ -33,14 +33,16 @@ build-type:          Simple
 --   hs-source-dirs:      lib
 --   default-language:    Haskell2010
 
-executable hgeometry-showcase
+executable showcase
   main-is:             Showcase.hs
   other-modules:       Common,
                        SSSP,
                        Inflate,
                        ClosestPair,
                        BentleyOttmann,
-                       ConvexHull
+                       ConvexHull,
+                       FastVisibility,
+                       RandomMonotone
   -- other-extensions:
   build-depends:       base,
                        reanimate >= 1.1.3.0, reanimate-svg,
@@ -50,7 +52,7 @@ executable hgeometry-showcase
                        hashable,
                        lens,
                        containers,
-                       vector-circular >= 0.1.1,
+                       vector-circular >= 0.1.2,
                        JuicyPixels,
                        vinyl,
                        hgeometry-combinatorial,
