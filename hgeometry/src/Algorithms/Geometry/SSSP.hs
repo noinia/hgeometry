@@ -21,10 +21,10 @@ import Algorithms.Geometry.PolygonTriangulation.Types       (PolygonEdgeType)
 import           Algorithms.Graph.DFS            (adjacencyLists, dfs', dfsSensitive)
 import           Control.Lens                    ((^.))
 import           Data.Bitraversable
-import           Data.Ext                        (ext, extra, type (:+) (..))
 import           Data.Either
+import           Data.Ext                        (ext, extra, type (:+) (..))
 import qualified Data.FingerTree                 as F
-import           Data.Geometry.Line              (Line, lineThrough)
+import           Data.Geometry.Line              (lineThrough)
 import           Data.Geometry.LineSegment       (LineSegment (ClosedLineSegment, LineSegment))
 import           Data.Geometry.PlanarSubdivision (PolygonFaceData (..))
 import           Data.Geometry.Point             (Point, ccw, pattern CCW, pattern CW)
@@ -36,7 +36,7 @@ import           Data.PlanarGraph                (PlanarGraph)
 import qualified Data.PlanarGraph                as Graph
 import           Data.PlaneGraph                 (FaceId (..), PlaneGraph, VertexData (..),
                                                   VertexId, VertexId', dual, graph, incidentEdges,
-                                                  leftFace, neighboursOf, vertices)
+                                                  leftFace, vertices)
 import qualified Data.PlaneGraph                 as PlaneGraph
 import           Data.Proxy
 import           Data.Tree                       (Tree (Node))
@@ -47,7 +47,6 @@ import           Data.Vector.Unboxed             (Vector)
 import qualified Data.Vector.Unboxed             as VU
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import Debug.Trace
 
 {-
 type AbsOffset = Int
@@ -206,7 +205,7 @@ instance Monoid (MinMax r) where
 
 -- Including the 'Point 2 r' here means we don't have to look it up.
 -- This mattered since lookups used to be O(log n) rather than O(1).
-newtype Index r = Index { unIndex :: Point 2 r :+ Int} -- deriving (Show)
+newtype Index r = Index (Point 2 r :+ Int) -- deriving (Show)
 
 instance Show (Index r) where
   show = show . indexExtra
