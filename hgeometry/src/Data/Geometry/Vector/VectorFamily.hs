@@ -16,8 +16,8 @@ module Data.Geometry.Vector.VectorFamily where
 
 import           Control.DeepSeq
 import           Control.Lens                           hiding (element)
+import           Control.Monad
 import           Data.Aeson
--- import           Data.Aeson (ToJSON(..),FromJSON(..))
 import qualified Data.Foldable                          as F
 import           Data.Functor.Classes
 import           Data.Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFamily (..),
@@ -25,6 +25,7 @@ import           Data.Geometry.Vector.VectorFamilyPeano (ImplicitArity, VectorFa
 import qualified Data.Geometry.Vector.VectorFamilyPeano as Fam
 import           Data.Geometry.Vector.VectorFixed       (C (..))
 import           Data.Hashable
+import           Data.List
 import qualified Data.List                              as L
 import           Data.Proxy
 import qualified Data.Vector.Fixed                      as V
@@ -36,10 +37,7 @@ import qualified Linear.V2                              as L2
 import qualified Linear.V3                              as L3
 import qualified Linear.V4                              as L4
 import           Linear.Vector
-import           Text.ParserCombinators.ReadP           (ReadP, pfail, string)
-import           Text.ParserCombinators.ReadPrec        (lift)
-import           Text.Read                              (Read (..), minPrec, readListPrecDefault,
-                                                         readPrec_to_P)
+import           Text.Read                              (Read (..), readListPrecDefault)
 
 --------------------------------------------------------------------------------
 -- * d dimensional Vectors
@@ -101,21 +99,47 @@ instance Arity d => V.Vector (Vector d) r where
   inspect    = V.inspect . _unV
   basicIndex = V.basicIndex . _unV
 
-instance (Arity d, Show r) => Show (Vector d r) where
-  show v = mconcat [ "Vector", show $ F.length v , " "
-                   , show $ F.toList v ]
+-- instance (Arity d, Show r) => Show (Vector d r) where
+--   show v = mconcat [ "Vector", show $ F.length v , " "
+--                    , show $ F.toList v ]
+
+-- instance (Read r, Arity d) => Read (Vector d r) where
+--   readPrec     = lift readVec
+--     where
+--       readVec :: (Arity d, Read r) => ReadP (Vector d r)
+--       readVec = do let d = natVal (Proxy :: Proxy d)
+--                    _  <- string $ "Vector" <> show d <> " "
+--                    rs <- readPrec_to_P readPrec minPrec
+--                    case vectorFromList rs of
+--                     Just v -> pure v
+--                     _      -> pfail
+--   readListPrec = readListPrecDefault
+
+instance (Show r, Arity d) => Show (Vector d r) where
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance (Arity d) => Show1 (Vector d) where
+  liftShowsPrec sp _ d v = showParen (d > 10) $
+      showString constr . showChar ' ' .
+      unwordsS (map (sp 11) (F.toList v))
+    where
+      constr = "Vector" <> show (fromIntegral (natVal @d Proxy))
+      unwordsS = foldr (.) id . intersperse (showChar ' ')
 
 instance (Read r, Arity d) => Read (Vector d r) where
-  readPrec     = lift readVec
-    where
-      readVec :: (Arity d, Read r) => ReadP (Vector d r)
-      readVec = do let d = natVal (Proxy :: Proxy d)
-                   _  <- string $ "Vector" <> show d <> " "
-                   rs <- readPrec_to_P readPrec minPrec
-                   case vectorFromList rs of
-                    Just v -> pure v
-                    _      -> pfail
+  readPrec     = liftReadPrec readPrec readListPrec
   readListPrec = readListPrecDefault
+
+instance (Arity d) => Read1 (Vector d) where
+  liftReadPrec rp _rl = readData $
+      readUnaryWith (replicateM d rp) constr $ \rs ->
+        case vectorFromList rs of
+          Just p -> p
+          _      -> error "internal error in Data.Geometry.Vector read instance."
+    where
+      d = fromIntegral (natVal (Proxy :: Proxy d))
+      constr = "Vector" <> show d
+  liftReadListPrec = liftReadListPrecDefault
 
 
 

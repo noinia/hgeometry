@@ -54,7 +54,7 @@ type instance NumType (Transformation d r) = r
 -- | Compute the inverse transformation
 --
 -- >>> inverseOf $ translation (Vector2 (10.0) (5.0))
--- Transformation {_transformationMatrix = Matrix Vector3 [Vector3 [1.0,0.0,-10.0],Vector3 [0.0,1.0,-5.0],Vector3 [0.0,0.0,1.0]]}
+-- Transformation {_transformationMatrix = Matrix (Vector3 (Vector3 1.0 0.0 (-10.0)) (Vector3 0.0 1.0 (-5.0)) (Vector3 0.0 0.0 1.0))}
 inverseOf :: (Fractional r, Invertible (d + 1) r)
           => Transformation d r -> Transformation d r
 inverseOf = Transformation . inverse' . _transformationMatrix
