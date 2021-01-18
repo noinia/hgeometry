@@ -71,14 +71,14 @@ type HalfPlane = HalfSpace 2
 -- | Get the halfplane left of a line (i.e. "above") a line
 --
 -- >>> leftOf $ horizontalLine 4
--- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 [0,1]}}
+-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 0 1}}
 leftOf   :: Num r => Line 2 r -> HalfPlane r
 leftOf l = (rightOf l)&boundingPlane.normalVec %~ ((-1) *^)
 
 -- | Get the halfplane right of a line (i.e. "below") a line
 --
 -- >>> rightOf $ horizontalLine 4
--- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 [0,-1]}}
+-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point2 0 4, _normalVec = Vector2 0 (-1)}}
 rightOf   :: Num r => Line 2 r -> HalfPlane r
 rightOf l = HalfSpace $ l^.re _asLine
 

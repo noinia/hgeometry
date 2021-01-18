@@ -348,7 +348,7 @@ compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
                        -> Ordering
 compareAroundEndPoint (sa@(LineSegment' p q) :+ _)
                       (sb@(LineSegment' s t) :+ _)
-    -- | traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
+    -- traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
     | p^.core == s^.core = ccwCmpAround' p q t
     | p^.core == t^.core = ccwCmpAround' p q s
     | q^.core == s^.core = ccwCmpAround' q p t

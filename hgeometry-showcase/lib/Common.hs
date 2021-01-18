@@ -23,43 +23,11 @@ import           Reanimate.Animation       (Sync (SyncFreeze))
 
 import Algorithms.Geometry.SSSP
 import Data.Ext
-import Data.Geometry.Interval
-import Data.RealNumber.Rational
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon
-import Data.Geometry.Polygon.Inflate
+import Data.Geometry.Transformation
 import Data.Geometry.Vector
-
-scaleLineSegment :: Num r => r -> LineSegment 2 p r -> LineSegment 2 p r
-scaleLineSegment v (LineSegment a b) =
-  LineSegment
-    (over (unEndPoint.core) (scalePoint v) a)
-    (over (unEndPoint.core) (scalePoint v) b)
-
-scalePointV :: Num r => Vector 2 r -> Point 2 r -> Point 2 r
-scalePointV (Vector2 a b) (Point2 x y) = Point2 (x*a) (y*b)
-
-scalePoint :: Num r => r -> Point 2 r -> Point 2 r
-scalePoint s p = s *^ p
-
-pScale :: (Num r, Eq r) => r -> SimplePolygon p r -> SimplePolygon p r
-pScale v p = fromPoints
-  [ scalePoint v pt :+ e
-  | (pt :+ e) <- toPoints p
-  ]
-
-pScaleV :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
-pScaleV v p = fromPoints
-  [ scalePointV v pt :+ e
-  | (pt :+ e) <- toPoints p
-  ]
-
-pTranslate :: (Num r, Eq r) => Vector 2 r -> SimplePolygon p r -> SimplePolygon p r
-pTranslate v p = fromPoints
-  [ pt .+^ v :+ e
-  | pt :+ e <- toPoints p
-  ]
 
 pCenter :: (Fractional r, Ord r) => SimplePolygon p r -> Point 2 r
 pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
@@ -70,7 +38,7 @@ pCenter p = Point2 (minX + (maxX-minX)/2) (minY + (maxY-minY)/2)
     Point2 _ minY :+ _ = minimumBy (comparing (view (core.yCoord))) p
 
 pAtCenter :: (Fractional r, Ord r) => SimplePolygon p r -> SimplePolygon p r
-pAtCenter p = pTranslate (neg $ toVec $ pCenter p) p
+pAtCenter p = translateBy (neg $ toVec $ pCenter p) p
   where
     neg (Vector2 a b) = Vector2 (-a) (-b)
 
@@ -136,7 +104,7 @@ rootColor :: PixelRGBA8
 rootColor = green
 
 nodeColor :: PixelRGBA8
-nodeColor = PixelRGBA8 0xFF 0xFF 0xFF 0xFF -- polyColorP -- "white"
+nodeColor = black -- PixelRGBA8 0xFF 0xFF 0xFF 0xFF -- polyColorP -- "white"
 
 nodeRadius :: Double
 nodeRadius = 0.2
@@ -162,14 +130,14 @@ ppPolygonBody color p = withFillOpacity 1 $
   | Point2 x y <- map (fmap realToFrac . _core) $ toPoints p
   ]
 
-ppPolygonNodes :: (Real r) => SimplePolygon p r -> SVG
-ppPolygonNodes p = mkGroup $
-  map (ppPolygonNode p) [0 .. size p-1]
+ppPolygonNodes :: (Real r) => PixelRGBA8 -> SimplePolygon p r -> SVG
+ppPolygonNodes color p = mkGroup $
+  map (ppPolygonNode color p) [0 .. size p-1]
 
-ppPolygonNode :: (Real r) => SimplePolygon p r -> Int -> SVG
-ppPolygonNode p idx =
+ppPolygonNode :: (Real r) => PixelRGBA8 -> SimplePolygon p r -> Int -> SVG
+ppPolygonNode color p idx =
   withFillColorPixel outlineColor $
-  withStrokeColorPixel nodeColor $
+  withStrokeColorPixel color $
   let Point2 x y = realToFrac <$> p^.outerVertex idx.core
   in translate x y $ mkCircle nodeRadius
 
@@ -182,6 +150,16 @@ ppSSSP p = ppSSSP' tree p'
 ppSSSP' :: Real r => SSSP -> SimplePolygon p r -> SVG
 ppSSSP' tree p = mkGroup $
   map (ppPathTo tree p) [1 .. size p - 1]
+
+ppLineSegment :: Real r => LineSegment 2 p r -> SVG
+ppLineSegment (LineSegment' a b) = ppLine (a^.core) (b^.core)
+
+ppLine :: Real r => Point 2 r -> Point 2 r -> SVG
+ppLine a b =
+    mkLine (x1,y1) (x2,y2)
+  where
+    Point2 x1 y1 = realToFrac <$> a
+    Point2 x2 y2 = realToFrac <$> b
 
 ppPathTo :: (Real r) => SSSP -> SimplePolygon p r -> Int -> SVG
 ppPathTo t p nth = withFillOpacity 0 $ withStrokeColorPixel pathColor $ mkLinePath
@@ -242,22 +220,15 @@ lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
 ------------------------------------------------------------------
 -- Random data
 
-granularity :: Integer
-granularity = 10000000
+genPoint :: (RandomGen g, Random r, Fractional r) => Rand g (Point 2 r)
+genPoint = Point2 <$> r <*> r
+  where
+    r = getRandomR (screenBottom, screenTop)
 
--- Random point between screenTop/screenBottom.
-genPoint :: RandomGen g => Rand g (Point 2 Rational)
-genPoint = do
-  x <- liftRand $ randomR (0, granularity)
-  y <- liftRand $ randomR (0, granularity)
-  pure $ Point2
-    ((x % granularity) * screenHeight - screenTop)
-    ((y % granularity) * screenHeight - screenTop)
-
-genPoints :: RandomGen g => Int -> Rand g [Point 2 Rational]
+genPoints :: (RandomGen g, Random r, Fractional r) => Int -> Rand g [Point 2 r]
 genPoints n = replicateM n genPoint
 
-genLineSegment :: RandomGen g => Rand g (LineSegment 2 () Rational)
+genLineSegment :: (RandomGen g, Random r, Fractional r) => Rand g (LineSegment 2 () r)
 genLineSegment = do
   a <- genPoint
   b <- genPoint

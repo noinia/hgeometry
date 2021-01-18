@@ -88,7 +88,7 @@ isValidTriangle t = find (\a -> not $ (a^.core) `intersects` h)
 -- | Computes the halfspace above the triangle.
 --
 -- >>> upperHalfSpaceOf (Triangle (ext $ origin) (ext $ Point3 10 0 0) (ext $ Point3 0 10 0))
--- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 [0,0,100]}}
+-- HalfSpace {_boundingPlane = HyperPlane {_inPlane = Point3 0 0 0, _normalVec = Vector3 0 0 100}}
 upperHalfSpaceOf                  :: (Ord r, Num r) => Triangle 3 p r -> HalfSpace 3 r
 upperHalfSpaceOf (Triangle p q r) = HalfSpace h
   where

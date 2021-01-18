@@ -20,7 +20,7 @@ class AsAPoint p where
 -- | Lens to access the vector corresponding to this point.
 --
 -- >>> (Point3 1 2 3) ^. vector'
--- Vector3 [1,2,3]
+-- Vector3 1 2 3
 -- >>> origin & vector' .~ Vector3 1 2 3
 -- Point3 1 2 3
 vector' :: AsAPoint p => Lens (p d r) (p d r') (Vector d r) (Vector d r')

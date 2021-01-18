@@ -1,5 +1,5 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE PatternSynonyms       #-}
+{-# LANGUAGE DataKinds       #-}
+{-# LANGUAGE PatternSynonyms #-}
 module Inflate (animateInflate) where
 
 import Control.Lens                  ((&), (^.))
@@ -10,6 +10,7 @@ import Data.Geometry.LineSegment     (LineSegment (OpenLineSegment), sqSegmentLe
 import Data.Geometry.Point           (Point (Point2))
 import Data.Geometry.Polygon         (SimplePolygon, outerVertex, simpleFromPoints, size)
 import Data.Geometry.Polygon.Inflate (Arc (Arc), inflate)
+import Data.Geometry.Transformation
 import Data.Geometry.Vector          (pattern Vector2)
 import Data.Intersection             (IsIntersectableWith (intersect),
                                       NoIntersection (NoIntersection))
@@ -23,10 +24,10 @@ import Reanimate                     (Animation, adjustZ, animate, applyE, fadeO
                                       setDuration, withFillColorPixel, withFillOpacity,
                                       withStrokeColorPixel, withStrokeLineJoin)
 
-import Common (black, green, outlineColor, pAtCenter, pScaleV, ppPolygonOutline)
+import Common (black, green, outlineColor, pAtCenter, ppPolygonOutline)
 
 testPolygon1 :: SimplePolygon () (RealNumber 10)
-testPolygon1 = pScaleV (Vector2 1 3) $ pAtCenter $ simpleFromPoints $ map ext
+testPolygon1 = scaleBy (Vector2 1 3) $ pAtCenter $ simpleFromPoints $ map ext
   [ Point2 0 0
   , Point2 1 1
   , Point2 3 1

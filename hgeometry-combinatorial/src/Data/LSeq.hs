@@ -103,9 +103,10 @@ instance Ixed (LSeq n a) where
     | otherwise                 = pure s
 
 instance (1 <= n) => Foldable1 (LSeq n)
--- instance (1 <= n) => Traversable1 (LSeq n) where
---   traverse1 f s = case traverse1 f $ viewl s of
---                     x :< s' -> x <| s'
+instance (1 <= n) => Traversable1 (LSeq n) where
+  traverse1 f (LSeq xs) = case runMaybeApply $ traverse (MaybeApply . Left . f) xs of
+                            Left xs' -> LSeq <$> xs'
+                            Right _  -> error "Data.LSeq.traverse1: impossible"
 
 -- | \( O(1) \) The empty sequence.
 empty :: LSeq 0 a
