@@ -75,6 +75,7 @@ module Data.Geometry.Polygon
 
   , rotateLeft
   , rotateRight
+  , findRotateTo
 
   ) where
 
