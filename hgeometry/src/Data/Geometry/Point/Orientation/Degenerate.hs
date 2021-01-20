@@ -50,7 +50,9 @@ instance Show CCW where
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = CCWWrap $ z `compare` 0
+ccw p q r = CCWWrap $ (ux * vy) `compare` (uy * vx)
+-- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
+                                       -- I've added a testcase that fails if comparing against 0.
             -- case z `compare` 0 of
             --   LT -> CW
             --   GT -> CCW
@@ -58,7 +60,7 @@ ccw p q r = CCWWrap $ z `compare` 0
      where
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
-       z             = ux * vy - uy * vx
+       _z             = ux * vy - uy * vx
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
