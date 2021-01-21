@@ -152,12 +152,3 @@ spec = do
     property $ qcReadShow1 @(Point 3) Proxy
   specify "Read/Show properties for Point4" $
     property $ qcReadShow1 @(Point 4) Proxy
-
-  specify "Read/Show properties for Vector1" $
-    property $ qcReadShow1 @(Vector 1) Proxy
-  specify "Read/Show properties for Vector2" $
-    property $ qcReadShow1 @(Vector 2) Proxy
-  specify "Read/Show properties for Vector3" $
-    property $ qcReadShow1 @(Vector 3) Proxy
-  specify "Read/Show properties for Vector4" $
-    property $ qcReadShow1 @(Vector 4) Proxy
