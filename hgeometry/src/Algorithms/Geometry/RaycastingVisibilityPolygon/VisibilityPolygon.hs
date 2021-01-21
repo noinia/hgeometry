@@ -46,6 +46,22 @@ Case 4: Ray from 'x' to a far corner is blocked by edges.
 \--x------/
 
 
+Case 5: Ray from 'x' is squeezed on both sides. Be careful you don't allow zero-width slivers
+        in the final visibility polygon.
+
+/-------\
+|       |
+|   /---/
+|   |     <- Ray should be blocked by this S-bend.
+|   \---\
+|   |   |
+\---\   |
+    |   | <- Ray should pass through first S-bend.
+/---/   |
+|   |   |
+\---x---/
+
+
 
 The brute-force visibility algorithm works as follows:
 1. X is a given point of origin inside of P.
