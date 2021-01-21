@@ -24,6 +24,9 @@ import qualified Data.List as L
 
 --------------------------------------------------------------------------------
 
+-- $setup
+-- >>> import Data.Double.Approximate
+
 -- | Data type for expressing the orientation of three points, with
 -- the option of allowing Colinearities.
 newtype CCW = CCWWrap Ordering deriving Eq
@@ -49,6 +52,18 @@ instance Show CCW where
 
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
+--
+-- Be vary of numerical instability:
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Double))
+-- CCW
+--
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Rational))
+-- CoLinear
+--
+-- If you can't use 'Rational', try 'SafeDouble' instead of 'Double':
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
+-- CoLinear
+--
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
 ccw p q r = CCWWrap $ (ux * vy) `compare` (uy * vx)
 -- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
