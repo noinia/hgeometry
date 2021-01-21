@@ -64,6 +64,9 @@ The brute-force visibility algorithm works as follows:
   appear before the grazing vertex.
   For case 4, nothing needs to be done and no points along the ray
   should appear in the visibility polygon.
+5. Take the points we know are in the visiblity polygon and construct
+   a polygon. The points are already in the right order (because of step 2)
+   so we can simply call 'fromPoints'.
 
 -}
 
