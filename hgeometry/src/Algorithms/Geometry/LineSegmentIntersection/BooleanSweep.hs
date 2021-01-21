@@ -12,27 +12,38 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
   ( intersections
+  , segmentsOverlap
   ) where
 
-import           Control.Lens hiding (contains)
+import           Control.Lens              hiding (contains)
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable             as F
+import           Data.Function
 import           Data.Geometry.Interval
-import           Data.Geometry.LineSegment
 import           Data.Geometry.Line
+import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Triangle
-import qualified Data.List as L
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List                 as L
+import           Data.List.NonEmpty        (NonEmpty (..))
+import qualified Data.List.NonEmpty        as NonEmpty
 import           Data.Maybe
-import Data.Function
-import           Data.Ord (Down(..), comparing)
-import qualified Data.Set as SS -- status struct
-import qualified Data.Set.Util as SS -- status struct
+import           Data.Ord                  (Down (..), comparing)
+import qualified Data.Set                  as SS
+import qualified Data.Set.Util             as SS
+import qualified Algorithms.Geometry.LineSegmentIntersection.Naive as Naive
 
 {-
 Scan line is horizontal and moves from +y to -y.
+-}
+
+line1 = LineSegment (Closed (Point2 3.5 6.5 :+ ())) (Open (Point2 5 (-1) :+ ()))
+line2 = LineSegment (Closed (Point2 5 2 :+ ())) (Closed (Point2 (-4) 2.5 :+ ()))
+line3 = LineSegment (Closed (Point2 1.5 7 :+ ())) (Closed (Point2 2.5 3.5 :+ ()))
+{-
+[LineSegment (Closed (Point2 7.26588 13.35486 :+ ())) (Open (Point2 10.57626 (-2.59247) :+ ()))
+,LineSegment (Closed (Point2 10.92919 4.06523 :+ ())) (Closed (Point2 (-8.76088) 5.30324 :+ ()))
+,LineSegment (Closed (Point2 3.31979 14.49398 :+ ())) (Closed (Point2 5.29352 7.49702 :+ ()))]
 -}
 
 --------------------------------------------------------------------------------
@@ -130,8 +141,8 @@ sweep (e@(eventPoint -> p):eq) ss = overlaps || sweep eq ss'
   where
     starts         = startSegs e
     (before,after) = splitBeforeAfter p ss
-    
-    overlaps 
+
+    overlaps
       | F.null newSegs = fromMaybe False (segmentsOverlap <$> sl <*> sr)
       | otherwise      = let s'  = SS.lookupMin newSegs
                              s'' = SS.lookupMax newSegs
@@ -181,13 +192,16 @@ rightEndpoint s = (s^.start.core.xCoord) `max` (s^.end.core.xCoord)
 -- * Finding New events
 
 segmentsOverlap :: (Num r, Ord r) => LineSegment 2 p r -> LineSegment 2 p r -> Bool
-segmentsOverlap a b =
-    (a^.start.core) `onSegment2` b ||
-    (a^.end.core) `onSegment2` b ||
-    (ccw' (a^.start) (b^.start) (a^.end) /= ccw' (a^.start) (b^.end) (a^.end) &&
+segmentsOverlap a@(LineSegment aStart aEnd) b =
+    (isClosed aStart && (aStart^.unEndPoint.core) `onSegment2` b) ||
+    (isClosed aEnd && (aEnd^.unEndPoint.core) `onSegment2` b) ||
+    (opposite (ccw' (a^.start) (b^.start) (a^.end)) (ccw' (a^.start) (b^.end) (a^.end)) &&
     not (onTriangleRelaxed (a^.end.core) t1) &&
     not (onTriangleRelaxed (a^.start.core) t2))
   where
+    opposite CW CCW = True
+    opposite CCW CW = True
+    opposite _ _ = False
     t1 = Triangle (a^.start) (b^.start) (b^.end)
     t2 = Triangle (a^.end) (b^.start) (b^.end)
 
