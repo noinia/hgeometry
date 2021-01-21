@@ -95,9 +95,18 @@ visibility polygon point =
 -------------------------------------------------------------------------------
 -- Helper functions
 
+data IntersectonType r
+  = BlockedBySegment (Point 2 r)
+  | BlockedByVertex (Point 2 r)
+  | GrazedOnTheRight (Point 2 r)
+  | GrazedOnTheLeft (Point 2 r)
+
 data Event p r
   = SegmentIntersection (Point 2 r) (LineSegment 2 p r)
   | VertexIntersection (Point 2 r) (LineSegment 2 p r) (LineSegment 2 p r)
+
+interpret :: Event p r -> IntersectonType r
+interpret = undefined
 
 shootRay :: HalfLine 2 r -> CircularVector (LineSegment 2 p r) -> [Event p r]
 shootRay = undefined
