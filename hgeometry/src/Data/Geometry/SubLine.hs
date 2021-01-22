@@ -92,9 +92,8 @@ onSubLine p (SubLine l r) = case toOffset p l of
 -- lies on the subline, i.e. in the interval r
 onSubLineUB                   :: (Ord r, Fractional r)
                               => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
-p `onSubLineUB` (SubLine l r) = case toOffset p l of
-                                  Nothing -> False
-                                  Just x  -> Val x `inInterval` r
+p `onSubLineUB` (SubLine l r) =
+  p `onLine2` l && Val (toOffset' p l) `inInterval` r
 
 -- | given point p, and a Subline l r such that p lies on line l, test if it
 -- lies on the subline, i.e. in the interval r
