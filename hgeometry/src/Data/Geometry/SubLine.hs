@@ -9,7 +9,22 @@
 -- SubLine; a part of a line
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.SubLine where
+module Data.Geometry.SubLine
+  ( SubLine(..)
+  , line
+  , subRange
+  , fixEndPoints
+  , dropExtra
+  , _unBounded
+  , toUnbounded
+  , fromUnbounded
+  , onSubLine
+  , onSubLineUB
+  , onSubLine2
+  , onSubLine2UB
+  , getEndPointsUnBounded
+  , fromLine
+  ) where
 
 import           Control.Lens
 import           Data.Bifunctor
