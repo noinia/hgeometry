@@ -61,9 +61,9 @@ instance (KnownNat abs, KnownNat rel) => Eq (DoubleRelAbs abs rel) where
      abs d2 < m_epsilon * fromIntegral (natVal @abs Proxy))
 
 instance (KnownNat abs, KnownNat rel) => Ord (DoubleRelAbs abs rel) where
-  DoubleRelAbs d1 `compare` DoubleRelAbs d2
-    | within (fromIntegral (natVal @rel Proxy)) d1 d2 = EQ
-    | otherwise = d1 `compare` d2
+  lhs@(DoubleRelAbs d1) `compare` rhs@(DoubleRelAbs d2)
+    | lhs == rhs = EQ
+    | otherwise  = d1 `compare` d2
 
 instance Show (DoubleRelAbs abs rel) where
   showsPrec i (DoubleRelAbs d) = showsPrec i d
