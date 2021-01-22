@@ -93,7 +93,12 @@ onSubLine p (SubLine l r) = case toOffset p l of
 onSubLineUB                   :: (Ord r, Fractional r)
                               => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
 p `onSubLineUB` (SubLine l r) =
-  p `onLine2` l && Val (toOffset' p l) `inInterval` r
+  p `onLine2` l &&
+  Val (toOffset' p l) `inInterval` r
+
+inSubLineIntervalUB                   :: (Ord r, Fractional r)
+                              => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
+p `inSubLineIntervalUB` (SubLine l r) = Val (toOffset' p l) `inInterval` r
 
 -- | given point p, and a Subline l r such that p lies on line l, test if it
 -- lies on the subline, i.e. in the interval r
@@ -150,7 +155,7 @@ instance (Ord r, Fractional r) =>
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
          H (\NoIntersection -> coRec NoIntersection)
-      :& H (\p@(Point _)    -> if onSubLine2UB p sl && onSubLine2UB p sm
+      :& H (\p@(Point _)    -> if inSubLineIntervalUB p sl && inSubLineIntervalUB p sm
                                  then coRec p
                                  else coRec NoIntersection)
       :& H (\_              -> match (r `intersect` s'') $

@@ -259,7 +259,7 @@ outsidePoint = Point2 5814191.399840455 2393283.2821864313
 --        This leads to numerical instability.
 numericalSpec :: Spec
 numericalSpec =
-  xdescribe "insidePolygon" $ do
+  describe "insidePolygon" $ do
     specify "baseline check" $ do
       ((insidePoint::Point 2 Rational) `inPolygon` polygon) `shouldBe` Inside
       ((outsidePoint::Point 2 Rational) `inPolygon` polygon) `shouldBe` Outside
