@@ -251,12 +251,11 @@ polygon = fromPoints $ map ext
   , Point2 5579688.373487147 2252038.6420285213
   ]
 
+
 insidePoint, outsidePoint :: Fractional r => Point 2 r
 insidePoint  = Point2 5565974.538888888 2273030.9266712796
 outsidePoint = Point2 5814191.399840455 2393283.2821864313
 
--- FIXME: 'inPolygon' tries to find all intersections instead of just counting them.
---        This leads to numerical instability.
 numericalSpec :: Spec
 numericalSpec =
   describe "insidePolygon" $ do
