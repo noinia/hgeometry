@@ -12,7 +12,7 @@
 --
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
-  ( intersections
+  ( hasIntersections
   , segmentsOverlap
   ) where
 
@@ -34,12 +34,12 @@ import qualified Data.Set.Util             as SS
 
 --------------------------------------------------------------------------------
 
--- | Compute all intersections
+-- | Tests if there are any intersections.
 --
 -- \(O(n\log n)\)
-intersections    :: (Ord r, Num r)
+hasIntersections    :: (Ord r, Num r)
                  => [LineSegment 2 p r] -> Bool
-intersections ss = sweep pts SS.empty
+hasIntersections ss = sweep pts SS.empty
   where
     pts = L.sortBy ordEvents . concatMap asEventPts $ ss
 
