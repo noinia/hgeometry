@@ -22,11 +22,11 @@ type R = RealNumber 5
 
 line1, line2, line3, line4 :: LineSegment 2 () R
 
-line1 = ClosedLineSegment (ext $ Point2 0.0 0) (ext $ Point2 1 0)
+line1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 1 0)
 line2 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 1)
 
-line3 = OpenLineSegment (ext $ Point2 0.0 0) (ext $ Point2 1 0)
-line4 = OpenLineSegment (ext $ Point2 0.0 0) (ext $ Point2 0 1)
+line3 = OpenLineSegment (ext $ Point2 0 0) (ext $ Point2 1 0)
+line4 = OpenLineSegment (ext $ Point2 0 0) (ext $ Point2 0 1)
 
 spec :: Spec
 spec = do
