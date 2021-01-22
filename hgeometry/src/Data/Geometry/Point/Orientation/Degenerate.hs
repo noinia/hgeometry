@@ -4,6 +4,8 @@ module Data.Geometry.Point.Orientation.Degenerate(
 
   , ccw, ccw'
 
+  , isCoLinear
+
   , sortAround, sortAround'
 
   , ccwCmpAroundWith, ccwCmpAroundWith'
@@ -76,6 +78,15 @@ ccw p q r = CCWWrap $ (ux * vy) `compare` (uy * vx)
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
        _z             = ux * vy - uy * vx
+
+-- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
+--
+-- This is identical to `ccw p q r == CoLinear` but doesn't have the `Ord` constraint.
+isCoLinear :: (Eq r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
+isCoLinear p q r = (ux * vy) == (uy * vx)
+     where
+       Vector2 ux uy = q .-. p
+       Vector2 vx vy = r .-. p
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW
