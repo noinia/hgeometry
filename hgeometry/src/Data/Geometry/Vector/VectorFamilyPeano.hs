@@ -38,6 +38,20 @@ type Three = S Two
 type Four = S Three
 type Many d = S (S (S (S (S d))))
 
+pattern Zero :: () => (d ~ Z) => SingPeano d
+pattern Zero = SZ
+pattern One :: () => (d ~ One) => SingPeano d
+pattern One = SS Zero
+pattern Two :: () => (d ~ Two) => SingPeano d
+pattern Two = SS One
+pattern Three :: () => (d ~ Three) => SingPeano d
+pattern Three = SS Two
+pattern Four :: () => (d ~ Four) => SingPeano d
+pattern Four = SS Three
+pattern Many :: () => (d ~ Many d') => SingPeano d
+pattern Many <- (SS (SS (SS (SS (SS _)))))
+
+{-# COMPLETE Zero, One,Two,Three,Four,Many #-}
 
 type family FromPeano (d :: PeanoNum) :: Nat where
   FromPeano Z     = 0
@@ -86,18 +100,18 @@ unVF :: Lens (VectorFamily  d r) (VectorFamily d t)
 unVF = lens _unVF (const VectorFamily)
 {-# INLINE unVF #-}
 
--- type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
-class (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
-instance (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
+type ImplicitArity d = (ImplicitPeano d, V.Arity (FromPeano d))
+-- class (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
+-- instance (ImplicitPeano d, V.Arity (FromPeano d)) => ImplicitArity d
 
 instance (Eq r, ImplicitArity d) => Eq (VectorFamily d r) where
   (VectorFamily u) == (VectorFamily v) = case (implicitPeano :: SingPeano d) of
-        SZ                         -> u == v
-        (SS SZ)                    -> u == v
-        (SS (SS SZ))               -> u == v
-        (SS (SS (SS SZ)))          -> u == v
-        (SS (SS (SS (SS SZ))))     -> u == v
-        (SS (SS (SS (SS (SS _))))) -> u == v
+        Zero  -> u == v
+        One   -> u == v
+        Two   -> u == v
+        Three -> u == v
+        Four  -> u == v
+        Many  -> u == v
   {-# INLINE (==) #-}
 
 instance (ImplicitArity d) => Eq1 (VectorFamily d) where

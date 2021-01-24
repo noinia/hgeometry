@@ -59,9 +59,10 @@ unV :: Iso (Vector d r) (Vector d s) (VectorFamily (Peano d) r) (VectorFamily (P
 unV = iso _unV MKVector
 {-# INLINE unV #-}
 
--- type Arity d = (ImplicitArity (Peano d), KnownNat d)
-class (ImplicitArity (Peano d), KnownNat d) => Arity d
-instance (ImplicitArity (Peano d), KnownNat d) => Arity d
+type Arity d = (ImplicitArity (Peano d), KnownNat d)
+
+-- class (ImplicitArity (Peano d), KnownNat d) => Arity d
+-- instance (ImplicitArity (Peano d), KnownNat d) => Arity d
 
 
 deriving instance (Eq r,  Arity d) => Eq  (Vector d r)
