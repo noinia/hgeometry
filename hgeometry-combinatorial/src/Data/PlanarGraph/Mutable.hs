@@ -1,28 +1,37 @@
-module Data.PlanarGraph.Persistent where
+module Data.PlanarGraph.Mutable where
 
+
+import Control.Monad.ST
+import Data.STRef
 import Data.HashMap.Strict
 import Control.Monad.State
+import Data.Vector.Unboxed.Mutable
 
-type HalfEdge = Int
+type HalfEdgeIdx = Int
+data HalfEdge s = HalfEdge Int (PlanarGraph s)
+type VertexIdx = Int
 type Vertex = Int
+type FaceIdx = Int
 type Face = Int
 
 -- PlanarGraphs have vertices, edges, and faces.
 -- Invariant: The half-edge of a boundary vertex is interior, twin is exterior.
-data PlanarGraph = PlanarGraph
-  { pgNextHalfEdgeId     :: HalfEdge
-  , pgNextVertexId       :: Vertex
-  , pgNextFaceId         :: Face
-  , pgNext               :: HashMap HalfEdge HalfEdge
-  , pgVertex             :: HashMap HalfEdge Vertex
-  , pgFace               :: HashMap HalfEdge Face
-  , pgHalfEdgeFromVertex :: HashMap Vertex HalfEdge
-  , pgHalfEdgeFromFace   :: HashMap Face HalfEdge
+
+type PlanarGraph s = STRef s (PlanarGraph' s)
+data PlanarGraph' s = PlanarGraph
+  { pgNextHalfEdgeId     :: HalfEdgeIdx
+  , pgNextVertexId       :: VertexIdx
+  , pgNextFaceId         :: FaceIdx
+  , pgNext               :: MVector s HalfEdgeIdx -- HalfEdge indexed
+  , pgVertex             :: MVector s VertexIdx   -- HalfEdge indexed
+  , pgFace               :: MVector s FaceIdx     -- HalfEdge indexed
+  , pgHalfEdgeFromVertex :: MVector s HalfEdgeIdx -- Vertex indexed
+  , pgHalfEdgeFromFace   :: MVector s HalfEdgeIdx -- Face indexed
   }
 
 -- data PlaneGraph r = PlaneGraph PlanarGraph (HashMap Vertex (Point 2 r))
 
-new :: Int -> PlanarGraph
+new :: Int -> ST s (PlanarGraph s)
 new = undefined
 
 -- O(log n)
@@ -34,11 +43,12 @@ new = undefined
 -- vertexAdjacentVertices :: Vertex -> PlanarGraph -> [Vertex]
 -- vertexAdjacentFaces :: Vertex -> PlanarGraph -> [Face]
 
-halfEdgeNext       :: HalfEdge -> PlanarGraph -> HalfEdge
+-- | O(1)
+halfEdgeNext :: HalfEdge s -> ST s (HalfEdge s)
 halfEdgeNext = undefined
 
-halfEdgeNextM       :: MonadState PlanarGraph m => HalfEdge -> m HalfEdge
-halfEdgeNextM = gets . halfEdgeNext
+-- halfEdgeNextM       :: MonadState PlanarGraph m => HalfEdge -> m HalfEdge
+-- halfEdgeNextM = gets . halfEdgeNext
 
 -- halfEdgeNext       :: HalfEdge -> PlanarGraph -> HalfEdge
 -- halfEdgeVertex     :: HalfEdge -> PlanarGraph -> Vertex
