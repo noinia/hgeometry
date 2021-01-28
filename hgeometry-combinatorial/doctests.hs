@@ -62,6 +62,7 @@ modules =
   , "Data.PlanarGraph"
   , "Data.PlanarGraph.Dart"
   , "Data.PlanarGraph.Core"
+  , "Data.PlanarGraph.Mutable"
   , "Data.Tree.Util"
   , "Data.Set.Util"
 
