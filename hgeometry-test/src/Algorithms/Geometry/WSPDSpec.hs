@@ -1,4 +1,4 @@
-module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec (spec) where
+module Algorithms.Geometry.WSPDSpec (spec) where
 
 import           Algorithms.Geometry.WSPD
 import           Control.Lens             ((%~), (&))
