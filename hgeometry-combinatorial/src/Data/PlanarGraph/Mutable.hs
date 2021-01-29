@@ -1,5 +1,64 @@
 module Data.PlanarGraph.Mutable
   ( PlanarGraph
+  , fromFaces -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
+  , clone     -- :: PlanarGraph s -> ST s (PlanarGraph s)
+    
+    -- * Vertices
+  , vertexFromId                -- :: VertexId -> PlanarGraph s -> Vertex s
+  , vertexToId                  -- :: Vertex s -> VertexId
+  , vertexHalfEdge              -- :: Vertex s -> ST s (HalfEdge s)
+  , vertexIsBoundary            -- :: Vertex s -> ST s Bool
+  , vertexOutgoingHalfEdges     -- :: Vertex s -> ST s (CircularVector (HalfEdge s))
+  , vertexWithOutgoingHalfEdges -- :: Vertex s -> (HalfEdge s -> ST s ()) -> ST s ()
+  , vertexIncomingHalfEdges     -- :: Vertex s -> ST s (CircularVector (HalfEdge s))
+  , vertexWithIncomingHalfEdges -- :: Vertex s -> (HalfEdge s -> ST s ()) -> ST s ()
+  , vertexNeighbours            -- :: Vertex s -> ST s (CircularVector (Vertex s))
+  -- , vertexNew -- :: PlanarGraph s -> ST s (Vertex s)
+  -- , vertexSetHalfEdge -- :: Vertex s -> HalfEdge s -> ST s ()
+
+    -- * Half-edges
+  , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph s -> HalfEdge s
+  , halfEdgeToId         -- :: HalfEdge s -> HalfEdgeId
+  , halfEdgeNext         -- :: HalfEdge s -> ST s (HalfEdge s)
+  , halfEdgePrev         -- :: HalfEdge s -> ST s (HalfEdge s)
+  , halfEdgeNextOutgoing -- :: HalfEdge s -> ST s (HalfEdge s)
+  , halfEdgeNextIncoming -- :: HalfEdge s -> ST s (HalfEdge s)
+  , halfEdgeVertex       -- :: HalfEdge s -> ST s (Vertex s)
+  , halfEdgeTwin         -- :: HalfEdge s -> HalfEdge s
+  , halfEdgeTailVertex   -- :: HalfEdge s -> ST s (Vertex s)
+  , halfEdgeTipVertex    -- :: HalfEdge s -> ST s (Vertex s)
+  , halfEdgeFace         -- :: HalfEdge s -> ST s (Face s)
+  , halfEdgeIsInterior   -- :: HalfEdge s -> ST s Bool
+  -- , halfEdgeNew          -- :: PlanarGraph s -> ST s (HalfEdge s)
+  -- , halfEdgeSetNext      -- :: HalfEdge s -> HalfEdge s -> ST s ()
+  -- , halfEdgeSetPrev      -- :: HalfEdge s -> HalfEdge s -> ST s ()
+  -- , halfEdgeSetFace      -- :: HalfEdge s -> Face s -> ST s ()
+  -- , halfEdgeSetVertex    -- :: HalfEdge s -> Vertex s -> ST s ()
+
+    -- * Faces
+  , faceInvalid    -- :: PlanarGraph s -> Face s
+  , faceIsValid    -- :: Face s -> Bool
+  , faceIsInvalid  -- :: Face s -> Bool
+  , faceFromId     -- :: FaceId -> PlanarGraph s -> Face s
+  , faceToId       -- :: Face s -> FaceId
+  , faceHalfEdge   -- :: Face s -> ST s (HalfEdge s)
+  , faceIsInterior -- :: Face s -> Bool
+  , faceIsBoundary -- :: Face s -> Bool
+  , faceHalfEdges  -- :: Face s -> ST s (CircularVector (HalfEdge s))
+  , faceBoundary   -- :: Face s -> ST s (CircularVector (Vertex s))
+  -- , faceNew :: PlanarGraph s -> ST s (Face s)
+  -- , faceNewBoundary :: PlanarGraph s -> ST s (Face s)
+  -- , faceSetHalfEdge :: Face s -> HalfEdge s -> ST s ()
+
+    -- * Mutation
+  , pgConnectVertices -- :: HalfEdge s -> HalfEdge s -> ST s (Edge s)
+-- pgSplitHalfEdge :: HalfEdge s -> ST s (Vertex s)
+
+-- pgRemoveFace :: Face s -> ST s ()
+-- pgRemoveHalfEdge :: HalfEdge s -> ST s ()
+-- pgRemoveVertex :: Vertex s -> ST s ()
+    -- * Misc
+  , tutteEmbedding -- :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
   )
   where
 
@@ -21,14 +80,6 @@ import           Linear.Matrix (luSolve)
 import           Linear.V
 
 import Debug.Trace
-
--- Only works in docs? Yes.
--- 
--- >>> runPG $ do pg <- fromFaces []; vertexDelete (vertexFromId 0 pg); pure pg
--- SomeHash
---
--- ![image description](pathtoimage.png)
-test = undefined
 
 -------------------------------------------------------------------------------
 -- Resizeable vector
