@@ -19,7 +19,7 @@ module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
 
                           , PointFunctor(..)
 
-                          , CCW, ccw, ccw'
+                          , CCW, ccw, ccw', isCoLinear
                           , pattern CCW, pattern CW, pattern CoLinear
 
                           , ccwCmpAround, ccwCmpAround'

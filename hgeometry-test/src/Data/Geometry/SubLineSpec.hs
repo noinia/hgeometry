@@ -24,6 +24,13 @@ spec = do
       ((Point2 (-1) (-1 :: Rational)) `onSubLine2`
        (seg^._SubLine))
     `shouldBe` False
+  it "open intersection " $ do
+      ((Point2 1 1) `onSubLine2` (seg2^._SubLine))
+        `shouldBe` False
+      ((Point2 5 5) `onSubLine2` (seg2^._SubLine))
+        `shouldBe` False
+      ((Point2 2 2) `onSubLine2` (seg2^._SubLine))
+        `shouldBe` True
 
   it "Intersection test" $ do
     let mySeg :: LineSegment 2 () Rational
@@ -49,6 +56,8 @@ mkSL s = s^._SubLine.re _unBounded
 seg :: LineSegment 2 () Rational
 seg = ClosedLineSegment (ext (Point2 1 1)) (ext (Point2 5 5))
 
+seg2 :: LineSegment 2 () Rational
+seg2 = OpenLineSegment (ext (Point2 1 1)) (ext (Point2 5 5))
 
 
 -- | Original def of onSubline

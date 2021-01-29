@@ -145,15 +145,24 @@ toOffset              :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r 
 toOffset p (Line q v) = scalarMultiple (p .-. q) v
 
 
--- | Given point p *on* a line (Line q v), Get the scalar lambda s.t.
--- p = q + lambda v. (So this is an unsafe version of 'toOffset')
+-- | Given point p near a line (Line q v), get the scalar lambda s.t.
+-- the distance between 'p' and 'q + lambda v' is minimized.
 --
--- pre: the input point p lies on the line l.
+-- >>> toOffset' (Point2 1 1) (lineThrough origin $ Point2 10 10)
+-- 0.1
+--
+-- >>> toOffset' (Point2 5 5) (lineThrough origin $ Point2 10 10)
+-- 0.5
+--
+-- \<6,4\> is not on the line but we can still point closest to it.
+-- >>> toOffset' (Point2 6 4) (lineThrough origin $ Point2 10 10)
+-- 0.5
 toOffset'             :: (Eq r, Fractional r, Arity d) => Point d r -> Line d r -> r
-toOffset' p = fromJust' . toOffset p
-  where
-    fromJust' (Just x) = x
-    fromJust' _        = error "toOffset: Nothing"
+toOffset' p (Line q v) = dot (p .-. q) v / quadrance v
+-- toOffset' p = fromJust' . toOffset p
+--   where
+--     fromJust' (Just x) = x
+--     fromJust' _        = error "toOffset: Nothing"
 
 
 -- | The intersection of two lines is either: NoIntersection, a point or a line.

@@ -4,6 +4,8 @@ module Data.Geometry.Point.Orientation.Degenerate(
 
   , ccw, ccw'
 
+  , isCoLinear
+
   , sortAround, sortAround'
 
   , ccwCmpAroundWith, ccwCmpAroundWith'
@@ -23,6 +25,9 @@ import           Data.Geometry.Vector
 import qualified Data.List as L
 
 --------------------------------------------------------------------------------
+
+-- $setup
+-- >>> import Data.Double.Approximate
 
 -- | Data type for expressing the orientation of three points, with
 -- the option of allowing Colinearities.
@@ -49,16 +54,46 @@ instance Show CCW where
 
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
+--
+-- Be vary of numerical instability:
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Double))
+-- CCW
+--
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Rational))
+-- CoLinear
+--
+-- If you can't use 'Rational', try 'SafeDouble' instead of 'Double':
+-- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::SafeDouble))
+-- CoLinear
+--
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = CCWWrap $ z `compare` 0
+ccw p q r = CCWWrap $ lhs `compare` rhs
+-- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
+                                       -- I've added a testcase that fails if comparing against 0.
             -- case z `compare` 0 of
             --   LT -> CW
             --   GT -> CCW
             --   EQ -> CoLinear
      where
+       Point2 px py = p
+       Point2 qx qy = q
+       Point2 rx ry = r
+       -- Expending the equations avoids premature rounding. This is essential for numerical
+       -- robustness.
+       lhs = qx*ry-qx*py-px*ry+px*py -- (qx-px) * (ry-py)
+       rhs = qy*rx-qy*px-py*rx+py*px -- (qy-py) * (rx-px)
+      --  Vector2 ux uy = q .-. p
+      --  Vector2 vx vy = r .-. p
+      --  _z             = ux * vy - uy * vx
+
+-- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
+--
+-- This is identical to `ccw p q r == CoLinear` but doesn't have the `Ord` constraint.
+isCoLinear :: (Eq r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> Bool
+isCoLinear p q r = (ux * vy) == (uy * vx)
+     where
        Vector2 ux uy = q .-. p
        Vector2 vx vy = r .-. p
-       z             = ux * vy - uy * vx
 
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 ccw' :: (Ord r, Num r) => Point 2 r :+ a -> Point 2 r :+ b -> Point 2 r :+ c -> CCW

@@ -3,16 +3,18 @@ module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens                                (over, view, (^.), (^..))
-import           Control.Monad.Random (Random, evalRand, mkStdGen)
+import           Control.Monad.Random                        (Random, evalRand, mkStdGen)
 import qualified Data.ByteString                             as BS
 import           Data.Coerce
+import           Data.Double.Approximate
 import           Data.Ext
 import qualified Data.Foldable                               as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
-import           Data.Geometry.Triangle
+import           Data.Geometry.Polygon
 import           Data.Geometry.Polygon.Monotone
+import           Data.Geometry.Triangle
 import           Data.Ord
 import           Data.Proxy
 import           Data.Ratio
@@ -163,6 +165,7 @@ spec = do
   it "is monotone" $
     property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
       isMonotone dir mono
+  numericalSpec
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
@@ -234,3 +237,34 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 
 
 -- main = readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
+
+
+----------------------------------
+-- Numerical Robustness
+
+-- Test case found by Kamil Figiela @kfigiela.
+polygon :: (Eq r, Fractional r) => SimplePolygon () r
+polygon = fromPoints $ map ext
+  [ Point2 5584390.945938013 2284567.4635945037
+  , Point2 5562410.061516319 2285869.7979417136
+  , Point2 5563196.65161862  2250738.663576637
+  , Point2 5579688.373487147 2252038.6420285213
+  ]
+
+
+insidePoint, outsidePoint :: Fractional r => Point 2 r
+insidePoint  = Point2 5565974.538888888 2273030.9266712796
+outsidePoint = Point2 5814191.399840455 2393283.2821864313
+
+numericalSpec :: Spec
+numericalSpec =
+  describe "insidePolygon" $ do
+    specify "baseline check" $ do
+      ((insidePoint::Point 2 Rational) `inPolygon` polygon) `shouldBe` Inside
+      ((outsidePoint::Point 2 Rational) `inPolygon` polygon) `shouldBe` Outside
+    it "describes possible regression" $ do
+      ((insidePoint::Point 2 Double) `inPolygon` polygon) `shouldBe` Inside
+      ((outsidePoint::Point 2 Double) `inPolygon` polygon) `shouldBe` Outside
+    it "describes possible regression" $ do
+      ((insidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Inside
+      ((outsidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Outside
