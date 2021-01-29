@@ -39,6 +39,11 @@ splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
                     g c y  = y `compare` x == c
                 in (l,m,r)
 
+splitBy       :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
+splitBy f s = let (l,s') = Set.spanAntitone ((==) LT . f) s
+                  (m,r)  = Set.spanAntitone ((==) EQ . f) s'
+              in (l,m,r)
+
 -- | Constructs a Set using the given Order.
 --
 -- Note that this is dangerous as the resulting set may not abide the
