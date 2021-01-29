@@ -15,6 +15,10 @@ module Algorithms.Geometry.WSPD
   , WSP
   , SplitTree
   , nodeData
+  , Level(..)
+  , reIndexPoints
+  , distributePoints
+  , distributePoints'
   ) where
 
 import           Algorithms.Geometry.WSPD.Types
