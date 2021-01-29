@@ -3013,56 +3013,6 @@ instance Data.Measured.Class.Measured v a => GHC.Base.Semigroup (Data.BinaryTree
 instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbitrary v) => Test.QuickCheck.Arbitrary.Arbitrary (Data.BinaryTree.BinLeafTree v a)
 
 
-module Data.BinaryTree.Zipper
-data Ctx a
-Top :: Ctx a
-L :: Ctx a -> a -> BinaryTree a -> Ctx a
-R :: BinaryTree a -> a -> Ctx a -> Ctx a
-data BinaryTreeZipper a
-Loc :: BinaryTree a -> Ctx a -> BinaryTreeZipper a
-
--- | Focus on the root
-top :: BinaryTree a -> BinaryTreeZipper a
-
--- | Go to the left child
-left :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
-
--- | Go to the right child
-right :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
-
--- | Move to the parent
-up :: BinaryTreeZipper a -> Maybe (BinaryTreeZipper a)
-
--- | Navigate to the root
-toRoot :: BinaryTreeZipper a -> BinaryTreeZipper a
-
--- | Returns a list of zippers; one focussed on each node in the tree
-visitAll :: BinaryTree a -> [BinaryTreeZipper a]
-
--- | Get the value stored at the current node
-accessZ :: BinaryTreeZipper a -> Maybe a
-
--- | Returns all subtrees; i.e. every node with all its decendents
-subTrees :: BinaryTree a -> [BinaryTree a]
-
--- | Splits the tree here, returns a pair (innerTree,outerTree)
-splitTree :: BinaryTreeZipper a -> (BinaryTree a, BinaryTree a)
-instance Data.Traversable.Traversable Data.BinaryTree.Zipper.BinaryTreeZipper
-instance Data.Foldable.Foldable Data.BinaryTree.Zipper.BinaryTreeZipper
-instance GHC.Base.Functor Data.BinaryTree.Zipper.BinaryTreeZipper
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.BinaryTree.Zipper.BinaryTreeZipper a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.BinaryTree.Zipper.BinaryTreeZipper a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.BinaryTree.Zipper.BinaryTreeZipper a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.BinaryTree.Zipper.BinaryTreeZipper a)
-instance Data.Traversable.Traversable Data.BinaryTree.Zipper.Ctx
-instance Data.Foldable.Foldable Data.BinaryTree.Zipper.Ctx
-instance GHC.Base.Functor Data.BinaryTree.Zipper.Ctx
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.BinaryTree.Zipper.Ctx a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.BinaryTree.Zipper.Ctx a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.BinaryTree.Zipper.Ctx a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.BinaryTree.Zipper.Ctx a)
-
-
 -- | Add an unbounded/infintity element to a data type. Essentially,
 --   <a>Bottom</a> adds &lt;math&gt; (and is pretty much identical to
 --   Maybe), whereas <a>Top</a> adds &lt;math&gt;. The Unbounded type adds
@@ -3141,10 +3091,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_a10U9 a_a12xx. Traversal (UnBounded a_a10U9) (UnBounded a_a12xx) a_a10U9 a_a12xx
-_MinInfinity :: forall a_a10U9. Prism' (UnBounded a_a10U9) ()
-_Val :: forall a_a10U9 a_a12Aq. Prism (UnBounded a_a12Aq) (UnBounded a_a10U9) a_a12Aq a_a10U9
-_MaxInfinity :: forall a_a10U9. Prism' (UnBounded a_a10U9) ()
+unUnBounded :: forall a_a10iw a_a11VU. Traversal (UnBounded a_a10iw) (UnBounded a_a11VU) a_a10iw a_a11VU
+_MinInfinity :: forall a_a10iw. Prism' (UnBounded a_a10iw) ()
+_Val :: forall a_a10iw a_a11YN. Prism (UnBounded a_a11YN) (UnBounded a_a10iw) a_a11YN a_a10iw
+_MaxInfinity :: forall a_a10iw. Prism' (UnBounded a_a10iw) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
