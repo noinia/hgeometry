@@ -1,13 +1,12 @@
-module Algorithms.Geometry.WellSeparatedPairDecomposition.WSPDSpec (spec) where
+module Algorithms.Geometry.WSPDSpec (spec) where
 
-import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
-import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
-import           Control.Lens                                             ((%~), (&))
+import           Algorithms.Geometry.WSPD
+import           Control.Lens             ((%~), (&))
 import           Data.Ext
 import           Data.Geometry
-import qualified Data.LSeq                                                as LSeq
-import qualified Data.List.NonEmpty                                       as NonEmpty
-import qualified Data.Vector                                              as V
+import qualified Data.LSeq                as LSeq
+import qualified Data.List.NonEmpty       as NonEmpty
+import qualified Data.Vector              as V
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
