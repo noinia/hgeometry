@@ -1,9 +1,12 @@
 module Data.PlanarGraph.Mutable
-  ( PlanarGraph
+  ( -- * Planar graphs
+    PlanarGraph
   , fromFaces -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
   , clone     -- :: PlanarGraph s -> ST s (PlanarGraph s)
-    
-    -- * Vertices
+
+    -- * Elements
+    -- ** Vertices
+  , Vertex, VertexId
   , vertexFromId                -- :: VertexId -> PlanarGraph s -> Vertex s
   , vertexToId                  -- :: Vertex s -> VertexId
   , vertexHalfEdge              -- :: Vertex s -> ST s (HalfEdge s)
@@ -16,7 +19,8 @@ module Data.PlanarGraph.Mutable
   -- , vertexNew -- :: PlanarGraph s -> ST s (Vertex s)
   -- , vertexSetHalfEdge -- :: Vertex s -> HalfEdge s -> ST s ()
 
-    -- * Half-edges
+    -- ** Half-edges
+  , HalfEdge, HalfEdgeId
   , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph s -> HalfEdge s
   , halfEdgeToId         -- :: HalfEdge s -> HalfEdgeId
   , halfEdgeNext         -- :: HalfEdge s -> ST s (HalfEdge s)
@@ -35,7 +39,8 @@ module Data.PlanarGraph.Mutable
   -- , halfEdgeSetFace      -- :: HalfEdge s -> Face s -> ST s ()
   -- , halfEdgeSetVertex    -- :: HalfEdge s -> Vertex s -> ST s ()
 
-    -- * Faces
+    -- ** Faces
+  , Face, FaceId
   , faceInvalid    -- :: PlanarGraph s -> Face s
   , faceIsValid    -- :: Face s -> Bool
   , faceIsInvalid  -- :: Face s -> Bool
@@ -201,10 +206,7 @@ new 1 = undefined
 new 2 = undefined
 new n = fromFaces [CV.unsafeFromList [0..n-1]]
 
-{-
-
--}
--- | O(n log n)
+-- | \( O(n \log n) \)
 fromFaces :: [CircularVector VertexId] -> ST s (PlanarGraph s)
 fromFaces [] = empty 0 0 0
 fromFaces faces = do
@@ -263,7 +265,7 @@ fromFaces faces = do
 -- fromFaces' nFaces nHalfEdges maxVertexId faces = do
 --   undefined
 
--- | O(n)
+-- | \( O(n) \)
 clone :: PlanarGraph s -> ST s (PlanarGraph s)
 clone = undefined
 
@@ -273,21 +275,21 @@ clone = undefined
 -------------------------------------------------------------------------------
 -- Vertices
 
--- | O(1)
+-- | \( O(1) \)
 vertexFromId :: VertexId -> PlanarGraph s -> Vertex s
 vertexFromId vId pg = Vertex vId pg
 
--- | O(1)
+-- | \( O(1) \)
 vertexToId :: Vertex s -> VertexId
 vertexToId (Vertex vId _pg) = vId
 
--- | O(1)
+-- | \( O(1) \)
 vertexHalfEdge :: Vertex s -> ST s (HalfEdge s)
 vertexHalfEdge (Vertex vId pg) = do
   eId <- readVector (pgVertices pg) vId
   pure $ HalfEdge eId pg
 
--- | O(1)
+-- | \( O(1) \)
 vertexIsBoundary :: Vertex s -> ST s Bool
 vertexIsBoundary vertex = faceIsBoundary <$> (halfEdgeFace =<< (halfEdgeTwin <$> vertexHalfEdge vertex))
 
@@ -575,6 +577,7 @@ pgConnectVertices e1 e2 = do
 -------------------------------------------------------------------------------
 -- Tutte embedding
 
+-- | \( O(n^3) \)
 tutteEmbedding :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
 tutteEmbedding pg = do
   nVertices <- readSTRef (pgNextVertexId pg)
@@ -585,7 +588,7 @@ tutteEmbedding pg = do
 
   boundary <- faceBoundary (Boundary 0 pg)
   let nBoundary = length boundary
-  trace ("Vectors: " ++ show boundary) $ CV.forM_ (CV.zip boundary (circlePoints nBoundary)) $ \(vertex,(x,y)) -> do
+  trace ("Vectors: " ++ show boundary) $ CV.forM_ (CV.zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
     V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
     V.write vx (vertexToId vertex) x
     V.write vy (vertexToId vertex) y
@@ -615,38 +618,11 @@ reifyMatrix :: forall a. Vector.Vector (Vector.Vector a) ->
 reifyMatrix m v f = reifyDim (Vector.length m) $ \(Proxy :: Proxy n) ->
   toVector (f (coerce m :: (V n (V n a))) (coerce v))
 
-circlePoints :: Int -> CircularVector (Double, Double)
-circlePoints n = CV.unsafeFromList
+regularPolygon :: Int -> CircularVector (Double, Double)
+regularPolygon n = CV.unsafeFromList
     [ (cos ang, sin ang)
     | i <- [0 .. n-1]
     , let ang = fromIntegral i * frac + pi/2]
   where
     frac = 2*pi / fromIntegral n
 
-{-
-0: (0,0)
-1: (2,0)
-2: (1,2)
-3: (?,?)
-4: (?,?)
-
-3 = (0+1+2+4)/4
-(3*4)-0-1-2-4 = 0
-
-0   1   2   3   4
-1   0   0   0    0      = 0
-0   1   0   0    0      = 2
-0   0   1   0    0      = 1
-1/4 1/4 1/4 -1   1/4    = 0
-1/3 1/3 0   1/3 -1      = 0
-
-0   1   2   3   4
-1   0   0   0    0      = 0
-0   1   0   0    0      = 0
-0   0   1   0    0      = 2
-1/4 1/4 1/4 -1   1/4    = 0
-1/3 1/3 0   1/3 -1      = 0
-
-
-4 = (0+1+3)/3
--}
