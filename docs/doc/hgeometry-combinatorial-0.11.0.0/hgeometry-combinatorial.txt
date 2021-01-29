@@ -2736,6 +2736,7 @@ module Data.Set.Util
 --   
 --   running time: &lt;math&gt;
 splitOn :: Ord b => (a -> b) -> b -> Set a -> (Set a, Set a, Set a)
+splitBy :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
 
 -- | Constructs a Set using the given Order.
 --   
@@ -3140,10 +3141,10 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_a10T0 a_a12wo. Traversal (UnBounded a_a10T0) (UnBounded a_a12wo) a_a10T0 a_a12wo
-_MinInfinity :: forall a_a10T0. Prism' (UnBounded a_a10T0) ()
-_Val :: forall a_a10T0 a_a12zh. Prism (UnBounded a_a12zh) (UnBounded a_a10T0) a_a12zh a_a10T0
-_MaxInfinity :: forall a_a10T0. Prism' (UnBounded a_a10T0) ()
+unUnBounded :: forall a_a10U9 a_a12xx. Traversal (UnBounded a_a10U9) (UnBounded a_a12xx) a_a10U9 a_a12xx
+_MinInfinity :: forall a_a10U9. Prism' (UnBounded a_a10U9) ()
+_Val :: forall a_a10U9 a_a12Aq. Prism (UnBounded a_a12Aq) (UnBounded a_a10U9) a_a12Aq a_a10U9
+_MaxInfinity :: forall a_a10U9. Prism' (UnBounded a_a10U9) ()
 
 -- | Test if an Unbounded is actually bounded.
 --   
