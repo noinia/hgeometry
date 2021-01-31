@@ -7,10 +7,12 @@ module Data.Double.Approximate
   , DoubleRelAbs(..)
   ) where
 
+import Control.DeepSeq
 import Data.Proxy
 import GHC.TypeLits
 import Numeric.MathFunctions.Comparison
 import Numeric.MathFunctions.Constants
+import System.Random
 import Text.Read
 
 -- | Relatively safe double floating-point type with a relative error
@@ -60,7 +62,7 @@ type SafeDouble = DoubleRelAbs 10 10
 --   broken algorithms and dramatically limits the resolution around zero.
 --   If possible, use a low absolute error margin.
 newtype DoubleRelAbs (abs :: Nat) (rel :: Nat) = DoubleRelAbs Double
-  deriving (Num, Enum, Floating, Fractional, Real, RealFloat, RealFrac)
+  deriving (Num, Enum, Floating, Fractional, Real, RealFloat, RealFrac, Random, NFData)
 
 instance (KnownNat abs, KnownNat rel) => Eq (DoubleRelAbs abs rel) where
   DoubleRelAbs d1 == DoubleRelAbs d2 =

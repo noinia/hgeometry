@@ -24,6 +24,7 @@ import GHC.TypeLits
 import Test.QuickCheck (Arbitrary (..))
 import Control.Monad.Random
 import Data.Ratio
+import           Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ import Data.Ratio
 -- If the number cannot be displayed exactly a '~' is printed after
 -- the number.
 newtype RealNumber (p :: Nat) = RealNumber Rational
-  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable,ToJSON,FromJSON)
+  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,Hashable,ToJSON,FromJSON,NFData)
 
 data NatPrec (p :: Nat) = NatPrec
 

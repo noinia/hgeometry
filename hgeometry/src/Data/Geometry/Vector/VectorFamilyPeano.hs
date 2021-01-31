@@ -12,6 +12,7 @@ module Data.Geometry.Vector.VectorFamilyPeano
   , VectorFamily(VectorFamily)
   , VectorFamilyF
   , FromPeano
+  , Two
   ) where
 
 import           Control.Applicative (liftA2)

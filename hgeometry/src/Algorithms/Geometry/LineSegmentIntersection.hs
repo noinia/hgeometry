@@ -9,6 +9,10 @@ module Algorithms.Geometry.LineSegmentIntersection
   ( hasInteriorIntersections
   , hasSelfIntersections
   , Intersections
+  , Associated(..)
+  , IntersectionPoint(..)
+  , isEndPointIntersection
+  , associated
   , Compare
   ) where
 
