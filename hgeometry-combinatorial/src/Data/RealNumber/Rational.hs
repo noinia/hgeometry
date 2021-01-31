@@ -80,14 +80,21 @@ instance Random (RealNumber p) where
 
 
 
-
+-- | Fixed-precision representation of a 'RealNumber'. If there's insufficient
+--   precision to accurately represent the 'RealNumber' then the 'Lossy' constructor
+--   will be used.
 data AsFixed p = Exact !(Fixed p) | Lossy !(Fixed p) deriving (Show,Eq)
 
+-- | Cast 'RealNumber' to a fixed-precision number. Data is silently lost if there's
+--   insufficient precision.
 toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
 toFixed = realToFrac
 
+-- | Cast a fixed-precision number to a 'RealNumber'.
 fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 fromFixed = realToFrac
 
+-- | Cast 'RealNumber' to a fixed-precision number. Data-loss caused by insufficient
+--   precision will be marked by the 'Lossy' constructor.
 asFixed   :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
 asFixed r = let p = toFixed r in if r == fromFixed p then Exact p else Lossy p

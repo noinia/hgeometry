@@ -35,6 +35,7 @@ type family IntersectionOf g h :: [*]
 coRec :: (a ∈ as) => a -> CoRec Identity as
 coRec = CoRec . Identity
 
+-- | Class relationship between intersectable geometric objects.
 class IsIntersectableWith g h where
   intersect :: g -> h -> Intersection g h
 

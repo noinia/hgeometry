@@ -8,21 +8,18 @@
 -- Maintainer  :  Frank Staals
 --
 -- Add an unbounded/infintity element to a data type. Essentially,
--- 'Bottom' adds \(-\infty\) (and is pretty much identical to Maybe),
--- whereas 'Top' adds \(\infty\). The Unbounded type adds both.
+-- t'Bottom' adds \(-\infty\) (and is pretty much identical to Maybe),
+-- whereas t'Top' adds \(\infty\). The 'UnBounded' type adds both.
 --
 --------------------------------------------------------------------------------
-module Data.UnBounded( Top, topToMaybe
-                     , pattern ValT, pattern Top
+module Data.UnBounded( Top( ValT, Top), topToMaybe
                      , _ValT, _Top, _TopMaybe
 
-                     , Bottom, bottomToMaybe
-                     , pattern Bottom, pattern ValB
+                     , Bottom(Bottom, ValB), bottomToMaybe
                      , _ValB, _Bottom, _BottomMaybe
 
                      , UnBounded(..)
-                     , unUnBounded
-                     , _MinInfinity, _Val, _MaxInfinity
+                     , _Val
                      , unBoundedToMaybe
                      ) where
 
@@ -34,12 +31,16 @@ import qualified Data.Traversable     as T
 --------------------------------------------------------------------------------
 -- * Top and Bottom
 
--- | `Top a` represents the type a, together with a 'Top' element, i.e. an element
+-- | @Top a@ represents the type a, together with a v'Top' element, i.e. an element
 -- that is greater than any other element. We can think of `Top a` being defined as:
 --
 -- >>> data Top a = ValT a | Top
-newtype Top a = GTop { topToMaybe :: Maybe a }
+newtype Top a = GTop (Maybe a)
                 deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1)
+
+-- | @Top a@ values are isomorphing to @Maybe a@ values.
+topToMaybe :: Top a -> Maybe a
+topToMaybe (GTop mb) = mb
 
 pattern ValT  :: a -> Top a
 pattern ValT x = GTop (Just x)
@@ -63,14 +64,22 @@ instance Show a => Show (Top a) where
   show Top       = "Top"
   show ~(ValT x) = "ValT " ++ show x
 
+-- | 'ValT' prism. Can be used to access the non-bottom element if it exists:
+--
+-- >>> ValT True & _ValT %~ not
+-- ValT False
+--
+-- >>> Top & _ValT %~ not
+-- Top
 _ValT :: Prism (Top a) (Top b) a b
 _ValT = prism ValT (\case Top -> Left Top ; ValT x -> Right x)
 
+-- | t'Top' prism.
 _Top :: Prism' (Top a) ()
 _Top = prism' (const Top) (\case Top -> Just () ; ValT _ -> Nothing)
 
--- | Iso between a 'Top a' and a 'Maybe a', interpreting a Top as a
--- Nothing and vice versa. Note that this reverses the ordering of
+-- | Iso between a @Top a@ and a @Maybe a@, interpreting a v'Top' as a
+-- 'Nothing' and vice versa. Note that this reverses the ordering of
 -- the elements.
 --
 -- >>> ValT 5 ^. _TopMaybe
@@ -86,13 +95,17 @@ _TopMaybe = iso topToMaybe GTop
 
 --------------------------------------------------------------------------------
 
--- | `Bottom a` represents the type a, together with a 'Bottom' element,
+-- | @`Bottom a`@ represents the type a, together with a v'Bottom' element,
 -- i.e. an element that is smaller than any other element. We can think of
--- `Bottom a` being defined as:
+-- @`Bottom a`@ being defined as:
 --
 -- >>> data Bottom a = Bottom | ValB a
-newtype Bottom a = GBottom { bottomToMaybe :: Maybe a }
+newtype Bottom a = GBottom (Maybe a)
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1,Ord1)
+
+-- | `Bottom a` values are isomorphing to `Maybe a` values.
+bottomToMaybe :: Bottom a -> Maybe a
+bottomToMaybe (GBottom mb) = mb
 
 pattern Bottom :: Bottom a
 pattern Bottom = GBottom Nothing
@@ -106,9 +119,17 @@ instance Show a => Show (Bottom a) where
   show Bottom    = "Bottom"
   show ~(ValB x) = "ValB " ++ show x
 
+-- | 'ValB' prism. Can be used to access the non-bottom element if it exists:
+--
+-- >>> ValB True & _ValB %~ not
+-- ValB False
+--
+-- >>> Bottom & _ValB %~ not
+-- Bottom
 _ValB :: Prism (Bottom a) (Bottom b) a b
 _ValB = prism ValB (\case Bottom -> Left Bottom ; ValB x -> Right x)
 
+-- | t'Bottom' prism.
 _Bottom :: Prism' (Bottom a) ()
 _Bottom = prism' (const Bottom) (\case Bottom -> Just () ; ValB _ -> Nothing)
 
@@ -133,8 +154,26 @@ _BottomMaybe = iso bottomToMaybe GBottom
 -- smaller than any other element.
 data UnBounded a = MinInfinity | Val { _unUnBounded :: a }  | MaxInfinity
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable)
-makeLenses ''UnBounded
-makePrisms ''UnBounded
+
+-- | Prism to access unbounded value if it exists.
+--
+-- >>> Val True ^? _Val
+-- Just True
+--
+-- >>> MinInfinity ^? _Val :: Maybe Bool
+-- Nothing
+--
+-- >>> Val True & _Val %~ not
+-- Val False
+--
+-- >>> MaxInfinity & _Val %~ not
+-- MaxInfinity
+_Val :: Prism (UnBounded a) (UnBounded b) a b
+_Val = prism Val fromUnBounded
+  where
+    fromUnBounded MinInfinity = Left MinInfinity
+    fromUnBounded MaxInfinity = Left MaxInfinity
+    fromUnBounded (Val v)     = Right v
 
 instance Show a => Show (UnBounded a) where
   show MinInfinity = "MinInfinity"

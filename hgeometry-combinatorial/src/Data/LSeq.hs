@@ -216,13 +216,13 @@ drop i = wrapUnsafe (S.drop i)
 -- | \( O(n \log n) \).  A generalization of 'unstableSort', 'unstableSortBy'
 -- takes an arbitrary comparator and sorts the specified sequence.
 -- The sort is not stable.  This algorithm is frequently faster and
--- uses less memory than 'sortBy'.
+-- uses less memory than 'Data.Sequence.sortBy'.
 unstableSortBy   :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 unstableSortBy f = wrapUnsafe (S.unstableSortBy f)
 
--- | \( O(n \log n) \).  'unstableSort' sorts the specified 'Seq' by
+-- | \( O(n \log n) \).  'unstableSort' sorts the specified 'LSeq' by
 -- the natural ordering of its elements, but the sort is not stable.
--- This algorithm is frequently faster and uses less memory than 'sort'.
+-- This algorithm is frequently faster and uses less memory than 'Data.Sequence.sort'.
 unstableSort :: Ord a => LSeq n a -> LSeq n a
 unstableSort = wrapUnsafe S.unstableSort
 
