@@ -1,46 +1,21 @@
--- {-# LANGUAGE #-}
 module Algorithms.Geometry.ConvexHull.Bench (benchmark) where
 
--- import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
--- import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
+import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
+import qualified Algorithms.Geometry.ConvexHull.GrahamScan       as GrahamScan
+import qualified Algorithms.Geometry.ConvexHull.JarvisMarch      as JarvisMarch
+import qualified Algorithms.Geometry.ConvexHull.QuickHull        as QuickHull
 
--- | copies of the convex hull algo with different point types
--- import qualified Algorithms.Geometry.ConvexHull.GrahamV2   as GV
--- import qualified Algorithms.Geometry.ConvexHull.GrahamFam  as GFam
--- import qualified Algorithms.Geometry.ConvexHull.GrahamFamPeano  as GPeano
--- import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
--- import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
 import           Control.Monad.Random
+import           Data.Double.Approximate
 import           Data.Ext
-import qualified Data.Ext.Multi       as Multi
 import           Data.Geometry.Point
 import           Data.Hashable
-import           Data.List.NonEmpty   (NonEmpty (..))
-import qualified Data.List.NonEmpty   as NonEmpty
+import           Data.List.NonEmpty       (NonEmpty (..))
+import qualified Data.List.NonEmpty       as NonEmpty
+import           Data.RealNumber.Rational
 import           Test.Tasty.Bench
 
--- import           Data.Semigroup.Foldable
--- import Data.BinaryTree
--- import Data.Geometry.Polygon.Convex
--- import Control.Lens
--- import Data.Geometry.Polygon
--- import           Data.Function (on)
-
---------------------------------------------------------------------------------
-
--- main :: IO ()
--- main = do
---          defaultMain [ benchBuild ]
-
--- main :: IO ()
--- main = defaultMainWith cfg [ benchmark ]
---   where
---     cfg = defaultConfig { reportFile = Just "bench.html" }
-
--- benchmark :: Benchmark
--- benchmark = bgroup "convexHullBench"
---     [ env (genPts' @Int 10000) benchBuild
---     ]
+type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
@@ -48,60 +23,37 @@ genPts                 :: (Ord r, Random r, RandomGen g)
                        => Int -> Rand g (NonEmpty (Point 2 r :+ ()))
 genPts n = NonEmpty.fromList <$> replicateM n (fmap ext getRandom)
 
-genPts'      :: (Ord r, Random r, RandomGen g) => Int
-             -> Rand g ( NonEmpty (Point 2 r :+ ())
-                   , NonEmpty (Point 2 r Multi.:+ '[])
-                   )
-genPts' n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
-               ) <$> genPts n
+-- genPts'      :: (Ord r, Random r, RandomGen g) => Int
+--              -> Rand g ( NonEmpty (Point 2 r :+ ())
+--                    , NonEmpty (Point 2 r Multi.:+ '[])
+--                    )
+-- genPts' n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
+--                ) <$> genPts n
 
+gen :: StdGen
+gen = mkStdGen (hash "convex hull")
 
 -- | Benchmark building the convexHull
 benchmark    :: Benchmark
-benchmark = bgroup "build" [ bgroup (show n) (build $ evalRand (genPts' @Int n) gen) -- $ take' n ps)
-                               | n <- [10000::Int]
-                               ]
+benchmark = bgroup "ConvexHull" $
+      [ bgroup (show n ++ "/RealNumber") (convexHullFractional $ evalRand (genPts @R n) gen)
+      | n <- [1000, 10000::Int]
+      ] ++
+      [ bgroup (show n ++ "/Int") (convexHullNum $ evalRand (genPts @Int n) gen)
+      | n <- [10000::Int, 100000]
+      ] ++
+      [ bgroup (show n ++ "/SafeDouble") (convexHullFractional $ evalRand (genPts @SafeDouble n) gen)
+      | n <- [10000::Int, 100000]
+      ]
   where
-    gen = mkStdGen (hash ("convex hull"::String))
-    -- take'' n = NonEmpty.fromList . NonEmpty.take n
-
-    -- take' n  = bimap (take'' n) (take'' n)
-
-    -- sizes'   :: a -> [Int]
-    -- sizes' _ = [10000]
-
-    -- build            :: (Ord a, Ord b) => (NonEmpty a, NonEmpty b) -> [Benchmark]
-    build (pts,pts') =
-                [ bench "sort"                 $ nf NonEmpty.sort pts
-                , bench "sort-Multi Ext"       $ nf NonEmpty.sort pts'
-                -- , bench "sort_Linear.V2"       $ nf NonEmpty.sort ptsV2
-                -- , bench "sort_FamPeano"        $ nf NonEmpty.sort ptsFamPeano
-                -- , bench "sort_Family"          $ nf NonEmpty.sort ptsFam
-                -- , bench "sort_Family6"         $ nf NonEmpty.sort ptsFam6
-                -- , bench "sort_Fixed"           $ nf NonEmpty.sort ptsFix
-
-                -- , bench "grahamScan"           $ nf GrahamScan.convexHull pts
-                -- , bench "grahamScan_Linear.V2" $ nf GV.convexHull         ptsV2
-
-                -- , bench "grahamScan_FamPeano"  $ nf GPeano.convexHull     ptsFamPeano
-                -- , bench "grahamScan_Family"    $ nf GFam.convexHull       ptsFam
-                -- , bench "grahamScan_Fixed"     $ nf GFix.convexHull       ptsFix
-
-                -- , bench "Div&Conq"             $ nf DivideAndConquer.convexHull pts
-
-                -- , bench "Div&Conq Old"         $ nf oldDivAndConquer            pts
+    convexHullFractional pts =
+                [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
+                , bench "DivideAndConquer" $ nf DivideAndConquer.convexHull pts
+                , bench "QuickHull" $ nf QuickHull.convexHull pts
+                , bench "JarvisMarch" $ nf JarvisMarch.convexHull pts
                 ]
-      -- where
-      --   ptsV2       = fmap (GV.fromP) pts
-      --   ptsFamPeano = fmap (GPeano.fromP) pts
-      --   ptsFam      = fmap (GFam.fromP) pts
-      --   ptsFam6     = fmap (GFam6.fromP) pts
-      --   ptsFix      = fmap (GFix.fromP) pts
-
-
-
--- oldDivAndConquer :: (Ord r, Num r) => NonEmpty.NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
--- oldDivAndConquer = DivideAndConquer.unMerge
---                  . foldMap1 (DivideAndConquer.Merge . ConvexPolygon . fromPoints . (:[]) . _unElem)
---                  . asBalancedBinLeafTree
---                  . NonEmpty.sortBy (compare `on` (^.core))
+    convexHullNum pts =
+                [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
+                , bench "DivideAndConquer" $ nf DivideAndConquer.convexHull pts
+                , bench "JarvisMarch" $ nf JarvisMarch.convexHull pts
+                ]

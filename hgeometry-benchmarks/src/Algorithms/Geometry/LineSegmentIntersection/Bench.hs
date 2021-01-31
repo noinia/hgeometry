@@ -19,12 +19,12 @@ import           Test.Tasty.Bench
 type R = RealNumber 5
 
 benchmark :: Benchmark
-benchmark = bgroup "linesegmentIntersectionBench"
+benchmark = bgroup "LineSegmentIntersection"
     [ benchBuild (evalRand (genPts @R 100) gen)
     ]
 
 gen :: StdGen
-gen = mkStdGen (hash ("line segment intersection"::String))
+gen = mkStdGen (hash "line segment intersection")
 
 --------------------------------------------------------------------------------
 

@@ -13,26 +13,21 @@ import           Test.Tasty.Bench
 
 --------------------------------------------------------------------------------
 
-benchmark :: Benchmark
-benchmark = bgroup "convexHullBench"
-    [ benchBuild
-    ]
-
---------------------------------------------------------------------------------
-
 genPts                 :: (Ord r, Random r, RandomGen g)
                        => Int -> Rand g (LSeq 2 (Point 2 r :+ ()))
 genPts n | n >= 2    = LSeq.promise . LSeq.fromList <$> replicateM n (fmap ext getRandom)
          | otherwise = error "genPts: Need at least 2 points"
 
+gen :: StdGen
+gen = mkStdGen (hash "closest pair")
 
 -- | Benchmark computing the closest pair
-benchBuild    :: Benchmark
-benchBuild = bgroup "closestPair" [ bgroup (show n) (build $ evalRand (genPts @Int n) gen)
-                                  | n <- sizes'
-                                  ]
+benchmark    :: Benchmark
+benchmark = bgroup "ClosestPair"
+    [ bgroup (show n) (build $ evalRand (genPts @Int n) gen)
+    | n <- sizes'
+    ]
   where
-    gen = mkStdGen (hash ("closest pair"::String))
     sizes' = [500]
 
     build pts = [ bench "sort"     $ nf LSeq.unstableSort pts
