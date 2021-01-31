@@ -1,5 +1,5 @@
 module Algorithms.Geometry.PolygonTriangulation.Bench where
-
+{-
 import Algorithms.Geometry.LineSegmentIntersection (hasSelfIntersections)
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotone as New
 import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld as Old
@@ -61,3 +61,4 @@ benchBuild ss = bgroup "MakeMonotone" [ bgroup (show n) (build $ take n ss)
     build ps = [ bench "Old"      $ nf (process Old.makeMonotone) ps
                , bench "New"      $ nf (process New.makeMonotone) ps
                ]
+-}

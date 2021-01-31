@@ -35,7 +35,6 @@ import qualified Data.Traversable         as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics             (Generic)
-import           System.Random
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
