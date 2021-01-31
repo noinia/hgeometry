@@ -6,9 +6,8 @@ import qualified Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld as Old
 import           Benchmark.Util
 import           Control.DeepSeq
 import           Control.Lens
-import           Criterion.Main
-import           Criterion.Types
 import           Data.Ext
+import           Test.Tasty.Bench
 import qualified Data.Foldable as F
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
@@ -27,9 +26,7 @@ data PX = PX
 main :: IO ()
 main = do
     polies <- getPolies "/home/frank/tmp/antarctica.ipe"
-    defaultMainWith cfg [ benchBuild polies ]
-  where
-    cfg = defaultConfig { reportFile = Just "bench.html" }
+    defaultMain [ benchBuild polies ]
 
 getPolies inFile = do
     ePage <- readSinglePageFile inFile

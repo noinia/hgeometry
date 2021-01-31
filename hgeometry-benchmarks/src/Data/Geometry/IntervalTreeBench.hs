@@ -3,8 +3,7 @@ module Data.Geometry.IntervalTreeBench where
 import           Benchmark.Util
 import           Control.DeepSeq
 import           Control.Lens
-import           Criterion.Main
-import           Criterion.Types
+import           Test.Tasty.Bench
 import           Data.Ext
 import           Data.Geometry.Interval
 import qualified Data.Geometry.IntervalTree as IT
@@ -17,14 +16,12 @@ import           Test.QuickCheck
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = defaultMainWith cfg [ intervalBench ]
-  where
-    cfg = defaultConfig { reportFile = Just "bench.html" }
+main = defaultMain [ intervalBench ]
 
 intervalBench :: Benchmark
 intervalBench = bgroup "IntervalTree"
     [ -- env (genIntervals (I (5 :: Int)) 1000) benchBuild
-      env (genIntervals (I (5 :: Int)) 100) benchQueryIT
+      -- env (genIntervals (I (5 :: Int)) 100) benchQueryIT
     ]
 
 --------------------------------------------------------------------------------
@@ -56,19 +53,19 @@ benchBuild is = bgroup "build" [ bench (show n) $ nf IT.fromIntervals (take n is
   where
     is' = I <$> is
 
-benchQueryIT    :: (Ord r, Arbitrary r, NFData r) => [Interval () r] -> Benchmark
-benchQueryIT is = bgroup "queries"
-    [ env (setup' n) (\(t,qs) ->
-                        bench ("queries on size" ++ show n) $ whnf (queryAll t) qs)
-    | n <- sizes is
-    ]
-  where
-    is'        = I <$> is
-    r          = is^.to head.start.core
-    setup' n  = traceShow "setup" $ setup n
+-- benchQueryIT    :: (Ord r, Arbitrary r, NFData r) => [Interval () r] -> Benchmark
+-- benchQueryIT is = bgroup "queries"
+--     [ env (setup' n) (\(t,qs) ->
+--                         bench ("queries on size" ++ show n) $ whnf (queryAll t) qs)
+--     | n <- sizes is
+--     ]
+--   where
+--     is'        = I <$> is
+--     r          = is^.to head.start.core
+--     setup' n  = traceShow "setup" $ setup n
 
-    setup n    = (IT.fromIntervals (take n is'),) <$> genQueries (I r) 100000
-    queryAll t = map (flip IT.search t)
+--     setup n    = (IT.fromIntervals (take n is'),) <$> genQueries (I r) 100000
+--     queryAll t = map (flip IT.search t)
 
 
 -- benchQueryIT          :: Ord r
