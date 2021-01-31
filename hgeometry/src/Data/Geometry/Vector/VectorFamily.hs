@@ -214,7 +214,7 @@ element' :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 element' i = unV.e (C :: C d) i
   where
     e  :: Arity d => proxy d -> Int -> Traversal' (VectorFamily (Peano d) r) r
-    e _ = Fam.element'
+    e _ = ix
 {-# INLINE element' #-}
 
 --------------------------------------------------------------------------------

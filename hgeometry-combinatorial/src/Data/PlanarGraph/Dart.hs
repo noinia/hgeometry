@@ -62,7 +62,16 @@ rev Positive = Negative
 data Dart s = Dart { _arc       :: !(Arc s)
                    , _direction :: !Direction
                    } deriving (Eq,Ord,Generic)
-makeLenses ''Dart
+
+-- | Arc lens.
+arc :: Lens' (Dart s) (Arc s)
+arc = lens _arc (\d a -> d{_arc = a})
+
+-- | Direction lens.
+direction :: Lens' (Dart s) Direction
+direction = lens _direction (\d dir -> d{_direction = dir})
+
+-- makeLenses ''Dart
 
 instance NFData (Dart s)
 

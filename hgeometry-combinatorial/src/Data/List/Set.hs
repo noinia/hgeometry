@@ -15,9 +15,9 @@ import qualified Data.List as List
 
 --------------------------------------------------------------------------------
 
--- | A Set of 'a's, implemented using a simple list. The only
+-- | A Set of @a@\'s, implemented using a simple list. The only
 -- advantage of this implementation over 'Data.Set' from containers is
--- that most operations require only 'Eq a' rather than 'Ord a'.
+-- that most operations require only @'Eq a'@ rather than @'Ord a'@.
 newtype Set a = Set { toList :: [a] }
               deriving (Show,Read,Functor,Foldable,Traversable)
 

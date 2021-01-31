@@ -37,7 +37,7 @@ runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
       -- Ideally this would just be a coerce. But GHC doesn't want to do that.
 
 class HasIndex i Int => CanAquire i a where
-  -- | A value of type i can obtain something of type 'a'
+  -- | A value of type i can obtain something of type @\'a\'@
   aquire  :: i -> a
 
 class HasIndex t i | t -> i where

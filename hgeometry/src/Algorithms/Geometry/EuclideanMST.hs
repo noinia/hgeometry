@@ -9,7 +9,7 @@
 -- spanning tree of a set of \(n\) points in \(\mathbb{R}^2\).
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.EuclideanMST where
+module Algorithms.Geometry.EuclideanMST ( euclideanMST ) where
 
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
 import           Algorithms.Geometry.DelaunayTriangulation.Types

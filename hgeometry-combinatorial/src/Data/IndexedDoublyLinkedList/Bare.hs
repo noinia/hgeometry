@@ -34,6 +34,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
+-- | Cell indices. Must be non-negative.
 type Index = Int
 
 -- | Cells in the Linked List
@@ -41,6 +42,7 @@ data Cell = Cell { prev :: !(Maybe Index)
                  , next :: !(Maybe Index)
                  } deriving (Show,Eq)
 
+-- | Empty cell with no next or prev cells.
 emptyCell :: Cell
 emptyCell = Cell Nothing Nothing
 
@@ -116,6 +118,7 @@ toListFromK i k = (i :|) <$> replicateM k getNext i
 toListFromR :: Index -> IDLListMonad s (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
 
+-- | Takes the current element and its k prev's
 toListFromRK     :: Index -> Int -> IDLListMonad s (NonEmpty Index)
 toListFromRK i k = (i :|) <$> replicateM k getPrev i
 

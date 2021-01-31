@@ -40,9 +40,11 @@ floydWarshall n graph = do
     put idx e = V.unsafeWrite graph (mkIndex n idx) e
     eps = 1e-10 -- When two paths are nearly the same length, pick the one with the fewest segments.
 
+-- | Compute the index of an element in a given range.
 mkIndex :: Num a => a -> (a, a) -> a
 mkIndex n (i,j) = i*n+j
 
+-- | Construct a weighted graph from \(n\) vertices, a max bound, and a list of weighted edges.
 mkGraph :: (Unbox a, Num a) => Int -> a -> [(Int,Int,a)] -> ST s (MVector s (a, Int))
 mkGraph n maxValue edges = do
   graph <- V.replicate (n*n) (maxValue, maxBound)

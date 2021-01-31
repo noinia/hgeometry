@@ -119,11 +119,12 @@ zipExactWith _ _ _            _               =
 --------------------------------------------------------------------------------
 -- * Converting into a Data.Tree
 
+-- | \( O(n) \) Convert binary tree to a rose tree, aka 'Tree.Tree'.
 toRoseTree              :: BinLeafTree v a -> Tree.Tree (TreeNode v a)
 toRoseTree (Leaf x)     = Tree.Node (LeafNode x) []
 toRoseTree (Node l v r) = Tree.Node (InternalNode v) (map toRoseTree [l,r])
 
-
+-- | 2-dimensional ASCII drawing of a tree.
 drawTree :: (Show v, Show a) => BinLeafTree v a -> String
 drawTree = Tree.drawTree . fmap show . toRoseTree
 

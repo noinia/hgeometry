@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Polygon.Inflate
+-- Copyright   :  (C) David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--------------------------------------------------------------------------------
 module Data.Geometry.Polygon.Inflate
   ( Arc(..)
   , inflate
