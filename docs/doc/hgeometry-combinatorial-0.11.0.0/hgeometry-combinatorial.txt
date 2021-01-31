@@ -322,6 +322,8 @@ type SafeDouble = DoubleRelAbs 10 10
 --   If possible, use a low absolute error margin.
 newtype DoubleRelAbs (abs :: Nat) (rel :: Nat)
 DoubleRelAbs :: Double -> DoubleRelAbs (abs :: Nat) (rel :: Nat)
+instance Control.DeepSeq.NFData (Data.Double.Approximate.DoubleRelAbs abs rel)
+instance System.Random.Random (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Real.RealFrac (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Float.RealFloat (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Real.Real (Data.Double.Approximate.DoubleRelAbs abs rel)
@@ -686,6 +688,32 @@ instance Data.Semigroup.Foldable.Class.Foldable1 Data.CircularSeq.CSeq
 instance Data.Foldable.Foldable Data.CircularSeq.CSeq
 instance GHC.Base.Functor Data.CircularSeq.CSeq
 instance Test.QuickCheck.Arbitrary.Arbitrary a => Test.QuickCheck.Arbitrary.Arbitrary (Data.CircularSeq.CSeq a)
+
+
+-- | A pair-like data type to represent a <a>core</a> type that has extra
+--   information as well.
+module Data.Ext.Multi
+data family core :+ (extras :: [*]) :: *
+infixr 1 :+
+pattern (:+) :: c -> HList (e : extras) -> c :+ (e : extras)
+infixr 1 :+
+ext :: c -> c :+ '[]
+class HasCore extras
+core :: HasCore extras => Lens (core :+ extras) (core' :+ extras) core core'
+class HasExtras extras extras'
+extra :: HasExtras extras extras' => Lens (core :+ extras) (core :+ extras') (HList extras) (HList extras')
+instance GHC.Show.Show core => GHC.Show.Show (core Data.Ext.Multi.:+ '[])
+instance GHC.Generics.Generic (core Data.Ext.Multi.:+ '[])
+instance Test.QuickCheck.Arbitrary.Arbitrary core => Test.QuickCheck.Arbitrary.Arbitrary (core Data.Ext.Multi.:+ '[])
+instance Control.DeepSeq.NFData core => Control.DeepSeq.NFData (core Data.Ext.Multi.:+ '[])
+instance GHC.Classes.Ord core => GHC.Classes.Ord (core Data.Ext.Multi.:+ '[])
+instance GHC.Classes.Eq core => GHC.Classes.Eq (core Data.Ext.Multi.:+ '[])
+instance Data.Ext.Multi.HasExtras '[] '[]
+instance Data.Ext.Multi.HasExtras '[] (t : ts)
+instance Data.Ext.Multi.HasExtras (t : ts) '[]
+instance Data.Ext.Multi.HasExtras (t : ts) (a : as)
+instance Data.Ext.Multi.HasCore '[]
+instance Data.Ext.Multi.HasCore (t : ts)
 
 
 -- | Defines a data type for representing intersections. Mostly useful for
@@ -1371,8 +1399,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aID7 a_aIVW. Lens (Permutation a_aID7) (Permutation a_aIVW) (Vector (Orbit a_aID7)) (Vector (Orbit a_aIVW))
-indexes :: forall a_aID7. Lens' (Permutation a_aID7) (Vector (Int, Int))
+orbits :: forall a_aJHy a_aK0n. Lens (Permutation a_aJHy) (Permutation a_aK0n) (Vector (Orbit a_aJHy)) (Vector (Orbit a_aK0n))
+indexes :: forall a_aJHy. Lens' (Permutation a_aJHy) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -2762,6 +2790,7 @@ fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 data Nat
 instance GHC.Classes.Eq (Data.RealNumber.Rational.AsFixed p)
 instance Data.Fixed.HasResolution p => GHC.Show.Show (Data.RealNumber.Rational.AsFixed p)
+instance Control.DeepSeq.NFData (Data.RealNumber.Rational.RealNumber p)
 instance Data.Aeson.Types.FromJSON.FromJSON (Data.RealNumber.Rational.RealNumber p)
 instance Data.Aeson.Types.ToJSON.ToJSON (Data.RealNumber.Rational.RealNumber p)
 instance Data.Hashable.Class.Hashable (Data.RealNumber.Rational.RealNumber p)

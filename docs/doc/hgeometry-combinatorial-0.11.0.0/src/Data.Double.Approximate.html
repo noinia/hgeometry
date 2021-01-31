@@ -7,60 +7,62 @@
 </span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier">DoubleRelAbs</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-8"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-9"></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.MathFunctions.Comparison</span></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.MathFunctions.Constants</span></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
-</span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- | Relatively safe double floating-point type with a relative error</span><span>
-</span><span id="line-17"></span><span class="hs-comment">--   margin of 10 &lt;https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs&gt;</span><span>
-</span><span id="line-18"></span><span class="hs-comment">--   and an absolute margin around zero of</span><span>
-</span><span id="line-19"></span><span class="hs-comment">--   @10*&lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;@.</span><span>
-</span><span id="line-20"></span><span class="hs-comment">--</span><span>
-</span><span id="line-21"></span><span class="hs-comment">--   Warning: All numbers within</span><span>
-</span><span id="line-22"></span><span class="hs-comment">--   @10*&lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;@ of zero will be considered zero.</span><span>
-</span><span id="line-23"></span><span class="hs-comment">--</span><span>
-</span><span id="line-24"></span><span class="hs-comment">-- &gt;&gt;&gt; m_epsilon * 10</span><span>
-</span><span id="line-25"></span><span class="hs-comment">-- 2.220446049250313e-15</span><span>
-</span><span id="line-26"></span><span class="hs-comment">--</span><span>
-</span><span id="line-27"></span><span class="hs-comment">-- &gt;&gt;&gt; realToFrac (m_epsilon * 10) == (0::SafeDouble)</span><span>
-</span><span id="line-28"></span><span class="hs-comment">-- False</span><span>
-</span><span id="line-29"></span><span class="hs-comment">--</span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- &gt;&gt;&gt; realToFrac (m_epsilon * 9) == (0::SafeDouble)</span><span>
-</span><span id="line-31"></span><span class="hs-comment">-- True</span><span>
-</span><span id="line-32"></span><span class="hs-comment">--</span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- &gt;&gt;&gt; 1e-20 == (5e-20 :: Double)</span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- False</span><span>
-</span><span id="line-35"></span><span class="hs-comment">-- &gt;&gt;&gt; 1e-20 == (5e-20 :: SafeDouble)</span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- True</span><span>
-</span><span id="line-37"></span><span class="hs-comment">--</span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- 'pi' and 'sin' are approximations:</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.MathFunctions.Comparison</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.MathFunctions.Constants</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Random</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- | Relatively safe double floating-point type with a relative error</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--   margin of 10 &lt;https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs&gt;</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--   and an absolute margin around zero of</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--   @10*&lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;@.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--</span><span>
+</span><span id="line-23"></span><span class="hs-comment">--   Warning: All numbers within</span><span>
+</span><span id="line-24"></span><span class="hs-comment">--   @10*&lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;@ of zero will be considered zero.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- &gt;&gt;&gt; m_epsilon * 10</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- 2.220446049250313e-15</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- &gt;&gt;&gt; realToFrac (m_epsilon * 10) == (0::SafeDouble)</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &gt;&gt;&gt; realToFrac (m_epsilon * 9) == (0::SafeDouble)</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- &gt;&gt;&gt; 1e-20 == (5e-20 :: Double)</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- &gt;&gt;&gt; 1e-20 == (5e-20 :: SafeDouble)</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- True</span><span>
 </span><span id="line-39"></span><span class="hs-comment">--</span><span>
-</span><span id="line-40"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi</span><span>
-</span><span id="line-41"></span><span class="hs-comment">-- 1.2246467991473532e-16</span><span>
-</span><span id="line-42"></span><span class="hs-comment">--</span><span>
-</span><span id="line-43"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi == (0 :: Double)</span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- False</span><span>
-</span><span id="line-45"></span><span class="hs-comment">--</span><span>
-</span><span id="line-46"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi == (0 :: SafeDouble)</span><span>
-</span><span id="line-47"></span><span class="hs-comment">-- True</span><span>
-</span><span id="line-48"></span><span class="hs-comment">--</span><span>
-</span><span id="line-49"></span><span class="hs-keyword">type</span><span> </span><span id="SafeDouble"><span class="annot"><a href="Data.Double.Approximate.html#SafeDouble"><span class="hs-identifier hs-var">SafeDouble</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span>
-</span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span class="hs-comment">-- | Custom double floating-point type with a relative error margin of</span><span>
-</span><span id="line-52"></span><span class="hs-comment">--   @rel@ number of</span><span>
-</span><span id="line-53"></span><span class="hs-comment">--   &lt;https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs&gt; and an</span><span>
-</span><span id="line-54"></span><span class="hs-comment">--   absolute error margin of @abs@ times</span><span>
-</span><span id="line-55"></span><span class="hs-comment">--   &lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;.</span><span>
-</span><span id="line-56"></span><span class="hs-comment">--</span><span>
-</span><span id="line-57"></span><span class="hs-comment">--   The relative error margin is the primary tool for good numerical</span><span>
-</span><span id="line-58"></span><span class="hs-comment">--   robustness and can relatively safely be set to a high number such</span><span>
-</span><span id="line-59"></span><span class="hs-comment">--   as 100. The absolute error margin is a last ditch attempt at fixing</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--   broken algorithms and dramatically limits the resolution around zero.</span><span>
-</span><span id="line-61"></span><span class="hs-comment">--   If possible, use a low absolute error margin.</span><span>
-</span><span id="line-62"></span><span class="hs-keyword">newtype</span><span> </span><span id="DoubleRelAbs"><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-var">DoubleRelAbs</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679320680"><span class="annot"><a href="#local-6989586621679320680"><span class="hs-identifier hs-type">abs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679320679"><span class="annot"><a href="#local-6989586621679320679"><span class="hs-identifier hs-type">rel</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DoubleRelAbs"><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-var">DoubleRelAbs</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
-</span><span id="line-63"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679320660"><span id="local-6989586621679320662"><span id="local-6989586621679320664"><span id="local-6989586621679320666"><span id="local-6989586621679320668"><span id="local-6989586621679320670"><span id="local-6989586621679320672"><span class="annot"><span class="annottext">Integer -&gt; DoubleRelAbs abs rel
+</span><span id="line-40"></span><span class="hs-comment">-- 'pi' and 'sin' are approximations:</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- 1.2246467991473532e-16</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi == (0 :: Double)</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-47"></span><span class="hs-comment">--</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; sin pi == (0 :: SafeDouble)</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">type</span><span> </span><span id="SafeDouble"><span class="annot"><a href="Data.Double.Approximate.html#SafeDouble"><span class="hs-identifier hs-var">SafeDouble</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="hs-number">10</span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Custom double floating-point type with a relative error margin of</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--   @rel@ number of</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--   &lt;https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs&gt; and an</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--   absolute error margin of @abs@ times</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--   &lt;https://en.wikipedia.org/wiki/Machine_epsilon epsilon&gt;.</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--   The relative error margin is the primary tool for good numerical</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--   robustness and can relatively safely be set to a high number such</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--   as 100. The absolute error margin is a last ditch attempt at fixing</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--   broken algorithms and dramatically limits the resolution around zero.</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--   If possible, use a low absolute error margin.</span><span>
+</span><span id="line-64"></span><span class="hs-keyword">newtype</span><span> </span><span id="DoubleRelAbs"><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-var">DoubleRelAbs</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679323638"><span class="annot"><a href="#local-6989586621679323638"><span class="hs-identifier hs-type">abs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679323637"><span class="annot"><a href="#local-6989586621679323637"><span class="hs-identifier hs-type">rel</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DoubleRelAbs"><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-var">DoubleRelAbs</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679323618"><span id="local-6989586621679323620"><span id="local-6989586621679323622"><span id="local-6989586621679323624"><span id="local-6989586621679323626"><span id="local-6989586621679323628"><span id="local-6989586621679323630"><span class="annot"><span class="annottext">Integer -&gt; DoubleRelAbs abs rel
 DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
 DoubleRelAbs abs rel
 -&gt; DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
@@ -116,7 +118,7 @@ DoubleRelAbs abs rel
 $c+ :: forall (abs :: Nat) (rel :: Nat).
 DoubleRelAbs abs rel
 -&gt; DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320643"><span id="local-6989586621679320645"><span id="local-6989586621679320647"><span id="local-6989586621679320649"><span id="local-6989586621679320651"><span id="local-6989586621679320653"><span id="local-6989586621679320655"><span id="local-6989586621679320657"><span class="annot"><span class="annottext">Int -&gt; DoubleRelAbs abs rel
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323601"><span id="local-6989586621679323603"><span id="local-6989586621679323605"><span id="local-6989586621679323607"><span id="local-6989586621679323609"><span id="local-6989586621679323611"><span id="local-6989586621679323613"><span id="local-6989586621679323615"><span class="annot"><span class="annottext">Int -&gt; DoubleRelAbs abs rel
 DoubleRelAbs abs rel -&gt; Int
 DoubleRelAbs abs rel -&gt; [DoubleRelAbs abs rel]
 DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
@@ -196,7 +198,7 @@ DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
 succ :: DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
 $csucc :: forall (abs :: Nat) (rel :: Nat).
 DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320597"><span id="local-6989586621679320599"><span id="local-6989586621679320601"><span id="local-6989586621679320603"><span id="local-6989586621679320605"><span id="local-6989586621679320607"><span id="local-6989586621679320609"><span id="local-6989586621679320611"><span id="local-6989586621679320613"><span id="local-6989586621679320615"><span id="local-6989586621679320617"><span id="local-6989586621679320619"><span id="local-6989586621679320621"><span id="local-6989586621679320623"><span id="local-6989586621679320625"><span id="local-6989586621679320627"><span id="local-6989586621679320629"><span id="local-6989586621679320631"><span id="local-6989586621679320633"><span id="local-6989586621679320635"><span id="local-6989586621679320637"><span id="local-6989586621679320639"><span class="annot"><span class="annottext">Fractional (DoubleRelAbs abs rel)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323555"><span id="local-6989586621679323557"><span id="local-6989586621679323559"><span id="local-6989586621679323561"><span id="local-6989586621679323563"><span id="local-6989586621679323565"><span id="local-6989586621679323567"><span id="local-6989586621679323569"><span id="local-6989586621679323571"><span id="local-6989586621679323573"><span id="local-6989586621679323575"><span id="local-6989586621679323577"><span id="local-6989586621679323579"><span id="local-6989586621679323581"><span id="local-6989586621679323583"><span id="local-6989586621679323585"><span id="local-6989586621679323587"><span id="local-6989586621679323589"><span id="local-6989586621679323591"><span id="local-6989586621679323593"><span id="local-6989586621679323595"><span id="local-6989586621679323597"><span class="annot"><span class="annottext">Fractional (DoubleRelAbs abs rel)
 DoubleRelAbs abs rel
 Fractional (DoubleRelAbs abs rel) =&gt;
 DoubleRelAbs abs rel
@@ -329,7 +331,7 @@ DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
 pi :: DoubleRelAbs abs rel
 $cpi :: forall (abs :: Nat) (rel :: Nat). DoubleRelAbs abs rel
 $cp1Floating :: forall (abs :: Nat) (rel :: Nat). Fractional (DoubleRelAbs abs rel)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Floating</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320589"><span id="local-6989586621679320591"><span id="local-6989586621679320593"><span class="annot"><span class="annottext">Num (DoubleRelAbs abs rel)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Floating</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323547"><span id="local-6989586621679323549"><span id="local-6989586621679323551"><span class="annot"><span class="annottext">Num (DoubleRelAbs abs rel)
 Num (DoubleRelAbs abs rel) =&gt;
 (DoubleRelAbs abs rel
  -&gt; DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel)
@@ -361,7 +363,7 @@ $c/ :: forall (abs :: Nat) (rel :: Nat).
 DoubleRelAbs abs rel
 -&gt; DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel
 $cp1Fractional :: forall (abs :: Nat) (rel :: Nat). Num (DoubleRelAbs abs rel)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Fractional</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320584"><span class="annot"><span class="annottext">Num (DoubleRelAbs abs rel)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Fractional</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323542"><span class="annot"><span class="annottext">Num (DoubleRelAbs abs rel)
 Ord (DoubleRelAbs abs rel)
 (Num (DoubleRelAbs abs rel), Ord (DoubleRelAbs abs rel)) =&gt;
 (DoubleRelAbs abs rel -&gt; Rational) -&gt; Real (DoubleRelAbs abs rel)
@@ -386,7 +388,7 @@ Ord (DoubleRelAbs abs rel)
 $cp1Real :: forall (abs :: Nat) (rel :: Nat).
 (KnownNat abs, KnownNat rel) =&gt;
 Num (DoubleRelAbs abs rel)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320553"><span id="local-6989586621679320555"><span id="local-6989586621679320557"><span id="local-6989586621679320559"><span id="local-6989586621679320561"><span id="local-6989586621679320563"><span id="local-6989586621679320565"><span id="local-6989586621679320567"><span id="local-6989586621679320569"><span id="local-6989586621679320571"><span id="local-6989586621679320573"><span id="local-6989586621679320575"><span id="local-6989586621679320577"><span id="local-6989586621679320579"><span class="annot"><span class="annottext">Floating (DoubleRelAbs abs rel)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323511"><span id="local-6989586621679323513"><span id="local-6989586621679323515"><span id="local-6989586621679323517"><span id="local-6989586621679323519"><span id="local-6989586621679323521"><span id="local-6989586621679323523"><span id="local-6989586621679323525"><span id="local-6989586621679323527"><span id="local-6989586621679323529"><span id="local-6989586621679323531"><span id="local-6989586621679323533"><span id="local-6989586621679323535"><span id="local-6989586621679323537"><span class="annot"><span class="annottext">Floating (DoubleRelAbs abs rel)
 RealFrac (DoubleRelAbs abs rel)
 (RealFrac (DoubleRelAbs abs rel),
  Floating (DoubleRelAbs abs rel)) =&gt;
@@ -531,7 +533,7 @@ Floating (DoubleRelAbs abs rel)
 $cp1RealFloat :: forall (abs :: Nat) (rel :: Nat).
 (KnownNat abs, KnownNat rel) =&gt;
 RealFrac (DoubleRelAbs abs rel)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">RealFloat</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679320540"><span id="local-6989586621679320542"><span id="local-6989586621679320544"><span id="local-6989586621679320546"><span id="local-6989586621679320548"><span class="annot"><span class="annottext">Fractional (DoubleRelAbs abs rel)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">RealFloat</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323498"><span id="local-6989586621679323500"><span id="local-6989586621679323502"><span id="local-6989586621679323504"><span id="local-6989586621679323506"><span class="annot"><span class="annottext">Fractional (DoubleRelAbs abs rel)
 Real (DoubleRelAbs abs rel)
 (Real (DoubleRelAbs abs rel), Fractional (DoubleRelAbs abs rel)) =&gt;
 (forall b.
@@ -597,30 +599,122 @@ Fractional (DoubleRelAbs abs rel)
 $cp1RealFrac :: forall (abs :: Nat) (rel :: Nat).
 (KnownNat abs, KnownNat rel) =&gt;
 Real (DoubleRelAbs abs rel)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">RealFrac</span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>
-</span><span id="line-65"></span><span id="local-6989586621679320537"><span id="local-6989586621679320538"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679320534"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679320538"><span class="hs-identifier hs-type">abs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679320537"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320538"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320537"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-66"></span><span>  </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679320532"><span class="annot"><span class="annottext">d1 :: Double
-</span><a href="#local-6989586621679320532"><span class="hs-identifier hs-var">d1</span></a></span></span><span> </span><span id="local-6989586621679320531"><span class="annot"><span class="annottext">== :: DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679320530"><span class="annot"><span class="annottext">d2 :: Double
-</span><a href="#local-6989586621679320530"><span class="hs-identifier hs-var">d2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-67"></span><span>    </span><span class="annot"><span class="annottext">Int -&gt; Double -&gt; Double -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">RealFrac</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323485"><span id="local-6989586621679323487"><span id="local-6989586621679323489"><span id="local-6989586621679323491"><span id="local-6989586621679323493"><span id="local-6989586621679323495"><span class="annot"><span class="annottext">IO (DoubleRelAbs abs rel)
+g -&gt; (DoubleRelAbs abs rel, g)
+g -&gt; [DoubleRelAbs abs rel]
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; IO (DoubleRelAbs abs rel)
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; (DoubleRelAbs abs rel, g)
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; [DoubleRelAbs abs rel]
+(forall g.
+ RandomGen g =&gt;
+ (DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+ -&gt; g -&gt; (DoubleRelAbs abs rel, g))
+-&gt; (forall g. RandomGen g =&gt; g -&gt; (DoubleRelAbs abs rel, g))
+-&gt; (forall g.
+    RandomGen g =&gt;
+    (DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+    -&gt; g -&gt; [DoubleRelAbs abs rel])
+-&gt; (forall g. RandomGen g =&gt; g -&gt; [DoubleRelAbs abs rel])
+-&gt; ((DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+    -&gt; IO (DoubleRelAbs abs rel))
+-&gt; IO (DoubleRelAbs abs rel)
+-&gt; Random (DoubleRelAbs abs rel)
+forall g. RandomGen g =&gt; g -&gt; [DoubleRelAbs abs rel]
+forall g. RandomGen g =&gt; g -&gt; (DoubleRelAbs abs rel, g)
+forall g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; [DoubleRelAbs abs rel]
+forall g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; (DoubleRelAbs abs rel, g)
+forall a.
+(forall g. RandomGen g =&gt; (a, a) -&gt; g -&gt; (a, g))
+-&gt; (forall g. RandomGen g =&gt; g -&gt; (a, g))
+-&gt; (forall g. RandomGen g =&gt; (a, a) -&gt; g -&gt; [a])
+-&gt; (forall g. RandomGen g =&gt; g -&gt; [a])
+-&gt; ((a, a) -&gt; IO a)
+-&gt; IO a
+-&gt; Random a
+forall (abs :: Nat) (rel :: Nat). IO (DoubleRelAbs abs rel)
+forall (abs :: Nat) (rel :: Nat).
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; IO (DoubleRelAbs abs rel)
+forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+g -&gt; [DoubleRelAbs abs rel]
+forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+g -&gt; (DoubleRelAbs abs rel, g)
+forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; [DoubleRelAbs abs rel]
+forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; (DoubleRelAbs abs rel, g)
+randomIO :: IO (DoubleRelAbs abs rel)
+$crandomIO :: forall (abs :: Nat) (rel :: Nat). IO (DoubleRelAbs abs rel)
+randomRIO :: (DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; IO (DoubleRelAbs abs rel)
+$crandomRIO :: forall (abs :: Nat) (rel :: Nat).
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; IO (DoubleRelAbs abs rel)
+randoms :: g -&gt; [DoubleRelAbs abs rel]
+$crandoms :: forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+g -&gt; [DoubleRelAbs abs rel]
+randomRs :: (DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; [DoubleRelAbs abs rel]
+$crandomRs :: forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; [DoubleRelAbs abs rel]
+random :: g -&gt; (DoubleRelAbs abs rel, g)
+$crandom :: forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+g -&gt; (DoubleRelAbs abs rel, g)
+randomR :: (DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; (DoubleRelAbs abs rel, g)
+$crandomR :: forall (abs :: Nat) (rel :: Nat) g.
+RandomGen g =&gt;
+(DoubleRelAbs abs rel, DoubleRelAbs abs rel)
+-&gt; g -&gt; (DoubleRelAbs abs rel, g)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Random</span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679323482"><span class="annot"><span class="annottext">DoubleRelAbs abs rel -&gt; ()
+(DoubleRelAbs abs rel -&gt; ()) -&gt; NFData (DoubleRelAbs abs rel)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall (abs :: Nat) (rel :: Nat). DoubleRelAbs abs rel -&gt; ()
+rnf :: DoubleRelAbs abs rel -&gt; ()
+$crnf :: forall (abs :: Nat) (rel :: Nat). DoubleRelAbs abs rel -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679323479"><span id="local-6989586621679323480"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679323476"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679323480"><span class="hs-identifier hs-type">abs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679323479"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323480"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323479"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679323474"><span class="annot"><span class="annottext">d1 :: Double
+</span><a href="#local-6989586621679323474"><span class="hs-identifier hs-var">d1</span></a></span></span><span> </span><span id="local-6989586621679323473"><span class="annot"><span class="annottext">== :: DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679323472"><span class="annot"><span class="annottext">d2 :: Double
+</span><a href="#local-6989586621679323472"><span class="hs-identifier hs-var">d2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">Int -&gt; Double -&gt; Double -&gt; Bool
 </span><span class="hs-identifier hs-var">within</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Proxy rel -&gt; Integer
 forall (n :: Nat) (proxy :: Nat -&gt; *).
 KnownNat n =&gt;
 proxy n -&gt; Integer
-</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679320537"><span class="hs-identifier hs-type">rel</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy rel
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679323479"><span class="hs-identifier hs-type">rel</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy rel
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320532"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320530"><span class="hs-identifier hs-var">d2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679323474"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679323472"><span class="hs-identifier hs-var">d2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span>
-</span><span id="line-68"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><span id="line-70"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320532"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679323474"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-identifier hs-var">m_epsilon</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
@@ -631,14 +725,14 @@ forall a b. (Integral a, Num b) =&gt; a -&gt; b
 forall (n :: Nat) (proxy :: Nat -&gt; *).
 KnownNat n =&gt;
 proxy n -&gt; Integer
-</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679320538"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy abs
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679323480"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy abs
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
-</span><span id="line-69"></span><span>     </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><span id="line-71"></span><span>     </span><span class="annot"><span class="annottext">Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320530"><span class="hs-identifier hs-var">d2</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679323472"><span class="hs-identifier hs-var">d2</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-identifier hs-var">m_epsilon</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
@@ -649,42 +743,42 @@ forall a b. (Integral a, Num b) =&gt; a -&gt; b
 forall (n :: Nat) (proxy :: Nat -&gt; *).
 KnownNat n =&gt;
 proxy n -&gt; Integer
-</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679320538"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy abs
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679323480"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><span class="annottext">Proxy abs
 forall k (t :: k). Proxy t
 </span><span class="hs-identifier hs-var">Proxy</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span id="local-6989586621679320519"><span id="local-6989586621679320520"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679320505"><span id="local-6989586621679320507"><span id="local-6989586621679320509"><span id="local-6989586621679320511"><span id="local-6989586621679320513"><span id="local-6989586621679320515"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679320520"><span class="hs-identifier hs-type">abs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679320519"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320520"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320519"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-72"></span><span>  </span><span id="local-6989586621679320503"><span class="annot"><span class="annottext">lhs :: DoubleRelAbs abs rel
-</span><a href="#local-6989586621679320503"><span class="hs-identifier hs-var">lhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679320502"><span class="annot"><span class="annottext">d1 :: Double
-</span><a href="#local-6989586621679320502"><span class="hs-identifier hs-var">d1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679320501"><span class="annot"><span class="annottext">compare :: DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Ordering
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span id="local-6989586621679320499"><span class="annot"><span class="annottext">rhs :: DoubleRelAbs abs rel
-</span><a href="#local-6989586621679320499"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679320498"><span class="annot"><span class="annottext">d2 :: Double
-</span><a href="#local-6989586621679320498"><span class="hs-identifier hs-var">d2</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-73"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">DoubleRelAbs abs rel
-</span><a href="#local-6989586621679320503"><span class="hs-identifier hs-var">lhs</span></a></span><span> </span><span class="annot"><span class="annottext">DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Bool
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="local-6989586621679323461"><span id="local-6989586621679323462"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679323447"><span id="local-6989586621679323449"><span id="local-6989586621679323451"><span id="local-6989586621679323453"><span id="local-6989586621679323455"><span id="local-6989586621679323457"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679323462"><span class="hs-identifier hs-type">abs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679323461"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323462"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323461"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679323445"><span class="annot"><span class="annottext">lhs :: DoubleRelAbs abs rel
+</span><a href="#local-6989586621679323445"><span class="hs-identifier hs-var">lhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679323444"><span class="annot"><span class="annottext">d1 :: Double
+</span><a href="#local-6989586621679323444"><span class="hs-identifier hs-var">d1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679323443"><span class="annot"><span class="annottext">compare :: DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Ordering
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">`compare`</span></span></span><span> </span><span id="local-6989586621679323441"><span class="annot"><span class="annottext">rhs :: DoubleRelAbs abs rel
+</span><a href="#local-6989586621679323441"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679323440"><span class="annot"><span class="annottext">d2 :: Double
+</span><a href="#local-6989586621679323440"><span class="hs-identifier hs-var">d2</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">DoubleRelAbs abs rel
+</span><a href="#local-6989586621679323445"><span class="hs-identifier hs-var">lhs</span></a></span><span> </span><span class="annot"><span class="annottext">DoubleRelAbs abs rel -&gt; DoubleRelAbs abs rel -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DoubleRelAbs abs rel
-</span><a href="#local-6989586621679320499"><span class="hs-identifier hs-var">rhs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679323441"><span class="hs-identifier hs-var">rhs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">EQ</span></span><span>
-</span><span id="line-74"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-76"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320502"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Ordering
+</span><a href="#local-6989586621679323444"><span class="hs-identifier hs-var">d1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320498"><span class="hs-identifier hs-var">d2</span></a></span></span></span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span id="local-6989586621679320496"><span id="local-6989586621679320497"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679320491"><span id="local-6989586621679320493"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320497"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320496"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-77"></span><span>  </span><span id="local-6989586621679320489"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; DoubleRelAbs abs rel -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679320487"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679320487"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679320486"><span class="annot"><span class="annottext">d :: Double
-</span><a href="#local-6989586621679320486"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Double -&gt; ShowS
+</span><a href="#local-6989586621679323440"><span class="hs-identifier hs-var">d2</span></a></span></span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679323438"><span id="local-6989586621679323439"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679323433"><span id="local-6989586621679323435"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323439"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323438"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679323431"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; DoubleRelAbs abs rel -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679323429"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679323429"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span id="local-6989586621679323428"><span class="annot"><span class="annottext">d :: Double
+</span><a href="#local-6989586621679323428"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Double -&gt; ShowS
 forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679320487"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679320486"><span class="hs-identifier hs-var">d</span></a></span></span></span><span>
-</span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span id="local-6989586621679320484"><span id="local-6989586621679320485"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679320477"><span id="local-6989586621679320480"><span id="local-6989586621679320482"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320485"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679320484"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-80"></span><span>  </span><span id="local-6989586621679320475"><span class="annot"><span class="annottext">readPrec :: ReadPrec (DoubleRelAbs abs rel)
+</span><a href="#local-6989586621679323429"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679323428"><span class="hs-identifier hs-var">d</span></a></span></span></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679323426"><span id="local-6989586621679323427"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679323419"><span id="local-6989586621679323422"><span id="local-6989586621679323424"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-type">DoubleRelAbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323427"><span class="hs-identifier hs-type">abs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679323426"><span class="hs-identifier hs-type">rel</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679323417"><span class="annot"><span class="annottext">readPrec :: ReadPrec (DoubleRelAbs abs rel)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">readPrec</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; DoubleRelAbs abs rel
 forall (abs :: Nat) (rel :: Nat). Double -&gt; DoubleRelAbs abs rel
 </span><a href="Data.Double.Approximate.html#DoubleRelAbs"><span class="hs-identifier hs-var">DoubleRelAbs</span></a></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; DoubleRelAbs abs rel)
@@ -693,5 +787,5 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ReadPrec Double
 forall a. Read a =&gt; ReadPrec a
 </span><span class="hs-identifier hs-var">readPrec</span></span></span></span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span></pre></body></html>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span></pre></body></html>
