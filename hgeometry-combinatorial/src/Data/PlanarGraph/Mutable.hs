@@ -1,8 +1,9 @@
 module Data.PlanarGraph.Mutable
   ( -- * Planar graphs
     PlanarGraph
-  , fromFaces -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
-  , clone     -- :: PlanarGraph s -> ST s (PlanarGraph s)
+  , pgFromFaces -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
+  , pgClone     -- :: PlanarGraph s -> ST s (PlanarGraph s)
+  , pgHash      -- :: PlanarGraph s -> ST s Int
 
     -- * Elements
     -- ** Vertices
@@ -77,6 +78,7 @@ import           Data.Vector.Circular (CircularVector)
 import qualified Data.Vector.Circular as CV
 import           Data.Vector.Mutable  (STVector)
 import qualified Data.Vector.Mutable  as V
+import Data.Hashable
 
 import           Data.Coerce
 import           Data.Proxy
@@ -126,6 +128,9 @@ data HalfEdge s = HalfEdge HalfEdgeId (PlanarGraph s)
   deriving Eq
 instance Show (HalfEdge s) where
   showsPrec d (HalfEdge s _) = showsPrec d s
+instance Hashable (HalfEdge s) where
+  hashWithSalt salt (HalfEdge eId _) = hashWithSalt salt eId
+
 
 data Edge s = Edge Int (PlanarGraph s)
   deriving Eq
@@ -135,6 +140,8 @@ data Vertex s = Vertex VertexId (PlanarGraph s)
   deriving Eq
 instance Show (Vertex s) where
   showsPrec d (Vertex v _) = showsPrec d v
+instance Hashable (Vertex s) where
+  hashWithSalt salt (Vertex vId _) = hashWithSalt salt vId
 
 type FaceId = Int
 data Face s = Face FaceId (PlanarGraph s) | Boundary FaceId (PlanarGraph s)
@@ -204,12 +211,23 @@ new n | n < 0 = panic "new" "Cannot contain negative vertices."
 new 0 = empty 0 0 0
 new 1 = undefined
 new 2 = undefined
-new n = fromFaces [CV.unsafeFromList [0..n-1]]
+new n = pgFromFaces [CV.unsafeFromList [0..n-1]]
+
+-- $setup
+-- >>> let list = CV.unsafeFromList
+-- >>> runST $ pgFromFaces [list [0,1,2]] >>= pgHash
+-- 2959979592048325618
 
 -- | \( O(n \log n) \)
-fromFaces :: [CircularVector VertexId] -> ST s (PlanarGraph s)
-fromFaces [] = empty 0 0 0
-fromFaces faces = do
+--
+-- ==== __Examples:__
+-- @
+-- 'pgFromFaces' $ map 'CV.unsafeFromList' [[0,1,2]]
+-- @
+-- Image here!
+pgFromFaces :: [CircularVector VertexId] -> ST s (PlanarGraph s)
+pgFromFaces [] = empty 0 0 0
+pgFromFaces faces = do
   let maxVertexId = maximum (map CV.maximum faces)
       nFaces = length faces
       nHalfEdges = sum (map length faces)
@@ -266,11 +284,22 @@ fromFaces faces = do
 --   undefined
 
 -- | \( O(n) \)
-clone :: PlanarGraph s -> ST s (PlanarGraph s)
-clone = undefined
+pgClone :: PlanarGraph s -> ST s (PlanarGraph s)
+pgClone = undefined
 
 -- dualTree :: Face s -> ST s (Tree (Face s))
 -- dualTree = undefined
+
+pgHash :: PlanarGraph s -> ST s Int
+pgHash pg = do
+  eMax <- readSTRef (pgNextHalfEdgeId pg)
+  let loop [] salt = pure salt
+      loop (edgeId:rest) salt = do
+        let he = halfEdgeFromId (edgeId*2) pg
+        vTail <- halfEdgeTailVertex he
+        vTip <- halfEdgeTipVertex he
+        loop rest (hashWithSalt salt (vTail, vTip))
+  loop [0..eMax-1] 0
 
 -------------------------------------------------------------------------------
 -- Vertices
