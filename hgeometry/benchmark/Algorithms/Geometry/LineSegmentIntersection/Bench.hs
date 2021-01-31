@@ -2,7 +2,7 @@ module Algorithms.Geometry.LineSegmentIntersection.Bench where
 
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BONew
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld as BOOld
-import           Algorithms.Geometry.LineSegmentIntersection.Types
+import           Algorithms.Geometry.LineSegmentIntersection
 import           Benchmark.Util
 import           Control.DeepSeq
 import           Control.Lens

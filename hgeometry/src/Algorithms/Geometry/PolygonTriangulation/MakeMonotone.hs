@@ -15,30 +15,30 @@ module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , classifyVertices
                                                             ) where
 
-import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
-import           Algorithms.Geometry.PolygonTriangulation.Types
+import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
+import Algorithms.Geometry.PolygonTriangulation.Types
+
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
-import           Control.Monad.Writer                                       (WriterT, execWriterT,
-                                                                             tell)
+import           Control.Monad.Writer                  (WriterT, execWriterT, tell)
 import           Data.Bifunctor
-import qualified Data.DList                                                 as DList
+import qualified Data.DList                            as DList
 import           Data.Ext
-import qualified Data.Foldable                                              as F
+import qualified Data.Foldable                         as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.IntMap                                                as IntMap
-import qualified Data.List.NonEmpty                                         as NonEmpty
-import           Data.Ord                                                   (Down (..), comparing)
-import qualified Data.Set                                                   as SS
-import qualified Data.Set.Util                                              as SS
+import qualified Data.IntMap                           as IntMap
+import qualified Data.List.NonEmpty                    as NonEmpty
+import           Data.Ord                              (Down (..), comparing)
+import qualified Data.Set                              as SS
+import qualified Data.Set.Util                         as SS
 import           Data.Util
-import qualified Data.Vector                                                as V
-import qualified Data.Vector.Circular                                       as CV
-import qualified Data.Vector.Mutable                                        as MV
+import qualified Data.Vector                           as V
+import qualified Data.Vector.Circular                  as CV
+import qualified Data.Vector.Mutable                   as MV
 
 
 -- import Debug.Trace

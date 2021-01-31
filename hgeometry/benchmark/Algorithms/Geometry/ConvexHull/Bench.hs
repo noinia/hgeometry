@@ -1,26 +1,23 @@
+-- {-# LANGUAGE #-}
 module Algorithms.Geometry.ConvexHull.Bench where
 
-import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
-import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
+-- import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
 
 -- | copies of the convex hull algo with different point types
-import qualified Algorithms.Geometry.ConvexHull.GrahamV2   as GV
-import qualified Algorithms.Geometry.ConvexHull.GrahamFam  as GFam
-import qualified Algorithms.Geometry.ConvexHull.GrahamFamPeano  as GPeano
-import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
-import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
-import qualified Data.Ext.Multi as Multi
-import           Benchmark.Util
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamV2   as GV
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamFam  as GFam
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamFamPeano  as GPeano
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
+-- import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
 import           Control.DeepSeq
-import           Control.Lens
-import           Criterion.Main
-import           Criterion.Types
 import           Data.Ext
+import qualified Data.Ext.Multi      as Multi
 import           Data.Geometry.Point
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Proxy
+import           Data.List.NonEmpty  (NonEmpty (..))
+import qualified Data.List.NonEmpty  as NonEmpty
 import           Test.QuickCheck
+import           Test.Tasty.Bench
 
 
 -- import           Data.Semigroup.Foldable
@@ -34,33 +31,30 @@ import           Test.QuickCheck
 
 main :: IO ()
 main = do
-         pts <- genPts' (Proxy :: Proxy Int) 10000
-         print pts
-         defaultMainWith cfg [ benchBuild pts ]
-  where
-    cfg = defaultConfig { reportFile = Just "bench.html" }
+         pts <- genPts' @Int 10000
+         defaultMain [ benchBuild pts ]
 
 -- main :: IO ()
 -- main = defaultMainWith cfg [ benchmark ]
 --   where
 --     cfg = defaultConfig { reportFile = Just "bench.html" }
 
-benchmark :: Benchmark
-benchmark = bgroup "convexHullBench"
-    [ env (genPts' (Proxy :: Proxy Int) 10000) benchBuild
-    ]
+-- benchmark :: Benchmark
+-- benchmark = bgroup "convexHullBench"
+--     [ env (genPts' @Int 10000) benchBuild
+--     ]
 
 --------------------------------------------------------------------------------
 
-genPts     :: (Ord r, Arbitrary r) => proxy r -> Int -> IO (NonEmpty (Point 2 r :+ ()))
-genPts _ n = generate (NonEmpty.fromList <$> vectorOf n arbitrary)
+genPts     :: (Ord r, Arbitrary r) => Int -> IO (NonEmpty (Point 2 r :+ ()))
+genPts n = generate (NonEmpty.fromList <$> vectorOf n arbitrary)
 
-genPts'      :: (Ord r, Arbitrary r) => proxy r -> Int
+genPts'      :: (Ord r, Arbitrary r) => Int
              -> IO ( NonEmpty (Point 2 r :+ ())
                    , NonEmpty (Point 2 r Multi.:+ '[])
                    )
-genPts' px n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
-               ) <$> genPts px n
+genPts' n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
+               ) <$> genPts n
 
 
 -- | Benchmark building the convexHull
@@ -70,15 +64,15 @@ benchBuild    :: forall r. (Ord r, Num r, NFData r)
                  )
               -> Benchmark
 benchBuild ps = bgroup "build" [ bgroup (show n) (build ps) -- $ take' n ps)
-                               | n <- [10000]
+                               | n <- [10000::Int]
                                ]
   where
     -- take'' n = NonEmpty.fromList . NonEmpty.take n
 
     -- take' n  = bimap (take'' n) (take'' n)
 
-    sizes'   :: a -> [Int]
-    sizes' _ = [10000]
+    -- sizes'   :: a -> [Int]
+    -- sizes' _ = [10000]
 
     -- build            :: (Ord a, Ord b) => (NonEmpty a, NonEmpty b) -> [Benchmark]
     build (pts,pts') =

@@ -63,6 +63,7 @@ benchmark benchmarks
   build-depends:
                 base
               , criterion >= 1.1.4.0
+              , tasty-bench
               , fixed-vector
               , linear
               , semigroups
@@ -81,6 +82,7 @@ benchmark benchmarks
               , vector
               , dlist
               , mtl
+              , vector-circular
 
 
   ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors
@@ -109,8 +111,6 @@ benchmark benchmarks
                     , DeriveFunctor
                     , DeriveFoldable
                     , DeriveTraversable
-
-                    , AutoDeriveTypeable
 
                     , FlexibleInstances
                     , FlexibleContexts
