@@ -1,5 +1,5 @@
 -- {-# LANGUAGE #-}
-module Algorithms.Geometry.ConvexHull.Bench where
+module Algorithms.Geometry.ConvexHull.Bench (benchmark) where
 
 -- import qualified Algorithms.Geometry.ConvexHull.DivideAndConquer as DivideAndConquer
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamScan as GrahamScan
@@ -11,14 +11,15 @@ module Algorithms.Geometry.ConvexHull.Bench where
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
 import           Control.DeepSeq
+import           Control.Monad.Random
 import           Data.Ext
-import qualified Data.Ext.Multi      as Multi
+import qualified Data.Ext.Multi       as Multi
 import           Data.Geometry.Point
-import           Data.List.NonEmpty  (NonEmpty (..))
-import qualified Data.List.NonEmpty  as NonEmpty
+import           Data.Hashable
+import           Data.List.NonEmpty   (NonEmpty (..))
+import qualified Data.List.NonEmpty   as NonEmpty
 import           Test.QuickCheck
 import           Test.Tasty.Bench
-
 
 -- import           Data.Semigroup.Foldable
 -- import Data.BinaryTree
@@ -29,10 +30,9 @@ import           Test.Tasty.Bench
 
 --------------------------------------------------------------------------------
 
-main :: IO ()
-main = do
-         pts <- genPts' @Int 10000
-         defaultMain [ benchBuild pts ]
+-- main :: IO ()
+-- main = do
+--          defaultMain [ benchBuild ]
 
 -- main :: IO ()
 -- main = defaultMainWith cfg [ benchmark ]
@@ -46,11 +46,15 @@ main = do
 
 --------------------------------------------------------------------------------
 
-genPts     :: (Ord r, Arbitrary r) => Int -> IO (NonEmpty (Point 2 r :+ ()))
-genPts n = generate (NonEmpty.fromList <$> vectorOf n arbitrary)
+genPts                 :: (Ord r, Random r, RandomGen g)
+                       => Int -> Rand g (NonEmpty (Point 2 r :+ ()))
+genPts n = NonEmpty.fromList <$> replicateM n (fmap ext genPoint)
 
-genPts'      :: (Ord r, Arbitrary r) => Int
-             -> IO ( NonEmpty (Point 2 r :+ ())
+genPoint :: (RandomGen g, Random r) => Rand g (Point 2 r)
+genPoint = Point2 <$> getRandom <*> getRandom
+
+genPts'      :: (Ord r, Random r, RandomGen g) => Int
+             -> Rand g ( NonEmpty (Point 2 r :+ ())
                    , NonEmpty (Point 2 r Multi.:+ '[])
                    )
 genPts' n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
@@ -58,15 +62,12 @@ genPts' n = (\pts -> (pts, fmap (\ ~(c :+ _) -> Multi.ext c) pts)
 
 
 -- | Benchmark building the convexHull
-benchBuild    :: forall r. (Ord r, Num r, NFData r)
-              => ( NonEmpty (Point 2 r :+ ())
-                 , NonEmpty (Point 2 r Multi.:+ '[])
-                 )
-              -> Benchmark
-benchBuild ps = bgroup "build" [ bgroup (show n) (build ps) -- $ take' n ps)
+benchmark    :: Benchmark
+benchmark = bgroup "build" [ bgroup (show n) (build $ evalRand (genPts' @Int n) gen) -- $ take' n ps)
                                | n <- [10000::Int]
                                ]
   where
+    gen = mkStdGen (hash ("convex hull"::String))
     -- take'' n = NonEmpty.fromList . NonEmpty.take n
 
     -- take' n  = bimap (take'' n) (take'' n)

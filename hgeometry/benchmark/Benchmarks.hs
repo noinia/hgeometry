@@ -7,4 +7,4 @@ import qualified Algorithms.Geometry.ConvexHull.Bench as M
 import           Test.Tasty.Bench
 
 main :: IO ()
-main = defaultMain [ CP.benchmark ]
+main = defaultMain [ CP.benchmark, M.benchmark ]

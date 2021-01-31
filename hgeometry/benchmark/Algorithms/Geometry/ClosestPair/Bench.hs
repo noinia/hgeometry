@@ -39,7 +39,6 @@ benchBuild = bgroup "closestPair" [ bgroup (show n) (build $ evalRand (genPts @I
                                   | n <- sizes'
                                   ]
   where
-    gen :: StdGen
     gen = mkStdGen (hash ("closest pair"::String))
     sizes' = [500]
 
