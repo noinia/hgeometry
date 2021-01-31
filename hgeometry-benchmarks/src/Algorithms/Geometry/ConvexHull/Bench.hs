@@ -10,7 +10,6 @@ module Algorithms.Geometry.ConvexHull.Bench (benchmark) where
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamFamPeano  as GPeano
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamFam6  as GFam6
 -- import qualified Algorithms.Geometry.ConvexHull.GrahamFixed as GFix
-import           Control.DeepSeq
 import           Control.Monad.Random
 import           Data.Ext
 import qualified Data.Ext.Multi       as Multi
@@ -18,7 +17,6 @@ import           Data.Geometry.Point
 import           Data.Hashable
 import           Data.List.NonEmpty   (NonEmpty (..))
 import qualified Data.List.NonEmpty   as NonEmpty
-import           Test.QuickCheck
 import           Test.Tasty.Bench
 
 -- import           Data.Semigroup.Foldable
@@ -48,10 +46,7 @@ import           Test.Tasty.Bench
 
 genPts                 :: (Ord r, Random r, RandomGen g)
                        => Int -> Rand g (NonEmpty (Point 2 r :+ ()))
-genPts n = NonEmpty.fromList <$> replicateM n (fmap ext genPoint)
-
-genPoint :: (RandomGen g, Random r) => Rand g (Point 2 r)
-genPoint = Point2 <$> getRandom <*> getRandom
+genPts n = NonEmpty.fromList <$> replicateM n (fmap ext getRandom)
 
 genPts'      :: (Ord r, Random r, RandomGen g) => Int
              -> Rand g ( NonEmpty (Point 2 r :+ ())

@@ -23,7 +23,7 @@ module Data.Geometry.Interval(
                              ) where
 
 import           Control.DeepSeq
-import           Control.Lens             (Lens', (%~), (&), (^.), Iso', iso)
+import           Control.Lens             (Iso', Lens', iso, (%~), (&), (^.))
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
@@ -35,6 +35,7 @@ import qualified Data.Traversable         as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics             (Generic)
+import           System.Random
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------

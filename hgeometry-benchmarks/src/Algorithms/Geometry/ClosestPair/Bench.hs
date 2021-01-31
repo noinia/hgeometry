@@ -3,16 +3,12 @@ module Algorithms.Geometry.ClosestPair.Bench where
 import qualified Algorithms.Geometry.ClosestPair.DivideAndConquer as DivideAndConquer
 import qualified Algorithms.Geometry.ClosestPair.Naive            as Naive
 
-import           Benchmark.Util
-import           Control.DeepSeq
 import           Control.Monad.Random
 import           Data.Ext
 import           Data.Geometry.Point
 import           Data.Hashable
 import           Data.LSeq            (LSeq)
 import qualified Data.LSeq            as LSeq
-import           Data.Proxy
-import           Test.QuickCheck
 import           Test.Tasty.Bench
 
 --------------------------------------------------------------------------------
@@ -26,11 +22,8 @@ benchmark = bgroup "convexHullBench"
 
 genPts                 :: (Ord r, Random r, RandomGen g)
                        => Int -> Rand g (LSeq 2 (Point 2 r :+ ()))
-genPts n | n >= 2    = LSeq.promise . LSeq.fromList <$> replicateM n (fmap ext genPoint)
+genPts n | n >= 2    = LSeq.promise . LSeq.fromList <$> replicateM n (fmap ext getRandom)
          | otherwise = error "genPts: Need at least 2 points"
-
-genPoint :: (RandomGen g, Random r) => Rand g (Point 2 r)
-genPoint = Point2 <$> getRandom <*> getRandom
 
 
 -- | Benchmark computing the closest pair
