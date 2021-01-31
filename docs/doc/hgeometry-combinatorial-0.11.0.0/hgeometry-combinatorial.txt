@@ -116,7 +116,12 @@ mergeSortedListsBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
 --   See Wikipedia article for details:
 --   <a>https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm</a>
 module Algorithms.FloydWarshall
+
+-- | Compute the index of an element in a given range.
 mkIndex :: Num a => a -> (a, a) -> a
+
+-- | Construct a weighted graph from &lt;math&gt; vertices, a max bound,
+--   and a list of weighted edges.
 mkGraph :: (Unbox a, Num a) => Int -> a -> [(Int, Int, a)] -> ST s (MVector s (a, Int))
 
 -- | &lt;math&gt;
@@ -154,7 +159,7 @@ module Control.CanAquire
 runAcquire :: forall t a b. Traversable t => (forall s. CanAquire (I s a) a => t (I s a) -> b) -> t a -> b
 class HasIndex i Int => CanAquire i a
 
--- | A value of type i can obtain something of type <tt>a</tt>
+-- | A value of type i can obtain something of type <tt>'a'</tt>
 aquire :: CanAquire i a => i -> a
 class HasIndex t i | t -> i
 
@@ -259,10 +264,11 @@ isShiftOf :: Eq a => CList a -> CList a -> Bool
 module Data.Double.Approximate
 
 -- | Relatively safe double floating-point type with a relative error
---   margin of 10 ULPs and an absolute margin around zero of 10*epsilon.
+--   margin of 10 <a>ULPs</a> and an absolute margin around zero of
+--   <tt>10*<a>epsilon</a></tt>.
 --   
---   Warning: All numbers within 10*epsilon of zero will be considered
---   zero.
+--   Warning: All numbers within <tt>10*<a>epsilon</a></tt> of zero will be
+--   considered zero.
 --   
 --   <pre>
 --   &gt;&gt;&gt; m_epsilon * 10
@@ -287,14 +293,27 @@ module Data.Double.Approximate
 --   True
 --   </pre>
 --   
---   <a>pi</a> and <a>sin</a> are approximations: &gt;&gt;&gt; sin pi
---   1.2246467991473532e-16 &gt;&gt;&gt; sin pi == (0 :: Double) False
---   &gt;&gt;&gt; sin pi == (0 :: SafeDouble) True
+--   <a>pi</a> and <a>sin</a> are approximations:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi
+--   1.2246467991473532e-16
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: Double)
+--   False
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: SafeDouble)
+--   True
+--   </pre>
 type SafeDouble = DoubleRelAbs 10 10
 
 -- | Custom double floating-point type with a relative error margin of
---   <tt>rel</tt> number of ULPs and an absolute error margin of <a>abs</a>
---   times epsilon.
+--   <tt>rel</tt> number of <a>ULPs</a> and an absolute error margin of
+--   <tt>abs</tt> times <a>epsilon</a>.
 --   
 --   The relative error margin is the primary tool for good numerical
 --   robustness and can relatively safely be set to a high number such as
@@ -318,7 +337,7 @@ instance GHC.Read.Read (Data.Double.Approximate.DoubleRelAbs abs rel)
 
 module Data.DynamicOrd
 
--- | Values of type <tt>a</tt> in our dynamically constructed <a>Ord</a>
+-- | Values of type '<tt>a</tt>' in our dynamically constructed <a>Ord</a>
 --   instance
 newtype O (s :: *) (a :: *)
 O :: a -> O (s :: *) (a :: *)
@@ -332,28 +351,30 @@ OrdDict :: (a -> a -> Ordering) -> OrdDict a
 -- | Run a computation with a given ordering
 withOrd :: (a -> a -> Ordering) -> (forall s. Reifies s (OrdDict a) => O s b) -> b
 
--- | Lifts a container f whose values (of type a) depend on <tt>s</tt> into
---   a more general computation in that produces a 'f a' (depending on s).
+-- | Lifts a container f whose values (of type a) depend on '<tt>s</tt>'
+--   into a more general computation in that produces a '<tt>f a</tt>'
+--   (depending on s).
 --   
 --   running time: &lt;math&gt;
 extractOrd1 :: f (O s a) -> O s (f a)
 
--- | Introduce dynamic order in a container <tt>f</tt>.
+-- | Introduce dynamic order in a container '<tt>f</tt>'.
 --   
 --   running time: &lt;math&gt;
 introOrd1 :: f a -> f (O s a)
 
--- | Lifts a function that works on a container <tt>f</tt> of
+-- | Lifts a function that works on a container '<tt>f</tt>' of
 --   orderable-things into one that works on dynamically ordered ones.
 liftOrd1 :: (f (O s a) -> f (O s a)) -> f a -> O s (f a)
 
--- | Lifts a container f whose keys (of type k) depend on <tt>s</tt> into a
---   more general computation in that produces a 'f k v' (depending on s).
+-- | Lifts a container f whose keys (of type k) depend on '<tt>s</tt>' into
+--   a more general computation in that produces a <tt>`f k v`</tt>
+--   (depending on s).
 --   
 --   running time: &lt;math&gt;
 extractOrd2 :: f (O s k) v -> O s (f k v)
 
--- | Introduce dynamic order in a container <tt>f</tt> that has keys of
+-- | Introduce dynamic order in a container '<tt>f</tt>' that has keys of
 --   type k.
 --   
 --   running time: &lt;math&gt;
@@ -684,6 +705,8 @@ type family IntersectionOf g h :: [*]
 
 -- | Helper to produce a corec
 coRec :: a ∈ as => a -> CoRec Identity as
+
+-- | Class relationship between intersectable geometric objects.
 class IsIntersectableWith g h
 intersect :: IsIntersectableWith g h => g -> h -> Intersection g h
 
@@ -812,16 +835,15 @@ take :: Int -> LSeq n a -> LSeq 0 a
 --   empty sequence is returned.
 drop :: Int -> LSeq n a -> LSeq 0 a
 
--- | &lt;math&gt;. <a>unstableSort</a> sorts the specified <tt>Seq</tt> by
+-- | &lt;math&gt;. <a>unstableSort</a> sorts the specified <a>LSeq</a> by
 --   the natural ordering of its elements, but the sort is not stable. This
---   algorithm is frequently faster and uses less memory than
---   <tt>sort</tt>.
+--   algorithm is frequently faster and uses less memory than <a>sort</a>.
 unstableSort :: Ord a => LSeq n a -> LSeq n a
 
 -- | &lt;math&gt;. A generalization of <a>unstableSort</a>,
 --   <a>unstableSortBy</a> takes an arbitrary comparator and sorts the
 --   specified sequence. The sort is not stable. This algorithm is
---   frequently faster and uses less memory than <tt>sortBy</tt>.
+--   frequently faster and uses less memory than <a>sortBy</a>.
 unstableSortBy :: (a -> a -> Ordering) -> LSeq n a -> LSeq n a
 
 -- | Gets the first element of the LSeq
@@ -919,7 +941,7 @@ instance (1 GHC.TypeNats.<= n) => Data.Semigroup.Traversable.Class.Traversable1 
 
 module Data.List.Alternating
 
--- | A (non-empty) alternating list of a's and b's
+-- | A (non-empty) alternating list of <tt>a</tt>'s and <tt>b</tt>'s
 data Alternating a b
 Alternating :: a -> [b :+ a] -> Alternating a b
 
@@ -932,7 +954,7 @@ Alternating :: a -> [b :+ a] -> Alternating a b
 withNeighbours :: Alternating a b -> [(a, b :+ a)]
 
 -- | Generic merging scheme that merges two Alternatings and applies the
---   function <tt>f</tt>, with the current/new value at every event. So
+--   function '<tt>f</tt>', with the current/new value at every event. So
 --   note that if the alternating consists of 'Alternating a0 [t1 :+ a1]'
 --   then the function is applied to a1, not to a0 (i.e. every value ai is
 --   considered alive on the interval [ti,t(i+1))
@@ -954,8 +976,8 @@ withNeighbours :: Alternating a b -> [(a, b :+ a)]
 mergeAlternating :: Ord t => (t -> a -> b -> c) -> Alternating a t -> Alternating b t -> [t :+ c]
 
 -- | Adds additional t-values in the alternating, (in sorted order). I.e.
---   if we insert a "breakpoint" at time t the current <tt>a</tt> value is
---   used at that time.
+--   if we insert a "breakpoint" at time t the current '<tt>a</tt>' value
+--   is used at that time.
 --   
 --   <pre>
 --   &gt;&gt;&gt; insertBreakPoints [0,2,4,6,8,10] $ Alternating "a" [3 :+ "c", 5 :+ "e", 7 :+ "g"]
@@ -980,9 +1002,10 @@ instance Data.Bitraversable.Bitraversable Data.List.Alternating.Alternating
 
 module Data.List.Set
 
--- | A Set of <tt>a</tt>s, implemented using a simple list. The only
+-- | A Set of <tt>a</tt>'s, implemented using a simple list. The only
 --   advantage of this implementation over <a>Set</a> from containers is
---   that most operations require only 'Eq a' rather than 'Ord a'.
+--   that most operations require only <tt>'Eq a'</tt> rather than <tt>'Ord
+--   a'</tt>.
 data Set a
 
 -- | Creates a singleton set.
@@ -1461,8 +1484,12 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-direction :: forall s_aLTv. Lens' (Dart s_aLTv) Direction
-arc :: forall s_aLTv s_aMjT. Lens (Dart s_aLTv) (Dart s_aMjT) (Arc s_aLTv) (Arc s_aMjT)
+
+-- | Arc lens.
+arc :: Lens' (Dart s) (Arc s)
+
+-- | Direction lens.
+direction :: Lens' (Dart s) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -1481,10 +1508,6 @@ isPositive :: Dart s -> Bool
 -- | Enumerates all darts such that allDarts !! i = d <a>=</a> i ==
 --   fromEnum d
 allDarts :: [Dart s]
-instance forall k (s :: k). Control.DeepSeq.NFData (Data.PlanarGraph.Dart.Dart s)
-instance forall k (s :: k). GHC.Show.Show (Data.PlanarGraph.Dart.Dart s)
-instance forall k (s :: k). Test.QuickCheck.Arbitrary.Arbitrary (Data.PlanarGraph.Dart.Dart s)
-instance forall k (s :: k). GHC.Enum.Enum (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). GHC.Generics.Generic (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). GHC.Classes.Ord (Data.PlanarGraph.Dart.Dart s)
 instance forall k (s :: k). GHC.Classes.Eq (Data.PlanarGraph.Dart.Dart s)
@@ -1499,6 +1522,10 @@ instance forall k (s :: k). GHC.Enum.Bounded (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Enum.Enum (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Classes.Ord (Data.PlanarGraph.Dart.Arc s)
 instance forall k (s :: k). GHC.Classes.Eq (Data.PlanarGraph.Dart.Arc s)
+instance forall k (s :: k). Control.DeepSeq.NFData (Data.PlanarGraph.Dart.Dart s)
+instance forall k (s :: k). GHC.Show.Show (Data.PlanarGraph.Dart.Dart s)
+instance forall k (s :: k). Test.QuickCheck.Arbitrary.Arbitrary (Data.PlanarGraph.Dart.Dart s)
+instance forall k (s :: k). GHC.Enum.Enum (Data.PlanarGraph.Dart.Dart s)
 instance Control.DeepSeq.NFData Data.PlanarGraph.Dart.Direction
 instance GHC.Show.Show Data.PlanarGraph.Dart.Direction
 instance GHC.Read.Read Data.PlanarGraph.Dart.Direction
@@ -1530,6 +1557,8 @@ VertexId :: Int -> VertexId s (w :: World)
 
 -- | Shorthand for vertices in the primal.
 type VertexId' s = VertexId s Primal
+
+-- | Getter for a VertexId's unique number.
 unVertexId :: Getter (VertexId s w) Int
 
 -- | The type to represent FaceId's
@@ -1560,8 +1589,14 @@ PlanarGraph :: Permutation (Dart s) -> Vector v -> Vector e -> Vector f -> Plana
 -- | Get the embedding, represented as a permutation of the darts, of this
 --   graph.
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
+
+-- | O(1) access, &lt;math&gt; update.
 vertexData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v' e f) (Vector v) (Vector v')
+
+-- | O(1) access, &lt;math&gt; update.
 rawDartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f) (Vector e) (Vector e')
+
+-- | O(1) access, &lt;math&gt; update.
 faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f') (Vector f) (Vector f')
 
 -- | Get the dual graph of this graph.
@@ -1782,6 +1817,8 @@ nextIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 --   
 --   running time: &lt;math&gt;
 prevIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where {
     type family DataOf g i;
 }
@@ -2030,11 +2067,17 @@ data PlanarGraph s (w :: World) v e f
 -- | Get the embedding, represented as a permutation of the darts, of this
 --   graph.
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
+
+-- | O(1) access, &lt;math&gt; update.
 vertexData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v' e f) (Vector v) (Vector v')
 
 -- | lens to access the Dart Data
 dartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f) (Vector (Dart s, e)) (Vector (Dart s, e'))
+
+-- | O(1) access, &lt;math&gt; update.
 faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f') (Vector f) (Vector f')
+
+-- | O(1) access, &lt;math&gt; update.
 rawDartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f) (Vector e) (Vector e')
 
 -- | edgeData is just an alias for <a>dartData</a>
@@ -2071,8 +2114,12 @@ data Dart s
 Dart :: !Arc s -> !Direction -> Dart s
 [_arc] :: Dart s -> !Arc s
 [_direction] :: Dart s -> !Direction
-arc :: forall s_aLTv s_aMjT. Lens (Dart s_aLTv) (Dart s_aMjT) (Arc s_aLTv) (Arc s_aMjT)
-direction :: forall s_aLTv. Lens' (Dart s_aLTv) Direction
+
+-- | Arc lens.
+arc :: Lens' (Dart s) (Arc s)
+
+-- | Direction lens.
+direction :: Lens' (Dart s) Direction
 
 -- | Get the twin of this dart (edge)
 --   
@@ -2325,6 +2372,8 @@ nextIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
 --   
 --   running time: &lt;math&gt;
 prevIncidentEdge :: Dart s -> PlanarGraph s w v e f -> Dart s
+
+-- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where {
     type family DataOf g i;
 }
@@ -2534,8 +2583,12 @@ pattern Range' :: a -> a -> Range a
 --   "(0,5]"
 --   </pre>
 prettyShow :: Show a => Range a -> String
-lower :: forall a_aSaI. Lens' (Range a_aSaI) (EndPoint a_aSaI)
-upper :: forall a_aSaI. Lens' (Range a_aSaI) (EndPoint a_aSaI)
+
+-- | Lens access for the lower part of a range.
+lower :: Lens' (Range a) (EndPoint a)
+
+-- | Lens access for the upper part of a range.
+upper :: Lens' (Range a) (EndPoint a)
 
 -- | Test if a value lies in a range.
 --   
@@ -2585,6 +2638,8 @@ clipLower :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
 -- | Clip the interval from above. I.e. intersect with (-infty, u}, where }
 --   is either open, ), or closed, ],
 clipUpper :: Ord a => EndPoint a -> Range a -> Maybe (Range a)
+
+-- | Compute the halfway point between the start and end of a range.
 midPoint :: Fractional r => Range r -> r
 
 -- | Clamps a value to a range. I.e. if the value lies outside the range we
@@ -2643,12 +2698,6 @@ shiftLeft :: Num r => r -> Range r -> Range r
 --   "(25,35)"
 --   </pre>
 shiftRight :: Num r => r -> Range r -> Range r
-instance GHC.Show.Show a => GHC.Show.Show (Data.Range.Range a)
-instance Data.Functor.Classes.Show1 Data.Range.Range
-instance GHC.Read.Read a => GHC.Read.Read (Data.Range.Range a)
-instance Data.Functor.Classes.Read1 Data.Range.Range
-instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.Range r)
-instance GHC.Classes.Ord a => Data.Intersection.IsIntersectableWith (Data.Range.Range a) (Data.Range.Range a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Range.Range a)
 instance GHC.Generics.Generic (Data.Range.Range a)
 instance Data.Traversable.Traversable Data.Range.Range
@@ -2661,6 +2710,12 @@ instance Data.Traversable.Traversable Data.Range.EndPoint
 instance Data.Foldable.Foldable Data.Range.EndPoint
 instance GHC.Base.Functor Data.Range.EndPoint
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Range.EndPoint a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.Range.Range a)
+instance Data.Functor.Classes.Show1 Data.Range.Range
+instance GHC.Read.Read a => GHC.Read.Read (Data.Range.Range a)
+instance Data.Functor.Classes.Read1 Data.Range.Range
+instance (Test.QuickCheck.Arbitrary.Arbitrary r, GHC.Classes.Ord r) => Test.QuickCheck.Arbitrary.Arbitrary (Data.Range.Range r)
+instance GHC.Classes.Ord a => Data.Intersection.IsIntersectableWith (Data.Range.Range a) (Data.Range.Range a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.Range.EndPoint a)
 instance Data.Functor.Classes.Show1 Data.Range.EndPoint
 instance GHC.Read.Read a => GHC.Read.Read (Data.Range.EndPoint a)
@@ -2683,11 +2738,24 @@ module Data.RealNumber.Rational
 --   number.
 newtype RealNumber (p :: Nat)
 RealNumber :: Rational -> RealNumber (p :: Nat)
+
+-- | Fixed-precision representation of a <a>RealNumber</a>. If there's
+--   insufficient precision to accurately represent the <a>RealNumber</a>
+--   then the <a>Lossy</a> constructor will be used.
 data AsFixed p
 Exact :: !Fixed p -> AsFixed p
 Lossy :: !Fixed p -> AsFixed p
+
+-- | Cast <a>RealNumber</a> to a fixed-precision number. Data-loss caused
+--   by insufficient precision will be marked by the <a>Lossy</a>
+--   constructor.
 asFixed :: KnownNat p => RealNumber p -> AsFixed (NatPrec p)
+
+-- | Cast <a>RealNumber</a> to a fixed-precision number. Data is silently
+--   lost if there's insufficient precision.
 toFixed :: KnownNat p => RealNumber p -> Fixed (NatPrec p)
+
+-- | Cast a fixed-precision number to a <a>RealNumber</a>.
 fromFixed :: KnownNat p => Fixed (NatPrec p) -> RealNumber p
 
 -- | (Kind) This is the kind of type-level natural numbers.
@@ -2736,6 +2804,13 @@ module Data.Set.Util
 --   
 --   running time: &lt;math&gt;
 splitOn :: Ord b => (a -> b) -> b -> Set a -> (Set a, Set a, Set a)
+
+-- | Given a monotonic function f that orders <tt>a</tt>, split the
+--   sequence <tt>s</tt> into three parts. I.e. the result (lt,eq,gt) is
+--   such that * all (x -&gt; f x == LT) . fmap f $ lt * all (x -&gt; f x
+--   == EQ) . fmap f $ eq * all (x -&gt; f x == GT) . fmap f $ gt
+--   
+--   running time: &lt;math&gt;
 splitBy :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
 
 -- | Constructs a Set using the given Order.
@@ -2963,7 +3038,11 @@ foldUpData :: (w -> v -> w -> w) -> (a -> w) -> BinLeafTree v a -> BinLeafTree w
 -- | Takes two trees, that have the same structure, and uses the provided
 --   functions to "zip" them together
 zipExactWith :: (u -> v -> w) -> (a -> b -> c) -> BinLeafTree u a -> BinLeafTree v b -> BinLeafTree w c
+
+-- | &lt;math&gt; Convert binary tree to a rose tree, aka <a>Tree</a>.
 toRoseTree :: BinLeafTree v a -> Tree (TreeNode v a)
+
+-- | 2-dimensional ASCII drawing of a tree.
 drawTree :: (Show v, Show a) => BinLeafTree v a -> String
 
 -- | Binary tree in which we store the values of type a in internal nodes.
@@ -3015,26 +3094,44 @@ instance (Test.QuickCheck.Arbitrary.Arbitrary a, Test.QuickCheck.Arbitrary.Arbit
 
 -- | Add an unbounded/infintity element to a data type. Essentially,
 --   <a>Bottom</a> adds &lt;math&gt; (and is pretty much identical to
---   Maybe), whereas <a>Top</a> adds &lt;math&gt;. The Unbounded type adds
---   both.
+--   Maybe), whereas <a>Top</a> adds &lt;math&gt;. The <a>UnBounded</a>
+--   type adds both.
 module Data.UnBounded
 
--- | `Top a` represents the type a, together with a <a>Top</a> element,
---   i.e. an element that is greater than any other element. We can think
---   of `Top a` being defined as:
+-- | <tt>Top a</tt> represents the type a, together with a <a>Top</a>
+--   element, i.e. an element that is greater than any other element. We
+--   can think of `Top a` being defined as:
 --   
 --   <pre>
 --   &gt;&gt;&gt; data Top a = ValT a | Top
 --   </pre>
 data Top a
-topToMaybe :: Top a -> Maybe a
 pattern ValT :: a -> Top a
 pattern Top :: Top a
+
+-- | <tt>Top a</tt> values are isomorphing to <tt>Maybe a</tt> values.
+topToMaybe :: Top a -> Maybe a
+
+-- | <a>ValT</a> prism. Can be used to access the non-bottom element if it
+--   exists:
+--   
+--   <pre>
+--   &gt;&gt;&gt; ValT True &amp; _ValT %~ not
+--   ValT False
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; Top &amp; _ValT %~ not
+--   Top
+--   </pre>
 _ValT :: Prism (Top a) (Top b) a b
+
+-- | <a>Top</a> prism.
 _Top :: Prism' (Top a) ()
 
--- | Iso between a 'Top a' and a 'Maybe a', interpreting a Top as a Nothing
---   and vice versa. Note that this reverses the ordering of the elements.
+-- | Iso between a <tt>Top a</tt> and a <tt>Maybe a</tt>, interpreting a
+--   <a>Top</a> as a <a>Nothing</a> and vice versa. Note that this reverses
+--   the ordering of the elements.
 --   
 --   <pre>
 --   &gt;&gt;&gt; ValT 5 ^. _TopMaybe
@@ -3051,18 +3148,35 @@ _Top :: Prism' (Top a) ()
 --   </pre>
 _TopMaybe :: Iso' (Top a) (Maybe a)
 
--- | `Bottom a` represents the type a, together with a <a>Bottom</a>
---   element, i.e. an element that is smaller than any other element. We
---   can think of `Bottom a` being defined as:
+-- | <tt>`Bottom a`</tt> represents the type a, together with a
+--   <a>Bottom</a> element, i.e. an element that is smaller than any other
+--   element. We can think of <tt>`Bottom a`</tt> being defined as:
 --   
 --   <pre>
 --   &gt;&gt;&gt; data Bottom a = Bottom | ValB a
 --   </pre>
 data Bottom a
-bottomToMaybe :: Bottom a -> Maybe a
 pattern Bottom :: Bottom a
 pattern ValB :: a -> Bottom a
+
+-- | `Bottom a` values are isomorphing to `Maybe a` values.
+bottomToMaybe :: Bottom a -> Maybe a
+
+-- | <a>ValB</a> prism. Can be used to access the non-bottom element if it
+--   exists:
+--   
+--   <pre>
+--   &gt;&gt;&gt; ValB True &amp; _ValB %~ not
+--   ValB False
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; Bottom &amp; _ValB %~ not
+--   Bottom
+--   </pre>
 _ValB :: Prism (Bottom a) (Bottom b) a b
+
+-- | <a>Bottom</a> prism.
 _Bottom :: Prism' (Bottom a) ()
 
 -- | Iso between a 'Bottom a' and a 'Maybe a', interpreting a Bottom as a
@@ -3091,10 +3205,29 @@ MinInfinity :: UnBounded a
 Val :: a -> UnBounded a
 [_unUnBounded] :: UnBounded a -> a
 MaxInfinity :: UnBounded a
-unUnBounded :: forall a_a10iw a_a11VU. Traversal (UnBounded a_a10iw) (UnBounded a_a11VU) a_a10iw a_a11VU
-_MinInfinity :: forall a_a10iw. Prism' (UnBounded a_a10iw) ()
-_Val :: forall a_a10iw a_a11YN. Prism (UnBounded a_a11YN) (UnBounded a_a10iw) a_a11YN a_a10iw
-_MaxInfinity :: forall a_a10iw. Prism' (UnBounded a_a10iw) ()
+
+-- | Prism to access unbounded value if it exists.
+--   
+--   <pre>
+--   &gt;&gt;&gt; Val True ^? _Val
+--   Just True
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; MinInfinity ^? _Val :: Maybe Bool
+--   Nothing
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; Val True &amp; _Val %~ not
+--   Val False
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; MaxInfinity &amp; _Val %~ not
+--   MaxInfinity
+--   </pre>
+_Val :: Prism (UnBounded a) (UnBounded b) a b
 
 -- | Test if an Unbounded is actually bounded.
 --   
@@ -3109,9 +3242,6 @@ _MaxInfinity :: forall a_a10iw. Prism' (UnBounded a_a10iw) ()
 --   Nothing
 --   </pre>
 unBoundedToMaybe :: UnBounded a -> Maybe a
-instance GHC.Show.Show a => GHC.Show.Show (Data.UnBounded.UnBounded a)
-instance GHC.Num.Num a => GHC.Num.Num (Data.UnBounded.UnBounded a)
-instance GHC.Real.Fractional a => GHC.Real.Fractional (Data.UnBounded.UnBounded a)
 instance Data.Traversable.Traversable Data.UnBounded.UnBounded
 instance Data.Foldable.Foldable Data.UnBounded.UnBounded
 instance GHC.Base.Functor Data.UnBounded.UnBounded
@@ -3133,6 +3263,9 @@ instance Data.Traversable.Traversable Data.UnBounded.Top
 instance Data.Foldable.Foldable Data.UnBounded.Top
 instance GHC.Base.Functor Data.UnBounded.Top
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.UnBounded.Top a)
+instance GHC.Show.Show a => GHC.Show.Show (Data.UnBounded.UnBounded a)
+instance GHC.Num.Num a => GHC.Num.Num (Data.UnBounded.UnBounded a)
+instance GHC.Real.Fractional a => GHC.Real.Fractional (Data.UnBounded.UnBounded a)
 instance GHC.Show.Show a => GHC.Show.Show (Data.UnBounded.Bottom a)
 instance Data.Functor.Classes.Ord1 Data.UnBounded.Top
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.UnBounded.Top a)
@@ -3148,6 +3281,8 @@ STR :: !a -> !b -> !c -> STR a b c
 
 -- | Strict Triple with all items the same
 type Three = V3
+
+-- | Pattern synonym for strict triples.
 pattern Three :: a -> a -> a -> Three a
 
 -- | Generate All unique unordered triplets.
@@ -3163,6 +3298,8 @@ SP :: !a -> !b -> SP a b
 --   
 --   Strict pair with both items the same
 type Two = V2
+
+-- | Pattern synonym for strict pairs.
 pattern Two :: a -> a -> Two a
 
 -- | Given a list xs, generate all unique (unordered) pairs.
@@ -3210,6 +3347,8 @@ data Cell
 Cell :: !Maybe Index -> !Maybe Index -> Cell
 [prev] :: Cell -> !Maybe Index
 [next] :: Cell -> !Maybe Index
+
+-- | Empty cell with no next or prev cells.
 emptyCell :: Cell
 
 -- | Monad in which we can use the IndexedDoublyLinkedList.
@@ -3217,6 +3356,8 @@ data IDLListMonad s a
 
 -- | Runs a DLList Computation, starting with n singleton values
 runIDLListMonad :: Int -> (forall s. IDLListMonad s a) -> a
+
+-- | Cell indices. Must be non-negative.
 type Index = Int
 
 -- | Constructs a new DoublyLinkedList, of size at most n
@@ -3254,6 +3395,8 @@ toListContains :: Index -> IDLListMonad s (NonEmpty Index)
 
 -- | Takes the current element and its k next's
 toListFromK :: Index -> Int -> IDLListMonad s (NonEmpty Index)
+
+-- | Takes the current element and its k prev's
 toListFromRK :: Index -> Int -> IDLListMonad s (NonEmpty Index)
 
 -- | Inserts the second argument after the first one into the linked list
@@ -3294,6 +3437,8 @@ data Cell
 Cell :: Maybe Index -> Maybe Index -> Cell
 [prev] :: Cell -> Maybe Index
 [next] :: Cell -> Maybe Index
+
+-- | Empty cell with no next or prev cells.
 emptyCell :: Cell
 
 -- | Monad in which we can use the IndexedDoublyLinkedList.
@@ -3302,6 +3447,8 @@ data DLListMonad s b a
 -- | Runs a DLList Computation, starting with singleton values, crated from
 --   the input vector.
 runDLListMonad :: Vector b -> (forall s. DLListMonad s b a) -> a
+
+-- | Cell indices. Must be non-negative.
 type Index = Int
 
 -- | Constructs a new DoublyLinkedList. Every element is its own singleton
@@ -3343,6 +3490,8 @@ toListContains :: Index -> DLListMonad s b (NonEmpty Index)
 
 -- | Takes the current element and its k next's
 toListFromK :: Index -> Int -> DLListMonad s b (NonEmpty Index)
+
+-- | Takes the current element and its k prev's
 toListFromRK :: Index -> Int -> DLListMonad s b (NonEmpty Index)
 
 -- | Inserts the second argument after the first one into the linked list
@@ -3367,6 +3516,7 @@ instance GHC.Show.Show Data.IndexedDoublyLinkedList.Cell
 instance Control.Monad.Primitive.PrimMonad (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance Control.Monad.Reader.Class.MonadReader (Data.IndexedDoublyLinkedList.DLList s b) (Data.IndexedDoublyLinkedList.DLListMonad s b)
 instance GHC.Base.Functor (Data.IndexedDoublyLinkedList.DLList s)
+
 
 module Data.Vector.Circular.Util
 
@@ -3439,6 +3589,8 @@ parseVersioned :: [(Version -> Bool, Value -> Parser a)] -> Value -> Parser (Ver
 -- | Data type for things that have a version
 data Versioned a
 Versioned :: Version -> a -> Versioned a
+
+-- | Unpack versioned data type.
 unversioned :: Versioned a -> a
 instance Data.Traversable.Traversable Data.Yaml.Util.Versioned
 instance Data.Foldable.Foldable Data.Yaml.Util.Versioned
