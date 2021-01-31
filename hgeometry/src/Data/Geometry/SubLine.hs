@@ -84,6 +84,7 @@ fixEndPoints sl = sl&subRange %~ f
 dropExtra :: SubLine d p s r -> SubLine d () s r
 dropExtra = over subRange (first (const ()))
 
+-- | Prism for downcasting an unbounded subline to a subline.
 _unBounded :: Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
 _unBounded = prism' toUnbounded fromUnbounded
 

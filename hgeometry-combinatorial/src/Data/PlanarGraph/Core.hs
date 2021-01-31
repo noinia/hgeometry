@@ -89,6 +89,7 @@ newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
 -- | Shorthand for vertices in the primal.
 type VertexId' s = VertexId s Primal
 
+-- | Getter for a VertexId's unique number.
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
 

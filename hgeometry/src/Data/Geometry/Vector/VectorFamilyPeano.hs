@@ -7,7 +7,12 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
-module Data.Geometry.Vector.VectorFamilyPeano where
+module Data.Geometry.Vector.VectorFamilyPeano
+  ( ImplicitArity
+  , VectorFamily(VectorFamily)
+  , VectorFamilyF
+  , FromPeano
+  ) where
 
 import           Control.Applicative (liftA2)
 import           Control.DeepSeq
@@ -304,14 +309,14 @@ instance (ToJSON r, ImplicitArity d) => ToJSON (VectorFamily d r) where
 vectorFromList :: ImplicitArity d => [r] -> Maybe (VectorFamily d r)
 vectorFromList = V.fromListM
 
-vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
-vectorFromListUnsafe = V.fromList
+-- vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
+-- vectorFromListUnsafe = V.fromList
 
--- | Get the head and tail of a vector
-destruct   :: (ImplicitArity d, ImplicitArity (S d))
-           => VectorFamily (S d) r -> (r, VectorFamily d r)
-destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
-  -- FIXME: this implementaion of tail is not particularly nice
+-- -- | Get the head and tail of a vector
+-- destruct   :: (ImplicitArity d, ImplicitArity (S d))
+--            => VectorFamily (S d) r -> (r, VectorFamily d r)
+-- destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+--   -- FIXME: this implementaion of tail is not particularly nice
 
 -- snoc     :: (ImplicitArity d, ImplicitArity (S d))
 --          => VectorFamily d r -> r -> VectorFamily (S d) r
