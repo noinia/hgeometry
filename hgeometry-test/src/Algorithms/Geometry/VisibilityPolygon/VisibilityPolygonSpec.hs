@@ -1,9 +1,12 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec where
 
-
+import  Data.Geometry.PolygonSpec()
 import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
-import           Algorithms.Geometry.VisibilityPolygon.Lee (toCombinatorial)
+import           Algorithms.Geometry.VisibilityPolygon.Lee (toCombinatorial
+                                                           , Definer
+                                                           , StarShapedPolygon
+                                                           )
 import           Control.Lens
 import qualified Data.Vector.Circular as CVec
 import           Data.Ext
@@ -163,12 +166,14 @@ spikeAnswer = CVec.unsafeFromList [Right (7,(2,3)), Left 7, Left 8,Left 1,Left 2
 --       applyAts ats = id
 -- flattenGroups' o                            = [o]
 
-visibilityPg    :: SimplePolygon () R -> StarShapedPolygon (Definer () ((),()) R) R
-visibilityPg pg = visibilityPolygon (pickPoint pg)
+visibilityPg :: Point 2 R -> SimplePolygon () R -> StarShapedPolygon (Definer () ((),()) R) R
+visibilityPg = RotationalSweep.visibilityPolygon
 
-main = do poly <- generate
-          let outP = visibilityPg poly
-              out = singlePageFromContent [iO defIO outP
-                                          , iO defIO poly
+maiG = do poly <- generate arbitrary
+          let outP = visibilityPg q poly
+              q    = pickPoint poly
+              out = singlePageFromContent [ iO $ defIO outP ! attr SFill (IpeColor "blue")
+                                          , iO $ defIO poly
+                                          , iO $ defIO q
                                           ]
           writeIpeFile "/tmp/out.ipe" out
