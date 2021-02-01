@@ -151,12 +151,27 @@ inTriangle q t
   where
     Vector3 a b c = toBarricentric q t
 
+inTriangleRelaxed     :: (Ord r, Num r)
+                 => Point 2 r -> Triangle 2 p r -> PointLocationResult
+inTriangleRelaxed q (Triangle a b c)
+    | ab == CoLinear && bc == ca = OnBoundary
+    | bc == CoLinear && ca == ab = OnBoundary
+    | ca == CoLinear && bc == ab = OnBoundary
+    | ab == bc && bc == ca       = Inside
+    | otherwise                  = Outside
+  where
+    ab = ccw (a^.core) (b^.core) q
+    bc = ccw (b^.core) (c^.core) q
+    ca = ccw (c^.core) (a^.core) q
+
 -- | Test if a point lies inside or on the boundary of a triangle
 onTriangle       :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle 2 p r -> Bool
 q `onTriangle` t = let Vector3 a b c = toBarricentric q t
                    in all (`inRange` ClosedRange 0 1) [a,b,c]
 
+onTriangleRelaxed :: (Ord r, Num r) => Point 2 r -> Triangle 2 p r -> Bool
+q `onTriangleRelaxed` t = inTriangleRelaxed q t /= Outside
 
 -- myQ :: Point 2 Rational
 -- myQ = read "Point2 [(-5985) % 16,(-14625) % 1]"

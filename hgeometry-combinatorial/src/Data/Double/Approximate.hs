@@ -7,16 +7,21 @@ module Data.Double.Approximate
   , DoubleRelAbs(..)
   ) where
 
+import Control.DeepSeq
 import Data.Proxy
 import GHC.TypeLits
 import Numeric.MathFunctions.Comparison
 import Numeric.MathFunctions.Constants
+import System.Random
 import Text.Read
 
 -- | Relatively safe double floating-point type with a relative error
---   margin of 10 ULPs and an absolute margin around zero of 10*epsilon.
+--   margin of 10 <https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs>
+--   and an absolute margin around zero of
+--   @10*<https://en.wikipedia.org/wiki/Machine_epsilon epsilon>@.
 --
---   Warning: All numbers within 10*epsilon of zero will be considered zero.
+--   Warning: All numbers within
+--   @10*<https://en.wikipedia.org/wiki/Machine_epsilon epsilon>@ of zero will be considered zero.
 --
 -- >>> m_epsilon * 10
 -- 2.220446049250313e-15
@@ -33,18 +38,23 @@ import Text.Read
 -- True
 --
 -- 'pi' and 'sin' are approximations:
+--
 -- >>> sin pi
 -- 1.2246467991473532e-16
+--
 -- >>> sin pi == (0 :: Double)
 -- False
+--
 -- >>> sin pi == (0 :: SafeDouble)
 -- True
 --
 type SafeDouble = DoubleRelAbs 10 10
 
 -- | Custom double floating-point type with a relative error margin of
---   'rel' number of ULPs and an absolute error margin of 'abs' times
---   epsilon.
+--   @rel@ number of
+--   <https://en.wikipedia.org/wiki/Unit_in_the_last_place ULPs> and an
+--   absolute error margin of @abs@ times
+--   <https://en.wikipedia.org/wiki/Machine_epsilon epsilon>.
 --
 --   The relative error margin is the primary tool for good numerical
 --   robustness and can relatively safely be set to a high number such
@@ -52,7 +62,7 @@ type SafeDouble = DoubleRelAbs 10 10
 --   broken algorithms and dramatically limits the resolution around zero.
 --   If possible, use a low absolute error margin.
 newtype DoubleRelAbs (abs :: Nat) (rel :: Nat) = DoubleRelAbs Double
-  deriving (Num, Enum, Floating, Fractional, Real, RealFloat, RealFrac)
+  deriving (Num, Enum, Floating, Fractional, Real, RealFloat, RealFrac, Random, NFData)
 
 instance (KnownNat abs, KnownNat rel) => Eq (DoubleRelAbs abs rel) where
   DoubleRelAbs d1 == DoubleRelAbs d2 =

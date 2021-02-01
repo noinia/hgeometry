@@ -22,7 +22,7 @@ import qualified Data.List as List
 
 --------------------------------------------------------------------------------
 
--- | A (non-empty) alternating list of a's and b's
+-- | A (non-empty) alternating list of @a@\'s and @b@\'s
 data Alternating a b = Alternating a [b :+ a] deriving (Show,Eq,Ord)
 
 instance Bifunctor Alternating where
@@ -44,7 +44,7 @@ withNeighbours (Alternating a0 xs) = let as = a0 : map (^.extra) xs
 
 
 -- | Generic merging scheme that merges two Alternatings and applies
--- the function 'f', with the current/new value at every event. So
+-- the function '@f@', with the current/new value at every event. So
 -- note that if the alternating consists of 'Alternating a0 [t1 :+
 -- a1]' then the function is applied to a1, not to a0 (i.e. every
 -- value ai is considered alive on the interval [ti,t(i+1))
@@ -72,7 +72,7 @@ mergeAlternating f (Alternating a00 as0)
 
 
 -- | Adds additional t-values in the alternating, (in sorted order). I.e. if we insert a
--- "breakpoint" at time t the current 'a' value is used at that time.
+-- "breakpoint" at time t the current '@a@' value is used at that time.
 --
 -- >>> insertBreakPoints [0,2,4,6,8,10] $ Alternating "a" [3 :+ "c", 5 :+ "e", 7 :+ "g"]
 -- Alternating "a" [0 :+ "a",2 :+ "a",3 :+ "c",4 :+ "c",5 :+ "e",6 :+ "e",7 :+ "g",8 :+ "g",10 :+ "g"]

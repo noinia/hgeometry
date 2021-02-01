@@ -89,6 +89,7 @@ newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
 -- | Shorthand for vertices in the primal.
 type VertexId' s = VertexId s Primal
 
+-- | Getter for a VertexId's unique number.
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
 
@@ -149,14 +150,17 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
 
+-- | O\(1\) access, \( O(n) \) update.
 vertexData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v' e f)
                    (V.Vector v) (V.Vector v')
 vertexData = lens _vertexData (\g vD -> updateData (const vD) id id g)
 
+-- | O\(1\) access, \( O(n) \) update.
 rawDartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
                     (V.Vector e) (V.Vector e')
 rawDartData = lens _rawDartData (\g dD -> updateData id (const dD) id g)
 
+-- | O\(1\) access, \( O(n) \) update.
 faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f')
                  (V.Vector f) (V.Vector f')
 faceData = lens _faceData (\g fD -> updateData id id (const fD) g)
@@ -480,7 +484,7 @@ prevIncidentEdge d g = let perm  = g^.embedding
 --------------------------------------------------------------------------------
 -- * Access data
 
-
+-- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where
   type DataOf g i
   -- | get the data associated with the value i.

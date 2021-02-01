@@ -27,10 +27,13 @@ module Data.Geometry.LineSegment
   , flipSegment
 
   , interpolate
+
+  , sampleLineSegment
   ) where
 
 import           Control.Arrow ((&&&))
 import           Control.DeepSeq
+import           Control.Monad.Random
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
@@ -103,6 +106,13 @@ instance (Arbitrary r, Arbitrary p, Arity d) => Arbitrary (LineSegment d p r) wh
 
 deriving instance (Arity d, NFData r, NFData p) => NFData (LineSegment d p r)
 
+sampleLineSegment :: (Arity d, RandomGen g, Random r) => Rand g (LineSegment d () r)
+sampleLineSegment = do
+  a <- ext <$> getRandom
+  a' <- getRandom
+  b <- ext <$> getRandom
+  b' <- getRandom
+  pure $ LineSegment (if a' then Open a else Closed a) (if b' then Open b else Closed b)
 
 {- HLINT ignore endPoints -}
 -- | Traversal to access the endpoints. Note that this traversal

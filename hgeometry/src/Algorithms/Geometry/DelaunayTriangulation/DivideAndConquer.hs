@@ -161,7 +161,7 @@ moveUp ut l r
                      moveUp ut l' r'
 
 
--- | ''rotates'' around r and removes all neighbours of r that violate the
+-- | \'rotates\' around r and removes all neighbours of r that violate the
 -- delaunay condition. Returns the first vertex (as a Neighbour of r) that
 -- should remain in the Delaunay Triangulation, as well as a boolean A that
 -- helps deciding if we merge up by rotating left or rotating right (See
@@ -280,7 +280,7 @@ size'              :: BinLeafTree Size a -> Size
 size' (Leaf _)     = 1
 size' (Node _ s _) = s
 
--- | an 'unsafe' version of rotateTo that assumes the element to rotate to
+-- | an \'unsafe\' version of rotateTo that assumes the element to rotate to
 -- occurs in the list.
 rotateTo   :: Eq a => a -> CL.CList a -> CL.CList a
 rotateTo x = fromJust . CL.rotateTo x
