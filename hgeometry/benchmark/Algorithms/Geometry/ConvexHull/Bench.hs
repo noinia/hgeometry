@@ -36,15 +36,21 @@ gen = mkStdGen (hash "convex hull")
 -- | Benchmark building the convexHull
 benchmark    :: Benchmark
 benchmark = bgroup "ConvexHull" $
-      [ bgroup (show n ++ "/RealNumber") (convexHullFractional $ evalRand (genPts @R n) gen)
-      | n <- [1000, 10000::Int]
+      [ bgroup ("1e"++show i ++ "/RealNumber") (convexHullFractional $ evalRand (genPts @R n) gen)
+      | i <- [3, 4::Int]
+      , let n = 10^i
       ] ++
-      [ bgroup (show n ++ "/Int") (convexHullNum $ evalRand (genPts @Int n) gen)
-      | n <- [10000::Int, 100000]
+      [ bgroup ("1e"++show i ++ "/Int") (convexHullNum $ evalRand (genPts @Int n) gen)
+      | i <- [4, 5::Int]
+      , let n = 10^i
       ] ++
-      [ bgroup (show n ++ "/SafeDouble") (convexHullFractional $ evalRand (genPts @SafeDouble n) gen)
-      | n <- [10000::Int, 100000]
-      ]
+      [ bgroup ("1e"++show i ++ "/SafeDouble") (convexHullFractional $ evalRand (genPts @SafeDouble n) gen)
+      | i <- [4, 5::Int]
+      , let n = 10^i
+      ] ++
+      [ bgroup ("1e"++show i ++ "/Double") (convexHullFractional $ evalRand (genPts @Double n) gen)
+      | i <- [4, 5::Int]
+      , let n = 10^i ]
   where
     convexHullFractional pts =
                 [ bench "GrahamScan" $ nf GrahamScan.convexHull pts
