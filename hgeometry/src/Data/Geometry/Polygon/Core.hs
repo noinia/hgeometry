@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon.Core
@@ -80,6 +81,7 @@ import           Control.Lens                                               (Get
                                                                              prism', to, toListOf,
                                                                              view, (%~), (&), (.~),
                                                                              (^.))
+import           Data.Aeson
 import           Data.Bifoldable
 import           Data.Bifunctor
 import           Data.Bitraversable
@@ -268,6 +270,32 @@ instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r 
   --     unpack (CoRec x) = x
   --     f = undefined
 
+instance (ToJSON r, ToJSON p) => ToJSON (Polygon t p r) where
+  toJSON     = \case
+    (SimplePolygon vs)   -> object [ "tag"           .= ("SimplePolygon" :: String)
+                                   , "vertices"      .= F.toList vs
+                                   ]
+    (MultiPolygon vs hs) -> object [ "tag"           .= ("MultiPolygon" :: String)
+                                   , "outerBoundary" .= getVertices vs
+                                   , "holes"         .= map getVertices hs
+                                   ]
+      where
+        getVertices = view (outerBoundaryVector.to F.toList)
+
+instance (FromJSON r, Eq r, Num r, FromJSON p) => FromJSON (Polygon Simple p r) where
+  parseJSON = withObject "Polygon" $ \o -> o .: "tag" >>= \case
+                                             "SimplePolygon" -> pSimple o
+                                             (_ :: String)   -> fail "Not a SimplePolygon"
+    where
+      pSimple o = fromPoints <$> o .: "vertices"
+
+instance (FromJSON r, Eq r, Num r, FromJSON p) => FromJSON (Polygon Multi p r) where
+  parseJSON = withObject "Polygon" $ \o -> o .: "tag" >>= \case
+                                             "MultiPolygon"  -> pMulti o
+                                             (_ :: String)   -> fail "Not a MultiPolygon"
+    where
+      pMulti  o = (\vs hs -> MultiPolygon (fromPoints vs) (map fromPoints hs))
+               <$> o .: "outerBoundary" <*> o .: "holes"
 
 
 
