@@ -338,7 +338,7 @@ benchmark benchmarks
               , semigroups
               , deepseq
               , deepseq-generics
-              , hgeometry                       >= 0.8.0.0
+              , hgeometry
               , hgeometry-combinatorial
               , lens
               , semigroupoids
@@ -385,3 +385,19 @@ benchmark benchmarks
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+
+executable planargraph
+  main-is: planargraph.hs
+  default-language:     Haskell2010
+  build-depends:  base,
+                  vector,
+                  vector-circular,
+                  linear,
+                  text,
+                  lens,
+                  directory,
+                  filepath,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  reanimate,
+                  reanimate-svg

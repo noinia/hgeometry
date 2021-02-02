@@ -1,9 +1,10 @@
 module Data.PlanarGraph.Mutable
   ( -- * Planar graphs
-    PlanarGraph
-  , pgFromFaces -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
-  , pgClone     -- :: PlanarGraph s -> ST s (PlanarGraph s)
-  , pgHash      -- :: PlanarGraph s -> ST s Int
+    PlanarGraph(..)
+  , pgFromFaces   -- :: [[VertexId]] -> ST s (PlanarGraph s)
+  , pgFromFacesCV -- :: [CircularVector VertexId] -> ST s (PlanarGraph s)
+  , pgClone       -- :: PlanarGraph s -> ST s (PlanarGraph s)
+  , pgHash        -- :: PlanarGraph s -> ST s Int
 
     -- * Elements
     -- ** Vertices
@@ -65,6 +66,7 @@ module Data.PlanarGraph.Mutable
 -- pgRemoveVertex :: Vertex s -> ST s ()
     -- * Misc
   , tutteEmbedding -- :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
+  , freezeCircularVector
   )
   where
 
@@ -96,6 +98,11 @@ type GrowVector s v = STRef s (STVector s v)
 newVector :: Int -> ST s (GrowVector s v)
 newVector n = newSTRef =<< V.new n
 
+setVector :: GrowVector s v -> v -> ST s ()
+setVector ref val = do
+  vec <- readSTRef ref
+  V.set vec val
+
 readVector :: GrowVector s v -> Int -> ST s v
 readVector ref idx = do
   v <- readSTRef ref
@@ -106,7 +113,7 @@ writeVector ref idx val = do
   v <- readSTRef ref
   let l = V.length v
   if idx >= l
-    then trace ("Growing: " ++ show (idx, l)) $ do
+    then {-trace ("Growing: " ++ show (idx, l)) $ -} do
       v' <- V.grow v ((idx+1)*2)
       V.write v' idx val
       writeSTRef ref v'
@@ -147,7 +154,8 @@ type FaceId = Int
 data Face s = Face FaceId (PlanarGraph s) | Boundary FaceId (PlanarGraph s)
   deriving Eq
 instance Show (Face s) where
-  showsPrec d = showsPrec d . faceToId
+  showsPrec d (Face fId _) = showString "Face " . shows fId
+  showsPrec d (Boundary fId _) = showString "Boundary " . shows fId
 
 -------------------------------------------------------------------------------
 -- Planar graph
@@ -211,27 +219,40 @@ new n | n < 0 = panic "new" "Cannot contain negative vertices."
 new 0 = empty 0 0 0
 new 1 = undefined
 new 2 = undefined
-new n = pgFromFaces [CV.unsafeFromList [0..n-1]]
+new n = pgFromFaces [[0..n-1]]
 
 -- $setup
--- >>> let list = CV.unsafeFromList
--- >>> runST $ pgFromFaces [list [0,1,2]] >>= pgHash
--- 2959979592048325618
+--
+-- >>> runST $ pgFromFaces [[0,1,2]] >>= pgHash
+-- 2753226191199495654
+-- >>> runST $ pgFromFaces [[0,1,2,3]] >>= pgHash
+-- 2271197297257670264
 
 -- | \( O(n \log n) \)
 --
+--
+--
 -- ==== __Examples:__
 -- @
--- 'pgFromFaces' $ map 'CV.unsafeFromList' [[0,1,2]]
+-- 'pgFromFaces' [[0,1,2]]
 -- @
--- Image here!
-pgFromFaces :: [CircularVector VertexId] -> ST s (PlanarGraph s)
-pgFromFaces [] = empty 0 0 0
-pgFromFaces faces = do
+-- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+--
+-- @
+-- 'pgFromFaces' [[0,1,2,3]]
+-- @
+-- <<docs/Data/PlanarGraph/planargraph-2271197297257670264.svg>>
+pgFromFaces :: [[VertexId]] -> ST s (PlanarGraph s)
+pgFromFaces = pgFromFacesCV . map CV.unsafeFromList
+
+pgFromFacesCV :: [CircularVector VertexId] -> ST s (PlanarGraph s)
+pgFromFacesCV [] = empty 0 0 0
+pgFromFacesCV faces = do
   let maxVertexId = maximum (map CV.maximum faces)
       nFaces = length faces
       nHalfEdges = sum (map length faces)
   pg <- empty nFaces (maxVertexId+1) (nHalfEdges `div` 2)
+  setVector (pgVertices pg) (-1)
   writeSTRef (pgNextVertexId pg) (maxVertexId+1)
   edgeMap <- newSTRef HM.empty
   let getHalfEdge (vTail, vTip) = do
@@ -241,40 +262,41 @@ pgFromFaces faces = do
           Nothing ->
             case HM.lookup (vTip, vTail) hm of
               Just twin -> pure (halfEdgeTwin twin)
-              Nothing   -> trace ("Creating new half-edge: " ++ show (vTip, vTail)) $ do
+              Nothing   -> {-trace ("Creating new half-edge: " ++ show (vTip, vTail)) $ -} do
                 halfEdge <- halfEdgeNew pg
                 halfEdgeSetFace (halfEdgeTwin halfEdge) (faceInvalid pg)
-                vertexSetHalfEdge (vertexFromId vTail pg) halfEdge
+                vertexSetHalfEdge (vertexFromId vTip pg) halfEdge
                 writeSTRef edgeMap $ HM.insert (vTail, vTip) halfEdge hm
-                halfEdgeSetVertex halfEdge (vertexFromId vTail pg)
-                halfEdgeSetVertex (halfEdgeTwin halfEdge) (vertexFromId vTip pg)
+                halfEdgeSetVertex halfEdge (vertexFromId vTip pg)
+                halfEdgeSetVertex (halfEdgeTwin halfEdge) (vertexFromId vTail pg)
                 pure halfEdge
       addFace face | length face < 3 = panic "fromFaces" "Faces must have at least 3 vertices."
-      addFace face = trace "Adding face" $ do
+      addFace face = {- trace "Adding face" $ -} do
         fId <- faceNew pg
         let edges = CV.zip face (CV.rotateRight 1 face)
-        halfEdges <- trace ("getHalfEdge") $ mapM getHalfEdge edges
+        halfEdges <- {- trace ("getHalfEdge") $ -} mapM getHalfEdge edges
         faceSetHalfEdge fId (CV.head halfEdges)
-        setNextPrevFace fId halfEdges
+        setNextPrevFace fId (CV.reverse halfEdges)
   forM_ faces addFace
 
+  maxHalfEdgeId <- readSTRef (pgNextHalfEdgeId pg)
   -- For each half-edge:
   --   If face is invalid:
   --     Find loop and add it as a boundary.
-  forM_ (map (`halfEdgeFromId` pg) [0..nHalfEdges-1]) $ \he -> trace ("Scan halfedge: " ++ show he) $ do
+  forM_ (map (`halfEdgeFromId` pg) [0..maxHalfEdgeId-1]) $ \he -> {- trace ("Scan halfedge: " ++ show he) $ -} do
     f <- halfEdgeFace he
     validFace <- faceIsValid <$> halfEdgeFace he
-    unless validFace $ trace ("Found invalid face: " ++ show f) $ do
+    unless validFace $ {- trace ("Found invalid face: " ++ show f) $ -} do
       face <- faceNewBoundary pg
-      boundary <- trace "mkBoundary" $ halfEdgeConstructBoundary he
-      trace ("Boundary: " ++ show boundary) $ return ()
-      trace "setEdge" $ faceSetHalfEdge face (CV.head boundary)
-      trace "setEdge done" $ setNextPrevFace face boundary
+      boundary <- halfEdgeConstructBoundary he
+      -- trace ("Boundary: " ++ show (face, boundary)) $ return ()
+      faceSetHalfEdge face (CV.head boundary)
+      setNextPrevFace face boundary
   pure pg
   where
     setNextPrevFace fId halfEdges = do
       let edgeTriples = CV.zip3 (CV.rotateLeft 1 halfEdges) halfEdges (CV.rotateRight 1 halfEdges)
-      forM_ (edgeTriples) $ \(prev, edge, next) -> trace ("setNextPrevFace: " ++ show (prev,edge,next)) $ do
+      forM_ (edgeTriples) $ \(prev, edge, next) -> do
           halfEdgeSetNext edge next
           halfEdgeSetPrev edge prev
           halfEdgeSetFace edge fId
@@ -299,7 +321,7 @@ pgHash pg = do
         vTail <- halfEdgeTailVertex he
         vTip <- halfEdgeTipVertex he
         loop rest (hashWithSalt salt (vTail, vTip))
-  loop [0..eMax-1] 0
+  abs <$> loop [0..eMax-1] 0
 
 -------------------------------------------------------------------------------
 -- Vertices
@@ -375,6 +397,10 @@ vertexSetHalfEdge (Vertex vId pg) (HalfEdge eId pg') = eqCheck "vertexSetHalfEdg
 -- Half-edges
 
 -- | O(1)
+halfEdgeIsValid :: HalfEdge s -> Bool
+halfEdgeIsValid (HalfEdge eId _) = eId >= 0
+
+-- | O(1)
 halfEdgeFromId :: HalfEdgeId -> PlanarGraph s -> HalfEdge s
 halfEdgeFromId eId pg = HalfEdge eId pg
 
@@ -424,7 +450,21 @@ halfEdgeTailVertex = halfEdgeVertex . halfEdgeTwin
 halfEdgeTipVertex  :: HalfEdge s -> ST s (Vertex s)
 halfEdgeTipVertex = halfEdgeVertex
 
--- | O(1)
+-- | \( O(1) \)
+--
+-- ==== __Examples:__
+-- @
+-- 'pgFromFaces' [[0,1,2]]
+-- @
+--
+-- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; show <$> halfEdgeFace (halfEdgeFromId 0 pg)
+-- "Face 0"
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; show <$> halfEdgeFace (halfEdgeFromId 1 pg)
+-- "Boundary 0"
+--
 halfEdgeFace       :: HalfEdge s -> ST s (Face s)
 halfEdgeFace (HalfEdge eId pg) = do
   fId <- readVector (pgHalfEdgeFace pg) eId
@@ -433,11 +473,11 @@ halfEdgeFace (HalfEdge eId pg) = do
 -- | O(n)
 --   Scan boundary half-edges without using 'next' or 'prev'.
 halfEdgeConstructBoundary :: HalfEdge s -> ST s (CircularVector (HalfEdge s))
-halfEdgeConstructBoundary halfEdge = trace ("mkBoundary from: " ++ show halfEdge) $ do
+halfEdgeConstructBoundary halfEdge = {- trace ("mkBoundary from: " ++ show halfEdge) $ -} do
   tmp <- newVector 10
   writeVector tmp 0 halfEdge
-  let loop i edge | edge == halfEdge = trace "Done" $ return i
-      loop i edge = trace ("Going to: " ++ show edge) $ do
+  let loop i edge | edge == halfEdge = {- trace "Done" $ -} return i
+      loop i edge = {- trace ("Going to: " ++ show edge) $ -} do
         face <- halfEdgeFace edge
         if faceIsInvalid face
           then do
@@ -447,9 +487,33 @@ halfEdgeConstructBoundary halfEdge = trace ("mkBoundary from: " ++ show halfEdge
             loop i =<< (halfEdgeTwin <$> halfEdgePrev edge)
   i <- loop 1 =<< (halfEdgeTwin <$> halfEdgeNextIncoming halfEdge)
   cv <- freezeCircularVector i tmp
-  trace ("Boundary: " ++ show cv) $ pure cv
+  -- trace ("Boundary: " ++ show cv) $ pure cv
+  pure cv
 
--- | O(1)
+-- $setup
+-- >>> let genPG = pgFromFaces [[0,1,2]]
+
+-- | \( O(1) \)
+--   Check if a half-edge's face is interior or exterior.
+--
+-- ==== __Examples:__
+-- @
+-- 'pgFromFaces' [[0,1,2]]
+-- @
+--
+-- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; halfEdgeIsInterior (halfEdgeFromId 0 pg)
+-- True
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; halfEdgeIsInterior (halfEdgeFromId 1 pg)
+-- False
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; halfEdgeIsInterior (halfEdgeFromId 2 pg)
+-- True
+--
+-- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; halfEdgeIsInterior (halfEdgeFromId 3 pg)
+-- False
 halfEdgeIsInterior :: HalfEdge s -> ST s Bool
 halfEdgeIsInterior edge = faceIsInterior <$> halfEdgeFace edge
 
@@ -462,21 +526,22 @@ halfEdgeNew pg = do
 
 halfEdgeSetNext :: HalfEdge s -> HalfEdge s -> ST s ()
 halfEdgeSetNext (HalfEdge e pg) (HalfEdge next pg') = eqCheck "halfEdgeSetNext" pg pg' $
-  trace ("Set next: " ++ show (e, next)) $
+  -- trace ("Set next: " ++ show (e, next)) $
   writeVector (pgHalfEdgeNext pg) e next
 
 halfEdgeSetPrev :: HalfEdge s -> HalfEdge s -> ST s ()
 halfEdgeSetPrev (HalfEdge e pg) (HalfEdge prev pg') = eqCheck "halfEdgeSetPrev" pg pg' $
-  trace ("Set prev: " ++ show (e, prev)) $
+  -- trace ("Set prev: " ++ show (e, prev)) $
   writeVector (pgHalfEdgePrev pg) e prev
 
 halfEdgeSetFace :: HalfEdge s -> Face s -> ST s ()
 halfEdgeSetFace (HalfEdge e pg) face =
-  trace ("Set face: " ++ show (e, face)) $
+  -- trace ("Set face: " ++ show (e, face)) $
   writeVector (pgHalfEdgeFace pg) e (faceToId face)
 
 halfEdgeSetVertex :: HalfEdge s -> Vertex s -> ST s ()
 halfEdgeSetVertex (HalfEdge e pg) vertex =
+  -- trace ("Set vertex: " ++ show (e, vertex)) $
   writeVector (pgHalfEdgeVertex pg) e (vertexToId vertex)
 
 -------------------------------------------------------------------------------
@@ -497,7 +562,7 @@ faceIsInvalid (Boundary fId _) = fId == maxBound
 
 -- | O(1)
 faceFromId :: FaceId -> PlanarGraph s -> Face s
-faceFromId fId pg | fId < 0 = Boundary (negate fId + 1) pg
+faceFromId fId pg | fId < 0 = Boundary (negate fId - 1) pg
 faceFromId fId pg = Face fId pg
 
 -- | O(1)
@@ -563,7 +628,7 @@ faceNewBoundary pg = do
 
 faceSetHalfEdge :: Face s -> HalfEdge s -> ST s ()
 faceSetHalfEdge (Boundary fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
-  trace ("faceSetHalfEdge: " ++ show (fId, eId)) $
+  -- trace ("faceSetHalfEdge: " ++ show (fId, eId)) $
   writeVector (pgBoundaries pg) fId eId
 faceSetHalfEdge (Face fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
   writeVector (pgFaces pg) fId eId
@@ -610,26 +675,34 @@ pgConnectVertices e1 e2 = do
 tutteEmbedding :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
 tutteEmbedding pg = do
   nVertices <- readSTRef (pgNextVertexId pg)
-  trace ("nVertices: " ++ show nVertices) $ return ()
+  -- trace ("nVertices: " ++ show nVertices) $ return ()
   m <- Vector.replicateM nVertices (V.replicate nVertices 0)
   vx <- V.replicate nVertices 0
   vy <- V.replicate nVertices 0
 
   boundary <- faceBoundary (Boundary 0 pg)
   let nBoundary = length boundary
-  trace ("Vectors: " ++ show boundary) $ CV.forM_ (CV.zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
-    V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
-    V.write vx (vertexToId vertex) x
-    V.write vy (vertexToId vertex) y
+  -- trace ("Vectors: " ++ show boundary) $
+  CV.forM_ (CV.zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
+    valid <- halfEdgeIsValid <$> vertexHalfEdge vertex
+    when valid $ do
+      V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
+      V.write vx (vertexToId vertex) x
+      V.write vy (vertexToId vertex) y
 
-  forM_ [0..nVertices-1] $ \vId -> trace ("Vertex: " ++ show vId) $ do
-    onBoundary <- vertexIsBoundary (vertexFromId vId pg)
-    unless onBoundary $ do
-      let vertex = vertexFromId vId pg
-      neighbours <- vertexNeighbours vertex
-      CV.forM_ neighbours $ \neighbour ->
-        V.write (m Vector.! vId) (vertexToId neighbour) (1::Double)
-      V.write (m Vector.! vId) vId (negate $ fromIntegral $ length neighbours)
+  forM_ [0..nVertices-1] $ \vId -> -- trace ("Vertex: " ++ show vId) $
+    do
+      valid <- halfEdgeIsValid <$> vertexHalfEdge (vertexFromId vId pg)
+      unless valid $ do
+        V.write (m Vector.! vId) vId (1::Double)
+      when valid $ do
+        onBoundary <- vertexIsBoundary (vertexFromId vId pg)
+        unless onBoundary $ do
+          let vertex = vertexFromId vId pg
+          neighbours <- vertexNeighbours vertex
+          CV.forM_ neighbours $ \neighbour ->
+            V.write (m Vector.! vId) (vertexToId neighbour) (1::Double)
+          V.write (m Vector.! vId) vId (negate $ fromIntegral $ length neighbours)
 
   mi <- mapM Vector.freeze m
   vxi <- Vector.freeze vx
