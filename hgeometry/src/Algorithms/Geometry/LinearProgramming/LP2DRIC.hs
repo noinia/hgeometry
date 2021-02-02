@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE PackageImports #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.LinearProgramming.LP2DRIC
@@ -37,7 +38,7 @@ import           Data.Maybe (mapMaybe)
 import           Data.Util
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           System.Random.Shuffle
+import "hgeometry-combinatorial" System.Random.Shuffle
 
 --------------------------------------------------------------------------------
 
