@@ -67,6 +67,8 @@ module Data.PlanarGraph.Mutable
     -- * Misc
   , tutteEmbedding -- :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
   , freezeCircularVector
+  , freezeVector
+  , thawVector
   )
   where
 
@@ -119,6 +121,12 @@ writeVector ref idx val = do
       writeSTRef ref v'
     else -- trace ("Writing: " ++ show (idx, l)) $
       V.write v idx val
+
+freezeVector :: GrowVector s v -> ST s (Vector.Vector v)
+freezeVector ref = Vector.freeze =<< readSTRef ref
+
+thawVector :: Vector.Vector v -> ST s (GrowVector s v)
+thawVector v = newSTRef =<< Vector.thaw v
 
 freezeCircularVector :: Int -> GrowVector s v -> ST s (CircularVector v)
 freezeCircularVector n ref =
