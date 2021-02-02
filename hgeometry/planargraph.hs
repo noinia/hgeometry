@@ -25,12 +25,12 @@ import System.FilePath
 main :: IO ()
 -- main = reanimate $ staticFrame (1/60) (fst test2)
 main = do
-  savePlanarGraphSVG $ pgFromFaces $ map CV.unsafeFromList [[0..2]]
-  savePlanarGraphSVG $ pgFromFaces $ map CV.unsafeFromList [[0..3]]
-  savePlanarGraphSVG $ pgFromFaces $ map CV.unsafeFromList [[0..3],[4,3,2,1]]
+  savePlanarGraphSVG $ pgFromFaces [[0..2]]
+  savePlanarGraphSVG $ pgFromFaces [[0..3]]
+  savePlanarGraphSVG $ pgFromFaces [[0..3],[4,3,2,1]]
 
-test1 = renderPlanarGraph (pgFromFaces $ map CV.unsafeFromList [[0..2]])
-test2 = renderPlanarGraph (pgFromFaces $ map CV.unsafeFromList [[0..3],[4,3,2,1]])
+test1 = renderPlanarGraph (pgFromFaces [[0..2]])
+test2 = renderPlanarGraph (pgFromFaces [[0..3],[4,3,2,1]])
 
 savePlanarGraphSVG :: (forall s. ST s (PlanarGraph s)) -> IO ()
 savePlanarGraphSVG genPG = do
