@@ -69,21 +69,15 @@ module Data.PlanarGraph.Mutable
   )
   where
 
-import           Control.Monad             (forM_, unless, when)
+import           Control.Monad             (forM_, unless)
 import           Control.Monad.ST          (ST)
 import           Data.Bits                 (Bits (xor))
-import           Data.Coerce               (coerce)
 import qualified Data.HashMap.Strict       as HM
 import           Data.Hashable             (Hashable (hashWithSalt))
 import           Data.PlanarGraph.Internal
-import           Data.Proxy                (Proxy (..))
 import           Data.STRef                (modifySTRef', newSTRef, readSTRef, writeSTRef)
-import qualified Data.Vector               as Vector
 import           Data.Vector.Circular      (CircularVector)
 import qualified Data.Vector.Circular      as CV
-import qualified Data.Vector.Mutable       as V
-import           Linear.Matrix             (luSolve)
-import           Linear.V                  (Dim, V (..), reifyDim)
 
 import Debug.Trace
 
@@ -160,9 +154,11 @@ new n = pgFromFaces [[0..n-1]]
 --
 -- >>> import Control.Monad.ST
 -- >>> runST $ pgFromFaces [[0,1,2]] >>= pgHash
--- 2753226191199495654
+-- 2959979592048325618
 -- >>> runST $ pgFromFaces [[0,1,2,3]] >>= pgHash
--- 2271197297257670264
+-- 2506803680640023584
+-- >>> runST $ pgFromFaces [[0,1,2,3],[4,3,2,1]] >>= pgHash
+-- 1711135548958680232
 
 -- | \( O(n \log n) \)
 --
@@ -188,7 +184,7 @@ pgFromFacesCV faces = do
       nFaces = length faces
       nHalfEdges = sum (map length faces)
   pg <- empty nFaces (maxVertexId+1) (nHalfEdges `div` 2)
-  setVector (pgVertices pg) (-1)
+  setVector (pgVertexEdges pg) (-1)
   writeSTRef (pgNextVertexId pg) (maxVertexId+1)
   edgeMap <- newSTRef HM.empty
   let getHalfEdge (vTail, vTip) = do
@@ -273,7 +269,7 @@ vertexToId (Vertex vId _pg) = vId
 -- | \( O(1) \)
 vertexHalfEdge :: Vertex s -> ST s (HalfEdge s)
 vertexHalfEdge (Vertex vId pg) = do
-  eId <- readVector (pgVertices pg) vId
+  eId <- readVector (pgVertexEdges pg) vId
   pure $ HalfEdge eId pg
 
 -- | \( O(1) \)
@@ -327,7 +323,7 @@ vertexNew pg = do
 
 vertexSetHalfEdge :: Vertex s -> HalfEdge s -> ST s ()
 vertexSetHalfEdge (Vertex vId pg) (HalfEdge eId pg') = eqCheck "vertexSetHalfEdge" pg pg' $
-  writeVector (pgVertices pg) vId eId
+  writeVector (pgVertexEdges pg) vId eId
 
 -------------------------------------------------------------------------------
 -- Half-edges
@@ -379,12 +375,12 @@ halfEdgeTwin (HalfEdge idx graph) = HalfEdge (idx `xor` 1) graph
 -- | O(1)
 --   Tail vertex. IE. the vertex of the twin edge.
 halfEdgeTailVertex :: HalfEdge s -> ST s (Vertex s)
-halfEdgeTailVertex = halfEdgeVertex . halfEdgeTwin
+halfEdgeTailVertex = halfEdgeVertex
 
 -- | O(1)
 --   Synonym of `halfEdgeVertex`.
 halfEdgeTipVertex  :: HalfEdge s -> ST s (Vertex s)
-halfEdgeTipVertex = halfEdgeVertex
+halfEdgeTipVertex = halfEdgeVertex . halfEdgeTwin
 
 -- | \( O(1) \)
 --
@@ -509,10 +505,10 @@ faceToId (Boundary fId _) = negate fId - 1
 -- | O(1)
 faceHalfEdge         :: Face s -> ST s (HalfEdge s)
 faceHalfEdge (Face fId pg) = do
-  eId <- readVector (pgFaces pg) fId
+  eId <- readVector (pgFaceEdges pg) fId
   pure $ HalfEdge eId pg
 faceHalfEdge (Boundary fId pg) = do
-  eId <- readVector (pgBoundaries pg) fId
+  eId <- readVector (pgBoundaryEdges pg) fId
   pure $ HalfEdge eId pg
 
 -- | O(1)
@@ -565,9 +561,9 @@ faceNewBoundary pg = do
 faceSetHalfEdge :: Face s -> HalfEdge s -> ST s ()
 faceSetHalfEdge (Boundary fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
   -- trace ("faceSetHalfEdge: " ++ show (fId, eId)) $
-  writeVector (pgBoundaries pg) fId eId
+  writeVector (pgBoundaryEdges pg) fId eId
 faceSetHalfEdge (Face fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
-  writeVector (pgFaces pg) fId eId
+  writeVector (pgFaceEdges pg) fId eId
 
 -------------------------------------------------------------------------------
 -- Mutation

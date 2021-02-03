@@ -1,79 +1,61 @@
 {-# LANGUAGE RecordWildCards #-}
 module Data.PlanarGraph.Immutable
   ( -- * Planar graphs
-    PlanarGraph(..)
-  , pgFromFaces   -- :: [[VertexId]] -> ST s (PlanarGraph)
-  , pgFromFacesCV -- :: [CircularVector VertexId] -> ST s (PlanarGraph)
-  , pgClone       -- :: PlanarGraph -> ST s (PlanarGraph)
-  , pgHash        -- :: PlanarGraph -> ST s Int
+    PlanarGraph
+  , pgFromFaces   -- :: [[VertexId]] -> PlanarGraph
+  , pgFromFacesCV -- :: [CircularVector VertexId] -> PlanarGraph
+  , pgHash        -- :: PlanarGraph -> Int
 
     -- * Elements
     -- ** Vertices
-  , Vertex, VertexId
+  , Vertex(..), VertexId
   , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
   , vertexToId                  -- :: Vertex -> VertexId
-  , vertexHalfEdge              -- :: Vertex -> ST s HalfEdge
-  , vertexIsBoundary            -- :: Vertex -> ST s Bool
-  , vertexOutgoingHalfEdges     -- :: Vertex -> ST s (CircularVector HalfEdge)
-  , vertexWithOutgoingHalfEdges -- :: Vertex -> (HalfEdge -> ST s ()) -> ST s ()
-  , vertexIncomingHalfEdges     -- :: Vertex -> ST s (CircularVector HalfEdge)
-  , vertexWithIncomingHalfEdges -- :: Vertex -> (HalfEdge -> ST s ()) -> ST s ()
-  , vertexNeighbours            -- :: Vertex -> ST s (CircularVector Vertex)
-  -- , vertexNew -- :: PlanarGraph -> ST s Vertex
-  -- , vertexSetHalfEdge -- :: Vertex -> HalfEdge -> ST s ()
+  , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
+  , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
+  , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> CircularVector HalfEdge
+  , vertexWithOutgoingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
+  , vertexIncomingHalfEdges     -- :: Vertex -> PlanarGraph -> CircularVector HalfEdge
+  , vertexWithIncomingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
+  , vertexNeighbours            -- :: Vertex -> PlanarGraph -> CircularVector Vertex
 
     -- ** Half-edges
-  , HalfEdge, HalfEdgeId
+  , HalfEdge(..), HalfEdgeId
   , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph -> HalfEdge
   , halfEdgeToId         -- :: HalfEdge -> HalfEdgeId
-  , halfEdgeNext         -- :: HalfEdge -> ST s HalfEdge
-  , halfEdgePrev         -- :: HalfEdge -> ST s HalfEdge
-  , halfEdgeNextOutgoing -- :: HalfEdge -> ST s HalfEdge
-  , halfEdgeNextIncoming -- :: HalfEdge -> ST s HalfEdge
-  , halfEdgeVertex       -- :: HalfEdge -> ST s Vertex
+  , halfEdgeNext         -- :: HalfEdge -> PlanarGraph -> HalfEdge
+  , halfEdgePrev         -- :: HalfEdge -> PlanarGraph -> HalfEdge
+  , halfEdgeNextOutgoing -- :: HalfEdge -> PlanarGraph -> HalfEdge
+  , halfEdgeNextIncoming -- :: HalfEdge -> PlanarGraph -> HalfEdge
+  , halfEdgeVertex       -- :: HalfEdge -> PlanarGraph -> Vertex
   , halfEdgeTwin         -- :: HalfEdge -> HalfEdge
-  , halfEdgeTailVertex   -- :: HalfEdge -> ST s Vertex
-  , halfEdgeTipVertex    -- :: HalfEdge -> ST s Vertex
-  , halfEdgeFace         -- :: HalfEdge -> ST s (Face s)
-  , halfEdgeIsInterior   -- :: HalfEdge -> ST s Bool
-  -- , halfEdgeNew          -- :: PlanarGraph -> ST s HalfEdge
-  -- , halfEdgeSetNext      -- :: HalfEdge -> HalfEdge -> ST s ()
-  -- , halfEdgeSetPrev      -- :: HalfEdge -> HalfEdge -> ST s ()
-  -- , halfEdgeSetFace      -- :: HalfEdge -> Face s -> ST s ()
-  -- , halfEdgeSetVertex    -- :: HalfEdge -> Vertex -> ST s ()
+  , halfEdgeTailVertex   -- :: HalfEdge -> PlanarGraph -> Vertex
+  , halfEdgeTipVertex    -- :: HalfEdge -> PlanarGraph -> Vertex
+  , halfEdgeFace         -- :: HalfEdge -> PlanarGraph -> Face
+  , halfEdgeIsInterior   -- :: HalfEdge -> PlanarGraph -> Bool
 
     -- ** Faces
-  , Face, FaceId
-  , faceInvalid    -- :: PlanarGraph -> Face s
-  , faceIsValid    -- :: Face s -> Bool
-  , faceIsInvalid  -- :: Face s -> Bool
-  , faceFromId     -- :: FaceId -> PlanarGraph -> Face s
-  , faceToId       -- :: Face s -> FaceId
-  , faceHalfEdge   -- :: Face s -> ST s HalfEdge
-  , faceIsInterior -- :: Face s -> Bool
-  , faceIsBoundary -- :: Face s -> Bool
-  , faceHalfEdges  -- :: Face s -> ST s (CircularVector HalfEdge)
-  , faceBoundary   -- :: Face s -> ST s (CircularVector Vertex)
-  -- , faceNew :: PlanarGraph -> ST s (Face s)
-  -- , faceNewBoundary :: PlanarGraph -> ST s (Face s)
-  -- , faceSetHalfEdge :: Face s -> HalfEdge -> ST s ()
+  , Face(..), FaceId
+  , pgFaces        -- :: PlanarGraph -> [Face]
+  , faceMember      -- :: Face -> PlanarGraph -> Bool
+  , faceFromId     -- :: FaceId -> PlanarGraph -> Face
+  , faceToId       -- :: Face -> FaceId
+  , faceHalfEdge   -- :: Face -> PlanarGraph -> HalfEdge
+  , faceIsInterior -- :: Face -> Bool
+  , faceIsBoundary -- :: Face -> Bool
+  , faceHalfEdges  -- :: Face -> PlanarGraph -> CircularVector HalfEdge
+  , faceBoundary   -- :: Face -> PlanarGraph -> CircularVector Vertex
 
     -- * Mutation
-  , pgMutate
-  , pgCreate
-  , pgThaw
-  , pgFreeze
-  , pgUnsafeThaw
-  , pgUnsafeFreeze
-  -- , pgConnectVertices -- :: HalfEdge -> HalfEdge -> ST s (Edge s)
--- pgSplitHalfEdge :: HalfEdge -> ST s Vertex
+  , pgMutate       -- :: PlanarGraph -> (forall s. Mut.PlanarGraph s -> ST s ()) -> PlanarGraph
+  , pgCreate       -- :: (forall s. ST s (Mut.PlanarGraph s)) -> PlanarGraph
+  , pgThaw         -- :: PlanarGraph -> ST s (Mut.PlanarGraph s)
+  , pgFreeze       -- :: Mut.PlanarGraph s -> ST s PlanarGraph
+  , pgUnsafeThaw   -- :: PlanarGraph -> ST s (Mut.PlanarGraph s)
+  , pgUnsafeFreeze -- :: Mut.PlanarGraph s -> ST s PlanarGraph
 
--- pgRemoveFace :: Face s -> ST s ()
--- pgRemoveHalfEdge :: HalfEdge -> ST s ()
--- pgRemoveVertex :: Vertex -> ST s ()
     -- * Misc
   , tutteEmbedding -- :: PlanarGraph -> Vector.Vector (V2 Double)
-  , freezeCircularVector
   )
   where
 
@@ -81,7 +63,7 @@ import           Control.Monad
 import           Control.Monad.ST
 import           Data.Bits
 import           Data.Hashable
-import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector )
+import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector, HalfEdgeId, VertexId, FaceId)
 import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
 import           Data.STRef
@@ -97,39 +79,25 @@ import           Linear.Matrix (luSolve)
 import           Linear.V
 import           Linear.V2
 
-import Debug.Trace
+-- import Debug.Trace
 
 -------------------------------------------------------------------------------
 -- Elements: Half-edges, vertices, faces.
 
 
-
-type HalfEdgeId = Int
+-- | Half-edges are directed edges.
 newtype HalfEdge = HalfEdge HalfEdgeId
-  deriving (Eq)
-instance Show HalfEdge where
-  showsPrec d (HalfEdge s) = showsPrec d s
-instance Hashable HalfEdge where
-  hashWithSalt salt (HalfEdge eId) = hashWithSalt salt eId
+  deriving (Eq, Show, Read, Hashable)
 
 
 newtype Edge s = Edge Int
   deriving Eq
 
-type VertexId = Int
 newtype Vertex = Vertex VertexId
-  deriving Eq
-instance Show Vertex where
-  showsPrec d (Vertex v) = showsPrec d v
-instance Hashable Vertex where
-  hashWithSalt salt (Vertex vId) = hashWithSalt salt vId
+  deriving (Eq, Show, Read, Hashable)
 
-type FaceId = Int
 data Face = Face FaceId | Boundary FaceId
-  deriving Eq
-instance Show Face where
-  showsPrec d (Face fId)     = showString "Face " . shows fId
-  showsPrec d (Boundary fId) = showString "Boundary " . shows fId
+  deriving (Eq, Show, Read)
 
 -------------------------------------------------------------------------------
 -- Planar graph
@@ -147,21 +115,24 @@ data PlanarGraph = PlanarGraph
   , pgHalfEdgePrev   :: !(Vector HalfEdgeId) -- HalfEdge indexed
   , pgHalfEdgeVertex :: !(Vector VertexId)   -- HalfEdge indexed
   , pgHalfEdgeFace   :: !(Vector FaceId)     -- HalfEdge indexed
-  , pgVertices       :: !(Vector HalfEdgeId) -- Vertex indexed
-  , pgFaces          :: !(Vector HalfEdgeId) -- Face indexed
-  , pgBoundaries     :: !(Vector HalfEdgeId) -- Boundary faces
+  , pgVertexEdges    :: !(Vector HalfEdgeId) -- Vertex indexed
+  , pgFaceEdges      :: !(Vector HalfEdgeId) -- Face indexed
+  , pgBoundaryEdges  :: !(Vector HalfEdgeId) -- Boundary faces
   } deriving Eq
 
--- panic :: String -> String -> a
--- panic tag msg = error $ "Data.PlanarGraph.Mutable." ++ tag ++ ": " ++ msg
+panic :: String -> String -> a
+panic tag msg = error $ "Data.PlanarGraph.Mutable." ++ tag ++ ": " ++ msg
 
 
 -- $setup
 --
 -- >>> pgHash $ pgFromFaces [[0,1,2]]
--- 2753226191199495654
+-- 2959979592048325618
 -- >>> pgHash $ pgFromFaces [[0,1,2,3]]
--- 2271197297257670264
+-- 2506803680640023584
+-- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- 1711135548958680232
+--
 
 -- | \( O(n \log n) \)
 --
@@ -187,11 +158,7 @@ pgFromFacesCV faces = pgCreate $ Mut.pgFromFacesCV faces
 -- fromFaces' nFaces nHalfEdges maxVertexId faces = do
 --   undefined
 
--- | \( O(n) \)
-pgClone :: PlanarGraph -> ST s (PlanarGraph)
-pgClone = undefined
-
--- dualTree :: Face s -> ST s (Tree (Face s))
+-- dualTree :: Face -> ST s (Tree Face)
 -- dualTree = undefined
 
 pgHash :: PlanarGraph -> Int
@@ -215,16 +182,74 @@ vertexFromId vId = Vertex vId
 vertexToId :: Vertex -> VertexId
 vertexToId (Vertex vId) = vId
 
--- | \( O(1) \)
-vertexHalfEdge :: Vertex -> PlanarGraph -> HalfEdge
-vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertices pg Vector.! vId
 
 -- | \( O(1) \)
+--   Each vertex has an assigned half-edge with the following properties:
+--
+--   @'halfEdgeVertex' ('vertexHalfEdge' vertex pg) pg = vertex@
+--
+--   @'faceIsInterior' ('halfEdgeFace' ('vertexHalfEdge' vertex pg) pg) = True@
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+--
+-- >>> vertexHalfEdge (Vertex 0) pg
+-- HalfEdge 4
+--
+-- >>> vertexHalfEdge (Vertex 1) pg
+-- HalfEdge 0
+--
+-- >>> halfEdgeVertex (vertexHalfEdge (Vertex 2) pg) pg
+-- Vertex 2
+--
+-- >>> halfEdgeFace (vertexHalfEdge (Vertex 0) pg) pg
+-- Face 0
+vertexHalfEdge :: Vertex -> PlanarGraph -> HalfEdge
+vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
+
+-- | \( O(1) \)
+--   Returns @True@ iff the vertex lines on a boundary.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> vertexIsBoundary (Vertex 0) pg
+-- True
+--
+-- >>> vertexIsBoundary (Vertex 2) pg
+-- False
+--
+-- >>> vertexIsBoundary (Vertex 4) pg
+-- True
 vertexIsBoundary :: Vertex -> PlanarGraph -> Bool
 vertexIsBoundary vertex pg =
     faceIsBoundary $ halfEdgeFace (halfEdgeTwin $ vertexHalfEdge vertex pg) pg
 
--- -- | O(k)
+-- | \( O(k) \)
+--   Query outgoing half-edges from a given vertex in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- [HalfEdge 0,HalfEdge 11,HalfEdge 3]
+--
+-- Each half-edge will point out from the origin vertex:
+--
+-- >>> map (`halfEdgeVertex` pg) $ CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- [Vertex 1,Vertex 1,Vertex 1]
+--
+-- >>> map (`halfEdgeTipVertex` pg) $ CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- [Vertex 0,Vertex 4,Vertex 2]
+--
+-- >>> CV.toList $ vertexOutgoingHalfEdges (Vertex 2) pg
+-- [HalfEdge 2,HalfEdge 5]
 vertexOutgoingHalfEdges :: Vertex -> PlanarGraph -> CircularVector HalfEdge
 vertexOutgoingHalfEdges vertex pg = runST $ do
   tmp <- newVector 10
@@ -236,18 +261,36 @@ vertexOutgoingHalfEdges vertex pg = runST $ do
   i <- readSTRef iRef
   freezeCircularVector i tmp
 
--- -- | O(k), more efficient than 'vertexOutgoingHalfEdges'.
+-- | O(k), more efficient than 'vertexOutgoingHalfEdges'.
 vertexWithOutgoingHalfEdges :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
 vertexWithOutgoingHalfEdges vertex pg cb = do
   let first = vertexHalfEdge vertex pg
   cb first
   let loop edge | edge == first = return ()
-      loop edge = trace ("At edge: "++ show (first, edge)) $ do
+      loop edge = do
         cb edge
         loop $ halfEdgeNext (halfEdgeTwin edge) pg
   loop $ halfEdgeNext (halfEdgeTwin first) pg
 
--- | O(k)
+-- | \( O(k) \)
+--   Query incoming half-edges from a given vertex in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- [HalfEdge 1,HalfEdge 10,HalfEdge 2]
+--
+-- >>> map (`halfEdgeVertex` pg) $ CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- [Vertex 0,Vertex 4,Vertex 2]
+--
+-- >>> map (`halfEdgeTipVertex` pg) $ CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- [Vertex 1,Vertex 1,Vertex 1]
+--
+-- >>> CV.toList $ vertexIncomingHalfEdges (Vertex 2) pg
+-- [HalfEdge 3,HalfEdge 4]
 vertexIncomingHalfEdges :: Vertex -> PlanarGraph -> CircularVector HalfEdge
 vertexIncomingHalfEdges vertex pg = CV.map halfEdgeTwin $ vertexOutgoingHalfEdges vertex pg
 
@@ -255,7 +298,22 @@ vertexIncomingHalfEdges vertex pg = CV.map halfEdgeTwin $ vertexOutgoingHalfEdge
 vertexWithIncomingHalfEdges :: Vertex -> (HalfEdge -> ST s ()) -> ST s ()
 vertexWithIncomingHalfEdges = undefined
 
--- | O(k)
+-- | \( O(k) \)
+--   Query vertex neighbours in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> CV.toList $ vertexNeighbours (Vertex 0) pg
+-- [Vertex 3,Vertex 1]
+--
+-- >>> CV.toList $ vertexNeighbours (Vertex 1) pg
+-- [Vertex 0,Vertex 4,Vertex 2]
+--
+-- >>> CV.toList $ vertexNeighbours (Vertex 2) pg
+-- [Vertex 1,Vertex 3]
 vertexNeighbours :: Vertex -> PlanarGraph -> CircularVector Vertex
 vertexNeighbours vertex pg = CV.map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges vertex pg
 
@@ -287,11 +345,34 @@ halfEdgeFromId eId = HalfEdge eId
 halfEdgeToId :: HalfEdge -> HalfEdgeId
 halfEdgeToId (HalfEdge eId) = eId
 
--- | O(1)
+
+-- | \( O(1) \)
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> halfEdgeNext (HalfEdge 4) pg
+-- HalfEdge 2
+--
+-- >>> halfEdgeNext (HalfEdge 3) pg
+-- HalfEdge 5
 halfEdgeNext :: HalfEdge -> PlanarGraph -> HalfEdge
 halfEdgeNext (HalfEdge eId) pg = HalfEdge $ pgHalfEdgeNext pg Vector.! eId
 
--- | O(1)
+-- | \( O(1) \)
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+--
+-- >>> halfEdgePrev (HalfEdge 4) pg
+-- HalfEdge 6
+--
+-- >>> halfEdgePrev (HalfEdge 3) pg
+-- HalfEdge 10
 halfEdgePrev :: HalfEdge -> PlanarGraph -> HalfEdge
 halfEdgePrev (HalfEdge eId) pg = HalfEdge $ pgHalfEdgePrev pg Vector.! eId
 
@@ -314,29 +395,25 @@ halfEdgeTwin       :: HalfEdge -> HalfEdge
 halfEdgeTwin (HalfEdge idx) = HalfEdge (idx `xor` 1)
 
 -- | O(1)
---   Tail vertex. IE. the vertex of the twin edge.
+--   Synonym of `halfEdgeVertex`.
 halfEdgeTailVertex :: HalfEdge -> PlanarGraph -> Vertex
-halfEdgeTailVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
+halfEdgeTailVertex e pg = halfEdgeVertex e pg
 
 -- | O(1)
---   Synonym of `halfEdgeVertex`.
+--   Tip vertex. IE. the vertex of the twin edge.
 halfEdgeTipVertex  :: HalfEdge -> PlanarGraph -> Vertex
-halfEdgeTipVertex = halfEdgeVertex
+halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 
 -- | \( O(1) \)
 --
 -- ==== __Examples:__
--- @
--- 'pgFromFaces' [[0,1,2]]
--- @
+-- >>> let pg = pgFromFaces [[0,1,2]]
 --
 -- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeFace (halfEdgeFromId 0) pg
 -- Face 0
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeFace (halfEdgeFromId 1) pg
 -- Boundary 0
 --
@@ -362,9 +439,6 @@ halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
 --   cv <- freezeCircularVector i tmp
 --   -- trace ("Boundary: " ++ show cv) $ pure cv
 --   pure cv
-
--- $setup
--- >>> let genPG = pgFromFaces [[0,1,2]]
 
 -- | \( O(1) \)
 --   Check if a half-edge's face is interior or exterior.
@@ -419,6 +493,38 @@ halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
 -------------------------------------------------------------------------------
 -- Faces
 
+-- | O(k)
+pgFaces :: PlanarGraph -> [Face]
+pgFaces pg =
+  [ Face fId
+  | fId <- [0 .. Vector.length (pgFaceEdges pg) ]
+  , halfEdgeIsValid (faceHalfEdge (Face fId) pg)
+  ]
+
+-- | O(1)
+faceCheck :: String -> Face -> PlanarGraph -> a -> a
+faceCheck tag (Face fId) pg _val
+  | fId >= Vector.length (pgFaceEdges pg) || fId < 0 =
+    panic tag ("Out-of-bounds face access: " ++ show fId)
+  | pgFaceEdges pg Vector.! fId < 0 =
+    panic tag ("Tried to access deleted face: " ++ show fId)
+faceCheck tag (Boundary fId) pg _val
+  | fId >= Vector.length (pgBoundaryEdges pg) || fId < 0 =
+    panic tag ("Out-of-bounds boundary access: " ++ show fId)
+  | pgBoundaryEdges pg Vector.! fId < 0 =
+    panic tag ("Tried to access deleted boundary: " ++ show fId)
+faceCheck _tag _face _pg val = val
+
+-- | O(1)
+faceMember :: Face -> PlanarGraph -> Bool
+faceMember face@(Face fId) pg =
+  (fId >= Vector.length (pgFaceEdges pg)) &&
+  halfEdgeIsValid (faceHalfEdge face pg)
+faceMember face@(Boundary fId) pg =
+  (fId >= Vector.length (pgFaceEdges pg)) &&
+  halfEdgeIsValid (faceHalfEdge face pg)
+
+
 -- | O(1)
 faceInvalid :: Face
 faceInvalid = faceFromId maxBound
@@ -442,25 +548,32 @@ faceToId :: Face -> FaceId
 faceToId (Face fId)     = fId
 faceToId (Boundary fId) = negate fId - 1
 
--- | O(1)
-faceHalfEdge         :: Face -> PlanarGraph -> HalfEdge
-faceHalfEdge (Face fId) pg =
-  let eId = pgFaces pg Vector.! fId
-  in HalfEdge eId
-faceHalfEdge (Boundary fId) pg =
-  let eId = pgBoundaries pg Vector.! fId
-  in HalfEdge eId
 
 -- | O(1)
-faceIsInterior       :: Face -> Bool
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- >>> faceHalfEdge (Face 0) pg
+-- HalfEdge 0
+--
+-- >>> faceHalfEdge (Face 1) pg
+-- ... Exception: Data.PlanarGraph.Mutable.faceHalfEdge: Out-of-bounds face access: 1
+-- ...
+--
+faceHalfEdge :: Face -> PlanarGraph -> HalfEdge
+faceHalfEdge face pg | faceCheck "faceHalfEdge" face pg False = undefined
+faceHalfEdge (Face fId) pg     = HalfEdge $ pgFaceEdges pg Vector.! fId
+faceHalfEdge (Boundary fId) pg = HalfEdge $ pgBoundaryEdges pg Vector.! fId
+
+-- | O(1)
+faceIsInterior :: Face -> Bool
 faceIsInterior = not . faceIsBoundary
 
 -- | O(1)
-faceIsBoundary       :: Face -> Bool
+faceIsBoundary :: Face -> Bool
 faceIsBoundary Face{}     = False
 faceIsBoundary Boundary{} = True
 
--- faceVertices         :: Face s -> ST s (CircularVector Vertex)
+-- faceVertices         :: Face -> ST s (CircularVector Vertex)
 
 -- | O(k)
 --   Counterclockwise vector of edges.
@@ -484,27 +597,7 @@ faceHalfEdges face pg
 faceBoundary :: Face -> PlanarGraph -> CircularVector Vertex
 faceBoundary face pg = CV.map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 
--- faceAdjacentFaces    :: Face s -> ST s (CircularVector (Face s))
-
--- faceNew :: PlanarGraph -> ST s (Face s)
--- faceNew pg = do
---   fId <- readSTRef (pgNextFaceId pg)
---   writeSTRef (pgNextFaceId pg) (fId+1)
---   return (Face fId pg)
-
--- faceNewBoundary :: PlanarGraph -> ST s (Face s)
--- faceNewBoundary pg = do
---   fId <- readSTRef (pgNextBoundaryId pg)
---   writeSTRef (pgNextBoundaryId pg) (fId+1)
---   return (Boundary fId pg)
-
--- faceSetHalfEdge :: Face -> HalfEdge -> PlanarGraph -> PlanarGraph
--- faceSetHalfEdge = undefined
--- faceSetHalfEdge (Boundary fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
---   -- trace ("faceSetHalfEdge: " ++ show (fId, eId)) $
---   writeVector (pgBoundaries pg) fId eId
--- faceSetHalfEdge (Face fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg pg' $
---   writeVector (pgFaces pg) fId eId
+-- faceAdjacentFaces    :: Face -> ST s (CircularVector Face)
 
 -------------------------------------------------------------------------------
 -- Mutation
@@ -516,6 +609,7 @@ pgMutate pg action = runST $ do
   action mutPG
   pgUnsafeFreeze mutPG
 
+-- | O(1)
 pgCreate :: (forall s. ST s (Mut.PlanarGraph s)) -> PlanarGraph
 pgCreate action = runST (action >>= pgUnsafeFreeze)
 
@@ -523,34 +617,34 @@ pgCreate action = runST (action >>= pgUnsafeFreeze)
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
-  pgNextVertexId <- newSTRef $ Vector.length $ pgVertices pg
-  pgNextFaceId <- newSTRef $ Vector.length $ pgFaces pg
-  pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaries pg
+  pgNextVertexId <- newSTRef $ Vector.length $ pgVertexEdges pg
+  pgNextFaceId <- newSTRef $ Vector.length $ pgFaceEdges pg
+  pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaryEdges pg
 
   pgHalfEdgeNext   <- Mut.thawVector $ pgHalfEdgeNext pg
   pgHalfEdgePrev   <- Mut.thawVector $ pgHalfEdgePrev pg
   pgHalfEdgeFace   <- Mut.thawVector $ pgHalfEdgeFace pg
   pgHalfEdgeVertex <- Mut.thawVector $ pgHalfEdgeVertex pg
-  pgVertices <- Mut.thawVector $ pgVertices pg
-  pgFaces <- Mut.thawVector $ pgFaces pg
-  pgBoundaries <- Mut.thawVector $ pgBoundaries pg
+  pgVertexEdges <- Mut.thawVector $ pgVertexEdges pg
+  pgFaceEdges <- Mut.thawVector $ pgFaceEdges pg
+  pgBoundaryEdges <- Mut.thawVector $ pgBoundaryEdges pg
   pure Mut.PlanarGraph {..}
 
 -- | O(1)
 pgUnsafeThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgUnsafeThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
-  pgNextVertexId <- newSTRef $ Vector.length $ pgVertices pg
-  pgNextFaceId <- newSTRef $ Vector.length $ pgFaces pg
-  pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaries pg
+  pgNextVertexId <- newSTRef $ Vector.length $ pgVertexEdges pg
+  pgNextFaceId <- newSTRef $ Vector.length $ pgFaceEdges pg
+  pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaryEdges pg
 
   pgHalfEdgeNext   <- Mut.unsafeThawVector $ pgHalfEdgeNext pg
   pgHalfEdgePrev   <- Mut.unsafeThawVector $ pgHalfEdgePrev pg
   pgHalfEdgeFace   <- Mut.unsafeThawVector $ pgHalfEdgeFace pg
   pgHalfEdgeVertex <- Mut.unsafeThawVector $ pgHalfEdgeVertex pg
-  pgVertices <- Mut.unsafeThawVector $ pgVertices pg
-  pgFaces <- Mut.unsafeThawVector $ pgFaces pg
-  pgBoundaries <- Mut.unsafeThawVector $ pgBoundaries pg
+  pgVertexEdges <- Mut.unsafeThawVector $ pgVertexEdges pg
+  pgFaceEdges <- Mut.unsafeThawVector $ pgFaceEdges pg
+  pgBoundaryEdges <- Mut.unsafeThawVector $ pgBoundaryEdges pg
   pure Mut.PlanarGraph {..}
 
 -- | O(n)
@@ -565,9 +659,9 @@ pgFreeze pg = do
   pgHalfEdgePrev   <- Vector.take (maxEdgeId*2) <$> Mut.freezeVector (Mut.pgHalfEdgePrev pg)
   pgHalfEdgeFace   <- Vector.take (maxEdgeId*2) <$> Mut.freezeVector (Mut.pgHalfEdgeFace pg)
   pgHalfEdgeVertex <- Vector.take (maxEdgeId*2) <$> Mut.freezeVector (Mut.pgHalfEdgeVertex pg)
-  pgVertices <- Vector.take maxVertexId <$> Mut.freezeVector (Mut.pgVertices pg)
-  pgFaces <- Vector.take maxFaceId <$> Mut.freezeVector (Mut.pgFaces pg)
-  pgBoundaries <- Vector.take maxBoundaryId <$> Mut.freezeVector (Mut.pgBoundaries pg)
+  pgVertexEdges <- Vector.take maxVertexId <$> Mut.freezeVector (Mut.pgVertexEdges pg)
+  pgFaceEdges <- Vector.take maxFaceId <$> Mut.freezeVector (Mut.pgFaceEdges pg)
+  pgBoundaryEdges <- Vector.take maxBoundaryId <$> Mut.freezeVector (Mut.pgBoundaryEdges pg)
   pure PlanarGraph { .. }
 
 -- | O(1)
@@ -582,9 +676,9 @@ pgUnsafeFreeze pg = do
   pgHalfEdgePrev   <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgePrev pg)
   pgHalfEdgeFace   <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgeFace pg)
   pgHalfEdgeVertex <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgeVertex pg)
-  pgVertices <- Vector.take maxVertexId <$> Mut.unsafeFreezeVector (Mut.pgVertices pg)
-  pgFaces <- Vector.take maxFaceId <$> Mut.unsafeFreezeVector (Mut.pgFaces pg)
-  pgBoundaries <- Vector.take maxBoundaryId <$> Mut.unsafeFreezeVector (Mut.pgBoundaries pg)
+  pgVertexEdges <- Vector.take maxVertexId <$> Mut.unsafeFreezeVector (Mut.pgVertexEdges pg)
+  pgFaceEdges <- Vector.take maxFaceId <$> Mut.unsafeFreezeVector (Mut.pgFaceEdges pg)
+  pgBoundaryEdges <- Vector.take maxBoundaryId <$> Mut.unsafeFreezeVector (Mut.pgBoundaryEdges pg)
   pure PlanarGraph { .. }
 
 -- { pgNextHalfEdgeId :: !(STRef s HalfEdgeId)
@@ -596,8 +690,8 @@ pgUnsafeFreeze pg = do
 --   , pgHalfEdgeVertex :: !(GrowVector s VertexId)   -- HalfEdge indexed
 --   , pgHalfEdgeFace   :: !(GrowVector s FaceId)     -- HalfEdge indexed
 --   , pgVertices       :: !(GrowVector s HalfEdgeId) -- Vertex indexed
---   , pgFaces          :: !(GrowVector s HalfEdgeId) -- Face indexed
---   , pgBoundaries     :: !(GrowVector s HalfEdgeId) -- Boundary faces
+--   , pgFaceEdges          :: !(GrowVector s HalfEdgeId) -- Face indexed
+--   , pgBoundaryEdges     :: !(GrowVector s HalfEdgeId) -- Boundary faces
 
 -- pgConnectVertices :: HalfEdge -> HalfEdge -> ST s (Edge s)
 -- pgConnectVertices e1 e2 = do
@@ -612,7 +706,7 @@ pgUnsafeFreeze pg = do
 
 -- pgSplitHalfEdge :: HalfEdge -> ST s Vertex
 
--- pgRemoveFace :: Face s -> ST s ()
+-- pgRemoveFace :: Face -> ST s ()
 -- pgRemoveHalfEdge :: HalfEdge -> ST s ()
 -- pgRemoveVertex :: Vertex -> ST s ()
 
@@ -637,7 +731,7 @@ pgUnsafeFreeze pg = do
 -- | \( O(n^3) \)
 tutteEmbedding :: PlanarGraph -> Vector.Vector (V2 Double)
 tutteEmbedding pg = runST $ do
-  let nVertices = Vector.length (pgVertices pg)
+  let nVertices = Vector.length (pgVertexEdges pg)
   -- trace ("nVertices: " ++ show nVertices) $ return ()
   m <- Vector.replicateM nVertices (V.replicate nVertices 0)
   vx <- V.replicate nVertices 0

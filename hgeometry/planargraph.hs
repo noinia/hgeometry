@@ -2,25 +2,26 @@
 module Main where
 
 import Data.PlanarGraph.Mutable
+import qualified Data.PlanarGraph.Immutable as Pure
 
+import           Control.Lens          ()
 import           Control.Monad.ST
-import           Control.Lens ()
+import           Data.Ext
+import           Data.Foldable         as F
+import           Data.Geometry.Point
+import           Data.Geometry.Polygon
 import           Data.STRef
-import qualified Data.Text            as T
-import qualified Data.Vector          as V
-import qualified Data.Vector.Circular as CV
+import qualified Data.Text             as T
+import qualified Data.Vector           as V
+import qualified Data.Vector.Circular  as CV
+import           Graphics.SvgTree      (Number (..))
+import           Linear.Metric
+import           Linear.V2
+import           Linear.Vector
 import           Reanimate
 import           Reanimate.Animation
-import           Graphics.SvgTree (Number(..))
-import Data.Geometry.Polygon
-import Data.Geometry.Point
-import Data.Ext
-import Data.Foldable as F
-import Linear.V2
-import Linear.Vector
-import Linear.Metric
-import System.Directory
-import System.FilePath
+import           System.Directory
+import           System.FilePath
 
 main :: IO ()
 -- main = reanimate $ staticFrame (1/60) (fst test2)

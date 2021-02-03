@@ -81,8 +81,8 @@ data PlanarGraph s = PlanarGraph
   , pgHalfEdgePrev   :: !(GrowVector s HalfEdgeId) -- HalfEdge indexed
   , pgHalfEdgeVertex :: !(GrowVector s VertexId)   -- HalfEdge indexed
   , pgHalfEdgeFace   :: !(GrowVector s FaceId)     -- HalfEdge indexed
-  , pgVertices       :: !(GrowVector s HalfEdgeId) -- Vertex indexed
-  , pgFaces          :: !(GrowVector s HalfEdgeId) -- Face indexed
-  , pgBoundaries     :: !(GrowVector s HalfEdgeId) -- Boundary faces
+  , pgVertexEdges    :: !(GrowVector s HalfEdgeId) -- Vertex indexed
+  , pgFaceEdges      :: !(GrowVector s HalfEdgeId) -- Face indexed
+  , pgBoundaryEdges  :: !(GrowVector s HalfEdgeId) -- Boundary faces
   } deriving Eq
 
