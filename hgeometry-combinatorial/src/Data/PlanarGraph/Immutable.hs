@@ -17,11 +17,11 @@ module Data.PlanarGraph.Immutable
   , vertexToId                  -- :: Vertex -> VertexId
   , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
   , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
-  , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> CircularVector HalfEdge
+  , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
   , vertexWithOutgoingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
-  , vertexIncomingHalfEdges     -- :: Vertex -> PlanarGraph -> CircularVector HalfEdge
+  , vertexIncomingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
   , vertexWithIncomingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
-  , vertexNeighbours            -- :: Vertex -> PlanarGraph -> CircularVector Vertex
+  , vertexNeighbours            -- :: Vertex -> PlanarGraph -> [Vertex]
 
     -- ** Edges
   , Edge(..)
@@ -69,20 +69,20 @@ module Data.PlanarGraph.Immutable
 import           Control.Monad
 import           Control.Monad.ST
 import           Data.Bits
+import           Data.Coerce
 import           Data.Hashable
-import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector, HalfEdgeId, VertexId, FaceId)
+import           Data.PlanarGraph.Internal (FaceId, HalfEdgeId, VertexId)
 import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
+import           Data.Proxy
 import           Data.STRef
+import           Data.Vector               (Vector)
+import qualified Data.Vector               as Vector
 import           Data.Vector.Circular      (CircularVector)
 import qualified Data.Vector.Circular      as CV
 import qualified Data.Vector.Mutable       as V
-
-import           Data.Coerce
-import           Data.Proxy
-import           Data.Vector   (Vector)
-import qualified Data.Vector   as Vector
-import           Linear.Matrix (luSolve)
+import           GHC.Exts
+import           Linear.Matrix             (luSolve)
 import           Linear.V
 import           Linear.V2
 
@@ -252,31 +252,30 @@ vertexIsBoundary vertex pg =
 --
 -- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
--- >>> CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- >>> vertexOutgoingHalfEdges (Vertex 1) pg
 -- [HalfEdge 0,HalfEdge 11,HalfEdge 3]
 --
 -- Each half-edge will point out from the origin vertex:
 --
--- >>> map (`halfEdgeVertex` pg) $ CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- >>> map (`halfEdgeVertex` pg) $ vertexOutgoingHalfEdges (Vertex 1) pg
 -- [Vertex 1,Vertex 1,Vertex 1]
 --
--- >>> map (`halfEdgeTipVertex` pg) $ CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
+-- >>> map (`halfEdgeTipVertex` pg) $ vertexOutgoingHalfEdges (Vertex 1) pg
 -- [Vertex 0,Vertex 4,Vertex 2]
 --
--- >>> CV.toList $ vertexOutgoingHalfEdges (Vertex 2) pg
+-- >>> vertexOutgoingHalfEdges (Vertex 2) pg
 -- [HalfEdge 2,HalfEdge 5]
-vertexOutgoingHalfEdges :: Vertex -> PlanarGraph -> CircularVector HalfEdge
-vertexOutgoingHalfEdges vertex pg = runST $ do
-  tmp <- newVector 10
-  iRef <- newSTRef 0
-  vertexWithOutgoingHalfEdges vertex pg $ \edge -> do
-    i <- readSTRef iRef
-    modifySTRef' iRef succ
-    writeVector tmp i edge
-  i <- readSTRef iRef
-  freezeCircularVector i tmp
+vertexOutgoingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
+vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
+  where
+    advance he = halfEdgeNext (halfEdgeTwin he) pg
+    first = vertexHalfEdge vertex pg
+    g :: HalfEdge -> (HalfEdge -> b -> b) -> b -> b
+    g he cons nil
+      | he == first = nil
+      | otherwise   = cons he (g (advance he) cons nil)
 
--- | O(k), more efficient than 'vertexOutgoingHalfEdges'.
+-- | O(k)
 vertexWithOutgoingHalfEdges :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
 vertexWithOutgoingHalfEdges vertex pg cb = do
   let first = vertexHalfEdge vertex pg
@@ -295,19 +294,19 @@ vertexWithOutgoingHalfEdges vertex pg cb = do
 --
 -- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
--- >>> CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- >>> vertexIncomingHalfEdges (Vertex 1) pg
 -- [HalfEdge 1,HalfEdge 10,HalfEdge 2]
 --
--- >>> map (`halfEdgeVertex` pg) $ CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- >>> map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges (Vertex 1) pg
 -- [Vertex 0,Vertex 4,Vertex 2]
 --
--- >>> map (`halfEdgeTipVertex` pg) $ CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
+-- >>> map (`halfEdgeTipVertex` pg) $ vertexIncomingHalfEdges (Vertex 1) pg
 -- [Vertex 1,Vertex 1,Vertex 1]
 --
--- >>> CV.toList $ vertexIncomingHalfEdges (Vertex 2) pg
+-- >>> vertexIncomingHalfEdges (Vertex 2) pg
 -- [HalfEdge 3,HalfEdge 4]
-vertexIncomingHalfEdges :: Vertex -> PlanarGraph -> CircularVector HalfEdge
-vertexIncomingHalfEdges vertex pg = CV.map halfEdgeTwin $ vertexOutgoingHalfEdges vertex pg
+vertexIncomingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
+vertexIncomingHalfEdges vertex pg = map halfEdgeTwin $ vertexOutgoingHalfEdges vertex pg
 
 -- | O(k)
 vertexWithIncomingHalfEdges :: Vertex -> (HalfEdge -> ST s ()) -> ST s ()
@@ -321,16 +320,16 @@ vertexWithIncomingHalfEdges = undefined
 --
 -- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
--- >>> CV.toList $ vertexNeighbours (Vertex 0) pg
+-- >>> vertexNeighbours (Vertex 0) pg
 -- [Vertex 3,Vertex 1]
 --
--- >>> CV.toList $ vertexNeighbours (Vertex 1) pg
+-- >>> vertexNeighbours (Vertex 1) pg
 -- [Vertex 0,Vertex 4,Vertex 2]
 --
--- >>> CV.toList $ vertexNeighbours (Vertex 2) pg
+-- >>> vertexNeighbours (Vertex 2) pg
 -- [Vertex 1,Vertex 3]
-vertexNeighbours :: Vertex -> PlanarGraph -> CircularVector Vertex
-vertexNeighbours vertex pg = CV.map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges vertex pg
+vertexNeighbours :: Vertex -> PlanarGraph -> [Vertex]
+vertexNeighbours vertex pg = map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges vertex pg
 
 -- vertexAdjacentVertices :: Vertex -> PlanarGraph -> [Vertex]
 -- vertexAdjacentFaces :: Vertex -> PlanarGraph -> [Face]
@@ -459,26 +458,6 @@ halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 --
 halfEdgeFace       :: HalfEdge -> PlanarGraph -> Face
 halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
-
--- -- | O(n)
--- --   Scan boundary half-edges without using 'next' or 'prev'.
--- halfEdgeConstructBoundary :: HalfEdge -> ST s (CircularVector HalfEdge)
--- halfEdgeConstructBoundary halfEdge = {- trace ("mkBoundary from: " ++ show halfEdge) $ -} do
---   tmp <- newVector 10
---   writeVector tmp 0 halfEdge
---   let loop i edge | edge == halfEdge = {- trace "Done" $ -} return i
---       loop i edge = {- trace ("Going to: " ++ show edge) $ -} do
---         face <- halfEdgeFace edge
---         if faceIsInvalid face
---           then do
---             writeVector tmp i edge
---             loop (i+1) =<< (halfEdgeTwin <$> halfEdgeNextIncoming edge)
---           else
---             loop i =<< (halfEdgeTwin <$> halfEdgePrev edge)
---   i <- loop 1 =<< (halfEdgeTwin <$> halfEdgeNextIncoming halfEdge)
---   cv <- freezeCircularVector i tmp
---   -- trace ("Boundary: " ++ show cv) $ pure cv
---   pure cv
 
 -- | \( O(1) \)
 --   Check if a half-edge's face is interior or exterior.
@@ -617,25 +596,20 @@ faceIsBoundary Boundary{} = True
 
 -- | O(k)
 --   Counterclockwise vector of edges.
-faceHalfEdges        :: Face -> PlanarGraph -> CircularVector HalfEdge
+faceHalfEdges        :: Face -> PlanarGraph -> [HalfEdge]
 faceHalfEdges face pg
-  | faceIsBoundary face = worker halfEdgeNext
-  | otherwise           = worker halfEdgePrev
+  | faceIsBoundary face = first : build (worker halfEdgeNext first)
+  | otherwise           = first : build (worker halfEdgePrev first)
   where
-    worker advance = runST $ do
-      let first = faceHalfEdge face pg
-      tmp <- newVector 10
-      writeVector tmp 0 first
-      let loop i edge | edge == first = return i
-          loop i edge = do
-            writeVector tmp i edge
-            loop (i+1) (advance edge pg)
-      i <- loop 1 (advance first pg)
-      freezeCircularVector i tmp
+    first = faceHalfEdge face pg
+    worker :: (HalfEdge -> PlanarGraph -> HalfEdge) -> HalfEdge -> (HalfEdge -> b -> b) -> b -> b
+    worker advance he cons nil
+      | he == first = nil
+      | otherwise   = cons he (worker advance (advance he pg) cons nil)
 
 -- | O(k)
-faceBoundary :: Face -> PlanarGraph -> CircularVector Vertex
-faceBoundary face pg = CV.map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
+faceBoundary :: Face -> PlanarGraph -> [Vertex]
+faceBoundary face pg = map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 
 -- faceAdjacentFaces    :: Face -> ST s (CircularVector Face)
 
@@ -780,7 +754,7 @@ tutteEmbedding pg = runST $ do
   let boundary = faceBoundary (Boundary 0) pg
   let nBoundary = length boundary
   -- trace ("Vectors: " ++ show boundary) $
-  CV.forM_ (CV.zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
+  forM_ (zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
     let valid = halfEdgeIsValid $ vertexHalfEdge vertex pg
     when valid $ do
       V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
@@ -797,7 +771,7 @@ tutteEmbedding pg = runST $ do
         unless onBoundary $ do
           let vertex = vertexFromId vId
           let neighbours = vertexNeighbours vertex pg
-          CV.forM_ neighbours $ \neighbour ->
+          forM_ neighbours $ \neighbour ->
             V.write (m Vector.! vId) (vertexToId neighbour) (1::Double)
           V.write (m Vector.! vId) vId (negate $ fromIntegral $ length neighbours)
 
@@ -817,8 +791,8 @@ reifyMatrix :: forall a. Vector.Vector (Vector.Vector a) ->
 reifyMatrix m v f = reifyDim (Vector.length m) $ \(Proxy :: Proxy n) ->
   toVector (f (coerce m :: (V n (V n a))) (coerce v))
 
-regularPolygon :: Int -> CircularVector (Double, Double)
-regularPolygon n = CV.unsafeFromList
+regularPolygon :: Int -> [(Double, Double)]
+regularPolygon n =
     [ (cos ang, sin ang)
     | i <- [0 .. n-1]
     , let ang = fromIntegral i * frac + pi/2]
