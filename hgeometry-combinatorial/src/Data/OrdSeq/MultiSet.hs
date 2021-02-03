@@ -44,19 +44,15 @@ instance Foldable OrdSeq where
 
 type Compare a = a -> a -> Ordering
 
--- | Insert into a monotone OrdSeq.
+-- | \(O(\log n)\) Insert into a monotone OrdSeq.
 --
 -- pre: the comparator maintains monotonicity
---
--- \(O(\log n)\)
 insertBy                  :: Compare a -> a -> OrdSeq a -> OrdSeq a
 insertBy cmp x (OrdSeq s) = OrdSeq $ l `mappend` (Elem x <| r)
   where
     (l,r) = split (\v -> liftCmp cmp v (Key x) `elem` [EQ, GT]) s
 
--- | Insert into a sorted OrdSeq
---
--- \(O(\log n)\)
+-- | \(O(\log n)\) Insert into a sorted OrdSeq
 insert :: Ord a => a -> OrdSeq a -> OrdSeq a
 insert = insertBy compare
 
@@ -77,6 +73,7 @@ splitBy cmp x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
     (m',r) = split (\v -> liftCmp cmp v (Key x) == GT) m
 
 
+{- HLINT ignore splitOn -}
 -- | Given a monotonic function f that maps a to b, split the sequence s
 -- depending on the b values. I.e. the result (l,m,r) is such that
 -- * all (< x) . fmap f $ l
@@ -103,24 +100,20 @@ splitMonotonic  :: (a -> Bool) -> OrdSeq a -> (OrdSeq a, OrdSeq a)
 splitMonotonic p = bimap OrdSeq OrdSeq . split (p . getKey) . _asFingerTree
 
 
--- Deletes all elements from the OrdDeq
---
--- \(O(n\log n)\)
+-- | \(O(n\log n)\) Deletes all elements from the OrdDeq
 deleteAll :: Ord a => a -> OrdSeq a -> OrdSeq a
 deleteAll = deleteAllBy compare
 
 
--- | inserts all eleements in order
--- \(O(n\log n)\)
+-- | \(O(n\log n)\) inserts all eleements in order
 fromListBy     :: Compare a -> [a] -> OrdSeq a
 fromListBy cmp = foldr (insertBy cmp) mempty
 
--- | inserts all eleements in order
--- \(O(n\log n)\)
+-- | \(O(n\log n)\) inserts all eleements in order
 fromListByOrd :: Ord a => [a] -> OrdSeq a
 fromListByOrd = fromListBy compare
 
--- | O(n)
+-- | \( O(n) \)
 fromAscList' :: [a] -> OrdSeq a
 fromAscList' = OrdSeq . fromList . fmap Elem
 
@@ -133,22 +126,19 @@ memberBy        :: Compare a -> a -> OrdSeq a -> Bool
 memberBy cmp x = isJust . lookupBy cmp x
 
 
--- | Fmap, assumes the order does not change
--- O(n)
+-- | \( O(n) \) Fmap, assumes the order does not change
 mapMonotonic   :: (a -> b) -> OrdSeq a -> OrdSeq b
 mapMonotonic f = fromAscList' . map f . F.toList
 
 
--- | Gets the first element from the sequence
--- \(O(1)\)
+-- | \(O(1)\) Gets the first element from the sequence
 viewl :: OrdSeq a -> ViewL OrdSeq a
 viewl = f . FT.viewl . _asFingerTree
   where
     f EmptyL         = EmptyL
     f (Elem x :< s)  = x :< OrdSeq s
 
--- Last element
--- \(O(1)\)
+-- | \(O(1)\) Last element
 viewr :: OrdSeq a -> ViewR OrdSeq a
 viewr = f . FT.viewr . _asFingerTree
   where
@@ -156,22 +146,22 @@ viewr = f . FT.viewr . _asFingerTree
     f (s :> Elem x)  = OrdSeq s :> x
 
 
--- \(O(1)\)
+-- | \(O(1)\)
 minView   :: OrdSeq a -> Maybe (a, OrdSeq a)
 minView s = case viewl s of
               EmptyL   -> Nothing
               (x :< t) -> Just (x,t)
 
--- \(O(1)\)
+-- | \(O(1)\)
 lookupMin :: OrdSeq a -> Maybe a
 lookupMin = fmap fst . minView
 
--- \(O(1)\)
+-- | \(O(1)\)
 maxView   :: OrdSeq a -> Maybe (a, OrdSeq a)
 maxView s = case viewr s of
               EmptyR   -> Nothing
               (t :> x) -> Just (x,t)
 
--- \(O(1)\)
+-- | \(O(1)\)
 lookupMax :: OrdSeq a -> Maybe a
 lookupMax = fmap fst . maxView

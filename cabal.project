@@ -1,3 +1,4 @@
+write-ghc-environment-files: always
 tests: true
 packages:
     hgeometry
@@ -5,5 +6,13 @@ packages:
     hgeometry-ipe
     hgeometry-examples
     hgeometry-test
-    hgeometry-benchmarks
     hgeometry-svg
+    hgeometry-showcase
+    hgeometry-web
+    hgeometry-showcase
+--    hgeometry-interactive
+
+package miso
+  flags: jsaddle
+package reanimate
+  flags: no-hgeometry

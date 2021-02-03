@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Zipper
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.List.Zipper where
 
 import qualified Data.List as List
@@ -51,7 +58,7 @@ allNexts = List.unfoldr (fmap (\z -> (z,goNext z))) . Just
 extractNext                :: Zipper a -> Maybe (a, Zipper a)
 extractNext (Zipper xs ys) = case ys of
                                []      -> Nothing
-                               (y:ys') -> Just $ (y,Zipper xs ys')
+                               (y:ys') -> Just (y,Zipper xs ys')
 
 
 -- | Drops the next element in the zipper.

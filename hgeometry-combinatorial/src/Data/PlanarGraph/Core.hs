@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
@@ -13,17 +12,17 @@ module Data.PlanarGraph.Core where
 
 
 import           Control.DeepSeq
-import           Control.Lens hiding ((.=))
+import           Control.Lens               hiding ((.=))
 import           Control.Monad.State.Strict
 import           Data.Aeson
-import qualified Data.Foldable as F
+import qualified Data.Foldable              as F
 import           Data.Permutation
 import           Data.PlanarGraph.Dart
-import           Data.Type.Equality (gcastWith, (:~:)(..))
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
-import           GHC.Generics (Generic)
-import           Unsafe.Coerce (unsafeCoerce)
+import           Data.Type.Equality         (gcastWith)
+import qualified Data.Vector                as V
+import qualified Data.Vector.Mutable        as MV
+import           GHC.Generics               (Generic)
+import           Unsafe.Coerce              (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
@@ -90,6 +89,7 @@ newtype VertexId s (w :: World) = VertexId { _unVertexId :: Int }
 -- | Shorthand for vertices in the primal.
 type VertexId' s = VertexId s Primal
 
+-- | Getter for a VertexId's unique number.
 unVertexId :: Getter (VertexId s w) Int
 unVertexId = to _unVertexId
 
@@ -150,14 +150,17 @@ instance (Eq v, Eq e, Eq f) => Eq (PlanarGraph s w v e f) where
 embedding :: Getter (PlanarGraph s w v e f) (Permutation (Dart s))
 embedding = to _embedding
 
+-- | O\(1\) access, \( O(n) \) update.
 vertexData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v' e f)
                    (V.Vector v) (V.Vector v')
 vertexData = lens _vertexData (\g vD -> updateData (const vD) id id g)
 
+-- | O\(1\) access, \( O(n) \) update.
 rawDartData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e' f)
                     (V.Vector e) (V.Vector e')
 rawDartData = lens _rawDartData (\g dD -> updateData id (const dD) id g)
 
+-- | O\(1\) access, \( O(n) \) update.
 faceData :: Lens (PlanarGraph s w v e f) (PlanarGraph s w v e f')
                  (V.Vector f) (V.Vector f')
 faceData = lens _faceData (\g fD -> updateData id id (const fD) g)
@@ -233,7 +236,7 @@ traverseVertices   :: Applicative m
                    => (VertexId s w -> v -> m v')
                    -> PlanarGraph s w v e f
                    -> m (PlanarGraph s w v' e f)
-traverseVertices f = itraverseOf (vertexData.itraversed) (\i -> f (VertexId i))
+traverseVertices f = itraverseOf (vertexData.itraversed) (f . VertexId)
 
 -- | Traverses the darts
 --
@@ -254,7 +257,7 @@ traverseDarts   :: Applicative m
                 => (Dart s -> e -> m e')
                 -> PlanarGraph s w v e f
                 -> m (PlanarGraph s w v e' f)
-traverseDarts f = itraverseOf (rawDartData.itraversed) (\i -> f (toEnum i))
+traverseDarts f = itraverseOf (rawDartData.itraversed) (f . toEnum)
 
 -- | Traverses the faces
 --
@@ -294,7 +297,7 @@ planarGraph' perm = pg
 --
 -- running time: \(O(n)\).
 planarGraph    :: [[(Dart s,e)]] -> PlanarGraph s Primal () e ()
-planarGraph ds = (planarGraph' perm)&dartData .~ (V.fromList . concat $ ds)
+planarGraph ds = planarGraph' perm & dartData .~ (V.fromList . concat $ ds)
   where
     n     = sum . map length $ ds
     perm  = toCycleRep n $ map (map fst) ds
@@ -481,7 +484,7 @@ prevIncidentEdge d g = let perm  = g^.embedding
 --------------------------------------------------------------------------------
 -- * Access data
 
-
+-- | General interface to accessing vertex data, dart data, and face data.
 class HasDataOf g i where
   type DataOf g i
   -- | get the data associated with the value i.

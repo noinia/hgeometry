@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.CircularList.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.CircularList.Util where
 
 import           Control.Lens
@@ -43,14 +50,14 @@ insertOrdBy cmp x = C.fromList . insertOrdBy' cmp x . C.rightElements
 insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
 insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     ([],  _)   -> L.insertBy cmp x pref
-    (z:zs, GT) -> (z : L.insertBy cmp x zs) ++ pref
-    (_:_,  EQ) -> (x : xs) -- == x : rest ++ pref
+    (z:zs, GT) -> z : L.insertBy cmp x zs ++ pref
+    (_:_,  EQ) -> x : xs -- == x : rest ++ pref
     (_:_,  LT) -> rest ++ L.insertBy cmp x pref
   where
     -- split the list at its maximum.
     (pref,rest) = splitIncr cmp xs
 
--- given a list of elements that is supposedly a a cyclic-shift of a list of
+-- | Given a list of elements that is supposedly a a cyclic-shift of a list of
 -- increasing items, find the splitting point. I.e. returns a pair of lists
 -- (ys,zs) such that xs = zs ++ ys, and ys ++ zs is (supposedly) in sorted
 -- order.

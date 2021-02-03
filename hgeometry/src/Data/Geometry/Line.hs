@@ -48,14 +48,14 @@ instance (Fractional r, Arity d, Arity (d + 1)) => IsTransformable (Line d r) wh
 type instance IntersectionOf (Point d r) (Line d r) = [NoIntersection, Point d r]
 
 
-instance (Eq r, Fractional r, Arity d) => (Point d r) `IsIntersectableWith` (Line d r) where
+instance (Eq r, Fractional r, Arity d) => Point d r `IsIntersectableWith` Line d r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   intersects = onLine
   p `intersect` l | p `intersects` l = coRec p
                   | otherwise        = coRec NoIntersection
 
 instance {-# OVERLAPPING #-} (Ord r, Num r)
-        => (Point 2 r) `IsIntersectableWith` (Line 2 r) where
+        => Point 2 r `IsIntersectableWith` Line 2 r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   intersects = onLine2
   p `intersect` l | p `intersects` l = coRec p
@@ -67,7 +67,7 @@ type instance IntersectionOf (Line 2 r) (Boundary (Rectangle p r)) =
 
 
 instance (Ord r, Fractional r)
-         => (Line 2 r) `IsIntersectableWith` (Boundary (Rectangle p r)) where
+         => Line 2 r `IsIntersectableWith` Boundary (Rectangle p r) where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   line' `intersect` (Boundary rect)  = case asAP segP of
@@ -104,12 +104,12 @@ type instance IntersectionOf (Line 2 r) (Rectangle p r) =
 
 
 instance (Ord r, Fractional r)
-         => (Line 2 r) `IsIntersectableWith` (Rectangle p r) where
+         => Line 2 r `IsIntersectableWith` Rectangle p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
-  line' `intersect` rect  = match (line' `intersect` (Boundary rect)) $
-       (H $ \NoIntersection -> coRec NoIntersection)
-    :& (H $ \p@(Point2 _ _) -> coRec p)
-    :& (H $ \(p,q)          -> coRec $ ClosedLineSegment (ext p) (ext q))
-    :& (H $ \s              -> coRec s)
+  line' `intersect` rect  = match (line' `intersect` Boundary rect) $
+       H coRec -- NoIntersection
+    :& H coRec -- Point2
+    :& H (\(p,q)          -> coRec $ ClosedLineSegment (ext p) (ext q))
+    :& H coRec -- LineSegment
     :& RNil

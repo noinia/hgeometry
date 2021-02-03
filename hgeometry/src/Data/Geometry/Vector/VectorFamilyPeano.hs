@@ -1,6 +1,19 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Geometry.Vector.VectorFamilyPeano where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Vector.VectorFamilyPeano
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Data.Geometry.Vector.VectorFamilyPeano
+  ( ImplicitArity
+  , VectorFamily(VectorFamily)
+  , VectorFamilyF
+  , FromPeano
+  , Two
+  ) where
 
 import           Control.Applicative (liftA2)
 import           Control.DeepSeq
@@ -10,6 +23,7 @@ import           Data.Aeson (FromJSON(..),ToJSON(..))
 import qualified Data.Foldable as F
 import qualified Data.Geometry.Vector.VectorFixed as FV
 import           Data.Proxy
+import           Data.Functor.Classes
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed.Cont (PeanoNum(..), Fun(..))
 import           GHC.TypeLits
@@ -91,6 +105,15 @@ instance (Eq r, ImplicitArity d) => Eq (VectorFamily d r) where
         (SS (SS (SS (SS SZ))))     -> u == v
         (SS (SS (SS (SS (SS _))))) -> u == v
   {-# INLINE (==) #-}
+
+instance (ImplicitArity d) => Eq1 (VectorFamily d) where
+  liftEq eq (VectorFamily u) (VectorFamily v) = case (implicitPeano :: SingPeano d) of
+        SZ                         -> liftEq eq u v
+        (SS SZ)                    -> liftEq eq u v
+        (SS (SS SZ))               -> liftEq eq u v
+        (SS (SS (SS SZ)))          -> liftEq eq u v
+        (SS (SS (SS (SS SZ))))     -> liftEq eq u v
+        (SS (SS (SS (SS (SS _))))) -> liftEq eq u v
 
 instance (Ord r, ImplicitArity d) => Ord (VectorFamily d r) where
   (VectorFamily u) `compare` (VectorFamily v) = case (implicitPeano :: SingPeano d) of
@@ -216,13 +239,13 @@ element' = case (implicitPeano :: SingPeano d) of
 {-# INLINE element' #-}
 
 elem0   :: Int -> Traversal' (VectorFamily Z r) r
-elem0 _ = \_ v -> pure v
+elem0 _ _ = pure
 {-# INLINE elem0 #-}
 -- zero length vectors don't store any elements
 
 elem1 :: Int -> Traversal' (VectorFamily One r) r
 elem1 = \case
-           0 -> unVF.(lens runIdentity (\_ -> Identity))
+           0 -> unVF.lens runIdentity (const Identity)
            _ -> \_ v -> pure v
 {-# INLINE elem1 #-}
 
@@ -287,14 +310,14 @@ instance (ToJSON r, ImplicitArity d) => ToJSON (VectorFamily d r) where
 vectorFromList :: ImplicitArity d => [r] -> Maybe (VectorFamily d r)
 vectorFromList = V.fromListM
 
-vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
-vectorFromListUnsafe = V.fromList
+-- vectorFromListUnsafe :: ImplicitArity d => [r] -> VectorFamily d r
+-- vectorFromListUnsafe = V.fromList
 
--- | Get the head and tail of a vector
-destruct   :: (ImplicitArity d, ImplicitArity (S d))
-           => VectorFamily (S d) r -> (r, VectorFamily d r)
-destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
-  -- FIXME: this implementaion of tail is not particularly nice
+-- -- | Get the head and tail of a vector
+-- destruct   :: (ImplicitArity d, ImplicitArity (S d))
+--            => VectorFamily (S d) r -> (r, VectorFamily d r)
+-- destruct v = (head $ F.toList v, vectorFromListUnsafe . tail $ F.toList v)
+--   -- FIXME: this implementaion of tail is not particularly nice
 
 -- snoc     :: (ImplicitArity d, ImplicitArity (S d))
 --          => VectorFamily d r -> r -> VectorFamily (S d) r

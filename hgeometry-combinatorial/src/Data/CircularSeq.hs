@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.CircularSeq
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.CircularSeq( CSeq
                        , cseq
                        , singleton
@@ -15,6 +22,7 @@ module Data.CircularSeq( CSeq
                        , rightElements
                        , leftElements
                        , asSeq
+                       , withIndices
 
                        , reverseDirection
                        , allRotations
@@ -32,18 +40,20 @@ module Data.CircularSeq( CSeq
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)
 import           Control.DeepSeq
-import           Control.Lens (lens, Lens', bimap)
+import           Control.Lens (Lens', bimap, lens)
+import           Data.Ext
 import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (listToMaybe, isJust)
+import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
-import           Data.Sequence ((|>),(<|),ViewL(..),ViewR(..),Seq)
+import           Data.Sequence               (Seq, ViewL (..), ViewR (..), (<|),
+                                              (|>))
 import qualified Data.Sequence as S
 import qualified Data.Traversable as T
 import           Data.Tuple (swap)
 import           GHC.Generics (Generic)
-import           Test.QuickCheck(Arbitrary(..))
+import           Test.QuickCheck (Arbitrary (..))
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -67,6 +77,11 @@ instance Show a => Show (CSeq a) where
                     showString (("CSeq " <>) . show . F.toList . rightElements $ s)
     where app_prec = 10
 
+instance Read a => Read (CSeq a) where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (fromList lst, t) | ("CSeq", s) <- lex r, (lst, t) <- reads s ]
+    where app_prec = 10
+
 -- traverses starting at the focus, going to the right.
 instance T.Traversable CSeq where
   traverse f (CSeq l x r) = (\x' r' l' -> CSeq l' x' r')
@@ -87,15 +102,18 @@ instance Functor CSeq where
 instance Arbitrary a => Arbitrary (CSeq a) where
   arbitrary = CSeq <$> arbitrary <*> arbitrary <*> arbitrary
 
+-- | /O(1)/ CSeq with exactly one element.
 singleton   :: a -> CSeq a
 singleton x = CSeq S.empty x S.empty
 
--- | Gets the focus of the CSeq
+-- | Gets the focus of the CSeq.
+--
 -- running time: O(1)
 focus              :: CSeq a -> a
 focus (CSeq _ x _) = x
 
--- | Access the i^th item  (w.r.t the focus) in the CSeq (indices modulo n).
+-- | Access the i^th item (w.r.t the focus; elements numbered in
+-- increasing order towards the right) in the CSeq (indices modulo n).
 --
 -- running time: \(O(\log (i \mod n))\)
 --
@@ -120,6 +138,15 @@ index s@(CSeq l x r) i' = let i  = i' `mod` length s
                                else if i - 1 < rn then S.index r (i - 1)
                                                   else S.index l (i - rn - 1)
 
+-- | Label the elements with indices.
+--
+-- >>> withIndices $ fromList [0..5]
+-- CSeq [0 :+ 0,1 :+ 1,2 :+ 2,3 :+ 3,4 :+ 4,5 :+ 5]
+withIndices              :: CSeq a -> CSeq (Int :+ a)
+withIndices (CSeq l x r) = let s = 1 + length r in
+  CSeq (S.mapWithIndex (\i y -> i + s :+ y) l) (0 :+ x) (S.mapWithIndex (\i y -> i+1 :+ y) r)
+
+
 -- | Adjusts the i^th element w.r.t the focus in the CSeq
 --
 -- running time: \(O(\log (i \mod n))\)
@@ -135,9 +162,9 @@ adjust f i' s@(CSeq l x r) = let i  = i' `mod` length s
                                      else CSeq (S.adjust f (i - rn - 1) l) x r
 
 
--- | Access te ith item in the CSeq (w.r.t the focus) as a lens
+-- | Access the ith item in the CSeq (w.r.t the focus) as a lens
 item   :: Int -> Lens' (CSeq a) a
-item i = lens (flip index i) (\s x -> adjust (const x) i s)
+item i = lens (`index` i) (\s x -> adjust (const x) i s)
 
 
 resplit   :: Seq a -> (Seq a, Seq a)
@@ -194,8 +221,8 @@ rotateR s@(CSeq l x r) = case S.viewl r of
 rotateL                :: CSeq a -> CSeq a
 rotateL s@(CSeq l x r) = case S.viewr l of
                            EmptyR    -> case S.viewr r of
-                             EmptyR     -> s
-                             (r' :> y)  -> cseq r' y (S.singleton x)
+                             EmptyR    -> s
+                             (r' :> y) -> cseq r' y (S.singleton x)
                            (l' :> y) -> cseq l' y (x <| r)
 
 
@@ -223,6 +250,11 @@ leftElements (CSeq l x r) = x <| S.reverse l <> S.reverse r
 fromNonEmpty                    :: NonEmpty.NonEmpty a -> CSeq a
 fromNonEmpty (x NonEmpty.:| xs) = withFocus x $ S.fromList xs
 
+{- HLINT ignore fromList -}
+-- | /O(n)/ Convert from a list to a CSeq.
+--
+-- Warning: the onus is on the user to ensure that their list
+-- is not empty, otherwise all bets are off!
 fromList        :: [a] -> CSeq a
 fromList (x:xs) = withFocus x $ S.fromList xs
 fromList []     = error "fromList: Empty list"
@@ -266,7 +298,7 @@ rotateNL i s = let (x :< xs) = S.viewl $ rightElements s
                     S.EmptyR -> let (y :< r') = S.viewl r in cseq l' y r'
 
 
--- | Reversres the direction of the CSeq
+-- | Reverses the direction of the CSeq
 --
 -- running time: \(O(n)\)
 --
@@ -283,9 +315,9 @@ reverseDirection (CSeq l x r) = CSeq (S.reverse r) x (S.reverse l)
 -- >>> findRotateTo (== 7) $ fromList [1..5]
 -- Nothing
 findRotateTo   :: (a -> Bool) -> CSeq a -> Maybe (CSeq a)
-findRotateTo p = listToMaybe . filter (p . focus) . allRotations'
+findRotateTo p = L.find (p . focus) . allRotations'
 
-
+-- | Rotate to a specific element in the CSeq.
 rotateTo   :: Eq a => a -> CSeq a -> Maybe (CSeq a)
 rotateTo x = findRotateTo (== x)
 
@@ -354,8 +386,8 @@ insertOrdBy cmp x = fromList . insertOrdBy' cmp x . F.toList . rightElements
 insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
 insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
     ([],  _)   -> L.insertBy cmp x pref
-    (z:zs, GT) -> (z : L.insertBy cmp x zs) ++ pref
-    (_:_,  EQ) -> (x : xs) -- == x : rest ++ pref
+    (z:zs, GT) -> z : L.insertBy cmp x zs ++ pref
+    (_:_,  EQ) -> x : xs -- == x : rest ++ pref
     (_:_,  LT) -> rest ++ L.insertBy cmp x pref
   where
     -- split the list at its maximum.

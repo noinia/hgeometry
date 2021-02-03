@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Point.Quadrants
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Point.Quadrants where
 
 import           Control.Lens
@@ -7,7 +14,6 @@ import           Data.Geometry.Point.Internal
 import           Data.Geometry.Vector
 import qualified Data.List as L
 import           GHC.TypeLits
-import           Text.Read (Read(..))
 
 --------------------------------------------------------------------------------
 

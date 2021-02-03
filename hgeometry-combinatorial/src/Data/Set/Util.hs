@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Set.Util
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Set.Util where
 
 import           Data.DynamicOrd
@@ -31,6 +38,18 @@ splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
                     (m,r)  = Set.spanAntitone (g EQ . f) s'
                     g c y  = y `compare` x == c
                 in (l,m,r)
+
+-- | Given a monotonic function f that orders @a@, split the sequence @s@
+-- into three parts. I.e. the result (lt,eq,gt) is such that
+-- * all (\x -> f x == LT) . fmap f $ lt
+-- * all (\x -> f x == EQ) . fmap f $ eq
+-- * all (\x -> f x == GT) . fmap f $ gt
+--
+-- running time: \(O(\log n)\)
+splitBy       :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
+splitBy f s = let (l,s') = Set.spanAntitone ((==) LT . f) s
+                  (m,r)  = Set.spanAntitone ((==) EQ . f) s'
+              in (l,m,r)
 
 -- | Constructs a Set using the given Order.
 --

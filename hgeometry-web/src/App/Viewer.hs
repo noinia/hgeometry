@@ -169,5 +169,6 @@ mainJSM = do
                                     $ defaultEvents
                     , initialAction = Id
                     , mountPoint    = Nothing
+                    , logLevel      = Off
                     }
     startApp myApp

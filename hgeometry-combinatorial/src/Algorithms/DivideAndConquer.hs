@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.DivideAndConquer( divideAndConquer
                                   , divideAndConquer1
                                   , divideAndConquer1With
@@ -26,6 +33,7 @@ divideAndConquer1 = divideAndConquer1With (<>)
 divideAndConquer   :: (Foldable f, Monoid s) => (a -> s) -> f a -> s
 divideAndConquer g = maybe mempty (divideAndConquer1 g) . NonEmpty.nonEmpty . F.toList
 
+{- HLINT ignore divideAndConquer1With -}
 -- | Divide and conquer strategy
 --
 -- the running time satifies T(n) = 2T(n/2) + M(n),
@@ -40,7 +48,7 @@ divideAndConquer1With (<.>) g = repeatedly merge . fmap g . toNonEmpty
 
     merge ts@(_ :| [])  = ts
     merge (l :| r : []) = l <.> r :| []
-    merge (l :| r : ts) = l <.> r <| (merge $ NonEmpty.fromList ts)
+    merge (l :| r : ts) = l <.> r <| merge (NonEmpty.fromList ts)
 
 
 --------------------------------------------------------------------------------

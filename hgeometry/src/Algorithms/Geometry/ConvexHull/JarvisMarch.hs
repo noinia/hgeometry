@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.JarvisMarch
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.JarvisMarch(
     convexHull
 
@@ -8,7 +15,6 @@ module Algorithms.Geometry.ConvexHull.JarvisMarch(
 
 import           Control.Lens ((^.))
 import           Data.Bifunctor
-import           Data.Either (either)
 import           Data.Ext
 import           Data.Foldable
 import           Data.Geometry.Point
@@ -30,8 +36,8 @@ import           Data.Semigroup.Foldable
 -- and \(h\) is the complexity of the hull.
 convexHull            :: (Ord r, Num r)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
-convexHull pts       = ConvexPolygon . fromPoints $ uh <> reverse lh
+convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
+convexHull pts       = ConvexPolygon . unsafeFromPoints $ uh <> reverse lh
   where
     lh = case NonEmpty.nonEmpty (NonEmpty.init $ lowerHull pts) of
            Nothing       -> []
@@ -93,13 +99,13 @@ lowerHull' pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
 -- with minimum slope w.r.t. the given point.
 steepestCcwFrom   :: (Ord r, Num r)
                => (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ b)  -> Point 2 r :+ b
-steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith (Vector2 0 (-1)) p)
+steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith' (Vector2 0 (-1)) p)
 
 -- | Find the next point in clockwise order, i.e. the point
 -- with maximum slope w.r.t. the given point.
 steepestCwFrom   :: (Ord r, Num r)
                => (Point 2 r :+ a) -> NonEmpty (Point 2 r :+ b)  -> Point 2 r :+ b
-steepestCwFrom p = List.minimumBy (cwCmpAroundWith (Vector2 0 1) p)
+steepestCwFrom p = List.minimumBy (cwCmpAroundWith' (Vector2 0 1) p)
 
 repeatedly       :: (a -> a -> Ordering) -> (a -> NonEmpty a -> a) -> a -> [a] -> NonEmpty a
 repeatedly cmp f = go
@@ -126,7 +132,7 @@ foldr1With f b = go . toNonEmpty
   where
     go (x :| xs) = case NonEmpty.nonEmpty xs of
                      Nothing  -> b x
-                     Just xs' -> x `f` (go xs')
+                     Just xs' -> x `f` go xs'
 
 -- | extracts all minima from the list. The result consists of the
 -- list of minima, and all remaining points. Both lists are returned

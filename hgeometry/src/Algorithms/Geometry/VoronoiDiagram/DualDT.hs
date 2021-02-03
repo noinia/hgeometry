@@ -1,24 +1,22 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Algorithms.Geometry.VoronoiDiagram.DualDT where
 
-
 import           Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Data.Ext
 import           Data.Geometry.Ball
 import           Data.Geometry.Box
-import           Data.Geometry.Point
-import           Data.Geometry.Vector
 import           Data.Geometry.HalfLine
 import           Data.Geometry.PlanarSubdivision
 import           Data.Geometry.Point
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.PlanarGraph(FaceId)
-import           Data.PlaneGraph(PlaneGraph)
-import qualified Data.PlaneGraph as PG
+import           Data.Geometry.Vector
+import qualified Data.List.NonEmpty                                         as NonEmpty
+import           Data.PlanarGraph                                           (FaceId)
+import           Data.PlaneGraph                                            (PlaneGraph)
+import qualified Data.PlaneGraph                                            as PG
 import           Data.Proxy
-import qualified Data.Vector as V
+import qualified Data.Vector                                                as V
 
 --------------------------------------------------------------------------------
 

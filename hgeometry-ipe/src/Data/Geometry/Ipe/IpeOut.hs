@@ -23,7 +23,6 @@ import           Data.Ext
 import           Data.Foldable (toList)
 import           Data.Geometry.Ball
 import           Data.Geometry.Ellipse(Ellipse, circleToEllipse)
-import           Data.Geometry.BezierSpline
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
 import           Data.Geometry.Ipe.Attributes
@@ -213,13 +212,13 @@ pathSegment = PolyLineSegment . fromLineSegment . first (const ())
 -- | Draw a polygon
 ipePolygon                          :: IpeOut (Polygon t p r) Path r
 ipePolygon (first (const ()) -> pg) = case pg of
-               (SimplePolygon _)  -> pg^.re _asSimplePolygon :+ mempty
-               (MultiPolygon _ _) -> pg^.re _asMultiPolygon  :+ mempty
+               SimplePolygon{} -> pg^.re _asSimplePolygon :+ mempty
+               MultiPolygon{}  -> pg^.re _asMultiPolygon  :+ mempty
 
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle p r) Path r
-ipeRectangle r = ipePolygon $ fromPoints [tl,tr,br,bl]
+ipeRectangle r = ipePolygon $ unsafeFromPoints [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
 

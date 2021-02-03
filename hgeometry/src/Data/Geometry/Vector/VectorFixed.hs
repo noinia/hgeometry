@@ -1,5 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Vector.VectorFixed
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Vector.VectorFixed where
 
 import           Control.DeepSeq
@@ -9,6 +16,7 @@ import qualified Data.Foldable as F
 import           Data.Proxy
 import qualified Data.Vector.Fixed as V
 import           Data.Vector.Fixed (Arity)
+import           Data.Functor.Classes
 import           Data.Vector.Fixed.Boxed
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
@@ -46,7 +54,7 @@ element _ = V.elementTy (Proxy :: Proxy i)
 element'   :: forall d r. Arity d => Int -> Traversal' (Vector d r) r
 element' i f v
   | 0 <= i && i < fromInteger (natVal (C :: C d)) = f (v V.! i)
-                                                 <&> \a -> (v&V.element i .~ a)
+                                                 <&> \a -> v&V.element i .~ a
        -- Implementation based on that of Ixed Vector in Control.Lens.At
   | otherwise                                     = pure v
 
@@ -64,6 +72,11 @@ instance (Show r, Arity d) => Show (Vector d r) where
                             ]
 
 deriving instance (Eq r, Arity d)   => Eq (Vector d r)
+
+-- FIXME: Upstream Eq1 instance to 'fixed-vector' package.
+instance Arity d => Eq1 (Vector d) where
+  liftEq eq (Vector lhs) (Vector rhs) = V.and $ V.zipWith eq lhs rhs
+
 deriving instance (Ord r, Arity d)  => Ord (Vector d r)
 -- deriving instance Arity d  => Functor (Vector d)
 
@@ -125,7 +138,7 @@ destruct (Vector v) = (V.head v, Vector $ V.tail v)
 
 -- | Cross product of two three-dimensional vectors
 cross       :: Num r => Vector 3 r -> Vector 3 r -> Vector 3 r
-u `cross` v = fromV3 $ (toV3 u) `L3.cross` (toV3 v)
+u `cross` v = fromV3 $ toV3 u `L3.cross` toV3 v
 
 
 --------------------------------------------------------------------------------

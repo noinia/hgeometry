@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.IndexedDoublyLinkedList
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.IndexedDoublyLinkedList( DLList(..)
                                    , Cell(..), emptyCell
                                    , DLListMonad, runDLListMonad
@@ -26,6 +33,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
+-- | Cell indices. Must be non-negative.
 type Index = Int
 
 -- TODO: Switch to unobxed sums for these!
@@ -35,6 +43,7 @@ data Cell = Cell { prev :: Maybe Index
                  , next :: Maybe Index
                  } deriving (Show,Eq)
 
+-- | Empty cell with no next or prev cells.
 emptyCell :: Cell
 emptyCell = Cell Nothing Nothing
 
@@ -63,7 +72,7 @@ instance PrimMonad (DLListMonad s b) where
 
 instance MonadReader (DLList s b) (DLListMonad s b) where
   local f = DLListMonad . local f . runDLListMonad'
-  ask = DLListMonad $ ask
+  ask = DLListMonad ask
 
 -- | Runs a DLList Computation, starting with singleton values, crated
 -- from the input vector.
@@ -121,6 +130,7 @@ toListFromK i k = (i :|) <$> replicateM k getNext i
 toListFromR :: Index -> DLListMonad s b (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
 
+-- | Takes the current element and its k prev's
 toListFromRK     :: Index -> Int -> DLListMonad s b (NonEmpty Index)
 toListFromRK i k = (i :|) <$> replicateM k getPrev i
 

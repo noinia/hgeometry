@@ -47,12 +47,14 @@ library
                     -- * Graph Algorithms
                     Algorithms.Graph.DFS
                     Algorithms.Graph.MST
+                    Algorithms.FloydWarshall
 
 
                     Algorithms.StringSearch.KMP
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
+                    Data.Double.Approximate
 
                     -- * Measurements
                     Data.Measured
@@ -65,15 +67,15 @@ library
                     Data.Range
 
                     Data.Ext
-                    -- Data.Ext.Multi
+                    Data.Ext.Multi
 
                     Data.LSeq
                     Data.CircularSeq
                     Data.Sequence.Util
                     Data.BinaryTree
-                    Data.BinaryTree.Zipper
 
                     Data.CircularList.Util
+                    Data.Vector.Circular.Util
                     Data.OrdSeq
                     Data.Tree.Util
                     Data.Util
@@ -115,6 +117,7 @@ library
   -- other-extensions:
   build-depends:
                 base                    >= 4.11      &&     < 5
+              , array                   >= 0.4
               , bifunctors              >= 4.1
               , bytestring              >= 0.10
               , containers              >= 0.5.9
@@ -136,13 +139,16 @@ library
               , linear                  >= 1.20.8
               , hashable                >= 1.2
 
-              , vector                  >= 0.11
+              , vector                  >= 0.11 && < 0.12.2.0
               , data-clist              >= 0.1.2.3
+              , vector-circular         >= 0.1.2
+              , nonempty-vector         >= 0.2.0.0
               , vector-builder          >= 0.3.7
 
               , aeson                   >= 1.0
               , yaml                    >= 0.8
               , text                    >= 1.1.1.0
+              , math-functions
 
               , mtl
               , template-haskell
@@ -205,12 +211,14 @@ test-suite hspec
 
   other-modules: Algorithms.StringSearch.KMPSpec
                  Algorithms.DivideAndConquerSpec
+                 Algorithms.Graph.DFSSpec
                  Data.RangeSpec
                  Data.EdgeOracleSpec
                  Data.PlanarGraphSpec
                  Data.OrdSeqSpec
                  Data.CircularSeqSpec
                  Data.IndexedDoublyLinkedListSpec
+                 Data.RealNumber.RationalSpec
 
 
   build-depends:        base
@@ -219,6 +227,7 @@ test-suite hspec
                       , quickcheck-instances    >= 0.3
                       , approximate-equality    >= 1.1.0.2
                       , hgeometry-combinatorial
+                      , deepseq
                       , lens
                       , data-clist
                       , linear
@@ -257,8 +266,6 @@ test-suite hspec
                     , DeriveFunctor
                     , DeriveFoldable
                     , DeriveTraversable
-
-                    , AutoDeriveTypeable
 
                     , FlexibleInstances
                     , FlexibleContexts

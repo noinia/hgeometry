@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Polygon
@@ -9,42 +8,74 @@
 -- A Polygon data type and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Polygon( PolygonType(..)
-                            , Polygon(..)
-                            , _SimplePolygon, _MultiPolygon
-                            , SimplePolygon, MultiPolygon, SomePolygon
+module Data.Geometry.Polygon
+  ( -- * Types
+    PolygonType(..)
+  , Polygon(..)
+  , _SimplePolygon, _MultiPolygon
+  , SimplePolygon, MultiPolygon, SomePolygon
 
-                            , fromPoints
+    -- * Conversion
+  , fromPoints
+  , fromCircularVector
 
-                            , polygonVertices, listEdges
+  , simpleFromPoints
+  , simpleFromCircularVector
 
-                            , outerBoundary, outerBoundaryEdges
-                            , outerVertex, outerBoundaryEdge
+  , unsafeFromPoints
+  , unsafeFromCircularVector
+  , unsafeFromVector
+  , toVector
+  , toPoints
 
-                            , polygonHoles, polygonHoles'
-                            , holeList
+  , isSimple
 
-                            , inPolygon, insidePolygon, onBoundary
+    -- * Accessors
 
-                            , area, signedArea
+  , size
+  , polygonVertices, listEdges
 
-                            , centroid
-                            , pickPoint
+  , outerBoundary, outerBoundaryVector
+  , unsafeOuterBoundaryVector
+  , outerBoundaryEdges
+  , outerVertex, outerBoundaryEdge
 
-                            , isTriangle, isStarShaped
+  , polygonHoles, polygonHoles'
+  , holeList
 
-                            , isCounterClockwise
-                            , toCounterClockWiseOrder, toCounterClockWiseOrder'
-                            , toClockwiseOrder, toClockwiseOrder'
-                            , reverseOuterBoundary
+    -- * Properties
 
-                            , findDiagonal
+  , area, signedArea
+  , centroid
 
-                            , withIncidentEdges, numberVertices
+    -- * Queries
+  , inPolygon, insidePolygon, onBoundary
 
-                            , asSimplePolygon
-                            , extremesLinear, cmpExtreme
-                            ) where
+
+  , isTriangle, isStarShaped
+
+  , isCounterClockwise
+  , toCounterClockWiseOrder, toCounterClockWiseOrder'
+  , toClockwiseOrder, toClockwiseOrder'
+  , reverseOuterBoundary
+
+  , rotateLeft
+  , rotateRight
+  , maximumBy
+  , minimumBy
+
+
+   -- * Misc
+  , pickPoint
+  , findDiagonal
+
+  , withIncidentEdges, numberVertices
+
+  , extremesLinear, cmpExtreme
+
+  , findRotateTo
+
+  ) where
 
 import           Algorithms.Geometry.LinearProgramming.LP2DRIC
 import           Algorithms.Geometry.LinearProgramming.Types

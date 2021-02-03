@@ -1,5 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.PolygonTriangulation.MakeMonotone
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , computeDiagonals
 
@@ -8,35 +15,33 @@ module Algorithms.Geometry.PolygonTriangulation.MakeMonotone( makeMonotone
                                                             , classifyVertices
                                                             ) where
 
-import           Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann ( xCoordAt
-                                                                            , ordAt)
-import           Algorithms.Geometry.PolygonTriangulation.Types
+import Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann (ordAt, xCoordAt)
+import Algorithms.Geometry.PolygonTriangulation.Types
+
 import           Control.Lens
-import           Control.Monad (forM_, when)
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
-import           Control.Monad.Writer (WriterT, execWriterT,tell)
+import           Control.Monad.Writer                  (WriterT, execWriterT, tell)
 import           Data.Bifunctor
-import           Data.CircularSeq (rotateL, rotateR, zip3LWith)
-import qualified Data.DList as DList
+import qualified Data.DList                            as DList
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                         as F
 import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import qualified Data.IntMap as IntMap
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing, Down(..))
-import qualified Data.Set as SS
-import qualified Data.Set.Util as SS
+import qualified Data.IntMap                           as IntMap
+import qualified Data.List.NonEmpty                    as NonEmpty
+import           Data.Ord                              (Down (..), comparing)
+import qualified Data.Set                              as SS
+import qualified Data.Set.Util                         as SS
 import           Data.Util
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector                           as V
+import qualified Data.Vector.Circular                  as CV
+import qualified Data.Vector.Mutable                   as MV
 
 
 -- import Debug.Trace
--- import qualified          Data.CircularSeq as CC
 ----------------------------------------------------------------------------------
 
 data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
@@ -49,10 +54,10 @@ data VertexType = Start | Merge | Split | End | Regular deriving (Show,Read,Eq)
 classifyVertices                     :: (Num r, Ord r)
                                      => Polygon t p r
                                      -> Polygon t (p :+ VertexType) r
-classifyVertices p@(SimplePolygon _) = classifyVertices' p
+classifyVertices p@SimplePolygon{}   = classifyVertices' p
 classifyVertices (MultiPolygon vs h) = MultiPolygon vs' h'
   where
-    (SimplePolygon vs') = classifyVertices' $ SimplePolygon vs
+    vs' = classifyVertices' vs
     h' = map (first (&extra %~ onHole) . classifyVertices') h
 
     -- the roles on hole vertices are slightly different
@@ -70,9 +75,10 @@ classifyVertices (MultiPolygon vs h) = MultiPolygon vs' h'
 classifyVertices'                    :: (Num r, Ord r)
                                      => SimplePolygon p r
                                      -> SimplePolygon (p :+ VertexType) r
-classifyVertices' (SimplePolygon vs) =
-    SimplePolygon $ zip3LWith f (rotateL vs) vs (rotateR vs)
+classifyVertices' poly =
+    unsafeFromCircularVector $ CV.zipWith3 f (CV.rotateLeft 1 vs) vs (CV.rotateRight 1 vs)
   where
+    vs = poly ^. outerBoundaryVector
     -- is the angle larger than > 180 degrees
     largeInteriorAngle p c n = case ccw (p^.core) (c^.core) (n^.core) of
            CCW -> False
@@ -98,7 +104,7 @@ p `cmpSweep` q =
 
 --------------------------------------------------------------------------------
 
-type Event r = Point 2 r :+ (Two (LineSegment 2 Int r))
+type Event r = Point 2 r :+ Two (LineSegment 2 Int r)
 
 data StatusStruct r = SS { _statusStruct :: !(SS.Set (LineSegment 2 Int r))
                          , _helper       :: !(IntMap.IntMap Int)
@@ -109,6 +115,7 @@ makeLenses ''StatusStruct
 ix'   :: Int -> Lens' (V.Vector a) a
 ix' i = singular (ix i)
 
+{- HLINT ignore computeDiagonals -}
 -- | Given a polygon, find a set of non-intersecting diagonals that partition
 -- the polygon into y-monotone pieces.
 --

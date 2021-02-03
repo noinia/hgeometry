@@ -14,7 +14,7 @@ import           Data.Geometry.LineSegment
 import           Data.Geometry.PlanarSubdivision.Basic
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine (PolyLine, fromLineSegment, points)
-import           Data.Geometry.Polygon
+import           Data.Geometry.Polygon (Polygon(..), SomePolygon, SimplePolygon)
 import           Data.Geometry.Polygon.Convex
 import           Data.Geometry.Vector
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -108,7 +108,7 @@ dPolygon = \case
     SimplePolygon vs   -> withAts polygon_ [points_ $ toPointsString vs ]
     MultiPolygon vs hs -> withAts path_ [d_ s]
       where
-        s = mconcat . map toSimplePolygonPathString $ SimplePolygon vs : hs
+        s = mconcat . map toSimplePolygonPathString $ vs : hs
 
 toSimplePolygonPathString                    :: ToMisoString r => SimplePolygon p r -> MisoString
 toSimplePolygonPathString (SimplePolygon vs) = mconcat [ "M", toOp p

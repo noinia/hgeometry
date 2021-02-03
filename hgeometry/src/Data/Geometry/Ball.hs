@@ -75,6 +75,7 @@ unitBall = Ball (ext origin) 1
 
 -- * Querying if a point lies in a ball
 
+-- | Query location of a point relative to a d-dimensional ball.
 inBall                 :: (Arity d, Ord r, Num r)
                        => Point d r -> Ball d p r -> PointLocationResult
 p `inBall` (Ball c sr) = case qdA p (c^.core) `compare` sr of
@@ -148,17 +149,18 @@ pattern Circle     :: Point 2 r :+ p ->  r -> Circle p r
 pattern Circle c r = Sphere c r
 {-# COMPLETE Circle #-}
 
+{- HLINT ignore disk -}
 -- | Given three points, get the disk through the three points. If the three
 -- input points are colinear we return Nothing
 --
 -- >>> disk (Point2 0 10) (Point2 10 0) (Point2 (-10) 0)
--- Just (Ball {_center = Point2 [0.0,0.0] :+ (), _squaredRadius = 100.0})
+-- Just (Ball {_center = Point2 0.0 0.0 :+ (), _squaredRadius = 100.0})
 disk       :: (Eq r, Fractional r)
            => Point 2 r -> Point 2 r -> Point 2 r -> Maybe (Disk () r)
 disk p q r = match (f p `intersect` f q) $
-       (H $ \NoIntersection -> Nothing)
-    :& (H $ \c@(Point _)    -> Just $ Ball (ext c) (qdA c p))
-    :& (H $ \_              -> Nothing)
+       H (\NoIntersection -> Nothing)
+    :& H (\c@Point{}      -> Just $ Ball (ext c) (qdA c p))
+    :& H (\_              -> Nothing)
     :& RNil
        -- If the intersection is not a point, The two lines f p and f q are
        -- parallel, that means the three input points where colinear.
@@ -196,7 +198,7 @@ type instance IntersectionOf (Line 2 r) (Circle p r) = [ NoIntersection
                                                        ]
 
 
-instance (Ord r, Floating r) => (Line 2 r) `IsIntersectableWith` (Circle p r) where
+instance (Ord r, Floating r) => Line 2 r `IsIntersectableWith` Circle p r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -238,16 +240,16 @@ type instance IntersectionOf (LineSegment 2 p r) (Circle q r) = [ NoIntersection
                                                                 ]
 
 
-instance (Ord r, Floating r) => (LineSegment 2 p r) `IsIntersectableWith` (Circle q r) where
+instance (Ord r, Floating r) => LineSegment 2 p r `IsIntersectableWith` Circle q r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   s `intersect` c = match (supportingLine s `intersect` c) $
-       (H $ \NoIntersection -> coRec NoIntersection)
-    :& (H $ \(Touching p)   -> if p `onSegment` s then coRec $ Touching p
+       H (\NoIntersection -> coRec NoIntersection)
+    :& H (\(Touching p)   -> if p `onSegment` s then coRec $ Touching p
                                                  else  coRec   NoIntersection
        )
-    :& (H $ \(p,q)          -> case (p `onSegment` s, q `onSegment` s) of
+    :& H (\(p,q)          -> case (p `onSegment` s, q `onSegment` s) of
                                  (False,False) -> coRec NoIntersection
                                  (False,True)  -> coRec q
                                  (True, False) -> coRec p

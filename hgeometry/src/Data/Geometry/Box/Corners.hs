@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Box.Corners
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Box.Corners( Corners(Corners), northWest, northEast, southEast, southWest
                                 , corners, cornersInDirection
                                 ) where
@@ -51,6 +58,7 @@ instance Monoid a => Monoid (Corners a) where
 
 --------------------------------------------------------------------------------
 
+{- HLINT ignore corners -}
 -- | Get the corners of a rectangle, the order is:
 -- (TopLeft, TopRight, BottomRight, BottomLeft).
 -- The extra values in the Top points are taken from the Top point,
@@ -59,8 +67,8 @@ corners :: Num r => Rectangle p r -> Corners (Point 2 r :+ p)
 corners r     = let w = width r
                     p = (_maxP r)&core %~ _cwMax
                     q = (_minP r)&core %~ _cwMin
-                in Corners (p&core.xCoord %~ (subtract w)) p
-                           (q&core.xCoord %~ (+ w))        q
+                in Corners (p&core.xCoord %~ subtract w) p
+                           (q&core.xCoord %~ (+ w))      q
 
 
 --------------------------------------------------------------------------------

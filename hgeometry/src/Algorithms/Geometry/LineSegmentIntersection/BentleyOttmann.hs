@@ -10,7 +10,13 @@
 -- and Ottmann.
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann where
+module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+  ( intersections
+  , interiorIntersections
+    -- FIXME: Move ordAt and xCoordAt to Data.Geometry.LineSegment?
+  , ordAt
+  , xCoordAt
+  ) where
 
 import           Algorithms.Geometry.LineSegmentIntersection.Types
 import           Control.Lens hiding (contains)
@@ -230,9 +236,9 @@ findNewEvent       :: (Ord r, Fractional r)
                    => Point 2 r -> LineSegment 2 p r -> LineSegment 2 p r
                    -> Maybe (Event p r)
 findNewEvent p l r = match (l `intersect` r) $
-     (H $ \NoIntersection -> Nothing)
-  :& (H $ \q              -> if ordPoints q p == GT then Just (Event q Intersection)
-                                      else Nothing)
-  :& (H $ \_              -> Nothing) -- full segment intersectsions are handled
-                                      -- at insertion time
+     H (const Nothing) -- NoIntersection
+  :& H (\q -> if ordPoints q p == GT then Just (Event q Intersection)
+                                     else Nothing)
+  :& H (const Nothing) -- full segment intersectsions are handled
+                       -- at insertion time
   :& RNil

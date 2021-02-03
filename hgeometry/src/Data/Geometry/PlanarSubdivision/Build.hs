@@ -72,7 +72,7 @@ fromPolygons _ pgs oD = PlanarSubdivision (V.fromList cs) rvData rdData rfData
 
 
     computeLabels :: State (Label s p f) [Component s r]
-    computeLabels = sequence $ zipWith (mkComponent oD')  [0..] (F.toList pgs)
+    computeLabels = zipWithM (mkComponent oD')  [0..] (F.toList pgs)
 
     (cs,ls) = runState computeLabels (Label 0 0 [] [] [])
 
@@ -99,7 +99,7 @@ tellE x = eRaws %= (x:)
 
 mkComponent                :: forall s p r f. _ -> Int -> SimplePolygon p r :+ f
                            -> State (Label s _ f) (Component s r)
-mkComponent oD i (pg :+ f) = do tellF $ (fi,Raw c (mkFaceId 1) f)
+mkComponent oD i (pg :+ f) = do tellF (fi,Raw c (mkFaceId 1) f)
                                 assignVertices c g >>= assignEdges c
   where
    c = toEnum i -- create a new component
@@ -118,14 +118,14 @@ assignVtx        :: ComponentId s -> VertexId' (Wrap s) -> v
                  -> State (Label s v f) (VertexId' s)
 assignVtx c vi v = do i <- getNext nextVertexId
                       let ui = VertexId i
-                      tellV $ (ui,Raw c vi v)
+                      tellV (ui,Raw c vi v)
                       pure ui
 
 assignDart        :: ComponentId s -> Dart (Wrap s) -> ()
                   -> State (Label s v f) (Dart s)
 assignDart c di x = do i <- getNext nextDartId
                        let d = toEnum i
-                       tellE $ (d,Raw c di x)
+                       tellE (d,Raw c di x)
                        pure d
   -- FIXME; this is very fragile!!!!!!!!!!!
 

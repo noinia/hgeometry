@@ -1,25 +1,31 @@
-{-# LANGUAGE UndecidableInstances  #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.KDTree
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.KDTree where
 
-import           Control.Lens hiding (imap, element, Empty, (:<))
+import           Control.Lens             hiding (Empty, element, imap, (:<))
 import           Data.BinaryTree
-import           Unsafe.Coerce(unsafeCoerce)
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable            as F
 import           Data.Geometry.Box
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Vector
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
+import           Data.LSeq                (LSeq, pattern (:<|))
+import qualified Data.LSeq                as LSeq
+import qualified Data.List.NonEmpty       as NonEmpty
 import           Data.Proxy
-import           Data.LSeq (LSeq, pattern (:<|))
-import qualified Data.LSeq as LSeq
 import           Data.Util
-import qualified Data.Vector.Fixed as FV
+import qualified Data.Vector.Fixed        as FV
 import           GHC.TypeLits
-import           Prelude hiding (replicate)
+import           Prelude                  hiding (replicate)
+import           Unsafe.Coerce            (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
@@ -165,7 +171,7 @@ splitOn c@(Coord i) pts = (l, SP c (m^.core.unsafeCoord i), r)
   where
     -- i = traceShow (c,j) j
 
-    m = let xs = fromJust $ pts^?element' (i-1)
+    m = let xs = pts^?!element' (i-1)
         in xs `LSeq.index` (F.length xs `div` 2)
 
     -- Since the input seq has >= 2 elems, F.length xs / 2 >= 1. It follows

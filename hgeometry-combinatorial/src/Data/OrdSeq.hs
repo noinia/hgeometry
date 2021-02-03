@@ -1,12 +1,41 @@
-module Data.OrdSeq where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.OrdSeq
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Data.OrdSeq
+  ( OrdSeq
+  , Compare
+  , insertBy
+  , insert
+  , splitBy
+  , splitOn
+  , splitMonotonic
+  , deleteAll
+  , deleteAllBy
+  , fromListBy
+  , fromListByOrd
+  , fromAscList
+  , lookupBy
+  , memberBy
+  , mapMonotonic
+  , viewl
+  , viewr
+  , minView
+  , lookupMin
+  , maxView
+  , lookupMax
+  ) where
 
 
-import           Control.Lens (bimap)
-import qualified Data.FingerTree as FT
+import           Control.Lens    (bimap)
 import           Data.FingerTree hiding (null, viewl, viewr)
-import qualified Data.Foldable as F
-import           Data.Maybe
-import           Test.QuickCheck
+import qualified Data.FingerTree as FT
+import qualified Data.Foldable   as F
+import           Data.Maybe      (fromJust, isJust, listToMaybe)
+import           Test.QuickCheck (Arbitrary (arbitrary))
 
 --------------------------------------------------------------------------------
 
@@ -28,14 +57,17 @@ liftCmp cmp (Key x) (Key y) = x `cmp` y
 
 
 
-newtype Elem a = Elem { getElem :: a } deriving (Eq,Ord,Traversable,Foldable,Functor)
+newtype Elem a = Elem a deriving (Eq,Ord,Traversable,Foldable,Functor)
 
 instance Show a => Show (Elem a) where
   show (Elem x) = "Elem " <> show x
 
-
+-- | Sequence of ordered elements.
 newtype OrdSeq a = OrdSeq { _asFingerTree :: FingerTree (Key a) (Elem a) }
-                   deriving (Show,Eq)
+                   deriving (Eq)
+
+instance Show a => Show (OrdSeq a) where
+  show s = "fromAscList " ++ show (F.toList s)
 
 instance Semigroup (OrdSeq a) where
   (OrdSeq s) <> (OrdSeq t) = OrdSeq $ s `mappend` t
@@ -57,7 +89,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrdSeq a) where
 instance Measured (Key a) (Elem a) where
   measure (Elem x) = Key x
 
-
+-- | Signature for functions that give the ordering of two values.
 type Compare a = a -> a -> Ordering
 
 -- | Insert into a monotone OrdSeq.
@@ -76,6 +108,7 @@ insertBy cmp x (OrdSeq s) = OrdSeq $ l `mappend` (Elem x <| r)
 insert :: Ord a => a -> OrdSeq a -> OrdSeq a
 insert = insertBy compare
 
+-- | \( O(\log n) \). Delete all elements that compare as equal to @x@.
 deleteAllBy         :: Compare a -> a -> OrdSeq a -> OrdSeq a
 deleteAllBy cmp x s = l <> r
   where
@@ -93,18 +126,18 @@ splitBy cmp x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
     (m',r) = split (\v -> liftCmp cmp v (Key x) == GT) m
 
 
+{- HLINT ignore splitOn -}
 -- | Given a monotonic function f that maps a to b, split the sequence s
 -- depending on the b values. I.e. the result (l,m,r) is such that
--- * all (< x) . fmap f $ l
--- * all (== x) . fmap f $ m
--- * all (> x) . fmap f $ r
 --
--- >>> splitOn id 3 $ fromAscList' [1..5]
--- (OrdSeq {_asFingerTree = fromList [Elem 1,Elem 2]},OrdSeq {_asFingerTree = fromList [Elem 3]},OrdSeq {_asFingerTree = fromList [Elem 4,Elem 5]})
--- >>> splitOn fst 2 $ fromAscList' [(0,"-"),(1,"A"),(2,"B"),(2,"C"),(3,"D"),(4,"E")]
--- (OrdSeq {_asFingerTree = fromList [Elem (0,"-"),Elem (1,"A")]},OrdSeq {_asFingerTree = fromList [Elem (2,"B"),Elem (2,"C")]},OrdSeq {_asFingerTree = fromList [Elem (3,"D"),Elem (4,"E")]})
+-- * @all (< x) . fmap f $ l@
+-- * @all (== x) . fmap f $ m@
+-- * @all (> x) . fmap f $ r@
 --
--- \(O(\log n)\)
+-- >>> splitOn id 3 $ fromAscList [1..5]
+-- (fromAscList [1,2],fromAscList [3],fromAscList [4,5])
+-- >>> splitOn fst 2 $ fromAscList [(0,"-"),(1,"A"),(2,"B"),(2,"C"),(3,"D"),(4,"E")]
+-- (fromAscList [(0,"-"),(1,"A")],fromAscList [(2,"B"),(2,"C")],fromAscList [(3,"D"),(4,"E")])
 splitOn :: Ord b => (a -> b) -> b -> OrdSeq a -> (OrdSeq a, OrdSeq a, OrdSeq a)
 splitOn f x (OrdSeq s) = (OrdSeq l, OrdSeq m', OrdSeq r)
   where
@@ -119,7 +152,7 @@ splitMonotonic  :: (a -> Bool) -> OrdSeq a -> (OrdSeq a, OrdSeq a)
 splitMonotonic p = bimap OrdSeq OrdSeq . split (p . getKey) . _asFingerTree
 
 
--- Deletes all elements from the OrdDeq
+-- | Deletes all elements from the OrdDeq
 --
 -- \(O(n\log n)\)
 deleteAll :: Ord a => a -> OrdSeq a -> OrdSeq a
@@ -136,58 +169,56 @@ fromListBy cmp = foldr (insertBy cmp) mempty
 fromListByOrd :: Ord a => [a] -> OrdSeq a
 fromListByOrd = fromListBy compare
 
--- | O(n)
-fromAscList' :: [a] -> OrdSeq a
-fromAscList' = OrdSeq . fromList . fmap Elem
+-- | \( O(n) \)
+fromAscList :: [a] -> OrdSeq a
+fromAscList = OrdSeq . fromList . fmap Elem
 
 
 -- | \(O(\log n)\)
 lookupBy         :: Compare a -> a -> OrdSeq a -> Maybe a
 lookupBy cmp x s = let (_,m,_) = splitBy cmp x s in listToMaybe . F.toList $ m
 
+-- | \(O(\log n)\). Queries for the existance of any elements that compare as equal to @x@.
 memberBy        :: Compare a -> a -> OrdSeq a -> Bool
 memberBy cmp x = isJust . lookupBy cmp x
 
 
--- | Fmap, assumes the order does not change
--- O(n)
+-- | \( O(n) \) Fmap, assumes the order does not change
 mapMonotonic   :: (a -> b) -> OrdSeq a -> OrdSeq b
-mapMonotonic f = fromAscList' . map f . F.toList
+mapMonotonic f = fromAscList . map f . F.toList
 
 
--- | Gets the first element from the sequence
--- \(O(1)\)
+-- | \(O(1)\) Gets the first element from the sequence
 viewl :: OrdSeq a -> ViewL OrdSeq a
 viewl = f . FT.viewl . _asFingerTree
   where
-    f EmptyL         = EmptyL
-    f (Elem x :< s)  = x :< OrdSeq s
+    f EmptyL        = EmptyL
+    f (Elem x :< s) = x :< OrdSeq s
 
--- Last element
--- \(O(1)\)
+-- | \(O(1)\) Gets the last element from the sequence
 viewr :: OrdSeq a -> ViewR OrdSeq a
 viewr = f . FT.viewr . _asFingerTree
   where
-    f EmptyR         = EmptyR
-    f (s :> Elem x)  = OrdSeq s :> x
+    f EmptyR        = EmptyR
+    f (s :> Elem x) = OrdSeq s :> x
 
 
--- \(O(1)\)
+-- | \(O(1)\)
 minView   :: OrdSeq a -> Maybe (a, OrdSeq a)
 minView s = case viewl s of
               EmptyL   -> Nothing
               (x :< t) -> Just (x,t)
 
--- \(O(1)\)
+-- | \(O(1)\)
 lookupMin :: OrdSeq a -> Maybe a
 lookupMin = fmap fst . minView
 
--- \(O(1)\)
+-- | \(O(1)\)
 maxView   :: OrdSeq a -> Maybe (a, OrdSeq a)
 maxView s = case viewr s of
               EmptyR   -> Nothing
               (t :> x) -> Just (x,t)
 
--- \(O(1)\)
+-- | \(O(1)\)
 lookupMax :: OrdSeq a -> Maybe a
 lookupMax = fmap fst . maxView

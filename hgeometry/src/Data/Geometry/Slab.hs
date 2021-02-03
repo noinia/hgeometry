@@ -1,5 +1,12 @@
 {-# Language ScopedTypeVariables #-}
 {-# Language TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Slab
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Slab where
 
 import           Control.Lens (makeLenses, (^.),(%~),(.~),(&), both, from)
@@ -56,15 +63,15 @@ type instance IntersectionOf (Slab Horizontal a r) (Slab Vertical a r) =
   '[Rectangle (a,a) r]
 
 
-instance Ord r => (Slab o a r) `IsIntersectableWith` (Slab o a r) where
+instance Ord r => Slab o a r `IsIntersectableWith` Slab o a r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (Slab i) `intersect` (Slab i') = match (i `intersect` i') $
-        (H $ \NoIntersection -> coRec NoIntersection)
-     :& (H $ \i''            -> coRec (Slab i'' :: Slab o a r))
+        H (\NoIntersection -> coRec NoIntersection)
+     :& H (\i''            -> coRec (Slab i'' :: Slab o a r))
      :& RNil
 
-instance (Slab Horizontal a r) `IsIntersectableWith` (Slab Vertical a r) where
+instance Slab Horizontal a r `IsIntersectableWith` Slab Vertical a r where
   nonEmptyIntersection _ _ _ = True
 
   (Slab h) `intersect` (Slab v) = coRec $ box low high
@@ -98,18 +105,18 @@ type instance IntersectionOf (Line 2 r) (Slab o a r) =
   [NoIntersection, Line 2 r, LineSegment 2 a r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
-         Line 2 r `IsIntersectableWith` (Slab o a r) where
+         Line 2 r `IsIntersectableWith` Slab o a r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   l@(Line p _) `intersect` s = match (l `intersect` a) $
-         (H $ \NoIntersection -> if p `inSlab` s then coRec l else coRec NoIntersection)
-      :& (H $ \pa             -> match (l `intersect` b) $
-            (H $ \NoIntersection -> coRec NoIntersection)
-         :& (H $ \pb             -> coRec $ lineSegment' pa pb)
-         :& (H $ \_              -> coRec l)
+         H (\NoIntersection -> if p `inSlab` s then coRec l else coRec NoIntersection)
+      :& H (\pa             -> match (l `intersect` b) $
+            H coRec -- NoIntersection
+         :& H (coRec . lineSegment' pa)
+         :& H (\_ -> coRec l)
          :& RNil
          )
-      :& (H $ \_              -> coRec l)
+      :& H (\_              -> coRec l)
       :& RNil
     where
       (a :+ _,b :+ _) = boundingLines s
@@ -125,17 +132,17 @@ type instance IntersectionOf (SubLine 2 p s r) (Slab o a r) =
   [NoIntersection, SubLine 2 () s r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
-         SubLine 2 a r r `IsIntersectableWith` (Slab o a r) where
+         SubLine 2 a r r `IsIntersectableWith` Slab o a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l _) `intersect` s = match (l `intersect` s) $
-       (H $ \NoIntersection -> coRec NoIntersection)
-    :& (H $ \(Line _ _)     -> coRec $ dropExtra sl)
-    :& (H $ \seg            -> match (sl `intersect` (seg^._SubLine)) $
-                                    (H $ \NoIntersection -> coRec NoIntersection)
-                                 :& (H $ \p@(Point2 _ _) -> coRec $ singleton p)
-                                 :& (H $ \ss             -> coRec $ dropExtra ss)
+       H (\NoIntersection -> coRec NoIntersection)
+    :& H (\(Line _ _)     -> coRec $ dropExtra sl)
+    :& H (\seg            -> match (sl `intersect` (seg^._SubLine)) $
+                                    H (\NoIntersection -> coRec NoIntersection)
+                                 :& H (\p@Point2{}     -> coRec $ singleton p)
+                                 :& H (                   coRec . dropExtra)
                                  :& RNil)
     :& RNil
     where
@@ -146,12 +153,12 @@ type instance IntersectionOf (LineSegment 2 p r) (Slab o a r) =
   [NoIntersection, LineSegment 2 () r]
 
 instance (Fractional r, Ord r, HasBoundingLines o) =>
-         LineSegment 2 a r `IsIntersectableWith` (Slab o a r) where
+         LineSegment 2 a r `IsIntersectableWith` Slab o a r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   seg `intersect` slab = match ((seg^._SubLine) `intersect` slab) $
-       (H $ \NoIntersection -> coRec   NoIntersection)
-    :& (H $ \sl             -> coRec $ sl^. from _SubLine)
+       H (\NoIntersection -> coRec   NoIntersection)
+    :& H (\sl             -> coRec $ sl^. from _SubLine)
     :& RNil
 
 

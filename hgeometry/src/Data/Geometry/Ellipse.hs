@@ -1,4 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Ellipse
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Ellipse(
     Ellipse(Ellipse)
   , affineTransformation
@@ -18,7 +25,7 @@ import Data.Geometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | A typre representing planar ellipses
+-- | A type representing planar ellipses
 newtype Ellipse r = Ellipse { _affineTransformation :: Transformation 2 r }
                    deriving (Show,Eq,Functor,Foldable,Traversable)
 makeLenses ''Ellipse

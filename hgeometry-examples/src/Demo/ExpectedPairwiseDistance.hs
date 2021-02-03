@@ -3,8 +3,7 @@
 module Demo.ExpectedPairwiseDistance where
 
 import           Algorithms.Geometry.Diameter.Naive
-import           Algorithms.Geometry.WellSeparatedPairDecomposition.Types
-import           Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
+import           Algorithms.Geometry.WSPD
 import           Control.Lens
 import           Control.Monad ((<=<))
 import           Data.BinaryTree

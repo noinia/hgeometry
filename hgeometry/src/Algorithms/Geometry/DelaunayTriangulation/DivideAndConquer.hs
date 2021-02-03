@@ -1,30 +1,40 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer where
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Algorithms.Geometry.DelaunayTriangulation.DivideAndConquer
+  (
+    -- * Divide & Conqueror Delaunay Triangulation
+    delaunayTriangulation
+  ) where
 
-import           Algorithms.Geometry.ConvexHull.GrahamScan as GS
+import           Algorithms.Geometry.ConvexHull.GrahamScan       as GS
 import           Algorithms.Geometry.DelaunayTriangulation.Types
 import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State
 import           Data.BinaryTree
-import qualified Data.CircularList as CL
-import qualified Data.CircularList.Util as CU
-import qualified Data.CircularSeq as CS
+import qualified Data.CircularList                               as CL
+import qualified Data.CircularList.Util                          as CU
 import           Data.Ext
-import qualified Data.Foldable as F
-import           Data.Function (on)
-import           Data.Geometry hiding (rotateTo)
-import           Data.Geometry.Ball (disk, insideBall)
-import           Data.Geometry.Polygon
-import           Data.Geometry.Polygon.Convex (ConvexPolygon(..), simplePolygon)
-import qualified Data.Geometry.Polygon.Convex as Convex
-import qualified Data.IntMap.Strict as IM
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           Data.Maybe (fromJust, fromMaybe)
+import qualified Data.Foldable                                   as F
+import           Data.Function                                   (on)
+import           Data.Geometry                                   hiding (rotateTo)
+import           Data.Geometry.Ball                              (disk, insideBall)
+import           Data.Geometry.Polygon.Convex                    (ConvexPolygon (..), simplePolygon)
+import qualified Data.Geometry.Polygon.Convex                    as Convex
+import qualified Data.IntMap.Strict                              as IM
+import qualified Data.List                                       as L
+import qualified Data.List.NonEmpty                              as NonEmpty
+import qualified Data.Map                                        as M
+import           Data.Maybe                                      (fromJust, fromMaybe)
 import           Data.Measured.Size
-import qualified Data.Vector as V
+import qualified Data.Vector                                     as V
+import qualified Data.Vector.Circular.Util                       as CV
 
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
@@ -41,7 +51,6 @@ import qualified Data.Vector as V
 -- successor (i.e. its predecessor) on the convex hull
 --
 -- Rotating Right <-> rotate clockwise
-
 
 -- | Computes the delaunay triangulation of a set of points.
 --
@@ -73,7 +82,7 @@ delaunayTriangulation' :: (Ord r, Fractional r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, ConvexPolygon $ fromPoints [withID p i])
+                     in (IM.singleton i CL.empty, ConvexPolygon $ unsafeFromPoints [withID p i])
   | size' pts <= 3 = let pts'  = NonEmpty.fromList
                                . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                . F.toList $ pts
@@ -99,8 +108,8 @@ firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
 -- pre: at least two elements
 fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . F.toList . CS.rightElements
-                                         $ p^.simplePolygon.outerBoundary
+                                         . F.toList . CV.rightElements
+                                         $ p^.simplePolygon.outerBoundaryVector
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
                         in IM.fromList es
@@ -138,8 +147,8 @@ moveUp ut l r
   | otherwise   = do
                      insert l r
                      -- Get the neighbours of r and l along the convex hull
-                     r1 <- pred' . rotateTo l . lookup'' r <$> get
-                     l1 <- succ' . rotateTo r . lookup'' l <$> get
+                     r1 <- gets (pred' . rotateTo l . lookup'' r)
+                     l1 <- gets (succ' . rotateTo r . lookup'' l)
 
                      (r1',a) <- rotateR l r r1
                      (l1',b) <- rotateL l r l1
@@ -152,7 +161,7 @@ moveUp ut l r
                      moveUp ut l' r'
 
 
--- | ''rotates'' around r and removes all neighbours of r that violate the
+-- | \'rotates\' around r and removes all neighbours of r that violate the
 -- delaunay condition. Returns the first vertex (as a Neighbour of r) that
 -- should remain in the Delaunay Triangulation, as well as a boolean A that
 -- helps deciding if we merge up by rotating left or rotating right (See
@@ -199,12 +208,12 @@ rotateL' l r = go
 -- by the first three points.
 qTest         :: (Ord r, Fractional r)
               => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Bool
-qTest h i j k = withPtMap . snd . fst <$> ask
+qTest h i j k = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = let h' = ptMap V.! h
                           i' = ptMap V.! i
-                          j' = ptMap V.! (focus' j)
-                          k' = ptMap V.! (focus' k)
+                          j' = ptMap V.! focus' j
+                          k' = ptMap V.! focus' k
                       in not . maybe True ((k'^.core) `insideBall`) $ disk' h' i' j'
     disk' p q r = disk (p^.core) (q^.core) (r^.core)
 
@@ -233,8 +242,8 @@ insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
                       . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
-    insert'' bi ai = CU.insertOrdBy (cwCmpAround' (ptMap V.! ai) `on` (ptMap V.!)) bi
-    cwCmpAround' c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
+    insert'' bi ai = CU.insertOrdBy (cmp (ptMap V.! ai) `on` (ptMap V.!)) bi
+    cmp c p q = cwCmpAround' c p q <> cmpByDistanceTo' c p q
 
 
 -- | Deletes an edge
@@ -247,7 +256,7 @@ delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
 -- | Lifted version of Convex.IsLeftOf
 isLeftOf           :: (Ord r, Num r)
                    => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
+p `isLeftOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isLeftOf'` (ptMap V.! l, ptMap V.! r)
     a `isLeftOf'` (b,c) = ccw' b c a == CCW
@@ -255,7 +264,7 @@ p `isLeftOf` (l,r) = withPtMap . snd . fst <$> ask
 -- | Lifted version of Convex.IsRightOf
 isRightOf           :: (Ord r, Num r)
                     => VertexID -> (VertexID, VertexID) -> Merge p r Bool
-p `isRightOf` (l,r) = withPtMap . snd . fst <$> ask
+p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isRightOf'` (ptMap V.! l, ptMap V.! r)
     a `isRightOf'` (b,c) = ccw' b c a == CW
@@ -271,7 +280,7 @@ size'              :: BinLeafTree Size a -> Size
 size' (Leaf _)     = 1
 size' (Node _ s _) = s
 
--- | an 'unsafe' version of rotateTo that assumes the element to rotate to
+-- | an \'unsafe\' version of rotateTo that assumes the element to rotate to
 -- occurs in the list.
 rotateTo   :: Eq a => a -> CL.CList a -> CL.CList a
 rotateTo x = fromJust . CL.rotateTo x
@@ -284,6 +293,7 @@ pred' = CL.rotR
 succ' :: CL.CList a -> CL.CList a
 succ' = CL.rotL
 
+-- | Return the focus of the CList, throwing an exception if the list is empty.
 focus' :: CL.CList a -> a
 focus' = fromJust . CL.focus
 
@@ -296,4 +306,4 @@ withID     :: c :+ e -> e' -> c :+ (e :+ e')
 withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
-lookup'' k m = fromJust . IM.lookup k $ m
+lookup'' k m = m IM.! k

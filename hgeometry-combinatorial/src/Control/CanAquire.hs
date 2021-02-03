@@ -1,4 +1,11 @@
 {-# LANGUAGE FunctionalDependencies #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Control.CanAquire
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Control.CanAquire(
       runAcquire
     , CanAquire(..)
@@ -13,23 +20,24 @@ import           Control.Monad.State.Strict
 import           Data.Reflection
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+import Unsafe.Coerce(unsafeCoerce)
 
 --------------------------------------------------------------------------------
 
 -- | Run a computation on something that can aquire i's.
 runAcquire         :: forall t a b. Traversable t
-                   => (forall i. CanAquire i a => t i -> b)
+                   => (forall s. CanAquire (I s a) a => t (I s a) -> b)
                    -> t a -> b
 runAcquire alg pts = reify v $ \px -> alg (coerceTS px ts)
   where
     (v,ts) = replaceByIndex pts
 
     coerceTS   :: proxy s -> t Int -> t (I s a)
-    coerceTS _ = fmap I
+    coerceTS _ = unsafeCoerce -- fmap I
       -- Ideally this would just be a coerce. But GHC doesn't want to do that.
 
 class HasIndex i Int => CanAquire i a where
-  -- | A value of type i can obtain something of type 'a'
+  -- | A value of type i can obtain something of type @\'a\'@
   aquire  :: i -> a
 
 class HasIndex t i | t -> i where
@@ -67,7 +75,7 @@ labelWithIndex = flip runState 0 . traverse lbl
 --------------------------------------------------------------------------------
 
 -- | A type that can act as an Index.
-newtype I s a = I Int deriving (Eq, Ord, Enum)
+newtype I (s :: *) a = I Int deriving (Eq, Ord, Enum)
 
 instance Show (I s a) where
   showsPrec i (I j) = showsPrec i j
@@ -75,5 +83,5 @@ instance Show (I s a) where
 instance HasIndex (I s a) Int where
   indexOf (I i) = i
 
-instance Reifies s (V.Vector a) => (I s a) `CanAquire` a where
+instance Reifies s (V.Vector a) => I s a `CanAquire` a where
   aquire (I i) = let v = reflect @s undefined in v V.! i

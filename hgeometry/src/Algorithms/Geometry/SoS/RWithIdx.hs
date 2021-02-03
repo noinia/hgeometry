@@ -22,7 +22,7 @@ instance Show r => Show (RWithIdx r) where
 
 instance Ord r => Ord (RWithIdx r) where
   (RWithIdx x i j) `compare` (RWithIdx y k l) = x `compare` y
-                                             <> (Down i) `compare` (Down k)
+                                             <> Down i `compare` Down k
                                              <> j `compare` l
   -- see the paper, function Smaller, for the slightly weird implementation I guess.
 

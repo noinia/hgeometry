@@ -1,5 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.BezierSpline
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.BezierSpline(
     BezierSpline (BezierSpline)
   , controlPoints
@@ -57,19 +63,23 @@ import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Datatype representing a Bezier curve of degree \(n\) in \(d\)-dimensional space.
-newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq n (Point d r) }
-makeLenses ''BezierSpline
+newtype BezierSpline n d r = BezierSpline { _controlPoints :: LSeq (1+n) (Point d r) }
+-- makeLenses ''BezierSpline
+
+-- | Bezier control points. With n degrees, there are n+1 control points.
+controlPoints :: Iso (BezierSpline n1 d1 r1) (BezierSpline n2 d2 r2) (LSeq (1+n1) (Point d1 r1)) (LSeq (1+n2) (Point d2 r2))
+controlPoints = iso _controlPoints BezierSpline
 
 -- | Quadratic Bezier Spline
 pattern Bezier2      :: Point d r -> Point d r -> Point d r -> BezierSpline 2 d r
-pattern Bezier2 p q r <- ((F.toList . LSeq.take 3 . _controlPoints) -> [p,q,r])
+pattern Bezier2 p q r <- (F.toList . LSeq.take 3 . _controlPoints -> [p,q,r])
   where
     Bezier2 p q r = fromPointSeq . Seq.fromList $ [p,q,r]
 {-# COMPLETE Bezier2 #-}
 
 -- | Cubic Bezier Spline
 pattern Bezier3         :: Point d r -> Point d r -> Point d r -> Point d r -> BezierSpline 3 d r
-pattern Bezier3 p q r s <- ((F.toList . LSeq.take 4 . _controlPoints) -> [p,q,r,s])
+pattern Bezier3 p q r s <- (F.toList . LSeq.take 4 . _controlPoints -> [p,q,r,s])
   where
     Bezier3 p q r s = fromPointSeq . Seq.fromList $ [p,q,r,s]
 {-# COMPLETE Bezier3 #-}
@@ -126,7 +136,6 @@ evaluate b t = evaluate' (b^.controlPoints.to LSeq.toSeq)
       pts@(_ :<| tl) -> let (ini :|> _) = pts in evaluate' $ Seq.zipWith blend ini tl
       _              -> error "evaluate: absurd"
     blend p q = p .+^ t *^ (q .-. p)
-
 
 -- | Extract a tangent vector from the first to the second control point.
 tangent   :: (Arity d, Num r, 1 <= n) => BezierSpline n d r -> Vector d r

@@ -14,10 +14,9 @@
 module Data.Range( EndPoint(..)
                  , isOpen, isClosed
                  , unEndPoint
-                 , Range(..)
+                 , Range(.., OpenRange, ClosedRange, Range')
                  , prettyShow
                  , lower, upper
-                 , pattern OpenRange, pattern ClosedRange, pattern Range'
                  , inRange, width, clipLower, clipUpper, midPoint, clampTo
                  , isValid, covers
 
@@ -26,11 +25,13 @@ module Data.Range( EndPoint(..)
 
 import Control.DeepSeq
 import Control.Lens
+import Control.Applicative
 import Data.Intersection
 import Data.Vinyl.CoRec
 import GHC.Generics (Generic)
 import Test.QuickCheck
-import Text.Printf (printf)
+import Data.Functor.Classes
+import Text.Read
 
 --------------------------------------------------------------------------------
 -- * Representing Endpoints of a Range
@@ -38,7 +39,25 @@ import Text.Printf (printf)
 -- | Endpoints of a range may either be open or closed.
 data EndPoint a = Open   !a
                 | Closed !a
-                deriving (Show,Read,Eq,Functor,Foldable,Traversable,Generic,NFData)
+                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
+
+instance (Show a) => Show (EndPoint a) where
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance Show1 EndPoint where
+  liftShowsPrec sp _sl d (Open a)   = showsUnaryWith sp "Open" d a
+  liftShowsPrec sp _sl d (Closed a) = showsUnaryWith sp "Closed" d a
+
+instance (Read a) => Read (EndPoint a) where
+  readPrec     = liftReadPrec readPrec readListPrec
+  readListPrec = readListPrecDefault
+
+instance Read1 EndPoint where
+  liftReadPrec rp _rl = readData $
+      readUnaryWith rp "Open" Open <|>
+      readUnaryWith rp "Closed" Closed
+  liftReadListPrec = liftReadListPrecDefault
+
 
 instance Ord a => Ord (EndPoint a) where
   -- | order on the actual value, and Open before Closed
@@ -56,6 +75,14 @@ _unEndPoint            :: EndPoint a -> a
 _unEndPoint (Open a)   = a
 _unEndPoint (Closed a) = a
 
+-- | Access lens for EndPoint value regardless of whether it is open or closed.
+--
+-- >>> Open 5 ^. unEndPoint
+-- 5
+-- >>> Closed 10 ^. unEndPoint
+-- 10
+-- >>> Open 4 & unEndPoint .~ 0
+-- Open 0
 unEndPoint :: Lens (EndPoint a) (EndPoint b) a b
 unEndPoint = lens _unEndPoint f
   where
@@ -63,10 +90,12 @@ unEndPoint = lens _unEndPoint f
     f (Closed _) a = Closed a
 {-# INLINE unEndPoint #-}
 
+-- | True iff EndPoint is open.
 isOpen          :: EndPoint a -> Bool
-isOpen (Open _) = True
-isOpen _        = False
+isOpen Open{} = True
+isOpen _      = False
 
+-- | True iff EndPoint is closed.
 isClosed :: EndPoint a -> Bool
 isClosed = not . isOpen
 
@@ -79,10 +108,33 @@ data Range a = Range { _lower :: !(EndPoint a)
                      , _upper :: !(EndPoint a)
                      }
                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
-makeLenses ''Range
 
-instance Show a => Show (Range a) where
-  show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
+-- | Lens access for the lower part of a range.
+lower :: Lens' (Range a) (EndPoint a)
+lower = lens _lower (\r l -> r{_lower=l})
+
+-- | Lens access for the upper part of a range.
+upper :: Lens' (Range a) (EndPoint a)
+upper = lens _upper (\r u -> r{_upper=u})
+
+-- instance Show a => Show (Range a) where
+--   show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
+
+instance (Show a) => Show (Range a) where
+  showsPrec = liftShowsPrec showsPrec showList
+
+instance Show1 Range where
+  liftShowsPrec sp sl d (Range l u) =
+      showsBinaryWith (liftShowsPrec sp sl) (liftShowsPrec sp sl) "Range" d l u
+
+instance (Read a) => Read (Range a) where
+  readPrec     = liftReadPrec readPrec readListPrec
+  readListPrec = readListPrecDefault
+
+instance Read1 Range where
+  liftReadPrec rp rl = readData $
+      readBinaryWith (liftReadPrec rp rl) (liftReadPrec rp rl) "Range" Range
+  liftReadListPrec = liftReadListPrecDefault
 
 
 pattern OpenRange       :: a -> a -> Range a
@@ -156,7 +208,7 @@ x `inRange` (Range l u) = case ((l^.unEndPoint) `compare` x, x `compare` (u^.unE
 
 type instance IntersectionOf (Range a) (Range a) = [ NoIntersection, Range a]
 
-instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
+instance Ord a => Range a `IsIntersectableWith` Range a where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
@@ -174,6 +226,7 @@ instance Ord a => (Range a) `IsIntersectableWith` (Range a) where
 width   :: Num r => Range r -> r
 width i = i^.upper.unEndPoint - i^.lower.unEndPoint
 
+-- | Compute the halfway point between the start and end of a range.
 midPoint   :: Fractional r => Range r -> r
 midPoint r = let w = width r in r^.lower.unEndPoint + (w / 2)
 
@@ -213,14 +266,14 @@ clipUpper u r = let r' = clipUpper' u r in if isValid r' then Just r' else Nothi
 
 -- | Wether or not the first range completely covers the second one
 covers       :: forall a. Ord a => Range a -> Range a -> Bool
-x `covers` y = maybe False (== y) . asA @(Range a) $ x `intersect` y
+x `covers` y = (== Just y) . asA @(Range a) $ x `intersect` y
 
 
 -- | Check if the range is valid and nonEmpty, i.e. if the lower endpoint is
 -- indeed smaller than the right endpoint. Note that we treat empty open-ranges
 -- as invalid as well.
 isValid             :: Ord a => Range a -> Bool
-isValid (Range l u) = case (_unEndPoint l) `compare` (_unEndPoint u) of
+isValid (Range l u) = case _unEndPoint l `compare` _unEndPoint u of
                           LT                            -> True
                           EQ | isClosed l || isClosed u -> True
                           _                             -> False
@@ -238,7 +291,7 @@ clipUpper' u' r@(Range l u) = case u' `cmpUpper` u of
 
 -- | Compare end points, Closed < Open
 cmpLower     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpLower a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
+cmpLower a b = case _unEndPoint a `compare` _unEndPoint b of
                  LT -> LT
                  GT -> GT
                  EQ -> case (a,b) of
@@ -250,7 +303,7 @@ cmpLower a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
 
 -- | Compare the end points, Open < Closed
 cmpUpper     :: Ord a => EndPoint a -> EndPoint a -> Ordering
-cmpUpper a b = case (_unEndPoint a) `compare` (_unEndPoint b) of
+cmpUpper a b = case _unEndPoint a `compare` _unEndPoint b of
                  LT -> LT
                  GT -> GT
                  EQ -> case (a,b) of

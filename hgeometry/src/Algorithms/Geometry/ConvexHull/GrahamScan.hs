@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Algorithms.Geometry.ConvexHull.GrahamScan
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Algorithms.Geometry.ConvexHull.GrahamScan( convexHull
                                                 , upperHull, upperHull'
                                                 , lowerHull, lowerHull'
@@ -18,11 +25,11 @@ import           Data.List.NonEmpty (NonEmpty(..))
 -- given in clockwise order.
 convexHull            :: (Ord r, Num r)
                       => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
+convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull ps        = let ps' = NonEmpty.toList . NonEmpty.sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in ConvexPolygon . fromPoints . reverse $ lh ++ uh
+                       in ConvexPolygon . unsafeFromPoints . reverse $ lh ++ uh
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --
@@ -83,7 +90,7 @@ hull _ h@(_ :| []) = h
 hull f pts         = hull' .  f
                    . NonEmpty.toList . NonEmpty.sortBy incXdecY $ pts
 
-incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py
 

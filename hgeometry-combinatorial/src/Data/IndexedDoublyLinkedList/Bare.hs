@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.IndexedDoublyLinkedList.Bare
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.IndexedDoublyLinkedList.Bare(
     IDLList(..)
   , Cell(..), emptyCell
@@ -27,6 +34,7 @@ import qualified Data.Vector.Mutable as MV
 
 --------------------------------------------------------------------------------
 
+-- | Cell indices. Must be non-negative.
 type Index = Int
 
 -- | Cells in the Linked List
@@ -34,6 +42,7 @@ data Cell = Cell { prev :: !(Maybe Index)
                  , next :: !(Maybe Index)
                  } deriving (Show,Eq)
 
+-- | Empty cell with no next or prev cells.
 emptyCell :: Cell
 emptyCell = Cell Nothing Nothing
 
@@ -56,7 +65,7 @@ instance PrimMonad (IDLListMonad s) where
 
 instance MonadReader (IDLList s) (IDLListMonad s) where
   local f = IDLListMonad . local f . runIDLListMonad'
-  ask = IDLListMonad $ ask
+  ask = IDLListMonad ask
 
 -- | Runs a DLList Computation, starting with n singleton values
 runIDLListMonad        :: Int -> (forall s. IDLListMonad s a) -> a
@@ -109,6 +118,7 @@ toListFromK i k = (i :|) <$> replicateM k getNext i
 toListFromR :: Index -> IDLListMonad s (NonEmpty Index)
 toListFromR i = (i :|) <$> iterateM getPrev i
 
+-- | Takes the current element and its k prev's
 toListFromRK     :: Index -> Int -> IDLListMonad s (NonEmpty Index)
 toListFromRK i k = (i :|) <$> replicateM k getPrev i
 
@@ -184,5 +194,4 @@ modify v i f = MV.modify v f i
 -- | For debugging purposes, dump the values and the cells
 dump :: IDLListMonad s (V.Vector Cell)
 dump = do IDLList cs <- ask
-          cs' <- V.freeze cs
-          pure cs'
+          V.freeze cs

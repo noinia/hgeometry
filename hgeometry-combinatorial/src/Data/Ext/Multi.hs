@@ -51,7 +51,7 @@ class HasExtras extras extras' where
   extra :: Lens (core :+ extras) (core :+ extras') (HList extras) (HList extras')
 
 instance HasExtras '[] '[] where
-  extra = lens (const RNil) (\c _ -> c)
+  extra = lens (const RNil) const
 instance HasExtras '[] (t:ts) where
   extra = lens (const RNil) (\(Only c) r -> c :+ r)
 instance HasExtras (t:ts) '[] where

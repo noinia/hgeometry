@@ -89,6 +89,7 @@ fromCenter c ws = let f x r = R.ClosedRange (x-r) (x+r)
                   in fromExtent $ FV.zipWith f (toVec c) ((/2) <$> ws)
 
 
+{- HLINT ignore centerPoint -}
 -- | Center of the box
 centerPoint   :: (Arity d, Fractional r) => Box d p r -> Point d r
 centerPoint b = Point $ w V.^/ 2
@@ -105,7 +106,7 @@ instance (Arity d, Ord r, Semigroup p) => Semigroup (Box d p r) where
 
 type instance IntersectionOf (Box d p r) (Box d q r) = '[ NoIntersection, Box d () r]
 
-instance (Ord r, Arity d) => (Box d p r) `IsIntersectableWith` (Box d q r) where
+instance (Ord r, Arity d) => Box d p r `IsIntersectableWith` Box d q r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   bx `intersect` bx' = f . sequence $ FV.zipWith intersect' (extent bx) (extent bx')
@@ -144,7 +145,7 @@ instance Arity d => Bitraversable (Box d) where
 
 type instance IntersectionOf (Point d r) (Box d p r) = '[ NoIntersection, Point d r]
 
-instance (Arity d, Ord r) => (Point d r) `IsIntersectableWith` (Box d p r) where
+instance (Arity d, Ord r) => Point d r `IsIntersectableWith` Box d p r where
   nonEmptyIntersection = defaultNonEmptyIntersection
   p `intersect` b
     | not $ p `inBox` b = coRec NoIntersection
@@ -192,7 +193,7 @@ p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 -- starting at zero.
 --
 -- >>> extent (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
--- Vector3 [Range (Closed 1) (Closed 10),Range (Closed 2) (Closed 20),Range (Closed 3) (Closed 30)]
+-- Vector3 (Range (Closed 1) (Closed 10)) (Range (Closed 2) (Closed 20)) (Range (Closed 3) (Closed 30))
 extent                                 :: Arity d
                                        => Box d p r -> Vector d (R.Range r)
 extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) (toVec b)
@@ -201,7 +202,7 @@ extent (Box (CWMin a :+ _) (CWMax b :+ _)) = FV.zipWith R.ClosedRange (toVec a) 
 -- whereas one would normally count dimensions starting at zero.
 --
 -- >>> size (boundingBoxList' [origin, Point3 1 2 3] :: Box 3 () Int)
--- Vector3 [1,2,3]
+-- Vector3 1 2 3
 size :: (Arity d, Num r) => Box d p r -> Vector d r
 size = fmap R.width . extent
 
@@ -233,6 +234,7 @@ widthIn' i = preview (V.element' (i-1)) . size
 
 type Rectangle = Box 2
 
+-- |
 -- >>> width (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 1
 -- >>> width (boundingBoxList' [origin] :: Rectangle () Int)
@@ -240,6 +242,7 @@ type Rectangle = Box 2
 width :: Num r => Rectangle p r -> r
 width = widthIn (C :: C 1)
 
+-- |
 -- >>> height (boundingBoxList' [origin, Point2 1 2] :: Rectangle () Int)
 -- 2
 -- >>> height (boundingBoxList' [origin] :: Rectangle () Int)
@@ -256,7 +259,7 @@ height = widthIn (C :: C 2)
 class IsBoxable g where
   boundingBox :: Ord (NumType g) => g -> Box (Dimension g) () (NumType g)
 
-
+-- | Create a bounding box that encapsulates a list of objects.
 boundingBoxList :: (IsBoxable g, F.Foldable1 c, Ord (NumType g), Arity (Dimension g))
                 => c g -> Box (Dimension g) () (NumType g)
 boundingBoxList = F.foldMap1 boundingBox

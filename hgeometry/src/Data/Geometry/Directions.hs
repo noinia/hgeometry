@@ -1,22 +1,29 @@
-{-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Directions
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+--------------------------------------------------------------------------------
 module Data.Geometry.Directions( CardinalDirection(..)
-                               , _North, _East, _South, _West
+                               -- , _North, _East, _South, _West
                                , oppositeDirection
 
                                 , InterCardinalDirection(..)
-                                , _NorthWest, _NorthEast, _SouthEast, _SouthWest
+                                -- , _NorthWest, _NorthEast, _SouthEast, _SouthWest
 
                                 , interCardinalsOf
                                 ) where
 
-import Control.Lens (makePrisms)
 import Data.Util
 import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
+-- | The four cardinal directions.
 data CardinalDirection = North | East | South | West deriving (Show,Read,Eq,Ord,Enum,Bounded)
-makePrisms ''CardinalDirection
+-- makePrisms ''CardinalDirection
 
 --------------------------------------------------------------------------------
 -- * Functions on Cardinal Directions
@@ -34,7 +41,7 @@ oppositeDirection = \case
 -- | Intercardinal directions
 data InterCardinalDirection = NorthWest | NorthEast | SouthEast | SouthWest
   deriving (Show,Read,Eq,Ord,Enum,Generic)
-makePrisms ''InterCardinalDirection
+-- makePrisms ''InterCardinalDirection
 
 --------------------------------------------------------------------------------
 -- * Functions on InterCardinal Directions

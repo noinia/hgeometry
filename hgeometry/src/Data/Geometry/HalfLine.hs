@@ -1,13 +1,20 @@
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE DeriveAnyClass       #-}
+{-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveAnyClass #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.HalfLine
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.HalfLine where
 
 
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable                as F
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -16,9 +23,10 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.Traversable as T
+import qualified Data.Traversable             as T
 import           Data.UnBounded
-import           GHC.Generics (Generic)
+import qualified Data.Vector.Fixed            as FV
+import           GHC.Generics                 (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
@@ -40,6 +48,14 @@ deriving instance Arity d           => T.Traversable (HalfLine d)
 type instance Dimension (HalfLine d r) = d
 type instance NumType   (HalfLine d r) = r
 
+
+instance {-# OVERLAPPING #-} (Eq r, Fractional r) => Eq (HalfLine 2 r) where
+  (HalfLine p u) == (HalfLine q v) =
+      p == q && -- Same starting point.
+      isCoLinear p (Point u) (Point v) && -- Directions are on the same line.
+      sameSigns -- Directions point in the same quadrant.
+    where
+      sameSigns = F.and $ FV.zipWith (\a b -> signum a==signum b) u v
 
 instance (Eq r, Fractional r, Arity d) => Eq (HalfLine d r) where
   (HalfLine p u) == (HalfLine q v) = let lam = scalarMultiple u v

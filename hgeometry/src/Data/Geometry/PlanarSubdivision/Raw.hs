@@ -46,7 +46,7 @@ dataVal = lens (\(Raw _ _ x) -> x) (\(Raw c i _) y -> Raw c i y)
 --------------------------------------------------------------------------------
 
 -- | The Face data consists of the data itself and a list of holes
-data FaceData h f = FaceData { _holes :: (Seq.Seq h)
+data FaceData h f = FaceData { _holes :: Seq.Seq h
                              , _fData :: !f
                              } deriving (Show,Eq,Ord,Functor,Foldable,Traversable,Generic)
 makeLenses ''FaceData

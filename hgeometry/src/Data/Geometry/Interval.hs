@@ -1,15 +1,17 @@
-{-# LANGUAGE TemplateHaskell  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.Interval
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.Interval(
-                             -- * 1 dimensional Intervals
-                               Interval
+                               -- * 1 dimensional Intervals
+                               Interval (Interval, OpenInterval,ClosedInterval)
                              , fromRange, toRange
                              , _Range
 
-                             , pattern OpenInterval
-                             , pattern ClosedInterval
-                             , pattern Interval
-
-                             -- * querying the start and end of intervals
+                               -- * querying the start and end of intervals
                              , HasStart(..), HasEnd(..)
                              -- * Working with intervals
                              , inInterval
@@ -21,18 +23,18 @@ module Data.Geometry.Interval(
                              ) where
 
 import           Control.DeepSeq
-import           Control.Lens (lens, (^.),(%~),(&), Lens')
+import           Control.Lens             (Iso', Lens', iso, (%~), (&), (^.))
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
-import qualified Data.Foldable as F
+import qualified Data.Foldable            as F
 import           Data.Geometry.Properties
 import           Data.Range
-import           Data.Semigroup(Arg(..))
-import qualified Data.Traversable as T
+import           Data.Semigroup           (Arg (..))
+import qualified Data.Traversable         as T
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
-import           GHC.Generics (Generic)
+import           GHC.Generics             (Generic)
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
@@ -42,11 +44,16 @@ import           Test.QuickCheck
 -- We can think of an interval being defined as:
 --
 -- >>> data Interval a r = Interval (EndPoint (r :+ a)) (EndPoint (r :+ a))
-newtype Interval a r = GInterval { toRange :: Range (r :+ a) }
+newtype Interval a r = GInterval (Range (r :+ a))
                      deriving (Eq,Generic,Arbitrary)
 
-_Range :: Lens' (Interval a r) (Range (r :+ a))
-_Range = lens toRange (const GInterval)
+-- | Cast an interval to a range.
+toRange :: Interval a r -> Range (r :+ a)
+toRange (GInterval r) = r
+
+-- | Intervals and ranges are isomorphic.
+_Range :: Iso' (Interval a r) (Range (r :+ a))
+_Range = iso toRange fromRange
 {-# INLINE _Range #-}
 
 -- | Constrct an interval from a Range
@@ -78,7 +85,7 @@ instance Bifunctor Interval where
 --  inInterval and inRange is that the extra value is *not* used in the
 --  comparison with inInterval, whereas it is in inRange.
 inInterval       :: Ord r => r -> Interval a r -> Bool
-x `inInterval` r = x `inRange` (fmap (^.core) $ r^._Range )
+x `inInterval` r = x `inRange` fmap (^.core) (r^._Range )
 
 
 pattern OpenInterval       :: (r :+ a) -> (r :+ a) -> Interval a r
@@ -122,14 +129,14 @@ type instance NumType   (Interval a r) = r
 
 type instance IntersectionOf (Interval a r) (Interval a r) = [NoIntersection, Interval a r]
 
-instance Ord r => (Interval a r) `IsIntersectableWith` (Interval a r) where
+instance Ord r => Interval a r `IsIntersectableWith` Interval a r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   (GInterval r) `intersect` (GInterval s) = match (r' `intersect` s') $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
-                                                           (u&unEndPoint %~ g) )
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\(Range l u)    -> coRec . GInterval $ Range (l&unEndPoint %~ g)
+                                                         (u&unEndPoint %~ g) )
       :& RNil
     where
       f x = Arg (x^.core) x

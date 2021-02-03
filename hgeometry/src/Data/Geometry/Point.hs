@@ -10,32 +10,32 @@
 -- \(d\)-dimensional points.
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.Point( Point(..)
+module Data.Geometry.Point( Point(.., Point1, Point2, Point3)
                           , origin, vector
                           , pointFromList
                           , projectPoint
 
-                          , pattern Point1
-                          , pattern Point2
-                          , pattern Point3
                           , xCoord, yCoord, zCoord
 
                           , PointFunctor(..)
 
-                          , CCW, ccw, ccw'
+                          , CCW, ccw, ccw', isCoLinear
                           , pattern CCW, pattern CW, pattern CoLinear
 
-                          , ccwCmpAround, cwCmpAround, ccwCmpAroundWith, cwCmpAroundWith
-                          , sortAround, insertIntoCyclicOrder
+                          , ccwCmpAround, ccwCmpAround'
+                          , cwCmpAround, cwCmpAround'
+                          , ccwCmpAroundWith, ccwCmpAroundWith'
+                          , cwCmpAroundWith, cwCmpAroundWith'
+                          , sortAround, sortAround'
+                          , insertIntoCyclicOrder
 
                           , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
-                          , cmpByDistanceTo
+                          , cmpByDistanceTo, cmpByDistanceTo'
 
                           , squaredEuclideanDist, euclideanDist
 
-
-                          , AsAPoint(..), coord, unsafeCoord, vector'
+                          , coord, unsafeCoord
                           ) where
 
 import Data.Geometry.Point.Class

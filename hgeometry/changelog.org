@@ -2,6 +2,15 @@
 
 * Changelog
 
+** 0.12
+
+- Switch polygon implementation from a circular seq to a circular vector.
+- Hide polygon implementation details.
+- Enforce CCW polygon order by default.
+- New algorithm: Single-source shortest path in O(n).
+- Fix bug in Data.Geometry.Polygon.Convex.extremes/maxInDirection.
+- Fix Read/Show instances for Point and Polygon such that 'read.show = id'.
+
 ** 0.11
 
 - Removed Functor instance from Triangle and replaced it with Bifunctor/Bifoldable/Bitraversable

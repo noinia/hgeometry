@@ -205,7 +205,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r))
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = map ext $ s:q:mapMaybe (^?_LineTo) ls
-                                      poly = Polygon.fromPoints . dropRepeats $ pts
+                                      poly = Polygon.unsafeFromPoints . dropRepeats $ pts
                                       pl   = fromPointsUnsafe pts
                                   in case xs of
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
@@ -242,8 +242,8 @@ instance IpeReadText (Apply f at) => IpeReadAttr (Attr f at) where
   ipeReadAttr _ _                 = Left "IpeReadAttr: Element expected, Text found"
 
 -- | Combination of zipRecWith and traverse
-zipTraverseWith                       :: forall f g h i (rs :: [u]). Applicative h
-                                      => (forall (x :: u). f x -> g x -> h (i x))
+zipTraverseWith                       :: forall f g h i (rs :: [AttributeUniverse]). Applicative h
+                                      => (forall (x :: AttributeUniverse). f x -> g x -> h (i x))
                                       -> Rec f rs -> Rec g rs -> h (Rec i rs)
 zipTraverseWith _ RNil      RNil      = pure RNil
 zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs ys

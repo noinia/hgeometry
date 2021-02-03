@@ -1,6 +1,11 @@
-{-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE UndecidableInstances  #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PolyLine
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
 module Data.Geometry.PolyLine where
 
 import           Control.Lens
@@ -35,7 +40,10 @@ import           GHC.TypeLits
 
 -- | A Poly line in R^d has at least 2 vertices
 newtype PolyLine d p r = PolyLine { _points :: LSeq 2 (Point d r :+ p) } deriving (Generic)
-makeLenses ''PolyLine
+
+-- | PolyLines are isomorphic to a sequence of points with at least 2 members.
+points :: Iso (PolyLine d1 p1 r1) (PolyLine d2 p2 r2) (LSeq 2 (Point d1 r1 :+ p1)) (LSeq 2 (Point d2 r2 :+ p2))
+points = iso (\(PolyLine s) -> s) PolyLine
 
 deriving instance (Show r, Show p, Arity d) => Show    (PolyLine d p r)
 deriving instance (Eq r, Eq p, Arity d)     => Eq      (PolyLine d p r)
@@ -70,6 +78,16 @@ instance (ToJSON p, ToJSON r, Arity d) => ToJSON (PolyLine d p r) where
     toEncoding = genericToEncoding defaultOptions
 instance (FromJSON p, FromJSON r, Arity d, KnownNat d) => FromJSON (PolyLine d p r)
 
+instance HasStart (PolyLine d p r) where
+  type StartCore (PolyLine d p r)  = Point d r
+  type StartExtra (PolyLine d p r) = p
+  start = points.head1
+
+instance HasEnd (PolyLine d p r) where
+  type EndCore (PolyLine d p r)  = Point d r
+  type EndExtra (PolyLine d p r) = p
+  end = points.last1
+
 -- | Builds a Polyline from a list of points, if there are sufficiently many points
 fromPoints :: [Point d r :+ p] -> Maybe (PolyLine d p r)
 fromPoints = fmap PolyLine . LSeq.eval (C @ 2) . LSeq.fromList
@@ -81,7 +99,7 @@ fromPointsUnsafe = PolyLine . LSeq.forceLSeq (C @ 2) . LSeq.fromList
 -- | pre: The input list contains at least two points. All extra vields are
 -- initialized with mempty.
 fromPointsUnsafe' :: (Monoid p) => [Point d r] -> PolyLine d p r
-fromPointsUnsafe' = fromPointsUnsafe . map (\p -> p :+ mempty)
+fromPointsUnsafe' = fromPointsUnsafe . map (:+ mempty)
 
 
 -- | We consider the line-segment as closed.
@@ -111,9 +129,9 @@ edgeSegments pl = let vs = pl^.points
 -- running time: \(O(\log n)\)
 --
 -- >>> interpolatePoly 0.5 myPolyLine
--- Point2 [5.0,5.0]
+-- Point2 5.0 5.0
 -- >>> interpolatePoly 1.5 myPolyLine
--- Point2 [10.0,15.0]
+-- Point2 10.0 15.0
 interpolatePoly      :: (RealFrac r, Arity d) => r -> PolyLine d p r -> Point d r
 interpolatePoly t pl = let i = floor t in case edgeSegments pl^?ix i of
                          Nothing -> pl^.points.to LSeq.last.core

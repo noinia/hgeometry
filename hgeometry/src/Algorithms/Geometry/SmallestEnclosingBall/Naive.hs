@@ -9,9 +9,10 @@
 -- points in \(\mathbb{R}^2\)
 --
 --------------------------------------------------------------------------------
-module Algorithms.Geometry.SmallestEnclosingBall.Naive( smallestEnclosingDisk
-                                                      , enclosesAll
-                                                      ) where
+module Algorithms.Geometry.SmallestEnclosingBall.Naive
+  ( smallestEnclosingDisk
+  , enclosesAll
+  ) where
 
 -- just for the types
 import Control.Lens
@@ -26,7 +27,7 @@ import Data.Util(uniquePairs, uniqueTriplets)
 import qualified Data.Util as Util
 --------------------------------------------------------------------------------
 
--- | Horrible O(n^4) implementation that simply tries all disks, checks if they
+-- | Horrible \( O(n^4) \) implementation that simply tries all disks, checks if they
 -- enclose all points, and takes the largest one. Basically, this is only useful
 -- to check correctness of the other algorithm(s)
 smallestEnclosingDisk          :: (Ord r, Fractional r)
@@ -44,6 +45,7 @@ triplets     :: (Ord r, Fractional r) => [Point 2 r :+ p] -> [DiskResult p r]
 triplets pts = [DiskResult (disk' a b c) (Three a b c)
                | Util.Three a b c <- uniqueTriplets pts]
 
+{- HLINT ignore disk' -}
 disk'       :: (Ord r, Fractional r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Disk () r
 disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)
@@ -56,7 +58,7 @@ disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)
 smallestEnclosingDisk'     :: (Ord r, Num r)
                            => [Point 2 r :+ p] -> [DiskResult p r] -> DiskResult p r
 smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))
-                           . filter (flip enclosesAll pts)
+                           . filter (`enclosesAll` pts)
 
 -- | check if a disk encloses all points
 enclosesAll   :: (Num r, Ord r) => DiskResult p r -> [Point 2 r :+ q] -> Bool

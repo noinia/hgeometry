@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
@@ -10,7 +9,22 @@
 -- SubLine; a part of a line
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.SubLine where
+module Data.Geometry.SubLine
+  ( SubLine(..)
+  , line
+  , subRange
+  , fixEndPoints
+  , dropExtra
+  , _unBounded
+  , toUnbounded
+  , fromUnbounded
+  , onSubLine
+  , onSubLineUB
+  , onSubLine2
+  , onSubLine2UB
+  , getEndPointsUnBounded
+  , fromLine
+  ) where
 
 import           Control.Lens
 import           Data.Bifunctor
@@ -27,8 +41,6 @@ import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           Test.QuickCheck(Arbitrary(..))
 
-import           Data.Ratio
-
 --------------------------------------------------------------------------------
 
 -- | Part of a line. The interval is ranged based on the vector of the
@@ -36,7 +48,14 @@ import           Data.Ratio
 data SubLine d p s r = SubLine { _line     :: Line d r
                                , _subRange :: Interval p s
                                }
-makeLenses ''SubLine
+
+-- | Line part of SubLine.
+line :: Lens (SubLine d1 p s r1) (SubLine d2 p s r2) (Line d1 r1) (Line d2 r2)
+line = lens _line (\sub l -> SubLine l (_subRange sub))
+
+-- | Interval part of SubLine.
+subRange :: Lens (SubLine d p1 s1 r) (SubLine d p2 s2 r) (Interval p1 s1) (Interval p2 s2)
+subRange = lens _subRange (SubLine . _line)
 
 type instance Dimension (SubLine d p s r) = d
 
@@ -57,7 +76,7 @@ fixEndPoints    :: (Num r, Arity d) => SubLine d p r r -> SubLine d (Point d r :
 fixEndPoints sl = sl&subRange %~ f
   where
     ptAt              = flip pointAt (sl^.line)
-    label (c :+ e)    = (c :+ (ptAt c :+ e))
+    label (c :+ e)    = c :+ (ptAt c :+ e)
     f ~(Interval l u) = Interval (l&unEndPoint %~ label)
                                  (u&unEndPoint %~ label)
 
@@ -65,6 +84,7 @@ fixEndPoints sl = sl&subRange %~ f
 dropExtra :: SubLine d p s r -> SubLine d () s r
 dropExtra = over subRange (first (const ()))
 
+-- | Prism for downcasting an unbounded subline to a subline.
 _unBounded :: Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
 _unBounded = prism' toUnbounded fromUnbounded
 
@@ -88,9 +108,13 @@ onSubLine p (SubLine l r) = case toOffset p l of
 -- lies on the subline, i.e. in the interval r
 onSubLineUB                   :: (Ord r, Fractional r)
                               => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
-p `onSubLineUB` (SubLine l r) = case toOffset p l of
-                                  Nothing -> False
-                                  Just x  -> Val x `inInterval` r
+p `onSubLineUB` (SubLine l r) =
+  p `onLine2` l &&
+  Val (toOffset' p l) `inInterval` r
+
+inSubLineIntervalUB                   :: (Ord r, Fractional r)
+                              => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
+p `inSubLineIntervalUB` (SubLine l r) = Val (toOffset' p l) `inInterval` r
 
 -- | given point p, and a Subline l r such that p lies on line l, test if it
 -- lies on the subline, i.e. in the interval r
@@ -118,19 +142,20 @@ type instance IntersectionOf (SubLine 2 p s r) (SubLine 2 q s r) = [ NoIntersect
                                                                    , SubLine 2 p s r
                                                                    ]
 
+{- HLINT ignore "Redundant bracket" -}
 instance (Ord r, Fractional r) =>
-         (SubLine 2 p r r) `IsIntersectableWith` (SubLine 2 p r r) where
+         SubLine 2 p r r `IsIntersectableWith` SubLine 2 p r r where
 
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\p@(Point _)    -> if onSubLine2 p sl && onSubLine2 p sm
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \_             -> match (r `intersect` s'') $
-                                      (H $ \NoIntersection -> coRec NoIntersection)
-                                   :& (H $ \i              -> coRec $ SubLine l i)
+      :& H (\_             -> match (r `intersect` s'') $
+                                      H coRec -- NoIntersection
+                                   :& H (coRec . SubLine l)
                                    :& RNil
            )
       :& RNil
@@ -141,17 +166,17 @@ instance (Ord r, Fractional r) =>
               &end.core   .~ toOffset' (s'^.end.extra.core)   l
 
 instance (Ord r, Fractional r) =>
-         (SubLine 2 p (UnBounded r) r) `IsIntersectableWith` (SubLine 2 p (UnBounded r) r) where
+         SubLine 2 p (UnBounded r) r `IsIntersectableWith` SubLine 2 p (UnBounded r) r where
   nonEmptyIntersection = defaultNonEmptyIntersection
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
-         (H $ \NoIntersection -> coRec NoIntersection)
-      :& (H $ \p@(Point _)    -> if onSubLine2UB p sl && onSubLine2UB p sm
+         H (\NoIntersection -> coRec NoIntersection)
+      :& H (\p@(Point _)    -> if inSubLineIntervalUB p sl && inSubLineIntervalUB p sm
                                  then coRec p
                                  else coRec NoIntersection)
-      :& (H $ \_             -> match (r `intersect` s'') $
-                                      (H $ \NoIntersection -> coRec NoIntersection)
-                                   :& (H $ \i              -> coRec $ SubLine l i)
+      :& H (\_              -> match (r `intersect` s'') $
+                                      H coRec -- NoIntersection
+                                   :& H (coRec . SubLine l)
                                    :& RNil
            )
       :& RNil
@@ -168,6 +193,7 @@ getEndPointsUnBounded sl = second (fmap f) $ sl^.subRange
   where
     f = flip pointAt (sl^.line)
 
+-- | Create a SubLine that covers the original line from -infinity to +infinity.
 fromLine   :: Arity d => Line d r -> SubLine d () (UnBounded r) r
 fromLine l = SubLine l (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
 
@@ -185,6 +211,6 @@ fromLine l = SubLine l (ClosedInterval (ext MinInfinity) (ext MaxInfinity))
 -- testzz = let f  = bimap (fmap Val) (const ())
 --          in
 
-testz :: SubLine 2 () Rational Rational
-testz = SubLine (Line (Point2 0 0) (Vector2 10 0))
-                (Interval (Closed (0 % 1 :+ ())) (Closed (1 % 1 :+ ())))
+-- testz :: SubLine 2 () Rational Rational
+-- testz = SubLine (Line (Point2 0 0) (Vector2 10 0))
+--                 (Interval (Closed (0 % 1 :+ ())) (Closed (1 % 1 :+ ())))

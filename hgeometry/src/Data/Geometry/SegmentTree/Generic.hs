@@ -121,7 +121,6 @@ fromIntervals      :: (Ord r, Eq p, Assoc v i, IntervalLike i, Monoid v, NumType
 fromIntervals f is = foldr (insert . f) (createTree pts mempty) is
   where
     endPoints (asRange -> Range' a b) = [a,b]
-    endPoints _ = error "Unreachable, but cannot prove it in Haskell"
     pts = nub' . NonEmpty.sort . NonEmpty.fromList . concatMap endPoints $ is
     nub' = fmap NonEmpty.head . NonEmpty.group1
 
@@ -190,7 +189,7 @@ insert                   :: (Assoc v i, NumType i ~ r, Ord r, IntervalLike i)
 insert i (SegmentTree t) = SegmentTree $ insertRoot t
   where
     ri@(Range a b) = asRange i
-    insertRoot t' = maybe t' (flip insert' t') $ getRange t'
+    insertRoot t' = maybe t' (`insert'` t') $ getRange t'
 
     insert' inR         lf@(Leaf nd@(LeafData rr _))
       | coversAtomic ri inR rr = Leaf $ nd&leafAssoc %~ insertAssoc i

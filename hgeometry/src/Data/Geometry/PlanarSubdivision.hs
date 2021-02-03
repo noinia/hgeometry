@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
@@ -76,7 +75,7 @@ fromPolygon                              :: forall proxy t p f r s. (Ord r, Frac
                                          -> f -- ^ data inside
                                          -> f -- ^ data outside the polygon
                                          -> PlanarSubdivision s p () f r
-fromPolygon p pg@(SimplePolygon _) iD oD = fromSimplePolygon p pg iD oD
+fromPolygon p pg@SimplePolygon{} iD oD   = fromSimplePolygon p pg iD oD
 fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
     Nothing  -> outerPG
     Just hs' -> let hs'' = (\pg -> fromSimplePolygon wp (toCounterClockWiseOrder pg) oD iD) <$> hs'
@@ -84,7 +83,7 @@ fromPolygon p (MultiPolygon vs hs) iD oD = case NonEmpty.nonEmpty hs of
   where
     wp = Proxy :: Proxy (Wrap s)
 
-    outerPG = fromSimplePolygon p (SimplePolygon vs) iD oD
+    outerPG = fromSimplePolygon p vs iD oD
     i = V.last $ faces' outerPG
 
 

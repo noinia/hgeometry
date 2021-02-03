@@ -28,10 +28,10 @@ import           Data.Util
 -- | \(O(n \log n)\) time ConvexHull using divide and conquer. The resulting polygon is
 -- given in clockwise order.
 convexHull           :: (Ord r, Num r) => NonEmpty (Point 2 r :+ p) -> ConvexPolygon p r
-convexHull (p :| []) = ConvexPolygon . fromPoints $ [p]
+convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts
   where
-    combine (l:|uh,_:|lh) = ConvexPolygon . fromPoints $ l : uh <> reverse (init lh)
+    combine (l:|uh,_:|lh) = ConvexPolygon . unsafeFromPoints $ l : uh <> reverse (init lh)
 
 ----------------------------------------
 -- * Computing a lower hull
@@ -72,10 +72,10 @@ instance (Num r, Ord r) => Semigroup (UH r p) where
 hull               :: (NonEmpty p -> NonEmpty p -> Two (p :+ [p]))
                    -> NonEmpty p -> NonEmpty p -> NonEmpty p
 hull tangent lh rh = let Two (l :+ lh') (r :+ rh') = tangent (NonEmpty.reverse lh) rh
-                     in NonEmpty.fromList $ (reverse lh') <> [l,r] <> rh'
+                     in NonEmpty.fromList $ reverse lh' <> [l,r] <> rh'
 
 --------------------------------------------------------------------------------
 
-incXdecY  :: Ord r => (Point 2 r) :+ p -> (Point 2 r) :+ q -> Ordering
+incXdecY  :: Ord r => Point 2 r :+ p -> Point 2 r :+ q -> Ordering
 incXdecY (Point2 px py :+ _) (Point2 qx qy :+ _) =
   compare px qx <> compare qy py

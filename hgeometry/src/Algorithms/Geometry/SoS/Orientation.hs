@@ -59,7 +59,7 @@ sideTest q ps = sideTest'' . fmap toSymbolic $ cons q ps
 -- | Given an input point, transform its number type to include
 -- symbolic $\varepsilon$ expressions so that we can use SoS.
 toSymbolic          :: (Ord i, Arity d) => Point d r :+ i -> Point d (Symbolic (i,Int) r)
-toSymbolic (p :+ i) = p&vector' %~ imap (\j x -> symbolic x (i,j))
+toSymbolic (p :+ i) = p&vector %~ imap (\j x -> symbolic x (i,j))
 
 -- | Given a point q and a vector of d points defining a hyperplane,
 -- test on which side of the hyperplane q lies.
@@ -80,4 +80,4 @@ sideTest'' = signDet . Matrix . fmap mkLambdaRow
 -- in a homogeneous matrix represetnation. I.e. we add a 1 as an
 -- additonal column at the end.
 mkLambdaRow :: (Num r, Arity d, Arity (d+1)) => Point d r -> Vector (d+1) r
-mkLambdaRow = flip snoc 1 . view vector'
+mkLambdaRow = flip snoc 1 . view vector
