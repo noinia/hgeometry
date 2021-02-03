@@ -59,8 +59,12 @@ module Data.PlanarGraph.Immutable
   -- , faceSetHalfEdge :: Face s -> HalfEdge -> ST s ()
 
     -- * Mutation
+  , pgMutate
+  , pgCreate
   , pgThaw
   , pgFreeze
+  , pgUnsafeThaw
+  , pgUnsafeFreeze
   -- , pgConnectVertices -- :: HalfEdge -> HalfEdge -> ST s (Edge s)
 -- pgSplitHalfEdge :: HalfEdge -> ST s Vertex
 
@@ -77,7 +81,7 @@ import           Control.Monad
 import           Control.Monad.ST
 import           Data.Bits
 import           Data.Hashable
-import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector)
+import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector )
 import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
 import           Data.STRef
@@ -177,7 +181,7 @@ pgFromFaces :: [[VertexId]] -> PlanarGraph
 pgFromFaces = pgFromFacesCV . map CV.unsafeFromList
 
 pgFromFacesCV :: [CircularVector VertexId] -> PlanarGraph
-pgFromFacesCV faces = runST $ Mut.pgFromFacesCV faces >>= pgFreeze
+pgFromFacesCV faces = pgCreate $ Mut.pgFromFacesCV faces
 
 -- fromFaces' :: Int -> Int -> Int -> [CircularVector VertexId] -> ST s (PlanarGraph)
 -- fromFaces' nFaces nHalfEdges maxVertexId faces = do
@@ -506,6 +510,16 @@ faceBoundary face pg = CV.map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 -- Mutation
 
 -- | O(n)
+pgMutate :: PlanarGraph -> (forall s. Mut.PlanarGraph s -> ST s ()) -> PlanarGraph
+pgMutate pg action = runST $ do
+  mutPG <- pgThaw pg
+  action mutPG
+  pgUnsafeFreeze mutPG
+
+pgCreate :: (forall s. ST s (Mut.PlanarGraph s)) -> PlanarGraph
+pgCreate action = runST (action >>= pgUnsafeFreeze)
+
+-- | O(n)
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
@@ -520,6 +534,23 @@ pgThaw pg = do
   pgVertices <- Mut.thawVector $ pgVertices pg
   pgFaces <- Mut.thawVector $ pgFaces pg
   pgBoundaries <- Mut.thawVector $ pgBoundaries pg
+  pure Mut.PlanarGraph {..}
+
+-- | O(1)
+pgUnsafeThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
+pgUnsafeThaw pg = do
+  pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
+  pgNextVertexId <- newSTRef $ Vector.length $ pgVertices pg
+  pgNextFaceId <- newSTRef $ Vector.length $ pgFaces pg
+  pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaries pg
+
+  pgHalfEdgeNext   <- Mut.unsafeThawVector $ pgHalfEdgeNext pg
+  pgHalfEdgePrev   <- Mut.unsafeThawVector $ pgHalfEdgePrev pg
+  pgHalfEdgeFace   <- Mut.unsafeThawVector $ pgHalfEdgeFace pg
+  pgHalfEdgeVertex <- Mut.unsafeThawVector $ pgHalfEdgeVertex pg
+  pgVertices <- Mut.unsafeThawVector $ pgVertices pg
+  pgFaces <- Mut.unsafeThawVector $ pgFaces pg
+  pgBoundaries <- Mut.unsafeThawVector $ pgBoundaries pg
   pure Mut.PlanarGraph {..}
 
 -- | O(n)
@@ -537,6 +568,23 @@ pgFreeze pg = do
   pgVertices <- Vector.take maxVertexId <$> Mut.freezeVector (Mut.pgVertices pg)
   pgFaces <- Vector.take maxFaceId <$> Mut.freezeVector (Mut.pgFaces pg)
   pgBoundaries <- Vector.take maxBoundaryId <$> Mut.freezeVector (Mut.pgBoundaries pg)
+  pure PlanarGraph { .. }
+
+-- | O(1)
+pgUnsafeFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
+pgUnsafeFreeze pg = do
+  maxEdgeId <- readSTRef (Mut.pgNextHalfEdgeId pg)
+  maxVertexId <- readSTRef (Mut.pgNextVertexId pg)
+  maxFaceId <- readSTRef (Mut.pgNextFaceId pg)
+  maxBoundaryId <- readSTRef (Mut.pgNextBoundaryId pg)
+
+  pgHalfEdgeNext   <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgeNext pg)
+  pgHalfEdgePrev   <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgePrev pg)
+  pgHalfEdgeFace   <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgeFace pg)
+  pgHalfEdgeVertex <- Vector.take (maxEdgeId*2) <$> Mut.unsafeFreezeVector (Mut.pgHalfEdgeVertex pg)
+  pgVertices <- Vector.take maxVertexId <$> Mut.unsafeFreezeVector (Mut.pgVertices pg)
+  pgFaces <- Vector.take maxFaceId <$> Mut.unsafeFreezeVector (Mut.pgFaces pg)
+  pgBoundaries <- Vector.take maxBoundaryId <$> Mut.unsafeFreezeVector (Mut.pgBoundaries pg)
   pure PlanarGraph { .. }
 
 -- { pgNextHalfEdgeId :: !(STRef s HalfEdgeId)

@@ -42,8 +42,15 @@ writeVector ref idx val = do
 freezeVector :: GrowVector s v -> ST s (Vector.Vector v)
 freezeVector ref = Vector.freeze =<< readSTRef ref
 
+unsafeFreezeVector :: GrowVector s v -> ST s (Vector.Vector v)
+unsafeFreezeVector ref = Vector.unsafeFreeze =<< readSTRef ref
+
 thawVector :: Vector.Vector v -> ST s (GrowVector s v)
 thawVector v = newSTRef =<< Vector.thaw v
+
+unsafeThawVector :: Vector.Vector v -> ST s (GrowVector s v)
+unsafeThawVector v = newSTRef =<< Vector.unsafeThaw v
+
 
 freezeCircularVector :: Int -> GrowVector s v -> ST s (CircularVector v)
 freezeCircularVector n ref =
