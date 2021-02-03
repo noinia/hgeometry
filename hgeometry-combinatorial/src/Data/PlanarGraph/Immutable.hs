@@ -77,13 +77,13 @@ import           Control.Monad
 import           Control.Monad.ST
 import           Data.Bits
 import           Data.Hashable
-import           Data.STRef
-import qualified Data.Vector          as V (unsafeFreeze)
-import           Data.Vector.Circular (CircularVector)
-import qualified Data.Vector.Circular as CV
-import           Data.Vector.Mutable  (STVector)
-import qualified Data.Vector.Mutable  as V
+import           Data.PlanarGraph.Internal (freezeCircularVector, newVector, writeVector)
+import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
+import           Data.STRef
+import           Data.Vector.Circular      (CircularVector)
+import qualified Data.Vector.Circular      as CV
+import qualified Data.Vector.Mutable       as V
 
 import           Data.Coerce
 import           Data.Proxy
@@ -94,41 +94,6 @@ import           Linear.V
 import           Linear.V2
 
 import Debug.Trace
-
--------------------------------------------------------------------------------
--- Resizeable vector
-
-type GrowVector s v = STRef s (STVector s v)
-
-newVector :: Int -> ST s (GrowVector s v)
-newVector n = newSTRef =<< V.new n
-
--- setVector :: GrowVector s v -> v -> ST s ()
--- setVector ref val = do
---   vec <- readSTRef ref
---   V.set vec val
-
--- readVector :: GrowVector s v -> Int -> ST s v
--- readVector ref idx = do
---   v <- readSTRef ref
---   V.read v idx
-
-writeVector :: GrowVector s v -> Int -> v -> ST s ()
-writeVector ref idx val = do
-  v <- readSTRef ref
-  let l = V.length v
-  if idx >= l
-    then {-trace ("Growing: " ++ show (idx, l)) $ -} do
-      v' <- V.grow v ((idx+1)*2)
-      V.write v' idx val
-      writeSTRef ref v'
-    else -- trace ("Writing: " ++ show (idx, l)) $
-      V.write v idx val
-
-freezeCircularVector :: Int -> GrowVector s v -> ST s (CircularVector v)
-freezeCircularVector n ref =
-  (CV.unsafeFromVector . Vector.take n) <$> (V.unsafeFreeze =<< readSTRef ref)
-
 
 -------------------------------------------------------------------------------
 -- Elements: Half-edges, vertices, faces.
@@ -445,7 +410,7 @@ halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
 -- halfEdgeSetVertex :: HalfEdge -> Vertex -> PlanarGraph -> PlanarGraph
 -- halfEdgeSetVertex (HalfEdge e) vertex pg =
 --   pg{ pgHalfEdgeVertex = pgHalfEdgeVertex pg Vector.// [(e, vertexToId vertex)] }
-  
+
 
 -------------------------------------------------------------------------------
 -- Faces
@@ -540,6 +505,7 @@ faceBoundary face pg = CV.map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 -------------------------------------------------------------------------------
 -- Mutation
 
+-- | O(n)
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
@@ -556,6 +522,7 @@ pgThaw pg = do
   pgBoundaries <- Mut.thawVector $ pgBoundaries pg
   pure Mut.PlanarGraph {..}
 
+-- | O(n)
 pgFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
 pgFreeze pg = do
   maxEdgeId <- readSTRef (Mut.pgNextHalfEdgeId pg)
