@@ -24,6 +24,7 @@ module Data.PlanarGraph.Immutable
   , vertexNeighbours            -- :: Vertex -> PlanarGraph -> CircularVector Vertex
 
     -- ** Edges
+  , Edge(..)
   , edgeHalfEdges        -- :: Edge -> (HalfEdge, HalfEdge)
 
     -- ** Half-edges
