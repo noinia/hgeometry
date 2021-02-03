@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Main where
 
-import Data.PlanarGraph.Mutable
+import Data.PlanarGraph.Immutable
 import qualified Data.PlanarGraph.Immutable as Pure
 
 import           Control.Lens          ()
@@ -33,24 +33,20 @@ main = do
 test1 = renderPlanarGraph (pgFromFaces [[0..2]])
 test2 = renderPlanarGraph (pgFromFaces [[0..3],[4,3,2,1]])
 
-savePlanarGraphSVG :: (forall s. ST s (PlanarGraph s)) -> IO ()
-savePlanarGraphSVG genPG = do
+savePlanarGraphSVG :: PlanarGraph -> IO ()
+savePlanarGraphSVG pg = do
     writeFile fileName svgOutput
   where
     svgOutput = renderSvg (Just $ Num 300) (Just $ Num 300) svg
-    fileName = "planargraph-" ++ show (abs hashValue) <.> "svg"
-    (svg, hashValue) = renderPlanarGraph genPG
+    fileName = "planargraph-" ++ show (pgHash pg) <.> "svg"
+    svg = renderPlanarGraph pg
 
-renderPlanarGraph :: (forall s. ST s (PlanarGraph s)) -> (SVG, Int)
-renderPlanarGraph genPG= runST $ do
-  pg <- genPG
-  h <- pgHash pg
-  vs <- tutteEmbedding pg
-  maxEdgeId <- readSTRef (pgNextHalfEdgeId pg)
-  edgeVertex <- V.freeze =<< readSTRef (pgHalfEdgeVertex pg)
-  faceCount <- readSTRef (pgNextFaceId pg)
-  faces <- mapM (\f -> CV.map vertexToId <$> faceBoundary f) [faceFromId fId pg | fId <- [0.. faceCount-1]]
-  let svg =
+renderPlanarGraph :: PlanarGraph -> SVG
+renderPlanarGraph pg = svg
+  where
+    vs = tutteEmbedding pg
+    faces = pgFaces pg
+    svg =
         withViewBox (screenBottom, screenBottom, screenHeight, screenHeight) $
         mkGroup
         [ mkBackground bgColor
@@ -63,14 +59,15 @@ renderPlanarGraph genPG= runST $ do
               translate 0 (-(svgHeight label+0.1)/2) $
               center $ mkLine (0,0) (svgWidth label*1.2,0)
             ]
-          | (fId, face) <- zip [0..] faces
-          , let poly = simpleFromPoints $ map ext
+          | face <- faces
+          , let boundary = faceBoundary face pg
+                poly = simpleFromPoints $ map ext
                         [ Point2 x y
-                        | vId <- CV.toList face
-                        , let (x,y) = vs V.! vId
+                        | vId <- CV.toList boundary
+                        , let V2 x y = vs V.! vertexToId vId
                         ]
                 Point2 x y = centroid poly
-                label = scale 0.5 $ center $ latex (T.pack $ show fId)
+                label = scale 0.5 $ center $ latex (T.pack $ show $ faceToId face)
           ]
         , mkGroup
           [ mkGroup
@@ -85,14 +82,13 @@ renderPlanarGraph genPG= runST $ do
               [ labelEdge
               ]
             ]
-          | edge <- [0 .. maxEdgeId-1]
-          , let tip = edgeVertex V.! (edge*2)
-                tail = edgeVertex V.! (edge*2+1)
-                (tipX,tipY) = vs V.! tip
-                (tailX,tailY) = vs V.! tail
+          | edge <- pgEdges pg
+          , let (tip, tail) = edgeHalfEdges edge
+                V2 tipX tipY = vs V.! vertexToId (halfEdgeVertex tip pg)
+                V2 tailX tailY = vs V.! vertexToId (halfEdgeVertex tail pg)
                 (halfX,halfY) = (tipX + (tailX-tipX)/2, tipY + (tailY-tipY)/2)
-                labelEdge = scale 0.4 $ center $ latex (T.pack $ show (edge*2))
-                labelTwin = scale 0.4 $ center $ latex (T.pack $ show (edge*2+1))
+                labelEdge = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeToId tip)
+                labelTwin = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeToId tail)
                 V2 angX angY = signorm (V2 tipX tipY - V2 tailX tailY) ^* 0.3
           ]
         , mkGroup
@@ -101,12 +97,11 @@ renderPlanarGraph genPG= runST $ do
             [ withFillOpacity 1 $ withFillColor "white" $ withStrokeColor "black" $
               mkCircle 0.3
             , label ]
-          | n <- [0..V.length vs-1]
-          , let (x,y) = vs V.! n
-                label = scaleToWidth 0.2 $ center $ latex (T.pack $ show n)
+          | v <- map vertexToId $ pgVertices pg
+          , let V2 x y = vs V.! v
+                label = scaleToWidth 0.2 $ center $ latex (T.pack $ show v)
           ]
         ]
-  return (svg, h)
 
 strokeWidth = defaultStrokeWidth*0.5
 

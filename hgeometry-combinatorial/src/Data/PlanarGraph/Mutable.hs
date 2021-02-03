@@ -168,12 +168,12 @@ new n = pgFromFaces [[0..n-1]]
 -- @
 -- 'pgFromFaces' [[0,1,2]]
 -- @
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- @
 -- 'pgFromFaces' [[0,1,2,3]]
 -- @
--- <<docs/Data/PlanarGraph/planargraph-2271197297257670264.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
 pgFromFaces :: [[VertexId]] -> ST s (PlanarGraph s)
 pgFromFaces = pgFromFacesCV . map CV.unsafeFromList
 
@@ -389,7 +389,7 @@ halfEdgeTipVertex = halfEdgeVertex . halfEdgeTwin
 -- 'pgFromFaces' [[0,1,2]]
 -- @
 --
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; show <$> halfEdgeFace (halfEdgeFromId 0 pg)
 -- "Face 0"
@@ -433,7 +433,7 @@ halfEdgeConstructBoundary halfEdge = {- trace ("mkBoundary from: " ++ show halfE
 -- 'pgFromFaces' [[0,1,2]]
 -- @
 --
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> runST $ do pg <- pgFromFaces [[0,1,2]]; halfEdgeIsInterior (halfEdgeFromId 0 pg)
 -- True
@@ -599,64 +599,3 @@ pgConnectVertices e1 e2 = do
 --     1. Keep vertex positions separate. Can update without changing the graph.
 --     2. Swap edges. HalfEdge+Twin. Find next of each. Delete original half-edges.
 --        Then insert half-edges to next.
-
--------------------------------------------------------------------------------
--- Tutte embedding
-
--- -- | \( O(n^3) \)
--- tutteEmbedding :: PlanarGraph s -> ST s (Vector.Vector (Double, Double))
--- tutteEmbedding pg = do
---   nVertices <- readSTRef (pgNextVertexId pg)
---   -- trace ("nVertices: " ++ show nVertices) $ return ()
---   m <- Vector.replicateM nVertices (V.replicate nVertices 0)
---   vx <- V.replicate nVertices 0
---   vy <- V.replicate nVertices 0
-
---   boundary <- faceBoundary (Boundary 0 pg)
---   let nBoundary = length boundary
---   -- trace ("Vectors: " ++ show boundary) $
---   CV.forM_ (CV.zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
---     valid <- halfEdgeIsValid <$> vertexHalfEdge vertex
---     when valid $ do
---       V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
---       V.write vx (vertexToId vertex) x
---       V.write vy (vertexToId vertex) y
-
---   forM_ [0..nVertices-1] $ \vId -> -- trace ("Vertex: " ++ show vId) $
---     do
---       valid <- halfEdgeIsValid <$> vertexHalfEdge (vertexFromId vId pg)
---       unless valid $ do
---         V.write (m Vector.! vId) vId (1::Double)
---       when valid $ do
---         onBoundary <- vertexIsBoundary (vertexFromId vId pg)
---         unless onBoundary $ do
---           let vertex = vertexFromId vId pg
---           neighbours <- vertexNeighbours vertex
---           CV.forM_ neighbours $ \neighbour ->
---             V.write (m Vector.! vId) (vertexToId neighbour) (1::Double)
---           V.write (m Vector.! vId) vId (negate $ fromIntegral $ length neighbours)
-
---   mi <- mapM Vector.freeze m
---   vxi <- Vector.freeze vx
---   vyi <- Vector.freeze vy
-
---   let xPos = reifyMatrix mi vxi luSolve
---       yPos = reifyMatrix mi vyi luSolve
-
---   traceShow (mi, vxi,vyi) $ pure $ Vector.zip xPos yPos
-
--- reifyMatrix :: forall a. Vector.Vector (Vector.Vector a) ->
---   Vector.Vector a ->
---   (forall (n :: *). Dim n => V n (V n a) -> V n a -> V n a) ->
---   Vector.Vector a
--- reifyMatrix m v f = reifyDim (Vector.length m) $ \(Proxy :: Proxy n) ->
---   toVector (f (coerce m :: (V n (V n a))) (coerce v))
-
--- regularPolygon :: Int -> CircularVector (Double, Double)
--- regularPolygon n = CV.unsafeFromList
---     [ (cos ang, sin ang)
---     | i <- [0 .. n-1]
---     , let ang = fromIntegral i * frac + pi/2]
---   where
---     frac = 2*pi / fromIntegral n
-

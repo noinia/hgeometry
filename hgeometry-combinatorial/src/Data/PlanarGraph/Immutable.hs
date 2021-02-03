@@ -5,6 +5,10 @@ module Data.PlanarGraph.Immutable
   , pgFromFaces   -- :: [[VertexId]] -> PlanarGraph
   , pgFromFacesCV -- :: [CircularVector VertexId] -> PlanarGraph
   , pgHash        -- :: PlanarGraph -> Int
+  , pgVertices    -- :: PlanarGraph -> [Vertex]
+  , pgEdges       -- :: PlanarGraph -> [Edge]
+  , pgHalfEdges   -- :: PlanarGraph -> [HalfEdge]
+  , pgFaces       -- :: PlanarGraph -> [Face]
 
     -- * Elements
     -- ** Vertices
@@ -18,6 +22,9 @@ module Data.PlanarGraph.Immutable
   , vertexIncomingHalfEdges     -- :: Vertex -> PlanarGraph -> CircularVector HalfEdge
   , vertexWithIncomingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
   , vertexNeighbours            -- :: Vertex -> PlanarGraph -> CircularVector Vertex
+
+    -- ** Edges
+  , edgeHalfEdges        -- :: Edge -> (HalfEdge, HalfEdge)
 
     -- ** Half-edges
   , HalfEdge(..), HalfEdgeId
@@ -36,7 +43,6 @@ module Data.PlanarGraph.Immutable
 
     -- ** Faces
   , Face(..), FaceId
-  , pgFaces        -- :: PlanarGraph -> [Face]
   , faceMember      -- :: Face -> PlanarGraph -> Bool
   , faceFromId     -- :: FaceId -> PlanarGraph -> Face
   , faceToId       -- :: Face -> FaceId
@@ -90,8 +96,8 @@ newtype HalfEdge = HalfEdge HalfEdgeId
   deriving (Eq, Show, Read, Hashable)
 
 
-newtype Edge s = Edge Int
-  deriving Eq
+newtype Edge = Edge Int
+  deriving (Eq, Show, Read, Hashable)
 
 newtype Vertex = Vertex VertexId
   deriving (Eq, Show, Read, Hashable)
@@ -142,12 +148,12 @@ panic tag msg = error $ "Data.PlanarGraph.Mutable." ++ tag ++ ": " ++ msg
 -- @
 -- 'pgFromFaces' [[0,1,2]]
 -- @
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- @
 -- 'pgFromFaces' [[0,1,2,3]]
 -- @
--- <<docs/Data/PlanarGraph/planargraph-2271197297257670264.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
 pgFromFaces :: [[VertexId]] -> PlanarGraph
 pgFromFaces = pgFromFacesCV . map CV.unsafeFromList
 
@@ -174,6 +180,14 @@ pgHash pg =
 -------------------------------------------------------------------------------
 -- Vertices
 
+-- | O(k)
+pgVertices :: PlanarGraph -> [Vertex]
+pgVertices pg =
+  [ Vertex v
+  | v <- [0 .. Vector.length (pgVertexEdges pg)-1 ]
+  , halfEdgeIsValid (HalfEdge $ pgVertexEdges pg Vector.! v)
+  ]
+
 -- | \( O(1) \)
 vertexFromId :: VertexId -> Vertex
 vertexFromId vId = Vertex vId
@@ -193,7 +207,7 @@ vertexToId (Vertex vId) = vId
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2]]
 --
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> vertexHalfEdge (Vertex 0) pg
 -- HalfEdge 4
@@ -215,7 +229,7 @@ vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> vertexIsBoundary (Vertex 0) pg
 -- True
@@ -235,7 +249,7 @@ vertexIsBoundary vertex pg =
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> CV.toList $ vertexOutgoingHalfEdges (Vertex 1) pg
 -- [HalfEdge 0,HalfEdge 11,HalfEdge 3]
@@ -278,7 +292,7 @@ vertexWithOutgoingHalfEdges vertex pg cb = do
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> CV.toList $ vertexIncomingHalfEdges (Vertex 1) pg
 -- [HalfEdge 1,HalfEdge 10,HalfEdge 2]
@@ -304,7 +318,7 @@ vertexWithIncomingHalfEdges = undefined
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> CV.toList $ vertexNeighbours (Vertex 0) pg
 -- [Vertex 3,Vertex 1]
@@ -331,7 +345,32 @@ vertexNeighbours vertex pg = CV.map (`halfEdgeVertex` pg) $ vertexIncomingHalfEd
 -- vertexSetHalfEdge (Vertex vId) (HalfEdge eId) = undefined
 
 -------------------------------------------------------------------------------
+-- Edges
+
+-- | O(k)
+pgEdges :: PlanarGraph -> [Edge]
+pgEdges pg =
+  [ Edge e
+  | e <- [0 .. Vector.length (pgHalfEdgeNext pg) `div` 2 -1]
+  , let he = e*2
+  , halfEdgeIsValid (HalfEdge he)
+  ]
+
+-- | O(1)
+edgeHalfEdges :: Edge -> (HalfEdge, HalfEdge)
+edgeHalfEdges (Edge e) = (HalfEdge $ e*2, HalfEdge $ e*2+1)
+
+-------------------------------------------------------------------------------
 -- Half-edges
+
+-- | O(k)
+pgHalfEdges :: PlanarGraph -> [HalfEdge]
+pgHalfEdges pg =
+  [ he
+  | he <- map HalfEdge [0 .. Vector.length (pgHalfEdgeNext pg)-1 ]
+  , halfEdgeIsValid he
+  ]
+
 
 -- | O(1)
 halfEdgeIsValid :: HalfEdge -> Bool
@@ -351,7 +390,7 @@ halfEdgeToId (HalfEdge eId) = eId
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> halfEdgeNext (HalfEdge 4) pg
 -- HalfEdge 2
@@ -366,7 +405,7 @@ halfEdgeNext (HalfEdge eId) pg = HalfEdge $ pgHalfEdgeNext pg Vector.! eId
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
--- <<docs/Data/PlanarGraph/planargraph-504463401599277864.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> halfEdgePrev (HalfEdge 4) pg
 -- HalfEdge 6
@@ -409,7 +448,7 @@ halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2]]
 --
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> halfEdgeFace (halfEdgeFromId 0) pg
 -- Face 0
@@ -448,7 +487,7 @@ halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
 -- 'pgFromFaces' [[0,1,2]]
 -- @
 --
--- <<docs/Data/PlanarGraph/planargraph-2753226191199495654.svg>>
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeIsInterior (halfEdgeFromId 0) pg
@@ -497,7 +536,7 @@ halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
 pgFaces :: PlanarGraph -> [Face]
 pgFaces pg =
   [ Face fId
-  | fId <- [0 .. Vector.length (pgFaceEdges pg) ]
+  | fId <- [0 .. Vector.length (pgFaceEdges pg)-1 ]
   , halfEdgeIsValid (faceHalfEdge (Face fId) pg)
   ]
 
