@@ -21,6 +21,12 @@ module Data.PlanarGraph.Mutable
   -- , vertexNew -- :: PlanarGraph s -> ST s (Vertex s)
   -- , vertexSetHalfEdge -- :: Vertex s -> HalfEdge s -> ST s ()
 
+    -- ** Edges
+  , Edge, EdgeId
+  , edgeFromId           -- :: EdgeId -> PlanarGraph s -> Edge s
+  , edgeToId             -- :: Edge s -> EdgeId
+  , edgeFromHalfEdge     -- :: HalfEdge s -> Edge s
+
     -- ** Half-edges
   , HalfEdge, HalfEdgeId
   , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph s -> HalfEdge s
@@ -69,7 +75,7 @@ module Data.PlanarGraph.Mutable
   )
   where
 
-import           Control.Monad             (forM_, unless)
+import           Control.Monad             (forM_, unless, when)
 import           Control.Monad.ST          (ST)
 import           Data.Bits                 (Bits (xor))
 import qualified Data.HashMap.Strict       as HM
@@ -92,7 +98,7 @@ instance Hashable (HalfEdge s) where
   hashWithSalt salt (HalfEdge eId _) = hashWithSalt salt eId
 
 
-data Edge s = Edge Int (PlanarGraph s)
+data Edge s = Edge EdgeId (PlanarGraph s)
   deriving Eq
 
 data Vertex s = Vertex VertexId (PlanarGraph s)
@@ -326,7 +332,26 @@ vertexSetHalfEdge (Vertex vId pg) (HalfEdge eId pg') = eqCheck "vertexSetHalfEdg
   writeVector (pgVertexEdges pg) vId eId
 
 -------------------------------------------------------------------------------
+-- Edges
+
+-- | O(1)
+edgeFromId :: EdgeId -> PlanarGraph s -> Edge s
+edgeFromId = Edge
+
+-- | O(1)
+edgeToId :: Edge s -> EdgeId
+edgeToId (Edge e _) = e
+
+-- | O(1)
+edgeFromHalfEdge :: HalfEdge s -> Edge s
+edgeFromHalfEdge (HalfEdge he pg) = Edge (he `div` 2) pg
+
+-------------------------------------------------------------------------------
 -- Half-edges
+
+-- | O(1)
+halfEdgePlanarGraph :: HalfEdge s -> PlanarGraph s
+halfEdgePlanarGraph (HalfEdge _ pg) = pg
 
 -- | O(1)
 halfEdgeIsValid :: HalfEdge s -> Bool
@@ -421,6 +446,14 @@ halfEdgeConstructBoundary halfEdge = {- trace ("mkBoundary from: " ++ show halfE
   cv <- freezeCircularVector i tmp
   -- trace ("Boundary: " ++ show cv) $ pure cv
   pure cv
+
+-- | O(k)
+halfEdgeWithLoop        :: HalfEdge s -> (HalfEdge s -> ST s ()) -> ST s ()
+halfEdgeWithLoop he cb = worker =<< halfEdgeNext he
+  where
+    worker edge
+      | edge == he = return ()
+      | otherwise  = do cb edge; worker =<< halfEdgeNext edge
 
 -- $setup
 -- >>> let genPG = pgFromFaces [[0,1,2]]
@@ -568,16 +601,73 @@ faceSetHalfEdge (Face fId pg) (HalfEdge eId pg') = eqCheck "faceSetHalfEdge" pg 
 -------------------------------------------------------------------------------
 -- Mutation
 
+-- | O(k) where @k@ is the number of edges in new face.
+--
+--   The two half-edges must be different, must have the same face, and may not be
+--   consecutive. The first half-edge will stay in the original face. The second
+--   half-edge will be in the newly created face.
+--
+-- ==== __Examples:__
+--
+-- @
+-- 'pgFromFaces' [[0,1,2,3]]
+-- @
+--
+-- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
+--
+-- @
+-- do pg <- 'pgFromFaces' [[0,1,2,3]]
+--    let he0 = 'halfEdgeFromId' 0 pg'
+--        he4 = 'halfEdgeFromId' 4 pg'
+--    'pgConnectVertices' he0 he4
+-- @
+--
+-- <<docs/Data/PlanarGraph/planargraph-1902492848341357096.svg>>
 pgConnectVertices :: HalfEdge s -> HalfEdge s -> ST s (Edge s)
-pgConnectVertices e1 e2 = do
+pgConnectVertices e1 e2 =
+  eqCheck "pgConnectVertices" (halfEdgePlanarGraph e1) (halfEdgePlanarGraph e2) $ do
+    let pg = halfEdgePlanarGraph e1
+    when (e1 == e2) $ fail "Edges must be different"
+    f1 <- halfEdgeFace e1
+    f2 <- halfEdgeFace e2
+    unless (f1==f2) $ fail "Faces must be the same"
+    e1' <- halfEdgeNext e1
+    e2' <- halfEdgeNext e2
+    when (e1' == e2 || e2' == e1) $ fail "Edges must not be consecutive"
+
+    e1_prev <- halfEdgePrev e1
+    e2_prev <- halfEdgePrev e2
+
+    he <- halfEdgeNew pg
+    halfEdgeSetFace he f1
+    let he' = halfEdgeTwin he
+    
+    halfEdgeSetVertex he =<< halfEdgeVertex e2
+    halfEdgeSetVertex he' =<< halfEdgeVertex e1
+
+    halfEdgeSetNext he e1
+    halfEdgeSetPrev he e2_prev
+
+    halfEdgeSetNext he' e2
+    halfEdgeSetPrev he' =<< halfEdgePrev e1
+    
+    halfEdgeSetPrev e1 he
+    halfEdgeSetNext e2_prev he
+
+    halfEdgeSetNext e1_prev he'
+    halfEdgeSetPrev e2 he'
+
+    face <- faceNew pg
+    faceSetHalfEdge face he'
+    halfEdgeWithLoop he' (`halfEdgeSetFace` face)
+    
+    pure $ Edge (halfEdgeToId he `div` 2) pg
   -- Check e1.face == e2.face
   -- Check e1.next /= e2
   -- Check e2.next /= e1
   -- create new half-edge pair: e and e'
   -- e.vertex = e1.vertex
   -- e.next = e2
-  --
-  undefined
 
 -- pgSplitHalfEdge :: HalfEdge s -> ST s (Vertex s)
 

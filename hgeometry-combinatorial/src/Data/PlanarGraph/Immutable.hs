@@ -71,7 +71,7 @@ import           Control.Monad.ST
 import           Data.Bits
 import           Data.Coerce
 import           Data.Hashable
-import           Data.PlanarGraph.Internal (FaceId, HalfEdgeId, VertexId)
+import           Data.PlanarGraph.Internal (FaceId, EdgeId, HalfEdgeId, VertexId)
 import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
 import           Data.Proxy
@@ -97,7 +97,7 @@ newtype HalfEdge = HalfEdge HalfEdgeId
   deriving (Eq, Show, Read, Hashable)
 
 
-newtype Edge = Edge Int
+newtype Edge = Edge EdgeId
   deriving (Eq, Show, Read, Hashable)
 
 newtype Vertex = Vertex VertexId
@@ -596,10 +596,14 @@ faceIsBoundary Boundary{} = True
 
 -- | O(k)
 --   Counterclockwise vector of edges.
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+-- >>> faceHalfEdges (Face 0) pg
+-- [HalfEdge 0,HalfEdge 2,HalfEdge 4]
 faceHalfEdges        :: Face -> PlanarGraph -> [HalfEdge]
 faceHalfEdges face pg
-  | faceIsBoundary face = first : build (worker halfEdgeNext first)
-  | otherwise           = first : build (worker halfEdgePrev first)
+  | faceIsBoundary face = first : build (worker halfEdgeNext (halfEdgeNext first pg))
+  | otherwise           = first : build (worker halfEdgePrev (halfEdgePrev first pg))
   where
     first = faceHalfEdge face pg
     worker :: (HalfEdge -> PlanarGraph -> HalfEdge) -> HalfEdge -> (HalfEdge -> b -> b) -> b -> b
@@ -608,6 +612,10 @@ faceHalfEdges face pg
       | otherwise   = cons he (worker advance (advance he pg) cons nil)
 
 -- | O(k)
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+-- >>> faceBoundary (Face 0) pg
+-- [Vertex 1,Vertex 2,Vertex 0]
 faceBoundary :: Face -> PlanarGraph -> [Vertex]
 faceBoundary face pg = map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 
@@ -630,7 +638,7 @@ pgCreate action = runST (action >>= pgUnsafeFreeze)
 -- | O(n)
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgThaw pg = do
-  pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
+  pgNextHalfEdgeId <- newSTRef $ Vector.length (pgHalfEdgeNext pg) `div` 2
   pgNextVertexId <- newSTRef $ Vector.length $ pgVertexEdges pg
   pgNextFaceId <- newSTRef $ Vector.length $ pgFaceEdges pg
   pgNextBoundaryId <- newSTRef $ Vector.length $ pgBoundaryEdges pg

@@ -2,7 +2,7 @@
 module Main where
 
 import Data.PlanarGraph.Immutable
-import qualified Data.PlanarGraph.Immutable as Pure
+import qualified Data.PlanarGraph.Mutable as Mut
 
 import           Control.Lens          ()
 import           Control.Monad.ST
@@ -22,13 +22,25 @@ import           Reanimate
 import           Reanimate.Animation
 import           System.Directory
 import           System.FilePath
+import Debug.Trace
+
+graphs :: [PlanarGraph]
+graphs =
+  [ pgFromFaces [[0..2]]
+  , pgFromFaces [[0..3]]
+  , pgFromFaces [[0..3],[4,3,2,1]]
+  , let pg = pgFromFaces [[0..3]]
+    in pgMutate pg $ \pg' -> do
+          let he0 = Mut.halfEdgeFromId 0 pg'
+              he4 = Mut.halfEdgeFromId 4 pg'
+          _newEdge <- Mut.pgConnectVertices he0 he4
+          return ()
+  ]
 
 main :: IO ()
 -- main = reanimate $ staticFrame (1/60) (fst test2)
 main = do
-  savePlanarGraphSVG $ pgFromFaces [[0..2]]
-  savePlanarGraphSVG $ pgFromFaces [[0..3]]
-  savePlanarGraphSVG $ pgFromFaces [[0..3],[4,3,2,1]]
+  forM_ graphs savePlanarGraphSVG
 
 test1 = renderPlanarGraph (pgFromFaces [[0..2]])
 test2 = renderPlanarGraph (pgFromFaces [[0..3],[4,3,2,1]])
@@ -63,7 +75,7 @@ renderPlanarGraph pg = svg
           , let boundary = faceBoundary face pg
                 poly = simpleFromPoints $ map ext
                         [ Point2 x y
-                        | vId <- CV.toList boundary
+                        | vId <- boundary
                         , let V2 x y = vs V.! vertexToId vId
                         ]
                 Point2 x y = centroid poly

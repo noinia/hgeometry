@@ -60,6 +60,7 @@ freezeCircularVector n ref =
 -------------------------------------------------------------------------------
 -- Planar graph
 
+type EdgeId = Int
 type HalfEdgeId = Int
 type VertexId = Int
 type FaceId = Int
