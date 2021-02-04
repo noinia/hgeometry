@@ -265,7 +265,7 @@ findStartVertex       :: (Ord r, Fractional r)
                       -> Maybe (Point 2 r, VertexId' s, Maybe (Line 2 r :+ l))
 findStartVertex p arr = do
     ss <- findSide p
-    i  <- binarySearchVec (pred' ss) (arr^.unboundedIntersections)
+    i  <- binarySearchVec' (pred' ss) (arr^.unboundedIntersections)
     pure $ arr^.unboundedIntersections.singular (ix i)
   where
     Sides t r b l = sides'' $ arr^.boundedArea

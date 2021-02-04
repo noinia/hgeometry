@@ -62,6 +62,7 @@ binarySearchUntil eps p = go
 
 --------------------------------------------------------------------------------
 
+
 -- | Given a monotonic predicate, Get the index h such that everything strictly
 -- smaller than h has: p i = False, and all i >= h, we have p h = True
 --
@@ -69,30 +70,59 @@ binarySearchUntil eps p = go
 --
 -- running time: \(O(\log^2 n + T*\log n)\), where \(T\) is the time to execute the
 -- predicate.
-binarySearchSeq     :: (a -> Bool) -> Seq a -> Maybe Int
-binarySearchSeq p s = case S.viewr s of
-                       EmptyR                 -> Nothing
-                       (_ :> x)   | p x       -> Just $ case S.viewl s of
-                         (y :< _) | p y          -> 0
-                         _                       -> binarySearch p' 0 u
-                                  | otherwise -> Nothing
+binarySearchSeq'     :: (a -> Bool) -> Seq a -> Maybe Int
+binarySearchSeq' p s = case S.viewr s of
+                        EmptyR                 -> Nothing
+                        (_ :> x)   | p x       -> Just $ case S.viewl s of
+                          (y :< _) | p y          -> 0
+                          _                       -> binarySearch p' 0 u
+                                   | otherwise -> Nothing
   where
     p' = p . S.index s
     u  = S.length s - 1
 
--- | Given a monotonic predicate, get the index h such that everything strictly
--- smaller than h has: p i = False, and all i >= h, we have p h = True
+-- | Given a monotonic predicate p and a sequence s, find the element
+-- s[h] such that that
+--
+-- for every index i <  h we have p s[i] = False, and
+-- for every inedx i >= h we have p s[i] = True
+--
+-- returns Nothing if no element satisfies p
+--
+-- running time: \(O(T*\log^2 n)\), where \(T\) is the time to execute the
+-- predicate.
+binarySearchSeq     :: (a -> Bool) -> Seq a -> Maybe a
+binarySearchSeq p s = S.index s <$> binarySearchSeq' p s
+
+
+-- | Given a monotonic predicate p and a vector v, find the index h such that that
+--
+-- for every index i <  h we have p v[i] = False, and
+-- for every inedx i >= h we have p v[i] = True
 --
 -- returns Nothing if no element satisfies p
 --
 -- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
 -- predicate.
-binarySearchVec                             :: V.Vector v a
-                                            => (a -> Bool) -> v a -> Maybe Int
-binarySearchVec p' v | V.null v   = Nothing
-                     | not $ p n' = Nothing
-                     | otherwise  = Just $ if p 0 then 0
+binarySearchVec'                   :: V.Vector v a
+                                   => (a -> Bool) -> v a -> Maybe Int
+binarySearchVec' p' v | V.null v   = Nothing
+                      | not $ p n' = Nothing
+                      | otherwise  = Just $ if p 0 then 0
                                                   else binarySearch p 0 n'
   where
     n' = V.length v - 1
     p = p' . (v V.!)
+
+-- | Given a monotonic predicate p and a vector v, find the element
+-- v[h] such that that
+--
+-- for every index i <  h we have p V[i] = False, and
+-- for every inedx i >= h we have p V[i] = True
+--
+-- returns Nothing if no element satisfies p
+--
+-- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
+-- predicate.
+binarySearchVec     :: V.Vector v a => (a -> Bool) -> v a -> Maybe a
+binarySearchVec p v = (v V.!) <$> binarySearchVec' p v

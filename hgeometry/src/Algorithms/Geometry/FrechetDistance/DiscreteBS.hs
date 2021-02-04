@@ -31,7 +31,7 @@ discreteFrechetDistance = discreteFrechetDistanceWith squaredEuclideanDist
 discreteFrechetDistanceWith :: ( Foldable f, Functor f, Functor g
                                , Foldable g, Ord r) => (Point 2 r -> Point 2 r -> r)
   -> f (Point 2 r :+ p) -> g (Point 2 r :+ q) -> r
-discreteFrechetDistanceWith d ta tb = (dists V.!) . fromJust
+discreteFrechetDistanceWith d ta tb = fromJust
                                     $ binarySearchVec (\eps -> decideDFDWith d eps ta' tb') dists
   where
     dists = allDistances d ta' tb'
