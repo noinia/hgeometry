@@ -66,9 +66,13 @@ verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep
                     $ ss
     sweep' = V.fromList . toList . sweep
 
+-- | Given a bunch of events happening at the same time, merge them into a single event
+-- where we apply all actions.
 combine                    :: NonEmpty (Event p e r) -> Event p e r
 combine es@((x :+ _) :| _) = x :+ foldMap1 eventActions es
 
+-- | Given a line segment construct the two events; i.e. when we
+-- insert it and when we delete it.
 toEvents   :: Ord r => LineSegment 2 p r :+ e -> NonEmpty (Event p e r)
 toEvents s = let (p,q) = bimap (^.core) (^.core) . orderedEndPoints $ s^.core
              in NonEmpty.fromList [ (p^.xCoord) :+ Insert s :| []
@@ -92,9 +96,9 @@ eventX = view core
 eventActions :: Event p e r -> NonEmpty (Action (LineSegment 2 p r :+ e))
 eventActions = view extra
 
-
 ----------------------------------------
 
+-- | Runs the sweep building the data structure from left to right.
 sweep    :: (Ord r, Fractional r)
          => NonEmpty (Event p e r) -> NonEmpty (r :+ StatusStructure p e r)
 sweep es = NonEmpty.fromList
@@ -105,6 +109,10 @@ sweep es = NonEmpty.fromList
 
 -- TODO: Verify that mapAccumL does not leak memory like foldl does.
 
+-- | Given the current status structure (for left of the next event
+-- 'l'), and the next two events (l,r); essentially defining the slab
+-- between l and r, we construct the status structure for in the slab (l,r).
+-- returns the right boundary and this status structure.
 handle                :: (Ord r, Fractional r)
                       => StatusStructure p e r
                       -> (Event p e r, Event p e r)
