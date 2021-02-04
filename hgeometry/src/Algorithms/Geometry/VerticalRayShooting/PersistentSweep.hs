@@ -118,7 +118,7 @@ handle ss ( l :+ acts
 -- * Querying the DS
 
 
--- | Find the segment vertically above query point q, if it exists.
+-- | Find the segment vertically strictly above query point q, if it exists.
 --
 -- \(O(\log n)\)
 segmentAbove :: Ord r
@@ -128,6 +128,17 @@ segmentAbove q ds | q^.xCoord < ds^.leftMost = Nothing
                                                >>= undefined -- searchInSlab q
   where
     q `leftOf` (r :+ _) = q^.xCoord <= r
+
+
+-- | Find the segment vertically query point q, if it exists.
+--
+-- \(O(\log n)\)
+segmentOnOrAbove  :: Ord r
+                  => Point 2 r -> VerticalRayShootingStructure p e r
+                  -> Maybe (LineSegment 2 p r :+ e)
+segmentOnOrAbove = undefined
+-- Maybe just expose a version that you can pass lookupGE, lookupGT, etc. to
+
 
 -- | Finds the first segment directly above q
 searchInSlab      :: Ord r

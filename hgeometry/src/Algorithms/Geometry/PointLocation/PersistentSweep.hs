@@ -20,6 +20,7 @@ import qualified Data.Vector as V
 
 --------------------------------------------------------------------------------
 
+-- | Planar Point Location Data structure
 data PointLocationDS s v e f r = PointLocationDS {
         _verticalRayShootingStructure :: VRS.VerticalRayShootingStructure v (Dart s) r
       , _subdivision                  :: PlanarSubdivision s v e f r
@@ -52,6 +53,8 @@ pointLocationDS ps = PointLocationDS (VRS.verticalRayShootingStructure es) ps (o
 -- returns Nothing if the query point lies in the outer face and there is no dart
 -- above it.
 --
+-- FIXME: Specify what happens when the query point lies on an edge
+--
 -- running time: \(O(\log n)\)
 dartAbove   :: (Ord r, Fractional r)
             => Point 2 r -> PointLocationDS s v e f r -> Maybe (Dart s)
@@ -68,3 +71,25 @@ faceContaining q ds = maybe (ds^.outerFace) getFace $ dartAbove q ds
     getFace d = let (u,v) = bimap (^.location) (^.location) $ endPointData d ps
                 in if u <= v then rightFace d ps
                              else leftFace  d ps
+
+--------------------------------------------------------------------------------
+
+-- | Data structure for fast InPolygon Queries
+newtype InPolygonDS v r = InPolygonDS (VRS.VerticalRayShootingStructure (Vertex v r) () r)
+  deriving (Show,Eq)
+
+type Vertex v r = Int :+ (Point 2 r :+ v)
+
+inPolygonDS    :: SimplePolygon v r -> InPolygonDS v r
+inPolygonDS pg = undefined
+
+edgeOnOrAbove      :: Point 2 r -> InPolygonDS v r -> Maybe (LineSegment 2 v r :+ (Int,Int))
+edgeOnOrAbove q ds = undefined
+
+pointInPolygon :: Point 2 r -> InPolygonDS v r -> PointLocationResult
+pointInPolygon q ds = undefined
+  -- FIXME: Make sure to also test the edge "below" q, i.e. if q is on
+  -- some edge we should return that edge.
+
+  -- FIXME: Vertical sides are important here. They are ignored by the structure, so if the query
+  -- point lies on such an edge we don't know it
