@@ -1,4 +1,16 @@
-module Algorithms.Geometry.VerticalRayShooting.PersistentSweep where
+{-# Language TemplateHaskell #-}
+module Algorithms.Geometry.VerticalRayShooting.PersistentSweep
+  ( VerticalRayShootingStructure(VerticalRayShootingStructure), StatusStructure
+  , leftMost, sweepStruct
+
+  -- * Building the Data Structure
+  , verticalRayShootingStructure
+  -- * Querying the Data Structure
+  , segmentAbove
+
+  , searchInSlab
+  , ordAt, yCoordAt
+  ) where
 
 import           Algorithms.BinarySearch (binarySearchVec)
 import           Control.Lens hiding (contains, below)
@@ -18,9 +30,7 @@ import qualified Data.Vector as V
 
 --------------------------------------------------------------------------------
 
-type StatusStructure p e r = SS.Set (LineSegment 2 p r :+ e)
-
-
+-- | The vertical ray shooting data structure
 data VerticalRayShootingStructure p e r =
     VerticalRayShootingStructure { _leftMost    :: r
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure p e r)
@@ -29,12 +39,9 @@ data VerticalRayShootingStructure p e r =
                                  }
   deriving (Show,Eq)
 
--- | x-corodinate of the leftmost endpoint
-leftMost :: Getter (VerticalRayShootingStructure p e r) r
-leftMost = to _leftMost
+type StatusStructure p e r = SS.Set (LineSegment 2 p r :+ e)
 
-sweepStruct  :: Getter (VerticalRayShootingStructure p e r) (V.Vector (r :+ StatusStructure p e r))
-sweepStruct = to _sweepStruct
+makeLensesWith (lensRules&generateUpdateableOptics .~ False) ''VerticalRayShootingStructure
 
 --------------------------------------------------------------------------------
 -- * Building the DS
@@ -103,15 +110,9 @@ handle                :: (Ord r, Fractional r)
                       -> (Event p e r, Event p e r)
                       -> r :+ StatusStructure p e r
 handle ss ( l :+ acts
-          , r :+ _
-          )           = let mid = (l+r)/2
+          , r :+ _)   = let mid               = (l+r)/2
+                            runActionAt x act = interpret act (ordAt x)
                         in r :+ foldr (runActionAt mid) ss acts
-
-runActionAt       :: (Ord r, Fractional r)
-                  => r -> Action (LineSegment 2 p r :+ e)
-                  -> StatusStructure p e r -> StatusStructure p e r
-runActionAt x act = interpret act (ordAt x)
-
 
 --------------------------------------------------------------------------------
 -- * Querying the DS
@@ -152,99 +153,7 @@ searchInSlab q ss = let qs = ClosedLineSegment (q :+ undefined) (q :+ undefined)
 -- queryWith cmp f g query q s = withOrd cmp $ liftOrd1 (query (f q)) s
 
 
-
-
-
-
-
-
-
-
-
-
-
-
--- -- | Locates the edge (dart) directly above the query point.
--- -- returns Nothing if the query point lies in the outer face and there is no dart
--- -- above it.
--- --
--- -- running time: \(O(\log n)\)
--- dartAbove                   :: (Ord r, Fractional r)
---                             => Point 2 r -> VerticalRayShootingStructure s v e f r -> Maybe (Dart s)
--- dartAbove (Point2 qx qy) ds = mi >>= \i -> vss^?ix i.extra >>= successorOf qy
---   where
---     vss   = ds^.sweepStruct
---     -- the index of the slab containing the query point (if such a slab exists)
---     mi = binarySearchVec (\(x' :+ _) -> x' > ValB qx) vss
---     -- the successor in the status-struct corresponding to the current slab
---     successorOf y ss = let (_,m,r) = SS.splitOn (yCoordAt' (ds^.subdivision) qx) y ss
---                        in SS.lookupMin $ m <> r
-
-
--- -- | Locates the face containing the query point.
--- --
--- -- running time: \(O(\log n)\)
--- faceContaining      :: (Ord r, Fractional r)
---                     => Point 2 r -> VerticalRayShootingStructure s v e f r -> FaceId' s
--- faceContaining q ds = maybe (ds^.outerFace) getFace $ dartAbove q ds
---   where
---     ps = ds^.subdivision
---     getFace d = let (u,v) = bimap (^.location) (^.location) $ endPointData d ps
---                 in if u <= v then rightFace d ps
---                              else leftFace  d ps
-
--- -- type Sweep s v e f r = Reader (PlanarSubdivision s v e f)
-
-
--- -- construct   :: PlanarSubdivision s v e f r -> VerticalRayShootingStructure s v e f r
--- -- construct ps = undefined
-
--- handle                     :: (Ord r, Fractional r)
---                            => PlanarSubdivision s v e f r
---                            -> Bottom r :+ StatusStructure s
---                            -> (VertexId' s, VertexData r v)
---                            -> Bottom r :+ StatusStructure s
--- handle ps (_ :+ ss) (v,vd) = ValB x :+ replace ps (vd^.location) rs ss
---   where
---     x       = vd^.location.xCoord
---     (_,rs)  = partition ps v x . V.toList $ incidentEdges v ps
-
-
--- -- | Given the planar subdiv, the location of a vertex v, and a list of edges
--- -- that start at v replaces all edges that end at v by the ones that start at v
--- replace               :: (Ord r, Fractional r)
---                       => PlanarSubdivision s v e f r
---                       -> Point 2 r -> [Dart s]
---                       -> StatusStructure s -> StatusStructure s
--- replace ps p rs ss = below <> SS.fromAscList' rs <> above
---   where
---     (below,_,above) = SS.splitOn (yCoordAt' ps (p^.xCoord)) (p^.yCoord) ss
---     -- note that the 'on' ones are exactly our 'left' segments that we should
---     -- remove
-
--- -- | Given a vertex v, its x-coordinate, and a list of its incident darts, it
--- -- partitions the darts around x into (ls,rs) where, ls are the darts whose
--- -- other endpoint is left of x and rs are the darts whose other endpoint lies
--- -- right of x.
--- --
--- -- The returned lists are still in clockwise order, ls with the first/topmost edge
--- -- and rs starting with the first/bottommost edge
--- partition           :: Ord r
---                     => PlanarSubdivision s v e f r -> VertexId' s -> r -> [Dart s]
---                     -> ([Dart s], [Dart s])
--- partition ps v x es = case ls of
---                         [] -> (ls' ++ ls'', rs' ++ rs)
---                         _  -> (ls' ++ ls  , rs)
---   where
---     otherEndPointX d = let (u,w) = endPoints d ps
---                            f z   = ps^.locationOf z.xCoord
---                        in if u == v then f w
---                                     else f u
---     (ls,rest)  = L.span (\e -> otherEndPointX e <= x) es
---     (rs,ls')   = L.span (\e -> otherEndPointX e >  x) rest
---     (ls'',rs') = L.span (\e -> otherEndPointX e <= x) ls'
-
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 type Compare a = a -> a -> Ordering
 

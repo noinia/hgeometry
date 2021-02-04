@@ -1,4 +1,14 @@
-module Algorithms.Geometry.PointLocation.PersistentSweep where
+{-# Language TemplateHaskell #-}
+module Algorithms.Geometry.PointLocation.PersistentSweep
+  ( PointLocationDS(PointLocationDS)
+  , verticalRayShootingStructure, subdivision, outerFace
+
+  -- * Building the Data Structure
+  , pointLocationDS
+  -- * Querying the Data Structure
+  , dartAbove
+  , faceContaining
+  ) where
 
 import qualified Algorithms.Geometry.VerticalRayShooting.PersistentSweep as VRS
 import           Control.Lens hiding (contains, below)
@@ -16,16 +26,7 @@ data PointLocationDS s v e f r = PointLocationDS {
       , _outerFace                    :: FaceId' s
       } deriving (Show,Eq)
 
-verticalRayShootingStructure :: Getter (PointLocationDS s v e f r)
-                                       (VRS.VerticalRayShootingStructure v (Dart s) r)
-verticalRayShootingStructure = to _verticalRayShootingStructure
-
-subdivision :: Getter (PointLocationDS s v e f r) (PlanarSubdivision s v e f r)
-subdivision = to _subdivision
-
-outerFace   :: Getter (PointLocationDS s v e f r) (FaceId' s)
-outerFace   = to _outerFace
-
+makeLensesWith (lensRules&generateUpdateableOptics .~ False) ''PointLocationDS
 
 --------------------------------------------------------------------------------
 -- * Buidlding the Point location Data structure
