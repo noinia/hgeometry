@@ -650,7 +650,7 @@ pgConnectVertices e1 e2 =
 
     halfEdgeSetNext he' e2
     halfEdgeSetPrev he' =<< halfEdgePrev e1
-    
+
     halfEdgeSetPrev e1 he
     halfEdgeSetNext e2_prev he
 
@@ -660,14 +660,8 @@ pgConnectVertices e1 e2 =
     face <- faceNew pg
     faceSetHalfEdge face he'
     halfEdgeWithLoop he' (`halfEdgeSetFace` face)
-    
+
     pure $ Edge (halfEdgeToId he `div` 2) pg
-  -- Check e1.face == e2.face
-  -- Check e1.next /= e2
-  -- Check e2.next /= e1
-  -- create new half-edge pair: e and e'
-  -- e.vertex = e1.vertex
-  -- e.next = e2
 
 -- pgSplitHalfEdge :: HalfEdge s -> ST s (Vertex s)
 
