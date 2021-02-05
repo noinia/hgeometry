@@ -221,7 +221,7 @@ pgFromFacesCV faces = do
   -- For each half-edge:
   --   If face is invalid:
   --     Find loop and add it as a boundary.
-  forM_ (map (`halfEdgeFromId` pg) [0..maxHalfEdgeId-1]) $ \he -> {- trace ("Scan halfedge: " ++ show he) $ -} do
+  forM_ (map (`halfEdgeFromId` pg) [0..maxHalfEdgeId*2-1]) $ \he -> {- trace ("Scan halfedge: " ++ show he) $ -} do
     -- f <- halfEdgeFace he
     validFace <- faceIsValid <$> halfEdgeFace he
     unless validFace $ {- trace ("Found invalid face: " ++ show f) $ -} do

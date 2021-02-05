@@ -1,4 +1,95 @@
 {-# LANGUAGE RecordWildCards #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.PlanarGraph.Immutable
+-- Copyright   :  (C) David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--
+-- A graph is planar if it can be drawn on a flat piece of
+-- paper without any crossing edges. More theory is explained on wikipedia:
+-- <https://en.wikipedia.org/wiki/Planar_graph>
+--
+-- This module describes the connectivity of planar graphs without knowing
+-- the 2D coordinates of each vertex. Algorithms that require the vertex
+-- positions (such as planar point locators or mesh smoothers) have to store
+-- that information somewhere else. Vertices are identified by dense, consecutive
+-- integers and can be efficiently used with arrays or finite maps.
+-- 
+-- A planar graph consists of directed edges (also called half-edges or darts),
+-- vertices, and faces. If a face lies on the outside of a set of vertices, this
+-- face is called a boundary.
+--
+-- The simplest planar graph has just three vertices and three edges:
+--
+-- @'pgFromFaces' [[0,1,2]]@
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- The above pictures shows three vertices (named @'0'@, @'1'@, and @'2'@), a single face
+-- (named @'0'@ with an underscore), and 6 half-edges (named @'0'@ through @'5'@).
+-- Vertices, faces, and half-edges can be efficiently queried and traversed.
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+-- >>> pgFaces pg
+-- [Face 0]
+-- >>> faceBoundary (Face 0) pg
+-- [Vertex 1,Vertex 2,Vertex 0]
+--
+--
+-- == Planar graph examples:
+--
+-- Faces in planar graphs do not have to be triangular:
+--
+-- @'pgFromFaces' [[0,1,2,3]]@
+--
+-- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
+--
+-- Vertices may be interior or lie on a boundary:
+--
+-- @'pgFromFaces' [[0,1,2,3],[4,3,2,1]]@
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- >>> pgFaces pg
+-- [Face 0,Face 1]
+-- >>> vertexIsBoundary (Vertex 0) pg
+-- True
+-- >>> vertexIsBoundary (Vertex 2) pg
+-- False
+--
+-- Planar graphs may have multiple boundaries. Notice how the area between vertices
+-- @'1'@, @'2'@ and @'3'@ does not have a face ID:
+--
+-- @'pgFromFaces' [[0,4,1],[0,1,2],[4,3,1],[4,5,3],[3,5,2],[2,5,0]]@
+--
+-- <<docs/Data/PlanarGraph/planargraph-2635031442529484236.compact.svg>>
+--
+-- >>> let pg = pgFromFaces [[0,4,1],[0,1,2],[4,3,1],[4,5,3],[3,5,2],[2,5,0]]
+-- >>> pgFaces pg
+-- [Face 0,Face 1,Face 2,Face 3,Face 4,Face 5]
+-- >>> pgBoundaries pg
+-- [Boundary 0,Boundary 1]
+-- >>> faceBoundary (Boundary 0) pg {- Outer boundary -}
+-- [Vertex 0,Vertex 4,Vertex 5]
+-- >>> faceBoundary (Boundary 1) pg {- Inner boundary -}
+-- [Vertex 1,Vertex 2,Vertex 3]
+--
+-- Planar graphs may also have multiple unconnected components but they cannot be
+-- automatically rendered:
+--
+-- >>> let pg = pgFromFaces [[0,1,2], [3,4,5]]
+-- >>> pgFaces pg
+-- [Face 0,Face 1]
+-- >>> pgBoundaries pg
+-- [Boundary 0,Boundary 1]
+-- >>> faceBoundary (Boundary 0) pg
+-- [Vertex 0,Vertex 1,Vertex 2]
+-- >>> faceBoundary (Boundary 1) pg
+-- [Vertex 3,Vertex 4,Vertex 5]
+--
+--------------------------------------------------------------------------------
 module Data.PlanarGraph.Immutable
   ( -- * Planar graphs
     PlanarGraph
@@ -198,6 +289,10 @@ vertexFromId vId = Vertex vId
 vertexToId :: Vertex -> VertexId
 vertexToId (Vertex vId) = vId
 
+-- $hidden
+--
+-- >>> pgHash $ pgFromFaces [[0,1,2]]
+-- 2959979592048325618
 
 -- | \( O(1) \)
 --   Each vertex has an assigned half-edge with the following properties:
@@ -224,6 +319,12 @@ vertexToId (Vertex vId) = vId
 -- Face 0
 vertexHalfEdge :: Vertex -> PlanarGraph -> HalfEdge
 vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
+
+
+-- $hidden
+--
+-- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- 1711135548958680232
 
 -- | \( O(1) \)
 --   Returns @True@ iff the vertex lines on a boundary.
@@ -286,6 +387,11 @@ vertexWithOutgoingHalfEdges vertex pg cb = do
         cb edge
         loop $ halfEdgeNext (halfEdgeTwin edge) pg
   loop $ halfEdgeNext (halfEdgeTwin first) pg
+
+-- $hidden
+--
+-- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- 1711135548958680232
 
 -- | \( O(k) \)
 --   Query incoming half-edges from a given vertex in counter-clockwise order.
@@ -385,6 +491,10 @@ halfEdgeFromId eId = HalfEdge eId
 halfEdgeToId :: HalfEdge -> HalfEdgeId
 halfEdgeToId (HalfEdge eId) = eId
 
+-- $hidden
+--
+-- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- 1711135548958680232
 
 -- | \( O(1) \)
 --
@@ -447,6 +557,11 @@ halfEdgeTailVertex e pg = halfEdgeVertex e pg
 --   Tip vertex. IE. the vertex of the twin edge.
 halfEdgeTipVertex  :: HalfEdge -> PlanarGraph -> Vertex
 halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
+
+-- $hidden
+--
+-- >>> pgHash $ pgFromFaces [[0,1,2]]
+-- 2959979592048325618
 
 -- | \( O(1) \)
 --
