@@ -670,6 +670,7 @@ pgConnectVertices e1 e2 =
 -- pgInsertVertex :: HalfEdge s -> ST s (Vertex s)
 
 -- pgRemoveEdge :: Edge s -> ST s ()
+-- pgRemoveEdges :: [Edge s] -> ST s ()
 -- pgRemoveVertex :: Vertex s -> ST s ()
 -- pgRemoveBorder :: Edge s -> ST s ()
 

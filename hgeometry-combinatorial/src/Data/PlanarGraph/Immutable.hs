@@ -432,7 +432,9 @@ halfEdgeVertex (HalfEdge idx) pg = Vertex $ pgHalfEdgeVertex pg Vector.! idx
 
 -- | \( O(1) \)
 --
--- prop> halfEdgeTwin . halfEdgeTwin == id
+-- @
+-- 'halfEdgeTwin' . 'halfEdgeTwin' == id
+-- @
 halfEdgeTwin       :: HalfEdge -> HalfEdge
 halfEdgeTwin (HalfEdge idx) = HalfEdge (idx `xor` 1)
 
