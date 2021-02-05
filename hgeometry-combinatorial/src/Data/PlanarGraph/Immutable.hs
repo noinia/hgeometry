@@ -9,6 +9,7 @@ module Data.PlanarGraph.Immutable
   , pgEdges       -- :: PlanarGraph -> [Edge]
   , pgHalfEdges   -- :: PlanarGraph -> [HalfEdge]
   , pgFaces       -- :: PlanarGraph -> [Face]
+  , pgBoundaries  -- :: PlanarGraph -> [Face]
 
     -- * Elements
     -- ** Vertices
@@ -429,7 +430,9 @@ halfEdgeNextIncoming e pg = halfEdgePrev (halfEdgeTwin e) pg
 halfEdgeVertex     :: HalfEdge -> PlanarGraph -> Vertex
 halfEdgeVertex (HalfEdge idx) pg = Vertex $ pgHalfEdgeVertex pg Vector.! idx
 
--- | O(1)
+-- | \( O(1) \)
+--
+-- prop> halfEdgeTwin . halfEdgeTwin == id
 halfEdgeTwin       :: HalfEdge -> HalfEdge
 halfEdgeTwin (HalfEdge idx) = HalfEdge (idx `xor` 1)
 
@@ -520,6 +523,14 @@ pgFaces pg =
   , halfEdgeIsValid (faceHalfEdge (Face fId) pg)
   ]
 
+-- | O(k)
+pgBoundaries :: PlanarGraph -> [Face]
+pgBoundaries pg =
+  [ Boundary fId
+  | fId <- [0 .. Vector.length (pgBoundaryEdges pg)-1 ]
+  , halfEdgeIsValid (faceHalfEdge (Boundary fId) pg)
+  ]
+
 -- | O(1)
 faceCheck :: String -> Face -> PlanarGraph -> a -> a
 faceCheck tag (Face fId) pg _val
@@ -569,6 +580,7 @@ faceToId (Boundary fId) = negate fId - 1
 
 
 -- | O(1)
+--
 -- >>> let pg = pgFromFaces [[0,1,2]]
 --
 -- >>> faceHalfEdge (Face 0) pg
@@ -775,8 +787,9 @@ tutteEmbedding pg = runST $ do
       unless valid $ do
         V.write (m Vector.! vId) vId (1::Double)
       when valid $ do
-        let onBoundary = vertexIsBoundary (vertexFromId vId) pg
-        unless onBoundary $ do
+        let onOuterBoundary =
+              Boundary 0 == halfEdgeFace (halfEdgeTwin $ vertexHalfEdge (vertexFromId vId) pg) pg
+        unless onOuterBoundary $ do
           let vertex = vertexFromId vId
           let neighbours = vertexNeighbours vertex pg
           forM_ neighbours $ \neighbour ->

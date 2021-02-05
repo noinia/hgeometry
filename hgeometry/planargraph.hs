@@ -1,4 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
 import Data.PlanarGraph.Immutable
@@ -35,6 +36,7 @@ graphs =
               he4 = Mut.halfEdgeFromId 4 pg'
           _newEdge <- Mut.pgConnectVertices he0 he4
           return ()
+  , pgFromFaces [[0,4,1],[0,1,2],[4,3,1],[4,5,3],[3,5,2],[2,5,0]]
   ]
 
 main :: IO ()
@@ -42,19 +44,28 @@ main :: IO ()
 main = do
   forM_ graphs savePlanarGraphSVG
 
-test1 = renderPlanarGraph (pgFromFaces [[0..2]])
-test2 = renderPlanarGraph (pgFromFaces [[0..3],[4,3,2,1]])
+-- test1 = renderPlanarGraph (pgFromFaces [[0..2]])
+-- test2 = renderPlanarGraph (pgFromFaces [[0..3],[4,3,2,1]])
 
 savePlanarGraphSVG :: PlanarGraph -> IO ()
 savePlanarGraphSVG pg = do
     writeFile fileName svgOutput
+    writeFile compactName compactOutput
   where
     svgOutput = renderSvg (Just $ Num 300) (Just $ Num 300) svg
+    compactOutput = renderSvg (Just $ Num 300) (Just $ Num 300) compactSvg
     fileName = "planargraph-" ++ show (pgHash pg) <.> "svg"
-    svg = renderPlanarGraph pg
+    compactName = "planargraph-" ++ show (pgHash pg) <.> "compact" <.> "svg"
+    defOpts = RenderOptions { disableHalfEdges = False }
+    compactOpts = RenderOptions { disableHalfEdges = True }
+    svg = renderPlanarGraph defOpts pg
+    compactSvg = renderPlanarGraph compactOpts pg
 
-renderPlanarGraph :: PlanarGraph -> SVG
-renderPlanarGraph pg = svg
+data RenderOptions = RenderOptions
+  { disableHalfEdges :: Bool }
+
+renderPlanarGraph :: RenderOptions -> PlanarGraph -> SVG
+renderPlanarGraph RenderOptions{..} pg = svg
   where
     vs = tutteEmbedding pg
     faces = pgFaces pg
@@ -82,18 +93,17 @@ renderPlanarGraph pg = svg
                 label = scale 0.5 $ center $ latex (T.pack $ show $ faceToId face)
           ]
         , mkGroup
-          [ mkGroup
+          [ mkGroup $
             [ withStrokeColor "black" $
               mkLine (tipX*scaleFactor, tipY*scaleFactor) (tailX*scaleFactor, tailY*scaleFactor)
-            , translate (halfX*scaleFactor + angY) (halfY*scaleFactor - angX) $
-              mkGroup
-              [labelTwin
-              ]
-            , translate (halfX*scaleFactor - angY) (halfY*scaleFactor + angX) $
-              mkGroup
-              [ labelEdge
-              ]
-            ]
+            ] ++ if disableHalfEdges
+              then []
+              else 
+                [ translate (halfX*scaleFactor + angY) (halfY*scaleFactor - angX) $
+                  labelTwin
+                , translate (halfX*scaleFactor - angY) (halfY*scaleFactor + angX) $
+                  labelEdge
+                ]
           | edge <- pgEdges pg
           , let (tip, tail) = edgeHalfEdges edge
                 V2 tipX tipY = vs V.! vertexToId (halfEdgeVertex tip pg)

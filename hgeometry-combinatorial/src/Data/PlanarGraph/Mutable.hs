@@ -346,6 +346,10 @@ edgeToId (Edge e _) = e
 edgeFromHalfEdge :: HalfEdge s -> Edge s
 edgeFromHalfEdge (HalfEdge he pg) = Edge (he `div` 2) pg
 
+-- | O(1)
+edgeToHalfEdges :: Edge s -> (HalfEdge s, HalfEdge s)
+edgeToHalfEdges (Edge e pg) = (HalfEdge (e*2) pg, HalfEdge (e*2+1) pg)
+
 -------------------------------------------------------------------------------
 -- Half-edges
 
@@ -663,11 +667,11 @@ pgConnectVertices e1 e2 =
 
     pure $ Edge (halfEdgeToId he `div` 2) pg
 
--- pgSplitHalfEdge :: HalfEdge s -> ST s (Vertex s)
+-- pgInsertVertex :: HalfEdge s -> ST s (Vertex s)
 
--- pgRemoveFace :: Face s -> ST s ()
--- pgRemoveHalfEdge :: HalfEdge s -> ST s ()
+-- pgRemoveEdge :: Edge s -> ST s ()
 -- pgRemoveVertex :: Vertex s -> ST s ()
+-- pgRemoveBorder :: Edge s -> ST s ()
 
 -------------------------------------------------------------------------------
 -- Use cases
