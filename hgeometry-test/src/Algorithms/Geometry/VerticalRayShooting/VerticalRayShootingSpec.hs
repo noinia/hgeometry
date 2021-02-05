@@ -1,27 +1,21 @@
 module Algorithms.Geometry.VerticalRayShooting.VerticalRayShootingSpec where
 
-import Algorithms.Geometry.VerticalRayShooting.PersistentSweep
+import           Algorithms.Geometry.VerticalRayShooting.PersistentSweep
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
-import           Data.Foldable (toList)
-import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (mapMaybe)
-import           Data.Ord (comparing)
-import           Data.Semigroup.Foldable
-import qualified Data.Set as SS -- status struct
-import qualified Data.Set.Util as SS
-import qualified Data.Vector as V
+import           Data.RealNumber.Rational
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
 
+type R = RealNumber 5
+
 spec :: Spec
-spec = describe "VerticalRayShooting Tests"
+spec = describe "VerticalRayShooting Tests" $ do
          it "manual queries on horizontal subidv" $ do
            segmentAbove (Point2 5 0) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
            segmentAbove (Point2 5 2) test1 `shouldBe` Just (LineSegment (Closed (Point2 1 4 :+ ())) (Closed (Point2 12 4 :+ ())) :+ 2)

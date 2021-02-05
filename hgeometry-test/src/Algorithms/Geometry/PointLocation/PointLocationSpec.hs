@@ -4,12 +4,13 @@ import Algorithms.Geometry.PointLocation.PersistentSweep
 import Data.RealNumber.Rational
 import Test.Hspec
 
-type R = RealNumber 5
-
 --------------------------------------------------------------------------------
 
+type R = RealNumber 5
+
+
 spec :: Spec
-spec = describe "PointLoction Tests"
+spec = describe "PointLoction Tests" $ do
          pure () -- TODO
 
 
