@@ -23,6 +23,6 @@ import           Data.Sequence (Seq)
 -- running time: \(O(\log^2 n + T*\log n)\), where \(T\) is the time to execute the
 -- predicate.
 splitMonotone     :: (a -> Bool) -> Seq a -> (Seq a, Seq a)
-splitMonotone p s = case binarySearchSeq' p s of
+splitMonotone p s = case binarySearchIdxIn p s of
                       Nothing -> (s,S.empty)
                       Just i  -> S.splitAt i s

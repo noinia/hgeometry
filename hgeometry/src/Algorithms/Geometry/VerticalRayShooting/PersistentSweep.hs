@@ -28,6 +28,9 @@ import qualified Data.Set.Util as SS
 import qualified Data.Vector as V
 
 
+import Data.RealNumber.Rational
+
+type R = RealNumber 5
 --------------------------------------------------------------------------------
 
 -- | The vertical ray shooting data structure
@@ -78,6 +81,7 @@ toEvents s = let (p,q) = bimap (^.core) (^.core) . orderedEndPoints $ s^.core
              in NonEmpty.fromList [ (p^.xCoord) :+ Insert s :| []
                                   , (q^.xCoord) :+ Delete s :| []
                                   ]
+  -- FIXME: Just turn the Actions into functions directly when we know things work
 
 ----------------------------------------
 
@@ -87,6 +91,8 @@ interpret :: Action a -> (a -> a -> Ordering) -> SS.Set a -> SS.Set a
 interpret = \case
   Insert s -> \cmp -> SS.insertBy    cmp s
   Delete s -> \cmp -> SS.deleteAllBy cmp s
+
+
 
 type Event p e r = r :+ NonEmpty (Action (LineSegment 2 p r :+ e))
 
@@ -120,7 +126,17 @@ handle                :: (Ord r, Fractional r)
 handle ss ( l :+ acts
           , r :+ _)   = let mid               = (l+r)/2
                             runActionAt x act = interpret act (ordAt x)
-                        in r :+ foldr (runActionAt mid) ss acts
+                        in r :+ foldr (runActionAt mid) ss (orderActs acts)
+                           -- run deletions first
+
+-- | orders the actions to put insertions first and then all deletions
+orderActs      :: NonEmpty (Action a) -> NonEmpty (Action a)
+orderActs acts = let (dels,ins) = NonEmpty.partition (\case
+                                                         Delete _ -> True
+                                                         Insert _ -> False
+                                                     ) acts
+                 in NonEmpty.fromList $ ins <> dels
+
 
 --------------------------------------------------------------------------------
 -- * Querying the DS
@@ -144,15 +160,18 @@ segmentAbove q ds | q^.xCoord < ds^.leftMost = Nothing
 segmentOnOrAbove  :: Ord r
                   => Point 2 r -> VerticalRayShootingStructure p e r
                   -> Maybe (LineSegment 2 p r :+ e)
-segmentOnOrAbove = undefined
+segmentOnOrAbove =  searchInSlab liesBelow
 -- Maybe just expose a version that you can pass lookupGE, lookupGT, etc. to
 
+-- |
+segmentAboveInSlab :: (Ord r, Num r)
+                   => Point 2 r -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+segmentAboveInSlab = searchInSlab (q `below`)
 
--- | Finds the first segment directly above q
-searchInSlab      :: Ord r
-                  => Point 2 r -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
-searchInSlab q ss = let qs = ClosedLineSegment (q :+ undefined) (q :+ undefined)
-                    in undefined -- SS.lookupGT qs ss
+-- | generic searching function
+searchInSlab   :: (Line 2 r -> Bool)
+               => StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+searchInSlab p = binarySearchIn (p . supportingLine . view core)
 
 
   -- mi >>= \i -> vss^?ix i.extra >>= successorOf qy
@@ -196,3 +215,12 @@ yCoordAt x (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _) :+ _)
     alpha = (x - px) / (qx - px)
 
 --------------------------------------------------------------------------------
+
+test1 :: VerticalRayShootingStructure () Int R
+test1 = verticalRayShootingStructure . NonEmpty.fromList $ zipWith (:+)
+        [ hor 2 0 10
+        , hor 4 1 12
+        , hor 2 10 14
+        ] [1..]
+  where
+    hor y l r = ClosedLineSegment (ext $ Point2 l y) (ext $ Point2 r y)
