@@ -41,8 +41,7 @@ data VerticalRayShootingStructure p e r =
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure p e r)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the
                                    -- status structure is 's', i.e up to 'r'
-                                 }
-  deriving (Show,Eq)
+                                 } deriving (Show,Eq)
 
 type StatusStructure p e r = SS.Set (LineSegment 2 p r :+ e)
 
@@ -96,11 +95,11 @@ toEvents s@(LineSegment' p q :+ _) = NonEmpty.fromList [ (p^.core.xCoord) :+ Ins
 
 data Action a = Insert a | Delete a  deriving (Show,Eq)
 
+{- HLINT ignore "Avoid lambda using `infix`" -}
 interpret :: Action a -> (a -> a -> Ordering) -> SS.Set a -> SS.Set a
 interpret = \case
   Insert s -> \cmp -> SS.insertBy    cmp s
   Delete s -> \cmp -> SS.deleteAllBy cmp s
-
 
 
 type Event p e r = r :+ NonEmpty (Action (LineSegment 2 p r :+ e))
@@ -152,8 +151,8 @@ orderActs acts = let (dels,ins) = NonEmpty.partition (\case
 -- exists.
 --
 -- \(O(\log n)\)
-segmentAbove :: (Ord r, Num r)
-             => Point 2 r -> VerticalRayShootingStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+segmentAbove      :: (Ord r, Num r) => Point 2 r -> VerticalRayShootingStructure p e r
+                  -> Maybe (LineSegment 2 p r :+ e)
 segmentAbove q ds = findSlab q ds >>= lookupAbove q
 
 -- | Find the segment vertically query point q, if it exists.
@@ -233,3 +232,15 @@ test1 = verticalRayShootingStructure . NonEmpty.fromList $ zipWith (:+)
         ] [1..]
   where
     hor y l r = ClosedLineSegment (ext $ Point2 l y) (ext $ Point2 r y)
+
+
+-- shouldBe = (==)
+
+-- foo = segmentAbove (Point2 5 0) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
+-- foo = segmentAbove (Point2 5 2) test1 `shouldBe` Just (LineSegment (Closed (Point2 1 4 :+ ())) (Closed (Point2 12 4 :+ ())) :+ 2)
+-- foo = segmentAbove (Point2 5 1) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
+-- foo = segmentAbove (Point2 5 5) test1 `shouldBe` Nothing
+-- foo = segmentAbove (Point2 10 5) test1 `shouldBe` Nothing
+-- foo = segmentAbove (Point2 10 0) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
+-- foo = segmentAbove (Point2 10 2) test1 `shouldBe` Just (LineSegment (Closed (Point2 1 4 :+ ())) (Closed (Point2 12 4 :+ ())) :+ 2)
+-- foo = segmentAbove (Point2 10 1) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)

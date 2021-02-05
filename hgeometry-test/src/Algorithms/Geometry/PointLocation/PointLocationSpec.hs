@@ -1,13 +1,17 @@
 module Algorithms.Geometry.PointLocation.PointLocationSpec where
 
-import Algorithms.Geometry.PointLocation.PersistentSweep as Sweep
+import Algorithms.Geometry.PointLocation.PersistentSweep
 import Data.RealNumber.Rational
+import Test.Hspec
 
 type R = RealNumber 5
 
+--------------------------------------------------------------------------------
 
 spec :: Spec
-spec = pure ()
+spec = describe "PointLoction Tests"
+         pure () -- TODO
+
 
 
 
