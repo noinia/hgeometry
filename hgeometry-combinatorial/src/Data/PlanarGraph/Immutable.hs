@@ -104,9 +104,9 @@ module Data.PlanarGraph.Immutable
 
     -- * Elements
     -- ** Vertices
-  , Vertex(..), VertexId
+  , Vertex(..)
   -- , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
-  , vertexId                    -- :: Vertex -> VertexId
+  -- , vertexId                    -- :: Vertex -> VertexId
   , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
   , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
   , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
@@ -116,13 +116,13 @@ module Data.PlanarGraph.Immutable
   , vertexNeighbours            -- :: Vertex -> PlanarGraph -> [Vertex]
 
     -- ** Edges
-  , Edge(..), EdgeId
+  , Edge(..)
   , edgeHalfEdges        -- :: Edge -> (HalfEdge, HalfEdge)
 
     -- ** Half-edges
-  , HalfEdge(..), HalfEdgeId
+  , HalfEdge(..)
   -- , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph -> HalfEdge
-  , halfEdgeId           -- :: HalfEdge -> HalfEdgeId
+  -- , halfEdgeId           -- :: HalfEdge -> HalfEdgeId
   , halfEdgeNext         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgePrev         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgeNextOutgoing -- :: HalfEdge -> PlanarGraph -> HalfEdge
@@ -185,18 +185,47 @@ import           Linear.V2
 
 
 -- | Half-edges are directed edges.
-newtype HalfEdge = HalfEdge HalfEdgeId
-  deriving (Eq, Show, Read, Hashable)
+newtype HalfEdge = HalfEdge {halfEdgeId :: Int}
+  deriving (Eq, Hashable)
 
+instance Show HalfEdge where
+  showsPrec d (HalfEdge v) = showParen (d > 10) $
+    showString "HalfEdge " . shows v
 
-newtype Edge = Edge EdgeId
-  deriving (Eq, Show, Read, Hashable)
+instance Read HalfEdge where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (HalfEdge v, t)
+      | ("HalfEdge", s) <- lex r, (v, t) <- reads s ]
+    where app_prec = 10
 
-newtype Vertex = Vertex VertexId
-  deriving (Eq, Show, Read, Hashable)
+newtype Edge = Edge {edgeId :: Int}
+  deriving (Eq, Hashable)
+
+instance Show Edge where
+  showsPrec d (Edge v) = showParen (d > 10) $
+    showString "Edge " . shows v
+
+instance Read Edge where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (Edge v, t)
+      | ("Edge", s) <- lex r, (v, t) <- reads s ]
+    where app_prec = 10
+
+newtype Vertex = Vertex {vertexId :: Int}
+  deriving (Eq, Hashable)
+
+instance Show Vertex where
+  showsPrec d (Vertex v) = showParen (d > 10) $
+    showString "Vertex " . shows v
+
+instance Read Vertex where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (Vertex v, t)
+      | ("Vertex", s) <- lex r, (v, t) <- reads s ]
+    where app_prec = 10
 
 data Face = Face FaceId | Boundary FaceId
-  deriving (Eq, Show, Read)
+  deriving (Eq, Read, Show)
 
 -------------------------------------------------------------------------------
 -- Planar graph
@@ -285,9 +314,9 @@ pgVertices pg =
 -- vertexFromId :: VertexId -> Vertex
 -- vertexFromId vId = Vertex vId
 
--- | \( O(1) \)
-vertexId :: Vertex -> VertexId
-vertexId (Vertex vId) = vId
+-- -- | \( O(1) \)
+-- vertexId :: Vertex -> VertexId
+-- vertexId (Vertex vId) = vId
 
 -- $hidden
 --
@@ -487,9 +516,9 @@ halfEdgeIsValid (HalfEdge eId) = eId >= 0
 -- halfEdgeFromId :: HalfEdgeId -> HalfEdge
 -- halfEdgeFromId eId = HalfEdge eId
 
--- | O(1)
-halfEdgeId :: HalfEdge -> HalfEdgeId
-halfEdgeId (HalfEdge eId) = eId
+-- -- | O(1)
+-- halfEdgeId :: HalfEdge -> HalfEdgeId
+-- halfEdgeId (HalfEdge eId) = eId
 
 -- $hidden
 --
