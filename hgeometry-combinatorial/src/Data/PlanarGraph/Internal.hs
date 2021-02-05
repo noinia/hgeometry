@@ -63,6 +63,9 @@ freezeCircularVector n ref =
 type EdgeId = Int
 type HalfEdgeId = Int
 type VertexId = Int
+
+-- | Numerical face identifier. Negative numbers indicate boundaries, non-negative numbers
+--   are internal faces.
 type FaceId = Int
 
 -- PlanarGraphs have vertices, edges, and faces.

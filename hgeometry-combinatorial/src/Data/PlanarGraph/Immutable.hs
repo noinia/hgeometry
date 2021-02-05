@@ -89,13 +89,20 @@
 -- >>> faceBoundary (Boundary 1) pg
 -- [Vertex 3,Vertex 4,Vertex 5]
 --
+-- == Big-O Notation
+--
+-- When describing runtime complexity, @n@ refers to the size of the graph
+-- (vertices, half-edges, faces, etcs). Some functions are output-sensitive
+-- and use @k@ to indicate the amount of data consumed. For example,
+-- 'vertexNeighbours' runs in \( O(k) \) and taking the first neighbour is therefore
+-- an \( O(1) \) operation (because k=1).
 --------------------------------------------------------------------------------
 module Data.PlanarGraph.Immutable
   ( -- * Planar graphs
     PlanarGraph
   , pgFromFaces   -- :: [[VertexId]] -> PlanarGraph
   , pgFromFacesCV -- :: [CircularVector VertexId] -> PlanarGraph
-  , pgHash        -- :: PlanarGraph -> Int
+  -- , pgHash        -- :: PlanarGraph -> Int
   , pgVertices    -- :: PlanarGraph -> [Vertex]
   , pgEdges       -- :: PlanarGraph -> [Edge]
   , pgHalfEdges   -- :: PlanarGraph -> [HalfEdge]
@@ -108,11 +115,10 @@ module Data.PlanarGraph.Immutable
   -- , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
   -- , vertexId                    -- :: Vertex -> VertexId
   , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
+  , vertexIsInterior            -- :: Vertex -> PlanarGraph -> Bool
   , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
   , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
-  , vertexWithOutgoingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
   , vertexIncomingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
-  , vertexWithIncomingHalfEdges -- :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
   , vertexNeighbours            -- :: Vertex -> PlanarGraph -> [Vertex]
 
     -- ** Edges
@@ -125,18 +131,19 @@ module Data.PlanarGraph.Immutable
   -- , halfEdgeId           -- :: HalfEdge -> HalfEdgeId
   , halfEdgeNext         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgePrev         -- :: HalfEdge -> PlanarGraph -> HalfEdge
+  , halfEdgeTwin         -- :: HalfEdge -> HalfEdge
   , halfEdgeNextOutgoing -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgeNextIncoming -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgeVertex       -- :: HalfEdge -> PlanarGraph -> Vertex
-  , halfEdgeTwin         -- :: HalfEdge -> HalfEdge
   , halfEdgeTailVertex   -- :: HalfEdge -> PlanarGraph -> Vertex
   , halfEdgeTipVertex    -- :: HalfEdge -> PlanarGraph -> Vertex
   , halfEdgeFace         -- :: HalfEdge -> PlanarGraph -> Face
   , halfEdgeIsInterior   -- :: HalfEdge -> PlanarGraph -> Bool
+  , halfEdgeIsBoundary   -- :: HalfEdge -> PlanarGraph -> Bool
 
     -- ** Faces
   , Face(..), FaceId
-  , faceMember      -- :: Face -> PlanarGraph -> Bool
+  , faceMember     -- :: Face -> PlanarGraph -> Bool
   , faceFromId     -- :: FaceId -> PlanarGraph -> Face
   , faceToId       -- :: Face -> FaceId
   , faceHalfEdge   -- :: Face -> PlanarGraph -> HalfEdge
@@ -184,7 +191,9 @@ import           Linear.V2
 -- Elements: Half-edges, vertices, faces.
 
 
--- | Half-edges are directed edges.
+-- | Half-edges are directed edges between vertices. All Half-edge have a twin
+--   in the opposite direction. Half-edges have individual identity but are always
+--   created in pairs.
 newtype HalfEdge = HalfEdge {halfEdgeId :: Int}
   deriving (Eq, Hashable)
 
@@ -198,6 +207,8 @@ instance Read HalfEdge where
       | ("HalfEdge", s) <- lex r, (v, t) <- reads s ]
     where app_prec = 10
 
+-- | Edges are bidirectional and connect two vertices. No two edges are allowed
+-- to cross.
 newtype Edge = Edge {edgeId :: Int}
   deriving (Eq, Hashable)
 
@@ -211,6 +222,7 @@ instance Read Edge where
       | ("Edge", s) <- lex r, (v, t) <- reads s ]
     where app_prec = 10
 
+-- | Graph vertices. For best performance, make sure to use consecutive numbers.
 newtype Vertex = Vertex {vertexId :: Int}
   deriving (Eq, Hashable)
 
@@ -224,6 +236,8 @@ instance Read Vertex where
       | ("Vertex", s) <- lex r, (v, t) <- reads s ]
     where app_prec = 10
 
+-- | Faces are the areas divided by edges. If a face is not surrounded by a set of vertices,
+--   it is called a boundary.
 data Face = Face FaceId | Boundary FaceId
   deriving (Eq, Read, Show)
 
@@ -238,6 +252,7 @@ data Face = Face FaceId | Boundary FaceId
 -- PlanarGraph with 1 vertex: No edges, no interior faces.
 -- PlanarGraph with 2 vertices: One edge, no interior faces.
 -- PlanarGraph with 3+ vertices: Usual properties hold.
+-- | Immutable planar graph.
 data PlanarGraph = PlanarGraph
   { pgHalfEdgeNext   :: !(Vector HalfEdgeId) -- HalfEdge indexed
   , pgHalfEdgePrev   :: !(Vector HalfEdgeId) -- HalfEdge indexed
@@ -254,17 +269,21 @@ panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 
 -- $setup
 --
--- >>> pgHash $ pgFromFaces [[0,1,2]]
+-- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
--- >>> pgHash $ pgFromFaces [[0,1,2,3]]
+-- >>> hash $ pgFromFaces [[0,1,2,3]]
 -- 2506803680640023584
--- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
 --
 
 -- | \( O(n \log n) \)
 --
---
+--   Construct a planar graph from a list of faces. Vertices are assumed to be dense
+--   (ie without gaps) but this only affects performance, not correctness. Memory
+--   usage is defined by the largest vertex ID. That means @'pgFromFaces' [[0,1,2]]@
+--   has the same connectivity as @'pgFromFaces' [[7,8,9]]@ but uses three times less
+--   memory.
 --
 -- ==== __Examples:__
 -- @
@@ -276,9 +295,17 @@ panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 -- 'pgFromFaces' [[0,1,2,3]]
 -- @
 -- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
+--
+-- @since 0.12.0.0
 pgFromFaces :: [[VertexId]] -> PlanarGraph
 pgFromFaces = pgFromFacesCV . map CV.unsafeFromList
 
+-- | \( O(n \log n) \)
+--
+--   Construct a planar graph from a list of faces. This is a slightly more
+--   efficient version of 'pgFromFacesCV'.
+-- 
+-- @since 0.12.0.0
 pgFromFacesCV :: [CircularVector VertexId] -> PlanarGraph
 pgFromFacesCV faces = pgCreate $ Mut.pgFromFacesCV faces
 
@@ -289,6 +316,13 @@ pgFromFacesCV faces = pgCreate $ Mut.pgFromFacesCV faces
 -- dualTree :: Face -> ST s (Tree Face)
 -- dualTree = undefined
 
+instance Hashable PlanarGraph where
+  hashWithSalt salt = hashWithSalt salt . pgHash
+  hash = pgHash
+
+-- | O(n)
+-- 
+-- @since 0.12.0.0
 pgHash :: PlanarGraph -> Int
 pgHash pg =
   let loop [] salt = salt
@@ -302,7 +336,20 @@ pgHash pg =
 -------------------------------------------------------------------------------
 -- Vertices
 
--- | O(k)
+-- | \( O(k) \)
+--   
+--   List all vertices in a graph.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> pgVertices pg
+-- [Vertex 0,Vertex 1,Vertex 2]
+--
+-- @since 0.12.0.0
 pgVertices :: PlanarGraph -> [Vertex]
 pgVertices pg =
   [ Vertex v
@@ -320,10 +367,11 @@ pgVertices pg =
 
 -- $hidden
 --
--- >>> pgHash $ pgFromFaces [[0,1,2]]
+-- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
 
 -- | \( O(1) \)
+--
 --   Each vertex has an assigned half-edge with the following properties:
 --
 --   @'halfEdgeVertex' ('vertexHalfEdge' vertex pg) pg = vertex@
@@ -346,16 +394,19 @@ pgVertices pg =
 --
 -- >>> halfEdgeFace (vertexHalfEdge (Vertex 0) pg) pg
 -- Face 0
+--
+-- @since 0.12.0.0
 vertexHalfEdge :: Vertex -> PlanarGraph -> HalfEdge
 vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 
 
 -- $hidden
 --
--- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
 
 -- | \( O(1) \)
+--
 --   Returns @True@ iff the vertex lies on a boundary.
 --
 -- ==== __Examples:__
@@ -371,11 +422,36 @@ vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 --
 -- >>> vertexIsBoundary (Vertex 4) pg
 -- True
+--
+-- @since 0.12.0.0
 vertexIsBoundary :: Vertex -> PlanarGraph -> Bool
 vertexIsBoundary vertex pg =
     faceIsBoundary $ halfEdgeFace (halfEdgeTwin $ vertexHalfEdge vertex pg) pg
 
+-- | \( O(1) \)
+--
+--   Returns @True@ iff the vertex is interior, ie. does not lie on a boundary.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
+-- >>> vertexIsInterior (Vertex 0) pg
+-- False
+--
+-- >>> vertexIsInterior (Vertex 2) pg
+-- True
+--
+-- >>> vertexIsInterior (Vertex 4) pg
+-- False
+--
+-- @since 0.12.0.0
+vertexIsInterior :: Vertex -> PlanarGraph -> Bool
+vertexIsInterior vertex pg = not $ vertexIsBoundary vertex pg
+
 -- | \( O(k) \)
+--
 --   Query outgoing half-edges from a given vertex in counter-clockwise order.
 --
 -- ==== __Examples:__
@@ -396,6 +472,8 @@ vertexIsBoundary vertex pg =
 --
 -- >>> vertexOutgoingHalfEdges (Vertex 2) pg
 -- [HalfEdge 2,HalfEdge 5]
+--
+-- @since 0.12.0.0
 vertexOutgoingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
 vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
   where
@@ -406,23 +484,13 @@ vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
       | he == first = nil
       | otherwise   = cons he (g (advance he) cons nil)
 
--- | O(k)
-vertexWithOutgoingHalfEdges :: Vertex -> PlanarGraph -> (HalfEdge -> ST s ()) -> ST s ()
-vertexWithOutgoingHalfEdges vertex pg cb = do
-  let first = vertexHalfEdge vertex pg
-  cb first
-  let loop edge | edge == first = return ()
-      loop edge = do
-        cb edge
-        loop $ halfEdgeNext (halfEdgeTwin edge) pg
-  loop $ halfEdgeNext (halfEdgeTwin first) pg
-
 -- $hidden
 --
--- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
 
 -- | \( O(k) \)
+--
 --   Query incoming half-edges from a given vertex in counter-clockwise order.
 --
 -- ==== __Examples:__
@@ -441,14 +509,13 @@ vertexWithOutgoingHalfEdges vertex pg cb = do
 --
 -- >>> vertexIncomingHalfEdges (Vertex 2) pg
 -- [HalfEdge 3,HalfEdge 4]
+--
+-- @since 0.12.0.0
 vertexIncomingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
 vertexIncomingHalfEdges vertex pg = map halfEdgeTwin $ vertexOutgoingHalfEdges vertex pg
 
--- | O(k)
-vertexWithIncomingHalfEdges :: Vertex -> (HalfEdge -> ST s ()) -> ST s ()
-vertexWithIncomingHalfEdges = undefined
-
 -- | \( O(k) \)
+--
 --   Query vertex neighbours in counter-clockwise order.
 --
 -- ==== __Examples:__
@@ -464,6 +531,8 @@ vertexWithIncomingHalfEdges = undefined
 --
 -- >>> vertexNeighbours (Vertex 2) pg
 -- [Vertex 1,Vertex 3]
+--
+-- @since 0.12.0.0
 vertexNeighbours :: Vertex -> PlanarGraph -> [Vertex]
 vertexNeighbours vertex pg = map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges vertex pg
 
@@ -483,7 +552,23 @@ vertexNeighbours vertex pg = map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges
 -------------------------------------------------------------------------------
 -- Edges
 
--- | O(k)
+-- | \( O(k) \)
+--   
+--   List all edges in a graph.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> pgEdges pg
+-- [Edge 0,Edge 1,Edge 2]
+--
+-- >>> map edgeHalfEdges $ pgEdges pg
+-- [(HalfEdge 0,HalfEdge 1),(HalfEdge 2,HalfEdge 3),(HalfEdge 4,HalfEdge 5)]
+--
+-- @since 0.12.0.0
 pgEdges :: PlanarGraph -> [Edge]
 pgEdges pg =
   [ Edge e
@@ -492,14 +577,31 @@ pgEdges pg =
   , halfEdgeIsValid (HalfEdge he)
   ]
 
--- | O(1)
+-- | \( O(1) \)
+--
+--   Split a bidirectional edge into directed half-edges.
+--
+-- @since 0.12.0.0
 edgeHalfEdges :: Edge -> (HalfEdge, HalfEdge)
 edgeHalfEdges (Edge e) = (HalfEdge $ e*2, HalfEdge $ e*2+1)
 
 -------------------------------------------------------------------------------
 -- Half-edges
 
--- | O(k)
+-- | \( O(k) \)
+--   
+--   List all half-edges in a graph.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> pgHalfEdges pg
+-- [HalfEdge 0,HalfEdge 1,HalfEdge 2,HalfEdge 3,HalfEdge 4,HalfEdge 5]
+--
+-- @since 0.12.0.0
 pgHalfEdges :: PlanarGraph -> [HalfEdge]
 pgHalfEdges pg =
   [ he
@@ -509,6 +611,8 @@ pgHalfEdges pg =
 
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 halfEdgeIsValid :: HalfEdge -> Bool
 halfEdgeIsValid (HalfEdge eId) = eId >= 0
 
@@ -522,77 +626,184 @@ halfEdgeIsValid (HalfEdge eId) = eId >= 0
 
 -- $hidden
 --
--- >>> pgHash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
+-- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
 -- 1711135548958680232
 
 -- | \( O(1) \)
+--
+--   Query the half-edge in the pointed direction. Internal half-edges
+--   are arranged clockwise and external half-edges go counter-clockwise.
 --
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
 -- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
--- >>> halfEdgeNext (HalfEdge 4) pg
+-- >>> halfEdgeNext (HalfEdge 4) pg {- clockwise -}
 -- HalfEdge 2
 --
--- >>> halfEdgeNext (HalfEdge 3) pg
+-- >>> halfEdgeNext (HalfEdge 3) pg {- clockwise -}
 -- HalfEdge 5
+--
+-- >>> halfEdgeNext (HalfEdge 1) pg {- counter-clockwise -}
+-- HalfEdge 11
+--
+-- @since 0.12.0.0
 halfEdgeNext :: HalfEdge -> PlanarGraph -> HalfEdge
 halfEdgeNext (HalfEdge eId) pg = HalfEdge $ pgHalfEdgeNext pg Vector.! eId
 
 -- | \( O(1) \)
 --
+--   Query the half-edge opposite the pointed direction. This means counter-clockwise
+--   for internal half-edges and clockwise for external half-edges.
+--
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
 --
 -- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
--- >>> halfEdgePrev (HalfEdge 4) pg
+-- >>> halfEdgePrev (HalfEdge 4) pg {- counter-clockwise -}
 -- HalfEdge 6
 --
--- >>> halfEdgePrev (HalfEdge 3) pg
+-- >>> halfEdgePrev (HalfEdge 3) pg {- counter-clockwise -}
 -- HalfEdge 10
+--
+-- >>> halfEdgePrev (HalfEdge 1) pg {- clockwise -}
+-- HalfEdge 7
+--
+-- @since 0.12.0.0
 halfEdgePrev :: HalfEdge -> PlanarGraph -> HalfEdge
 halfEdgePrev (HalfEdge eId) pg = HalfEdge $ pgHalfEdgePrev pg Vector.! eId
 
--- | O(1)
---   Next half-edge with the same vertex.
+-- | \( O(1) \)
+--
+--   Next half-edge with the same vertex in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
+-- @HalfEdge 0@ is poiting out from @Vertex 1@. Moving counter-clockwise
+-- around @Vertex 1@ yields @HalfEdge 11@ and @HalfEdge 3@.
+--
+-- >>> halfEdgeNextOutgoing (HalfEdge 0) pg
+-- HalfEdge 11
+--
+-- >>> halfEdgeNextOutgoing (HalfEdge 11) pg
+-- HalfEdge 3
+--
+-- >>> halfEdgeNextOutgoing (HalfEdge 3) pg
+-- HalfEdge 0
+--
+-- @since 0.12.0.0
 halfEdgeNextOutgoing :: HalfEdge -> PlanarGraph -> HalfEdge
 halfEdgeNextOutgoing e pg = halfEdgeNext (halfEdgeTwin e) pg
 
--- | O(1)
---   Next half-edge with the same vertex.
+-- | \( O(1) \)
+--
+--   Next half-edge with the same vertex in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
+-- @HalfEdge 6@ is poiting towards @Vertex 3@. Moving clockwise
+-- around @Vertex 3@ yields @HalfEdge 11@ and @HalfEdge 3@.
+--
+-- >>> halfEdgeNextIncoming (HalfEdge 6) pg
+-- HalfEdge 5
+--
+-- >>> halfEdgeNextIncoming (HalfEdge 5) pg
+-- HalfEdge 9
+--
+-- >>> halfEdgeNextIncoming (HalfEdge 9) pg
+-- HalfEdge 6
+--
+-- @since 0.12.0.0
 halfEdgeNextIncoming :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgeNextIncoming e pg = halfEdgePrev (halfEdgeTwin e) pg
-
--- | O(1)
-halfEdgeVertex     :: HalfEdge -> PlanarGraph -> Vertex
-halfEdgeVertex (HalfEdge idx) pg = Vertex $ pgHalfEdgeVertex pg Vector.! idx
+halfEdgeNextIncoming e pg = halfEdgeTwin (halfEdgeNext e pg)
 
 -- | \( O(1) \)
 --
 -- @
 -- 'halfEdgeTwin' . 'halfEdgeTwin' == id
 -- @
-halfEdgeTwin       :: HalfEdge -> HalfEdge
+--
+-- @since 0.12.0.0
+halfEdgeTwin :: HalfEdge -> HalfEdge
 halfEdgeTwin (HalfEdge idx) = HalfEdge (idx `xor` 1)
 
+
+-- | \( O(1) \)
+--
+--   Tail-end of a half-edge. Synonym of 'halfEdgeTailVertex'.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> halfEdgeVertex (HalfEdge 1) pg
+-- Vertex 0
+--
+-- >>> halfEdgeVertex (HalfEdge 2) pg
+-- Vertex 2
+--
+-- @since 0.12.0.0
+halfEdgeVertex :: HalfEdge -> PlanarGraph -> Vertex
+halfEdgeVertex (HalfEdge idx) pg = Vertex $ pgHalfEdgeVertex pg Vector.! idx
+
 -- | O(1)
---   Synonym of `halfEdgeVertex`.
+--
+--   Tail-end of a half-edge. Synonym of 'halfEdgeVertex'.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> halfEdgeTailVertex (HalfEdge 1) pg
+-- Vertex 0
+--
+-- >>> halfEdgeTailVertex (HalfEdge 2) pg
+-- Vertex 2
+--
+-- @since 0.12.0.0
 halfEdgeTailVertex :: HalfEdge -> PlanarGraph -> Vertex
 halfEdgeTailVertex e pg = halfEdgeVertex e pg
 
 -- | O(1)
---   Tip vertex. IE. the vertex of the twin edge.
+--
+--   Tip-end of a half-edge. This is the tail-end vertex of the twin half-edge.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> halfEdgeTipVertex (HalfEdge 1) pg
+-- Vertex 1
+--
+-- >>> halfEdgeTipVertex (HalfEdge 5) pg
+-- Vertex 0
+--
+-- @since 0.12.0.0
 halfEdgeTipVertex  :: HalfEdge -> PlanarGraph -> Vertex
 halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 
 -- $hidden
 --
--- >>> pgHash $ pgFromFaces [[0,1,2]]
+-- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
 
 -- | \( O(1) \)
+--
+--   Query the face of a half-edge.
 --
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2]]
@@ -605,34 +816,60 @@ halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 -- >>> halfEdgeFace (HalfEdge 1) pg
 -- Boundary 0
 --
+--
+-- @since 0.12.0.0
 halfEdgeFace       :: HalfEdge -> PlanarGraph -> Face
 halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
 
 -- | \( O(1) \)
---   Check if a half-edge's face is interior or exterior.
+--
+--   Check if a half-edge's face is on a boundary.
 --
 -- ==== __Examples:__
--- @
--- 'pgFromFaces' [[0,1,2]]
--- @
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
 --
 -- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
+-- >>> halfEdgeIsBoundary (HalfEdge 0) pg
+-- False
+--
+-- >>> halfEdgeIsBoundary (HalfEdge 1) pg
+-- True
+--
+-- >>> halfEdgeIsBoundary (HalfEdge 2) pg
+-- False
+--
+-- >>> halfEdgeIsBoundary (HalfEdge 3) pg
+-- True
+--
+-- @since 0.12.0.0
+halfEdgeIsBoundary :: HalfEdge -> PlanarGraph -> Bool
+halfEdgeIsBoundary edge pg = faceIsBoundary $ halfEdgeFace edge pg
+
+-- | \( O(1) \)
+--
+--   Check if a half-edge's face is interior.
+--
+-- ==== __Examples:__
+--
 -- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
 -- >>> halfEdgeIsInterior (HalfEdge 0) pg
 -- True
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeIsInterior (HalfEdge 1) pg
 -- False
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeIsInterior (HalfEdge 2) pg
 -- True
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> halfEdgeIsInterior (HalfEdge 3) pg
 -- False
+--
+-- @since 0.12.0.0
 halfEdgeIsInterior :: HalfEdge -> PlanarGraph -> Bool
 halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
 
@@ -661,7 +898,20 @@ halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
 -------------------------------------------------------------------------------
 -- Faces
 
--- | O(k)
+-- | \( O(k) \)
+--   
+--   List all faces in a graph.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,4,1],[0,1,2],[4,3,1],[4,5,3],[3,5,2],[2,5,0]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2635031442529484236.compact.svg>>
+--
+-- >>> pgFaces pg
+-- [Face 0,Face 1,Face 2,Face 3,Face 4,Face 5]
+--
+-- @since 0.12.0.0
 pgFaces :: PlanarGraph -> [Face]
 pgFaces pg =
   [ Face fId
@@ -669,7 +919,27 @@ pgFaces pg =
   , halfEdgeIsValid (faceHalfEdge (Face fId) pg)
   ]
 
--- | O(k)
+-- | \( O(k) \)
+--   
+--   List all boundaries (ie external faces) in a graph. There may be
+--   multiple boundaries and they may or may not be reachable from each other.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,4,1],[0,1,2],[4,3,1],[4,5,3],[3,5,2],[2,5,0]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2635031442529484236.compact.svg>>
+--
+-- >>> pgBoundaries pg
+-- [Boundary 0,Boundary 1]
+--
+-- >>> faceBoundary (Boundary 0) pg
+-- [Vertex 0,Vertex 4,Vertex 5]
+--
+-- >>> faceBoundary (Boundary 1) pg
+-- [Vertex 1,Vertex 2,Vertex 3]
+--
+-- @since 0.12.0.0
 pgBoundaries :: PlanarGraph -> [Face]
 pgBoundaries pg =
   [ Boundary fId
@@ -692,6 +962,8 @@ faceCheck tag (Boundary fId) pg _val
 faceCheck _tag _face _pg val = val
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 faceMember :: Face -> PlanarGraph -> Bool
 faceMember face@(Face fId) pg =
   (fId >= Vector.length (pgFaceEdges pg)) &&
@@ -715,11 +987,15 @@ faceIsInvalid (Face fId)     = fId == maxBound
 faceIsInvalid (Boundary fId) = fId == maxBound
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 faceFromId :: FaceId -> Face
 faceFromId fId | fId < 0 = Boundary (negate fId - 1)
 faceFromId fId = Face fId
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 faceToId :: Face -> FaceId
 faceToId (Face fId)     = fId
 faceToId (Boundary fId) = negate fId - 1
@@ -736,16 +1012,22 @@ faceToId (Boundary fId) = negate fId - 1
 -- ... Exception: Data.PlanarGraph.Immutable.faceHalfEdge: Out-of-bounds face access: 1
 -- ...
 --
+--
+-- @since 0.12.0.0
 faceHalfEdge :: Face -> PlanarGraph -> HalfEdge
 faceHalfEdge face pg | faceCheck "faceHalfEdge" face pg False = undefined
 faceHalfEdge (Face fId) pg     = HalfEdge $ pgFaceEdges pg Vector.! fId
 faceHalfEdge (Boundary fId) pg = HalfEdge $ pgBoundaryEdges pg Vector.! fId
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 faceIsInterior :: Face -> Bool
 faceIsInterior = not . faceIsBoundary
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 faceIsBoundary :: Face -> Bool
 faceIsBoundary Face{}     = False
 faceIsBoundary Boundary{} = True
@@ -758,6 +1040,8 @@ faceIsBoundary Boundary{} = True
 -- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> faceHalfEdges (Face 0) pg
 -- [HalfEdge 0,HalfEdge 2,HalfEdge 4]
+--
+-- @since 0.12.0.0
 faceHalfEdges        :: Face -> PlanarGraph -> [HalfEdge]
 faceHalfEdges face pg
   | faceIsBoundary face = first : build (worker halfEdgeNext (halfEdgeNext first pg))
@@ -774,6 +1058,8 @@ faceHalfEdges face pg
 -- >>> let pg = pgFromFaces [[0,1,2]]
 -- >>> faceBoundary (Face 0) pg
 -- [Vertex 1,Vertex 2,Vertex 0]
+--
+-- @since 0.12.0.0
 faceBoundary :: Face -> PlanarGraph -> [Vertex]
 faceBoundary face pg = map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 
@@ -783,6 +1069,8 @@ faceBoundary face pg = map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 -- Mutation
 
 -- | O(n)
+--
+-- @since 0.12.0.0
 pgMutate :: PlanarGraph -> (forall s. Mut.PlanarGraph s -> ST s ()) -> PlanarGraph
 pgMutate pg action = runST $ do
   mutPG <- pgThaw pg
@@ -790,10 +1078,14 @@ pgMutate pg action = runST $ do
   pgUnsafeFreeze mutPG
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 pgCreate :: (forall s. ST s (Mut.PlanarGraph s)) -> PlanarGraph
 pgCreate action = runST (action >>= pgUnsafeFreeze)
 
 -- | O(n)
+--
+-- @since 0.12.0.0
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length (pgHalfEdgeNext pg) `div` 2
@@ -811,6 +1103,8 @@ pgThaw pg = do
   pure Mut.PlanarGraph {..}
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 pgUnsafeThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
 pgUnsafeThaw pg = do
   pgNextHalfEdgeId <- newSTRef $ Vector.length $ pgHalfEdgeNext pg
@@ -828,6 +1122,8 @@ pgUnsafeThaw pg = do
   pure Mut.PlanarGraph {..}
 
 -- | O(n)
+--
+-- @since 0.12.0.0
 pgFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
 pgFreeze pg = do
   maxEdgeId <- readSTRef (Mut.pgNextHalfEdgeId pg)
@@ -845,6 +1141,8 @@ pgFreeze pg = do
   pure PlanarGraph { .. }
 
 -- | O(1)
+--
+-- @since 0.12.0.0
 pgUnsafeFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
 pgUnsafeFreeze pg = do
   maxEdgeId <- readSTRef (Mut.pgNextHalfEdgeId pg)
@@ -909,6 +1207,8 @@ pgUnsafeFreeze pg = do
 -- Tutte embedding
 
 -- | \( O(n^3) \)
+--
+-- @since 0.12.0.0
 tutteEmbedding :: PlanarGraph -> Vector.Vector (V2 Double)
 tutteEmbedding pg = runST $ do
   let nVertices = Vector.length (pgVertexEdges pg)
