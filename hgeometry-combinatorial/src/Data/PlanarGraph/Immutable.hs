@@ -105,8 +105,8 @@ module Data.PlanarGraph.Immutable
     -- * Elements
     -- ** Vertices
   , Vertex(..), VertexId
-  , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
-  , vertexToId                  -- :: Vertex -> VertexId
+  -- , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
+  , vertexId                    -- :: Vertex -> VertexId
   , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
   , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
   , vertexOutgoingHalfEdges     -- :: Vertex -> PlanarGraph -> [HalfEdge]
@@ -116,13 +116,13 @@ module Data.PlanarGraph.Immutable
   , vertexNeighbours            -- :: Vertex -> PlanarGraph -> [Vertex]
 
     -- ** Edges
-  , Edge(..)
+  , Edge(..), EdgeId
   , edgeHalfEdges        -- :: Edge -> (HalfEdge, HalfEdge)
 
     -- ** Half-edges
   , HalfEdge(..), HalfEdgeId
-  , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph -> HalfEdge
-  , halfEdgeToId         -- :: HalfEdge -> HalfEdgeId
+  -- , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph -> HalfEdge
+  , halfEdgeId           -- :: HalfEdge -> HalfEdgeId
   , halfEdgeNext         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgePrev         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgeNextOutgoing -- :: HalfEdge -> PlanarGraph -> HalfEdge
@@ -220,7 +220,7 @@ data PlanarGraph = PlanarGraph
   } deriving Eq
 
 panic :: String -> String -> a
-panic tag msg = error $ "Data.PlanarGraph.Mutable." ++ tag ++ ": " ++ msg
+panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 
 
 -- $setup
@@ -264,7 +264,7 @@ pgHash :: PlanarGraph -> Int
 pgHash pg =
   let loop [] salt = salt
       loop (edgeId:rest) salt =
-        let he = halfEdgeFromId (edgeId*2)
+        let he = HalfEdge (edgeId*2)
             vTail = halfEdgeTailVertex he pg
             vTip = halfEdgeTipVertex he pg
         in loop rest (hashWithSalt salt (vTail, vTip))
@@ -281,13 +281,13 @@ pgVertices pg =
   , halfEdgeIsValid (HalfEdge $ pgVertexEdges pg Vector.! v)
   ]
 
--- | \( O(1) \)
-vertexFromId :: VertexId -> Vertex
-vertexFromId vId = Vertex vId
+-- -- | \( O(1) \)
+-- vertexFromId :: VertexId -> Vertex
+-- vertexFromId vId = Vertex vId
 
 -- | \( O(1) \)
-vertexToId :: Vertex -> VertexId
-vertexToId (Vertex vId) = vId
+vertexId :: Vertex -> VertexId
+vertexId (Vertex vId) = vId
 
 -- $hidden
 --
@@ -327,7 +327,7 @@ vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 -- 1711135548958680232
 
 -- | \( O(1) \)
---   Returns @True@ iff the vertex lines on a boundary.
+--   Returns @True@ iff the vertex lies on a boundary.
 --
 -- ==== __Examples:__
 -- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
@@ -483,13 +483,13 @@ pgHalfEdges pg =
 halfEdgeIsValid :: HalfEdge -> Bool
 halfEdgeIsValid (HalfEdge eId) = eId >= 0
 
--- | O(1)
-halfEdgeFromId :: HalfEdgeId -> HalfEdge
-halfEdgeFromId eId = HalfEdge eId
+-- -- | O(1)
+-- halfEdgeFromId :: HalfEdgeId -> HalfEdge
+-- halfEdgeFromId eId = HalfEdge eId
 
 -- | O(1)
-halfEdgeToId :: HalfEdge -> HalfEdgeId
-halfEdgeToId (HalfEdge eId) = eId
+halfEdgeId :: HalfEdge -> HalfEdgeId
+halfEdgeId (HalfEdge eId) = eId
 
 -- $hidden
 --
@@ -570,10 +570,10 @@ halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 --
 -- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
--- >>> halfEdgeFace (halfEdgeFromId 0) pg
+-- >>> halfEdgeFace (HalfEdge 0) pg
 -- Face 0
 --
--- >>> halfEdgeFace (halfEdgeFromId 1) pg
+-- >>> halfEdgeFace (HalfEdge 1) pg
 -- Boundary 0
 --
 halfEdgeFace       :: HalfEdge -> PlanarGraph -> Face
@@ -590,19 +590,19 @@ halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
 -- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
 --
 -- >>> let pg = pgFromFaces [[0,1,2]]
--- >>> halfEdgeIsInterior (halfEdgeFromId 0) pg
+-- >>> halfEdgeIsInterior (HalfEdge 0) pg
 -- True
 --
 -- >>> let pg = pgFromFaces [[0,1,2]]
--- >>> halfEdgeIsInterior (halfEdgeFromId 1) pg
+-- >>> halfEdgeIsInterior (HalfEdge 1) pg
 -- False
 --
 -- >>> let pg = pgFromFaces [[0,1,2]]
--- >>> halfEdgeIsInterior (halfEdgeFromId 2) pg
+-- >>> halfEdgeIsInterior (HalfEdge 2) pg
 -- True
 --
 -- >>> let pg = pgFromFaces [[0,1,2]]
--- >>> halfEdgeIsInterior (halfEdgeFromId 3) pg
+-- >>> halfEdgeIsInterior (HalfEdge 3) pg
 -- False
 halfEdgeIsInterior :: HalfEdge -> PlanarGraph -> Bool
 halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
@@ -704,7 +704,7 @@ faceToId (Boundary fId) = negate fId - 1
 -- HalfEdge 0
 --
 -- >>> faceHalfEdge (Face 1) pg
--- ... Exception: Data.PlanarGraph.Mutable.faceHalfEdge: Out-of-bounds face access: 1
+-- ... Exception: Data.PlanarGraph.Immutable.faceHalfEdge: Out-of-bounds face access: 1
 -- ...
 --
 faceHalfEdge :: Face -> PlanarGraph -> HalfEdge
@@ -894,23 +894,23 @@ tutteEmbedding pg = runST $ do
   forM_ (zip boundary (regularPolygon nBoundary)) $ \(vertex,(x,y)) -> do
     let valid = halfEdgeIsValid $ vertexHalfEdge vertex pg
     when valid $ do
-      V.write (m Vector.! vertexToId vertex) (vertexToId vertex) (1::Double)
-      V.write vx (vertexToId vertex) x
-      V.write vy (vertexToId vertex) y
+      V.write (m Vector.! vertexId vertex) (vertexId vertex) (1::Double)
+      V.write vx (vertexId vertex) x
+      V.write vy (vertexId vertex) y
 
   forM_ [0..nVertices-1] $ \vId -> -- trace ("Vertex: " ++ show vId) $
     do
-      let valid = halfEdgeIsValid $ vertexHalfEdge (vertexFromId vId) pg
+      let valid = halfEdgeIsValid $ vertexHalfEdge (Vertex vId) pg
       unless valid $ do
         V.write (m Vector.! vId) vId (1::Double)
       when valid $ do
         let onOuterBoundary =
-              Boundary 0 == halfEdgeFace (halfEdgeTwin $ vertexHalfEdge (vertexFromId vId) pg) pg
+              Boundary 0 == halfEdgeFace (halfEdgeTwin $ vertexHalfEdge (Vertex vId) pg) pg
         unless onOuterBoundary $ do
-          let vertex = vertexFromId vId
+          let vertex = Vertex vId
           let neighbours = vertexNeighbours vertex pg
           forM_ neighbours $ \neighbour ->
-            V.write (m Vector.! vId) (vertexToId neighbour) (1::Double)
+            V.write (m Vector.! vId) (vertexId neighbour) (1::Double)
           V.write (m Vector.! vId) vId (negate $ fromIntegral $ length neighbours)
 
   mi <- mapM Vector.freeze m
