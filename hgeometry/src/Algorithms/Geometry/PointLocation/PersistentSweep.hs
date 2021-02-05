@@ -75,13 +75,19 @@ faceContaining q ds = maybe (ds^.outerFace) getFace $ dartAbove q ds
 --------------------------------------------------------------------------------
 
 -- | Data structure for fast InPolygon Queries
-newtype InPolygonDS v r = InPolygonDS (VRS.VerticalRayShootingStructure (Vertex v r) () r)
-  deriving (Show,Eq)
+-- newtype InPolygonDS v r = InPolygonDS (VRS.VerticalRayShootingStructure (Vertex v r) () r)
+--   deriving (Show,Eq)
+
+data InOut = In | Out deriving (Show,Eq)
+
+data Dummy = Dummy
+type InPolygonDS v r = PointLocationDS Dummy v () InOut  r
+
 
 type Vertex v r = Int :+ (Point 2 r :+ v)
 
-inPolygonDS    :: SimplePolygon v r -> InPolygonDS v r
-inPolygonDS pg = undefined
+inPolygonDS :: (Fractional r, Ord r) => SimplePolygon v r -> InPolygonDS v r
+inPolygonDS = pointLocationDS . fromSimplePolygon Dummy In Out
 
 edgeOnOrAbove      :: Point 2 r -> InPolygonDS v r -> Maybe (LineSegment 2 v r :+ (Int,Int))
 edgeOnOrAbove q ds = undefined

@@ -6,21 +6,23 @@ module Algorithms.Geometry.VerticalRayShooting.PersistentSweep
   -- * Building the Data Structure
   , verticalRayShootingStructure
   -- * Querying the Data Structure
-  , segmentAbove
-
-  , searchInSlab
+  , segmentAbove, segmentAboveOrOn
+  , findSlab
+  , lookupAbove, lookupAboveOrOn, searchInSlab
   , ordAt, yCoordAt
   ) where
 
-import           Algorithms.BinarySearch (binarySearchVec)
+import           Algorithms.BinarySearch (binarySearchIn)
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
 import           Data.Foldable (toList)
+import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (mapMaybe)
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable
 import qualified Data.Set as SS -- status struct
@@ -28,7 +30,7 @@ import qualified Data.Set.Util as SS
 import qualified Data.Vector as V
 
 
-import Data.RealNumber.Rational
+import           Data.RealNumber.Rational
 
 type R = RealNumber 5
 --------------------------------------------------------------------------------
@@ -49,12 +51,11 @@ makeLensesWith (lensRules&generateUpdateableOptics .~ False) ''VerticalRayShooti
 --------------------------------------------------------------------------------
 -- * Building the DS
 
-
--- | Given a set of \(n\) interiorly pairwise disjoint segments,
+-- | Given a set of \(n\) interiorly pairwise disjoint *closed* segments,
 -- compute a vertical ray shooting data structure.  (i.e. the
 -- endpoints of the segments may coincide).
 --
--- pre: no vertical segments (they are ignored)
+-- pre: no vertical segments
 --
 -- running time: \(O(n\log n)\).
 -- space: \(O(n\log n)\).
@@ -66,8 +67,18 @@ verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep
     events@(e :| _) = fmap combine
                     . NonEmpty.groupAllWith1 eventX
                     . foldMap1 toEvents
+                    . NonEmpty.fromList -- precondition guarantees that this is safe
+                    . mapMaybe reOrient . toList
                     $ ss
     sweep' = V.fromList . toList . sweep
+
+    reOrient s'@(s :+ z) = case (s^.start.core.xCoord) `compare` (s^.end.core.xCoord) of
+                             LT -> Just s'
+                             GT -> let s'' = s&start .~ (s^.end) -- flip the segment
+                                              &end   .~ (s^.start)
+                                   in Just $ s'' :+ z
+                             EQ -> Nothing -- precondition says this won't happen, but kill
+                                           -- them anyway
 
 -- | Given a bunch of events happening at the same time, merge them into a single event
 -- where we apply all actions.
@@ -76,12 +87,10 @@ combine es@((x :+ _) :| _) = x :+ foldMap1 eventActions es
 
 -- | Given a line segment construct the two events; i.e. when we
 -- insert it and when we delete it.
-toEvents   :: Ord r => LineSegment 2 p r :+ e -> NonEmpty (Event p e r)
-toEvents s = let (p,q) = bimap (^.core) (^.core) . orderedEndPoints $ s^.core
-             in NonEmpty.fromList [ (p^.xCoord) :+ Insert s :| []
-                                  , (q^.xCoord) :+ Delete s :| []
-                                  ]
-  -- FIXME: Just turn the Actions into functions directly when we know things work
+toEvents                           :: Ord r => LineSegment 2 p r :+ e -> NonEmpty (Event p e r)
+toEvents s@(LineSegment' p q :+ _) = NonEmpty.fromList [ (p^.core.xCoord) :+ Insert s :| []
+                                                       , (q^.core.xCoord) :+ Delete s :| []
+                                                       ]
 
 ----------------------------------------
 
@@ -113,8 +122,6 @@ sweep es = NonEmpty.fromList
   where
     h ss evts = let x :+ ss' = handle ss evts in (ss',x :+ ss')
 
--- TODO: Verify that mapAccumL does not leak memory like foldl does.
-
 -- | Given the current status structure (for left of the next event
 -- 'l'), and the next two events (l,r); essentially defining the slab
 -- between l and r, we construct the status structure for in the slab (l,r).
@@ -141,54 +148,56 @@ orderActs acts = let (dels,ins) = NonEmpty.partition (\case
 --------------------------------------------------------------------------------
 -- * Querying the DS
 
-
--- | Find the segment vertically strictly above query point q, if it exists.
+-- | Find the segment vertically strictly above query point q, if it
+-- exists.
 --
 -- \(O(\log n)\)
-segmentAbove :: Ord r
+segmentAbove :: (Ord r, Num r)
              => Point 2 r -> VerticalRayShootingStructure p e r -> Maybe (LineSegment 2 p r :+ e)
-segmentAbove q ds | q^.xCoord < ds^.leftMost = Nothing
-                  | otherwise                = binarySearchVec (q `leftOf `) (ds^.sweepStruct)
-                                               >>= undefined -- searchInSlab q
-  where
-    q `leftOf` (r :+ _) = q^.xCoord <= r
-
+segmentAbove q ds = findSlab q ds >>= lookupAbove q
 
 -- | Find the segment vertically query point q, if it exists.
 --
 -- \(O(\log n)\)
-segmentOnOrAbove  :: Ord r
-                  => Point 2 r -> VerticalRayShootingStructure p e r
-                  -> Maybe (LineSegment 2 p r :+ e)
-segmentOnOrAbove =  searchInSlab liesBelow
--- Maybe just expose a version that you can pass lookupGE, lookupGT, etc. to
+segmentAboveOrOn      :: (Ord r, Num r)
+                      => Point 2 r -> VerticalRayShootingStructure p e r
+                      -> Maybe (LineSegment 2 p r :+ e)
+segmentAboveOrOn q ds = findSlab q ds >>= lookupAboveOrOn q
 
--- |
-segmentAboveInSlab :: (Ord r, Num r)
-                   => Point 2 r -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
-segmentAboveInSlab = searchInSlab (q `below`)
+
+
+-- | Given a query point, find the (data structure of the) slab containing the query point
+--
+-- \(O(\log n)\)
+findSlab :: Ord r
+         => Point 2 r -> VerticalRayShootingStructure p e r -> Maybe (StatusStructure p e r)
+findSlab q ds | q^.xCoord < ds^.leftMost = Nothing
+              | otherwise                = view extra
+                                        <$> binarySearchIn (q `leftOf `) (ds^.sweepStruct)
+  where
+    q' `leftOf` (r :+ _) = q'^.xCoord <= r
+
+--------------------------------------------------------------------------------
+-- * Querying in a single slab
+
+-- | Finds the segment containing or above the query point 'q'
+--
+-- \(O(\log n)\)
+lookupAboveOrOn   :: (Ord r, Num r)
+                  => Point 2 r -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+lookupAboveOrOn q = searchInSlab (not . (q `liesAbove`))
+
+-- | Finds the first segment strictly above q
+--
+-- \(O(\log n)\)
+lookupAbove   :: (Ord r, Num r)
+              => Point 2 r -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+lookupAbove q = searchInSlab (q `liesBelow`)
 
 -- | generic searching function
-searchInSlab   :: (Line 2 r -> Bool)
-               => StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
+searchInSlab   :: Num r => (Line 2 r -> Bool)
+               -> StatusStructure p e r -> Maybe (LineSegment 2 p r :+ e)
 searchInSlab p = binarySearchIn (p . supportingLine . view core)
-
-
-  -- mi >>= \i -> vss^?ix i.extra >>= successorOf qy
-  -- where
-  --   vss   = ds^.sweepStruct
-  --   -- the index of the slab containing the query point (if such a slab exists)
-  --   mi = binarySearchVec (\(x' :+ _) -> x' > ValB qx) vss
-  --   -- the successor in the status-struct corresponding to the current slab
-  --   successorOf y ss = let (_,m,r) = SS.splitOn (yCoordAt' (ds^.subdivision) qx) y ss
-  --                      in SS.lookupMin $ m <> r
-
-
--- -- | General query lifting function
--- queryWith                   :: (r -> r -> Ordering) -> (q -> r) -> (a -> r)
---                             -> (a -> Set a -> b)
---                             -> q -> SS.Set a -> b
--- queryWith cmp f g query q s = withOrd cmp $ liftOrd1 (query (f q)) s
 
 
 ----------------------------------------------------------------------------------
