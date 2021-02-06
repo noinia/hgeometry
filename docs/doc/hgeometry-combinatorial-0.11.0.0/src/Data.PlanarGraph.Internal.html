@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.PlanarGraph.Internal</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.ST</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.STRef</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unsafeFreeze</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Vector</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vector.Circular</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CircularVector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Circular</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">CV</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vector.Mutable</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">STVector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Mutable</span></span><span>  </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Resizeable vector</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">type</span><span> </span><span id="GrowVector"><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-var">GrowVector</span></a></span></span><span> </span><span id="local-6989586621679344128"><span class="annot"><a href="#local-6989586621679344128"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679344127"><span class="annot"><a href="#local-6989586621679344127"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">STRef</span></span><span> </span><span class="annot"><a href="#local-6989586621679344128"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344128"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344127"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span id="local-6989586621679344125"><span id="local-6989586621679344126"><span class="annot"><a href="Data.PlanarGraph.Internal.html#newVector"><span class="hs-identifier hs-type">newVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344126"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344126"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344125"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-18"></span><span id="newVector"><span class="annot"><span class="annottext">newVector :: Int -&gt; ST s (GrowVector s v)
+</span><a href="Data.PlanarGraph.Internal.html#newVector"><span class="hs-identifier hs-var hs-var">newVector</span></a></span></span><span> </span><span id="local-6989586621679344123"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679344123"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">STVector s v -&gt; ST s (GrowVector s v)
+forall a s. a -&gt; ST s (STRef s a)
+</span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">(STVector s v -&gt; ST s (GrowVector s v))
+-&gt; ST s (STVector s v) -&gt; ST s (GrowVector s v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Int -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">V.new</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344123"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span id="local-6989586621679344118"><span id="local-6989586621679344119"><span class="annot"><a href="Data.PlanarGraph.Internal.html#setVector"><span class="hs-identifier hs-type">setVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344119"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344118"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679344118"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344119"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-21"></span><span id="setVector"><span class="annot"><span class="annottext">setVector :: GrowVector s v -&gt; v -&gt; ST s ()
+</span><a href="Data.PlanarGraph.Internal.html#setVector"><span class="hs-identifier hs-var hs-var">setVector</span></a></span></span><span> </span><span id="local-6989586621679344116"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344116"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span id="local-6989586621679344115"><span class="annot"><span class="annottext">val :: v
+</span><a href="#local-6989586621679344115"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-22"></span><span>  </span><span id="local-6989586621679344114"><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344114"><span class="hs-identifier hs-var">vec</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (STVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344116"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) v -&gt; v -&gt; ST s ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">V.set</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+MVector (PrimState (ST s)) v
+</span><a href="#local-6989586621679344114"><span class="hs-identifier hs-var">vec</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679344115"><span class="hs-identifier hs-var">val</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span id="local-6989586621679344110"><span id="local-6989586621679344111"><span class="annot"><a href="Data.PlanarGraph.Internal.html#readVector"><span class="hs-identifier hs-type">readVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344111"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344110"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344111"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344110"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-26"></span><span id="readVector"><span class="annot"><span class="annottext">readVector :: GrowVector s v -&gt; Int -&gt; ST s v
+</span><a href="Data.PlanarGraph.Internal.html#readVector"><span class="hs-identifier hs-var hs-var">readVector</span></a></span></span><span> </span><span id="local-6989586621679344108"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344108"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span id="local-6989586621679344107"><span class="annot"><span class="annottext">idx :: Int
+</span><a href="#local-6989586621679344107"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679344106"><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344106"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (STVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344108"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) v -&gt; Int -&gt; ST s v
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; m a
+</span><span class="hs-identifier hs-var">V.read</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+MVector (PrimState (ST s)) v
+</span><a href="#local-6989586621679344106"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344107"><span class="hs-identifier hs-var">idx</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span id="local-6989586621679344103"><span id="local-6989586621679344104"><span class="annot"><a href="Data.PlanarGraph.Internal.html#writeVector"><span class="hs-identifier hs-type">writeVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344103"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679344103"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344104"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-31"></span><span id="writeVector"><span class="annot"><span class="annottext">writeVector :: GrowVector s v -&gt; Int -&gt; v -&gt; ST s ()
+</span><a href="Data.PlanarGraph.Internal.html#writeVector"><span class="hs-identifier hs-var hs-var">writeVector</span></a></span></span><span> </span><span id="local-6989586621679344101"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344101"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span id="local-6989586621679344100"><span class="annot"><span class="annottext">idx :: Int
+</span><a href="#local-6989586621679344100"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span id="local-6989586621679344099"><span class="annot"><span class="annottext">val :: v
+</span><a href="#local-6989586621679344099"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679344098"><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344098"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (STVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344101"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679344097"><span class="annot"><span class="annottext">l :: Int
+</span><a href="#local-6989586621679344097"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">STVector s v -&gt; Int
+forall s a. MVector s a -&gt; Int
+</span><span class="hs-identifier hs-var">V.length</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344098"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344100"><span class="hs-identifier hs-var">idx</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344097"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-35"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="hs-comment">{-trace (&quot;Growing: &quot; ++ show (idx, l)) $ -}</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-36"></span><span>      </span><span id="local-6989586621679344095"><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344095"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) v
+-&gt; Int -&gt; ST s (MVector (PrimState (ST s)) v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">V.grow</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+MVector (PrimState (ST s)) v
+</span><a href="#local-6989586621679344098"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344100"><span class="hs-identifier hs-var">idx</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) v -&gt; Int -&gt; v -&gt; ST s ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">V.write</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+MVector (PrimState (ST s)) v
+</span><a href="#local-6989586621679344095"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344100"><span class="hs-identifier hs-var">idx</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679344099"><span class="hs-identifier hs-var">val</span></a></span><span>
+</span><span id="line-38"></span><span>      </span><span class="annot"><span class="annottext">GrowVector s v -&gt; STVector s v -&gt; ST s ()
+forall s a. STRef s a -&gt; a -&gt; ST s ()
+</span><span class="hs-identifier hs-var">writeSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344101"><span class="hs-identifier hs-var">ref</span></a></span><span> </span><span class="annot"><span class="annottext">STVector s v
+</span><a href="#local-6989586621679344095"><span class="hs-identifier hs-var">v'</span></a></span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="hs-comment">-- trace (&quot;Writing: &quot; ++ show (idx, l)) $</span><span>
+</span><span id="line-40"></span><span>      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) v -&gt; Int -&gt; v -&gt; ST s ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">V.write</span></span><span> </span><span class="annot"><span class="annottext">STVector s v
+MVector (PrimState (ST s)) v
+</span><a href="#local-6989586621679344098"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344100"><span class="hs-identifier hs-var">idx</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679344099"><span class="hs-identifier hs-var">val</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span id="local-6989586621679344088"><span id="local-6989586621679344089"><span class="annot"><a href="Data.PlanarGraph.Internal.html#freezeVector"><span class="hs-identifier hs-type">freezeVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344089"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344088"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344089"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344088"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-43"></span><span id="freezeVector"><span class="annot"><span class="annottext">freezeVector :: GrowVector s v -&gt; ST s (Vector v)
+</span><a href="Data.PlanarGraph.Internal.html#freezeVector"><span class="hs-identifier hs-var hs-var">freezeVector</span></a></span></span><span> </span><span id="local-6989586621679344086"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344086"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s v -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; m (Vector a)
+</span><span class="hs-identifier hs-var">Vector.freeze</span></span><span> </span><span class="annot"><span class="annottext">(MVector s v -&gt; ST s (Vector v))
+-&gt; ST s (MVector s v) -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (MVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344086"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679344083"><span id="local-6989586621679344084"><span class="annot"><a href="Data.PlanarGraph.Internal.html#unsafeFreezeVector"><span class="hs-identifier hs-type">unsafeFreezeVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344084"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344083"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344084"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344083"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-46"></span><span id="unsafeFreezeVector"><span class="annot"><span class="annottext">unsafeFreezeVector :: GrowVector s v -&gt; ST s (Vector v)
+</span><a href="Data.PlanarGraph.Internal.html#unsafeFreezeVector"><span class="hs-identifier hs-var hs-var">unsafeFreezeVector</span></a></span></span><span> </span><span id="local-6989586621679344081"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344081"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector s v -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; m (Vector a)
+</span><span class="hs-identifier hs-var">Vector.unsafeFreeze</span></span><span> </span><span class="annot"><span class="annottext">(MVector s v -&gt; ST s (Vector v))
+-&gt; ST s (MVector s v) -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (MVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344081"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679344079"><span id="local-6989586621679344080"><span class="annot"><a href="Data.PlanarGraph.Internal.html#thawVector"><span class="hs-identifier hs-type">thawVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344080"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344079"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344079"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344080"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-49"></span><span id="thawVector"><span class="annot"><span class="annottext">thawVector :: Vector v -&gt; ST s (GrowVector s v)
+</span><a href="Data.PlanarGraph.Internal.html#thawVector"><span class="hs-identifier hs-var hs-var">thawVector</span></a></span></span><span> </span><span id="local-6989586621679344077"><span class="annot"><span class="annottext">v :: Vector v
+</span><a href="#local-6989586621679344077"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">STVector s v -&gt; ST s (GrowVector s v)
+forall a s. a -&gt; ST s (STRef s a)
+</span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">(STVector s v -&gt; ST s (GrowVector s v))
+-&gt; ST s (STVector s v) -&gt; ST s (GrowVector s v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Vector v -&gt; ST s (MVector (PrimState (ST s)) v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Vector a -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">Vector.thaw</span></span><span> </span><span class="annot"><span class="annottext">Vector v
+</span><a href="#local-6989586621679344077"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679344074"><span id="local-6989586621679344075"><span class="annot"><a href="Data.PlanarGraph.Internal.html#unsafeThawVector"><span class="hs-identifier hs-type">unsafeThawVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344075"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344074"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344074"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344075"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-52"></span><span id="unsafeThawVector"><span class="annot"><span class="annottext">unsafeThawVector :: Vector v -&gt; ST s (GrowVector s v)
+</span><a href="Data.PlanarGraph.Internal.html#unsafeThawVector"><span class="hs-identifier hs-var hs-var">unsafeThawVector</span></a></span></span><span> </span><span id="local-6989586621679344072"><span class="annot"><span class="annottext">v :: Vector v
+</span><a href="#local-6989586621679344072"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">STVector s v -&gt; ST s (GrowVector s v)
+forall a s. a -&gt; ST s (STRef s a)
+</span><span class="hs-identifier hs-var">newSTRef</span></span><span> </span><span class="annot"><span class="annottext">(STVector s v -&gt; ST s (GrowVector s v))
+-&gt; ST s (STVector s v) -&gt; ST s (GrowVector s v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Vector v -&gt; ST s (MVector (PrimState (ST s)) v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Vector a -&gt; m (MVector (PrimState m) a)
+</span><span class="hs-identifier hs-var">Vector.unsafeThaw</span></span><span> </span><span class="annot"><span class="annottext">Vector v
+</span><a href="#local-6989586621679344072"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679344069"><span id="local-6989586621679344070"><span class="annot"><a href="Data.PlanarGraph.Internal.html#freezeCircularVector"><span class="hs-identifier hs-type">freezeCircularVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344070"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344069"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679344070"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CircularVector</span></span><span> </span><span class="annot"><a href="#local-6989586621679344069"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-56"></span><span id="freezeCircularVector"><span class="annot"><span class="annottext">freezeCircularVector :: Int -&gt; GrowVector s v -&gt; ST s (CircularVector v)
+</span><a href="Data.PlanarGraph.Internal.html#freezeCircularVector"><span class="hs-identifier hs-var hs-var">freezeCircularVector</span></a></span></span><span> </span><span id="local-6989586621679344067"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679344067"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679344066"><span class="annot"><span class="annottext">ref :: GrowVector s v
+</span><a href="#local-6989586621679344066"><span class="hs-identifier hs-var">ref</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector v -&gt; CircularVector v
+forall a. Vector a -&gt; CircularVector a
+</span><span class="hs-identifier hs-var">CV.unsafeFromVector</span></span><span> </span><span class="annot"><span class="annottext">(Vector v -&gt; CircularVector v)
+-&gt; (Vector v -&gt; Vector v) -&gt; Vector v -&gt; CircularVector v
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector v -&gt; Vector v
+forall a. Int -&gt; Vector a -&gt; Vector a
+</span><span class="hs-identifier hs-var">Vector.take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679344067"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector v -&gt; CircularVector v)
+-&gt; ST s (Vector v) -&gt; ST s (CircularVector v)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVector s v -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; m (Vector a)
+</span><span class="hs-identifier hs-var">V.unsafeFreeze</span></span><span> </span><span class="annot"><span class="annottext">(MVector s v -&gt; ST s (Vector v))
+-&gt; ST s (MVector s v) -&gt; ST s (Vector v)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v -&gt; ST s (MVector s v)
+forall s a. STRef s a -&gt; ST s a
+</span><span class="hs-identifier hs-var">readSTRef</span></span><span> </span><span class="annot"><span class="annottext">GrowVector s v
+</span><a href="#local-6989586621679344066"><span class="hs-identifier hs-var">ref</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- Planar graph</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">type</span><span> </span><span id="EdgeId"><span class="annot"><a href="Data.PlanarGraph.Internal.html#EdgeId"><span class="hs-identifier hs-var">EdgeId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">type</span><span> </span><span id="HalfEdgeId"><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-var">HalfEdgeId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">type</span><span> </span><span id="VertexId"><span class="annot"><a href="Data.PlanarGraph.Internal.html#VertexId"><span class="hs-identifier hs-var">VertexId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- | Numerical face identifier. Negative numbers indicate boundaries, non-negative numbers</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--   are internal faces.</span><span>
+</span><span id="line-69"></span><span class="hs-keyword">type</span><span> </span><span id="FaceId"><span class="annot"><a href="Data.PlanarGraph.Internal.html#FaceId"><span class="hs-identifier hs-var">FaceId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- PlanarGraphs have vertices, edges, and faces.</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- Invariant: The half-edge of a boundary vertex is interior, twin is exterior.</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- FIXME: Use STRefU ?</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- PlanarGraph with 0 vertices: No edges, no vertices, no faces.</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- PlanarGraph with 1 vertex: No edges, no interior faces.</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- PlanarGraph with 2 vertices: One edge, no interior faces.</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- PlanarGraph with 3+ vertices: Usual properties hold.</span><span>
+</span><span id="line-79"></span><span class="hs-keyword">data</span><span> </span><span id="PlanarGraph"><span class="annot"><a href="Data.PlanarGraph.Internal.html#PlanarGraph"><span class="hs-identifier hs-var">PlanarGraph</span></a></span></span><span> </span><span id="local-6989586621679344057"><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlanarGraph"><span class="annot"><a href="Data.PlanarGraph.Internal.html#PlanarGraph"><span class="hs-identifier hs-var">PlanarGraph</span></a></span></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="pgNextHalfEdgeId"><span class="annot"><span class="annottext">PlanarGraph s -&gt; STRef s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgNextHalfEdgeId"><span class="hs-identifier hs-var hs-var">pgNextHalfEdgeId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STRef</span></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgNextVertexId"><span class="annot"><span class="annottext">PlanarGraph s -&gt; STRef s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgNextVertexId"><span class="hs-identifier hs-var hs-var">pgNextVertexId</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STRef</span></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgNextFaceId"><span class="annot"><span class="annottext">PlanarGraph s -&gt; STRef s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgNextFaceId"><span class="hs-identifier hs-var hs-var">pgNextFaceId</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STRef</span></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#FaceId"><span class="hs-identifier hs-type">FaceId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgNextBoundaryId"><span class="annot"><span class="annottext">PlanarGraph s -&gt; STRef s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgNextBoundaryId"><span class="hs-identifier hs-var hs-var">pgNextBoundaryId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">STRef</span></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#FaceId"><span class="hs-identifier hs-type">FaceId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgHalfEdgeNext"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgHalfEdgeNext"><span class="hs-identifier hs-var hs-var">pgHalfEdgeNext</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- HalfEdge indexed</span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgHalfEdgePrev"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgHalfEdgePrev"><span class="hs-identifier hs-var hs-var">pgHalfEdgePrev</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- HalfEdge indexed</span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgHalfEdgeVertex"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgHalfEdgeVertex"><span class="hs-identifier hs-var hs-var">pgHalfEdgeVertex</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#VertexId"><span class="hs-identifier hs-type">VertexId</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-comment">-- HalfEdge indexed</span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgHalfEdgeFace"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgHalfEdgeFace"><span class="hs-identifier hs-var hs-var">pgHalfEdgeFace</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#FaceId"><span class="hs-identifier hs-type">FaceId</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-comment">-- HalfEdge indexed</span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgVertexEdges"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgVertexEdges"><span class="hs-identifier hs-var hs-var">pgVertexEdges</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Vertex indexed</span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgFaceEdges"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgFaceEdges"><span class="hs-identifier hs-var hs-var">pgFaceEdges</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Face indexed</span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pgBoundaryEdges"><span class="annot"><span class="annottext">PlanarGraph s -&gt; GrowVector s Int
+</span><a href="Data.PlanarGraph.Internal.html#pgBoundaryEdges"><span class="hs-identifier hs-var hs-var">pgBoundaryEdges</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Data.PlanarGraph.Internal.html#GrowVector"><span class="hs-identifier hs-type">GrowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679344057"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="Data.PlanarGraph.Internal.html#HalfEdgeId"><span class="hs-identifier hs-type">HalfEdgeId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Boundary faces</span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679344041"><span id="local-6989586621679344043"><span class="annot"><span class="annottext">PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+(PlanarGraph s -&gt; PlanarGraph s -&gt; Bool)
+-&gt; (PlanarGraph s -&gt; PlanarGraph s -&gt; Bool) -&gt; Eq (PlanarGraph s)
+forall s. PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+$c/= :: forall s. PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+== :: PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+$c== :: forall s. PlanarGraph s -&gt; PlanarGraph s -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span></pre></body></html>
