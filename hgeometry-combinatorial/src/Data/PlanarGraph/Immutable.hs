@@ -102,7 +102,6 @@ module Data.PlanarGraph.Immutable
     PlanarGraph
   , pgFromFaces   -- :: [[VertexId]] -> PlanarGraph
   , pgFromFacesCV -- :: [CircularVector VertexId] -> PlanarGraph
-  -- , pgHash        -- :: PlanarGraph -> Int
   , pgVertices    -- :: PlanarGraph -> [Vertex]
   , pgEdges       -- :: PlanarGraph -> [Edge]
   , pgHalfEdges   -- :: PlanarGraph -> [HalfEdge]
@@ -112,8 +111,6 @@ module Data.PlanarGraph.Immutable
     -- * Elements
     -- ** Vertices
   , Vertex(..)
-  -- , vertexFromId                -- :: VertexId -> PlanarGraph -> Vertex
-  -- , vertexId                    -- :: Vertex -> VertexId
   , vertexHalfEdge              -- :: Vertex -> PlanarGraph -> HalfEdge
   , vertexIsInterior            -- :: Vertex -> PlanarGraph -> Bool
   , vertexIsBoundary            -- :: Vertex -> PlanarGraph -> Bool
@@ -127,8 +124,6 @@ module Data.PlanarGraph.Immutable
 
     -- ** Half-edges
   , HalfEdge(..)
-  -- , halfEdgeFromId       -- :: HalfEdgeId -> PlanarGraph -> HalfEdge
-  -- , halfEdgeId           -- :: HalfEdge -> HalfEdgeId
   , halfEdgeNext         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgePrev         -- :: HalfEdge -> PlanarGraph -> HalfEdge
   , halfEdgeTwin         -- :: HalfEdge -> HalfEdge
@@ -144,7 +139,6 @@ module Data.PlanarGraph.Immutable
     -- ** Faces
   , Face(..), FaceId
   , faceMember     -- :: Face -> PlanarGraph -> Bool
-  -- , faceFromId     -- :: FaceId -> PlanarGraph -> Face
   , faceId         -- :: Face -> FaceId
   , faceHalfEdge   -- :: Face -> PlanarGraph -> HalfEdge
   , faceIsInterior -- :: Face -> Bool
@@ -1402,4 +1396,3 @@ regularPolygon n =
     , let ang = fromIntegral i * frac + pi/2]
   where
     frac = 2*pi / fromIntegral n
-
