@@ -28,6 +28,8 @@ extra-source-files:  README.md
 
 Extra-doc-files:     docs/Data/PlanarGraph/testG.png
                      docs/Data/PlaneGraph/planegraph.png
+                     docs/Data/PlanarGraph/*.svg
+                     docs/Data/PlanarGraph/*.compact.svg
                      -- docs/**/*.png
 
 cabal-version:       2.0
@@ -96,6 +98,9 @@ library
                     -- * Planar Graphs
                     Data.Permutation
                     Data.PlanarGraph
+                    Data.PlanarGraph.Persistent
+                    Data.PlanarGraph.Mutable
+                    Data.PlanarGraph.Immutable
                     Data.PlanarGraph.AdjRep
                     Data.PlanarGraph.IO
                     Data.PlanarGraph.Dart
@@ -112,7 +117,7 @@ library
 
                     Data.Yaml.Util
 
-  other-modules:
+  other-modules:    Data.PlanarGraph.Internal
 
   -- other-extensions:
   build-depends:
@@ -143,6 +148,7 @@ library
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
               , vector-builder          >= 0.3.7
+              , unordered-containers
 
               , aeson                   >= 1.0
               , yaml                    >= 0.8
