@@ -144,8 +144,8 @@ module Data.PlanarGraph.Immutable
     -- ** Faces
   , Face(..), FaceId
   , faceMember     -- :: Face -> PlanarGraph -> Bool
-  , faceFromId     -- :: FaceId -> PlanarGraph -> Face
-  , faceToId       -- :: Face -> FaceId
+  -- , faceFromId     -- :: FaceId -> PlanarGraph -> Face
+  , faceId         -- :: Face -> FaceId
   , faceHalfEdge   -- :: Face -> PlanarGraph -> HalfEdge
   , faceIsInterior -- :: Face -> Bool
   , faceIsBoundary -- :: Face -> Bool
@@ -170,7 +170,7 @@ import           Control.Monad.ST
 import           Data.Bits
 import           Data.Coerce
 import           Data.Hashable
-import           Data.PlanarGraph.Internal (FaceId, EdgeId, HalfEdgeId, VertexId)
+import           Data.PlanarGraph.Internal (FaceId, HalfEdgeId, VertexId)
 import qualified Data.PlanarGraph.Internal as Mut
 import qualified Data.PlanarGraph.Mutable  as Mut
 import           Data.Proxy
@@ -271,6 +271,8 @@ panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 --
 -- >>> hash $ pgFromFaces [[0,1,2]]
 -- 2959979592048325618
+-- >>> hash $ pgFromFaces [[1,2,3]]
+-- 2486673127436488352
 -- >>> hash $ pgFromFaces [[0,1,2,3]]
 -- 2506803680640023584
 -- >>> hash $ pgFromFaces [[0,1,2,3],[4,3,2,1]]
@@ -295,6 +297,11 @@ panic tag msg = error $ "Data.PlanarGraph.Immutable." ++ tag ++ ": " ++ msg
 -- 'pgFromFaces' [[0,1,2,3]]
 -- @
 -- <<docs/Data/PlanarGraph/planargraph-2506803680640023584.svg>>
+--
+-- @
+-- 'pgFromFaces' [[1,2,3]]
+-- @
+-- <<docs/Data/PlanarGraph/planargraph-2486673127436488352.svg>>
 --
 -- @since 0.12.0.0
 pgFromFaces :: [[VertexId]] -> PlanarGraph
@@ -335,6 +342,15 @@ pgHash pg =
 
 -------------------------------------------------------------------------------
 -- Vertices
+
+-- | O(1)
+vertexCheck :: String -> Vertex -> PlanarGraph -> a -> a
+vertexCheck tag (Vertex vId) pg _val
+  | vId >= Vector.length (pgVertexEdges pg) || vId < 0 =
+    panic tag ("Out-of-bounds vertex access: " ++ show vId)
+  | not (halfEdgeIsValid (HalfEdge (pgVertexEdges pg Vector.! vId))) =
+    panic tag ("Tried to access deleted vertex: " ++ show vId)
+vertexCheck _tag _face _pg val = val
 
 -- | \( O(k) \)
 --   
@@ -389,6 +405,14 @@ pgVertices pg =
 -- >>> vertexHalfEdge (Vertex 1) pg
 -- HalfEdge 0
 --
+-- >>> vertexHalfEdge (Vertex 6) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexHalfEdge: Out-of-bounds vertex access: 6
+-- ...
+--
+-- >>> vertexHalfEdge (Vertex (-10)) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexHalfEdge: Out-of-bounds vertex access: -10
+-- ...
+--
 -- >>> halfEdgeVertex (vertexHalfEdge (Vertex 2) pg) pg
 -- Vertex 2
 --
@@ -397,6 +421,7 @@ pgVertices pg =
 --
 -- @since 0.12.0.0
 vertexHalfEdge :: Vertex -> PlanarGraph -> HalfEdge
+vertexHalfEdge vertex pg | vertexCheck "vertexHalfEdge" vertex pg False = undefined
 vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 
 
@@ -423,8 +448,13 @@ vertexHalfEdge (Vertex vId) pg = HalfEdge $ pgVertexEdges pg Vector.! vId
 -- >>> vertexIsBoundary (Vertex 4) pg
 -- True
 --
+-- >>> vertexIsBoundary (Vertex 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexIsBoundary: Out-of-bounds vertex access: 12
+-- ...
+--
 -- @since 0.12.0.0
 vertexIsBoundary :: Vertex -> PlanarGraph -> Bool
+vertexIsBoundary vertex pg | vertexCheck "vertexIsBoundary" vertex pg False = undefined
 vertexIsBoundary vertex pg =
     faceIsBoundary $ halfEdgeFace (halfEdgeTwin $ vertexHalfEdge vertex pg) pg
 
@@ -446,8 +476,13 @@ vertexIsBoundary vertex pg =
 -- >>> vertexIsInterior (Vertex 4) pg
 -- False
 --
+-- >>> vertexIsInterior (Vertex 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexIsInterior: Out-of-bounds vertex access: 12
+-- ...
+--
 -- @since 0.12.0.0
 vertexIsInterior :: Vertex -> PlanarGraph -> Bool
+vertexIsInterior vertex pg | vertexCheck "vertexIsInterior" vertex pg False = undefined
 vertexIsInterior vertex pg = not $ vertexIsBoundary vertex pg
 
 -- | \( O(k) \)
@@ -473,8 +508,13 @@ vertexIsInterior vertex pg = not $ vertexIsBoundary vertex pg
 -- >>> vertexOutgoingHalfEdges (Vertex 2) pg
 -- [HalfEdge 2,HalfEdge 5]
 --
+-- >>> vertexOutgoingHalfEdges (Vertex 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexOutgoingHalfEdges: Out-of-bounds vertex access: 12
+-- ...
+--
 -- @since 0.12.0.0
 vertexOutgoingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
+vertexOutgoingHalfEdges vertex pg | vertexCheck "vertexOutgoingHalfEdges" vertex pg False = undefined
 vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
   where
     advance he = halfEdgeNext (halfEdgeTwin he) pg
@@ -510,8 +550,13 @@ vertexOutgoingHalfEdges vertex pg = first : build (g (advance first))
 -- >>> vertexIncomingHalfEdges (Vertex 2) pg
 -- [HalfEdge 3,HalfEdge 4]
 --
+-- >>> vertexIncomingHalfEdges (Vertex 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexIncomingHalfEdges: Out-of-bounds vertex access: 12
+-- ...
+--
 -- @since 0.12.0.0
 vertexIncomingHalfEdges :: Vertex -> PlanarGraph -> [HalfEdge]
+vertexIncomingHalfEdges vertex pg | vertexCheck "vertexIncomingHalfEdges" vertex pg False = undefined
 vertexIncomingHalfEdges vertex pg = map halfEdgeTwin $ vertexOutgoingHalfEdges vertex pg
 
 -- | \( O(k) \)
@@ -532,22 +577,17 @@ vertexIncomingHalfEdges vertex pg = map halfEdgeTwin $ vertexOutgoingHalfEdges v
 -- >>> vertexNeighbours (Vertex 2) pg
 -- [Vertex 1,Vertex 3]
 --
+-- >>> vertexNeighbours (Vertex 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.vertexNeighbours: Out-of-bounds vertex access: 12
+-- ...
+--
 -- @since 0.12.0.0
 vertexNeighbours :: Vertex -> PlanarGraph -> [Vertex]
+vertexNeighbours vertex pg | vertexCheck "vertexNeighbours" vertex pg False = undefined
 vertexNeighbours vertex pg = map (`halfEdgeVertex` pg) $ vertexIncomingHalfEdges vertex pg
 
 -- vertexAdjacentVertices :: Vertex -> PlanarGraph -> [Vertex]
 -- vertexAdjacentFaces :: Vertex -> PlanarGraph -> [Face]
-
--- O(1), internal function.
--- vertexNew :: PlanarGraph -> ST s Vertex
--- vertexNew pg = do
---   vId <- readSTRef (pgNextVertexId pg)
---   writeSTRef (pgNextVertexId pg) (vId+1)
---   return (Vertex vId pg)
-
--- vertexSetHalfEdge :: Vertex -> HalfEdge -> ST s ()
--- vertexSetHalfEdge (Vertex vId) (HalfEdge eId) = undefined
 
 -------------------------------------------------------------------------------
 -- Edges
@@ -587,6 +627,15 @@ edgeHalfEdges (Edge e) = (HalfEdge $ e*2, HalfEdge $ e*2+1)
 
 -------------------------------------------------------------------------------
 -- Half-edges
+
+-- | O(1)
+halfEdgeCheck :: String -> HalfEdgeId -> PlanarGraph -> a -> a
+halfEdgeCheck tag eId pg _val
+  | eId >= Vector.length (pgHalfEdgeVertex pg) || eId < 0 =
+    panic tag ("Out-of-bounds half-edge access: " ++ show eId)
+  | pgHalfEdgeVertex pg Vector.! eId < 0 =
+    panic tag ("Tried to access deleted half-edge: " ++ show eId)
+halfEdgeCheck _tag _face _pg val = val
 
 -- | \( O(k) \)
 --   
@@ -648,9 +697,14 @@ halfEdgeIsValid (HalfEdge eId) = eId >= 0
 -- >>> halfEdgeNext (HalfEdge 1) pg {- counter-clockwise -}
 -- HalfEdge 11
 --
+-- >>> halfEdgeNext (HalfEdge 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeNext: Out-of-bounds half-edge access: 12
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeNext :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgeNext (HalfEdge eId) pg = HalfEdge $ pgHalfEdgeNext pg Vector.! eId
+halfEdgeNext (HalfEdge eId) pg = halfEdgeCheck "halfEdgeNext" eId pg $
+  HalfEdge $ pgHalfEdgeNext pg Vector.! eId
 
 -- | \( O(1) \)
 --
@@ -671,9 +725,14 @@ halfEdgeNext (HalfEdge eId) pg = HalfEdge $ pgHalfEdgeNext pg Vector.! eId
 -- >>> halfEdgePrev (HalfEdge 1) pg {- clockwise -}
 -- HalfEdge 7
 --
+-- >>> halfEdgePrev (HalfEdge 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgePrev: Out-of-bounds half-edge access: 12
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgePrev :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgePrev (HalfEdge eId) pg = HalfEdge $ pgHalfEdgePrev pg Vector.! eId
+halfEdgePrev (HalfEdge eId) pg = halfEdgeCheck "halfEdgePrev" eId pg $
+  HalfEdge $ pgHalfEdgePrev pg Vector.! eId
 
 -- | \( O(1) \)
 --
@@ -696,9 +755,14 @@ halfEdgePrev (HalfEdge eId) pg = HalfEdge $ pgHalfEdgePrev pg Vector.! eId
 -- >>> halfEdgeNextOutgoing (HalfEdge 3) pg
 -- HalfEdge 0
 --
+-- >>> halfEdgeNextOutgoing (HalfEdge 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeNextOutgoing: Out-of-bounds half-edge access: 12
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeNextOutgoing :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgeNextOutgoing e pg = halfEdgeNext (halfEdgeTwin e) pg
+halfEdgeNextOutgoing e pg = halfEdgeCheck "halfEdgeNextOutgoing" (halfEdgeId e) pg $
+  halfEdgeNext (halfEdgeTwin e) pg
 
 -- | \( O(1) \)
 --
@@ -721,9 +785,14 @@ halfEdgeNextOutgoing e pg = halfEdgeNext (halfEdgeTwin e) pg
 -- >>> halfEdgeNextIncoming (HalfEdge 9) pg
 -- HalfEdge 6
 --
+-- >>> halfEdgeNextIncoming (HalfEdge 12) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeNextIncoming: Out-of-bounds half-edge access: 12
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeNextIncoming :: HalfEdge -> PlanarGraph -> HalfEdge
-halfEdgeNextIncoming e pg = halfEdgeTwin (halfEdgeNext e pg)
+halfEdgeNextIncoming e pg = halfEdgeCheck "halfEdgeNextIncoming" (halfEdgeId e) pg $
+  halfEdgeTwin (halfEdgeNext e pg)
 
 -- | \( O(1) \)
 --
@@ -752,9 +821,14 @@ halfEdgeTwin (HalfEdge idx) = HalfEdge (idx `xor` 1)
 -- >>> halfEdgeVertex (HalfEdge 2) pg
 -- Vertex 2
 --
+-- >>> halfEdgeVertex (HalfEdge 6) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeVertex: Out-of-bounds half-edge access: 6
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeVertex :: HalfEdge -> PlanarGraph -> Vertex
-halfEdgeVertex (HalfEdge idx) pg = Vertex $ pgHalfEdgeVertex pg Vector.! idx
+halfEdgeVertex (HalfEdge idx) pg = halfEdgeCheck "halfEdgeVertex" idx pg $
+  Vertex $ pgHalfEdgeVertex pg Vector.! idx
 
 -- | O(1)
 --
@@ -816,10 +890,14 @@ halfEdgeTipVertex e pg = halfEdgeVertex (halfEdgeTwin e) pg
 -- >>> halfEdgeFace (HalfEdge 1) pg
 -- Boundary 0
 --
+-- >>> halfEdgeFace (HalfEdge 6) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeFace: Out-of-bounds half-edge access: 6
+-- ...
 --
 -- @since 0.12.0.0
 halfEdgeFace       :: HalfEdge -> PlanarGraph -> Face
-halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
+halfEdgeFace (HalfEdge eId) pg = halfEdgeCheck "halfEdgeFace" eId pg $
+  faceFromId $ pgHalfEdgeFace pg Vector.! eId
 
 -- | \( O(1) \)
 --
@@ -843,9 +921,14 @@ halfEdgeFace (HalfEdge eId) pg = faceFromId $ pgHalfEdgeFace pg Vector.! eId
 -- >>> halfEdgeIsBoundary (HalfEdge 3) pg
 -- True
 --
+-- >>> halfEdgeIsBoundary (HalfEdge 6) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeIsBoundary: Out-of-bounds half-edge access: 6
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeIsBoundary :: HalfEdge -> PlanarGraph -> Bool
-halfEdgeIsBoundary edge pg = faceIsBoundary $ halfEdgeFace edge pg
+halfEdgeIsBoundary edge pg = halfEdgeCheck "halfEdgeIsBoundary" (halfEdgeId edge) pg $
+  faceIsBoundary $ halfEdgeFace edge pg
 
 -- | \( O(1) \)
 --
@@ -869,31 +952,14 @@ halfEdgeIsBoundary edge pg = faceIsBoundary $ halfEdgeFace edge pg
 -- >>> halfEdgeIsInterior (HalfEdge 3) pg
 -- False
 --
+-- >>> halfEdgeIsInterior (HalfEdge 6) pg
+-- ... Exception: Data.PlanarGraph.Immutable.halfEdgeIsInterior: Out-of-bounds half-edge access: 6
+-- ...
+--
 -- @since 0.12.0.0
 halfEdgeIsInterior :: HalfEdge -> PlanarGraph -> Bool
-halfEdgeIsInterior edge pg = faceIsInterior $ halfEdgeFace edge pg
-
--- O(1) Allocate new half-edge pair.
--- halfEdgeNew :: PlanarGraph -> ST s HalfEdge
--- halfEdgeNew pg = undefined
---   eId <- readSTRef (pgNextHalfEdgeId pg)
---   writeSTRef (pgNextHalfEdgeId pg) (eId+1)
---   return (HalfEdge (eId*2) pg)
-
--- halfEdgeSetNext :: HalfEdge -> HalfEdge -> PlanarGraph -> PlanarGraph
--- halfEdgeSetNext (HalfEdge e) (HalfEdge next) pg = undefined
-
--- halfEdgeSetPrev :: HalfEdge -> HalfEdge -> PlanarGraph -> PlanarGraph
--- halfEdgeSetPrev (HalfEdge e) (HalfEdge prev) pg = undefined
-
--- halfEdgeSetFace :: HalfEdge -> Face -> PlanarGraph -> PlanarGraph
--- halfEdgeSetFace (HalfEdge e) face pg =
---   pg{ pgHalfEdgeFace = pgHalfEdgeFace pg Vector.// [(e, faceToId face)] }
-
--- halfEdgeSetVertex :: HalfEdge -> Vertex -> PlanarGraph -> PlanarGraph
--- halfEdgeSetVertex (HalfEdge e) vertex pg =
---   pg{ pgHalfEdgeVertex = pgHalfEdgeVertex pg Vector.// [(e, vertexToId vertex)] }
-
+halfEdgeIsInterior edge pg = halfEdgeCheck "halfEdgeIsInterior" (halfEdgeId edge) pg $
+  faceIsInterior $ halfEdgeFace edge pg
 
 -------------------------------------------------------------------------------
 -- Faces
@@ -961,30 +1027,58 @@ faceCheck tag (Boundary fId) pg _val
     panic tag ("Tried to access deleted boundary: " ++ show fId)
 faceCheck _tag _face _pg val = val
 
--- | O(1)
+-- | \( O(1) \)
+--
+--   Returns @True@ iff a face or boundary is part of the planar graph.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-2959979592048325618.svg>>
+--
+-- >>> faceMember (Face 0) pg
+-- True
+--
+-- >>> faceMember (Face 1) pg
+-- False
+--
+-- >>> faceMember (Face 100) pg
+-- False
+--
+-- >>> faceMember (Face (-100)) pg
+-- False
+--
+-- >>> faceMember (Boundary 0) pg
+-- True
+--
+-- >>> faceMember (Boundary 1) pg
+-- False
 --
 -- @since 0.12.0.0
 faceMember :: Face -> PlanarGraph -> Bool
 faceMember face@(Face fId) pg =
-  (fId >= Vector.length (pgFaceEdges pg)) &&
+  fId < Vector.length (pgFaceEdges pg) &&
+  fId >= 0 &&
   halfEdgeIsValid (faceHalfEdge face pg)
 faceMember face@(Boundary fId) pg =
-  (fId >= Vector.length (pgFaceEdges pg)) &&
+  fId < Vector.length (pgFaceEdges pg) &&
+  fId >= 0 &&
   halfEdgeIsValid (faceHalfEdge face pg)
 
 
--- | O(1)
-faceInvalid :: Face
-faceInvalid = faceFromId maxBound
+-- -- | O(1)
+-- faceInvalid :: Face
+-- faceInvalid = faceFromId maxBound
 
--- | O(1)
-faceIsValid :: Face -> Bool
-faceIsValid = not . faceIsInvalid
+-- -- | O(1)
+-- faceIsValid :: Face -> Bool
+-- faceIsValid = not . faceIsInvalid
 
--- | O(1)
-faceIsInvalid :: Face -> Bool
-faceIsInvalid (Face fId)     = fId == maxBound
-faceIsInvalid (Boundary fId) = fId == maxBound
+-- -- | O(1)
+-- faceIsInvalid :: Face -> Bool
+-- faceIsInvalid (Face fId)     = fId == maxBound
+-- faceIsInvalid (Boundary fId) = fId == maxBound
 
 -- | O(1)
 --
@@ -993,39 +1087,93 @@ faceFromId :: FaceId -> Face
 faceFromId fId | fId < 0 = Boundary (negate fId - 1)
 faceFromId fId = Face fId
 
--- | O(1)
+-- | \( O(1) \)
+--
+--   Maps interior faces to positive integers and boundary faces to negative integers.
+--
+-- ==== __Examples:__
+--
+-- >>> faceId (Face 0)
+-- 0
+--
+-- >>> faceId (Face 10)
+-- 10
+--
+-- >>> faceId (Boundary 0)
+-- -1
+--
+-- >>> faceId (Boundary 10)
+-- -11
 --
 -- @since 0.12.0.0
-faceToId :: Face -> FaceId
-faceToId (Face fId)     = fId
-faceToId (Boundary fId) = negate fId - 1
+faceId :: Face -> FaceId
+faceId (Face fId)     = fId
+faceId (Boundary fId) = negate fId - 1
 
 
--- | O(1)
+-- | \( O(1) \)
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
+--   Query the half-edge associated with a face or boundary.
+--
+-- ==== __Examples:__
+--
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
 --
 -- >>> faceHalfEdge (Face 0) pg
 -- HalfEdge 0
 --
 -- >>> faceHalfEdge (Face 1) pg
--- ... Exception: Data.PlanarGraph.Immutable.faceHalfEdge: Out-of-bounds face access: 1
--- ...
+-- HalfEdge 8
 --
+-- >>> faceHalfEdge (Boundary 0) pg
+-- HalfEdge 1
+--
+-- >>> faceHalfEdge (Face 10) pg {- Invalid face -}
+-- ... Exception: Data.PlanarGraph.Immutable.faceHalfEdge: Out-of-bounds face access: 10
+-- ...
 --
 -- @since 0.12.0.0
 faceHalfEdge :: Face -> PlanarGraph -> HalfEdge
-faceHalfEdge face pg | faceCheck "faceHalfEdge" face pg False = undefined
-faceHalfEdge (Face fId) pg     = HalfEdge $ pgFaceEdges pg Vector.! fId
-faceHalfEdge (Boundary fId) pg = HalfEdge $ pgBoundaryEdges pg Vector.! fId
+faceHalfEdge face pg = faceCheck "faceHalfEdge" face pg $
+  case face of
+    Face fId     -> HalfEdge $ pgFaceEdges pg Vector.! fId
+    Boundary fId -> HalfEdge $ pgBoundaryEdges pg Vector.! fId
 
--- | O(1)
+-- | \( O(1) \)
+--
+--   Returns @True@ iff a face is interior. Does not check if the face actually exists.
+--
+-- ==== __Examples:__
+--
+-- >>> faceIsInterior (Face 0)
+-- True
+--
+-- >>> faceIsInterior (Face 10000)
+-- True
+--
+-- >>> faceIsInterior (Boundary 0)
+-- False
 --
 -- @since 0.12.0.0
 faceIsInterior :: Face -> Bool
 faceIsInterior = not . faceIsBoundary
 
--- | O(1)
+-- | \( O(1) \)
+--
+--   Returns @True@ iff a face is a boundary. Does not check if the face actually exists.
+--
+-- ==== __Examples:__
+--
+-- >>> faceIsBoundary (Face 0)
+-- False
+--
+-- >>> faceIsBoundary (Face 10000)
+-- False
+--
+-- >>> faceIsBoundary (Boundary 0)
+-- True
 --
 -- @since 0.12.0.0
 faceIsBoundary :: Face -> Bool
@@ -1034,15 +1182,31 @@ faceIsBoundary Boundary{} = True
 
 -- faceVertices         :: Face -> ST s (CircularVector Vertex)
 
--- | O(k)
---   Counterclockwise vector of edges.
+-- | \( O(k) \)
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
+--   Query the half-edges around a face in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
 -- >>> faceHalfEdges (Face 0) pg
--- [HalfEdge 0,HalfEdge 2,HalfEdge 4]
+-- [HalfEdge 0,HalfEdge 2,HalfEdge 4,HalfEdge 6]
+--
+-- >>> faceHalfEdges (Face 1) pg
+-- [HalfEdge 8,HalfEdge 5,HalfEdge 3,HalfEdge 10]
+--
+-- >>> faceHalfEdges (Boundary 0) pg
+-- [HalfEdge 1,HalfEdge 11,HalfEdge 9,HalfEdge 7]
+--
+-- >>> faceHalfEdges (Face 10) pg
+-- ... Exception: Data.PlanarGraph.Immutable.faceHalfEdges: Out-of-bounds face access: 10
+-- ...
 --
 -- @since 0.12.0.0
 faceHalfEdges        :: Face -> PlanarGraph -> [HalfEdge]
+faceHalfEdges face pg | faceCheck "faceHalfEdges" face pg False = undefined
 faceHalfEdges face pg
   | faceIsBoundary face = first : build (worker halfEdgeNext (halfEdgeNext first pg))
   | otherwise           = first : build (worker halfEdgePrev (halfEdgePrev first pg))
@@ -1053,22 +1217,39 @@ faceHalfEdges face pg
       | he == first = nil
       | otherwise   = cons he (worker advance (advance he pg) cons nil)
 
--- | O(k)
+-- | \( O(k) \)
 --
--- >>> let pg = pgFromFaces [[0,1,2]]
+--   Query the vertices of a face in counter-clockwise order.
+--
+-- ==== __Examples:__
+-- >>> let pg = pgFromFaces [[0,1,2,3],[4,3,2,1]]
+--
+-- <<docs/Data/PlanarGraph/planargraph-1711135548958680232.svg>>
+--
 -- >>> faceBoundary (Face 0) pg
--- [Vertex 1,Vertex 2,Vertex 0]
+-- [Vertex 1,Vertex 2,Vertex 3,Vertex 0]
+--
+-- >>> faceBoundary (Face 1) pg
+-- [Vertex 3,Vertex 2,Vertex 1,Vertex 4]
+--
+-- >>> faceBoundary (Boundary 0) pg
+-- [Vertex 0,Vertex 1,Vertex 4,Vertex 3]
+--
+-- >>> faceBoundary (Face 10) pg
+-- ... Exception: Data.PlanarGraph.Immutable.faceBoundary: Out-of-bounds face access: 10
+-- ...
 --
 -- @since 0.12.0.0
 faceBoundary :: Face -> PlanarGraph -> [Vertex]
-faceBoundary face pg = map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
+faceBoundary face pg = faceCheck "faceBoundary" face pg $
+  map (`halfEdgeVertex` pg) $ faceHalfEdges face pg
 
 -- faceAdjacentFaces    :: Face -> ST s (CircularVector Face)
 
 -------------------------------------------------------------------------------
 -- Mutation
 
--- | O(n)
+-- | \( O(n) \)
 --
 -- @since 0.12.0.0
 pgMutate :: PlanarGraph -> (forall s. Mut.PlanarGraph s -> ST s ()) -> PlanarGraph
@@ -1077,13 +1258,13 @@ pgMutate pg action = runST $ do
   action mutPG
   pgUnsafeFreeze mutPG
 
--- | O(1)
+-- | \( O(1) \)
 --
 -- @since 0.12.0.0
 pgCreate :: (forall s. ST s (Mut.PlanarGraph s)) -> PlanarGraph
 pgCreate action = runST (action >>= pgUnsafeFreeze)
 
--- | O(n)
+-- | \( O(n) \)
 --
 -- @since 0.12.0.0
 pgThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
@@ -1102,7 +1283,7 @@ pgThaw pg = do
   pgBoundaryEdges <- Mut.thawVector $ pgBoundaryEdges pg
   pure Mut.PlanarGraph {..}
 
--- | O(1)
+-- | \( O(1) \)
 --
 -- @since 0.12.0.0
 pgUnsafeThaw :: PlanarGraph -> ST s (Mut.PlanarGraph s)
@@ -1121,7 +1302,7 @@ pgUnsafeThaw pg = do
   pgBoundaryEdges <- Mut.unsafeThawVector $ pgBoundaryEdges pg
   pure Mut.PlanarGraph {..}
 
--- | O(n)
+-- | \( O(n) \)
 --
 -- @since 0.12.0.0
 pgFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
@@ -1140,7 +1321,7 @@ pgFreeze pg = do
   pgBoundaryEdges <- Vector.take maxBoundaryId <$> Mut.freezeVector (Mut.pgBoundaryEdges pg)
   pure PlanarGraph { .. }
 
--- | O(1)
+-- | \( O(1) \)
 --
 -- @since 0.12.0.0
 pgUnsafeFreeze :: Mut.PlanarGraph s -> ST s PlanarGraph
@@ -1158,50 +1339,6 @@ pgUnsafeFreeze pg = do
   pgFaceEdges <- Vector.take maxFaceId <$> Mut.unsafeFreezeVector (Mut.pgFaceEdges pg)
   pgBoundaryEdges <- Vector.take maxBoundaryId <$> Mut.unsafeFreezeVector (Mut.pgBoundaryEdges pg)
   pure PlanarGraph { .. }
-
--- { pgNextHalfEdgeId :: !(STRef s HalfEdgeId)
---   , pgNextVertexId   :: !(STRef s VertexId)
---   , pgNextFaceId     :: !(STRef s FaceId)
---   , pgNextBoundaryId :: !(STRef s FaceId)
---   , pgHalfEdgeNext   :: !(GrowVector s HalfEdgeId) -- HalfEdge indexed
---   , pgHalfEdgePrev   :: !(GrowVector s HalfEdgeId) -- HalfEdge indexed
---   , pgHalfEdgeVertex :: !(GrowVector s VertexId)   -- HalfEdge indexed
---   , pgHalfEdgeFace   :: !(GrowVector s FaceId)     -- HalfEdge indexed
---   , pgVertices       :: !(GrowVector s HalfEdgeId) -- Vertex indexed
---   , pgFaceEdges          :: !(GrowVector s HalfEdgeId) -- Face indexed
---   , pgBoundaryEdges     :: !(GrowVector s HalfEdgeId) -- Boundary faces
-
--- pgConnectVertices :: HalfEdge -> HalfEdge -> ST s (Edge s)
--- pgConnectVertices e1 e2 = do
---   -- Check e1.face == e2.face
---   -- Check e1.next /= e2
---   -- Check e2.next /= e1
---   -- create new half-edge pair: e and e'
---   -- e.vertex = e1.vertex
---   -- e.next = e2
---   --
---   undefined
-
--- pgSplitHalfEdge :: HalfEdge -> ST s Vertex
-
--- pgRemoveFace :: Face -> ST s ()
--- pgRemoveHalfEdge :: HalfEdge -> ST s ()
--- pgRemoveVertex :: Vertex -> ST s ()
-
--------------------------------------------------------------------------------
--- Use cases
-
--- Use cases:
---   Triangulate polygon.
---     Create PlanarGraph from polygon. Holes have unique faces.
---     Update with [LineSegment 2 Vertex r]
---     Update Face ids at the end.
---   Cut planar graph in two.
---   Re-triangulate part of graph.
---   Mesh smoothing.
---     1. Keep vertex positions separate. Can update without changing the graph.
---     2. Swap edges. HalfEdge+Twin. Find next of each. Delete original half-edges.
---        Then insert half-edges to next.
 
 -------------------------------------------------------------------------------
 -- Tutte embedding

@@ -12,6 +12,7 @@ import           Data.Foldable         as F
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.STRef
+import           Data.Hashable
 import qualified Data.Text             as T
 import qualified Data.Vector           as V
 import qualified Data.Vector.Circular  as CV
@@ -28,6 +29,7 @@ import Debug.Trace
 graphs :: [PlanarGraph]
 graphs =
   [ pgFromFaces [[0..2]]
+  , pgFromFaces [[1,2,3]]
   , pgFromFaces [[0..3]]
   , pgFromFaces [[0..3],[4,3,2,1]]
   , let pg = pgFromFaces [[0..3]]
@@ -54,8 +56,8 @@ savePlanarGraphSVG pg = do
   where
     svgOutput = renderSvg (Just $ Num 300) (Just $ Num 300) svg
     compactOutput = renderSvg (Just $ Num 300) (Just $ Num 300) compactSvg
-    fileName = "planargraph-" ++ show (pgHash pg) <.> "svg"
-    compactName = "planargraph-" ++ show (pgHash pg) <.> "compact" <.> "svg"
+    fileName = "planargraph-" ++ show (hash pg) <.> "svg"
+    compactName = "planargraph-" ++ show (hash pg) <.> "compact" <.> "svg"
     defOpts = RenderOptions { disableHalfEdges = False }
     compactOpts = RenderOptions { disableHalfEdges = True }
     svg = renderPlanarGraph defOpts pg
@@ -87,10 +89,10 @@ renderPlanarGraph RenderOptions{..} pg = svg
                 poly = simpleFromPoints $ map ext
                         [ Point2 x y
                         | vId <- boundary
-                        , let V2 x y = vs V.! vertexToId vId
+                        , let V2 x y = vs V.! vertexId vId
                         ]
                 Point2 x y = centroid poly
-                label = scale 0.5 $ center $ latex (T.pack $ show $ faceToId face)
+                label = scale 0.5 $ center $ latex (T.pack $ show $ faceId face)
           ]
         , mkGroup
           [ mkGroup $
@@ -106,11 +108,11 @@ renderPlanarGraph RenderOptions{..} pg = svg
                 ]
           | edge <- pgEdges pg
           , let (tip, tail) = edgeHalfEdges edge
-                V2 tipX tipY = vs V.! vertexToId (halfEdgeVertex tip pg)
-                V2 tailX tailY = vs V.! vertexToId (halfEdgeVertex tail pg)
+                V2 tipX tipY = vs V.! vertexId (halfEdgeVertex tip pg)
+                V2 tailX tailY = vs V.! vertexId (halfEdgeVertex tail pg)
                 (halfX,halfY) = (tipX + (tailX-tipX)/2, tipY + (tailY-tipY)/2)
-                labelEdge = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeToId tip)
-                labelTwin = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeToId tail)
+                labelEdge = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeId tip)
+                labelTwin = scale 0.4 $ center $ latex (T.pack $ show $ halfEdgeId tail)
                 V2 angX angY = signorm (V2 tipX tipY - V2 tailX tailY) ^* 0.3
           ]
         , mkGroup
@@ -119,7 +121,7 @@ renderPlanarGraph RenderOptions{..} pg = svg
             [ withFillOpacity 1 $ withFillColor "white" $ withStrokeColor "black" $
               mkCircle 0.3
             , label ]
-          | v <- map vertexToId $ pgVertices pg
+          | v <- map vertexId $ pgVertices pg
           , let V2 x y = vs V.! v
                 label = scaleToWidth 0.2 $ center $ latex (T.pack $ show v)
           ]
