@@ -191,7 +191,10 @@ executable fromgeojson
                   hgeometry,
                   hgeometry-combinatorial,
                   lens,
-                  hspec
+                  -- for whatever reason my dev setup doesn't like it if I don't specify these,
+                  -- even if we don't need them
+                  hspec,
+                  hgeometry-ipe
 
   default-extensions: TypeFamilies
                     , GADTs

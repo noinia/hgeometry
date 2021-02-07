@@ -1,7 +1,12 @@
 module Algorithms.Geometry.PointLocation.PointLocationSpec where
 
+import Control.Lens
+import Data.Ext
 import Algorithms.Geometry.PointLocation.PersistentSweep
 import Data.RealNumber.Rational
+import Data.Geometry.Point
+import Data.Geometry.Polygon
+import Data.Geometry.Ipe
 import Test.Hspec
 
 --------------------------------------------------------------------------------
@@ -11,14 +16,29 @@ type R = RealNumber 5
 
 spec :: Spec
 spec = describe "PointLoction Tests" $ do
-         pure () -- TODO
+         manual "src/Algorithms/Geometry/PointLocation/manual.ipe"
+
+manual    :: FilePath -> Spec
+manual fp = runIO (readSinglePageFileThrow fp) >>= spec'
+
+spec'      :: IpePage R -> Spec
+spec' page = let points = readAll @(Point 2 R)          page
+                 pgs'   = readAll @(SimplePolygon () R) page
+                 pgs    = map (over core inPolygonDS) pgs'
+             in sequence_ [ query q pg | q <- points, pg <- pgs ]
+
+query                           :: Point 2 R        :+ IpeAttributes IpeSymbol R
+                                -> InPolygonDS () R :+ IpeAttributes Path R
+                                -> Spec
+query (q :+ qAts) (pg :+ pgAts) = it ("querying " <> show q <> " in pg: " <> color pgAts) $
+                                    let res = pointInPolygon q pg
+                                    in if color qAts == color pgAts
+                                       then res `shouldBe` In
+                                       else res `shouldBe` Out
+  where
+    color ats = ats^?_Attr SFill
 
 
-
-
--- -- | Point sets per color, Crosses form the solution
--- readInput    :: FilePath -> IO (Either ConversionError [TestCase R])
--- readInput fp = fmap f <$> readSinglePageFile fp
 --   where
 --     f page = [ TestCase [p^.core.symbolPoint :+ () | p <- pSet] (solutionOf pSet)
 --              | pSet <- byStrokeColour syms
