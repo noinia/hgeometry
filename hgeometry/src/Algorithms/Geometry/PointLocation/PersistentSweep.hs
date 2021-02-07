@@ -26,6 +26,7 @@ import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy
+import           Data.Util (SP(..))
 import qualified Data.Vector as V
 
 --------------------------------------------------------------------------------
@@ -88,11 +89,13 @@ faceContaining q ds = ds^.subdivision.dataOf (faceIdContaining q ds)
 
 -- | Locates the faceId of the face containing the query point.
 --
+-- If the query point lies *on* an edge, an arbitrary face incident to
+-- the edge is returned.
+--
 -- running time: \(O(\log n)\)
 faceIdContaining      :: (Ord r, Fractional r)
                       => Point 2 r -> PointLocationDS s v e f r -> FaceId' s
 faceIdContaining q ds = dartToFace ds $ dartAbove q ds
-  -- TODO: describe what happens when you are on an edge
 
 -- | Given the dart determine the faceId correspondig to it (depending
 -- on the orientation of the dart that is returned.)
@@ -104,6 +107,30 @@ dartToFace ds = maybe (ds^.outerFace) getFace
                 in if u <= v then rightFace d ps
                              else leftFace  d ps
 
+
+data OneOrTwo a = One !a | Two !a !a deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
+
+-- | Locates the faceId of the face containing the query point. If the
+-- query point lies on an edge, it returns both faces incident to the
+-- edge; first the one below the edge then the one above the edge.
+--
+-- running time: \(O(\log n)\)
+faceIdContaining'      :: (Ord r, Fractional r)
+                      => Point 2 r -> PointLocationDS s v e f r -> OneOrTwo (FaceId' s)
+faceIdContaining' q ds = maybe (One $ ds^.outerFace) getFace $ dartAboveOrOn q ds
+  where
+    ps = ds^.subdivision
+
+    getFace = getFace' . orient
+
+    orient d = let (u,v) = bimap (^.location) (^.location) $ endPointData d ps
+               in if u <= v then (d,u,v) else (twin d, v, u)
+
+
+    getFace' (d,u,v) = case ccw u q v of
+                         CoLinear -> Two (rightFace d ps) (leftFace d ps)
+                         _        -> One (rightFace d ps)
+
 --------------------------------------------------------------------------------
 
 -- | Data structure for fast InPolygon Queries
@@ -113,19 +140,30 @@ dartToFace ds = maybe (ds^.outerFace) getFace
 data InOut = In | Out deriving (Show,Eq)
 
 data Dummy
-type InPolygonDS v r = PointLocationDS Dummy v () InOut  r
+type InPolygonDS v r = PointLocationDS Dummy (SP Int v) () InOut  r
 
 
 -- type Vertex v r = Int :+ (Point 2 r :+ v)
 
 inPolygonDS    :: (Fractional r, Ord r) => SimplePolygon v r -> InPolygonDS v r
-inPolygonDS pg = pointLocationDS $ fromSimplePolygon (Proxy @Dummy) pg In Out
+inPolygonDS pg = pointLocationDS $ fromSimplePolygon (Proxy @Dummy) (numberVertices pg) In Out
 
-edgeOnOrAbove      :: Point 2 r -> InPolygonDS v r -> Maybe (LineSegment 2 v r :+ (Int,Int))
-edgeOnOrAbove q ds = undefined
+-- | Finds the edge on or above the query point, if it exists
+--
+--
+edgeOnOrAbove      :: (Ord r, Fractional r)
+                   => Point 2 r -> InPolygonDS v r -> Maybe (LineSegment 2 (SP Int v) r)
+edgeOnOrAbove q ds = view core . flip edgeSegment (ds^.subdivision) <$> dartAboveOrOn q ds
 
+
+-- | Returns if a query point lies in (or on the boundary of) the polygon.
+--
+-- \(O(\log n)\)
 pointInPolygon :: (Ord r, Fractional r) => Point 2 r -> InPolygonDS v r -> InOut
-pointInPolygon = faceContaining
+pointInPolygon q ds = case faceIdContaining' q ds of
+                        One i   -> ds^.subdivision.dataOf i
+                        Two _ _ -> In -- on an edge, so inside.
+
   -- FIXME: Make sure to also test the edge "below" q, i.e. if q is on
   -- some edge we should return that edge.
 
