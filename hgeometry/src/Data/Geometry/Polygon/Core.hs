@@ -66,8 +66,8 @@ module Data.Geometry.Polygon.Core
   , reflexVertices, convexVertices, strictlyConvexVertices
 
     -- * Specialized folds
-  , maximumBy
-  , minimumBy
+  , maximumVertexBy
+  , minimumVertexBy
   , findRotateTo
   , rotateLeft
   , rotateRight
@@ -782,9 +782,9 @@ _maximum :: Ord r => Polygon t p r -> Point 2 r :+ p
 _maximum = F.maximumBy (comparing _core) . view outerBoundaryVector
 
 -- | \( O(n) \) Yield the maximum point of a polygon according to the given comparison function.
-maximumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
-maximumBy fn (SimplePolygon vs)  = F.maximumBy fn vs
-maximumBy fn (MultiPolygon b hs) = F.maximumBy fn $ map (maximumBy fn) (b:hs)
+maximumVertexBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
+maximumVertexBy fn (SimplePolygon vs)  = F.maximumBy fn vs
+maximumVertexBy fn (MultiPolygon b hs) = F.maximumBy fn $ map (maximumVertexBy fn) (b:hs)
 
 -- | \( O(n) \) Yield the maximum point of the polygon. Points are compared first by x-coordinate
 --   and then by y-coordinate. The minimum point will therefore be the left-most point in
@@ -795,9 +795,9 @@ _minimum :: Ord r => Polygon t p r -> Point 2 r :+ p
 _minimum = F.minimumBy (comparing _core) . view outerBoundaryVector
 
 -- | \( O(n) \) Yield the maximum point of a polygon according to the given comparison function.
-minimumBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
-minimumBy fn (SimplePolygon vs)  = F.minimumBy fn vs
-minimumBy fn (MultiPolygon b hs) = F.minimumBy fn $ map (minimumBy fn) (b:hs)
+minimumVertexBy :: (Point 2 r :+ p -> Point 2 r :+ p -> Ordering) -> Polygon t p r -> Point 2 r :+ p
+minimumVertexBy fn (SimplePolygon vs)  = F.minimumBy fn vs
+minimumVertexBy fn (MultiPolygon b hs) = F.minimumBy fn $ map (minimumVertexBy fn) (b:hs)
 
 -- | Rotate to the first point that matches the given condition.
 --

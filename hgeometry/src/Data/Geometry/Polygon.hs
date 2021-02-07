@@ -61,8 +61,8 @@ module Data.Geometry.Polygon
 
   , rotateLeft
   , rotateRight
-  , maximumBy
-  , minimumBy
+  , maximumVertexBy
+  , minimumVertexBy
 
 
    -- * Misc
