@@ -30,7 +30,7 @@ spec' page = let points = readAll @(Point 2 R)          page
 query                           :: Point 2 R        :+ IpeAttributes IpeSymbol R
                                 -> InPolygonDS () R :+ IpeAttributes Path R
                                 -> Spec
-query (q :+ qAts) (pg :+ pgAts) = it ("querying " <> show q <> " in pg: " <> color pgAts) $
+query (q :+ qAts) (pg :+ pgAts) = it ("querying " <> show q <> " in pg: " <> show (color pgAts)) $
                                     let res = pointInPolygon q pg
                                     in if color qAts == color pgAts
                                        then res `shouldBe` In

@@ -91,13 +91,18 @@ faceContaining q ds = ds^.subdivision.dataOf (faceIdContaining q ds)
 -- running time: \(O(\log n)\)
 faceIdContaining      :: (Ord r, Fractional r)
                       => Point 2 r -> PointLocationDS s v e f r -> FaceId' s
-faceIdContaining q ds = maybe (ds^.outerFace) getFace $ dartAbove q ds
+faceIdContaining q ds = dartToFace ds $ dartAbove q ds
+  -- TODO: describe what happens when you are on an edge
+
+-- | Given the dart determine the faceId correspondig to it (depending
+-- on the orientation of the dart that is returned.)
+dartToFace    :: Ord r => PointLocationDS s v e f r -> Maybe (Dart s) -> FaceId' s
+dartToFace ds = maybe (ds^.outerFace) getFace
   where
     ps = ds^.subdivision
     getFace d = let (u,v) = bimap (^.location) (^.location) $ endPointData d ps
                 in if u <= v then rightFace d ps
                              else leftFace  d ps
-  -- TODO: describe what happens when you are on an edge
 
 --------------------------------------------------------------------------------
 
@@ -119,8 +124,8 @@ inPolygonDS pg = pointLocationDS $ fromSimplePolygon (Proxy @Dummy) pg In Out
 edgeOnOrAbove      :: Point 2 r -> InPolygonDS v r -> Maybe (LineSegment 2 v r :+ (Int,Int))
 edgeOnOrAbove q ds = undefined
 
-pointInPolygon :: Point 2 r -> InPolygonDS v r -> InOut
-pointInPolygon = undefined -- faceContaining
+pointInPolygon :: (Ord r, Fractional r) => Point 2 r -> InPolygonDS v r -> InOut
+pointInPolygon = faceContaining
   -- FIXME: Make sure to also test the edge "below" q, i.e. if q is on
   -- some edge we should return that edge.
 
