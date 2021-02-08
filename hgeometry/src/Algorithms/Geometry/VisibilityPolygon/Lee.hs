@@ -23,6 +23,7 @@ import           Control.Monad ((<=<))
 import           Data.Bifunctor (first, second)
 import           Data.Ext
 import qualified Data.Foldable as F
+import           Data.Function (on)
 import           Data.Geometry.HalfLine
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -35,12 +36,12 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe, isJust)
 import           Data.Ord (comparing)
+import           Data.RealNumber.Rational
 import           Data.Semigroup.Foldable
 import qualified Data.Set as Set
 import qualified Data.Set.Util as Set
 import           Data.Vinyl.CoRec
 import           Debug.Trace
-import           Data.RealNumber.Rational
 
 type R = RealNumber 5
 
@@ -88,7 +89,19 @@ visibilityPolygon   :: forall p t r. (Ord r, Fractional r, Show r, Show p)
                     => Point 2 r
                     -> Polygon t p r
                     -> StarShapedPolygon (Definer p (p,p) r) r
-visibilityPolygon q = fromPoints . visibilityPolygonFromTo Nothing q . closedEdges
+visibilityPolygon q pg =
+    fromPoints . visibilityPolygonFromTo v Nothing q . closedEdges $ pg
+  where
+    (a,b) = consecutive q . polygonVertices $ pg
+    v     = startingDirection q (a^.core) (b^.core)
+
+consecutive   :: (Ord r, Num r)
+              => Point 2 r -> NonEmpty (Point 2 r :+ p)
+              -> (Point 2 r :+ p,Point 2 r :+ p)
+consecutive q = \case
+  (p:|pts) -> (p,List.minimumBy (ccwCmpAroundWith' (p^.core .-. q) (ext q)) pts)
+
+
 
 closedEdges :: Polygon t p r -> [LineSegment 2 p r :+ (p,p)]
 closedEdges = map asClosed . listEdges
@@ -103,37 +116,42 @@ closedEdges = map asClosed . listEdges
 --       - no singleton linesegments exactly pointing away from q.
 --       - for every orientattion the visibility is blocked somewhere, i.e.
 --            no rays starting in the query point q that are disjoint from all segments.
+--       - no vertices at staring direction sv
 --
 -- running time: \(O(n\log n)\)
-visibilityPolygonFromTo            :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
-                                   => Maybe (Point 2 r, Point 2 r)
-                                   -- ^ pair of points indicating the CCW range to
-                                   -- compute the visibility in. If Nothing use the whole range
-                                   -> Point 2 r -- ^ the point form which we compute the visibility polgyon
-                                   -> [LineSegment 2 p r :+ e]
-                                   -> [Point 2 r :+ Definer p e r]
-visibilityPolygonFromTo rng q segs = snd $ sweep (traceShowId $ events)
+visibilityPolygonFromTo             :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
+                                    => Vector 2 r -- ^ starting direction of the sweep
+                                    -> Maybe (Point 2 r)
+                                    -- ^ -- point indicating the last point to sweep to
+                                    -> Point 2 r -- ^ the point form which we compute the visibility polgyon
+                                    -> [LineSegment 2 p r :+ e]
+                                    -> [Point 2 r :+ Definer p e r]
+visibilityPolygonFromTo sv mt q segs = snd $ sweep (traceShowId $ events)
   where
     -- lazily test if the segment intersects the initial ray
     segs' = map (\(s :+ e) -> s :+ (initialIntersection q initialRay s, e)) segs
 
-    events@(e0:e1:_) = map (combine q)
-                     . groupBy' (\a b -> ccwCmpAroundWith' sv (ext q) (a^.eventVtx) (b^.eventVtx))
-                     . untilEnd
-                     . concatMap (mkEvent sv q) $ segs'
+    events = map (combine q)
+           . groupBy' (\a b -> ccwCmpAroundWith' sv (ext q) (a^.eventVtx) (b^.eventVtx))
+           . untilEnd
+           . List.sortBy (cmp `on` (^.eventVtx))
+           . concatMap (mkEvent sv q) $ segs'
 
         -- take only until the end of the range (if defined)
     untilEnd = maybe id
-                     (\(_,t) -> List.takeWhile (\e ->
-                                  ccwCmpAroundWith' sv (ext q) (e^.eventVtx) (ext t) == LT))
-                     rng
-    sv = maybe (Vector2 1 0) (\(s,_) -> s .-. q) rng
+                     (\t -> List.takeWhile (\e ->
+                              ccwCmpAroundWith' sv (ext q) (e^.eventVtx) (ext t) == LT))
+                     mt
 
-    initialRay = HalfLine q (startingDirection q (e0^.eventVtx.core) (e1^.eventVtx.core))
+    initialRay = traceShowIdWith "ray" $ HalfLine q sv
 
     statusStruct = traceShowId $ fromListByDistTo q segs'
 
     sweep = List.foldl' (handleEvent q) (statusStruct,[])
+
+    cmp = ccwCmpAroundWith' sv (ext q) <> cmpByDistanceTo' (ext q)
+
+
 
 -- | Given multiple events happening at the same orientation, combine
 -- them into a single event.
@@ -155,13 +173,13 @@ startingDirection q u w = v .-. q
         -- to v, as u and w are supposed to be the first two events. This means the
         -- precondition does not hold.
 
-allEndPoints      :: (Ord r, Num r)
-                  => Vector 2 r -> Point 2 r -> [LineSegment 2 p r :+ e]
-                  -> [Point 2 r :+ (LineSegment 2 p r :+ e)]
-allEndPoints sv q = List.sortBy cmp
-                  . concatMap (\s@((LineSegment' u v) :+ _) -> [(u^.core) :+ s, (v^.core) :+ s])
-  where
-    cmp = ccwCmpAroundWith' sv (ext q) <> cmpByDistanceTo' (ext q)
+-- allEndPoints      :: (Ord r, Num r)
+--                   => Vector 2 r -> Point 2 r -> [LineSegment 2 p r :+ e]
+--                   -> [Point 2 r :+ (LineSegment 2 p r :+ e)]
+-- allEndPoints sv q = List.sortBy cmp
+--                   . concatMap (\s@((LineSegment' u v) :+ _) -> [(u^.core) :+ s, (v^.core) :+ s])
+--   where
+--     cmp = ccwCmpAroundWith' sv (ext q) <> cmpByDistanceTo' (ext q)
 
 -- -- | Computes the events in the sweep. The events are recorded in CCW
 -- -- order, starting from the horizontal line to the right.
@@ -181,26 +199,27 @@ allEndPoints sv q = List.sortBy cmp
 
 
 
+traceShowIdWith x y = traceShow (show x,y) y
 
-mkEvent                                      :: (Ord r, Num r)
+mkEvent                                      :: (Ord r, Num r, Show r,Show e, Show p)
                                              => Vector 2 r
                                              -> Point 2 r
                                              -> LineSegment 2 p r :+ (Maybe r, e)
                                              -> [Event p e r]
 mkEvent sv q (s@(LineSegment' u v) :+ (d,e)) = case cmp u v of
-                                            LT -> [ Event u insert
-                                                  , Event v delete
-                                                  ]
-                                            GT -> [ Event v insert
-                                                  , Event u delete
-                                                  ]
-                                            EQ -> [] -- zero length segment, just skip
+                                                 LT -> [ Event u insert
+                                                       , Event v delete
+                                                       ]
+                                                 GT -> [ Event v insert
+                                                       , Event u delete
+                                                       ]
+                                                 EQ -> [] -- zero length segment, just skip
   where
     cmp = ccwCmpAroundWith' sv (ext q) <> cmpByDistanceTo' (ext q)
     s'  = s :+ e
 
-    insert = (if isJust d then Delete s' else Insert s') :| []
-    delete = (if isJust d then Insert s' else Delete s') :| []
+    insert = traceShowIdWith d $ (if isJust d then Delete s' else Insert s') :| []
+    delete = traceShowIdWith d $ (if isJust d then Insert s' else Delete s') :| []
 
 
 
@@ -387,7 +406,7 @@ fromListByDistTo q = Set.mapMonotonic (^.extra)
 -- | Given q and a segment s, computes if the segment intersects the initial, rightward
 -- ray starting in q, and if so returns the (squared) distance from q to that point
 -- together with the segment.
-initialIntersection         :: forall r p e. (Ord r, Fractional r)
+initialIntersection         :: forall r p. (Ord r, Fractional r)
                             => Point 2 r -> HalfLine 2 r -> LineSegment 2 p r
                             -> Maybe r
 initialIntersection q ray s =

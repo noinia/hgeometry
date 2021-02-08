@@ -1,20 +1,19 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec where
 
-import  Data.Geometry.PolygonSpec()
-import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
-import           Algorithms.Geometry.VisibilityPolygon.Lee (toCombinatorial
-                                                           , Definer
+import           Algorithms.Geometry.VisibilityPolygon.Lee ( Definer
                                                            , StarShapedPolygon
                                                            )
+import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
+import           Data.Bifunctor
 import           Control.Lens
-import qualified Data.Vector.Circular as CVec
 import           Data.Ext
 import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import           Data.Geometry.PolygonSpec ()
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -22,6 +21,7 @@ import           Data.Proxy
 import           Data.RealNumber.Rational
 import           Data.Semigroup
 import qualified Data.Set as Set
+import qualified Data.Vector.Circular as CVec
 import           Debug.Trace
 import           Test.Hspec
 import           Test.QuickCheck
@@ -49,8 +49,15 @@ spec = do
     sweep q pg = toCombinatorial $ RotationalSweep.visibilityPolygon q pg
 
 
+-- | Gets the combinatorial representation of the visibility polygon
+toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CVec.CircularVector (Either p (p,e))
+toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundaryVector
+  where
+    f = bimap (^.extra) (^.extra)
+
+
 testPgAnswer :: CVec.CircularVector (Either P (P,E))
-testPgAnswer = CVec.unsafeFromList [Left 1,Left 2,Right (2,(3,4)),Right (6,(3,4)),Left 6,Left 7,Left 8]
+testPgAnswer = CVec.unsafeFromList [Left 2,Right (2,(3,4)),Right (6,(3,4)),Left 6,Left 7,Left 8,Left 1]
 
 testPg :: SimplePolygon Int R
 testPg = fromPoints [ Point2 3    1     :+ 1
@@ -71,9 +78,9 @@ querySpike = Point2 252 704
 spike :: SimplePolygon Int R
 spike = read "SimplePolygon [Point2 160 656 :+ 1,Point2 288 640 :+ 2,Point2 320 704 :+ 3,Point2 368 640 :+ 4,Point2 368 736 :+ 5,Point2 288 752 :+ 6,Point2 256 704 :+ 7,Point2 224 768 :+ 8]"
 
-spikeEasy = CVec.unsafeFromList [Left 5,Left 6, Right (3,(6,7)), Left 3, Left 4]
+spikeEasy = CVec.unsafeFromList [Left 4,Left 5,Left 6, Right (3,(6,7)), Left 3]
 
-spikeAnswer = CVec.unsafeFromList [Right (7,(2,3)), Left 7, Left 8,Left 1,Left 2]
+spikeAnswer = CVec.unsafeFromList [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
 
 
 
