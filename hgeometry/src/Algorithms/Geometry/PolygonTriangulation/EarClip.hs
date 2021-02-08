@@ -20,13 +20,13 @@ module Algorithms.Geometry.PolygonTriangulation.EarClip
   ) where
 
 import           Control.Lens                ((^.))
-import           Control.Monad.ST
+import           Control.Monad.ST            (ST, runST)
 import           Control.Monad.ST.Unsafe     (unsafeInterleaveST)
 import           Data.Ext
-import           Data.Geometry.Boundary
-import           Data.Geometry.Point
-import           Data.Geometry.Polygon
-import           Data.Geometry.Triangle
+import           Data.Geometry.Boundary      (PointLocationResult (Outside))
+import           Data.Geometry.Point         (Point, ccw', pattern CCW)
+import           Data.Geometry.Polygon       (SimplePolygon, outerBoundaryVector)
+import           Data.Geometry.Triangle      (Triangle (Triangle), inTriangleRelaxed)
 import           Data.Vector                 (Vector)
 import qualified Data.Vector                 as V
 import qualified Data.Vector.Circular        as CV
@@ -34,65 +34,6 @@ import qualified Data.Vector.NonEmpty        as NE
 import qualified Data.Vector.Unboxed         as U
 import qualified Data.Vector.Unboxed.Mutable as MU
 import           GHC.Exts                    (build)
-
-data MutList s a = MutList
-  { mutListVector  :: Vector a
-  , mutListNextVec :: MU.MVector s Int
-  , mutListPrevVec :: MU.MVector s Int
-  }
-
--- O(n)
-mutListFromVector :: Vector a -> ST s (MutList s a)
-mutListFromVector vec = MutList vec
-  <$> do
-    arr <- U.unsafeThaw (U.enumFromN 1 (V.length vec))
-    MU.unsafeWrite arr (V.length vec-1) 0
-    pure arr
-  <*> do
-    arr <- U.unsafeThaw (U.enumFromN (-1) (V.length vec))
-    MU.unsafeWrite arr 0 (V.length vec-1)
-    pure arr
-
-mutListClone :: MutList s a -> ST s (MutList s a)
-mutListClone (MutList vec nextVec prevVec) = MutList vec
-  <$> MU.clone nextVec
-  <*> MU.clone prevVec
-
-mutListNext :: MutList s a -> Int -> ST s Int
-mutListNext m idx = MU.unsafeRead (mutListNextVec m) idx
-
-mutListPrev :: MutList s a -> Int -> ST s Int
-mutListPrev m idx = MU.unsafeRead (mutListPrevVec m) idx
-
-mutListDelete :: MutList s a -> Int -> Int -> ST s ()
-mutListDelete m prev next = do
-  MU.unsafeWrite (mutListNextVec m) prev next
-  MU.unsafeWrite (mutListPrevVec m) next prev
-
-mutListInsert :: MutList s a -> Int -> Int -> Int -> ST s ()
-mutListInsert m before after elt = do
-  MU.unsafeWrite (mutListNextVec m) before elt  -- before.next = elt
-  MU.unsafeWrite (mutListNextVec m) elt after   -- elt.next = after
-  MU.unsafeWrite (mutListPrevVec m) after elt   -- after.prev = elt
-  MU.unsafeWrite (mutListPrevVec m) elt before  -- elt.prev = before
-
-earCheck :: (Num r, Ord r) => MutList s (Point 2 r :+ p) -> Int -> Int -> Int -> ST s Bool
-earCheck vertices a b c = do
-  let vs = mutListVector vertices
-      pointA = V.unsafeIndex vs a
-      pointB = V.unsafeIndex vs b
-      pointC = V.unsafeIndex vs c
-      trig = Triangle pointA pointB pointC
-
-  let loop elt | elt == a = pure True
-      loop elt = do
-        let point = V.unsafeIndex vs elt ^. core
-        case inTriangleRelaxed point trig of
-          Outside -> loop =<< mutListNext vertices elt
-          _       -> pure False
-  if ccw' pointA pointB pointC == CCW
-    then loop =<< mutListNext vertices c
-    else pure False
 
 {-
   We can check if a vertex is an ear in O(n) time. Checking all vertices will definitely
@@ -165,3 +106,70 @@ earClip poly = build gen
 
 -- earClipRandomHashed :: SimplePolygon p r -> [(Int,Int,Int)]
 -- earClipRandomHashed = undefined
+
+
+-------------------------------------------------------------------------------
+-- Utilities
+
+data MutList s a = MutList
+  { mutListVector  :: Vector a
+  , mutListNextVec :: MU.MVector s Int
+  , mutListPrevVec :: MU.MVector s Int
+  }
+
+-- O(n)
+mutListFromVector :: Vector a -> ST s (MutList s a)
+mutListFromVector vec = MutList vec
+  <$> do
+    arr <- U.unsafeThaw (U.enumFromN 1 (V.length vec))
+    MU.unsafeWrite arr (V.length vec-1) 0
+    pure arr
+  <*> do
+    arr <- U.unsafeThaw (U.enumFromN (-1) (V.length vec))
+    MU.unsafeWrite arr 0 (V.length vec-1)
+    pure arr
+
+mutListClone :: MutList s a -> ST s (MutList s a)
+mutListClone (MutList vec nextVec prevVec) = MutList vec
+  <$> MU.clone nextVec
+  <*> MU.clone prevVec
+
+mutListNext :: MutList s a -> Int -> ST s Int
+mutListNext m idx = MU.unsafeRead (mutListNextVec m) idx
+
+mutListPrev :: MutList s a -> Int -> ST s Int
+mutListPrev m idx = MU.unsafeRead (mutListPrevVec m) idx
+
+mutListDelete :: MutList s a -> Int -> Int -> ST s ()
+mutListDelete m prev next = do
+  MU.unsafeWrite (mutListNextVec m) prev next
+  MU.unsafeWrite (mutListPrevVec m) next prev
+
+mutListInsert :: MutList s a -> Int -> Int -> Int -> ST s ()
+mutListInsert m before after elt = do
+  MU.unsafeWrite (mutListNextVec m) before elt  -- before.next = elt
+  MU.unsafeWrite (mutListNextVec m) elt after   -- elt.next = after
+  MU.unsafeWrite (mutListPrevVec m) after elt   -- after.prev = elt
+  MU.unsafeWrite (mutListPrevVec m) elt before  -- elt.prev = before
+
+-------------------------------------------------------------------------------
+-- Ear checking
+
+-- O(n)
+earCheck :: (Num r, Ord r) => MutList s (Point 2 r :+ p) -> Int -> Int -> Int -> ST s Bool
+earCheck vertices a b c = do
+  let vs = mutListVector vertices
+      pointA = V.unsafeIndex vs a
+      pointB = V.unsafeIndex vs b
+      pointC = V.unsafeIndex vs c
+      trig = Triangle pointA pointB pointC
+
+  let loop elt | elt == a = pure True
+      loop elt = do
+        let point = V.unsafeIndex vs elt ^. core
+        case inTriangleRelaxed point trig of
+          Outside -> loop =<< mutListNext vertices elt
+          _       -> pure False
+  if ccw' pointA pointB pointC == CCW
+    then loop =<< mutListNext vertices c
+    else pure False
