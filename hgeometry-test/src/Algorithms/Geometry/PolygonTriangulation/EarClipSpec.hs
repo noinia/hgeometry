@@ -17,12 +17,21 @@ import qualified Data.Vector.NonEmpty            as NE
 import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances       ()
+import           Data.RealNumber.Rational
+
+type R = RealNumber 5
 
 spec :: Spec
 spec = do
-  it "sum (map area (triangulate polygon)) == area polygon" $ do
-    property $ \(poly :: SimplePolygon () Rational) ->
+  it "sum (map area (earClip polygon)) == area polygon" $ do
+    property $ \(poly :: SimplePolygon () R) ->
       let g = earClip poly
+          trigs = map (polygonTrig poly) g
+      in sum (map Triangle.area trigs) === area poly
+
+  it "sum (map area (earClipRandom polygon)) == area polygon" $ do
+    property $ \(poly :: SimplePolygon () R) ->
+      let g = earClipRandom poly
           trigs = map (polygonTrig poly) g
       in sum (map Triangle.area trigs) === area poly
 

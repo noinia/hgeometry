@@ -1,3 +1,4 @@
+{-# LANGUAGE BinaryLiterals #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.PolygonTriangulation.EarClip
@@ -17,16 +18,20 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.PolygonTriangulation.EarClip
   ( earClip
+  , earClipRandom
   ) where
 
 import           Control.Lens                ((^.))
 import           Control.Monad.ST            (ST, runST)
+import           Control.Monad.Identity
 import           Control.Monad.ST.Unsafe     (unsafeInterleaveST)
 import           Data.Ext
+import           Data.Bits
 import           Data.Geometry.Boundary      (PointLocationResult (Outside))
 import           Data.Geometry.Point         (Point, ccw', pattern CCW)
 import           Data.Geometry.Polygon       (SimplePolygon, outerBoundaryVector)
 import           Data.Geometry.Triangle      (Triangle (Triangle), inTriangleRelaxed)
+import           Data.STRef
 import           Data.Vector                 (Vector)
 import qualified Data.Vector                 as V
 import qualified Data.Vector.Circular        as CV
@@ -34,6 +39,8 @@ import qualified Data.Vector.NonEmpty        as NE
 import qualified Data.Vector.Unboxed         as U
 import qualified Data.Vector.Unboxed.Mutable as MU
 import           GHC.Exts                    (build)
+import           System.Random
+import Linear.V2
 
 {-
   We can check if a vertex is an ear in O(n) time. Checking all vertices will definitely
@@ -91,15 +98,61 @@ earClip poly = build gen
                         mutListInsert possibleEars prevEar nextEar next
                       (False, False) -> return ()
 
-                    rest <- unsafeInterleaveST $ worker (len-1) nextEar
-                    return $ cons (prev, focus, next) rest
-                  else do
-                    mutListDelete possibleEars prevEar nextEar -- remove ear
+                    cons (prev, focus, next)
+                      <$> unsafeInterleaveST (worker (len-1) nextEar)
+                  else do -- not an ear
+                    mutListDelete possibleEars prevEar nextEar -- remove vertex
                     worker len nextEar
       worker (V.length vs) 0
 
--- earClipRandom :: SimplePolygon p r -> [(Int,Int,Int)]
--- earClipRandom = undefined
+-- | \( O(n^2) \)
+--
+--   Returns triangular faces using absolute polygon point indices.
+earClipRandom :: (Num r, Ord r) => SimplePolygon p r -> [(Int,Int,Int)]
+earClipRandom poly = build gen
+  where
+    vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
+    gen :: ((Int,Int,Int) -> b -> b) -> b -> b
+    gen cons nil = runST $ do
+      vertices <- mutListFromVector vs
+      possibleEars <- mutListClone vertices
+      shuffled <- newShuffled (V.length vs)
+      let worker len = do
+            focus <- popShuffled shuffled
+            prev <- mutListPrev vertices focus
+            next <- mutListNext vertices focus
+            if len == 3
+              then
+                return $ cons (prev, focus, next) nil
+              else do
+                prevEar <- mutListPrev possibleEars focus
+                nextEar <- mutListNext possibleEars focus
+                isEar <- earCheck vertices prev focus next
+                if isEar
+                  then do
+                    mutListDelete possibleEars prevEar nextEar
+                    mutListDelete vertices prev next -- remove ear
+
+                    case (prevEar /= prev, nextEar /= next) of
+                      (True, True)  -> do
+                        pushShuffled shuffled prev
+                        pushShuffled shuffled next
+                        mutListInsert possibleEars prevEar nextEar prev
+                        mutListInsert possibleEars prev nextEar next
+                      (True, False) -> do
+                        pushShuffled shuffled prev
+                        mutListInsert possibleEars prevEar nextEar prev
+                      (False, True) -> do
+                        pushShuffled shuffled next
+                        mutListInsert possibleEars prevEar nextEar next
+                      (False, False) -> return ()
+
+                    cons (prev, focus, next)
+                      <$> unsafeInterleaveST (worker (len-1))
+                  else do -- not an ear
+                    mutListDelete possibleEars prevEar nextEar -- remove vertex
+                    worker len
+      worker (V.length vs)
 
 -- earClipHashed :: SimplePolygon p r -> [(Int,Int,Int)]
 -- earClipHashed = undefined
@@ -109,7 +162,63 @@ earClip poly = build gen
 
 
 -------------------------------------------------------------------------------
--- Utilities
+-- Z-Order
+-- https://en.wikipedia.org/wiki/Z-order_curve
+
+zHash :: V2 Word -> Word
+zHash (V2 a b) = zHashSingle a .|. (unsafeShiftL (zHashSingle b) 1)
+
+zHashSingle :: Word -> Word
+zHashSingle w
+  | finiteBitSize w == 32 = zHashSingle32 w
+  | otherwise             = zHashSingle64 w
+
+zHashSingle32 :: Word -> Word
+zHashSingle32 w = runIdentity $ do
+    w <- pure $ w .&. 0x0000FFFF
+    w <- pure $ (w .|. unsafeShiftL w 8)  .&. 0x00FF00FF
+    w <- pure $ (w .|. unsafeShiftL w 4)  .&. 0x0F0F0F0F
+    w <- pure $ (w .|. unsafeShiftL w 2)  .&. 0x33333333
+    w <- pure $ (w .|. unsafeShiftL w 1)  .&. 0x55555555
+    pure w
+
+zHashSingle64 :: Word -> Word
+zHashSingle64 w = runIdentity $ do
+    w <- pure $ w .&. 0x00000000FFFFFFFF
+    w <- pure $ (w .|. unsafeShiftL w 16) .&. 0x0000FFFF0000FFFF
+    w <- pure $ (w .|. unsafeShiftL w 8)  .&. 0x00FF00FF00FF00FF
+    w <- pure $ (w .|. unsafeShiftL w 4)  .&. 0x0F0F0F0F0F0F0F0F
+    w <- pure $ (w .|. unsafeShiftL w 2)  .&. 0x3333333333333333
+    w <- pure $ (w .|. unsafeShiftL w 1)  .&. 0x5555555555555555
+    pure w
+
+-------------------------------------------------------------------------------
+-- Shuffled
+
+data Shuffled s = Shuffled
+  { shuffleCount  :: STRef s Int
+  , shuffleVector :: MU.MVector s Int }
+
+newShuffled :: Int -> ST s (Shuffled s)
+newShuffled len = Shuffled <$> newSTRef len <*> U.unsafeThaw (U.enumFromN 0 len)
+
+popShuffled :: Shuffled s -> ST s Int
+popShuffled (Shuffled ref vector) = do
+  count <- readSTRef ref
+  writeSTRef ref (count-1)
+  let idx = fst $ uniformR (0, count-1) (mkStdGen count)
+  val <- MU.unsafeRead vector idx
+  MU.unsafeWrite vector idx =<< MU.unsafeRead vector (count-1)
+  pure val
+
+pushShuffled :: Shuffled s -> Int -> ST s ()
+pushShuffled (Shuffled ref vector) val = do
+  count <- readSTRef ref
+  writeSTRef ref (count+1)
+  MU.unsafeWrite vector count val
+
+-------------------------------------------------------------------------------
+-- MutList
 
 data MutList s a = MutList
   { mutListVector  :: Vector a
