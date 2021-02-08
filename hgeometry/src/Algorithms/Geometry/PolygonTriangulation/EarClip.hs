@@ -206,7 +206,7 @@ popShuffled :: Shuffled s -> ST s Int
 popShuffled (Shuffled ref vector) = do
   count <- readSTRef ref
   writeSTRef ref (count-1)
-  let idx = fst $ uniformR (0, count-1) (mkStdGen count)
+  let idx = fst $ randomR (0, count-1) (mkStdGen count)
   val <- MU.unsafeRead vector idx
   MU.unsafeWrite vector idx =<< MU.unsafeRead vector (count-1)
   pure val
