@@ -95,16 +95,24 @@ earCheck vertices a b c = do
     else pure False
 
 {-
-  Make mut list of possible ears.
-  Pop index from mut list.
-  Check if it is an ear.
-  If ear:
-    Remove ear and add neighbours to list of possible ears (if they aren't on the list already)
-  If not:
-    Remove from mut list and repeat.
+  We can check if a vertex is an ear in O(n) time. Checking all vertices will definitely
+  yield at least one ear in O(n^2) time. So, finding N ears will take O(n^3) if done naively.
 
-  Algorithm is O(n^2) because work is added to the possible ears list at most N times (one for each ear).
-  Thus, the number of 'isEar' checks will range from N to 3*N.
+  Keeping a separate list of possible ears will improve matters. For each possible ear,
+  we check if the vertex really is an ear or not. If it isn't, it is deleted from the
+  list of possible ears. If it /is/ an ear, the vertex is cut and the neighbours are
+  added back to the list of possible ears (if they aren't in the list already).
+
+  So, start with a list of N possible ears, and we might add two vertices to the list
+  ever time we find an ear. Since there are only N ears to be found, only 2*N vertices
+  can be added to the list of possible ears in the worst case scenario. The list is
+  therefore bounded to 3*N and finding all ears is therefore O(n^2).
+
+  Note: When checking if a vertex is an ear, it is sufficient to check against
+        reflex vertices. Some implementations keep a separate list of reflex
+        vertices for this reason but it does increase the constant factor
+        overhead. I think it's better to keep the constant factor low for small values
+        of N and use the hashed algorithm for larger values of N.
 -}
 -- | \( O(n^2) \)
 --
