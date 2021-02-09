@@ -5,6 +5,7 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                  readRawIpeFile
                                , readIpeFile
                                , readSinglePageFile
+                               , readSinglePageFileThrow
                                , ConversionError
 
                                -- * Reading XML directly
@@ -26,32 +27,33 @@ module Data.Geometry.Ipe.Reader( -- * Reading ipe Files
                                , Coordinate(..)
                                ) where
 
-import           Control.Applicative((<|>))
+import           Control.Applicative ((<|>))
 import           Control.Lens hiding (Const, rmap)
+import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
-import           Data.Geometry.Box
 import           Data.Geometry.BezierSpline
-import           Data.Geometry.Ellipse(ellipseMatrix)
+import           Data.Geometry.Box
+import           Data.Geometry.Ellipse (ellipseMatrix)
 import           Data.Geometry.Ipe.Attributes
-import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
-import           Data.Geometry.Ipe.PathParser
-import           Data.Geometry.Ipe.Path
+import           Data.Geometry.Ipe.Color (IpeColor(..))
 import           Data.Geometry.Ipe.Matrix
+import           Data.Geometry.Ipe.ParserPrimitives (pInteger, pWhiteSpace)
+import           Data.Geometry.Ipe.Path
+import           Data.Geometry.Ipe.PathParser
 import           Data.Geometry.Ipe.Types
 import           Data.Geometry.Ipe.Value
-import           Data.Geometry.Ipe.Color(IpeColor(..))
+import qualified Data.Geometry.Matrix as Matrix
 import           Data.Geometry.Point
 import           Data.Geometry.PolyLine
 import qualified Data.Geometry.Polygon as Polygon
-import qualified Data.Geometry.Matrix as Matrix
+import qualified Data.LSeq as LSeq
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
-import qualified Data.LSeq as LSeq
 import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
@@ -78,7 +80,7 @@ readRawIpeFile = fmap fromIpeXML . B.readFile
 -- This function applies all matrices to objects.
 readIpeFile :: (Coordinate r, Eq r)
             => FilePath -> IO (Either ConversionError (IpeFile r))
-readIpeFile = fmap (bimap id applyMatrices) . readRawIpeFile
+readIpeFile = fmap (second applyMatrices) . readRawIpeFile
 
 
 -- | Since most Ipe file contain only one page, we provide a shortcut for that
@@ -94,6 +96,13 @@ readSinglePageFile = fmap (fmap f) . readIpeFile
     f   :: IpeFile r -> IpePage r
     f i = withDefaults . NonEmpty.head $ i^.pages
 
+-- | Tries to read a single page file, throws an error when this
+-- fails. See 'readSinglePageFile' for further details.
+readSinglePageFileThrow    :: (Coordinate r, Eq r) => FilePath -> IO (IpePage r)
+readSinglePageFileThrow fp = readSinglePageFile fp >>= \case
+  Left err -> fail (show err)
+  Right p  -> pure p
+
 -- | Given a Bytestring, try to parse the bytestring into anything that is
 -- IpeReadable, i.e. any of the Ipe elements.
 fromIpeXML   :: IpeRead (t r) => B.ByteString -> Either ConversionError (t r)
@@ -101,7 +110,7 @@ fromIpeXML b = readXML b >>= ipeRead
 
 -- | Reads the data from a Bytestring into a proper Node
 readXML :: B.ByteString -> Either ConversionError (Node Text Text)
-readXML = bimap (T.pack . show) id . parse' defaultParseOptions
+readXML = first (T.pack . show) . parse' defaultParseOptions
 
 --------------------------------------------------------------------------------
 

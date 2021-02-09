@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Geometry.Ipe.FromIpe
@@ -249,7 +250,7 @@ instance HasDefaultFromIpe (MultiPolygon () r) where
 
 
 -- | Read all g's from some ipe page(s).
-readAll   :: (HasDefaultFromIpe g, r ~ NumType g)
+readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
           => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAll p = p^..content.traverse.defaultFromIpe
 
