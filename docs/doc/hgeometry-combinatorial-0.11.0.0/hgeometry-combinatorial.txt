@@ -47,26 +47,37 @@ binarySearch :: Integral a => (a -> Bool) -> a -> a -> a
 --   0.515625
 --   </pre>
 binarySearchUntil :: (Fractional r, Ord r) => r -> (r -> Bool) -> r -> r -> r
+class BinarySearch v where {
+    type family Index v :: *;
+    type family Elem v :: *;
+}
 
--- | Given a monotonic predicate, Get the index h such that everything
---   strictly smaller than h has: p i = False, and all i &gt;= h, we have p
---   h = True
+-- | Given a monotonic predicate p and a data structure v, find the element
+--   v[h] such that that
+--   
+--   for every index i &lt; h we have p v[i] = False, and for every inedx i
+--   &gt;= h we have p v[i] = True
 --   
 --   returns Nothing if no element satisfies p
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the time to execute
 --   the predicate.
-binarySearchSeq :: (a -> Bool) -> Seq a -> Maybe Int
+binarySearchIn :: BinarySearch v => (Elem v -> Bool) -> v -> Maybe (Elem v)
 
--- | Given a monotonic predicate, get the index h such that everything
---   strictly smaller than h has: p i = False, and all i &gt;= h, we have p
---   h = True
+-- | Given a monotonic predicate p and a data structure v, find the index h
+--   such that that
+--   
+--   for every index i &lt; h we have p v[i] = False, and for every inedx i
+--   &gt;= h we have p v[i] = True
 --   
 --   returns Nothing if no element satisfies p
 --   
 --   running time: &lt;math&gt;, where &lt;math&gt; is the time to execute
 --   the predicate.
-binarySearchVec :: Vector v a => (a -> Bool) -> v a -> Maybe Int
+binarySearchIdxIn :: BinarySearch v => (Elem v -> Bool) -> v -> Maybe (Index v)
+instance Algorithms.BinarySearch.BinarySearch (Data.Sequence.Internal.Seq a)
+instance Data.Vector.Generic.Base.Vector v a => Algorithms.BinarySearch.BinarySearch (v a)
+instance Algorithms.BinarySearch.BinarySearch (Data.Set.Internal.Set a)
 
 
 module Algorithms.DivideAndConquer
@@ -367,7 +378,7 @@ introOrd1 :: f a -> f (O s a)
 
 -- | Lifts a function that works on a container '<tt>f</tt>' of
 --   orderable-things into one that works on dynamically ordered ones.
-liftOrd1 :: (f (O s a) -> f (O s a)) -> f a -> O s (f a)
+liftOrd1 :: (f (O s a) -> g (O s a)) -> f a -> O s (g a)
 
 -- | Lifts a container f whose keys (of type k) depend on '<tt>s</tt>' into
 --   a more general computation in that produces a <tt>`f k v`</tt>
@@ -1399,8 +1410,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aJHy a_aK0n. Lens (Permutation a_aJHy) (Permutation a_aK0n) (Vector (Orbit a_aJHy)) (Vector (Orbit a_aK0n))
-indexes :: forall a_aJHy. Lens' (Permutation a_aJHy) (Vector (Int, Int))
+orbits :: forall a_aJR1 a_aK9Q. Lens (Permutation a_aJR1) (Permutation a_aK9Q) (Vector (Orbit a_aJR1)) (Vector (Orbit a_aK9Q))
+indexes :: forall a_aJR1. Lens' (Permutation a_aJR1) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
@@ -4161,6 +4172,9 @@ splitMonotone :: (a -> Bool) -> Seq a -> (Seq a, Seq a)
 
 
 module Data.Set.Util
+data S
+S :: String -> S
+cmpS :: S -> S -> Ordering
 
 -- | Given a monotonic function f that maps a to b, split the sequence s
 --   depending on the b values. I.e. the result (l,m,r) is such that * all
@@ -4225,6 +4239,25 @@ insertBy :: (a -> a -> Ordering) -> a -> Set a -> Set a
 --   
 --   running time: &lt;math&gt;
 deleteAllBy :: (a -> a -> Ordering) -> a -> Set a -> Set a
+
+-- | Run a query, eg. lookupGE, on the set with the given ordering.
+--   
+--   Note: The <a>binarySearchIn</a> function may be a useful alternative
+--   to <a>queryBy</a>
+--   
+--   <pre>
+--   &gt;&gt;&gt; queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+--   Just (S "bbb")
+--   
+--   &gt;&gt;&gt; queryBy cmpS Set.lookupLE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+--   Just (S "a")
+--   
+--   &gt;&gt;&gt; queryBy cmpS Set.lookupGE (S "333") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+--   Just (S "bbb")
+--   </pre>
+queryBy :: (a -> a -> Ordering) -> (forall b. Ord b => b -> Set b -> t b) -> a -> Set a -> t a
+test :: Maybe S
+instance GHC.Show.Show Data.Set.Util.S
 
 
 -- | Tree-related utilities.
