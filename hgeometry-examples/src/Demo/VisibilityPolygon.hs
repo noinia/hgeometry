@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Demo.VisibilityPolygon where
 
@@ -7,6 +8,7 @@ import           Data.Data
 import           Data.Either (partitionEithers)
 import           Data.Ext
 import           Data.Geometry
+import           Data.Geometry.HalfLine
 import           Data.Geometry.Ipe
 import           Data.Geometry.Triangulation.Draw
 import qualified Data.List.NonEmpty as NonEmpty
@@ -56,8 +58,13 @@ mainWith (Options inFile outFile) =
         visibilities2 = [visibilityPolygon q pg
                         | pg :+ _ <- simples, q :+ _ <- points']
 
+        hl = HalfLine (Point2 336.88 331.903) (Vector2 34.909 (-67.6465))
         out  = concat [ map iO' points
-                      , map iO' visibilities2
+                      , map (\vis -> iO $ defIO vis ! attr SFill (IpeColor "blue"))
+                            visibilities2
                       , map (\(pg :+ ats) -> iO'' pg ats) simples
+                      , [iO' hl]
                       ]
     writeIpeFile outFile . singlePageFromContent $ out
+
+test = mainWith (Options "/tmp/bug.ipe" "/tmp/out.ipe")

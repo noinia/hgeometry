@@ -40,7 +40,7 @@ type P = Int
 type E = (P,P)
 
 
-
+-- Property: query point inside visibilityPg
 
 spec :: Spec
 spec = do

@@ -287,7 +287,7 @@ handleEvent                                  :: (Ord r, Fractional r, Show r, Sh
                                              -> (Status p e r, [Point 2 r :+ Definer p e r])
                                              -> Event p e r
                                              -> (Status p e r, [Point 2 r :+ Definer p e r])
-handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx <> out)
+handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx' <> out)
   where
     (ins,dels) = bimap (map extract) (map extract) . NonEmpty.partition isInsert $ acts
 
@@ -295,6 +295,7 @@ handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx <> out)
         . flip (foldr (deleteAt q p)) dels
         $ ss
 
+    newVtx' = traceShowIdWith ("handle",p,ss,ss') newVtx
     newVtx = let (a :+ sa) = firstHitAt' q p ss
                  (b :+ sb) = firstHitAt' q p ss'
                  ae        = valOf a sa
@@ -369,7 +370,7 @@ firstHitAt' q p s = case firstHitAt q p s of
 insertAt     :: (Ord r, Fractional r, Show r, Show p)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
-insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndPoint)
+insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip (compareAroundEndPoint q))
   -- if two segments have the same distance, they must share and endpoint
   -- so we use the CCW ordering around this common endpoint to determine
   -- the order.
@@ -385,7 +386,7 @@ insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip compareAroundEndP
 deleteAt     :: (Ord r, Fractional r, Show r, Show p, Show e)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
-deleteAt q p = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint)
+deleteAt q p = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint q)
   -- if two segments have the same distance, we use the ccw order around their common
   -- (end) point.
 
@@ -436,19 +437,21 @@ compareByDistanceToAt q p = comparing f
 -- | Given two segments that share an endpoint, order them by their
 -- order around this common endpoint. I.e. if uv and uw share endpoint
 -- u we uv is considered smaller iff v is smaller than w in the
--- counterclockwise order around u (treating horizontal rightward as
--- zero).
+-- counterclockwise order around u (treating the direction from q to
+-- the common endpoint as zero).
 compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
-                       => LineSegment 2 p r :+ e
+                       => Point 2 r
+                       -> LineSegment 2 p r :+ e
                        -> LineSegment 2 p r :+ e
                        -> Ordering
-compareAroundEndPoint (sa@(LineSegment' p q) :+ _)
+compareAroundEndPoint q
+                      (sa@(LineSegment' a b) :+ _)
                       (sb@(LineSegment' s t) :+ _)
     -- traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
-    | p^.core == s^.core = ccwCmpAround' p q t
-    | p^.core == t^.core = ccwCmpAround' p q s
-    | q^.core == s^.core = ccwCmpAround' q p t
-    | q^.core == t^.core = ccwCmpAround' q p s
+    | a^.core == s^.core = ccwCmpAroundWith' (a^.core .-. q) a b t
+    | a^.core == t^.core = ccwCmpAroundWith' (a^.core .-. q) a b s
+    | b^.core == s^.core = ccwCmpAroundWith' (b^.core .-. q) b a t
+    | b^.core == t^.core = ccwCmpAroundWith' (b^.core .-. q) b a s
     | otherwise          = error $ "compareAroundEndPoint: precondition failed!" <> show (sa,sb)
 
 
@@ -543,3 +546,44 @@ query2 = Point2 252 704
 
 spike :: SimplePolygon () R
 spike = traceShowId $ read "SimplePolygon [Point2 160 656 :+ (),Point2 288 640 :+ (),Point2 320 704 :+ (),Point2 368 640 :+ (),Point2 368 736 :+ (),Point2 288 752 :+ (),Point2 256 704 :+ (),Point2 224 768 :+ ()]"
+
+
+
+
+
+---- inserting new segments goes wrong somehow:
+-- ("(\"handle\",Point2 364.24 297.949,
+
+-- fromList [ClosedLineSegment (Point2 379.338 230.564 :+ ()) (Point2 385.72 283.017 :+ ()) :+ ((),())]
+
+-- fromList [ClosedLineSegment (Point2 385.72 283.017 :+ ()) (Point2 364.24 297.949 :+ ()) :+ ((),())
+--          ,ClosedLineSegment (Point2 364.24 297.949 :+ ()) (Point2 350.14 387.195 :+ ()) :+ ((),())
+--          ,ClosedLineSegment (Point2 379.338 230.564 :+ ()) (Point2 385.72 283.017 :+ ()) :+ ((),())
+--          ]
+--          )"
+
+-- ,[Point2 364.24 297.949 :+ Left ()
+--  ,Point2 384.48057~ 272.83027~ :+ Right (Point2 364.24 297.949 :+
+--  (),ClosedLineSegment (Point2 379.338 230.564 :+ ()) (Point2 385.72 283.017 :+ ()) :+ ((),()))]
+
+
+
+
+
+
+
+
+-- )
+
+-- ("(\"handle\",Point2 385.72 283.017
+
+-- ,fromList [ClosedLineSegment (Point2 385.72 283.017 :+ ()) (Point2
+-- 364.24 297.949 :+ ()) :+ ((),()),ClosedLineSegment (Point2 364.24
+-- 297.949 :+ ()) (Point2 350.14 387.195 :+ ()) :+
+-- ((),()),ClosedLineSegment (Point2 379.338 230.564 :+ ()) (Point2
+-- 385.72 283.017 :+ ()) :+ ((),())]
+-- ,fromList [ClosedLineSegment (Point2 385.72 283.017 :+ ()) (Point2
+-- 364.24 297.949 :+ ()) :+ ((),()),ClosedLineSegment (Point2 364.24
+-- 297.949 :+ ()) (Point2 350.14 387.195 :+ ()) :+ ((),())])"
+
+-- ,[Point2 385.72 283.017 :+ Left ()])
