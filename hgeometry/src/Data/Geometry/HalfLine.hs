@@ -18,9 +18,9 @@ module Data.Geometry.HalfLine( HalfLine(HalfLine)
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
-import           Data.Vinyl.CoRec
-import           Data.Vinyl
 import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
+import           Data.Geometry.Box
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -31,6 +31,8 @@ import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
 import qualified Data.Traversable as T
 import           Data.UnBounded
+import           Data.Vinyl
+import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 
@@ -168,6 +170,48 @@ instance (Ord r, Fractional r, Arity d) => Point d r `IsIntersectableWith` HalfL
   intersects = onHalfLine
   p `intersect` hl | p `intersects` hl = coRec p
                    | otherwise         = coRec NoIntersection
+
+
+
+type instance IntersectionOf (HalfLine 2 r) (Boundary (Rectangle p r)) =
+  [ NoIntersection, Point 2 r, (Point 2 r, Point 2 r) , LineSegment 2 () r]
+
+type instance IntersectionOf (HalfLine 2 r) (Rectangle p r) = [ NoIntersection
+                                                              , Point 2 r
+                                                              , LineSegment 2 () r
+                                                              ]
+
+instance (Ord r, Fractional r)
+         => HalfLine 2 r `IsIntersectableWith` Boundary (Rectangle p r) where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+
+  hl@(HalfLine o v) `intersect` br = match (Line o v `intersect` br) $
+       H coRec -- NoIntersection
+    :& H (\p -> if p `intersects` hl then coRec p else coRec NoIntersection)
+    :& H (\(p,q) -> case (p `intersects` hl, q `intersects` hl) of
+                      (False,False) -> coRec NoIntersection
+                      (False,True)  -> coRec q
+                      (True,False)  -> coRec p
+                      (True,True)   -> coRec (p,q))
+    :& H (\s@(LineSegment' p q) -> case ((p^.core) `intersects` hl, (q^.core) `intersects` hl) of
+                      (False,False) -> coRec NoIntersection
+                      (False,True)  -> coRec $ ClosedLineSegment (ext o) q
+                      (True,False)  -> coRec $ ClosedLineSegment (ext o) p
+                      (True,True)   -> coRec s)
+    :& RNil
+
+instance (Ord r, Fractional r)
+         => HalfLine 2 r `IsIntersectableWith` Rectangle p r where
+  nonEmptyIntersection = defaultNonEmptyIntersection
+
+  hl@(HalfLine o _) `intersect` rect  = match (hl `intersect` Boundary rect) $
+       H coRec -- NoIntersection
+    :& H (\p -> if o `insideBox` rect then coRec (ClosedLineSegment (ext o) (ext p))
+                                      else coRec p -- p is on the boundary
+         )
+    :& H (\(p,q) -> coRec $ ClosedLineSegment (ext p) (ext q))
+    :& H coRec -- LineSegment
+    :& RNil
 
 -- | Test if a point lies on a half-line
 onHalfLine :: (Ord r, Fractional r, Arity d) => Point d r -> HalfLine d r -> Bool

@@ -188,6 +188,19 @@ maxPoint b = let (CWMax p :+ e) = b^.maxP in p :+ e
 inBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
 p `inBox` b = FV.and . FV.zipWith R.inRange (toVec p) . extent $ b
 
+
+-- | Check if a point lies strictly inside a box (i.e. not on its boundary)
+--
+-- >>> origin `inBox` (boundingBoxList' [Point3 1 2 3, Point3 10 20 30] :: Box 3 () Int)
+-- False
+-- >>> origin `inBox` (boundingBoxList' [Point3 (-1) (-2) (-3), Point3 10 20 30] :: Box 3 () Int)
+-- True
+insideBox :: (Arity d, Ord r) => Point d r -> Box d p r -> Bool
+p `insideBox` b = FV.and . FV.zipWith R.inRange (toVec p) . fmap toOpenRange . extent $ b
+  where
+    toOpenRange (R.Range' l r) = R.OpenRange l r
+
+
 -- | Get a vector with the extent of the box in each dimension. Note that the
 -- resulting vector is 0 indexed whereas one would normally count dimensions
 -- starting at zero.
