@@ -158,7 +158,7 @@ earClipRandom poly = build gen
                     worker len
       worker (V.length vs)
 
--- | \( O(n^2) \)
+-- | \( O(n \log n) \) expected time.
 --
 --   Returns triangular faces using absolute polygon point indices.
 earClipHashed :: Real r => SimplePolygon p r -> [(Int,Int,Int)]
@@ -205,7 +205,7 @@ earClipHashed poly = build gen
                     worker len nextEar
       worker n 0
 
--- | \( O(n^2) \)
+-- | \( O(n \log n) \) expected time.
 --
 --   Returns triangular faces using absolute polygon point indices.
 earClipRandomHashed :: Real r => SimplePolygon p r -> [(Int,Int,Int)]
