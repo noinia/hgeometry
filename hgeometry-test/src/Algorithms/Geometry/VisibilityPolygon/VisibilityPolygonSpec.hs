@@ -5,15 +5,19 @@ import           Algorithms.Geometry.VisibilityPolygon.Lee ( Definer
                                                            , StarShapedPolygon
                                                            )
 import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
-import           Data.Bifunctor
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Ext
+import           Data.Geometry.Box (Rectangle)
 import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
+import           Data.Geometry.Properties
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
+import           Data.Geometry.Vector
 import           Data.Geometry.PolygonSpec ()
+import           Data.Geometry.Transformation
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -24,8 +28,10 @@ import qualified Data.Set as Set
 import qualified Data.Vector.Circular as CVec
 import           Debug.Trace
 import           Test.Hspec
-import           Test.QuickCheck
+import           Test.QuickCheck (arbitrary, generate)
 import           Test.Util
+
+import qualified Data.Geometry.Box as Box
 
 --------------------------------------------------------------------------------
 
@@ -81,6 +87,8 @@ spike = read "SimplePolygon [Point2 160 656 :+ 1,Point2 288 640 :+ 2,Point2 320 
 spikeEasy = CVec.unsafeFromList [Left 4,Left 5,Left 6, Right (3,(6,7)), Left 3]
 
 spikeAnswer = CVec.unsafeFromList [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
+
+
 
 
 
@@ -173,14 +181,50 @@ spikeAnswer = CVec.unsafeFromList [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
 --       applyAts ats = id
 -- flattenGroups' o                            = [o]
 
+
+toGrid     :: (Fractional r, Ord r) => [Polygon t p r] -> [Polygon t p r]
+toGrid pgs = zipWith (\pos pg -> fitToBox (box pos) pg) (map toCellIdx [0..]) withBoxes
+  where
+    n = length pgs
+    c = ceiling $ sqrt (fromIntegral n)
+    cellSize = fmap maximum . traverse (Box.size . view extra) $ withBoxes
+    cell     = Box.box (ext origin) (ext $ Point cellSize)
+    withBoxes =  map (\pg -> pg :+ Box.boundingBox pg) pgs
+
+    box v = translateBy ((*) <$> v <*> cellSize) cell
+    toCellIdx = fmap fromIntegral . uncurry Vector2 . (flip quotRem c)
+
+
+fitToBox            :: forall g r q z. ( IsTransformable g, NumType g ~ r, Dimension g ~ 2
+                       , Ord r, Fractional r
+                       ) => Rectangle q r -> g :+ Rectangle z r -> g
+fitToBox r (g :+ b) = transformBy (translation v2 |.| uniformScaling lam |.| translation v1) g
+  where
+    v1  :: Vector 2 r
+    v1  = negate <$> b^.to Box.minPoint.core.vector
+    v2  = r^.to Box.minPoint.core.vector
+    lam = minimum $ (\wr wb -> wr / wb) <$> Box.size r <*> Box.size b
+
+
 visibilityPg :: Point 2 R -> SimplePolygon () R -> StarShapedPolygon (Definer () ((),()) R) R
 visibilityPg = RotationalSweep.visibilityPolygon
 
-maiG = do poly <- generate arbitrary
-          let outP = visibilityPg q poly
-              q    = pickPoint poly
-              out = singlePageFromContent [ iO $ defIO outP ! attr SFill (IpeColor "blue")
-                                          , iO $ defIO poly
-                                          , iO $ defIO q
-                                          ]
-          writeIpeFile "/tmp/out.ipe" out
+
+renderVisibilityPg pg = let outP = visibilityPg q pg
+                            q    = pickPoint pg
+                        in iO $
+                           ipeGroup [ iO $ defIO outP ! attr SFill (IpeColor "blue")
+                                    , iO $ defIO pg
+                                    , iO $ defIO q
+                                    ]
+
+maiG = do polies' <- map (scaleUniformlyBy 40) . take 16 <$> generate arbitrary
+          let polies = toGrid (polies' :: [SimplePolygon () R])
+              out    = singlePageFromContent $ map renderVisibilityPg polies
+          -- let outP = visibilityPg q poly
+          --     q    = pickPoint poly
+          --     out = singlePageFromContent [ iO $ defIO outP ! attr SFill (IpeColor "blue")
+          --                                 , iO $ defIO poly
+          --                                 , iO $ defIO q
+          --                                 ]
+          writeIpeFile "/tmp/out1.ipe" out
