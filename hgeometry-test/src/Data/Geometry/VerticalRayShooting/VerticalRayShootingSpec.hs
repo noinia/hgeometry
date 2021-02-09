@@ -1,6 +1,6 @@
-module Algorithms.Geometry.VerticalRayShooting.VerticalRayShootingSpec where
+module Data.Geometry.VerticalRayShooting.VerticalRayShootingSpec where
 
-import           Algorithms.Geometry.VerticalRayShooting.PersistentSweep
+import           Data.Geometry.VerticalRayShooting.PersistentSweep
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
 import           Data.Geometry.LineSegment

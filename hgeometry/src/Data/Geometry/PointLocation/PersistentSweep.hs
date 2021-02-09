@@ -1,6 +1,13 @@
 {-# Language TemplateHaskell #-}
 {-# Language TypeApplications #-}
-module Algorithms.Geometry.PointLocation.PersistentSweep
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.PointLocation.PersistentSweep
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Data.Geometry.PointLocation.PersistentSweep
   ( PointLocationDS(PointLocationDS)
   , verticalRayShootingStructure, subdivision, outerFace
 
@@ -17,7 +24,7 @@ module Algorithms.Geometry.PointLocation.PersistentSweep
   , edgeOnOrAbove
   ) where
 
-import qualified Algorithms.Geometry.VerticalRayShooting.PersistentSweep as VRS
+import qualified Data.Geometry.VerticalRayShooting.PersistentSweep as VRS
 import           Control.Lens hiding (contains, below)
 import           Data.Ext
 import           Data.Geometry.LineSegment

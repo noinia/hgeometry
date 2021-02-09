@@ -1,5 +1,12 @@
 {-# Language TemplateHaskell #-}
-module Algorithms.Geometry.VerticalRayShooting.PersistentSweep
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Geometry.VerticalRayShooting.PersistentSweep
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module Data.Geometry.VerticalRayShooting.PersistentSweep
   ( VerticalRayShootingStructure(VerticalRayShootingStructure), StatusStructure
   , leftMost, sweepStruct
 
@@ -221,26 +228,3 @@ yCoordAt x (LineSegment' (Point2 px py :+ _) (Point2 qx qy :+ _) :+ _)
     | otherwise = py + alpha * (qy - py)
   where
     alpha = (x - px) / (qx - px)
-
---------------------------------------------------------------------------------
-
-test1 :: VerticalRayShootingStructure () Int R
-test1 = verticalRayShootingStructure . NonEmpty.fromList $ zipWith (:+)
-        [ hor 2 0 10
-        , hor 4 1 12
-        , hor 2 10 14
-        ] [1..]
-  where
-    hor y l r = ClosedLineSegment (ext $ Point2 l y) (ext $ Point2 r y)
-
-
--- shouldBe = (==)
-
--- foo = segmentAbove (Point2 5 0) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
--- foo = segmentAbove (Point2 5 2) test1 `shouldBe` Just (LineSegment (Closed (Point2 1 4 :+ ())) (Closed (Point2 12 4 :+ ())) :+ 2)
--- foo = segmentAbove (Point2 5 1) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
--- foo = segmentAbove (Point2 5 5) test1 `shouldBe` Nothing
--- foo = segmentAbove (Point2 10 5) test1 `shouldBe` Nothing
--- foo = segmentAbove (Point2 10 0) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)
--- foo = segmentAbove (Point2 10 2) test1 `shouldBe` Just (LineSegment (Closed (Point2 1 4 :+ ())) (Closed (Point2 12 4 :+ ())) :+ 2)
--- foo = segmentAbove (Point2 10 1) test1 `shouldBe` Just (LineSegment (Closed (Point2 0 2 :+ ())) (Closed (Point2 10 2 :+ ())) :+ 1)

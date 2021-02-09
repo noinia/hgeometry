@@ -1,8 +1,8 @@
-module Algorithms.Geometry.PointLocation.PointLocationSpec where
+module Data.Geometry.PointLocation.PointLocationSpec where
 
 import Control.Lens
 import Data.Ext
-import Algorithms.Geometry.PointLocation.PersistentSweep
+import Data.Geometry.PointLocation.PersistentSweep
 import Data.RealNumber.Rational
 import Data.Geometry.Point
 import Data.Geometry.Polygon
@@ -16,7 +16,7 @@ type R = RealNumber 5
 
 spec :: Spec
 spec = describe "PointLoction Tests" $ do
-         manual "src/Algorithms/Geometry/PointLocation/manual.ipe"
+         manual "src/Data/Geometry/PointLocation/manual.ipe"
 
 manual    :: FilePath -> Spec
 manual fp = runIO (readSinglePageFileThrow fp) >>= spec'
