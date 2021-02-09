@@ -1,4 +1,5 @@
-{-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.Geometry.PolygonTriangulation.EarClip
@@ -19,28 +20,30 @@
 module Algorithms.Geometry.PolygonTriangulation.EarClip
   ( earClip
   , earClipRandom
+  , earClipHashed
   ) where
 
-import           Control.Lens                ((^.))
-import           Control.Monad.ST            (ST, runST)
+import           Control.Lens                 ((^.))
 import           Control.Monad.Identity
-import           Control.Monad.ST.Unsafe     (unsafeInterleaveST)
-import           Data.Ext
+import           Control.Monad.ST             (ST, runST)
+import           Control.Monad.ST.Unsafe      (unsafeInterleaveST)
 import           Data.Bits
-import           Data.Geometry.Boundary      (PointLocationResult (Outside))
-import           Data.Geometry.Point         (Point, ccw', pattern CCW)
-import           Data.Geometry.Polygon       (SimplePolygon, outerBoundaryVector)
-import           Data.Geometry.Triangle      (Triangle (Triangle), inTriangleRelaxed)
+import           Data.Ext
+import           Data.Geometry.Boundary       (PointLocationResult (Outside))
+import           Data.Geometry.Point          (Point (Point2), ccw', pattern CCW, xCoord, yCoord)
+import           Data.Geometry.Polygon
+import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangleRelaxed)
 import           Data.STRef
-import           Data.Vector                 (Vector)
-import qualified Data.Vector                 as V
-import qualified Data.Vector.Circular        as CV
-import qualified Data.Vector.NonEmpty        as NE
-import qualified Data.Vector.Unboxed         as U
-import qualified Data.Vector.Unboxed.Mutable as MU
-import           GHC.Exts                    (build)
-import           System.Random
-import Linear.V2
+import           Data.Vector                  (Vector)
+import qualified Data.Vector                  as V
+import qualified Data.Vector.Algorithms.Intro as Algo
+import qualified Data.Vector.Circular         as CV
+import qualified Data.Vector.NonEmpty         as NE
+import qualified Data.Vector.Unboxed          as U
+import qualified Data.Vector.Unboxed.Mutable  as MU
+import           GHC.Exts                     (build)
+import           Linear.V2
+import           System.Random                (mkStdGen, randomR)
 
 {-
   We can check if a vertex is an ear in O(n) time. Checking all vertices will definitely
@@ -154,16 +157,100 @@ earClipRandom poly = build gen
                     worker len
       worker (V.length vs)
 
--- earClipHashed :: SimplePolygon p r -> [(Int,Int,Int)]
--- earClipHashed = undefined
+-- | \( O(n^2) \)
+--
+--   Returns triangular faces using absolute polygon point indices.
+earClipHashed :: (Show r, Real r) => SimplePolygon p r -> [(Int,Int,Int)]
+earClipHashed poly = build gen
+  where
+    vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
+    n = V.length vs
+    bb = boundingBox vs
+    zHashVec = U.generate n $ \i -> zHashPoint bb (V.unsafeIndex vs i ^. core)
+    gen :: ((Int,Int,Int) -> b -> b) -> b -> b
+    gen cons nil = runST $ do
+      vertices <- mutListFromVector vs
+      zHashes <- mutListSort zHashVec
+      possibleEars <- mutListClone vertices
+      let worker len focus = do
+            prev <- mutListPrev vertices focus
+            next <- mutListNext vertices focus
+            if len == 3
+              then
+                return $ cons (prev, focus, next) nil
+              else do
+                prevEar <- mutListPrev possibleEars focus
+                nextEar <- mutListNext possibleEars focus
+                isEar <- earCheckHashed bb vertices zHashes prev focus next
+                if isEar
+                  then do
+                    mutListDelete possibleEars prevEar nextEar
+                    mutListDelete vertices prev next -- remove ear
+
+                    case (prevEar /= prev, nextEar /= next) of
+                      (True, True)  -> do
+                        mutListInsert possibleEars prevEar nextEar prev
+                        mutListInsert possibleEars prev nextEar next
+                      (True, False) -> do
+                        mutListInsert possibleEars prevEar nextEar prev
+                      (False, True) -> do
+                        mutListInsert possibleEars prevEar nextEar next
+                      (False, False) -> return ()
+
+                    cons (prev, focus, next)
+                      <$> unsafeInterleaveST (worker (len-1) nextEar)
+                  else do -- not an ear
+                    mutListDelete possibleEars prevEar nextEar -- remove vertex
+                    worker len nextEar
+      worker (V.length vs) 0
 
 -- earClipRandomHashed :: SimplePolygon p r -> [(Int,Int,Int)]
 -- earClipRandomHashed = undefined
 
+-------------------------------------------------------------------------------
+-- Bounding box
+
+-- Returns (minX, widthX, minY, heightY)
+boundingBox :: Real r => V.Vector (Point 2 r :+ p) -> (r, Double, r, Double)
+boundingBox v =
+    case V.foldl' fn (initX,initX,initY,initY) (V.unsafeTail v) of
+      (minX, maxX, minY, maxY) -> (minX, realToFrac (maxX-minX), minY, realToFrac (maxY-minY))
+  where
+    fn (minX, maxX, minY, maxY) (Point2 x y :+ _) =
+      (min minX x, max maxX x, min minY y, max maxY y)
+    Point2 initX initY = V.unsafeHead v ^. core
+
+triangleBoundingBox :: Ord r => Triangle 2 p r -> (Point 2 r, Point 2 r)
+triangleBoundingBox (Triangle a b c) =
+    (Point2 minTX minTY, Point2 maxTX maxTY)
+  where
+    min3 v1 v2 v3
+        | v1 < v2   = if v1 < v3 then v1 else v3
+        | otherwise = if v2 < v3 then v2 else v3
+    max3 v1 v2 v3
+      | v1 > v2   = if v1 > v3 then v1 else v3
+      | otherwise = if v2 > v3 then v2 else v3
+    minTX = min3 (a^.core.xCoord) (b^.core.xCoord) (c^.core.xCoord)
+    minTY = min3 (a^.core.yCoord) (b^.core.yCoord) (c^.core.yCoord)
+    maxTX = max3 (a^.core.xCoord) (b^.core.xCoord) (c^.core.xCoord)
+    maxTY = max3 (a^.core.yCoord) (b^.core.yCoord) (c^.core.yCoord)
 
 -------------------------------------------------------------------------------
 -- Z-Order
 -- https://en.wikipedia.org/wiki/Z-order_curve
+
+zHashPoint :: Real r => (r,Double,r,Double) -> Point 2 r -> Word
+zHashPoint (minX, widthX, minY, heightY) (Point2 x y) =
+    zHash (V2 x' y')
+  where
+    x' = round (realToFrac (x-minX) / widthX * zHashMax)
+    y' = round (realToFrac (y-minY) / heightY * zHashMax)
+
+zHashMax :: Double
+zHashMax = realToFrac zHashMaxW
+
+zHashMaxW :: Word
+zHashMaxW = if finiteBitSize zHashMaxW == 32 then 0xFFFF else 0xFFFFFFFF
 
 zHash :: V2 Word -> Word
 zHash (V2 a b) = zHashSingle a .|. (unsafeShiftL (zHashSingle b) 1)
@@ -203,12 +290,12 @@ newShuffled :: Int -> ST s (Shuffled s)
 newShuffled len = Shuffled <$> newSTRef len <*> U.unsafeThaw (U.enumFromN 0 len)
 
 popShuffled :: Shuffled s -> ST s Int
-popShuffled (Shuffled ref vector) = do
-  count <- readSTRef ref
-  writeSTRef ref (count-1)
+popShuffled Shuffled{..} = do
+  count <- readSTRef shuffleCount
+  writeSTRef shuffleCount (count-1)
   let idx = fst $ randomR (0, count-1) (mkStdGen count)
-  val <- MU.unsafeRead vector idx
-  MU.unsafeWrite vector idx =<< MU.unsafeRead vector (count-1)
+  val <- MU.unsafeRead shuffleVector idx
+  MU.unsafeWrite shuffleVector idx =<< MU.unsafeRead shuffleVector (count-1)
   pure val
 
 pushShuffled :: Shuffled s -> Int -> ST s ()
@@ -221,14 +308,14 @@ pushShuffled (Shuffled ref vector) val = do
 -- MutList
 
 data MutList s a = MutList
-  { mutListVector  :: Vector a
+  { mutListIndex   :: (Int -> a)
   , mutListNextVec :: MU.MVector s Int
   , mutListPrevVec :: MU.MVector s Int
   }
 
 -- O(n)
 mutListFromVector :: Vector a -> ST s (MutList s a)
-mutListFromVector vec = MutList vec
+mutListFromVector vec = MutList (V.unsafeIndex vec)
   <$> do
     arr <- U.unsafeThaw (U.enumFromN 1 (V.length vec))
     MU.unsafeWrite arr (V.length vec-1) 0
@@ -261,24 +348,96 @@ mutListInsert m before after elt = do
   MU.unsafeWrite (mutListPrevVec m) after elt   -- after.prev = elt
   MU.unsafeWrite (mutListPrevVec m) elt before  -- elt.prev = before
 
+mutListSort :: (Ord a, MU.Unbox a) => U.Vector a -> ST s (MutList s a)
+mutListSort vec = do
+    sorted <- do
+      arr <- U.unsafeThaw $ (U.enumFromN 0 n :: U.Vector Int)
+      Algo.sortBy (\a b -> compare (U.unsafeIndex vec a) (U.unsafeIndex vec b)) arr
+      U.unsafeFreeze arr
+
+    next <- MU.new n
+    prev <- MU.new n
+    MU.write next
+      (U.unsafeIndex sorted (n-1))
+      (-1)
+    forM_ [0..n-2] $ \i -> do
+      MU.write next
+        (U.unsafeIndex sorted i)
+        (U.unsafeIndex sorted (i+1))
+    MU.write prev
+      (U.unsafeIndex sorted 0)
+      (-1)
+    forM_ [1..n-1] $ \i -> do
+      MU.write prev
+        (U.unsafeIndex sorted i)
+        (U.unsafeIndex sorted (i-1))
+    pure $ MutList (U.unsafeIndex vec) next prev
+  where
+    n = U.length vec
+
 -------------------------------------------------------------------------------
 -- Ear checking
 
 -- O(n)
 earCheck :: (Num r, Ord r) => MutList s (Point 2 r :+ p) -> Int -> Int -> Int -> ST s Bool
 earCheck vertices a b c = do
-  let vs = mutListVector vertices
-      pointA = V.unsafeIndex vs a
-      pointB = V.unsafeIndex vs b
-      pointC = V.unsafeIndex vs c
+  let pointA = mutListIndex vertices a
+      pointB = mutListIndex vertices b
+      pointC = mutListIndex vertices c
       trig = Triangle pointA pointB pointC
 
   let loop elt | elt == a = pure True
       loop elt = do
-        let point = V.unsafeIndex vs elt ^. core
+        let point = mutListIndex vertices elt ^. core
         case inTriangleRelaxed point trig of
           Outside -> loop =<< mutListNext vertices elt
           _       -> pure False
   if ccw' pointA pointB pointC == CCW
     then loop =<< mutListNext vertices c
+    else pure False
+
+-- showBinary :: (Integral a, Show a) => a -> String
+-- showBinary i = showIntAtBase 2 intToDigit i ""
+
+earCheckHashed :: Real r => (r, Double, r, Double) -> MutList s (Point 2 r :+ p) -> MutList s Word -> Int -> Int -> Int -> ST s Bool
+earCheckHashed bb vertices zHashes a b c = do
+  let pointA = mutListIndex vertices a
+      pointB = mutListIndex vertices b
+      pointC = mutListIndex vertices c
+      trig = Triangle pointA pointB pointC
+      (lowPt, highPt) = triangleBoundingBox trig
+
+      minZ = zHashPoint bb lowPt
+      maxZ = zHashPoint bb highPt
+
+  let upwards up
+        | up == -1 || upZ > maxZ = pure True
+        | inTriangleRelaxed pointUp trig /= Outside = pure False
+        | otherwise = upwards =<< mutListNext zHashes up
+        where
+          upZ = mutListIndex zHashes up
+          pointUp = mutListIndex vertices up ^. core
+      downwards down
+        | down == -1 || downZ < minZ = pure True
+        | inTriangleRelaxed pointDown trig /= Outside = pure False
+        | otherwise = downwards =<< mutListPrev zHashes down
+        where
+          downZ = mutListIndex zHashes down
+          pointDown = mutListIndex vertices down ^. core
+      bidirectional up down
+        | up == -1   || upZ > maxZ   = downwards down
+        | down == -1 || downZ < minZ = upwards up
+        | up /= a && up /= b && inTriangleRelaxed pointUp trig /= Outside = pure False
+        | down /= a && down /= b && inTriangleRelaxed pointDown trig /= Outside = pure False
+        | otherwise = do
+          up' <- mutListNext zHashes up
+          down' <- mutListPrev zHashes down
+          bidirectional up' down'
+        where
+          upZ = mutListIndex zHashes up
+          downZ = mutListIndex zHashes down
+          pointUp = mutListIndex vertices up ^. core
+          pointDown = mutListIndex vertices down ^. core
+  if ccw' pointA pointB pointC == CCW
+    then bidirectional b b
     else pure False
