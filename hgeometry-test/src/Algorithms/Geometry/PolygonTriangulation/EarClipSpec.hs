@@ -37,9 +37,19 @@ spec = do
           trigs = map (polygonTrig poly) g
       in sum (map Triangle.area trigs) === area poly
 
+  it "sum (map area (earClipRandomHashed polygon)) == area polygon" $ do
+    property $ \(poly :: SimplePolygon () R) ->
+      let g = earClipRandomHashed poly
+          trigs = map (polygonTrig poly) g
+      in sum (map Triangle.area trigs) === area poly
+
   it "earClip == earClipHashed" $ do
     property $ \(poly :: SimplePolygon () R) ->
       earClip poly === earClipHashed poly
+
+  it "earClipRandom == earClipRandomHashed" $ do
+    property $ \(poly :: SimplePolygon () R) ->
+      earClipRandom poly === earClipRandomHashed poly
 
 polygonTrig :: SimplePolygon p r -> (Int,Int,Int) -> Triangle.Triangle 2 p r
 polygonTrig p (a,b,c) = Triangle.Triangle (vs V.! a) (vs V.! b) (vs V.! c)

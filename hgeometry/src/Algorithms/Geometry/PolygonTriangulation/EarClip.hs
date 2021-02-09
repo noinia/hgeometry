@@ -21,6 +21,7 @@ module Algorithms.Geometry.PolygonTriangulation.EarClip
   ( earClip
   , earClipRandom
   , earClipHashed
+  , earClipRandomHashed
   ) where
 
 import           Control.Lens                 ((^.))
@@ -160,7 +161,7 @@ earClipRandom poly = build gen
 -- | \( O(n^2) \)
 --
 --   Returns triangular faces using absolute polygon point indices.
-earClipHashed :: (Show r, Real r) => SimplePolygon p r -> [(Int,Int,Int)]
+earClipHashed :: Real r => SimplePolygon p r -> [(Int,Int,Int)]
 earClipHashed poly = build gen
   where
     vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
@@ -202,10 +203,60 @@ earClipHashed poly = build gen
                   else do -- not an ear
                     mutListDelete possibleEars prevEar nextEar -- remove vertex
                     worker len nextEar
-      worker (V.length vs) 0
+      worker n 0
 
--- earClipRandomHashed :: SimplePolygon p r -> [(Int,Int,Int)]
--- earClipRandomHashed = undefined
+-- | \( O(n^2) \)
+--
+--   Returns triangular faces using absolute polygon point indices.
+earClipRandomHashed :: Real r => SimplePolygon p r -> [(Int,Int,Int)]
+earClipRandomHashed poly = build gen
+  where
+    vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
+    n = V.length vs
+    bb = boundingBox vs
+    zHashVec = U.generate n $ \i -> zHashPoint bb (V.unsafeIndex vs i ^. core)
+    gen :: ((Int,Int,Int) -> b -> b) -> b -> b
+    gen cons nil = runST $ do
+      vertices <- mutListFromVector vs
+      zHashes <- mutListSort zHashVec
+      possibleEars <- mutListClone vertices
+      shuffled <- newShuffled (V.length vs)
+      let worker len = do
+            focus <- popShuffled shuffled
+            prev <- mutListPrev vertices focus
+            next <- mutListNext vertices focus
+            if len == 3
+              then
+                return $ cons (prev, focus, next) nil
+              else do
+                prevEar <- mutListPrev possibleEars focus
+                nextEar <- mutListNext possibleEars focus
+                isEar <- earCheckHashed bb vertices zHashes prev focus next
+                if isEar
+                  then do
+                    mutListDelete possibleEars prevEar nextEar
+                    mutListDelete vertices prev next -- remove ear
+
+                    case (prevEar /= prev, nextEar /= next) of
+                      (True, True)  -> do
+                        pushShuffled shuffled prev
+                        pushShuffled shuffled next
+                        mutListInsert possibleEars prevEar nextEar prev
+                        mutListInsert possibleEars prev nextEar next
+                      (True, False) -> do
+                        pushShuffled shuffled prev
+                        mutListInsert possibleEars prevEar nextEar prev
+                      (False, True) -> do
+                        pushShuffled shuffled next
+                        mutListInsert possibleEars prevEar nextEar next
+                      (False, False) -> return ()
+
+                    cons (prev, focus, next)
+                      <$> unsafeInterleaveST (worker (len-1))
+                  else do -- not an ear
+                    mutListDelete possibleEars prevEar nextEar -- remove vertex
+                    worker len
+      worker n
 
 -------------------------------------------------------------------------------
 -- Bounding box
