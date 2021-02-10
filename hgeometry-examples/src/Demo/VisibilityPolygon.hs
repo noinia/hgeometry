@@ -43,7 +43,7 @@ options = info (helper <*> parser)
 
 
 compute            :: (p ~ ()) => Polygon t p R :+ e
-                   -> (Point 2 R, StarShapedPolygon (Definer p (p,p) R) R)
+                   -> (Point 2 R, StarShapedPolygon (Definer p () R) R)
 compute (pg :+ _)  = let q = pickPoint pg
                      in traceShow (q,pg) (q, visibilityPolygon q pg)
 
@@ -58,13 +58,9 @@ mainWith (Options inFile outFile) =
         visibilities2 = [visibilityPolygon q pg
                         | pg :+ _ <- simples, q :+ _ <- points']
 
-        hl = HalfLine (Point2 336.88 331.903) (Vector2 34.909 (-67.6465))
         out  = concat [ map iO' points
                       , map (\vis -> iO $ defIO vis ! attr SFill (IpeColor "blue"))
                             visibilities2
                       , map (\(pg :+ ats) -> iO'' pg ats) simples
-                      , [iO' hl]
                       ]
     writeIpeFile outFile . singlePageFromContent $ out
-
-test = mainWith (Options "/tmp/bug.ipe" "/tmp/out.ipe")
