@@ -100,7 +100,7 @@ type Status p e r = Set.Set (LineSegment 2 p r :+ e)
 -- pre: q lies strictly inside the polygon
 --
 -- running time: \(O(n\log n)\)
-visibilityPolygon      :: forall p t r. (Ord r, Fractional r, Show r, Show p)
+visibilityPolygon      :: forall p t r. (Ord r, Fractional r)
                        => Point 2 r
                        -> Polygon t p r
                        -> StarShapedPolygon (Definer p () r) r
@@ -198,21 +198,21 @@ incidentTo i s = s^.start.extra._1 == i || s^.end.extra._1 == i
 --       - no vertices at staring direction sv
 --
 -- running time: \(O(n\log n)\)
-visibilitySweep              :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
+visibilitySweep              :: forall p r e. (Ord r, Fractional r)
                              => Vector 2 r -- ^ starting direction of the sweep
                              -> Maybe (Point 2 r)
                              -- ^ -- point indicating the last point to sweep to
                              -> Point 2 r -- ^ the point form which we compute the visibility polgyon
                              -> [LineSegment 2 p r :+ e]
                              -> [Point 2 r :+ Definer p e r]
-visibilitySweep sv mt q segs = sweep q statusStruct (traceShowIdWith "events" events)
+visibilitySweep sv mt q segs = sweep q statusStruct events
   where
     -- lazily test if the segment intersects the initial ray
     segs'  = labelWithDistances q initialRay segs
     events = computeEvents q sv (untilEnd q sv mt) segs'
 
-    initialRay = traceShowIdWith "ray" $ HalfLine q sv
-    statusStruct = traceShowIdWith "initialSS" $ mkInitialSS segs'
+    initialRay = HalfLine q sv
+    statusStruct = mkInitialSS segs'
 
 -- | Take until the ending point if defined. We can use that the list
 -- of events appears in sorted order in the cyclic orientation around
@@ -227,7 +227,7 @@ untilEnd q sv = \case
   Just t  -> List.takeWhile (\e -> ccwCmpAroundWith' sv (ext q) (e^.eventVtx) (ext t) == LT)
 
 -- | Runs the actual sweep
-sweep                :: (Foldable t, Ord r, Fractional r, Show r, Show p, Show e)
+sweep                :: (Foldable t, Ord r, Fractional r)
                      => Point 2 r    -- ^ query point
                      -> Status p e r -- ^ initial status structure
                      -> t (Event p e r) -- ^ events to handle
@@ -236,7 +236,7 @@ sweep q statusStruct = snd . List.foldl' (handleEvent q) (statusStruct,[])
 
 
 -- | Computes the events in the sweep
-computeEvents                :: (Ord r, Num r, Foldable t, Show r, Show e1, Show p1)
+computeEvents                :: (Ord r, Num r, Foldable t)
                              => Point 2 r -- ^ query point
                              -> Vector 2 r -- ^ starting direction
                              -> ([Event p1 e1 r] -> [Event p2 e2 r]) -- ^ until where to take the vents
@@ -260,7 +260,7 @@ combine q es = Event p acts
     p    = F.minimumBy (cmpByDistanceTo' (ext q)) . fmap (^.eventVtx) $ es
 
 -- | Constructs the at most two events resulting from this segement.
-mkEvent                                      :: (Ord r, Num r, Show r,Show e, Show p)
+mkEvent                                      :: (Ord r, Num r)
                                              => Vector 2 r -- ^ starting direction
                                              -> Point 2 r  -- ^ query point
                                              -> LineSegment 2 p r :+ (Maybe r, e)
@@ -277,17 +277,17 @@ mkEvent sv q (s@(LineSegment' u v) :+ (d,e)) = case cmp u v of
     cmp = ccwCmpAroundWith' sv (ext q) <> cmpByDistanceTo' (ext q)
     s'  = s :+ e
 
-    insert = traceShowIdWith d $ (if isJust d then Delete s' else Insert s') :| []
-    delete = traceShowIdWith d $ (if isJust d then Insert s' else Delete s') :| []
+    insert = (if isJust d then Delete s' else Insert s') :| []
+    delete = (if isJust d then Insert s' else Delete s') :| []
 
 
 -- | Handles an event, computes the new status structure and output polygon.
-handleEvent                                  :: (Ord r, Fractional r, Show r, Show p, Show e)
+handleEvent                                  :: (Ord r, Fractional r)
                                              => Point 2 r
                                              -> (Status p e r, [Point 2 r :+ Definer p e r])
                                              -> Event p e r
                                              -> (Status p e r, [Point 2 r :+ Definer p e r])
-handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx' <> out)
+handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx <> out)
   where
     (ins,dels) = bimap (map extract) (map extract) . NonEmpty.partition isInsert $ acts
 
@@ -295,7 +295,6 @@ handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx' <> out)
         . flip (foldr (deleteAt q p)) dels
         $ ss
 
-    newVtx' = traceShowIdWith ("handle",p,ss,ss') newVtx
     newVtx = let (a :+ sa) = firstHitAt' q p ss
                  (b :+ sb) = firstHitAt' q p ss'
                  ae        = valOf a sa
@@ -330,7 +329,7 @@ handleEvent q (ss,out) (Event (p :+ z) acts) = (ss', newVtx' <> out)
 --      from q through p (in a point), in that order.
 --
 -- running time: \(O(\log n)\)
-firstHitAt     :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
+firstHitAt     :: forall p r e. (Ord r, Fractional r)
                => Point 2 r -> Point 2 r
                -> Status p e r
                -> Maybe (Point 2 r :+ LineSegment 2 p r :+ e)
@@ -348,13 +347,13 @@ firstHitAt q p = computeIntersectionPoint <=< Set.lookupMin
 --      - the status structure is non-empty
 --
 -- running time: \(O(\log n)\)
-firstHitAt'        :: forall p r e. (Ord r, Fractional r, Show r, Show p, Show e)
+firstHitAt'        :: forall p r e. (Ord r, Fractional r)
                   => Point 2 r -> Point 2 r
                   -> Status p e r
                   -> Point 2 r :+ LineSegment 2 p r :+ e
 firstHitAt' q p s = case firstHitAt q p s of
                       Just x  -> x
-                      Nothing -> error $ "firstHitAt: precondition failed!" <> show (p,q,s)
+                      Nothing -> error "firstHitAt: precondition failed!"
 
 --------------------------------------------------------------------------------
 -- * Status Structure Operations
@@ -367,7 +366,7 @@ firstHitAt' q p s = case firstHitAt q p s of
 --      from q through p, in that order.
 --
 -- \(O(\log n)\)
-insertAt     :: (Ord r, Fractional r, Show r, Show p)
+insertAt     :: (Ord r, Fractional r)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
 insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip (compareAroundEndPoint q))
@@ -383,7 +382,7 @@ insertAt q p = Set.insertBy (compareByDistanceToAt q p <> flip (compareAroundEnd
 --      from q through p, in that order.
 --
 -- \(O(\log n)\)
-deleteAt     :: (Ord r, Fractional r, Show r, Show p, Show e)
+deleteAt     :: (Ord r, Fractional r)
              => Point 2 r -> Point 2 r -> LineSegment 2 p r :+ e
              -> Status p e r -> Status p e r
 deleteAt q p = Set.deleteAllBy (compareByDistanceToAt q p <> compareAroundEndPoint q)
@@ -446,20 +445,20 @@ compareByDistanceToAt q p = comparing f
 -- u we uv is considered smaller iff v is smaller than w in the
 -- counterclockwise order around u (treating the direction from q to
 -- the common endpoint as zero).
-compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r, Show r, Show p)
+compareAroundEndPoint  :: forall p r e. (Ord r, Fractional r)
                        => Point 2 r
                        -> LineSegment 2 p r :+ e
                        -> LineSegment 2 p r :+ e
                        -> Ordering
 compareAroundEndPoint q
-                      (sa@(LineSegment' a b) :+ _)
-                      (sb@(LineSegment' s t) :+ _)
+                      (LineSegment' a b :+ _)
+                      (LineSegment' s t :+ _)
     -- traceshow ("comapreAroundEndPoint ", sa, sb) False = undefined
     | a^.core == s^.core = ccwCmpAroundWith' (a^.core .-. q) a b t
     | a^.core == t^.core = ccwCmpAroundWith' (a^.core .-. q) a b s
     | b^.core == s^.core = ccwCmpAroundWith' (b^.core .-. q) b a t
     | b^.core == t^.core = ccwCmpAroundWith' (b^.core .-. q) b a s
-    | otherwise          = error $ "compareAroundEndPoint: precondition failed!" <> show (sa,sb)
+    | otherwise          = error "compareAroundEndPoint: precondition failed!"
 
 --------------------------------------------------------------------------------
 -- * Helper functions for polygon operations
