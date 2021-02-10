@@ -108,7 +108,14 @@ data Range a = Range { _lower :: !(EndPoint a)
                      , _upper :: !(EndPoint a)
                      }
                deriving (Eq,Functor,Foldable,Traversable,Generic,NFData)
-makeLenses ''Range
+
+-- | Lens access for the lower part of a range.
+lower :: Lens' (Range a) (EndPoint a)
+lower = lens _lower (\r l -> r{_lower=l})
+
+-- | Lens access for the upper part of a range.
+upper :: Lens' (Range a) (EndPoint a)
+upper = lens _upper (\r u -> r{_upper=u})
 
 -- instance Show a => Show (Range a) where
 --   show (Range l u) = printf "Range (%s) (%s)" (show l) (show u)
@@ -219,6 +226,7 @@ instance Ord a => Range a `IsIntersectableWith` Range a where
 width   :: Num r => Range r -> r
 width i = i^.upper.unEndPoint - i^.lower.unEndPoint
 
+-- | Compute the halfway point between the start and end of a range.
 midPoint   :: Fractional r => Range r -> r
 midPoint r = let w = width r in r^.lower.unEndPoint + (w / 2)
 

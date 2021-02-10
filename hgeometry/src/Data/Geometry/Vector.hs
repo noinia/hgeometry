@@ -86,7 +86,7 @@ isScalarMultipleOf       :: (Eq r, Fractional r, Arity d)
                          => Vector d r -> Vector d r -> Bool
 u `isScalarMultipleOf` v = let d = u `dot` v
                                num = quadrance u * quadrance v
-                           in num == 0 || 1 == d*d / num
+                           in num == 0 || num == d*d
 -- u `isScalarMultipleOf` v = isJust $ scalarMultiple u v
 {-# SPECIALIZE
     isScalarMultipleOf :: (Eq r, Fractional r) => Vector 2 r -> Vector 2 r -> Bool  #-}

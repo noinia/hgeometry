@@ -66,6 +66,7 @@ data Versioned a = Versioned { version :: Version
                              , content :: a
                              } deriving (Show,Read,Generic,Eq,Functor,Foldable,Traversable)
 
+-- | Unpack versioned data type.
 unversioned :: Versioned a -> a
 unversioned = content
 

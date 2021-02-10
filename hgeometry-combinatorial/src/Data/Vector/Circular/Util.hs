@@ -1,4 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Vector.Circular.Util
+-- Copyright   :  (C) Frank Staals, David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  David Himmelstrup
+--------------------------------------------------------------------------------
 module Data.Vector.Circular.Util where
 
 import           Algorithms.StringSearch.KMP (isSubStringOf)

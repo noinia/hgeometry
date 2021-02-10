@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Algorithms.BinarySearch
@@ -7,8 +8,11 @@
 --------------------------------------------------------------------------------
 module Algorithms.BinarySearch where
 
-import Data.Sequence(Seq, ViewL(..),ViewR(..))
-import qualified Data.Sequence as S
+import           Control.Applicative ((<|>))
+import           Data.Sequence (Seq, ViewL(..),ViewR(..))
+import qualified Data.Sequence as Seq
+import           Data.Set (Set)
+import qualified Data.Set.Internal as Set
 import qualified Data.Vector.Generic as V
 
 --------------------------------------------------------------------------------
@@ -61,38 +65,85 @@ binarySearchUntil eps p = go
 
 
 --------------------------------------------------------------------------------
+-- * Binary Searching in some data structure
 
--- | Given a monotonic predicate, Get the index h such that everything strictly
--- smaller than h has: p i = False, and all i >= h, we have p h = True
---
--- returns Nothing if no element satisfies p
---
--- running time: \(O(\log^2 n + T*\log n)\), where \(T\) is the time to execute the
--- predicate.
-binarySearchSeq     :: (a -> Bool) -> Seq a -> Maybe Int
-binarySearchSeq p s = case S.viewr s of
-                       EmptyR                 -> Nothing
-                       (_ :> x)   | p x       -> Just $ case S.viewl s of
-                         (y :< _) | p y          -> 0
-                         _                       -> binarySearch p' 0 u
-                                  | otherwise -> Nothing
-  where
-    p' = p . S.index s
-    u  = S.length s - 1
 
--- | Given a monotonic predicate, get the index h such that everything strictly
--- smaller than h has: p i = False, and all i >= h, we have p h = True
---
--- returns Nothing if no element satisfies p
---
--- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
--- predicate.
-binarySearchVec                             :: V.Vector v a
-                                            => (a -> Bool) -> v a -> Maybe Int
-binarySearchVec p' v | V.null v   = Nothing
-                     | not $ p n' = Nothing
-                     | otherwise  = Just $ if p 0 then 0
-                                                  else binarySearch p 0 n'
-  where
-    n' = V.length v - 1
-    p = p' . (v V.!)
+class BinarySearch v where
+  type Index v :: *
+  type Elem  v :: *
+
+  -- | Given a monotonic predicate p and a data structure v, find the
+  -- element v[h] such that that
+  --
+  -- for every index i <  h we have p v[i] = False, and
+  -- for every inedx i >= h we have p v[i] = True
+  --
+  -- returns Nothing if no element satisfies p
+  --
+  -- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
+  -- predicate.
+  binarySearchIn     :: (Elem v -> Bool) -> v -> Maybe (Elem v)
+
+  -- | Given a monotonic predicate p and a data structure v, find the
+  -- index h such that that
+  --
+  -- for every index i <  h we have p v[i] = False, and
+  -- for every inedx i >= h we have p v[i] = True
+  --
+  -- returns Nothing if no element satisfies p
+  --
+  -- running time: \(O(T*\log n)\), where \(T\) is the time to execute the
+  -- predicate.
+  binarySearchIdxIn :: (Elem v -> Bool) -> v -> Maybe (Index v)
+
+--------------------------------------------------------------------------------
+-- * Searching on a Sequence
+
+instance BinarySearch (Seq a) where
+  type Index (Seq a) = Int
+  type Elem  (Seq a) = a
+
+  -- ^ runs in \(O(T*\log^2 n)\) time.
+  binarySearchIn p s = Seq.index s <$>  binarySearchIdxIn p s
+
+  -- ^ runs in \(O(T*\log^2 n)\) time.
+  binarySearchIdxIn p s = case Seq.viewr s of
+                            EmptyR                 -> Nothing
+                            (_ :> x)   | p x       -> Just $ case Seq.viewl s of
+                              (y :< _) | p y          -> 0
+                              _                       -> binarySearch p' 0 u
+                                       | otherwise -> Nothing
+    where
+      p' = p . Seq.index s
+      u  = Seq.length s - 1
+
+instance {-# OVERLAPPABLE #-} V.Vector v a => BinarySearch (v a) where
+  type Index (v a) = Int
+  type Elem  (v a) = a
+
+  binarySearchIdxIn p' v | V.null v   = Nothing
+                         | not $ p n' = Nothing
+                         | otherwise  = Just $ if p 0 then 0 else binarySearch p 0 n'
+    where
+      n' = V.length v - 1
+      p = p' . (v V.!)
+
+  binarySearchIn p v = (v V.!) <$>  binarySearchIdxIn p v
+
+instance BinarySearch (Set a) where
+  type Index (Set a) = Int
+  type Elem  (Set a) = a
+
+  binarySearchIn p = go
+    where
+      go = \case
+        Set.Tip                     -> Nothing
+        Set.Bin _ k l r | p k       -> go l <|> Just k
+                        | otherwise -> go r
+
+  binarySearchIdxIn p = go
+    where
+      go = \case
+        Set.Tip                     -> Nothing
+        Set.Bin _ k l r | p k       -> go l <|> Just (Set.size l)
+                        | otherwise -> (+ (1 + Set.size l)) <$> go r

@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld where
 
-import           Algorithms.Geometry.LineSegmentIntersection.Types
+import           Algorithms.Geometry.LineSegmentIntersection
 import           Control.Lens hiding (contains)
 import           Data.Ext
 import qualified Data.Foldable as F

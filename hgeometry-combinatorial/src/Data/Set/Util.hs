@@ -8,16 +8,16 @@
 module Data.Set.Util where
 
 import           Data.DynamicOrd
-import qualified Data.Set as Set
 import           Data.Set (Set)
+import qualified Data.Set as Set
 import qualified Data.Set.Internal as Internal
 
 
--- import Data.Ord(comparing)
+import           Data.Ord (comparing)
 
--- data S = S String deriving Show
--- cmpS :: S -> S -> Ordering
--- cmpS = comparing (\(S s) -> length s)
+data S = S String deriving Show
+cmpS :: S -> S -> Ordering
+cmpS = comparing (\(S s) -> length s)
 
 
 -- $setup
@@ -38,6 +38,18 @@ splitOn f x s = let (l,s') = Set.spanAntitone (g LT . f) s
                     (m,r)  = Set.spanAntitone (g EQ . f) s'
                     g c y  = y `compare` x == c
                 in (l,m,r)
+
+-- | Given a monotonic function f that orders @a@, split the sequence @s@
+-- into three parts. I.e. the result (lt,eq,gt) is such that
+-- * all (\x -> f x == LT) . fmap f $ lt
+-- * all (\x -> f x == EQ) . fmap f $ eq
+-- * all (\x -> f x == GT) . fmap f $ gt
+--
+-- running time: \(O(\log n)\)
+splitBy       :: (a -> Ordering) -> Set a -> (Set a, Set a, Set a)
+splitBy f s = let (l,s') = Set.spanAntitone ((==) LT . f) s
+                  (m,r)  = Set.spanAntitone ((==) EQ . f) s'
+              in (l,m,r)
 
 -- | Constructs a Set using the given Order.
 --
@@ -85,3 +97,44 @@ insertBy cmp x s = withOrd cmp $ liftOrd1 (Set.insert $ O x) s
 -- running time: \(O(\log n)\)
 deleteAllBy         :: (a -> a -> Ordering) -> a -> Set a -> Set a
 deleteAllBy cmp x s = withOrd cmp $ liftOrd1 (Set.delete $ O x) s
+
+-- | Run a query, eg. lookupGE, on the set with the given ordering.
+--
+-- Note: The 'Algorithms.BinarySearch.binarySearchIn' function may be
+-- a useful alternative to 'queryBy'
+--
+-- >>> queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "bbb")
+-- >>> queryBy cmpS Set.lookupLE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "a")
+-- >>> queryBy cmpS Set.lookupGE (S "333") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- Just (S "bbb")
+queryBy           :: (a -> a -> Ordering)
+                  -> (forall b. Ord b => b -> Set b -> t b)
+                  -> a -> Set a -> t a
+queryBy cmp fs q s = withOrd cmp $ liftOrd1 (fs $ O q) s
+
+
+
+
+-- queryBy'           :: Ord r
+--                    => (a -> r)
+--                    -> r
+--                   -> (forall b. Ord b => b -> Set b -> t b)
+--                   -> a -> Set a -> t a
+-- queryBy' g fs q s = queryBy
+--   where
+
+
+
+--   withOrd cmp $ liftOrd1 (fs $ O q) s
+
+
+
+  -- withOrd cmp $ liftOrd1 (Set.lookupGE $ O q) s
+
+
+
+
+test = queryBy cmpS Set.lookupGE (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]
+-- test = succBy cmpS (S "22") $ fromListBy cmpS [S "a" , S "bbb" , S "ddddddd"]

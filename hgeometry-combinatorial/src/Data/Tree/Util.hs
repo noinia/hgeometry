@@ -140,8 +140,8 @@ findEvert' p = fmap unZipperLocal . List.find (p . focus) . allTrees . root
 --which one is returned.
 --
 -- running time: \(O(n(T_p+T_s)\), where \(n\) is the size of the tree, and
--- \(T_p\) and \(T_s\) are the times it takes to evaluate the 'isStartingNode'
--- and 'isEndingNode' predicates.
+-- \(T_p\) and \(T_s\) are the times it takes to evaluate the @isStartingNode@
+-- and @isEndingNode@ predicates.
 --
 --
 -- >>> findPath (== 1) (==4) myTree

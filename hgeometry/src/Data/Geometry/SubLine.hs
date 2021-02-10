@@ -9,7 +9,22 @@
 -- SubLine; a part of a line
 --
 --------------------------------------------------------------------------------
-module Data.Geometry.SubLine where
+module Data.Geometry.SubLine
+  ( SubLine(..)
+  , line
+  , subRange
+  , fixEndPoints
+  , dropExtra
+  , _unBounded
+  , toUnbounded
+  , fromUnbounded
+  , onSubLine
+  , onSubLineUB
+  , onSubLine2
+  , onSubLine2UB
+  , getEndPointsUnBounded
+  , fromLine
+  ) where
 
 import           Control.Lens
 import           Data.Bifunctor
@@ -69,6 +84,7 @@ fixEndPoints sl = sl&subRange %~ f
 dropExtra :: SubLine d p s r -> SubLine d () s r
 dropExtra = over subRange (first (const ()))
 
+-- | Prism for downcasting an unbounded subline to a subline.
 _unBounded :: Prism' (SubLine d p (UnBounded r) r) (SubLine d p r r)
 _unBounded = prism' toUnbounded fromUnbounded
 
@@ -92,9 +108,13 @@ onSubLine p (SubLine l r) = case toOffset p l of
 -- lies on the subline, i.e. in the interval r
 onSubLineUB                   :: (Ord r, Fractional r)
                               => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
-p `onSubLineUB` (SubLine l r) = case toOffset p l of
-                                  Nothing -> False
-                                  Just x  -> Val x `inInterval` r
+p `onSubLineUB` (SubLine l r) =
+  p `onLine2` l &&
+  Val (toOffset' p l) `inInterval` r
+
+inSubLineIntervalUB                   :: (Ord r, Fractional r)
+                              => Point 2 r -> SubLine 2 p (UnBounded r) r -> Bool
+p `inSubLineIntervalUB` (SubLine l r) = Val (toOffset' p l) `inInterval` r
 
 -- | given point p, and a Subline l r such that p lies on line l, test if it
 -- lies on the subline, i.e. in the interval r
@@ -151,7 +171,7 @@ instance (Ord r, Fractional r) =>
 
   sl@(SubLine l r) `intersect` sm@(SubLine m _) = match (l `intersect` m) $
          H (\NoIntersection -> coRec NoIntersection)
-      :& H (\p@(Point _)    -> if onSubLine2UB p sl && onSubLine2UB p sm
+      :& H (\p@(Point _)    -> if inSubLineIntervalUB p sl && inSubLineIntervalUB p sm
                                  then coRec p
                                  else coRec NoIntersection)
       :& H (\_              -> match (r `intersect` s'') $

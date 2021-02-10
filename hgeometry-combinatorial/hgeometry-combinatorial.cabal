@@ -28,6 +28,8 @@ extra-source-files:  README.md
 
 Extra-doc-files:     docs/Data/PlanarGraph/testG.png
                      docs/Data/PlaneGraph/planegraph.png
+                     docs/Data/PlanarGraph/*.svg
+                     docs/Data/PlanarGraph/*.compact.svg
                      -- docs/**/*.png
 
 cabal-version:       2.0
@@ -54,6 +56,7 @@ library
 
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
+                    Data.Double.Approximate
 
                     -- * Measurements
                     Data.Measured
@@ -66,13 +69,12 @@ library
                     Data.Range
 
                     Data.Ext
-                    -- Data.Ext.Multi
+                    Data.Ext.Multi
 
                     Data.LSeq
                     Data.CircularSeq
                     Data.Sequence.Util
                     Data.BinaryTree
-                    Data.BinaryTree.Zipper
 
                     Data.CircularList.Util
                     Data.Vector.Circular.Util
@@ -96,6 +98,9 @@ library
                     -- * Planar Graphs
                     Data.Permutation
                     Data.PlanarGraph
+                    Data.PlanarGraph.Persistent
+                    Data.PlanarGraph.Mutable
+                    Data.PlanarGraph.Immutable
                     Data.PlanarGraph.AdjRep
                     Data.PlanarGraph.IO
                     Data.PlanarGraph.Dart
@@ -112,7 +117,7 @@ library
 
                     Data.Yaml.Util
 
-  other-modules:
+  other-modules:    Data.PlanarGraph.Internal
 
   -- other-extensions:
   build-depends:
@@ -122,7 +127,7 @@ library
               , bytestring              >= 0.10
               , containers              >= 0.5.9
               , dlist                   >= 0.7
-              , lens                    >= 4.2
+              , lens                    >= 4.18
               , contravariant           >= 1.5
               , semigroupoids           >= 5
               , semigroups              >= 0.18
@@ -138,15 +143,17 @@ library
               , linear                  >= 1.20.8
               , hashable                >= 1.2
 
-              , vector                  >= 0.11
+              , vector                  >= 0.11 && < 0.12.2.0
               , data-clist              >= 0.1.2.3
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
               , vector-builder          >= 0.3.7
+              , unordered-containers
 
               , aeson                   >= 1.0
               , yaml                    >= 0.8
               , text                    >= 1.1.1.0
+              , math-functions
 
               , mtl
               , template-haskell

@@ -1,40 +1,36 @@
-module Algorithms.Geometry.LineSegmentIntersection.Bench where
+module Algorithms.Geometry.LineSegmentIntersection.Bench (benchmark) where
 
-import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann as BONew
+import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann    as BONew
 import qualified Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld as BOOld
-import           Algorithms.Geometry.LineSegmentIntersection.Types
-import           Benchmark.Util
+
 import           Control.DeepSeq
 import           Control.Lens
-import           Criterion.Main
-import           Criterion.Types
+import           Control.Monad.Random
 import           Data.Ext
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
-import qualified Data.LSeq as LSeq
-import qualified Data.List as List
-import           Data.Proxy
-import           Test.QuickCheck
+import           Data.Hashable
+import qualified Data.List                 as List
+import           Data.RealNumber.Rational
+import           Test.Tasty.Bench
 
 --------------------------------------------------------------------------------
 
-main :: IO ()
-main = defaultMainWith cfg [ benchmark ]
-  where
-    cfg = defaultConfig { reportFile = Just "bench.html" }
+type R = RealNumber 5
 
 benchmark :: Benchmark
-benchmark = bgroup "linesegmentIntersectionBench"
-    [ env (genPts (Proxy :: Proxy Rational) 100) benchBuild
+benchmark = bgroup "LineSegmentIntersection"
+    [ benchBuild (evalRand (genPts @R 100) gen)
     ]
+
+gen :: StdGen
+gen = mkStdGen (hash "line segment intersection")
 
 --------------------------------------------------------------------------------
 
-genPts                 :: (Ord r, Arbitrary r)
-                       => proxy r -> Int
-                       -> IO [LineSegment 2 () r]
-genPts _ n | n >= 2    = generate (vectorOf n arbitrary)
-           | otherwise = error "genPts: Need at least 2 points"
+genPts                 :: (Ord r, Random r, RandomGen g)
+                       => Int -> Rand g [LineSegment 2 () r]
+genPts n = replicateM n sampleLineSegment
 
 -- | Benchmark computing the closest pair
 benchBuild    :: (Ord r, Fractional r, NFData r) => [LineSegment 2 () r] -> Benchmark

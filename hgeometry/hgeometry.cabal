@@ -30,6 +30,10 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+flag planargraph
+  default: False
+  manual: True
+
 library
   ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
 
@@ -113,10 +117,16 @@ library
                     Data.Geometry.QuadTree.Split
                     Data.Geometry.QuadTree.Tree
 
+                    Data.Geometry.PointLocation
+                    Data.Geometry.PointLocation.PersistentSweep
+
+                    Data.Geometry.VerticalRayShooting
+                    Data.Geometry.VerticalRayShooting.PersistentSweep
 
                     -- * Algorithms
 
                     -- * Geometric Algorithms
+                    Algorithms.Geometry.ConvexHull
                     Algorithms.Geometry.ConvexHull.GrahamScan
                     Algorithms.Geometry.ConvexHull.DivideAndConquer
                     Algorithms.Geometry.ConvexHull.QuickHull
@@ -135,11 +145,14 @@ library
 
                     Algorithms.Geometry.PolyLineSimplification.DouglasPeucker
 
+                    Algorithms.Geometry.EuclideanMST
                     Algorithms.Geometry.EuclideanMST.EuclideanMST
 
+                    Algorithms.Geometry.WSPD
                     Algorithms.Geometry.WellSeparatedPairDecomposition.WSPD
                     Algorithms.Geometry.WellSeparatedPairDecomposition.Types
 
+                    Algorithms.Geometry.Diameter
                     Algorithms.Geometry.Diameter.Naive
                     Algorithms.Geometry.Diameter.ConvexHull
 
@@ -153,9 +166,11 @@ library
                     Algorithms.Geometry.LineSegmentIntersection
                     Algorithms.Geometry.LineSegmentIntersection.Naive
                     Algorithms.Geometry.LineSegmentIntersection.BentleyOttmann
+                    Algorithms.Geometry.LineSegmentIntersection.BooleanSweep
 
                     -- Algorithms.Geometry.HiddenSurfaceRemoval.HiddenSurfaceRemoval
 
+                    Algorithms.Geometry.ClosestPair
                     Algorithms.Geometry.ClosestPair.Naive
                     Algorithms.Geometry.ClosestPair.DivideAndConquer
 
@@ -169,6 +184,7 @@ library
                     Algorithms.Geometry.VisibilityPolygon.Lee
                     Algorithms.Geometry.SSSP
                     Algorithms.Geometry.SSSP.Naive
+
 
                     -- * Embedded Planar Graphs
                     Data.PlaneGraph
@@ -189,6 +205,8 @@ library
 
                     Algorithms.Geometry.LineSegmentIntersection.Types
                     Algorithms.Geometry.SmallestEnclosingBall.Types
+
+                    Algorithms.Geometry.WSPD.Types
 
                     Data.Geometry.Point.Internal
                     Data.Geometry.Point.Orientation
@@ -237,7 +255,7 @@ library
               -- , ghc-typelits-natnormalise >= 0.6
               -- , ghc-typelits-knownnat     >= 0.6
 
-              , vector                  >= 0.11
+              , vector                  >= 0.11 && < 0.12.2.0
               , data-clist              >= 0.1.2.3
               , vector-circular         >= 0.1.2
               , nonempty-vector         >= 0.2.0.0
@@ -295,3 +313,108 @@ test-suite doctests
                , quickcheck-instances
 
   default-language:    Haskell2010
+
+benchmark benchmarks
+
+  hs-source-dirs: benchmark
+
+  main-is: Benchmarks.hs
+  type: exitcode-stdio-1.0
+
+  other-modules: Benchmark.Util
+                 Algorithms.Geometry.ConvexHull.Bench
+                 Algorithms.Geometry.ConvexHull.GrahamV2
+                 Algorithms.Geometry.ConvexHull.GrahamFam
+                 Algorithms.Geometry.ConvexHull.GrahamFamPeano
+                 Algorithms.Geometry.ConvexHull.GrahamFixed
+                 Data.Geometry.Vector.VectorFamily6
+                 Algorithms.Geometry.ConvexHull.GrahamFam6
+                 Data.Geometry.IntervalTreeBench
+                 -- Demo.ExpectedPairwiseDistance
+                 -- Demo.TriangulateWorld
+                 -- WSPDBench
+                 Algorithms.Geometry.ClosestPair.Bench
+
+                 Algorithms.Geometry.LineSegmentIntersection.Bench
+                 Algorithms.Geometry.LineSegmentIntersection.BentleyOttmannOld
+
+                 Algorithms.Geometry.PolygonTriangulation.Bench
+                 Algorithms.Geometry.PolygonTriangulation.MakeMonotoneOld
+
+
+  build-depends:
+                base
+              , tasty-bench
+              , fixed-vector
+              , linear
+              , semigroups
+              , deepseq
+              , deepseq-generics
+              , hgeometry
+              , hgeometry-combinatorial
+              , lens
+              , semigroupoids
+              , QuickCheck
+              , bytestring
+              , containers
+              , optparse-applicative
+              , vinyl
+              , vector
+              , dlist
+              , mtl
+              , vector-circular
+              , MonadRandom
+              , hashable
+
+
+  ghc-options: -Wall -O2 -rtsopts -fno-warn-unticked-promoted-constructors
+
+  default-language:    Haskell2010
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+                    , PatternSynonyms
+                    , ViewPatterns
+                    , LambdaCase
+                    , TupleSections
+
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
+executable planargraph
+  main-is: planargraph.hs
+  if flag(planargraph)
+    buildable: True
+  else
+    buildable: False
+  default-language:     Haskell2010
+  build-depends:  base,
+                  vector,
+                  vector-circular,
+                  linear,
+                  text,
+                  hashable,
+                  lens,
+                  directory,
+                  filepath,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  reanimate,
+                  reanimate-svg

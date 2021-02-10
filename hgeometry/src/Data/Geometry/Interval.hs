@@ -23,7 +23,7 @@ module Data.Geometry.Interval(
                              ) where
 
 import           Control.DeepSeq
-import           Control.Lens             (Lens', lens, (%~), (&), (^.))
+import           Control.Lens             (Iso', Lens', iso, (%~), (&), (^.))
 import           Data.Bifunctor
 import           Data.Bitraversable
 import           Data.Ext
@@ -44,11 +44,16 @@ import           Test.QuickCheck
 -- We can think of an interval being defined as:
 --
 -- >>> data Interval a r = Interval (EndPoint (r :+ a)) (EndPoint (r :+ a))
-newtype Interval a r = GInterval { toRange :: Range (r :+ a) }
+newtype Interval a r = GInterval (Range (r :+ a))
                      deriving (Eq,Generic,Arbitrary)
 
-_Range :: Lens' (Interval a r) (Range (r :+ a))
-_Range = lens toRange (const fromRange)
+-- | Cast an interval to a range.
+toRange :: Interval a r -> Range (r :+ a)
+toRange (GInterval r) = r
+
+-- | Intervals and ranges are isomorphic.
+_Range :: Iso' (Interval a r) (Range (r :+ a))
+_Range = iso toRange fromRange
 {-# INLINE _Range #-}
 
 -- | Constrct an interval from a Range
