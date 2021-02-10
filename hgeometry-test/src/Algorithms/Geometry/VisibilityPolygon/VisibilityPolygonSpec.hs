@@ -13,6 +13,7 @@ import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
 import           Data.Geometry.Properties
 import           Data.Geometry.LineSegment
+import           Data.Geometry.Boundary
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
@@ -28,7 +29,7 @@ import qualified Data.Set as Set
 import qualified Data.Vector.Circular as CVec
 import           Debug.Trace
 import           Test.Hspec
-import           Test.QuickCheck (arbitrary, generate)
+import           Test.QuickCheck (arbitrary, generate, property)
 import           Test.Util
 
 import qualified Data.Geometry.Box as Box
@@ -40,19 +41,20 @@ type P = Int
 type E = (P,P)
 
 
--- Property: query point inside visibilityPg
+sweep :: Show p => Point 2 R -> SimplePolygon p R -> StarShapedPolygon (Definer p (p,p) R) R
+sweep = RotationalSweep.visibilityPolygon
 
 spec :: Spec
 spec = do
     describe "Testing Visibility Polygon" $ do
       it "small testPg" $
-        sweep origin testPg `shouldBe` testPgAnswer
+        toCombinatorial (sweep origin testPg) `shouldBe` testPgAnswer
       it "spike easy" $
-        sweep (Point2 356 704) spike `shouldBe` spikeEasy
+        toCombinatorial (sweep (Point2 356 704) spike) `shouldBe` spikeEasy
       it "spike" $
-        sweep querySpike spike `shouldBe` spikeAnswer
-  where
-    sweep q pg = toCombinatorial $ RotationalSweep.visibilityPolygon q pg
+        toCombinatorial (sweep querySpike spike) `shouldBe` spikeAnswer
+      it "query point inside" $
+        property $ \q (pg :: SimplePolygon () R) -> q `inPolygon` sweep q pg == Inside
 
 
 -- | Gets the combinatorial representation of the visibility polygon
