@@ -1,24 +1,23 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module Algorithms.Geometry.VisibilityPolygon.VisibilityPolygonSpec where
 
-import           Algorithms.Geometry.VisibilityPolygon.Lee ( Definer
-                                                           , StarShapedPolygon
-                                                           )
+import           Algorithms.Geometry.VisibilityPolygon.Lee ( VisibilityPolygon , Definer )
 import qualified Algorithms.Geometry.VisibilityPolygon.Lee as RotationalSweep
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Ext
+import qualified Data.Foldable as F
+import           Data.Geometry.Boundary
 import           Data.Geometry.Box (Rectangle)
 import           Data.Geometry.Interval
 import           Data.Geometry.Ipe
-import           Data.Geometry.Properties
 import           Data.Geometry.LineSegment
-import           Data.Geometry.Boundary
 import           Data.Geometry.Point
 import           Data.Geometry.Polygon
-import           Data.Geometry.Vector
 import           Data.Geometry.PolygonSpec ()
+import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
+import           Data.Geometry.Vector
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -29,7 +28,7 @@ import qualified Data.Set as Set
 import qualified Data.Vector.Circular as CVec
 import           Debug.Trace
 import           Test.Hspec
-import           Test.QuickCheck (arbitrary, generate, property)
+import           Test.QuickCheck (arbitrary, generate, property, (==>))
 import           Test.Util
 
 import qualified Data.Geometry.Box as Box
@@ -41,7 +40,7 @@ type P = Int
 type E = (P,P)
 
 
-sweep :: Show p => Point 2 R -> SimplePolygon p R -> StarShapedPolygon (Definer p (p,p) R) R
+sweep :: Show p => Point 2 R -> SimplePolygon p R -> VisibilityPolygon p () R
 sweep = RotationalSweep.visibilityPolygon
 
 spec :: Spec
@@ -53,19 +52,25 @@ spec = do
         toCombinatorial (sweep (Point2 356 704) spike) `shouldBe` spikeEasy
       it "spike" $
         toCombinatorial (sweep querySpike spike) `shouldBe` spikeAnswer
-      it "query point inside" $
-        property $ \q (pg :: SimplePolygon () R) -> q `inPolygon` sweep q pg == Inside
+      -- it "query point in the output polygon" $
+      --   property $ \q (pg :: SimplePolygon () R) ->
+      --     q `insidePolygon` pg ==> q `inPolygon` sweep q pg /= Outside
 
-
--- | Gets the combinatorial representation of the visibility polygon
-toCombinatorial    :: StarShapedPolygon (Definer p e r) r -> CVec.CircularVector (Either p (p,e))
-toCombinatorial pg = fmap (second f . (^.extra)) $ pg^.outerBoundaryVector
+toCombinatorial    :: VisibilityPolygon P () R -> [Either P (P,E)]
+toCombinatorial pg = second f . view extra <$> pg^.outerBoundaryVector.to F.toList
   where
-    f = bimap (^.extra) (^.extra)
+    f (_ :+ r, s :+ _) = (r, (s^.start.extra,s^.end.extra))
 
+testPgAnswer :: [Either P (P,E)]
+testPgAnswer =  [Left 2
+                ,Right (2,(3,4))
+                ,Right (6,(3,4))
+                ,Left 6
+                ,Left 7
+                ,Left 8
+                ,Left 1
+                ]
 
-testPgAnswer :: CVec.CircularVector (Either P (P,E))
-testPgAnswer = CVec.unsafeFromList [Left 2,Right (2,(3,4)),Right (6,(3,4)),Left 6,Left 7,Left 8,Left 1]
 
 testPg :: SimplePolygon Int R
 testPg = fromPoints [ Point2 3    1     :+ 1
@@ -86,9 +91,9 @@ querySpike = Point2 252 704
 spike :: SimplePolygon Int R
 spike = read "SimplePolygon [Point2 160 656 :+ 1,Point2 288 640 :+ 2,Point2 320 704 :+ 3,Point2 368 640 :+ 4,Point2 368 736 :+ 5,Point2 288 752 :+ 6,Point2 256 704 :+ 7,Point2 224 768 :+ 8]"
 
-spikeEasy = CVec.unsafeFromList [Left 4,Left 5,Left 6, Right (3,(6,7)), Left 3]
+spikeEasy = [Left 4,Left 5,Left 6, Right (3,(6,7)), Left 3]
 
-spikeAnswer = CVec.unsafeFromList [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
+spikeAnswer = [Left 2,Right (7,(2,3)),Left 7, Left 8,Left 1]
 
 
 
@@ -208,9 +213,8 @@ fitToBox r (g :+ b) = transformBy (translation v2 |.| uniformScaling lam |.| tra
     lam = minimum $ (\wr wb -> wr / wb) <$> Box.size r <*> Box.size b
 
 
-visibilityPg :: Point 2 R -> SimplePolygon () R -> StarShapedPolygon (Definer () ((),()) R) R
+visibilityPg :: Point 2 R -> SimplePolygon () R -> VisibilityPolygon () () R
 visibilityPg = RotationalSweep.visibilityPolygon
-
 
 renderVisibilityPg pg = let outP = visibilityPg q pg
                             q    = pickPoint pg
