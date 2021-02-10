@@ -28,6 +28,7 @@ module Data.Geometry.LineSegment.Internal
 
   , interpolate
   , validSegment
+  , sampleLineSegment
   ) where
 
 import           Control.Arrow ((&&&))
