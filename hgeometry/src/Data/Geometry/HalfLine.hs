@@ -14,14 +14,12 @@ module Data.Geometry.HalfLine( HalfLine(HalfLine)
                              , halfLineToSubLine, fromSubLine
                              ) where
 
-
 import           Control.DeepSeq
 import           Control.Lens
 import           Data.Ext
 import qualified Data.Foldable as F
 import           Data.Geometry.Boundary
 import           Data.Geometry.Box
-import qualified Data.Foldable                as F
 import           Data.Geometry.Interval
 import           Data.Geometry.Line
 import           Data.Geometry.LineSegment
@@ -30,13 +28,12 @@ import           Data.Geometry.Properties
 import           Data.Geometry.SubLine
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.Traversable             as T
+import qualified Data.Traversable as T
 import           Data.UnBounded
+import qualified Data.Vector.Fixed as FV
 import           Data.Vinyl
 import           Data.Vinyl.CoRec
 import           GHC.Generics (Generic)
-import qualified Data.Vector.Fixed            as FV
-import           GHC.Generics                 (Generic)
 import           GHC.TypeLits
 
 --------------------------------------------------------------------------------
