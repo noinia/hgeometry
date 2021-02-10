@@ -24,7 +24,7 @@ module Data.Geometry.LineSegment
   , sqDistanceToSeg, sqDistanceToSegArg
   , flipSegment
 
-  , interpolate
+  , interpolate, sampleLineSegment
   ) where
 
 import Data.Geometry.Interval hiding (width, midPoint)
