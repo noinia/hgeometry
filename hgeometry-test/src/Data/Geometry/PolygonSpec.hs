@@ -166,6 +166,9 @@ spec = do
     property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
       isMonotone dir mono
   numericalSpec
+  it "pickPoint picks point inside polygon" $
+    property $ \(pg :: SimplePolygon () R) ->
+      pickPoint pg `insidePolygon` pg
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
