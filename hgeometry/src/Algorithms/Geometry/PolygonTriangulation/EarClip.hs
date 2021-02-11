@@ -187,6 +187,7 @@ earClipHashed poly = build gen
                   then do
                     mutListDelete possibleEars prevEar nextEar
                     mutListDelete vertices prev next -- remove ear
+                    mutListDeleteFocus zHashes focus
 
                     case (prevEar /= prev, nextEar /= next) of
                       (True, True)  -> do
@@ -236,6 +237,7 @@ earClipRandomHashed poly = build gen
                   then do
                     mutListDelete possibleEars prevEar nextEar
                     mutListDelete vertices prev next -- remove ear
+                    mutListDeleteFocus zHashes focus
 
                     case (prevEar /= prev, nextEar /= next) of
                       (True, True)  -> do
@@ -391,6 +393,15 @@ mutListDelete :: MutList s a -> Int -> Int -> ST s ()
 mutListDelete m prev next = do
   MU.unsafeWrite (mutListNextVec m) prev next
   MU.unsafeWrite (mutListPrevVec m) next prev
+
+mutListDeleteFocus :: MutList s a -> Int -> ST s ()
+mutListDeleteFocus m focus = do
+  prev <- mutListPrev m focus
+  next <- mutListNext m focus
+  unless (prev == -1) $
+    MU.unsafeWrite (mutListNextVec m) prev next
+  unless (next == -1) $
+    MU.unsafeWrite (mutListPrevVec m) next prev
 
 mutListInsert :: MutList s a -> Int -> Int -> Int -> ST s ()
 mutListInsert m before after elt = do
