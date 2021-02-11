@@ -3,30 +3,31 @@
 -- | Triangles in \(d\)-dimensional space.
 module Data.Geometry.Triangle where
 
-import           Control.DeepSeq
+import           Control.DeepSeq              (NFData)
 import           Control.Lens
-import           Data.Bifoldable
-import           Data.Bifunctor
+import           Data.Bifoldable              (Bifoldable (bifoldMap))
+import           Data.Bifunctor               (Bifunctor (first))
 import           Data.Bitraversable
-import           Data.Either (partitionEithers)
+import           Data.Either                  (partitionEithers)
 import           Data.Ext
-import           Data.Geometry.Ball (Disk, disk)
-import           Data.Geometry.Boundary
+import           Data.Geometry.Ball           (Disk, disk)
+import           Data.Geometry.Boundary       (PointLocationResult (..))
+import           Data.Geometry.Box            (IsBoxable (..))
 import           Data.Geometry.HyperPlane
-import           Data.Geometry.Line
+import           Data.Geometry.Line           (Line (Line))
 import           Data.Geometry.LineSegment
 import           Data.Geometry.Point
 import           Data.Geometry.Properties
 import           Data.Geometry.Transformation
 import           Data.Geometry.Vector
-import qualified Data.Geometry.Vector as V
-import qualified Data.List as List
-import           Data.Maybe (mapMaybe)
-import           Data.Util
-import           Data.Vinyl
-import           Data.Vinyl.CoRec
-import           GHC.Generics (Generic)
-import           GHC.TypeLits
+import qualified Data.Geometry.Vector         as V
+import qualified Data.List                    as List
+import           Data.Maybe                   (mapMaybe)
+import           Data.Util                    (Three, pattern Three)
+import           Data.Vinyl                   (Rec (RNil, (:&)))
+import           Data.Vinyl.CoRec             (Handler (H), match)
+import           GHC.Generics                 (Generic)
+import           GHC.TypeLits                 (type (+))
 
 --------------------------------------------------------------------------------
 
@@ -255,3 +256,6 @@ instance (Fractional r, Ord r) => Line 3 r `IsIntersectableWith` Triangle 3 p r 
          :& H (\(LineSegment s e) -> coRec $ LineSegment (s&unEndPoint.core %~ lift)
                                                          (e&unEndPoint.core %~ lift))
          :& RNil
+
+instance (Arity d, Ord r) => IsBoxable (Triangle d p r) where
+  boundingBox (Triangle a b c) = boundingBox a <> boundingBox b <> boundingBox c
