@@ -23,6 +23,7 @@ module Algorithms.Geometry.PolygonTriangulation.EarClip
   , earClipHashed
   , earClipRandomHashed
   , zHash
+  , zHashPoint
   , zUnHash
   ) where
 

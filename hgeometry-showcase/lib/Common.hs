@@ -26,6 +26,7 @@ import Data.Ext
 import Data.Geometry.LineSegment
 import Data.Geometry.Point
 import Data.Geometry.Polygon
+import Data.Geometry.Box (Rectangle, box, minPoint, maxPoint)
 import Data.Geometry.Transformation
 import Data.Geometry.Vector
 
@@ -216,6 +217,12 @@ lerpLineSegment t (LineSegment' (a1 :+ p1) (b1 :+ p2)) (LineSegment' (a2 :+ _) (
 
 lerpPoint :: Fractional r => Double -> Point 2 r -> Point 2 r -> Point 2 r
 lerpPoint t a b = Point $ lerp (realToFrac t) (toVec a) (toVec b)
+
+lerpPoint' :: Fractional r => Double -> Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
+lerpPoint' t (a :+ p) (b :+ _) = lerpPoint t a b :+ p
+
+lerpRectangle :: Fractional r => Double -> Rectangle p r -> Rectangle p r -> Rectangle p r
+lerpRectangle t a b = box (lerpPoint' t (minPoint a) (minPoint b)) (lerpPoint' t (maxPoint a) (maxPoint b))
 
 ------------------------------------------------------------------
 -- Random data
