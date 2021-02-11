@@ -22,6 +22,8 @@ module Algorithms.Geometry.PolygonTriangulation.EarClip
   , earClipRandom
   , earClipHashed
   , earClipRandomHashed
+  , zHash
+  , zUnHash
   ) where
 
 import           Control.Lens                 ((^.))
@@ -308,10 +310,19 @@ zHashMaxW = if finiteBitSize zHashMaxW == 32 then 0xFFFF else 0xFFFFFFFF
 zHash :: V2 Word -> Word
 zHash (V2 a b) = zHashSingle a .|. (unsafeShiftL (zHashSingle b) 1)
 
+zUnHash :: Word -> V2 Word
+zUnHash z =
+  V2 (zUnHashSingle z) (zUnHashSingle (unsafeShiftR z 1))
+
 zHashSingle :: Word -> Word
 zHashSingle w
   | finiteBitSize w == 32 = zHashSingle32 w
   | otherwise             = zHashSingle64 w
+
+zUnHashSingle :: Word -> Word
+zUnHashSingle w
+  | finiteBitSize w == 32 = zUnHashSingle32 w
+  | otherwise             = zUnHashSingle64 w
 
 zHashSingle32 :: Word -> Word
 zHashSingle32 w = runIdentity $ do
@@ -322,6 +333,15 @@ zHashSingle32 w = runIdentity $ do
     w <- pure $ (w .|. unsafeShiftL w 1)  .&. 0x55555555
     pure w
 
+zUnHashSingle32 :: Word -> Word
+zUnHashSingle32 w = runIdentity $ do
+    w <- pure $ w .&. 0x55555555
+    w <- pure $ (w .|. unsafeShiftR w 1)  .&. 0x33333333
+    w <- pure $ (w .|. unsafeShiftR w 2)  .&. 0x0F0F0F0F
+    w <- pure $ (w .|. unsafeShiftR w 4)  .&. 0x00FF00FF
+    w <- pure $ (w .|. unsafeShiftR w 8)  .&. 0x0000FFFF
+    pure w
+
 zHashSingle64 :: Word -> Word
 zHashSingle64 w = runIdentity $ do
     w <- pure $ w .&. 0x00000000FFFFFFFF
@@ -330,6 +350,16 @@ zHashSingle64 w = runIdentity $ do
     w <- pure $ (w .|. unsafeShiftL w 4)  .&. 0x0F0F0F0F0F0F0F0F
     w <- pure $ (w .|. unsafeShiftL w 2)  .&. 0x3333333333333333
     w <- pure $ (w .|. unsafeShiftL w 1)  .&. 0x5555555555555555
+    pure w
+
+zUnHashSingle64 :: Word -> Word
+zUnHashSingle64 w = runIdentity $ do
+    w <- pure $ w .&. 0x5555555555555555
+    w <- pure $ (w .|. unsafeShiftR w 1) .&. 0x3333333333333333
+    w <- pure $ (w .|. unsafeShiftR w 2)  .&. 0x0F0F0F0F0F0F0F0F
+    w <- pure $ (w .|. unsafeShiftR w 4)  .&. 0x00FF00FF00FF00FF
+    w <- pure $ (w .|. unsafeShiftR w 8)  .&. 0x0000FFFF0000FFFF
+    w <- pure $ (w .|. unsafeShiftR w 16)  .&. 0x00000000FFFFFFFF
     pure w
 
 -------------------------------------------------------------------------------
