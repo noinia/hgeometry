@@ -33,8 +33,9 @@ import           Control.Monad.ST.Unsafe      (unsafeInterleaveST)
 import           Data.Bits
 import           Data.Ext
 import           Data.Geometry.Boundary       (PointLocationResult (Outside))
-import           Data.Geometry.Point          (Point (Point2), ccw', pattern CCW, xCoord, yCoord)
+import           Data.Geometry.Point          (Point (Point2), ccw', pattern CCW)
 import           Data.Geometry.Polygon
+import           Data.Geometry.Box
 import           Data.Geometry.Triangle       (Triangle (Triangle), inTriangleRelaxed)
 import           Data.STRef
 import           Data.Vector                  (Vector)
@@ -168,8 +169,8 @@ earClipHashed poly = build gen
   where
     vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
     n = V.length vs
-    bb = boundingBox vs
-    zHashVec = U.generate n $ \i -> zHashPoint bb (V.unsafeIndex vs i ^. core)
+    hasher = zHashGen vs
+    zHashVec = U.generate n $ \i -> hasher (V.unsafeIndex vs i ^. core)
     gen :: ((Int,Int,Int) -> b -> b) -> b -> b
     gen cons nil = runST $ do
       vertices <- mutListFromVector vs
@@ -184,7 +185,7 @@ earClipHashed poly = build gen
               else do
                 prevEar <- mutListPrev possibleEars focus
                 nextEar <- mutListNext possibleEars focus
-                isEar <- earCheckHashed bb vertices zHashes prev focus next
+                isEar <- earCheckHashed hasher vertices zHashes prev focus next
                 if isEar
                   then do
                     mutListDelete possibleEars prevEar nextEar
@@ -216,8 +217,8 @@ earClipRandomHashed poly = build gen
   where
     vs = NE.toVector $ CV.vector $ poly^.outerBoundaryVector
     n = V.length vs
-    bb = boundingBox vs
-    zHashVec = U.generate n $ \i -> zHashPoint bb (V.unsafeIndex vs i ^. core)
+    hasher = zHashGen vs
+    zHashVec = U.generate n $ \i -> hasher (V.unsafeIndex vs i ^. core)
     gen :: ((Int,Int,Int) -> b -> b) -> b -> b
     gen cons nil = runST $ do
       vertices <- mutListFromVector vs
@@ -234,7 +235,7 @@ earClipRandomHashed poly = build gen
               else do
                 prevEar <- mutListPrev possibleEars focus
                 nextEar <- mutListNext possibleEars focus
-                isEar <- earCheckHashed bb vertices zHashes prev focus next
+                isEar <- earCheckHashed hasher vertices zHashes prev focus next
                 if isEar
                   then do
                     mutListDelete possibleEars prevEar nextEar
@@ -266,29 +267,13 @@ earClipRandomHashed poly = build gen
 -- Bounding box
 
 -- Returns (minX, widthX, minY, heightY)
-boundingBox :: Real r => V.Vector (Point 2 r :+ p) -> (r, Double, r, Double)
-boundingBox v =
-    case V.foldl' fn (initX,initX,initY,initY) (V.unsafeTail v) of
-      (minX, maxX, minY, maxY) -> (minX, realToFrac (maxX-minX), minY, realToFrac (maxY-minY))
+zHashGen :: Real r => V.Vector (Point 2 r :+ p) -> (Point 2 r -> Word)
+zHashGen v = zHashPoint bounds
   where
-    fn (minX, maxX, minY, maxY) (Point2 x y :+ _) =
-      (min minX x, max maxX x, min minY y, max maxY y)
-    Point2 initX initY = V.unsafeHead v ^. core
-
-triangleBoundingBox :: Ord r => Triangle 2 p r -> (Point 2 r, Point 2 r)
-triangleBoundingBox (Triangle a b c) =
-    (Point2 minTX minTY, Point2 maxTX maxTY)
-  where
-    min3 v1 v2 v3
-        | v1 < v2   = if v1 < v3 then v1 else v3
-        | otherwise = if v2 < v3 then v2 else v3
-    max3 v1 v2 v3
-      | v1 > v2   = if v1 > v3 then v1 else v3
-      | otherwise = if v2 > v3 then v2 else v3
-    minTX = min3 (a^.core.xCoord) (b^.core.xCoord) (c^.core.xCoord)
-    minTY = min3 (a^.core.yCoord) (b^.core.yCoord) (c^.core.yCoord)
-    maxTX = max3 (a^.core.xCoord) (b^.core.xCoord) (c^.core.xCoord)
-    maxTY = max3 (a^.core.yCoord) (b^.core.yCoord) (c^.core.yCoord)
+    bounds = (minX, realToFrac (maxX-minX), minY, realToFrac (maxY-minY))
+    bb = V.foldl1' (<>) $ V.map boundingBox v
+    Point2 minX minY = minPoint bb ^. core
+    Point2 maxX maxY = minPoint bb ^. core
 
 -------------------------------------------------------------------------------
 -- Z-Order
@@ -493,16 +478,19 @@ earCheck vertices a b c = do
 -- showBinary :: (Integral a, Show a) => a -> String
 -- showBinary i = showIntAtBase 2 intToDigit i ""
 
-earCheckHashed :: Real r => (r, Double, r, Double) -> MutList s (Point 2 r :+ p) -> MutList s Word -> Int -> Int -> Int -> ST s Bool
-earCheckHashed bb vertices zHashes a b c = do
+earCheckHashed :: Real r => (Point 2 r -> Word) -> MutList s (Point 2 r :+ p) -> MutList s Word -> Int -> Int -> Int -> ST s Bool
+earCheckHashed hasher vertices zHashes a b c = do
   let pointA = mutListIndex vertices a
       pointB = mutListIndex vertices b
       pointC = mutListIndex vertices c
       trig = Triangle pointA pointB pointC
-      (lowPt, highPt) = triangleBoundingBox trig
+      trigBB = boundingBox trig
+      lowPt = minPoint trigBB ^. core
+      highPt = maxPoint trigBB ^. core
+      -- (lowPt, highPt) = triangleBoundingBox trig
 
-      minZ = zHashPoint bb lowPt
-      maxZ = zHashPoint bb highPt
+      minZ = hasher lowPt
+      maxZ = hasher highPt
 
   let upwards up
         | up == -1 || upZ > maxZ = pure True
