@@ -23,7 +23,6 @@ module Algorithms.Geometry.PolygonTriangulation.EarClip
   , earClipHashed
   , earClipRandomHashed
   , zHash
-  , zHashPoint
   , zUnHash
   ) where
 
@@ -308,9 +307,11 @@ zHashMax = realToFrac zHashMaxW
 zHashMaxW :: Word
 zHashMaxW = if finiteBitSize zHashMaxW == 32 then 0xFFFF else 0xFFFFFFFF
 
+-- | O(1) Z-Order hash the first half-world of each coordinate.
 zHash :: V2 Word -> Word
 zHash (V2 a b) = zHashSingle a .|. (unsafeShiftL (zHashSingle b) 1)
 
+-- | O(1) Reverse z-order hash.
 zUnHash :: Word -> V2 Word
 zUnHash z =
   V2 (zUnHashSingle z) (zUnHashSingle (unsafeShiftR z 1))
