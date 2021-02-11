@@ -7,7 +7,7 @@ import qualified Data.Foldable as F
 import           Data.Geometry.Point
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe, fromJust)
-import           Data.Sequence.Util (binarySearchVec)
+import           Data.Sequence.Util (binarySearchIn)
 import           Data.Util (SP(..))
 import           Data.Vector ((!?))
 import qualified Data.Vector as V
@@ -31,8 +31,8 @@ discreteFrechetDistance = discreteFrechetDistanceWith squaredEuclideanDist
 discreteFrechetDistanceWith :: ( Foldable f, Functor f, Functor g
                                , Foldable g, Ord r) => (Point 2 r -> Point 2 r -> r)
   -> f (Point 2 r :+ p) -> g (Point 2 r :+ q) -> r
-discreteFrechetDistanceWith d ta tb = (dists V.!) . fromJust
-                                    $ binarySearchVec (\eps -> decideDFDWith d eps ta' tb') dists
+discreteFrechetDistanceWith d ta tb = fromJust
+                                    $ binarySearchIn (\eps -> decideDFDWith d eps ta' tb') dists
   where
     dists = allDistances d ta' tb'
     ta' = Builder.build . Builder.foldable . fmap (^.core) $ ta

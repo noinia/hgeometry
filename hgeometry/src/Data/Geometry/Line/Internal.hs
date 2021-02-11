@@ -292,6 +292,9 @@ q `onSide` (Line p v) = let r    =  p .+^ v
 liesAbove       :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
 q `liesAbove` l = q `onSideUpDown` l == Above
 
+-- | Test if the query point q lies (strictly) above line l
+liesBelow      :: (Ord r, Num r) => Point 2 r -> Line 2 r -> Bool
+q `liesBelow` l = q `onSideUpDown` l == Below
 
 -- | Get the bisector between two points
 bisector     :: Fractional r => Point 2 r -> Point 2 r -> Line 2 r
