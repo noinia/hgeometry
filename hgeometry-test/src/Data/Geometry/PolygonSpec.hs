@@ -32,23 +32,34 @@ import           Test.QuickCheck.Instances                   ()
 
 type R = RealNumber 5
 
-{-# NOINLINE allSimplePolygons #-}
 allSimplePolygons :: [SimplePolygon () Double]
-allSimplePolygons = unsafePerformIO $ do
+allSimplePolygons = allSimplePolygonsWith id
+
+allSimplePolygons' :: [SimplePolygon () Rational]
+allSimplePolygons' = allSimplePolygonsWith realToFrac
+  -- note: don't use map (realToFrac <$>) allSimplePolygons since that may create
+  -- self-intersecting polygons
+
+{-# NOINLINE allSimplePolygonsWith #-}
+allSimplePolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon () r]
+allSimplePolygonsWith f = unsafePerformIO $ do
   inp <- BS.readFile =<< getDataFileName "data/polygons.simple"
   case decode inp of
     Left msg -> error msg
     Right pts -> pure $
-      [ simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+      [ simpleFromPoints [ ext (f <$> Point2 x y) | (x,y) <- lst ]
       | lst <- pts
       ]
 
-allSimplePolygons' :: [SimplePolygon () Rational]
-allSimplePolygons' = map (realToFrac <$>) allSimplePolygons
-
-{-# NOINLINE allMultiPolygons #-}
 allMultiPolygons :: [MultiPolygon () Double]
-allMultiPolygons = unsafePerformIO $ do
+allMultiPolygons = allMultiPolygonsWith id
+
+allMultiPolygons' :: [MultiPolygon () Rational]
+allMultiPolygons' = allMultiPolygonsWith realToFrac
+
+{-# NOINLINE allMultiPolygonsWith #-}
+allMultiPolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [MultiPolygon () r]
+allMultiPolygonsWith f = unsafePerformIO $ do
   inp <- BS.readFile =<< getDataFileName "data/polygons.multi"
   case decode inp of
     Left msg -> error msg
@@ -57,10 +68,8 @@ allMultiPolygons = unsafePerformIO $ do
       | (boundary:holes) <- pts
       ]
   where
-    toSimple lst = simpleFromPoints [ ext (Point2 x y) | (x,y) <- lst ]
+    toSimple lst = simpleFromPoints [ ext (f <$> Point2 x y) | (x,y) <- lst ]
 
-allMultiPolygons' :: [MultiPolygon () Rational]
-allMultiPolygons' = map (realToFrac <$>) allMultiPolygons
 
 instance Arbitrary (SimplePolygon () Rational) where
   arbitrary = do
@@ -72,7 +81,7 @@ instance Arbitrary (SimplePolygon () Rational) where
     | otherwise = cutEars p ++ simplifyP p
 
 instance Arbitrary (SimplePolygon () (RealNumber (p::Nat))) where
-  arbitrary = elements (map (fmap realToFrac) allSimplePolygons')
+  arbitrary = fmap realToFrac <$> (arbitrary :: Gen (SimplePolygon () Rational))
   shrink = map (fmap realToFrac) . shrink . trunc
     where
       trunc :: SimplePolygon () (RealNumber (p::Nat)) -> SimplePolygon () Rational
@@ -184,7 +193,7 @@ spec = do
       isMonotone dir mono
   numericalSpec
   it "pickPoint picks point inside polygon" $
-    property $ \(pg :: SimplePolygon () R) ->
+    property $ \(pg :: SimplePolygon () Rational) ->
       pickPoint pg `insidePolygon` pg
 
 data ShowPoly a b = ShowPoly a b deriving Show
