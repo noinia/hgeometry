@@ -32,6 +32,7 @@ import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
 import           Data.Ext
+import           Data.Geometry hiding (head)
 import           Data.Geometry.Box
 import           Data.Geometry.BezierSpline
 import           Data.Geometry.Ellipse(ellipseMatrix)
@@ -189,7 +190,7 @@ instance Coordinate r => IpeReadText (IpeSize r) where
 instance Coordinate r => IpeReadText [Operation r] where
   ipeReadText = readPathOperations
 
-instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r)) where
+instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r)) where
   ipeReadText t = ipeReadText t >>= fromOpsN
     where
       fromOpsN xs = case fromOps xs of
@@ -213,6 +214,7 @@ instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r))
 
       fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
       fromOps' s [Spline [a, b, c]]  = Right [CubicBezierSegment $ Bezier3 s a b c]
+      fromOps' s [Spline ps] = Right $ map CubicBezierSegment $ splineToCubicBeziers $ s : ps
       -- these will not occur anymore with recent ipe files
       fromOps' s [QCurveTo a b]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
       fromOps' s [CurveTo a b c] = Right [CubicBezierSegment $ Bezier3 s a b c]
@@ -223,10 +225,22 @@ instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r))
       x <<| xs = (x:) <$> fromOps xs
 
 
+-- | Read a list of control points of a uniform cubic B-spline and conver it
+--   to cubic Bezier pieces
+splineToCubicBeziers :: Fractional r => [Point 2 r] -> [BezierSpline 3 2 r]
+splineToCubicBeziers [a, b, c, d] = [Bezier3 a b c d]
+splineToCubicBeziers (a : b : c : d : rest) =
+  let p = b .+^ (c .-. b) ^/ 2
+      q = c .+^ (d .-. c) ^/ 3
+      r = p .+^ (q .-. p) ^/ 2
+  in (Bezier3 a b p r) : splineToCubicBeziers (r : q : d : rest)
+splineToCubicBeziers _ = error "splineToCubicBeziers needs at least four points"
+
+
 dropRepeats :: Eq a => [a] -> [a]
 dropRepeats = map head . L.group
 
-instance (Coordinate r, Eq r) => IpeReadText (Path r) where
+instance (Coordinate r, Fractional r, Eq r) => IpeReadText (Path r) where
   ipeReadText = fmap (Path . LSeq.fromNonEmpty) . ipeReadText
 
 --------------------------------------------------------------------------------
@@ -340,7 +354,7 @@ allText = fmap T.unlines . mapM unT
     unT (Text t) = Right t
     unT _        = Left "allText: Expected Text, found an Element"
 
-instance (Coordinate r, Eq r) => IpeRead (Path r) where
+instance (Coordinate r, Fractional r, Eq r) => IpeRead (Path r) where
   ipeRead (Element "path" _ chs) = allText chs >>= ipeReadText
   ipeRead _                      = Left "path: expected element, found text"
 
@@ -372,7 +386,7 @@ instance Coordinate r => IpeRead (Image r) where
   ipeRead (Element "image" ats _) = Image () <$> (lookup' "rect" ats >>= ipeReadText)
   ipeRead _                       = Left "Image: Element expected, text found"
 
-instance (Coordinate r, Eq r) => IpeRead (IpeObject r) where
+instance (Coordinate r, Fractional r, Eq r) => IpeRead (IpeObject r) where
   ipeRead x = firstRight [ IpeUse       <$> ipeReadObject (Proxy :: Proxy IpeSymbol) r x
                          , IpePath      <$> ipeReadObject (Proxy :: Proxy Path)      r x
                          , IpeGroup     <$> ipeReadObject (Proxy :: Proxy Group)     r x
