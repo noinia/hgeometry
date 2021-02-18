@@ -211,6 +211,10 @@ instance (Coordinate r, Eq r) => IpeReadText (NonEmpty.NonEmpty (PathSegment r))
                                        (ClosePath : xs') -> PolygonPath poly   <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
+      fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
+      fromOps' s [Spline [a, b, c]]  = Right [CubicBezierSegment $ Bezier3 s a b c]
+      -- these will not occur anymore with recent ipe files
+      fromOps' s [QCurveTo a b]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
       fromOps' s [CurveTo a b c] = Right [CubicBezierSegment $ Bezier3 s a b c]
       fromOps' _ _ = Left "fromOpts': rest not implemented yet."
 

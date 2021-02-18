@@ -118,18 +118,19 @@ readRectangle = runParser pRectangle
 pOperation :: forall r. Coordinate r => Parser (Operation r)
 pOperation = pChoice [ MoveTo       <$> pPoint                         *>> 'm'
                      , LineTo       <$> pPoint                         *>> 'l'
-                     , CurveTo      <$> pPoint <*> pPoint' <*> pPoint' *>> 'c'
-                     , QCurveTo     <$> pPoint <*> pPoint'             *>> 'q'
                      , Ellipse      <$> pMatrix                        *>> 'e'
                      , ArcTo        <$> pMatrix <*> pPoint'            *>> 'a'
-                     , Spline       <$> pPoint `pSepBy` pWhiteSpace    *>> 's'
+                     , Spline       <$> pPoint `pSepBy` pWhiteSpace    *>> 'c'
                      , ClosedSpline <$> pPoint `pSepBy` pWhiteSpace    *>> 'u'
                      , pChar 'h'  *> pure ClosePath
+                     -- for backward compatibility (ipe now marks all splines with 'c', but this used to be 'q', 'c', or s' depending on the length)
+                     , QCurveTo     <$> pPoint <*> pPoint'             *>> 'q'
+                     , CurveTo      <$> pPoint <*> pPoint' <*> pPoint' *>> 'c'
+                     , Spline       <$> pPoint `pSepBy` pWhiteSpace    *>> 's'
                      ]
              where
                pPoint' = pWhiteSpace *> pPoint
                p *>> c = p <*>< pWhiteSpace ***> pChar c
-
 
 
 pPoint :: Coordinate r => Parser (Point 2 r)
