@@ -99,8 +99,8 @@ instance KnownNat n => Ord (SDouble n) where
 --
 -- @sin pi@ should theoretically be zero but we cannot do better than saying it is near zero:
 --
--- >>> sin pi :: Shaman
--- 1.2246467991473532e-16±4.440892098500626e-16
+-- >>> sin pi
+-- 1.2246467991473532e-16
 --
 -- The error margins are greater than value itself so we have no significant digits:
 --
