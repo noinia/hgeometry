@@ -14,6 +14,30 @@ import Numeric.MathFunctions.Constants
 import GHC.TypeLits
 import Data.Double.Approximate
 
+-- | Double-precision floating point numbers that throw exceptions if
+--   the accumulated errors grow large enough to cause unstable branching.
+--
+--   If @SDouble n@ works without throwing any exceptions, it'll be safe to
+--   use @DoubleRelAbs n 0@ instead for a sizable performance boost.
+--
+-- >>> sin pi == (0 :: SDouble 0)
+-- *** Exception: Insufficient precision.
+-- ...
+--
+-- @SDouble 0@ failed so @DoubleRelAbs 0 0@ will lead to an unstable branch. In
+-- other words, it'll return @False@ when it should have returned @True@:
+--
+-- >>> sin pi == (0 :: DoubleRelAbs 0 0)
+-- False
+--
+-- Comparing to within 1 ULP stabalizes the branch:
+--
+-- >>> sin pi == (0 :: SDouble 1)
+-- True
+--
+-- >>> sin pi == (0 :: DoubleRelAbs 1 0)
+-- True
+--
 newtype SDouble (n::Nat) = SDouble Shaman
   deriving (Num, Fractional, Floating, Real, RealFrac, RealFloat)
 
@@ -51,7 +75,48 @@ instance KnownNat n => Ord (SDouble n) where
 
 
 
-
+-- | Double-precision floating point numbers with error-bounds.
+--
+-- Some digits can be represented exactly and have essentially an infinitely number of significant digits:
+--
+-- >>> significativeDigits 1
+-- Infinity
+--
+-- Some fractional numbers can also be represented exactly:
+--
+-- >>> significativeDigits 0.5
+-- Infinity
+--
+-- Other numbers are merely approximations:
+--
+-- >>> significativeDigits 0.1
+-- 16.255619765854984
+--
+-- Pi is an irrational number so we can't represent it with infinite precision:
+--
+-- >>> significativeDigits pi
+-- 15.849679651557175
+--
+-- @sin pi@ should theoretically be zero but we cannot do better than saying it is near zero:
+--
+-- >>> sin pi :: Shaman
+-- 1.2246467991473532e-16±4.440892098500626e-16
+--
+-- The error margins are greater than value itself so we have no significant digits:
+--
+-- >>> significativeDigits (sin pi)
+-- 0.0
+--
+-- Since 'near zero' is not zero, the following fails when using Doubles:
+--
+-- >>> sin pi == (0 :: Double)
+-- False
+--
+-- Equality testing for Shaman numbers tests whether the two intervals
+-- overlap:
+--
+-- >>> sin pi == (0 :: Shaman)
+-- True
 data Shaman = Shaman
   { shamanValue :: {-# UNPACK #-} !Double
   , shamanError :: {-# UNPACK #-} !Double
@@ -68,9 +133,11 @@ instance Read Shaman where
       , (shamanError, t') <- reads t]
     where app_prec = 10
 
+-- | Number of significant bits (base 2).
 significativeBits :: Shaman -> Double
 significativeBits v = significativeValue v / log 2
 
+-- | Number of significant digits (base 10).
 significativeDigits :: Shaman -> Double
 significativeDigits v = significativeValue v / log 10
 
