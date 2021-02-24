@@ -1,14 +1,89 @@
 -- https://tel.archives-ouvertes.fr/tel-03116750/document
 {-# LANGUAGE BangPatterns #-}
-module Data.Double.Shaman where
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RecordWildCards #-}
+module Data.Double.Shaman
+  ( Shaman
+  , significativeBits
+  , significativeDigits
+  , SDouble
+  ) where
 
-import Numeric.MathFunctions.Comparison ( addUlps )
--- import Numeric.MathFunctions.Constants
+import Numeric.MathFunctions.Comparison ( addUlps)
+import Numeric.MathFunctions.Constants
+import GHC.TypeLits
+import Data.Double.Approximate
+
+newtype SDouble (n::Nat) = SDouble Shaman
+  deriving (Num, Fractional, Floating)
+
+instance Show (SDouble n) where
+  showsPrec d (SDouble s) = showsPrec d s
+
+instance Read (SDouble n) where
+  readsPrec d inp = [ (SDouble v, r) | (v, r) <- readsPrec d inp ]
+
+
+-- shamanUlpDistance :: Shaman -> Word64
+-- shamanUlpDistance (Shaman n e) = ulpDistance n (n+e)
+
+compareSDouble :: KnownNat n => SDouble n -> SDouble n -> Ordering
+compareSDouble a@(SDouble a') b@(SDouble b')
+   | a == b    = EQ
+   | otherwise = shamanValue a' `compare` shamanValue b'
+
+toDoubleRelAbs :: SDouble n -> DoubleRelAbs n 0
+toDoubleRelAbs (SDouble (Shaman v _e)) = DoubleRelAbs v
+
+-- If (a :: DoubleRelAbs n 0) == (b :: DoubleRelAbs n 0)
+instance KnownNat n => Eq (SDouble n) where
+  a@(SDouble a') == b@(SDouble b')
+    | blessedResult == approxResult = blessedResult
+    | otherwise                     = error "Insufficient precision."
+    where
+      blessedResult = a' == b'
+      approxResult = toDoubleRelAbs a == toDoubleRelAbs b
+
+instance KnownNat n => Ord (SDouble n) where
+  compare = compareSDouble
+
+
+
+
+
 
 data Shaman = Shaman
   { shamanValue :: {-# UNPACK #-} !Double
   , shamanError :: {-# UNPACK #-} !Double
-  } deriving Show
+  }
+
+instance Show Shaman where
+  showsPrec d Shaman{..} = showParen (d > 10) $
+    shows shamanValue . showChar '±' . shows shamanError
+
+instance Read Shaman where
+  readsPrec d = readParen (d > app_prec) $ \r ->
+      [ (Shaman{..}, t')
+      | (shamanValue, '±':t) <- reads r
+      , (shamanError, t') <- reads t]
+    where app_prec = 10
+
+significativeBits :: Shaman -> Double
+significativeBits v = significativeValue v / log 2
+
+significativeDigits :: Shaman -> Double
+significativeDigits v = significativeValue v / log 10
+
+significativeValue :: Shaman -> Double
+significativeValue (Shaman v e)
+  | e == 0    = m_pos_inf
+  | isNaN e   = 0
+  | v == 0    = max 0 (log (abs e - 1))
+  | otherwise =
+    let relError = abs (e / v) in
+    if relError >= 1
+      then 0
+      else negate $ log relError
 
 instance Num Shaman where
   Shaman x dx + Shaman y dy =
@@ -89,7 +164,7 @@ twoSum x y xy = abs (x-x') + abs (y-y')
 foreignOp :: (Double -> Double -> Double -> Double) -> (Double -> Double) -> Shaman -> Shaman
 foreignOp mkDelta fn (Shaman x dx) =
   let !z = fn x
-  in Shaman z (mkDelta x dx z)
+  in Shaman z (abs $ mkDelta x dx z)
 
 foreignBinOp ::
     (Double -> Double -> Double -> Double -> Double -> Double) ->
