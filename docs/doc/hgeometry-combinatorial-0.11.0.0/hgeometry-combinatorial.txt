@@ -347,6 +347,133 @@ instance (GHC.TypeNats.KnownNat abs, GHC.TypeNats.KnownNat rel) => GHC.Classes.O
 instance GHC.Show.Show (Data.Double.Approximate.DoubleRelAbs abs rel)
 instance GHC.Read.Read (Data.Double.Approximate.DoubleRelAbs abs rel)
 
+module Data.Double.Shaman
+
+-- | Double-precision floating point numbers with error-bounds.
+--   
+--   Some digits can be represented exactly and have essentially an
+--   infinitely number of significant digits:
+--   
+--   <pre>
+--   &gt;&gt;&gt; significativeDigits 1
+--   Infinity
+--   </pre>
+--   
+--   Some fractional numbers can also be represented exactly:
+--   
+--   <pre>
+--   &gt;&gt;&gt; significativeDigits 0.5
+--   Infinity
+--   </pre>
+--   
+--   Other numbers are merely approximations:
+--   
+--   <pre>
+--   &gt;&gt;&gt; significativeDigits 0.1
+--   16.255619765854984
+--   </pre>
+--   
+--   Pi is an irrational number so we can't represent it with infinite
+--   precision:
+--   
+--   <pre>
+--   &gt;&gt;&gt; significativeDigits pi
+--   15.849679651557175
+--   </pre>
+--   
+--   <tt>sin pi</tt> should theoretically be zero but we cannot do better
+--   than saying it is near zero:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi
+--   1.2246467991473532e-16
+--   </pre>
+--   
+--   The error margins are greater than value itself so we have no
+--   significant digits:
+--   
+--   <pre>
+--   &gt;&gt;&gt; significativeDigits (sin pi)
+--   0.0
+--   </pre>
+--   
+--   Since 'near zero' is not zero, the following fails when using Doubles:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: Double)
+--   False
+--   </pre>
+--   
+--   Equality testing for Shaman numbers tests whether the two intervals
+--   overlap:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: Shaman)
+--   True
+--   </pre>
+data Shaman
+
+-- | Number of significant bits (base 2).
+significativeBits :: Shaman -> Double
+
+-- | Number of significant digits (base 10).
+significativeDigits :: Shaman -> Double
+
+-- | Double-precision floating point numbers that throw exceptions if the
+--   accumulated errors grow large enough to cause unstable branching.
+--   
+--   If <tt>SDouble n</tt> works without throwing any exceptions, it'll be
+--   safe to use <tt>DoubleRelAbs n 0</tt> instead for a sizable
+--   performance boost.
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: SDouble 0)
+--   *** Exception: Insufficient precision.
+--   ...
+--   </pre>
+--   
+--   <tt>SDouble 0</tt> failed so <tt>DoubleRelAbs 0 0</tt> will lead to an
+--   unstable branch. In other words, it'll return <tt>False</tt> when it
+--   should have returned <tt>True</tt>:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: DoubleRelAbs 0 0)
+--   False
+--   </pre>
+--   
+--   Comparing to within 1 ULP stabalizes the branch:
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: SDouble 1)
+--   True
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; sin pi == (0 :: DoubleRelAbs 1 0)
+--   True
+--   </pre>
+data SDouble (n :: Nat)
+instance GHC.TypeNats.KnownNat n => GHC.Float.RealFloat (Data.Double.Shaman.SDouble n)
+instance GHC.TypeNats.KnownNat n => GHC.Real.RealFrac (Data.Double.Shaman.SDouble n)
+instance GHC.TypeNats.KnownNat n => GHC.Real.Real (Data.Double.Shaman.SDouble n)
+instance GHC.Float.Floating (Data.Double.Shaman.SDouble n)
+instance GHC.Real.Fractional (Data.Double.Shaman.SDouble n)
+instance GHC.Num.Num (Data.Double.Shaman.SDouble n)
+instance GHC.Show.Show (Data.Double.Shaman.SDouble n)
+instance GHC.Read.Read (Data.Double.Shaman.SDouble n)
+instance GHC.TypeNats.KnownNat n => GHC.Classes.Eq (Data.Double.Shaman.SDouble n)
+instance GHC.TypeNats.KnownNat n => GHC.Classes.Ord (Data.Double.Shaman.SDouble n)
+instance GHC.Show.Show Data.Double.Shaman.Shaman
+instance GHC.Read.Read Data.Double.Shaman.Shaman
+instance GHC.Num.Num Data.Double.Shaman.Shaman
+instance GHC.Real.Fractional Data.Double.Shaman.Shaman
+instance GHC.Float.Floating Data.Double.Shaman.Shaman
+instance GHC.Real.Real Data.Double.Shaman.Shaman
+instance GHC.Real.RealFrac Data.Double.Shaman.Shaman
+instance GHC.Float.RealFloat Data.Double.Shaman.Shaman
+instance GHC.Classes.Eq Data.Double.Shaman.Shaman
+instance GHC.Classes.Ord Data.Double.Shaman.Shaman
+
 
 module Data.DynamicOrd
 
@@ -1410,8 +1537,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aJR1 a_aK9Q. Lens (Permutation a_aJR1) (Permutation a_aK9Q) (Vector (Orbit a_aJR1)) (Vector (Orbit a_aK9Q))
-indexes :: forall a_aJR1. Lens' (Permutation a_aJR1) (Vector (Int, Int))
+orbits :: forall a_aL3K a_aLmz. Lens (Permutation a_aL3K) (Permutation a_aLmz) (Vector (Orbit a_aL3K)) (Vector (Orbit a_aLmz))
+indexes :: forall a_aL3K. Lens' (Permutation a_aL3K) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
