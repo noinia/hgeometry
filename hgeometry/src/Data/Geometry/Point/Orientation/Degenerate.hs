@@ -67,7 +67,7 @@ instance Show CCW where
 -- CoLinear
 --
 ccw :: (Ord r, Num r) => Point 2 r -> Point 2 r -> Point 2 r -> CCW
-ccw p q r = CCWWrap $ lhs `compare` rhs
+ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
 -- ccw p q r = CCWWrap $ z `compare` 0 -- Comparing against 0 is bad for numerical robustness.
                                        -- I've added a testcase that fails if comparing against 0.
             -- case z `compare` 0 of
@@ -75,15 +75,8 @@ ccw p q r = CCWWrap $ lhs `compare` rhs
             --   GT -> CCW
             --   EQ -> CoLinear
      where
-       Point2 px py = p
-       Point2 qx qy = q
-       Point2 rx ry = r
-       -- Expending the equations avoids premature rounding. This is essential for numerical
-       -- robustness.
-       lhs = qx*ry-qx*py-px*ry+px*py -- (qx-px) * (ry-py)
-       rhs = qy*rx-qy*px-py*rx+py*px -- (qy-py) * (rx-px)
-      --  Vector2 ux uy = q .-. p
-      --  Vector2 vx vy = r .-. p
+       Vector2 ux uy = q .-. p
+       Vector2 vx vy = r .-. p
       --  _z             = ux * vy - uy * vx
 
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.

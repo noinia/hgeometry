@@ -69,4 +69,7 @@ modules =
   , "Data.List.Util"
   , "Data.List.Alternating"
   , "Data.List.Zipper"
+
+  , "Data.Double.Approximate"
+  , "Data.Double.Shaman"
   ]

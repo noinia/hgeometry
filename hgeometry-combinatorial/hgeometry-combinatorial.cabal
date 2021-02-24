@@ -57,6 +57,7 @@ library
                     -- * Numeric Data Types
                     Data.RealNumber.Rational
                     Data.Double.Approximate
+                    Data.Double.Shaman
 
                     -- * Measurements
                     Data.Measured
@@ -192,6 +193,9 @@ library
                     , FlexibleInstances
                     , FlexibleContexts
                     , MultiParamTypeClasses
+
+  c-sources: cbits/erf.c
+  extra-libraries: m
 
 test-suite doctests
   type:          exitcode-stdio-1.0
