@@ -15,7 +15,7 @@ import GHC.TypeLits
 import Data.Double.Approximate
 
 newtype SDouble (n::Nat) = SDouble Shaman
-  deriving (Num, Fractional, Floating)
+  deriving (Num, Fractional, Floating, Real, RealFrac, RealFloat)
 
 instance Show (SDouble n) where
   showsPrec d (SDouble s) = showsPrec d s
@@ -142,6 +142,35 @@ instance Floating Shaman where
   acosh = foreignOp erf_acosh acosh
   atanh = foreignOp erf_atanh atanh
 
+instance Real Shaman where
+  toRational (Shaman v _) = toRational v
+
+instance RealFrac Shaman where
+  properFraction (Shaman v e) =
+    case properFraction v of
+      (i, v') -> (i, Shaman v' e)
+  truncate (Shaman v _e) = truncate v
+  round (Shaman v _e) = round v
+  ceiling (Shaman v e) = ceiling (v+e)
+  floor (Shaman v e) = floor (v-e)
+
+instance RealFloat Shaman where
+  floatRadix = floatRadix . shamanValue
+  floatDigits = floatDigits . shamanValue
+  floatRange = floatRange . shamanValue
+  decodeFloat = decodeFloat . shamanValue
+  encodeFloat m e = Shaman (encodeFloat m e) 0 -- FIXME: 1 ULP error bound?
+  exponent = exponent . shamanValue
+  significand s = Shaman (significand $ shamanValue s) 0
+  scaleFloat p (Shaman v e) = Shaman (scaleFloat p v) e
+  isNaN = isNaN . shamanValue
+  isInfinite = isInfinite . shamanValue
+  isDenormalized = isDenormalized . shamanValue
+  isNegativeZero = isNegativeZero . shamanValue
+  isIEEE = isIEEE . shamanValue
+  atan2 = foreignBinOp erf_atan2 atan2
+
+
 instance Eq Shaman where
   x == y = compareShaman x y == EQ
 
@@ -195,3 +224,5 @@ foreign import ccall unsafe "erf_tanh" erf_tanh :: Double -> Double -> Double ->
 foreign import ccall unsafe "erf_asinh" erf_asinh :: Double -> Double -> Double -> Double
 foreign import ccall unsafe "erf_acosh" erf_acosh :: Double -> Double -> Double -> Double
 foreign import ccall unsafe "erf_atanh" erf_atanh :: Double -> Double -> Double -> Double
+
+foreign import ccall unsafe "erf_atan2" erf_atan2 :: Double -> Double -> Double -> Double -> Double -> Double

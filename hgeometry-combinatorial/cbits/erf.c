@@ -89,3 +89,9 @@ double erf_atanh(double number, double error, double result)
   long double precise = atanhl((long double)number + (long double)error);
   return (double) (precise - (long double)result);
 }
+
+double erf_atan2(double n1, double e1, double n2, double e2, double result)
+{
+  long double precise = atan2l((long double)n1 + (long double)e1, (long double)n2 + (long double)e2);
+  return (double) (precise - (long double)result);
+}
