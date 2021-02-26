@@ -155,11 +155,16 @@ ccwCmpAroundWith z@(Vector2 zx zy) c q r =
             CW       -> GT
             CoLinear -> EQ
 
-ccwCmpAroundWith'                             :: (Ord r, Num r)
-                                              => Vector 2 r
-                                              -> Point 2 r :+ c
-                                              -> Point 2 r :+ a -> Point 2 r :+ b
-                                              -> Ordering
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the ccw ordering of p and q around c with this vector as zero
+-- direction.
+--
+-- pre: the points p,q /= c
+ccwCmpAroundWith'                              :: (Ord r, Num r)
+                                               => Vector 2 r
+                                               -> Point 2 r :+ c
+                                               -> Point 2 r :+ a -> Point 2 r :+ b
+                                               -> Ordering
 ccwCmpAroundWith' z (c :+ _) (q :+ _) (r :+ _) = ccwCmpAroundWith z c q r
 
 -- | Given a zero vector z, a center c, and two points p and q,
@@ -174,6 +179,12 @@ cwCmpAroundWith     :: (Ord r, Num r)
                     -> Ordering
 cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
 
+
+-- | Given a zero vector z, a center c, and two points p and q,
+-- compute the cw ordering of p and q around c with this vector as zero
+-- direction.
+--
+-- pre: the points p,q /= c
 cwCmpAroundWith'    :: (Ord r, Num r)
                     => Vector 2 r
                     -> Point 2 r :+ a

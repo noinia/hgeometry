@@ -107,3 +107,38 @@ extractMinimaBy cmp = \case
   -- TODO: This is actually a good scenario for testing how much slower :+ is compared
   -- to doing nothing. i..e compare minimaBy and extractMinimaBy
   -- note that I'm using foldr here, and foldl' before
+
+
+--------------------------------------------------------------------------------
+-- * Partitioning and Grouping
+
+-- | Given a function f, partitions the list into three lists
+-- (lts,eqs,gts) such that:
+--
+-- - f x == LT for all x in lts
+-- - f x == EQ for all x in eqs
+-- - f x == gt for all x in gts
+--
+-- >>> partition3 (compare 4) [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
+-- ([5,5,6,6,7,7,7,7,7,8],[4],[0,1,2,2,3])
+--
+partition3   :: Foldable f => (a -> Ordering) -> f a -> ([a],[a],[a])
+partition3 f = foldr g ([],[],[])
+  where
+    g x (lts,eqs,gts) = case f x of
+                          LT -> (x:lts,   eqs,  gts)
+                          EQ -> (  lts, x:eqs,  gts)
+                          GT -> (  lts,   eqs,x:gts)
+
+-- | A version of groupBy that uses the given Ordering to group
+-- consecutive Equal items
+--
+-- >>> groupBy' compare [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
+-- [0 :| [],1 :| [],2 :| [2],3 :| [],4 :| [],5 :| [5],6 :| [6],7 :| [7,7,7,7],8 :| []]
+groupBy'     :: (a -> a -> Ordering) -> [a] -> [NonEmpty a]
+groupBy' cmp = go
+  where
+    go = \case
+      []       -> []
+      (x:xs)   -> let (pref,rest) = List.span (\y -> x `cmp` y == EQ) xs
+                  in (x :| pref) : go rest

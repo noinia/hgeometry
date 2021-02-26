@@ -182,7 +182,7 @@ sideIntersections      :: (Ord r, Fractional r)
                        => [Line 2 r :+ l] -> LineSegment 2 q r
                        -> [(Point 2 r, Line 2 r :+ l)]
 sideIntersections ls s = let l   = supportingLine s :+ undefined
-                         in List.sortOn fst . filter (flip onSegment s . fst)
+                         in List.sortOn fst . filter ((`intersects` s) . fst)
                           . mapMaybe (\m -> (,m) <$> l `intersectionPoint` m) $ ls
 
 -- | Constructs the unbounded intersections. Reported in clockwise direction.
@@ -271,7 +271,7 @@ findStartVertex p arr = do
     Sides t r b l = sides'' $ arr^.boundedArea
     sides''       = fmap (\(ClosedLineSegment a c) -> LineSegment (Closed a) (Open c)) . sides
 
-    findSide q = fmap fst . List.find (onSegment q . snd) $ zip [1..] [t,r,b,l]
+    findSide q = fmap fst . List.find (intersects q. snd) $ zip [1..] [t,r,b,l]
 
     pred' ss (q,_,_) = let Just j = findSide q
                            x      = before (ss,p) (j,q)

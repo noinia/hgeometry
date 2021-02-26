@@ -69,4 +69,5 @@ modules =
   , "Algorithms.Geometry.ConvexHull.JarvisMarch"
 
   , "Algorithms.Geometry.SoS.Orientation"
+  , "Algorithms.Geometry.InPolygon"
   ]
