@@ -43,8 +43,6 @@ module Data.Geometry.Polygon.Core
   , polygonHoles, polygonHoles'
   , holeList
 
-  , inPolygon, insidePolygon, onBoundary
-
   , area, signedArea
 
   , centroid
@@ -102,18 +100,17 @@ import           Data.Geometry.Vector                                       (Add
                                                                              (*^), (^*), (^/))
 import qualified Data.List                                                  as List
 import qualified Data.List.NonEmpty                                         as NonEmpty
-import           Data.Maybe                                                 (catMaybes, mapMaybe)
+import           Data.Maybe                                                 (catMaybes)
 import           Data.Ord                                                   (comparing)
 import           Data.Semigroup                                             (sconcat)
 import           Data.Semigroup.Foldable
-import qualified Data.Sequence                                              as Seq
 import           Data.Util
 import           Data.Vector                                                (Vector)
 import qualified Data.Vector                                                as V
 import           Data.Vector.Circular                                       (CircularVector)
 import qualified Data.Vector.Circular                                       as CV
 import qualified Data.Vector.Circular.Util                                  as CV
-import           Data.Vinyl.CoRec                                           (asA)
+
 
 -- import Data.RealNumber.Rational
 
@@ -247,28 +244,6 @@ instance Fractional r => IsTransformable (Polygon t p r) where
 instance IsBoxable (Polygon t p r) where
   boundingBox = boundingBoxList' . toListOf (outerBoundaryVector.traverse.core)
 
-type instance IntersectionOf (Line 2 r) (Boundary (Polygon t p r)) =
-  '[Seq.Seq (Either (Point 2 r) (LineSegment 2 () r))]
-
-type instance IntersectionOf (Point 2 r) (Polygon t p r) = [NoIntersection, Point 2 r]
-
-instance (Fractional r, Ord r) => Point 2 r `IsIntersectableWith` Polygon t p r where
-  nonEmptyIntersection = defaultNonEmptyIntersection
-  q `intersects` pg = q `inPolygon` pg /= Outside
-  q `intersect` pg | q `intersects` pg = coRec q
-                   | otherwise         = coRec NoIntersection
-
--- instance IsIntersectableWith (Line 2 r) (Boundary (Polygon t p r)) where
---   nonEmptyIntersection _ _ (CoRec xs) = null xs
---   l `intersect` (Boundary (SimplePolygon vs)) =
---     undefined
-  -- l `intersect` (Boundary (MultiPolygon vs hs)) = coRec .
-  --    Seq.sortBy f . Seq.fromList
-  --     . concatMap (unpack . (l `intersect`) . Boundary)
-  --     $ SimplePolygon vs : hs
-  --   where
-  --     unpack (CoRec x) = x
-  --     f = undefined
 
 instance (ToJSON r, ToJSON p) => ToJSON (Polygon t p r) where
   toJSON     = \case
@@ -537,120 +512,6 @@ withIncidentEdges (MultiPolygon vs hs) = MultiPolygon vs' hs'
 -- half-open.
 toEdges    :: CircularVector (Point 2 r :+ p) -> CircularVector (LineSegment 2 p r)
 toEdges vs = CV.zipWith (\p q -> LineSegment (Closed p) (Open q)) vs (CV.rotateRight 1 vs)
-
-
--- | \( O(n) \) Test if q lies on the boundary of the polygon.
---
--- >>> Point2 1 1 `onBoundary` simplePoly
--- False
--- >>> Point2 0 0 `onBoundary` simplePoly
--- True
--- >>> Point2 10 0 `onBoundary` simplePoly
--- True
--- >>> Point2 5 13 `onBoundary` simplePoly
--- False
--- >>> Point2 5 10 `onBoundary` simplePoly
--- False
--- >>> Point2 10 5 `onBoundary` simplePoly
--- True
--- >>> Point2 20 5 `onBoundary` simplePoly
--- False
---
--- TODO: testcases multipolygon
-onBoundary        :: (Num r, Ord r) => Point 2 r -> Polygon t p r -> Bool
-q `onBoundary` pg = any (q `intersects`) es
-  where
-    out = pg^.outerBoundary
-    es = concatMap (F.toList . outerBoundaryEdges) $ out : holeList pg
-
--- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.
--- Running time: O(n).
---
--- >>> Point2 1 1 `inPolygon` simplePoly
--- Inside
--- >>> Point2 0 0 `inPolygon` simplePoly
--- OnBoundary
--- >>> Point2 10 0 `inPolygon` simplePoly
--- OnBoundary
--- >>> Point2 5 13 `inPolygon` simplePoly
--- Inside
--- >>> Point2 5 10 `inPolygon` simplePoly
--- Inside
--- >>> Point2 10 5 `inPolygon` simplePoly
--- OnBoundary
--- >>> Point2 20 5 `inPolygon` simplePoly
--- Outside
---
--- TODO: Add some testcases with multiPolygons
--- TODO: Add some more onBoundary testcases
-inPolygon                                :: forall t p r. (Fractional r, Ord r)
-                                         => Point 2 r -> Polygon t p r
-                                         -> PointLocationResult
-q `inPolygon` pg
-    | q `onBoundary` pg                             = OnBoundary
-    | odd kl && odd kr && not (any (q `inHole`) hs) = Inside
-    | otherwise                                     = Outside
-  where
-    l = horizontalLine $ q^.yCoord
-
-    -- Given a line segment, compute the intersection point (if a point) with the
-    -- line l
-    intersectionPoint = asA @(Point 2 r) . (`intersect` l)
-
-    -- Count the number of intersections that the horizontal line through q
-    -- maxes with the polygon, that are strictly to the left and strictly to
-    -- the right of q. If these numbers are both odd the point lies within the polygon.
-    --
-    --
-    -- note that: - by the asA (Point 2 r) we ignore horizontal segments (as desired)
-    --            - by the filtering, we effectively limit l to an open-half line, starting
-    --               at the (open) point q.
-    --            - by using half-open segments as edges we avoid double counting
-    --               intersections that coincide with vertices.
-    --            - If the point is outside, and on the same height as the
-    --              minimum or maximum coordinate of the polygon. The number of
-    --              intersections to the left or right may be one. Thus
-    --              incorrectly classifying the point as inside. To avoid this,
-    --              we count both the points to the left *and* to the right of
-    --              p. Only if both are odd the point is inside.  so that if
-    --              the point is outside, and on the same y-coordinate as one
-    --              of the extermal vertices (one ofth)
-    --
-    -- See http://geomalgorithms.com/a03-_inclusion.html for more information.
-    SP kl kr = count (\p -> (p^.xCoord) `compare` (q^.xCoord))
-             . mapMaybe intersectionPoint . F.toList . outerBoundaryEdges $ pg
-
-    -- For multi polygons we have to test if we do not lie in a hole .
-    inHole = insidePolygon
-    hs     = holeList pg
-
-    count   :: (a -> Ordering) -> [a] -> SP Int Int
-    count f = foldr (\x (SP lts gts) -> case f x of
-                             LT -> SP (lts + 1) gts
-                             EQ -> SP lts       gts
-                             GT -> SP lts       (gts + 1)) (SP 0 0)
-
-
--- | Test if a point lies strictly inside the polgyon.
-insidePolygon        :: (Fractional r, Ord r) => Point 2 r -> Polygon t p r -> Bool
-q `insidePolygon` pg = q `inPolygon` pg == Inside
-
-
--- testQ = map (`inPolygon` testPoly) [ Point2 1 1    -- Inside
---                                    , Point2 0 0    -- OnBoundary
---                                    , Point2 5 14   -- Inside
---                                    , Point2 5 10   -- Inside
---                                    , Point2 10 5   -- OnBoundary
---                                    , Point2 20 5   -- Outside
---                                    ]
-
--- testPoly :: SimplePolygon () Rational
--- testPoly = SimplePolygon . C.fromList . map ext $ [ Point2 0 0
---                                                   , Point2 10 0
---                                                   , Point2 10 10
---                                                   , Point2 5 15
---                                                   , Point2 1 11
---                                                   ]
 
 -- | Compute the area of a polygon
 area                        :: Fractional r => Polygon t p r -> r

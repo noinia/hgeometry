@@ -38,6 +38,7 @@ import           Data.Geometry.Polygon
 import           Data.Geometry.Vector
 import           Data.Intersection
 import qualified Data.List as List
+import qualified Data.List.Util as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe, isJust)
@@ -244,7 +245,7 @@ computeEvents                :: (Ord r, Num r, Foldable t)
                              -> [Event p2 e2 r]
 computeEvents q sv takeUntil =
      map (combine q)
-   . groupBy' (\a b -> ccwCmpAroundWith' sv (ext q) (a^.eventVtx) (b^.eventVtx))
+   . List.groupBy' (\a b -> ccwCmpAroundWith' sv (ext q) (a^.eventVtx) (b^.eventVtx))
    . takeUntil
    . List.sortBy (cmp `on` (^.eventVtx))
    . concatMap (mkEvent sv q)
@@ -500,36 +501,6 @@ closedEdges = map asClosed . listEdges
 --------------------------------------------------------------------------------
 -- * Generic Helper functions
 
--- | Given a function f, partitions the list into three lists
--- (lts,eqs,gts) such that:
---
--- - f x == LT for all x in lts
--- - f x == EQ for all x in eqs
--- - f x == gt for all x in gts
---
--- >>> partition3 (compare 4) [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
--- ([5,5,6,6,7,7,7,7,7,8],[4],[0,1,2,2,3])
---
-partition3   :: Foldable f => (a -> Ordering) -> f a -> ([a],[a],[a])
-partition3 f = foldr g ([],[],[])
-  where
-    g x (lts,eqs,gts) = case f x of
-                          LT -> (x:lts,   eqs,  gts)
-                          EQ -> (  lts, x:eqs,  gts)
-                          GT -> (  lts,   eqs,x:gts)
-
--- | A version of groupBy that uses the given Ordering to group
--- consecutive Equal items
---
--- >>> groupBy' compare [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
--- [0 :| [],1 :| [],2 :| [2],3 :| [],4 :| [],5 :| [5],6 :| [6],7 :| [7,7,7,7],8 :| []]
-groupBy'     :: (a -> a -> Ordering) -> [a] -> [NonEmpty a]
-groupBy' cmp = go
-  where
-    go = \case
-      []       -> []
-      (x:xs)   -> let (pref,rest) = List.span (\y -> x `cmp` y == EQ) xs
-                  in (x :| pref) : go rest
 
 
 --------------------------------------------------------------------------------

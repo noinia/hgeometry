@@ -44,6 +44,77 @@ source-repository head
   type:     git
   location: https://github.com/noinia/hgeometry
 
+executable fromgeojson
+  main-is: FromGeoJSON.hs
+  hs-source-dirs: src
+  default-language:     Haskell2010
+  build-depends:  base,
+                  containers,
+                  lens,
+                  aeson,
+                  bytestring,
+                  hashable,
+                  hgeometry,
+                  hgeometry-combinatorial,
+                  geojson,
+                  cereal,
+                  MonadRandom
+                      , QuickCheck           >= 2.5
+                      , approximate-equality >= 1.1.0.2
+                      , base
+                      , bytestring
+                      , cereal
+                      , containers
+                      , data-clist
+                      , directory
+                      , filepath
+                      , hgeometry                >= 0.11.0.0
+                      , hgeometry-combinatorial
+                      , hgeometry-ipe
+                      , hspec                >= 2.1
+                      , lens
+                      , linear
+                      , quickcheck-instances    >= 0.3
+                      , random
+                      , semigroups
+                      , singletons
+                      , singletons
+                      , vector
+                      , vector-circular      >= 0.1.1
+                      , vinyl
+                      , yaml
+                      , hspec
+                      , hgeometry-ipe
+
+  default-extensions: TypeFamilies
+                    , GADTs
+                    , KindSignatures
+                    , DataKinds
+                    , TypeOperators
+                    , ConstraintKinds
+                    , PolyKinds
+                    , RankNTypes
+                    , TypeApplications
+                    , ScopedTypeVariables
+
+
+                    , PatternSynonyms
+                    , ViewPatterns
+                    , LambdaCase
+                    , TupleSections
+
+
+                    , StandaloneDeriving
+                    , GeneralizedNewtypeDeriving
+                    , DeriveFunctor
+                    , DeriveFoldable
+                    , DeriveTraversable
+
+                    , FlexibleInstances
+                    , FlexibleContexts
+                    , MultiParamTypeClasses
+
+
 test-suite hspec
   type:                 exitcode-stdio-1.0
   default-language:     Haskell2010
@@ -149,53 +220,6 @@ test-suite hspec
                       , vector-circular      >= 0.1.1
                       , vinyl
                       , yaml
-
-  default-extensions: TypeFamilies
-                    , GADTs
-                    , KindSignatures
-                    , DataKinds
-                    , TypeOperators
-                    , ConstraintKinds
-                    , PolyKinds
-                    , RankNTypes
-                    , TypeApplications
-                    , ScopedTypeVariables
-
-
-                    , PatternSynonyms
-                    , ViewPatterns
-                    , LambdaCase
-                    , TupleSections
-
-
-                    , StandaloneDeriving
-                    , GeneralizedNewtypeDeriving
-                    , DeriveFunctor
-                    , DeriveFoldable
-                    , DeriveTraversable
-
-                    , FlexibleInstances
-                    , FlexibleContexts
-                    , MultiParamTypeClasses
-
-executable fromgeojson
-  main-is: FromGeoJSON.hs
-  hs-source-dirs: src
-  default-language:     Haskell2010
-  build-depends:  aeson,
-                  base,
-                  bytestring,
-                  cereal,
-                  containers,
-                  geojson,
-                  hashable,
-                  hgeometry,
-                  hgeometry-combinatorial,
-                  lens,
-                  -- for whatever reason my dev setup doesn't like it if I don't specify these,
-                  -- even if we don't need them
-                  hspec,
-                  hgeometry-ipe
 
   default-extensions: TypeFamilies
                     , GADTs

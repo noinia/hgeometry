@@ -3,13 +3,13 @@
 module Data.Geometry.PolygonSpec (spec) where
 
 import           Algorithms.Geometry.LineSegmentIntersection
-import           Control.Lens                                (over, view, (^.), (^..))
-import           Control.Monad.Random                        (Random, evalRand, mkStdGen)
-import qualified Data.ByteString                             as BS
+import           Control.Lens (over, view, (^.), (^..))
+import           Control.Monad.Random (Random, evalRand, mkStdGen)
+import qualified Data.ByteString as BS
 import           Data.Coerce
 import           Data.Double.Approximate
 import           Data.Ext
-import qualified Data.Foldable                               as F
+import qualified Data.Foldable as F
 import           Data.Geometry
 import           Data.Geometry.Boundary
 import           Data.Geometry.Ipe
@@ -21,14 +21,21 @@ import           Data.Proxy
 import           Data.Ratio
 import           Data.RealNumber.Rational
 import           Data.Serialize
-import qualified Data.Vector                                 as V
-import           Data.Vector.Circular                        (CircularVector)
-import qualified Data.Vector.Circular                        as CV
+import qualified Data.Vector as V
+import           Data.Vector.Circular (CircularVector)
+import qualified Data.Vector.Circular as CV
 import           Paths_hgeometry_test
 import           System.IO.Unsafe
 import           Test.Hspec
 import           Test.QuickCheck
-import           Test.QuickCheck.Instances                   ()
+import           Test.QuickCheck.Instances ()
+
+import           Data.Geometry.Transformation
+import Data.Util
+import Data.Maybe
+import Data.Vinyl
+import Data.Vinyl.CoRec
+import Debug.Trace
 
 type R = RealNumber 5
 
@@ -192,27 +199,20 @@ spec = do
     property $ forAll genMonotone $ \(dir, mono :: SimplePolygon () R) ->
       isMonotone dir mono
   numericalSpec
-  it "pickPoint picks point inside polygon" $
-    property $ \(pg :: SimplePolygon () Rational) ->
-      pickPoint pg `insidePolygon` pg
+  it "pickPoint picks point inside polygon (manual)" $
+      (pickPoint myPg `insidePolygon` myPg) `shouldBe` True
+  it "pickPoint picks point inside polygon" $ do
+      property $ \(pg :: SimplePolygon () R) ->
+        pickPoint pg `insidePolygon` pg
 
-data ShowPoly a b = ShowPoly a b deriving Show
-instance Eq b => Eq (ShowPoly a b) where
-  (ShowPoly _ a) == (ShowPoly _ b) = a == b
-
+myPg :: SimplePolygon () R
+myPg = read "SimplePolygon [Point2 7865790 3349116 :+ (),Point2 6304943 3123049 :+ (),Point2 5770988 3123102 :+ (),Point2 5770988 3123103 :+ (),Point2 5093248 2691560 :+ (),Point2 4456582 2321791 :+ (),Point2 3984237 1931429 :+ (),Point2 3327061 1479350 :+ (),Point2 2423390 1130062 :+ (),Point2 184830 842440 :+ (),Point2 0 410951 :+ (),Point2 1376016 61610 :+ (),Point2 3861016 0 :+ (),Point2 6058502 205475 :+ (),Point2 8030084 452025 :+ (),Point2 9734688 719111 :+ (),Point2 11357118 1047861 :+ (),Point2 11316045 1582088 :+ (),Point2 11192824 2034113 :+ (),Point2 10741016 2671078 :+ (),Point2 9447147 3123049 :+ ()]"
 
 testCases    :: FilePath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
     Left e    -> it "reading point in polygon file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
     Right tcs -> mapM_ toSpec tcs
-
-
---   ipeF <- beforeAll $ readInputFromFile "tests/Data/Geometry/pointInPolygon.ipe"
---   describe "Point in Polygon tests" $ do
---     it "returns the first element of a list" $ do
---       head [23 ..] `shouldBe` (23 :: Int)
-
 
 data TestCase r = TestCase { _polygon    :: SimplePolygon () r
                            , _inside     :: [Point 2 r]
