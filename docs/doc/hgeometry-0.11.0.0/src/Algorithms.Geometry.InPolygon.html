@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Algorithms.Geometry.InPolygon</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Testing if a point lies in a polygon</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Algorithms.Geometry.InPolygon</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#inPolygon"><span class="hs-identifier">inPolygon</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#insidePolygon"><span class="hs-identifier">insidePolygon</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#onBoundary"><span class="hs-identifier">onBoundary</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Lens</span></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ext</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Boundary.html"><span class="hs-identifier">Data.Geometry.Boundary</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Line.html"><span class="hs-identifier">Data.Geometry.Line</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.LineSegment.html"><span class="hs-identifier">Data.Geometry.LineSegment</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Point.html"><span class="hs-identifier">Data.Geometry.Point</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html"><span class="hs-identifier">Data.Geometry.Polygon.Core</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Geometry.Properties.html"><span class="hs-identifier">Data.Geometry.Properties</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.Util</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Vinyl.CoRec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">asA</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">{- $setup
+&gt;&gt;&gt; import Data.RealNumber.Rational
+&gt;&gt;&gt; import Data.Foldable
+&gt;&gt;&gt; import Control.Lens.Extras
+&gt;&gt;&gt; :{
+-- import qualified Data.Vector.Circular as CV
+let simplePoly :: SimplePolygon () (RealNumber 10)
+    simplePoly = fromPoints . map ext $
+      [ Point2 0 0
+      , Point2 10 0
+      , Point2 10 10
+      , Point2 5 15
+      , Point2 1 11
+      ]
+    simpleTriangle :: SimplePolygon () (RealNumber 10)
+    simpleTriangle = fromPoints  . map ext $
+      [ Point2 0 0, Point2 2 0, Point2 1 1]
+    multiPoly :: MultiPolygon () (RealNumber 10)
+    multiPoly = MultiPolygon
+      (fromPoints . map ext $ [Point2 (-1) (-1), Point2 3 (-1), Point2 2 2])
+      [simpleTriangle]
+:} -}</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- | \( O(n) \) Test if q lies on the boundary of the polygon.</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 1 1 `onBoundary` simplePoly</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 0 0 `onBoundary` simplePoly</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 0 `onBoundary` simplePoly</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 13 `onBoundary` simplePoly</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 10 `onBoundary` simplePoly</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 5 `onBoundary` simplePoly</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- True</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 20 5 `onBoundary` simplePoly</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- False</span><span>
+</span><span id="line-73"></span><span class="hs-comment">--</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- TODO: testcases multipolygon</span><span>
+</span><span id="line-75"></span><span id="local-6989586621680032655"><span id="local-6989586621680032656"><span id="local-6989586621680032657"><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#onBoundary"><span class="hs-identifier hs-type">onBoundary</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621680032657"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680032657"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680032657"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032656"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032655"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032657"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span><span>
+</span><span id="line-76"></span><span id="local-6989586621680032582"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680032582"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="onBoundary"><span class="annot"><span class="annottext">onBoundary :: Point 2 r -&gt; Polygon t p r -&gt; Bool
+</span><a href="Algorithms.Geometry.InPolygon.html#onBoundary"><span class="hs-operator hs-var hs-var">`onBoundary`</span></a></span></span><span> </span><span id="local-6989586621680032581"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621680032581"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Bool) -&gt; [LineSegment 2 p r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">any</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032582"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineSegment 2 p r -&gt; Bool
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680032578"><span class="hs-identifier hs-var">es</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621680032577"><span class="annot"><span class="annottext">out :: SimplePolygon p r
+</span><a href="#local-6989586621680032577"><span class="hs-identifier hs-var hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032581"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">Polygon t p r
+-&gt; Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+-&gt; SimplePolygon p r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+forall (t :: PolygonType) p r.
+Lens' (Polygon t p r) (SimplePolygon p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621680032578"><span class="annot"><span class="annottext">es :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032578"><span class="hs-identifier hs-var hs-var">es</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; [LineSegment 2 p r])
+-&gt; [SimplePolygon p r] -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CircularVector (LineSegment 2 p r) -&gt; [LineSegment 2 p r]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">(CircularVector (LineSegment 2 p r) -&gt; [LineSegment 2 p r])
+-&gt; (SimplePolygon p r -&gt; CircularVector (LineSegment 2 p r))
+-&gt; SimplePolygon p r
+-&gt; [LineSegment 2 p r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; CircularVector (LineSegment 2 p r)
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; CircularVector (LineSegment 2 p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundaryEdges"><span class="hs-identifier hs-var">outerBoundaryEdges</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([SimplePolygon p r] -&gt; [LineSegment 2 p r])
+-&gt; [SimplePolygon p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621680032577"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [SimplePolygon p r] -&gt; [SimplePolygon p r]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; [SimplePolygon p r]
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; [Polygon 'Simple p r]
+</span><a href="Data.Geometry.Polygon.Core.html#holeList"><span class="hs-identifier hs-var">holeList</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032581"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- | Check if a point lies inside a polygon, on the boundary, or outside of the polygon.</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- Running time: O(n).</span><span>
+</span><span id="line-83"></span><span class="hs-comment">--</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 1 1 `inPolygon` simplePoly</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- Inside</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 0 0 `inPolygon` simplePoly</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- OnBoundary</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 0 `inPolygon` simplePoly</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- OnBoundary</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 13 `inPolygon` simplePoly</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- Inside</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 10 `inPolygon` simplePoly</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- Inside</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 5 `inPolygon` simplePoly</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- OnBoundary</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 20 5 `inPolygon` simplePoly</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- Outside</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- TODO: Add some testcases with multiPolygons</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- TODO: Add some more onBoundary testcases</span><span>
+</span><span id="line-101"></span><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#inPolygon"><span class="hs-identifier hs-type">inPolygon</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680032590"><span class="annot"><a href="#local-6989586621680032590"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span id="local-6989586621680032589"><span class="annot"><a href="#local-6989586621680032589"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680032591"><span class="annot"><a href="#local-6989586621680032591"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680032591"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680032591"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680032591"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032590"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032589"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032591"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Boundary.html#PointLocationResult"><span class="hs-identifier hs-type">PointLocationResult</span></a></span><span>
+</span><span id="line-103"></span><span id="local-6989586621680032569"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680032569"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="inPolygon"><span class="annot"><span class="annottext">inPolygon :: Point 2 r -&gt; Polygon t p r -&gt; PointLocationResult
+</span><a href="Algorithms.Geometry.InPolygon.html#inPolygon"><span class="hs-operator hs-var hs-var">`inPolygon`</span></a></span></span><span> </span><span id="local-6989586621680032568"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621680032568"><span class="hs-identifier hs-var">pg</span></a></span></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032569"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Polygon t p r -&gt; Bool
+forall r (t :: PolygonType) p.
+(Num r, Ord r) =&gt;
+Point 2 r -&gt; Polygon t p r -&gt; Bool
+</span><a href="Algorithms.Geometry.InPolygon.html#onBoundary"><span class="hs-operator hs-var">`onBoundary`</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032568"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#OnBoundary"><span class="hs-identifier hs-var">OnBoundary</span></a></span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680032566"><span class="hs-identifier hs-var">inHole</span></a></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032569"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; SimplePolygon p r -&gt; PointLocationResult
+forall p r.
+(Fractional r, Ord r) =&gt;
+Point 2 r -&gt; SimplePolygon p r -&gt; PointLocationResult
+</span><a href="Algorithms.Geometry.InPolygon.html#inPolygon%27"><span class="hs-operator hs-var">`inPolygon'`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032568"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">Polygon t p r
+-&gt; Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+-&gt; SimplePolygon p r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">Getting (SimplePolygon p r) (Polygon t p r) (SimplePolygon p r)
+forall (t :: PolygonType) p r.
+Lens' (Polygon t p r) (SimplePolygon p r)
+</span><a href="Data.Geometry.Polygon.Core.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621680032566"><span class="annot"><span class="annottext">inHole :: Bool
+</span><a href="#local-6989586621680032566"><span class="hs-identifier hs-var hs-var">inHole</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r -&gt; Bool) -&gt; [SimplePolygon p r] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">any</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032569"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; SimplePolygon p r -&gt; Bool
+forall r (t :: PolygonType) p.
+(Fractional r, Ord r) =&gt;
+Point 2 r -&gt; Polygon t p r -&gt; Bool
+</span><a href="Algorithms.Geometry.InPolygon.html#insidePolygon"><span class="hs-operator hs-var">`insidePolygon`</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([SimplePolygon p r] -&gt; Bool) -&gt; [SimplePolygon p r] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Polygon t p r -&gt; [SimplePolygon p r]
+forall (t :: PolygonType) p r.
+Polygon t p r -&gt; [Polygon 'Simple p r]
+</span><a href="Data.Geometry.Polygon.Core.html#holeList"><span class="hs-identifier hs-var">holeList</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032568"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | Returns true if the point lies in the polygon</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- pre: point lies inside or outside the polygon, not on its boundary.</span><span>
+</span><span id="line-112"></span><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#inPolygon%27"><span class="hs-identifier hs-type">inPolygon'</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680032653"><span class="annot"><a href="#local-6989586621680032653"><span class="hs-identifier hs-type">p</span></a></span></span><span> </span><span id="local-6989586621680032654"><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032653"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-114"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Boundary.html#PointLocationResult"><span class="hs-identifier hs-type">PointLocationResult</span></a></span><span>
+</span><span id="line-115"></span><span id="local-6989586621680032563"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680032563"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="inPolygon%27"><span class="annot"><span class="annottext">inPolygon' :: Point 2 r -&gt; SimplePolygon p r -&gt; PointLocationResult
+</span><a href="Algorithms.Geometry.InPolygon.html#inPolygon%27"><span class="hs-operator hs-var hs-var">`inPolygon'`</span></a></span></span><span> </span><span id="local-6989586621680032562"><span class="annot"><span class="annottext">pg :: SimplePolygon p r
+</span><a href="#local-6989586621680032562"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool
+forall a. Integral a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">odd</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool)
+-&gt; ([LineSegment 2 p r] -&gt; Int) -&gt; [LineSegment 2 p r] -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 r] -&gt; Int)
+-&gt; ([LineSegment 2 p r] -&gt; [Point 2 r])
+-&gt; [LineSegment 2 p r]
+-&gt; Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Maybe (Point 2 r))
+-&gt; [LineSegment 2 p r] -&gt; [Point 2 r]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Maybe (Point 2 r)
+</span><a href="#local-6989586621680032559"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r] -&gt; Bool) -&gt; [LineSegment 2 p r] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680032558"><span class="hs-identifier hs-var">ups</span></a></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r] -&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680032557"><span class="hs-identifier hs-var">downs</span></a></span><span>
+</span><span id="line-116"></span><span>                    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">-- we don't care about horizontal edges</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680032555"><span class="annot"><span class="annottext">ups' :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032555"><span class="hs-identifier hs-var">ups'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680032554"><span class="annot"><span class="annottext">_horizontals :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032554"><span class="hs-identifier hs-var">_horizontals</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621680032553"><span class="annot"><span class="annottext">downs' :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032553"><span class="hs-identifier hs-var">downs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+</span><a href="#local-6989586621680032552"><span class="hs-identifier hs-var">partitionEdges</span></a></span><span> </span><span class="annot"><span class="annottext">([LineSegment 2 p r]
+ -&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r]))
+-&gt; (SimplePolygon p r -&gt; [LineSegment 2 p r])
+-&gt; SimplePolygon p r
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r -&gt; [LineSegment 2 p r]
+forall (t :: PolygonType) p r. Polygon t p r -&gt; [LineSegment 2 p r]
+</span><a href="Data.Geometry.Polygon.Core.html#listEdges"><span class="hs-identifier hs-var">listEdges</span></a></span><span> </span><span class="annot"><span class="annottext">(SimplePolygon p r
+ -&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r]))
+-&gt; SimplePolygon p r
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon p r
+</span><a href="#local-6989586621680032562"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621680032552"><span class="annot"><span class="annottext">partitionEdges :: [LineSegment 2 p r]
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+</span><a href="#local-6989586621680032552"><span class="hs-identifier hs-var hs-var">partitionEdges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; Ordering)
+-&gt; [LineSegment 2 p r]
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+forall (f :: * -&gt; *) a.
+Foldable f =&gt;
+(a -&gt; Ordering) -&gt; f a -&gt; ([a], [a], [a])
+</span><span class="hs-identifier hs-var">List.partition3</span></span><span> </span><span class="annot"><span class="annottext">((LineSegment 2 p r -&gt; Ordering)
+ -&gt; [LineSegment 2 p r]
+ -&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r]))
+-&gt; (LineSegment 2 p r -&gt; Ordering)
+-&gt; [LineSegment 2 p r]
+-&gt; ([LineSegment 2 p r], [LineSegment 2 p r], [LineSegment 2 p r])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680032549"><span class="annot"><span class="annottext">s :: LineSegment 2 p r
+</span><a href="#local-6989586621680032549"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680032549"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Getting r (LineSegment 2 p r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ EndExtra (LineSegment 2 p r))
+ -&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r)))
+-&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r)
+forall t. HasEnd t =&gt; Lens' t (EndCore t :+ EndExtra t)
+</span><a href="Data.Geometry.Interval.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ EndExtra (LineSegment 2 p r))
+  -&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r)))
+ -&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r))
+-&gt; ((r -&gt; Const r r)
+    -&gt; (Point 2 r :+ EndExtra (LineSegment 2 p r))
+    -&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r)))
+-&gt; Getting r (LineSegment 2 p r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ EndExtra (LineSegment 2 p r))
+-&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r))
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ EndExtra (LineSegment 2 p r))
+ -&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r)))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (r -&gt; Const r r)
+-&gt; (Point 2 r :+ EndExtra (LineSegment 2 p r))
+-&gt; Const r (Point 2 r :+ EndExtra (LineSegment 2 p r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+</span><a href="#local-6989586621680032549"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">LineSegment 2 p r -&gt; Getting r (LineSegment 2 p r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">((Point 2 r :+ StartExtra (LineSegment 2 p r))
+ -&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r)))
+-&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r)
+forall t. HasStart t =&gt; Lens' t (StartCore t :+ StartExtra t)
+</span><a href="Data.Geometry.Interval.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="annot"><span class="annottext">(((Point 2 r :+ StartExtra (LineSegment 2 p r))
+  -&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r)))
+ -&gt; LineSegment 2 p r -&gt; Const r (LineSegment 2 p r))
+-&gt; ((r -&gt; Const r r)
+    -&gt; (Point 2 r :+ StartExtra (LineSegment 2 p r))
+    -&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r)))
+-&gt; Getting r (LineSegment 2 p r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (Point 2 r :+ StartExtra (LineSegment 2 p r))
+-&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r))
+forall core extra core'.
+Lens (core :+ extra) (core' :+ extra) core core'
+</span><span class="hs-identifier hs-var">core</span></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; (Point 2 r :+ StartExtra (LineSegment 2 p r))
+ -&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r)))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; (r -&gt; Const r r)
+-&gt; (Point 2 r :+ StartExtra (LineSegment 2 p r))
+-&gt; Const r (Point 2 r :+ StartExtra (LineSegment 2 p r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>    </span><span class="hs-comment">-- upward edges include start, exclude end</span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621680032558"><span class="annot"><span class="annottext">ups :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032558"><span class="hs-identifier hs-var hs-var">ups</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; LineSegment 2 p r)
+-&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment%27"><span class="hs-identifier hs-type">LineSegment'</span></a></span><span> </span><span id="local-6989586621680032542"><span class="annot"><span class="annottext">a :: Point 2 r :+ p
+</span><a href="#local-6989586621680032542"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680032541"><span class="annot"><span class="annottext">b :: Point 2 r :+ p
+</span><a href="#local-6989586621680032541"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; EndPoint (Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall (d :: Nat) r p.
+EndPoint (Point d r :+ p)
+-&gt; EndPoint (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-var">LineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680032542"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Open</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680032541"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680032555"><span class="hs-identifier hs-var">ups'</span></a></span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-comment">-- downward edges exclude start, include end</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621680032557"><span class="annot"><span class="annottext">downs :: [LineSegment 2 p r]
+</span><a href="#local-6989586621680032557"><span class="hs-identifier hs-var hs-var">downs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LineSegment 2 p r -&gt; LineSegment 2 p r)
+-&gt; [LineSegment 2 p r] -&gt; [LineSegment 2 p r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.LineSegment.Internal.html#LineSegment%27"><span class="hs-identifier hs-type">LineSegment'</span></a></span><span> </span><span id="local-6989586621680032537"><span class="annot"><span class="annottext">a :: Point 2 r :+ p
+</span><a href="#local-6989586621680032537"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680032536"><span class="annot"><span class="annottext">b :: Point 2 r :+ p
+</span><a href="#local-6989586621680032536"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EndPoint (Point 2 r :+ p)
+-&gt; EndPoint (Point 2 r :+ p) -&gt; LineSegment 2 p r
+forall (d :: Nat) r p.
+EndPoint (Point d r :+ p)
+-&gt; EndPoint (Point d r :+ p) -&gt; LineSegment d p r
+</span><a href="Data.Geometry.LineSegment.Internal.html#LineSegment"><span class="hs-identifier hs-var">LineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Open</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680032537"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ p) -&gt; EndPoint (Point 2 r :+ p)
+forall a. a -&gt; EndPoint a
+</span><span class="hs-identifier hs-var">Closed</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r :+ p
+</span><a href="#local-6989586621680032536"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LineSegment 2 p r]
+</span><a href="#local-6989586621680032553"><span class="hs-identifier hs-var">downs'</span></a></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-comment">-- Given an edge, compute the intersection point (if a point) with</span><span>
+</span><span id="line-128"></span><span>    </span><span class="hs-comment">-- the line through the query point, and test if it lies strictly</span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-comment">-- right of q.</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-comment">-- See http://geomalgorithms.com/a03-_inclusion.html for more information.</span><span>
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621680032559"><span class="annot"><span class="annottext">intersectionPoint :: LineSegment 2 p r -&gt; Maybe (Point 2 r)
+</span><a href="#local-6989586621680032559"><span class="hs-identifier hs-var hs-var">intersectionPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Bool) -&gt; Maybe (Point 2 r) -&gt; Maybe (Point 2 r)
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">F.find</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680032534"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621680032534"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032534"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)) -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032563"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">Point 2 r
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)) -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(1 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Point 2 r) -&gt; Maybe (Point 2 r))
+-&gt; (LineSegment 2 p r -&gt; Maybe (Point 2 r))
+-&gt; LineSegment 2 p r
+-&gt; Maybe (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (ts :: [*]).
+NatToInt (RIndex (Point 2 r) ts) =&gt;
+CoRec Identity ts -&gt; Maybe (Point 2 r)
+forall t (ts :: [*]).
+NatToInt (RIndex t ts) =&gt;
+CoRec Identity ts -&gt; Maybe t
+</span><span class="hs-identifier hs-var">asA</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680032654"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 p r]
+ -&gt; Maybe (Point 2 r))
+-&gt; (LineSegment 2 p r
+    -&gt; CoRec Identity '[NoIntersection, Point 2 r, LineSegment 2 p r])
+-&gt; LineSegment 2 p r
+-&gt; Maybe (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineSegment 2 p r
+-&gt; Line 2 r -&gt; Intersection (LineSegment 2 p r) (Line 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">Line 2 r
+</span><a href="#local-6989586621680032530"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>    </span><span id="local-6989586621680032530"><span class="annot"><span class="annottext">l :: Line 2 r
+</span><a href="#local-6989586621680032530"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Line 2 r
+forall r. Num r =&gt; r -&gt; Line 2 r
+</span><a href="Data.Geometry.Line.Internal.html#horizontalLine"><span class="hs-identifier hs-var">horizontalLine</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; Line 2 r) -&gt; r -&gt; Line 2 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032563"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">Point 2 r
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)) -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Nat) (point :: Nat -&gt; * -&gt; *) r.
+(2 &lt;= d, Arity d, AsAPoint point) =&gt;
+Lens' (point d r) r
+</span><a href="Data.Geometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- | Test if a point lies strictly inside the polgyon.</span><span>
+</span><span id="line-137"></span><span id="local-6989586621680032650"><span id="local-6989586621680032651"><span id="local-6989586621680032652"><span class="annot"><a href="Algorithms.Geometry.InPolygon.html#insidePolygon"><span class="hs-identifier hs-type">insidePolygon</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621680032652"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621680032652"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Point.Internal.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621680032652"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Geometry.Polygon.Core.html#Polygon"><span class="hs-identifier hs-type">Polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032651"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032650"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680032652"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span><span>
+</span><span id="line-138"></span><span id="local-6989586621680032528"><span class="annot"><span class="annottext">q :: Point 2 r
+</span><a href="#local-6989586621680032528"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="insidePolygon"><span class="annot"><span class="annottext">insidePolygon :: Point 2 r -&gt; Polygon t p r -&gt; Bool
+</span><a href="Algorithms.Geometry.InPolygon.html#insidePolygon"><span class="hs-operator hs-var hs-var">`insidePolygon`</span></a></span></span><span> </span><span id="local-6989586621680032527"><span class="annot"><span class="annottext">pg :: Polygon t p r
+</span><a href="#local-6989586621680032527"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621680032528"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Polygon t p r -&gt; PointLocationResult
+forall (t :: PolygonType) p r.
+(Fractional r, Ord r) =&gt;
+Point 2 r -&gt; Polygon t p r -&gt; PointLocationResult
+</span><a href="Algorithms.Geometry.InPolygon.html#inPolygon"><span class="hs-operator hs-var">`inPolygon`</span></a></span><span> </span><span class="annot"><span class="annottext">Polygon t p r
+</span><a href="#local-6989586621680032527"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="Data.Geometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- testQ = map (`inPolygon` testPoly) [ Point2 1 1    -- Inside</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--                                    , Point2 0 0    -- OnBoundary</span><span>
+</span><span id="line-143"></span><span class="hs-comment">--                                    , Point2 5 14   -- Inside</span><span>
+</span><span id="line-144"></span><span class="hs-comment">--                                    , Point2 5 10   -- Inside</span><span>
+</span><span id="line-145"></span><span class="hs-comment">--                                    , Point2 10 5   -- OnBoundary</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--                                    , Point2 20 5   -- Outside</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--                                    ]</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- testPoly :: SimplePolygon () Rational</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- testPoly = fromPoints . map ext $ [ Point2 0 0</span><span>
+</span><span id="line-151"></span><span class="hs-comment">--                                                   , Point2 10 0</span><span>
+</span><span id="line-152"></span><span class="hs-comment">--                                                   , Point2 10 10</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--                                                   , Point2 5 15</span><span>
+</span><span id="line-154"></span><span class="hs-comment">--                                                   , Point2 1 11</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--                                                   ]</span><span>
+</span><span id="line-156"></span></pre></body></html>

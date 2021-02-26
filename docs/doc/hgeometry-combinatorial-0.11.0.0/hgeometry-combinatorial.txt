@@ -1347,6 +1347,30 @@ minimaBy :: (a -> a -> Ordering) -> [a] -> [a]
 --   </pre>
 extractMinimaBy :: (a -> a -> Ordering) -> [a] -> [a] :+ [a]
 
+-- | Given a function f, partitions the list into three lists (lts,eqs,gts)
+--   such that:
+--   
+--   <ul>
+--   <li>f x == LT for all x in lts</li>
+--   <li>f x == EQ for all x in eqs</li>
+--   <li>f x == gt for all x in gts</li>
+--   </ul>
+--   
+--   <pre>
+--   &gt;&gt;&gt; partition3 (compare 4) [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
+--   ([5,5,6,6,7,7,7,7,7,8],[4],[0,1,2,2,3])
+--   </pre>
+partition3 :: Foldable f => (a -> Ordering) -> f a -> ([a], [a], [a])
+
+-- | A version of groupBy that uses the given Ordering to group consecutive
+--   Equal items
+--   
+--   <pre>
+--   &gt;&gt;&gt; groupBy' compare [0,1,2,2,3,4,5,5,6,6,7,7,7,7,7,8]
+--   [0 :| [],1 :| [],2 :| [2],3 :| [],4 :| [],5 :| [5],6 :| [6],7 :| [7,7,7,7],8 :| []]
+--   </pre>
+groupBy' :: (a -> a -> Ordering) -> [a] -> [NonEmpty a]
+
 
 module Data.Measured.Class
 
@@ -1537,8 +1561,8 @@ Permutation :: Vector (Orbit a) -> Vector (Int, Int) -> Permutation a
 -- | idxes (fromEnum a) = (i,j) implies that a is the j^th item in the i^th
 --   orbit
 [_indexes] :: Permutation a -> Vector (Int, Int)
-orbits :: forall a_aL3K a_aLmz. Lens (Permutation a_aL3K) (Permutation a_aLmz) (Vector (Orbit a_aL3K)) (Vector (Orbit a_aLmz))
-indexes :: forall a_aL3K. Lens' (Permutation a_aL3K) (Vector (Int, Int))
+orbits :: forall a_aL5S a_aLoH. Lens (Permutation a_aL5S) (Permutation a_aLoH) (Vector (Orbit a_aL5S)) (Vector (Orbit a_aLoH))
+indexes :: forall a_aL5S. Lens' (Permutation a_aL5S) (Vector (Int, Int))
 elems :: Permutation a -> Vector a
 size :: Permutation a -> Int
 
